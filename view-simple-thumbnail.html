@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고장 - 도담부고 (심플 썸네일)</title>
+    <meta name="description" content="품격있는 모바일 부고장">
+    <meta name="color-scheme" content="light dark">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/view-toss.css">
+    
+    <style>
+        /* 썸네일 헤더 - 이미지만 */
+        .bugo-header {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            margin: 20px auto 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .bugo-header img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 다크모드 썸네일 */
+        .dark .bugo-header {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #3A3A3C;
+        }
+        
+        .dark .template-flower .bugo-header {
+            border: none;
+        }
+        
+        /* 애도 문구 섹션 (새로 추가) */
+        .condolence-section {
+            background: white;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            border-bottom: 8px solid #F5F5F5;
+            text-align: center;
+        }
+        
+        .condolence-main {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #191F28;
+            line-height: 1.6;
+            margin: 0 0 8px 0;
+        }
+        
+        .condolence-sub {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 14px;
+            color: #4E5968;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* 다크모드 */
+        .dark .condolence-section {
+            background: #1C1C1E;
+            border-bottom-color: #2C2C2E;
+        }
+        
+        .dark .condolence-main {
+            color: #FFFFFF;
+        }
+        
+        .dark .condolence-sub {
+            color: #98989D;
+        }
+    </style>
+</head>
+<body>
+    <!-- 테마 토글 -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="다크모드 토글">
+        <svg class="sun" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+        </svg>
+        <svg class="moon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
+    <!-- Loading -->
+    <div id="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>부고장을 불러오는 중...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2>부고장을 찾을 수 없습니다</h2>
+            <p>존재하지 않거나 삭제된 부고장입니다.</p>
+            <div class="error-actions">
+                <a href="search.html" class="btn-secondary">부고 검색하기</a>
+                <a href="index.html" class="btn-primary">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bugo View -->
+    <main id="bugoView" class="bugo-view" style="display: none;">
+        <!-- 썸네일 헤더 (이미지만) -->
+        <div class="bugo-header" id="bugoHeader">
+            <img id="templateImage" src="" alt="부고장 템플릿">
+        </div>
+
+        <!-- 애도 문구 섹션 -->
+        <section class="condolence-section">
+            <p class="condolence-main" id="condolenceMain">
+                故 홍길동 님께서 11월 25일 별세하셨기에
+            </p>
+            <p class="condolence-sub">
+                삼가 알려드립니다.
+            </p>
+        </section>
+
+        <!-- 컨텐츠 -->
+        <div class="bugo-content">
+            <!-- 고인 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">고인</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">고인</span>
+                        <span class="info-value" id="deceasedNameInfo">故 홍길동</span>
+                    </div>
+                    <div class="info-row" id="ageRow">
+                        <span class="info-label">향년</span>
+                        <span class="info-value" id="age">75세</span>
+                    </div>
+                    <div class="info-row" id="genderRow">
+                        <span class="info-label">성별</span>
+                        <span class="info-value" id="gender">남</span>
+                    </div>
+                    <div class="info-row" id="religionRow">
+                        <span class="info-label">종교</span>
+                        <span class="info-value" id="religion">불교</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 상주 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">상주</h3>
+                <div id="mournersInfo" class="mourners-list"></div>
+            </section>
+
+            <!-- 빈소 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">빈소</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">장례식장</span>
+                        <span class="info-value" id="funeralHome">-</span>
+                    </div>
+                    <div class="info-row" id="roomRow">
+                        <span class="info-label">호실</span>
+                        <span class="info-value" id="roomNumber">-</span>
+                    </div>
+                    <div class="info-row" id="funeralTelRow">
+                        <span class="info-label">연락처</span>
+                        <span class="info-value">
+                            <a href="tel:" id="funeralTelLink">-</a>
+                        </span>
+                    </div>
+                    <div class="info-row" id="addressRow">
+                        <span class="info-label">주소</span>
+                        <span class="info-value" id="address">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 일정 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">일정</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">별세</span>
+                        <span class="info-value" id="deathDatetime">-</span>
+                    </div>
+                    <div class="info-row" id="encoffinRow">
+                        <span class="info-label">입관</span>
+                        <span class="info-value" id="encoffinDatetime">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">발인</span>
+                        <span class="info-value" id="funeralDatetime">-</span>
+                    </div>
+                    <div class="info-row" id="funeralTypeRow">
+                        <span class="info-label">장례방법</span>
+                        <span class="info-value" id="funeralType">-</span>
+                    </div>
+                    <div class="info-row" id="burialPlaceRow">
+                        <span class="info-label">장지</span>
+                        <span class="info-value" id="burialPlace">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 지도 -->
+            <section class="content-section map-section" id="mapSection">
+                <div class="map-header">
+                    <h3 class="content-title">오시는 길</h3>
+                </div>
+                <div id="map" class="map-container"></div>
+                <div class="map-actions">
+                    <button class="map-btn" onclick="openKakaoMap()">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+                            <path d="M10 2.5c-3.866 0-7 2.686-7 6 0 3.866 4.667 8.333 7 9.5 2.333-1.167 7-5.634 7-9.5 0-3.314-3.134-6-7-6z"/>
+                            <circle cx="10" cy="8.5" r="2"/>
+                        </svg>
+                        길찾기
+                    </button>
+                    <button class="map-btn primary" onclick="shareBugo()">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+                            <path d="M15 6.667a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 18.333a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                            <path d="M7.083 11.25l5.834 3.167M12.917 5.583L7.083 8.75"/>
+                        </svg>
+                        공유하기
+                    </button>
+                </div>
+            </section>
+
+            <!-- 안내 메시지 -->
+            <section class="content-section" id="messageSection" style="display: none;">
+                <h3 class="content-title">안내하는 글</h3>
+                <div class="condolence-message">
+                    <p class="condolence-text" id="message"></p>
+                </div>
+            </section>
+
+            <!-- 계좌 정보 -->
+            <section class="content-section" id="accountSection" style="display: none;">
+                <h3 class="content-title">계좌 정보</h3>
+                <div id="accountInfo" class="account-list"></div>
+            </section>
+
+            <!-- 하단 안내 -->
+            <section class="content-section">
+                <div class="footer-notice">
+                    <p class="notice-text">
+                        황망한 마음에 일일이 연락드리지 못함을<br>
+                        너그러이 양해해 주시기 바랍니다.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- 하단 액션 버튼 -->
+        <div class="bugo-actions">
+            <button class="action-btn" onclick="showEditModal()">
+                <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14.167 2.5a1.768 1.768 0 0 1 2.5 2.5L5.833 15.833 1.667 17.5l1.666-4.167L14.167 2.5z"/>
+                </svg>
+                수정
+            </button>
+            <button class="action-btn btn-primary" onclick="location.href='index.html'">
+                <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+                    <path d="M2.5 7.5l7.5-5 7.5 5v8.333a1.667 1.667 0 0 1-1.667 1.667H4.167A1.667 1.667 0 0 1 2.5 15.833V7.5z"/>
+                    <path d="M7.5 17.5v-7.5h5v7.5"/>
+                </svg>
+                홈으로
+            </button>
+        </div>
+    </main>
+
+    <!-- 플로팅 근조화 버튼 -->
+    <div id="floatingBtn" class="floating-button" style="display: none;">
+        <button class="condolence-flower-btn" onclick="sendCondolenceFlower()">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z"/>
+                <path d="M12 8v8M8 12h8" stroke-linecap="round"/>
+            </svg>
+            <span>근조화</span>
+        </button>
+    </div>
+
+    <!-- Kakao Map API -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
+    
+    <script src="js/view-new.js"></script>
+    
+    <script>
+        // 썸네일 렌더링 오버라이드
+        function renderTemplateHeader(data) {
+            console.log('심플 썸네일 렌더링');
+            
+            const header = document.getElementById('bugoHeader');
+            const templateImage = document.getElementById('templateImage');
+            const condolenceMain = document.getElementById('condolenceMain');
+            
+            if (!header || !templateImage || !condolenceMain) {
+                console.error('필수 요소를 찾을 수 없습니다');
+                return;
+            }
+            
+            // 템플릿별 이미지 매핑
+            const templateImages = {
+                basic: 'images/template-basic.jpg',
+                ribbon: 'images/template-ribbon.jpg',
+                border: 'images/template-border.jpg',
+                flower: 'images/template-flower.jpg'
+            };
+            
+            // 템플릿 클래스 적용
+            const template = data.template || 'basic';
+            header.className = `bugo-header template-${template}`;
+            
+            // 이미지 설정
+            const imageUrl = templateImages[template] || templateImages.basic;
+            templateImage.src = imageUrl;
+            templateImage.alt = `부고장 템플릿 - ${template}`;
+            
+            console.log('✅ 썸네일 이미지:', imageUrl);
+            
+            // 애도 문구 생성
+            const deathDate = data.death_date ? new Date(data.death_date) : null;
+            if (deathDate) {
+                const month = deathDate.getMonth() + 1;
+                const day = deathDate.getDate();
+                condolenceMain.textContent = `故 ${data.deceased_name} 님께서 ${month}월 ${day}일 별세하셨기에`;
+            } else {
+                condolenceMain.textContent = `故 ${data.deceased_name} 님께서 별세하셨기에`;
+            }
+        }
+        
+        // 다크모드 토글
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 페이지 로드 시 테마 복원
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        });
+    </script>
+</body>
+</html>

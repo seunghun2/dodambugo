@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고장 작성 - 도담부고</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/create-detailed.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <!-- Daum 주소 API -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <!-- Kakao Map API -->
+    <script type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo"
+                style="cursor: pointer; text-decoration: none; color: inherit;">도담부고</a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#home" class="nav-link">홈</a></li>
+                <li><a href="search.html" class="nav-link">부고검색</a></li>
+                <li><a href="index.html#templates" class="nav-link">템플릿</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="nav-cta" onclick="location.href='create.html'">부고장 만들기</button>
+                <button class="nav-toggle" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-overlay" id="sideMenuOverlay"></div>
+        <div class="side-menu-content">
+            <div class="side-menu-header">
+                <div class="side-menu-logo">도담부고</div>
+                <button class="side-menu-close" id="sideMenuClose">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <nav class="side-menu-nav">
+                <a href="create.html" class="side-menu-item">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>부고장 만들기</span>
+                </a>
+                <a href="search.html" class="side-menu-item">
+                    <span class="material-symbols-outlined">search</span>
+                    <span>부고 검색</span>
+                </a>
+                <a href="index.html#faq" class="side-menu-item">
+                    <span class="material-symbols-outlined">contact_support</span>
+                    <span>자주 묻는 질문</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <main class="create-main">
+        <div class="create-container">
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">템플릿 선택</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">정보 입력</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">공유하기</div>
+                </div>
+            </div>
+
+            <!-- Step 1: 템플릿 선택 -->
+            <section class="step-section active" id="step1">
+                <div class="step-header">
+                    <h1>템플릿을 선택해주세요</h1>
+                    <p>고인께 어울리는 디자인을 선택하세요</p>
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" data-template="basic">
+                        <div class="template-image">
+                            <img src="images/basic.png" alt="기본형 부고장">
+                        </div>
+                        <div class="template-info">
+                            <div class="template-name">기본형 부고장</div>
+                            <div class="template-actions">
+                                <button type="button" class="btn-preview"
+                                    onclick="previewTemplate('basic')">미리보기</button>
+                                <button type="button" class="btn-select" onclick="selectTemplate('basic')">선택</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-template="ribbon">
+                        <div class="template-image">
+                            <img src="images/ribbon.png" alt="정중형 부고장">
+                        </div>
+                        <div class="template-info">
+                            <div class="template-name">정중형 부고장</div>
+                            <div class="template-actions">
+                                <button type="button" class="btn-preview"
+                                    onclick="previewTemplate('ribbon')">미리보기</button>
+                                <button type="button" class="btn-select" onclick="selectTemplate('ribbon')">선택</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-template="border">
+                        <div class="template-image">
+                            <img src="images/border.png" alt="안내형 부고장">
+                        </div>
+                        <div class="template-info">
+                            <div class="template-name">안내형 부고장</div>
+                            <div class="template-actions">
+                                <button type="button" class="btn-preview"
+                                    onclick="previewTemplate('border')">미리보기</button>
+                                <button type="button" class="btn-select" onclick="selectTemplate('border')">선택</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-template="flower">
+                        <div class="template-image">
+                            <img src="images/flower-detail.png" alt="고급형 부고장">
+                        </div>
+                        <div class="template-info">
+                            <div class="template-name">고급형 부고장</div>
+                            <div class="template-actions">
+                                <button type="button" class="btn-preview"
+                                    onclick="previewTemplate('flower')">미리보기</button>
+                                <button type="button" class="btn-select" onclick="selectTemplate('flower')">선택</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: 정보 입력 -->
+            <section class="step-section" id="step2">
+                <form id="bugoForm" class="bugo-form">
+                    <input type="hidden" name="template" id="template">
+
+                    <!-- 신청자 정보 -->
+                    <div class="form-section applicant-section">
+                        <h2 class="section-title">신청자 정보</h2>
+                        <p class="section-description">부고장 수정 시 필요한 정보입니다</p>
+
+                        <div class="form-group">
+                            <label class="form-label required">신청자명</label>
+                            <input type="text" name="applicant_name" class="form-input" placeholder="신청자 성함" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">휴대번호 뒷자리</label>
+                            <input type="password" name="phone_password" class="form-input" placeholder="휴대번호 뒷 4자리"
+                                maxlength="4" pattern="[0-9]{4}" required>
+                            <p class="form-help">부고장 수정 시 사용됩니다 (4자리 숫자)</p>
+                        </div>
+                    </div>
+
+                    <!-- 고인 정보 -->
+                    <div class="form-section">
+                        <h2 class="section-title">고인 정보</h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">성함</label>
+                                <input type="text" name="deceased_name" class="form-input" placeholder="고인의 성함"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">성별</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="">선택</option>
+                                    <option value="남">남</option>
+                                    <option value="여">여</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">관계</label>
+                                <select name="relationship" class="form-select" required>
+                                    <option value="">선택</option>
+                                    <option value="배우자">배우자</option>
+                                    <option value="아들">아들</option>
+                                    <option value="딸">딸</option>
+                                    <option value="며느리">며느리</option>
+                                    <option value="사위">사위</option>
+                                    <option value="손">손</option>
+                                    <option value="손자">손자</option>
+                                    <option value="손녀">손녀</option>
+                                    <option value="외손">외손</option>
+                                    <option value="외손자">외손자</option>
+                                    <option value="외손녀">외손녀</option>
+                                    <option value="증손">증손</option>
+                                    <option value="외증손자 며느리">외증손자 며느리</option>
+                                    <option value="외증손 사위">외증손 사위</option>
+                                    <option value="부친">부친</option>
+                                    <option value="모친">모친</option>
+                                    <option value="형">형</option>
+                                    <option value="오빠">오빠</option>
+                                    <option value="누나">누나</option>
+                                    <option value="언니">언니</option>
+                                    <option value="동생">동생</option>
+                                    <option value="형수">형수</option>
+                                    <option value="제수">제수</option>
+                                    <option value="매형">매형</option>
+                                    <option value="자제">자제</option>
+                                    <option value="중손자">중손자</option>
+                                    <option value="중손녀">중손녀</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">연세</label>
+                                <input type="number" name="age" class="form-input" placeholder="세" min="1" max="999"
+                                    oninput="if(this.value.length > 3) this.value = this.value.slice(0, 3);">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">종교</label>
+                            <select name="religion" class="form-select" id="religionSelect"
+                                onchange="toggleReligionInput()">
+                                <option value="">선택</option>
+                                <option value="불교">불교</option>
+                                <option value="기독교">기독교</option>
+                                <option value="천주교">천주교</option>
+                                <option value="무교">무교</option>
+                                <option value="기타">기타</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="religionInputGroup" style="display: none;">
+                            <label class="form-label">종교 직접 입력</label>
+                            <input type="text" name="religion_custom" id="religionCustom" class="form-input"
+                                placeholder="종교를 입력하세요">
+                        </div>
+
+                        <!-- 영정 사진 업로드 -->
+                        <div class="form-group">
+                            <div class="option-item">
+                                <div class="option-info">
+                                    <h4>영정 사진 업로드</h4>
+                                    <p>고인의 사진을 부고장에 표시하시겠습니까?</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="photoToggle" onchange="togglePhotoUpload()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="photoUploadSection" class="photo-upload-section" style="display: none;">
+                            <p class="form-help">JPEG, PNG 형식 (2MB 이하 권장)</p>
+
+                            <input type="file" id="photoInput" accept="image/*" style="display: none;"
+                                onchange="handlePhotoUpload(event)">
+                            <input type="hidden" name="photo_url" id="photoUrl">
+
+                            <div class="photo-upload-area" id="photoUploadArea"
+                                onclick="document.getElementById('photoInput').click()">
+                                <div class="photo-upload-placeholder" id="photoPlaceholder">
+                                    <span class="material-symbols-outlined">add_photo_alternate</span>
+                                    <p class="upload-text">사진 선택하기</p>
+                                    <p class="upload-hint">클릭하여 사진을 선택하세요</p>
+                                </div>
+                                <div class="photo-preview" id="photoPreview" style="display: none;">
+                                    <img id="photoPreviewImg" src="" alt="영정 사진 미리보기">
+                                    <button type="button" class="btn-remove-photo" onclick="removePhoto(event)">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 상주 정보 -->
+                    <div class="form-section">
+                        <h2 class="section-title">상주 정보</h2>
+
+                        <div id="mournersList">
+                            <div class="mourner-item" data-index="0">
+                                <div class="mourner-header">
+                                    <span class="mourner-number">상주 1</span>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required">관계</label>
+                                        <select name="mourners[0][relationship]" class="form-select" required>
+                                            <option value="">선택</option>
+                                            <option value="배우자">배우자</option>
+                                            <option value="아들">아들</option>
+                                            <option value="딸">딸</option>
+                                            <option value="며느리">며느리</option>
+                                            <option value="사위">사위</option>
+                                            <option value="손">손</option>
+                                            <option value="손자">손자</option>
+                                            <option value="손녀">손녀</option>
+                                            <option value="외손">외손</option>
+                                            <option value="외손자">외손자</option>
+                                            <option value="외손녀">외손녀</option>
+                                            <option value="증손">증손</option>
+                                            <option value="외증손자 며느리">외증손자 며느리</option>
+                                            <option value="외증손 사위">외증손 사위</option>
+                                            <option value="부친">부친</option>
+                                            <option value="모친">모친</option>
+                                            <option value="형">형</option>
+                                            <option value="오빠">오빠</option>
+                                            <option value="누나">누나</option>
+                                            <option value="언니">언니</option>
+                                            <option value="동생">동생</option>
+                                            <option value="형수">형수</option>
+                                            <option value="제수">제수</option>
+                                            <option value="매형">매형</option>
+                                            <option value="자제">자제</option>
+                                            <option value="중손자">중손자</option>
+                                            <option value="중손녀">중손녀</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required">성함</label>
+                                        <input type="text" name="mourners[0][name]" class="form-input"
+                                            placeholder="상주 성함" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">연락처</label>
+                                    <input type="tel" name="mourners[0][contact]" class="form-input"
+                                        placeholder="010-0000-0000" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mourner-actions">
+                            <button type="button" class="btn-add-mourner" onclick="addMourner()">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                                상주 추가
+                            </button>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 장례식장 정보 -->
+                    <div class="form-section">
+                        <h2 class="section-title">장례식장 정보</h2>
+
+                        <div class="form-group">
+                            <label class="form-label required">장례식장</label>
+                            <input type="text" name="funeral_home" class="form-input" placeholder="장례식장명" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">호실</label>
+                                <input type="text" name="room_number" class="form-input" placeholder="호실">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">연락처</label>
+                                <input type="text" name="funeral_home_tel" class="form-input no-phone-format"
+                                    placeholder="장례식장 연락처">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">주소</label>
+                            <div class="address-input-group">
+                                <input type="text" name="address" id="address" class="form-input"
+                                    placeholder="주소를 검색하세요" readonly onclick="searchAddress()">
+                                <button type="button" class="btn-address-search" onclick="searchAddress()">주소
+                                    검색</button>
+                            </div>
+                            <input type="text" name="address_detail" id="address_detail" class="form-input mt-2"
+                                placeholder="상세주소" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- 임종일시 -->
+                    <div class="form-section">
+                        <h2 class="section-title">임종일시</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">별세 날짜</label>
+                            <div class="date-input-wrapper">
+                                <input type="date" name="death_date" class="form-input date-input">
+                                <svg class="date-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor"
+                                        stroke-width="1.5" />
+                                    <path d="M3 8H17M7 2V4M13 2V4" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">시</label>
+                                <select name="death_hour" class="form-select" required>
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">분</label>
+                                <select name="death_minute" class="form-select">
+                                    <option value="00" selected>00분</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 입관일시 -->
+                    <div class="form-section">
+                        <h2 class="section-title">입관일시</h2>
+
+                        <div class="form-group">
+                            <label class="form-label required">입관 날짜</label>
+                            <div class="date-input-wrapper">
+                                <input type="date" name="encoffin_date" class="form-input date-input" required>
+                                <svg class="date-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor"
+                                        stroke-width="1.5" />
+                                    <path d="M3 8H17M7 2V4M13 2V4" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">시</label>
+                                <select name="encoffin_hour" class="form-select" required>
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">분</label>
+                                <select name="encoffin_minute" class="form-select">
+                                    <option value="00" selected>00분</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 발인일시 -->
+                    <div class="form-section">
+                        <h2 class="section-title">발인일시</h2>
+
+                        <div class="form-group">
+                            <label class="form-label required">발인 날짜</label>
+                            <div class="date-input-wrapper">
+                                <input type="date" name="funeral_date" class="form-input date-input" required>
+                                <svg class="date-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor"
+                                        stroke-width="1.5" />
+                                    <path d="M3 8H17M7 2V4M13 2V4" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">시</label>
+                                <select name="funeral_hour" class="form-select" required>
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">분</label>
+                                <select name="funeral_minute" class="form-select">
+                                    <option value="00" selected>00분</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">장지</label>
+                            <input type="text" name="burial_place" class="form-input" placeholder="장지">
+                        </div>
+                    </div>
+
+                    <!-- 안내하는 글 -->
+                    <div class="form-section">
+                        <h2 class="section-title">안내하는 글</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">메시지</label>
+                            <textarea name="message" class="form-textarea" rows="5"
+                                placeholder="고인에 대한 추가 메시지나 안내사항을 입력하세요"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 계좌번호 정보 -->
+                    <div class="form-section">
+                        <h2 class="section-title">계좌번호 정보</h2>
+
+                        <div class="form-group">
+                            <div class="option-item">
+                                <div class="option-info">
+                                    <h4>계좌번호 입력</h4>
+                                    <p>부의금 계좌 정보를 입력하시겠습니까?</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="accountToggle" onchange="toggleAccountInfo()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="accountInfo" class="account-info" style="display: none;">
+                            <div class="account-item">
+                                <div class="account-header">
+                                    <span>계좌 1</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">예금주</label>
+                                    <input type="text" name="accounts[0][holder]" class="form-input" placeholder="예금주">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">은행명</label>
+                                        <select name="accounts[0][bank]" class="form-select">
+                                            <option value="">선택</option>
+                                            <option value="KB국민은행">KB국민은행</option>
+                                            <option value="신한은행">신한은행</option>
+                                            <option value="우리은행">우리은행</option>
+                                            <option value="하나은행">하나은행</option>
+                                            <option value="NH농협은행">NH농협은행</option>
+                                            <option value="IBK기업은행">IBK기업은행</option>
+                                            <option value="SC제일은행">SC제일은행</option>
+                                            <option value="한국씨티은행">한국씨티은행</option>
+                                            <option value="KDB산업은행">KDB산업은행</option>
+                                            <option value="수협은행">수협은행</option>
+                                            <option value="대구은행">대구은행</option>
+                                            <option value="부산은행">부산은행</option>
+                                            <option value="경남은행">경남은행</option>
+                                            <option value="광주은행">광주은행</option>
+                                            <option value="전북은행">전북은행</option>
+                                            <option value="제주은행">제주은행</option>
+                                            <option value="카카오뱅크">카카오뱅크</option>
+                                            <option value="케이뱅크">케이뱅크</option>
+                                            <option value="토스뱅크">토스뱅크</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">계좌번호</label>
+                                        <input type="text" name="accounts[0][number]" class="form-input"
+                                            placeholder="계좌번호">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 제출 버튼 -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="previewBugo()">미리보기</button>
+                        <button type="button" class="btn-secondary" onclick="saveDraft()">임시저장</button>
+                        <button type="submit" class="btn-primary">작성 완료</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Step 3: 공유하기 -->
+            <section class="step-section" id="step3">
+                <div class="share-container">
+                    <div class="completion-icon">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                            <circle cx="40" cy="40" r="38" fill="#EBF4FF" stroke="#3182F6" stroke-width="2" />
+                            <path d="M25 40L35 50L55 30" stroke="#3182F6" stroke-width="4" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h1 class="share-title">부고장이 완성되었습니다</h1>
+                    <p class="share-description">아래 링크를 복사하여 지인들에게 공유해주세요</p>
+
+                    <div class="share-link-box">
+                        <input type="text" id="shareLink" class="share-link-input" readonly>
+                        <button type="button" class="btn-copy" onclick="copyShareLink()">복사</button>
+                    </div>
+
+                    <div class="share-buttons">
+                        <button type="button" class="btn-share kakao" onclick="shareKakao()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 3C6.477 3 2 6.477 2 10.8c0 2.827 1.875 5.31 4.688 6.75-.188.69-.625 2.344-.719 2.719-.125.5.188.5.406.344.156-.094 2.5-1.719 3.344-2.344C10.438 18.438 11.188 18.5 12 18.5c5.523 0 10-3.477 10-7.7S17.523 3 12 3z" />
+                            </svg>
+                            카카오톡 공유
+                        </button>
+                        <button type="button" class="btn-share sms" onclick="shareSMS()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                            </svg>
+                            문자 공유
+                        </button>
+                        <button type="button" class="btn-share link" onclick="shareLink()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            링크 공유
+                        </button>
+                    </div>
+
+                    <div class="share-preview">
+                        <h3 class="preview-title">부고장 미리보기</h3>
+                        <div id="bugoPreviewContent" class="preview-content">
+                            <!-- 부고장 미리보기 내용 -->
+                        </div>
+                        <button type="button" class="btn-view-full" onclick="viewFullBugo()">전체 보기</button>
+                    </div>
+
+                    <div class="share-actions">
+                        <button type="button" class="btn-secondary" onclick="goToStep(2)">수정하기</button>
+                        <button type="button" class="btn-primary" onclick="location.href='index.html'">메인으로</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 템플릿 미리보기 모달 -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-modal-overlay" onclick="closePreviewModal()"></div>
+        <div class="preview-modal-content">
+            <button class="preview-modal-close" onclick="closePreviewModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div class="preview-modal-header">
+                <h2 id="previewModalTitle">템플릿 미리보기</h2>
+            </div>
+            <div class="preview-modal-body">
+                <iframe id="previewModalFrame" src="" frameborder="0"></iframe>
+            </div>
+            <div class="preview-modal-actions">
+                <button class="btn-modal-action btn-change-template" onclick="showTemplateSelector()">
+                    <span class="material-symbols-outlined">swap_horiz</span>
+                    다른 템플릿
+                </button>
+                <button class="btn-modal-action btn-modal-primary" onclick="selectTemplateFromPreview()">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    이 템플릿으로 제작하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 부고장 미리보기 모달 -->
+    <div class="bugo-preview-modal" id="bugoPreviewModal">
+        <div class="bugo-preview-overlay" onclick="closeBugoPreview()"></div>
+        <div class="bugo-preview-content">
+            <button class="bugo-preview-close" onclick="closeBugoPreview()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <iframe id="bugoPreviewFrame" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">도담부고</div>
+                <div class="footer-links-horizontal">
+                    <a href="terms.html" target="_blank">이용약관</a>
+                    <span class="footer-separator">|</span>
+                    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+                    <span class="footer-separator">|</span>
+                    <a href="contact.html" target="_blank">제휴/문의</a>
+                </div>
+                <div class="footer-info">
+                    <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
+                    <p>통신판매 제 2024-서울강서-1938</p>
+                    <p>Copyright dodambugo Corp All right reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner-large"></div>
+            <p class="loading-text">부고장을 생성하고 있습니다...</p>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="loadingProgressBar"></div>
+            </div>
+            <p class="loading-hint">잠시만 기다려주세요</p>
+        </div>
+    </div>
+
+
+    <!-- Supabase 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+
+    <script src="js/create-detailed.js"></script>
+    <script>
+        // 사이드 메뉴 관련 함수
+        function openSideMenu() {
+            document.getElementById('sideMenu').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSideMenu() {
+            document.getElementById('sideMenu').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 햄버거 메뉴 토글
+        document.getElementById('navToggle')?.addEventListener('click', function () {
+            openSideMenu();
+        });
+
+        // 사이드 메뉴 닫기 버튼
+        document.getElementById('sideMenuClose')?.addEventListener('click', function () {
+            closeSideMenu();
+        });
+
+        // 오버레이 클릭 시 닫기
+        document.getElementById('sideMenuOverlay')?.addEventListener('click', function () {
+            closeSideMenu();
+        });
+
+        // ESC 키로 메뉴 닫기
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeSideMenu();
+            }
+        });
+    </script>
+</body>
+
+</html>

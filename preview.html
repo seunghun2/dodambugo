@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>템플릿 미리보기 - 도담부고</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/preview.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="preview-header">
+        <button class="back-btn" onclick="history.back()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19L5 12L12 5"/>
+            </svg>
+        </button>
+        <h1 class="preview-title">부고장 샘플 보기</h1>
+    </header>
+
+    <!-- 템플릿 미리보기 컨테이너 -->
+    <div class="preview-container" id="previewContainer">
+        <!-- JavaScript로 동적 생성 -->
+    </div>
+
+    <script>
+        // URL에서 템플릿 타입 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateType = urlParams.get('template') || 'basic';
+
+        // 템플릿 데이터
+        const templates = {
+            basic: {
+                name: '기본형 부고장',
+                image: 'images/basic-full.png'
+            },
+            ribbon: {
+                name: '검은리본 부고장',
+                image: 'images/ribbon-detail.png'
+            },
+            border: {
+                name: '검은띠 부고장',
+                image: 'images/border-full.png'
+            },
+            flower: {
+                name: '국화 부고장',
+                image: 'images/flower-detail.png'
+            }
+        };
+
+        // 선택된 템플릿 표시
+        const template = templates[templateType];
+        const container = document.getElementById('previewContainer');
+
+        if (template) {
+            document.title = `${template.name} 미리보기 - 도담부고`;
+            container.innerHTML = `
+                <div class="preview-image-wrapper">
+                    <img src="${template.image}" alt="${template.name}" class="preview-image">
+                </div>
+                <div class="preview-actions">
+                    <button class="btn-secondary" onclick="history.back()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 5L5 15M5 5l10 10"/>
+                        </svg>
+                        닫기
+                    </button>
+                    <button class="btn-primary" onclick="location.href='create.html?template=${templateType}'">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 3H4C3.46957 3 2.96086 3.21071 2.58579 3.58579C2.21071 3.96086 2 4.46957 2 5V16C2 16.5304 2.21071 17.0391 2.58579 17.4142C2.96086 17.7893 3.46957 18 4 18H15C15.5304 18 16.0391 17.7893 16.4142 17.4142C16.7893 17.0391 17 16.5304 17 16V11"/>
+                            <path d="M15.5 2C15.8978 1.60217 16.4374 1.37868 17 1.37868C17.5626 1.37868 18.1022 1.60217 18.5 2C18.8978 2.39782 19.1213 2.93739 19.1213 3.5C19.1213 4.06261 18.8978 4.60217 18.5 5L10 13.5L6 14.5L7 10.5L15.5 2Z"/>
+                        </svg>
+                        이 템플릿으로 제작하기
+                    </button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = '<p class="error-message">템플릿을 찾을 수 없습니다.</p>';
+        }
+    </script>
+</body>
+</html>

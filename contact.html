@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제휴/문의 - 도담부고</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <h1 class="popup-title">제휴/문의</h1>
+            <button class="popup-close" onclick="window.close()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="popup-content">
+            <section class="contact-intro">
+                <p>도담부고 서비스와 제휴를 원하시거나 문의사항이 있으신 경우 아래 양식을 작성해주세요.</p>
+                <p>빠른 시일 내에 답변드리겠습니다.</p>
+            </section>
+
+            <form id="contactForm" class="contact-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">이름 <span class="required">*</span></label>
+                        <input type="text" name="name" class="form-input" placeholder="이름을 입력해주세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">연락처 <span class="required">*</span></label>
+                        <input type="tel" name="phone" class="form-input" placeholder="010-0000-0000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">회사명</label>
+                    <input type="text" name="company" class="form-input" placeholder="회사명을 입력해주세요 (선택)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">이메일 <span class="required">*</span></label>
+                    <input type="email" name="email" class="form-input" placeholder="example@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">문의 유형 <span class="required">*</span></label>
+                    <select name="inquiry_type" class="form-select" required>
+                        <option value="">선택해주세요</option>
+                        <option value="partnership">제휴 문의</option>
+                        <option value="service">서비스 문의</option>
+                        <option value="technical">기술 지원</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">문의 내용 <span class="required">*</span></label>
+                    <textarea name="message" class="form-textarea" rows="6" placeholder="문의하실 내용을 상세히 입력해주세요" required></textarea>
+                </div>
+
+                <div class="form-privacy">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="privacyAgree" required>
+                        <span>개인정보 수집 및 이용에 동의합니다. <a href="privacy.html" target="_blank">(자세히 보기)</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit btn-primary">
+                    문의 전송
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="contact-info">
+                <h3>📞 연락처 정보</h3>
+                <ul>
+                    <li><strong>이메일:</strong> wsh9991@gmail.com</li>
+                    <li><strong>운영시간:</strong> 평일 09:00 - 18:00 (주말 및 공휴일 제외)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 폼 제출 처리
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 폼 데이터 수집
+            const formData = new FormData(this);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // 이메일 형식으로 변환
+            const emailBody = `
+이름: ${data.name}
+연락처: ${data.phone}
+회사명: ${data.company || '(없음)'}
+이메일: ${data.email}
+문의유형: ${data.inquiry_type}
+
+문의내용:
+${data.message}
+            `.trim();
+            
+            // mailto 링크 생성 (실제 서비스에서는 서버로 전송)
+            const subject = encodeURIComponent(`[도담부고 문의] ${data.name}님의 ${data.inquiry_type} 문의`);
+            const body = encodeURIComponent(emailBody);
+            const mailtoLink = `mailto:wsh9991@gmail.com?subject=${subject}&body=${body}`;
+            
+            // 사용자에게 알림
+            showNotification('문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.', 'success');
+            
+            // 메일 클라이언트 열기
+            window.location.href = mailtoLink;
+            
+            // 폼 초기화
+            setTimeout(() => {
+                this.reset();
+            }, 1000);
+        });
+        
+        // 전화번호 자동 포맷팅
+        document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 3 && value.length <= 7) {
+                value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+            } else if (value.length > 7) {
+                value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+            }
+            e.target.value = value;
+        });
+        
+        // 알림 표시 함수
+        function showNotification(message, type = 'info') {
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            const colors = {
+                success: '#00C853',
+                error: '#FF6B6B',
+                warning: '#FFA726',
+                info: '#3182F6'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 24px;
+                background: ${colors[type]};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 15px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // 애니메이션 스타일 추가
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

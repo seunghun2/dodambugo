@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고 검색 - 도담부고</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/search.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="nav-logo" onclick="location.href='index.html'" style="cursor: pointer;">도담부고</div>
+            <button class="btn-create" onclick="location.href='create.html'">부고장 만들기</button>
+        </div>
+    </nav>
+
+    <!-- 검색 섹션 -->
+    <section class="search-section">
+        <div class="search-container">
+            <div class="search-header">
+                <h1 class="search-title">부고 검색</h1>
+                <p class="search-subtitle">고인 성함 또는 부고장 번호로 검색하세요</p>
+            </div>
+
+            <!-- 검색 폼 -->
+            <div class="search-form-wrapper">
+                <div class="search-tabs">
+                    <button class="search-tab active" data-tab="name">이름으로 검색</button>
+                    <button class="search-tab" data-tab="number">부고장 번호</button>
+                </div>
+
+                <div class="search-form">
+                    <!-- 이름 검색 -->
+                    <div class="tab-content active" id="nameSearch">
+                        <div class="search-input-group">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21L16.65 16.65"/>
+                            </svg>
+                            <input type="text" class="search-input" id="nameInput" placeholder="고인 성함을 입력하세요">
+                            <button class="search-clear-btn" onclick="clearInput('nameInput')">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 5L5 15M5 5l10 10"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="btn-search" onclick="searchByName()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="8" cy="8" r="6"/>
+                                <path d="M17 17L13 13"/>
+                            </svg>
+                            검색하기
+                        </button>
+                    </div>
+
+                    <!-- 번호 검색 -->
+                    <div class="tab-content" id="numberSearch">
+                        <div class="search-input-group">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"/>
+                                <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z"/>
+                            </svg>
+                            <input type="text" class="search-input" id="numberInput" placeholder="부고장 번호를 입력하세요">
+                            <button class="search-clear-btn" onclick="clearInput('numberInput')">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 5L5 15M5 5l10 10"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="btn-search" onclick="searchByNumber()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="8" cy="8" r="6"/>
+                                <path d="M17 17L13 13"/>
+                            </svg>
+                            검색하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 검색 안내 -->
+            <div class="search-notice">
+                <div class="notice-icon">ℹ️</div>
+                <div class="notice-content">
+                    <h3>부고장 검색 안내</h3>
+                    <ul>
+                        <li>고인의 성함으로 검색하실 수 있습니다</li>
+                        <li>부고장 번호는 부고장 하단에서 확인 가능합니다</li>
+                        <li>정확한 정보 입력 시 더 빠른 검색이 가능합니다</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 최근 검색 -->
+            <div class="recent-searches" id="recentSearches" style="display: none;">
+                <div class="recent-header">
+                    <h3>최근 검색</h3>
+                    <button class="clear-all-btn" onclick="clearAllRecent()">전체 삭제</button>
+                </div>
+                <div class="recent-list" id="recentList">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 검색 결과 섹션 -->
+    <section class="results-section" id="resultsSection" style="display: none;">
+        <div class="search-container">
+            <div class="results-header">
+                <h2 class="results-title">검색 결과 <span class="results-count" id="resultsCount">0</span>건</h2>
+            </div>
+            <div class="results-grid" id="resultsGrid">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">도담부고</div>
+                <div class="footer-links">
+                    <a href="terms.html" target="_blank">이용약관</a>
+                    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+                    <a href="contact.html" target="_blank">제휴/문의</a>
+                </div>
+                <div class="footer-info">
+                    <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
+                    <p>통신판매 제 2024-서울강서-1938</p>
+                    <p>Copyright dodambugo Corp All right reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/search.js"></script>
+</body>
+</html>

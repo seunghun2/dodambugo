@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중앙정렬 테스트</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- view.html과 동일한 CSS 로드 -->
+    <link rel="stylesheet" href="css/view-toss.css">
+    <link rel="stylesheet" href="css/view-overlay.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h2 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            color: #191F28;
+        }
+        
+        .test-section p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #4E5968;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .preview-item {
+            background: #F9FAFB;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .preview-item h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #191F28;
+        }
+        
+        /* 배경 그리드로 중앙 확인 */
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 10% 20px;
+            position: relative;
+        }
+        
+        .grid-bg::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3182F6;
+            z-index: 1;
+        }
+        
+        .test-text {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-section">
+            <h2>🎯 중앙정렬 테스트</h2>
+            <p><strong>목적:</strong> view.html과 동일한 CSS를 로드한 상태에서 중앙정렬이 되는지 확인</p>
+            <p><strong>파란선:</strong> 정확한 중앙선 (50%)</p>
+            <p><strong>확인:</strong> 텍스트가 파란선 기준으로 좌우 대칭인지 확인</p>
+        </div>
+        
+        <div class="preview-grid">
+            <!-- 1. 순수 인라인 스타일 (test-simple과 동일) -->
+            <div class="preview-item">
+                <h3>1️⃣ 순수 인라인 (CSS 없음)</h3>
+                <div class="grid-bg" style="position: relative; width: 100%; overflow: hidden; padding: 20px 0;">
+                    <div style="position: relative; width: 100%; max-width: 400px; margin: 0 auto; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <img src="images/template-ribbon.png" alt="정중형" style="width: 100%; height: auto; display: block;">
+                        <div style="position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 110%; text-align: center; pointer-events: none; z-index: 2;">
+                            <p class="test-text" style="display: block; font-family: 'Noto Serif KR', serif; font-size: 16px; font-weight: 700; color: #1a1a1a; line-height: 1.8; text-align: center; width: 100%; margin: 0; padding: 0; box-sizing: border-box;">
+                                故홍길동님께서 11월 25일<br>
+                                별세하셨기에 삼가 알려드립니다.<br>
+                                마음으로 따뜻한 위로 부탁드리며<br>
+                                고인의 명복을 빌어주시길 바랍니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 2. view.html과 동일한 구조 (CSS 포함) -->
+            <div class="preview-item">
+                <h3>2️⃣ view.html 구조 (CSS 포함)</h3>
+                <div class="grid-bg" style="position: relative; width: 100%; overflow: hidden; padding: 20px 0;">
+                    <div class="bugo-header template-ribbon" style="max-width: 400px; margin: 0 auto;">
+                        <img src="images/template-ribbon.png" alt="정중형" style="width: 100%; height: auto; display: block;">
+                        <div class="text-overlay">
+                            <p class="test-text overlay-text overlay-full-message" style="display: block !important;">
+                                故홍길동님께서 11월 25일<br>
+                                별세하셨기에 삼가 알려드립니다.<br>
+                                마음으로 따뜻한 위로 부탁드리며<br>
+                                고인의 명복을 빌어주시길 바랍니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section" style="margin-top: 20px;">
+            <h2>🔍 결과 분석</h2>
+            <p><strong>1번이 중앙, 2번이 오른쪽이면:</strong> CSS 파일 문제 (view-toss.css 또는 view-overlay.css)</p>
+            <p><strong>둘 다 중앙이면:</strong> view.html의 다른 JavaScript나 HTML 구조 문제</p>
+            <p><strong>둘 다 오른쪽이면:</strong> 브라우저 자체 문제 또는 이미지 로드 문제</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>🛠️ 개발자 도구로 확인</h2>
+            <p><strong>1. F12 → Elements 탭</strong></p>
+            <p><strong>2. overlay-full-message 요소 선택</strong></p>
+            <p><strong>3. Computed 스타일 확인:</strong></p>
+            <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.8; color: #4E5968;">
+                <li>text-align: center ✅</li>
+                <li>margin-left: ? (0 또는 auto여야 함)</li>
+                <li>margin-right: ? (0 또는 auto여야 함)</li>
+                <li>padding-left: ? (0이어야 함)</li>
+                <li>padding-right: ? (0이어야 함)</li>
+                <li>transform: ? (none이어야 함)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        window.addEventListener('load', function() {
+            const elements = document.querySelectorAll('.overlay-full-message');
+            elements.forEach((el, index) => {
+                const computed = window.getComputedStyle(el);
+                console.log(`=== ${index + 1}번 요소 스타일 ===`);
+                console.log('text-align:', computed.textAlign);
+                console.log('margin-left:', computed.marginLeft);
+                console.log('margin-right:', computed.marginRight);
+                console.log('padding-left:', computed.paddingLeft);
+                console.log('padding-right:', computed.paddingRight);
+                console.log('left:', computed.left);
+                console.log('right:', computed.right);
+                console.log('transform:', computed.transform);
+                console.log('width:', computed.width);
+                console.log('---');
+            });
+        });
+    </script>
+</body>
+</html>

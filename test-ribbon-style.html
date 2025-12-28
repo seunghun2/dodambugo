@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정중형 템플릿 스타일 테스트</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/view-toss.css">
+    <link rel="stylesheet" href="css/view-overlay.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #F9FAFB;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .test-info {
+            background: #E8F3FF;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h2 {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            color: #3182F6;
+        }
+        
+        .test-info ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #4E5968;
+            line-height: 1.8;
+        }
+        
+        .computed-styles {
+            background: #F2F4F6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            color: #191F28;
+        }
+        
+        .computed-styles strong {
+            color: #3182F6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-info">
+            <h2>✅ 정중형(ribbon) 템플릿 스타일 테스트</h2>
+            <ul>
+                <li><strong>텍스트:</strong> 4줄 하드코딩된 문구 (이름/날짜만 동적)</li>
+                <li><strong>위치:</strong> 기존보다 16px 위로 (padding-top: calc(45% - 16px))</li>
+                <li><strong>폰트 크기:</strong> 16px (모바일 15px/14px)</li>
+                <li><strong>폰트 굵기:</strong> 700 (bold)</li>
+                <li><strong>정렬:</strong> 중앙 정렬</li>
+                <li><strong>컬러:</strong> #1a1a1a (검은색)</li>
+            </ul>
+        </div>
+        
+        <!-- 정중형 템플릿 -->
+        <div class="bugo-header template-ribbon" style="position: relative; width: 100%; max-width: 480px; margin: 0 auto; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);">
+            <img src="images/template-ribbon.png" alt="정중형 템플릿" style="width: 100%; height: auto; display: block;">
+            <div class="text-overlay" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; padding-top: 120% !important; text-align: center !important; pointer-events: none !important; z-index: 2 !important;">
+                <p class="overlay-text overlay-full-message" id="testMessage" style="display: block !important; font-family: 'Noto Serif KR', serif !important; font-size: 16px !important; font-weight: 700 !important; color: #1a1a1a !important; line-height: 1.8 !important; text-align: center !important; width: 100% !important; margin: 0 !important; padding: 0 8% !important; box-sizing: border-box !important;">
+                    故홍길동님께서 11월 25일<br>
+                    별세하셨기에 삼가 알려드립니다.<br>
+                    마음으로 따뜻한 위로 부탁드리며<br>
+                    고인의 명복을 빌어주시길 바랍니다.
+                </p>
+            </div>
+        </div>
+        
+        <!-- 계산된 스타일 표시 -->
+        <div class="computed-styles" id="computedStyles">스타일 정보를 불러오는 중...</div>
+    </div>
+    
+    <script>
+        // 페이지 로드 후 계산된 스타일 표시
+        window.addEventListener('load', function() {
+            const element = document.getElementById('testMessage');
+            const computed = window.getComputedStyle(element);
+            const textOverlay = element.closest('.text-overlay');
+            const textOverlayComputed = window.getComputedStyle(textOverlay);
+            
+            const info = `
+🎨 <strong>계산된 스타일 (Computed Styles):</strong>
+
+<strong>[overlay-full-message 요소]</strong>
+• display: ${computed.display}
+• font-size: ${computed.fontSize}
+• font-weight: ${computed.fontWeight}
+• font-family: ${computed.fontFamily}
+• color: ${computed.color}
+• text-align: ${computed.textAlign}
+• line-height: ${computed.lineHeight}
+• width: ${computed.width}
+• padding: ${computed.padding}
+
+<strong>[text-overlay 컨테이너]</strong>
+• display: ${textOverlayComputed.display}
+• flex-direction: ${textOverlayComputed.flexDirection}
+• align-items: ${textOverlayComputed.alignItems}
+• justify-content: ${textOverlayComputed.justifyContent}
+• padding-top: ${textOverlayComputed.paddingTop}
+• text-align: ${textOverlayComputed.textAlign}
+
+<strong>[실제 렌더링된 크기]</strong>
+• offsetWidth: ${element.offsetWidth}px
+• offsetHeight: ${element.offsetHeight}px
+• clientWidth: ${element.clientWidth}px
+• clientHeight: ${element.clientHeight}px
+            `.trim();
+            
+            document.getElementById('computedStyles').innerHTML = info;
+            
+            // 콘솔에도 출력
+            console.log('=== 정중형 템플릿 스타일 진단 ===');
+            console.log('Element:', element);
+            console.log('Computed Style:', computed);
+            console.log('Text Overlay:', textOverlayComputed);
+        });
+    </script>
+</body>
+</html>

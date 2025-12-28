@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도담부고 - 품격있는 무료 모바일 부고장</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/kakao-style.css">
+    <link rel="stylesheet" href="css/template-select.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    
+    <style>
+        /* 임시저장 확인 모달 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10001;
+        }
+        
+        .confirm-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .confirm-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .confirm-modal-content {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            background: white;
+            border-radius: 16px;
+            padding: 32px 28px;
+            animation: scaleIn 0.3s ease-out;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .confirm-modal-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .confirm-icon {
+            font-size: 48px;
+            color: #FFA726;
+        }
+        
+        .confirm-modal-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+        
+        .confirm-modal-text {
+            font-size: 16px;
+            color: #4a4a4a;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        
+        .confirm-modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-confirm-no,
+        .btn-confirm-yes {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .btn-confirm-no {
+            background: #f5f5f5;
+            color: #4a4a4a;
+        }
+        
+        .btn-confirm-no:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-confirm-yes {
+            background: #3182F6;
+            color: white;
+        }
+        
+        .btn-confirm-yes:hover {
+            background: #1b64da;
+            box-shadow: 0 4px 12px rgba(49, 130, 246, 0.3);
+        }
+        
+        /* 템플릿 미리보기 모달 */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+        }
+        
+        .preview-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .preview-modal-content {
+            position: relative;
+            width: 90vw;
+            max-width: 500px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            animation: scaleIn 0.3s ease-out;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 3;
+            font-size: 20px;
+        }
+        
+        .preview-modal-close .material-symbols-outlined {
+            font-size: 20px;
+        }
+        
+        .preview-modal-close:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+        
+        .preview-modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .preview-modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+        
+        .preview-modal-body {
+            flex: 1;
+            overflow: auto;
+            background: #f5f5f5;
+        }
+        
+        .preview-modal-body iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: none;
+            display: block;
+        }
+        
+        .preview-modal-actions {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .btn-modal-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 16px;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            background: white;
+            color: #1a1a1a;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .btn-modal-action .material-symbols-outlined {
+            font-size: 20px;
+        }
+        
+        .btn-modal-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-modal-secondary {
+            background: white;
+            color: #4a4a4a;
+            border-color: #d0d0d0;
+        }
+        
+        .btn-modal-secondary:hover {
+            border-color: #808080;
+            background: #f5f5f5;
+        }
+        
+        .btn-modal-primary {
+            background: #3182F6;
+            color: white;
+            border-color: #3182F6;
+        }
+        
+        .btn-modal-primary:hover {
+            background: #1b64da;
+            border-color: #1b64da;
+            box-shadow: 0 4px 12px rgba(49, 130, 246, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* 임시저장 배너 */
+        .draft-banner {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 999;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .draft-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 22px 20px 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .draft-banner-content .material-symbols-outlined {
+            font-size: 20px;
+            color: #666;
+            flex-shrink: 0;
+        }
+        
+        .draft-banner-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .draft-banner-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .draft-banner-btn-delete {
+            padding: 4px 10px;
+            background: #9e9e9e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .draft-banner-btn-delete:hover {
+            background: #757575;
+        }
+        
+        .draft-banner-btn {
+            padding: 8px 20px;
+            background: white;
+            color: #3182F6;
+            border: 1px solid #3182F6;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .draft-banner-btn:hover {
+            background: #3182F6;
+            color: white;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .draft-banner {
+                top: 56px;
+            }
+            
+            .draft-banner-content {
+                padding: 18px 16px 10px 16px;
+                font-size: 13px;
+                gap: 10px;
+            }
+            
+            .draft-banner-left {
+                gap: 8px;
+            }
+            
+            .draft-banner-text {
+                font-size: 13px;
+            }
+            
+            .draft-banner-btn-delete {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .draft-banner-btn {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+            
+            .preview-modal-content {
+                max-width: 95vw;
+                max-height: 95vh;
+                width: 95vw;
+            }
+            
+            .preview-modal-actions {
+                flex-direction: column;
+                padding: 12px 16px;
+            }
+            
+            .preview-modal-header {
+                padding: 16px 20px;
+            }
+            
+            .preview-modal-header h2 {
+                font-size: 18px;
+            }
+            
+            .btn-modal-action {
+                width: 100%;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 토스 스타일 네비게이션 -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <div class="nav-logo">도담부고</div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link">홈</a></li>
+                <li><a href="search.html" class="nav-link">부고검색</a></li>
+                <li><a href="#templates" class="nav-link">템플릿</a></li>
+                <li><a href="#guide" class="nav-link">이용안내</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="nav-cta" onclick="checkDraftBeforeCreate()">부고장 만들기</button>
+                <button class="nav-toggle" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-overlay" id="sideMenuOverlay"></div>
+        <div class="side-menu-content">
+            <div class="side-menu-header">
+                <div class="side-menu-logo">도담부고</div>
+                <button class="side-menu-close" id="sideMenuClose">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <nav class="side-menu-nav">
+                <a href="create.html" class="side-menu-item">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>부고장 만들기</span>
+                </a>
+                <a href="search.html" class="side-menu-item">
+                    <span class="material-symbols-outlined">search</span>
+                    <span>부고 검색</span>
+                </a>
+                <a href="#faq" class="side-menu-item" onclick="scrollToFAQ(); closeSideMenu();">
+                    <span class="material-symbols-outlined">contact_support</span>
+                    </svg>
+                    <span>자주 묻는 질문</span>
+                </a>
+                <a href="test-view.html" class="side-menu-item" style="opacity: 0.5;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        <path d="M9 12h6m-6 4h6"/>
+                    </svg>
+                    <span>부고 목록 (테스트)</span>
+                </a>
+                <a href="thumbnail-compare.html" class="side-menu-item" style="opacity: 0.5;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18M9 21V9"/>
+                    </svg>
+                    <span>썸네일 옵션 비교</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 히어로 섹션 - 토스 스타일 -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">무료 · 광고없음 · 회원가입 없음</div>
+            <h1 class="hero-title">
+                품격있는<br>
+                <span class="gradient-text">모바일 부고장</span>
+            </h1>
+            <p class="hero-subtitle">
+                3분이면 완성되는 정중하고 세련된 부고장.<br>
+                고인의 품격을 지키는 가장 쉬운 방법입니다.
+            </p>
+            <div class="hero-cta">
+                <button class="btn-primary" onclick="checkDraftBeforeCreate()">
+                    지금 무료로 만들기
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="btn-secondary" onclick="location.href='search.html'">부고 검색</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="50000">0</div>
+                    <div class="stat-label">누적 부고장</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="98">0</div>
+                    <div class="stat-label">만족도</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="3">0</div>
+                    <div class="stat-label">분만에 완성</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 서비스 특징 - Glassmorphism 카드 -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">왜 도담부고일까요?</h2>
+                <p class="section-subtitle">다른 부고 서비스와는 다른 특별함</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="0">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient1)" opacity="0.2"/>
+                            <path d="M24 14V24L30 30" stroke="url(#gradient1)" stroke-width="3" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gradient1" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#3182F6"/>
+                                    <stop offset="1" stop-color="#1B64DA"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">3분 만에 완성</h3>
+                    <p class="feature-description">복잡한 과정 없이 간단한 정보 입력만으로 세련된 부고장이 완성됩니다.</p>
+                </div>
+
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="100">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient2)" opacity="0.2"/>
+                            <path d="M16 24L22 30L32 18" stroke="url(#gradient2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="gradient2" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#00C7B2"/>
+                                    <stop offset="1" stop-color="#009F8B"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">완전 무료</h3>
+                    <p class="feature-description">작성부터 공유까지 모든 기능을 완전히 무료로 사용하실 수 있습니다.</p>
+                </div>
+
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="200">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient3)" opacity="0.2"/>
+                            <rect x="14" y="18" width="20" height="16" rx="2" stroke="url(#gradient3)" stroke-width="3"/>
+                            <path d="M18 18V16C18 13.7909 19.7909 12 22 12H26C28.2091 12 30 13.7909 30 16V18" stroke="url(#gradient3)" stroke-width="3"/>
+                            <defs>
+                                <linearGradient id="gradient3" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#8B7355"/>
+                                    <stop offset="1" stop-color="#6B5744"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">품격있는 디자인</h3>
+                    <p class="feature-description">고인의 품격을 지키는 세련되고 정중한 디자인 템플릿을 제공합니다.</p>
+                </div>
+
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="300">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient4)" opacity="0.2"/>
+                            <path d="M30 18L18 30M18 18L30 30" stroke="url(#gradient4)" stroke-width="3" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gradient4" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#FF6B6B"/>
+                                    <stop offset="1" stop-color="#EE5A52"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">광고 없음</h3>
+                    <p class="feature-description">부고장 어디에도 광고나 불필요한 링크가 없습니다.</p>
+                </div>
+
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="400">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient5)" opacity="0.2"/>
+                            <path d="M16 24L22 30L32 18" stroke="url(#gradient5)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="gradient5" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#FFA726"/>
+                                    <stop offset="1" stop-color="#FB8C00"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">회원가입 불필요</h3>
+                    <p class="feature-description">별도의 회원가입이나 앱 설치 없이 바로 사용 가능합니다.</p>
+                </div>
+
+                <div class="feature-card glass-card" data-aos="fade-up" data-delay="500">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" fill="url(#gradient6)" opacity="0.2"/>
+                            <path d="M24 14C18.48 14 14 18.48 14 24C14 29.52 18.48 34 24 34C26.76 34 29.24 32.88 31 31.06" stroke="url(#gradient6)" stroke-width="3" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gradient6" x1="0" y1="0" x2="48" y2="48">
+                                    <stop stop-color="#AB47BC"/>
+                                    <stop offset="1" stop-color="#8E24AA"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">쉬운 공유</h3>
+                    <p class="feature-description">카카오톡, 문자 등으로 한 번에 간편하게 공유할 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 템플릿 미리보기 -->
+    <!-- 템플릿 선택 섹션 -->
+    <section class="templates" id="templates">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">4가지 템플릿 제공</h2>
+            </div>
+            <div class="template-selection-grid">
+                <!-- 기본형 부고장 -->
+                <div class="template-select-card" data-template="basic">
+                    <div class="template-preview-box">
+                        <img src="images/basic.png" alt="기본형 부고장" class="template-thumb">
+                    </div>
+                    <div class="template-details">
+                        <h3 class="template-name">기본형 부고장</h3>
+                        <p class="template-desc">전통적이고 정중한 분위기</p>
+                        <button class="template-preview-btn" onclick="showTemplatePreview('basic')">미리보기</button>
+                        <button class="template-create-btn" onclick="location.href='create.html?template=basic'">제작하기</button>
+                    </div>
+                </div>
+
+                <!-- 검은리본 부고장 -->
+                <div class="template-select-card" data-template="ribbon">
+                    <div class="template-preview-box">
+                        <img src="images/ribbon.png" alt="검은리본 부고장" class="template-thumb">
+                    </div>
+                    <div class="template-details">
+                        <h3 class="template-name">검은리본 부고장</h3>
+                        <p class="template-desc">추모의 마음을 담은 디자인</p>
+                        <button class="template-preview-btn" onclick="showTemplatePreview('ribbon')">미리보기</button>
+                        <button class="template-create-btn" onclick="location.href='create.html?template=ribbon'">제작하기</button>
+                    </div>
+                </div>
+
+                <!-- 검은띠 부고장 -->
+                <div class="template-select-card" data-template="border">
+                    <div class="template-preview-box">
+                        <img src="images/border.png" alt="검은띠 부고장" class="template-thumb">
+                    </div>
+                    <div class="template-details">
+                        <h3 class="template-name">검은띠 부고장</h3>
+                        <p class="template-desc">깔끔하고 세련된 스타일</p>
+                        <button class="template-preview-btn" onclick="showTemplatePreview('border')">미리보기</button>
+                        <button class="template-create-btn" onclick="location.href='create.html?template=border'">제작하기</button>
+                    </div>
+                </div>
+
+                <!-- 국화 부고장 -->
+                <div class="template-select-card" data-template="flower">
+                    <div class="template-preview-box">
+                        <img src="images/flower-detail.png" alt="국화 부고장" class="template-thumb">
+                    </div>
+                    <div class="template-details">
+                        <h3 class="template-name">국화 부고장</h3>
+                        <p class="template-desc">우아하고 품격있는 느낌</p>
+                        <button class="template-preview-btn" onclick="showTemplatePreview('flower')">미리보기</button>
+                        <button class="template-create-btn" onclick="location.href='create.html?template=flower'">제작하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 이용 가이드 -->
+    <section class="guide" id="guide">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">이용 방법</h2>
+                <p class="section-subtitle">3단계로 완성되는 간편한 프로세스</p>
+            </div>
+            <div class="guide-steps">
+                <div class="guide-step" data-aos="fade-right" data-delay="0">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3 class="step-title">템플릿 선택</h3>
+                        <p class="step-description">마음에 드는 디자인 템플릿을 선택합니다</p>
+                    </div>
+                    <div class="step-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                            <rect x="15" y="15" width="30" height="30" rx="4" stroke="#3182F6" stroke-width="3"/>
+                            <path d="M25 25H35M25 30H35M25 35H30" stroke="#3182F6" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="guide-step" data-aos="fade-right" data-delay="100">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3 class="step-title">정보 입력</h3>
+                        <p class="step-description">고인과 장례 정보를 간단히 입력합니다</p>
+                    </div>
+                    <div class="step-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                            <path d="M20 25H40M20 30H40M20 35H35" stroke="#00C7B2" stroke-width="3" stroke-linecap="round"/>
+                            <rect x="15" y="15" width="30" height="30" rx="4" stroke="#00C7B2" stroke-width="3"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="guide-step" data-aos="fade-right" data-delay="200">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3 class="step-title">공유하기</h3>
+                        <p class="step-description">완성된 부고장을 카카오톡으로 공유합니다</p>
+                    </div>
+                    <div class="step-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                            <path d="M30 20L30 40M30 20L25 25M30 20L35 25" stroke="#8B7355" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20 40L40 40" stroke="#8B7355" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-cta">
+                <button class="btn-primary btn-large" onclick="checkDraftBeforeCreate()">
+                    지금 시작하기
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ 섹션 -->
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">자주 묻는 질문</h2>
+                <p class="section-subtitle">궁금하신 내용을 확인해보세요</p>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item" data-aos="fade-up" data-delay="0">
+                    <button class="faq-question">
+                        <span>정말 무료인가요?</span>
+                        <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>네, 완전히 무료입니다. 부고장 작성, 수정, 공유 등 모든 기능을 제한 없이 무료로 이용하실 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-delay="100">
+                    <button class="faq-question">
+                        <span>회원가입이 필요한가요?</span>
+                        <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>아니요, 회원가입 없이 바로 사용 가능합니다. 별도의 앱 설치도 필요하지 않습니다.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-delay="200">
+                    <button class="faq-question">
+                        <span>부고장을 수정할 수 있나요?</span>
+                        <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>네, 작성 후에도 언제든지 수정이 가능합니다. 부고장 관리 페이지에서 수정하실 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-delay="300">
+                    <button class="faq-question">
+                        <span>어떻게 공유하나요?</span>
+                        <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>부고장 완성 후 카카오톡, 문자, 링크 복사 등 다양한 방법으로 간편하게 공유하실 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">도담부고</div>
+                <div class="footer-links-horizontal">
+                    <a href="terms.html" target="_blank">이용약관</a>
+                    <span class="footer-separator">|</span>
+                    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+                    <span class="footer-separator">|</span>
+                    <a href="contact.html" target="_blank">제휴/문의</a>
+                </div>
+                <div class="footer-info">
+                    <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
+                    <p>통신판매 제 2024-서울강서-1938</p>
+                    <p>Copyright dodambugo Corp All right reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 검색 모달 -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <div class="search-modal-header">
+                <h3 class="search-modal-title">부고 검색</h3>
+                <button class="search-close-btn" onclick="closeSearchModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-input-group">
+                <input type="text" class="search-input" placeholder="고인 성함 또는 부고장 번호를 입력하세요" id="searchInput">
+            </div>
+            <button class="search-btn" onclick="performSearch()">검색하기</button>
+        </div>
+    </div>
+
+    <!-- 임시저장 확인 모달 -->
+    <div class="confirm-modal" id="draftConfirmModal">
+        <div class="confirm-modal-overlay" onclick="closeDraftConfirmModal()"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <span class="material-symbols-outlined confirm-icon">info</span>
+                <h3>임시저장된 부고장이 있습니다</h3>
+            </div>
+            <p class="confirm-modal-text">이전에 작성하던 내용을 불러올까요?</p>
+            <div class="confirm-modal-actions">
+                <button class="btn-confirm-no" onclick="goToCreateNew()">아니오</button>
+                <button class="btn-confirm-yes" onclick="goToLoadDraft()">예</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 템플릿 미리보기 모달 -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-modal-overlay" onclick="closePreviewModal()"></div>
+        <div class="preview-modal-content">
+            <button class="preview-modal-close" onclick="closePreviewModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div class="preview-modal-header">
+                <h2 id="previewModalTitle">템플릿 미리보기</h2>
+            </div>
+            <div class="preview-modal-body">
+                <iframe id="previewModalFrame" src="" frameborder="0"></iframe>
+            </div>
+            <div class="preview-modal-actions">
+                <button class="btn-modal-action btn-modal-secondary" onclick="closePreviewModal()">
+                    <span class="material-symbols-outlined">close</span>
+                    닫기
+                </button>
+                <button class="btn-modal-action btn-modal-primary" onclick="createFromPreview()">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    부고장 만들기
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Supabase 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    
+    <script src="js/main.js"></script>
+    <script>
+        // 사이드 메뉴 관련 함수
+        function openSideMenu() {
+            document.getElementById('sideMenu').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSideMenu() {
+            document.getElementById('sideMenu').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function scrollToFAQ() {
+            const faqSection = document.querySelector('.faq');
+            if (faqSection) {
+                faqSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 햄버거 메뉴 토글
+        document.getElementById('navToggle').addEventListener('click', function() {
+            openSideMenu();
+        });
+
+        // 사이드 메뉴 닫기 버튼
+        document.getElementById('sideMenuClose').addEventListener('click', function() {
+            closeSideMenu();
+        });
+
+        // 오버레이 클릭 시 닫기
+        document.getElementById('sideMenuOverlay').addEventListener('click', function() {
+            closeSideMenu();
+        });
+
+        // 검색 모달 관련 함수
+        function showSearchModal() {
+            document.getElementById('searchModal').classList.add('active');
+            document.getElementById('searchInput').focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').classList.remove('active');
+        }
+
+        function performSearch() {
+            const searchValue = document.getElementById('searchInput').value.trim();
+            if (searchValue) {
+                alert('검색 기능은 준비 중입니다.\n검색어: ' + searchValue);
+                closeSearchModal();
+            } else {
+                alert('검색어를 입력해주세요.');
+            }
+        }
+
+        function scrollToGuide() {
+            document.getElementById('guide').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 현재 미리보기 중인 템플릿
+        let currentPreviewTemplate = null;
+
+        // 템플릿 미리보기
+        function showTemplatePreview(templateType) {
+            currentPreviewTemplate = templateType;
+            
+            const templateMap = {
+                basic: 'templates/basic.html',
+                ribbon: 'templates/ribbon.html',
+                border: 'templates/border.html',
+                flower: 'templates/flower.html'
+            };
+            
+            const templateNames = {
+                basic: '기본형 부고장',
+                ribbon: '검은리본 부고장',
+                border: '검은띠 부고장',
+                flower: '국화 부고장'
+            };
+            
+            const modal = document.getElementById('previewModal');
+            const iframe = document.getElementById('previewModalFrame');
+            const title = document.getElementById('previewModalTitle');
+            
+            if (modal && iframe && title) {
+                iframe.src = templateMap[templateType] || templateMap.basic;
+                title.textContent = templateNames[templateType] || '템플릿 미리보기';
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // 미리보기 모달 닫기
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            const iframe = document.getElementById('previewModalFrame');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                if (iframe) {
+                    iframe.src = '';
+                }
+                currentPreviewTemplate = null;
+            }
+        }
+
+        // 미리보기에서 제작하기
+        function createFromPreview() {
+            if (currentPreviewTemplate) {
+                location.href = `create.html?template=${currentPreviewTemplate}`;
+            }
+        }
+
+        // 다른 템플릿 보기
+        function changePreviewTemplate() {
+            closePreviewModal();
+            // 템플릿 섹션으로 스크롤
+            document.getElementById('templates').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 부고장 만들기 전 임시저장 확인
+        function checkDraftBeforeCreate() {
+            const draftId = localStorage.getItem('bugo_draft_id');
+            const draftTime = localStorage.getItem('bugo_draft_time');
+            
+            if (draftId && draftTime) {
+                // 임시저장이 있으면 확인 모달 표시
+                const modal = document.getElementById('draftConfirmModal');
+                if (modal) {
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            } else {
+                // 임시저장이 없으면 바로 create.html로 이동
+                location.href = 'create.html';
+            }
+        }
+
+        // 임시저장 확인 모달 닫기
+        function closeDraftConfirmModal() {
+            const modal = document.getElementById('draftConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 새로 작성하기
+        function goToCreateNew() {
+            closeDraftConfirmModal();
+            // 임시저장 정보 삭제
+            localStorage.removeItem('bugo_draft_id');
+            localStorage.removeItem('bugo_draft_time');
+            
+            // 배너도 제거
+            const banner = document.getElementById('draftBanner');
+            if (banner) {
+                banner.remove();
+            }
+            
+            location.href = 'create.html';
+        }
+
+        // 임시저장 불러오기
+        function goToLoadDraft() {
+            closeDraftConfirmModal();
+            location.href = 'create.html?loadDraft=true';
+        }
+
+        // 페이지 로드 시 임시저장 배너 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            const draftId = localStorage.getItem('bugo_draft_id');
+            const draftTime = localStorage.getItem('bugo_draft_time');
+            
+            if (draftId && draftTime) {
+                showDraftBanner();
+            }
+        });
+
+        // 임시저장 배너 표시
+        function showDraftBanner() {
+            if (document.getElementById('draftBanner')) return;
+            
+            const body = document.body;
+            
+            const draftBanner = document.createElement('div');
+            draftBanner.id = 'draftBanner';
+            draftBanner.className = 'draft-banner';
+            draftBanner.innerHTML = `
+                <div class="draft-banner-content">
+                    <span class="material-symbols-outlined">draft</span>
+                    <div class="draft-banner-left">
+                        <span class="draft-banner-text">임시저장된 내용이 있습니다</span>
+                        <button class="draft-banner-btn-delete" onclick="deleteDraftFromIndex()">지우기</button>
+                    </div>
+                    <button class="draft-banner-btn" onclick="location.href='create.html?loadDraft=true'">불러오기</button>
+                </div>
+            `;
+            
+            body.insertBefore(draftBanner, body.firstChild);
+        }
+
+        // 임시저장 삭제
+        function deleteDraftFromIndex() {
+            if (confirm('임시저장된 내용을 삭제하시겠습니까?')) {
+                localStorage.removeItem('bugo_draft_id');
+                localStorage.removeItem('bugo_draft_time');
+                
+                const banner = document.getElementById('draftBanner');
+                if (banner) {
+                    banner.remove();
+                }
+                
+                alert('임시저장이 삭제되었습니다.');
+            }
+        }
+
+        // 모달 배경 클릭 시 닫기
+        document.getElementById('searchModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSearchModal();
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSearchModal();
+                closeSideMenu();
+            }
+        });
+    </script>
+</body>
+</html>
