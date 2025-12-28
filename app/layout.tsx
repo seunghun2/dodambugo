@@ -83,7 +83,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/css/kakao-style.css" />
         <link rel="stylesheet" href="/css/template-select.css" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <MantineProvider theme={theme} defaultColorScheme="light">
           <ModalsProvider>
             <Notifications position="top-right" />
