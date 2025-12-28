@@ -9,11 +9,9 @@ import {
   Stack,
   Card,
   SimpleGrid,
-  Badge,
   Box,
   Divider,
   Accordion,
-  ThemeIcon,
   rem,
   Anchor,
 } from '@mantine/core';
@@ -98,53 +96,49 @@ export default function HomePage() {
     <Box className={classes.wrapper}>
       {/* Navigation */}
       <Box component="header" className={classes.header}>
-        <Container size="lg">
-          <Group justify="space-between" h={60}>
+        <Container size="md">
+          <Group justify="space-between" h={56}>
             <Text fw={700} size="lg" className={classes.logo}>
               도담부고
             </Text>
-            <Group gap="md" visibleFrom="sm">
-              <Anchor component={Link} href="/search" c="dimmed" size="sm">
+            <Group gap="sm">
+              <Anchor component={Link} href="/search" c="dimmed" size="sm" className={classes.navLink}>
                 부고 검색
               </Anchor>
-              <Button component={Link} href="/create" size="sm" radius="xl">
+              <Button
+                component={Link}
+                href="/create"
+                size="sm"
+                radius="xl"
+                className={classes.headerBtn}
+              >
                 부고장 만들기
               </Button>
             </Group>
-            <Button
-              component={Link}
-              href="/create"
-              size="xs"
-              radius="xl"
-              hiddenFrom="sm"
-            >
-              만들기
-            </Button>
           </Group>
         </Container>
       </Box>
 
       {/* Hero Section */}
       <Box className={classes.hero}>
-        <Container size="lg">
-          <Stack align="center" gap="xl" py={80}>
-            <Badge size="lg" variant="light" radius="xl">
-              완전 무료 · 광고 없음
-            </Badge>
+        <Container size="md">
+          <Stack align="center" gap="lg" py={60}>
+            <Box className={classes.badge}>완전 무료 · 광고 없음</Box>
             <Title order={1} ta="center" className={classes.heroTitle}>
               3분 만에 만드는<br />
-              <Text component="span" inherit c="blue">품격있는</Text> 모바일 부고장
+              <Text component="span" inherit className={classes.heroHighlight}>품격있는</Text> 모바일 부고장
             </Title>
-            <Text size="lg" c="dimmed" ta="center" maw={500}>
+            <Text size="md" c="dimmed" ta="center" maw={400} className={classes.heroDesc}>
               세련된 템플릿으로 고인을 정중히 알리세요.
               복잡한 절차 없이 간단하게 제작할 수 있습니다.
             </Text>
-            <Group>
+            <Group gap="sm" mt="md">
               <Button
                 component={Link}
                 href="/create"
                 size="lg"
                 radius="xl"
+                className={classes.primaryBtn}
                 rightSection={<IconChevronRight size={18} />}
               >
                 부고장 만들기
@@ -154,7 +148,8 @@ export default function HomePage() {
                 href="/search"
                 size="lg"
                 radius="xl"
-                variant="light"
+                variant="default"
+                className={classes.secondaryBtn}
                 leftSection={<IconSearch size={18} />}
               >
                 부고 검색
@@ -165,27 +160,27 @@ export default function HomePage() {
       </Box>
 
       {/* Features Section */}
-      <Box py={80} bg="gray.0">
-        <Container size="lg">
-          <Stack align="center" gap="xl" mb={50}>
-            <Title order={2} ta="center">
+      <Box py={60} className={classes.section}>
+        <Container size="md">
+          <Stack align="center" gap="lg" mb={40}>
+            <Title order={2} ta="center" className={classes.sectionTitle}>
               왜 도담부고인가요?
             </Title>
-            <Text c="dimmed" ta="center" maw={500}>
+            <Text c="dimmed" ta="center" maw={400} size="sm">
               어려운 시간에 부담 없이 사용할 수 있도록
               모든 기능을 무료로 제공합니다.
             </Text>
           </Stack>
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
             {features.map((feature, index) => (
-              <Card key={index} shadow="sm" padding="lg" radius="md" withBorder>
-                <ThemeIcon size={50} radius="md" variant="light" mb="md">
-                  <feature.icon size={28} />
-                </ThemeIcon>
-                <Text fw={600} size="lg" mb="xs">
+              <Card key={index} padding="lg" radius="md" className={classes.featureCard}>
+                <Box className={classes.featureIcon}>
+                  <feature.icon size={24} stroke={1.5} />
+                </Box>
+                <Text fw={600} size="md" mt="sm" className={classes.featureTitle}>
                   {feature.title}
                 </Text>
-                <Text size="sm" c="dimmed">
+                <Text size="sm" c="dimmed" mt={4} lh={1.6}>
                   {feature.description}
                 </Text>
               </Card>
@@ -195,46 +190,41 @@ export default function HomePage() {
       </Box>
 
       {/* Templates Section */}
-      <Box py={80}>
-        <Container size="lg">
-          <Stack align="center" gap="xl" mb={50}>
-            <Title order={2} ta="center">
+      <Box py={60} className={classes.sectionAlt}>
+        <Container size="md">
+          <Stack align="center" gap="lg" mb={40}>
+            <Title order={2} ta="center" className={classes.sectionTitle}>
               4가지 세련된 템플릿
             </Title>
-            <Text c="dimmed" ta="center" maw={500}>
+            <Text c="dimmed" ta="center" maw={400} size="sm">
               상황에 맞는 디자인을 선택하세요.
               모든 템플릿은 모바일에 최적화되어 있습니다.
             </Text>
           </Stack>
-          <SimpleGrid cols={{ base: 2, md: 4 }} spacing="lg">
+          <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
             {templates.map((template) => (
               <Card
                 key={template.id}
-                shadow="sm"
-                padding="lg"
+                padding="md"
                 radius="md"
-                withBorder
                 className={classes.templateCard}
               >
-                <Box
-                  h={120}
-                  mb="md"
-                  style={{ borderRadius: rem(8), overflow: 'hidden', background: '#f0f0f0' }}
-                >
+                <Box className={classes.templateImage}>
                   <img
                     src={template.image}
                     alt={template.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 </Box>
-                <Text fw={600} mb="xs">{template.name}</Text>
-                <Text size="xs" c="dimmed" mb="md">{template.description}</Text>
+                <Text fw={600} size="sm" mt="sm">{template.name}</Text>
+                <Text size="xs" c="dimmed" mt={2}>{template.description}</Text>
                 <Button
                   component={Link}
                   href={`/create?template=${template.id}`}
                   variant="light"
-                  size="sm"
+                  size="xs"
                   fullWidth
+                  mt="sm"
+                  radius="md"
                 >
                   선택하기
                 </Button>
@@ -245,18 +235,22 @@ export default function HomePage() {
       </Box>
 
       {/* FAQ Section */}
-      <Box py={80} bg="gray.0">
+      <Box py={60} className={classes.section}>
         <Container size="sm">
-          <Stack align="center" gap="xl" mb={50}>
-            <Title order={2} ta="center">
+          <Stack align="center" gap="lg" mb={40}>
+            <Title order={2} ta="center" className={classes.sectionTitle}>
               자주 묻는 질문
             </Title>
           </Stack>
-          <Accordion variant="separated" radius="md">
+          <Accordion variant="separated" radius="md" className={classes.accordion}>
             {faqData.map((faq, index) => (
               <Accordion.Item key={index} value={`faq-${index}`}>
-                <Accordion.Control>{faq.question}</Accordion.Control>
-                <Accordion.Panel>{faq.answer}</Accordion.Panel>
+                <Accordion.Control className={classes.accordionControl}>
+                  {faq.question}
+                </Accordion.Control>
+                <Accordion.Panel className={classes.accordionPanel}>
+                  {faq.answer}
+                </Accordion.Panel>
               </Accordion.Item>
             ))}
           </Accordion>
@@ -264,14 +258,14 @@ export default function HomePage() {
       </Box>
 
       {/* CTA Section */}
-      <Box py={80}>
+      <Box py={60} className={classes.ctaSection}>
         <Container size="sm">
-          <Card shadow="lg" padding="xl" radius="lg" bg="blue.6">
-            <Stack align="center" gap="lg">
-              <Title order={2} c="white" ta="center">
+          <Card padding="xl" radius="lg" className={classes.ctaCard}>
+            <Stack align="center" gap="md">
+              <Title order={2} c="white" ta="center" className={classes.ctaTitle}>
                 지금 바로 시작하세요
               </Title>
-              <Text c="white" ta="center" opacity={0.9}>
+              <Text c="white" ta="center" opacity={0.9} size="sm">
                 복잡한 회원가입 없이 바로 부고장을 만들 수 있습니다.
               </Text>
               <Button
@@ -279,9 +273,7 @@ export default function HomePage() {
                 href="/create"
                 size="lg"
                 radius="xl"
-                color="white"
-                variant="white"
-                c="blue"
+                className={classes.ctaBtn}
                 rightSection={<IconEdit size={18} />}
               >
                 부고장 만들기
@@ -292,22 +284,22 @@ export default function HomePage() {
       </Box>
 
       {/* Footer */}
-      <Box component="footer" py={40} bg="gray.1">
-        <Container size="lg">
-          <Group justify="space-between" align="flex-start">
-            <Stack gap="xs">
-              <Text fw={700}>도담부고</Text>
-              <Text size="sm" c="dimmed">
+      <Box component="footer" py={32} className={classes.footer}>
+        <Container size="md">
+          <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
+            <Stack gap={4}>
+              <Text fw={700} size="sm">도담부고</Text>
+              <Text size="xs" c="dimmed">
                 품격있는 무료 모바일 부고장 서비스
               </Text>
             </Stack>
-            <Group gap="lg">
-              <Anchor href="/terms" size="sm" c="dimmed">이용약관</Anchor>
-              <Anchor href="/privacy" size="sm" c="dimmed">개인정보처리방침</Anchor>
-              <Anchor href="/contact" size="sm" c="dimmed">문의하기</Anchor>
+            <Group gap="md">
+              <Anchor href="/terms" size="xs" c="dimmed">이용약관</Anchor>
+              <Anchor href="/privacy" size="xs" c="dimmed">개인정보처리방침</Anchor>
+              <Anchor href="/contact" size="xs" c="dimmed">문의하기</Anchor>
             </Group>
           </Group>
-          <Divider my="lg" />
+          <Divider my="md" />
           <Text size="xs" c="dimmed" ta="center">
             © 2024 도담부고. All rights reserved.
           </Text>

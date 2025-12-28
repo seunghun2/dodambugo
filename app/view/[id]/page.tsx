@@ -1,39 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-    Container,
-    Title,
-    Text,
-    Stack,
-    Card,
-    Group,
-    Box,
-    Divider,
-    Button,
-    Paper,
-    Badge,
-    Anchor,
-    Skeleton,
-    Alert,
-    rem,
-} from '@mantine/core';
-import {
-    IconPhone,
-    IconMapPin,
-    IconCalendar,
-    IconShare,
-    IconCopy,
-    IconBrandKakoTalk,
-    IconMessage,
-    IconHome,
-    IconAlertCircle,
-} from '@tabler/icons-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase, Bugo } from '@/lib/supabase';
-import { notifications } from '@mantine/notifications';
-import classes from './page.module.css';
+import Link from 'next/link';
+import './view.css';
 
 export default function ViewPage() {
     const params = useParams();
@@ -65,207 +36,207 @@ export default function ViewPage() {
         }
     }, [params.id]);
 
-    const copyShareUrl = () => {
-        navigator.clipboard.writeText(window.location.href);
-        notifications.show({
-            title: '복사 완료',
-            message: '링크가 클립보드에 복사되었습니다.',
-            color: 'green',
-        });
+    const copyShareUrl = async () => {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('링크가 복사되었습니다.');
     };
 
     if (loading) {
         return (
-            <Box className={classes.wrapper}>
-                <Container size="sm" py={100}>
-                    <Stack gap="md">
-                        <Skeleton height={200} radius="md" />
-                        <Skeleton height={150} radius="md" />
-                        <Skeleton height={150} radius="md" />
-                    </Stack>
-                </Container>
-            </Box>
+            <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>부고장을 불러오는 중...</p>
+            </div>
         );
     }
 
     if (error || !bugo) {
         return (
-            <Box className={classes.wrapper}>
-                <Container size="sm" py={100}>
-                    <Alert
-                        icon={<IconAlertCircle size={16} />}
-                        title="부고장을 찾을 수 없습니다"
-                        color="red"
-                    >
-                        요청하신 부고장이 존재하지 않거나 삭제되었습니다.
-                    </Alert>
-                    <Button component={Link} href="/" mt="xl" leftSection={<IconHome size={16} />}>
-                        홈으로 돌아가기
-                    </Button>
-                </Container>
-            </Box>
+            <div className="error-container">
+                <div className="error-content">
+                    <div className="error-icon">😢</div>
+                    <h2>부고장을 찾을 수 없습니다</h2>
+                    <p>요청하신 부고장이 존재하지 않거나 삭제되었습니다.</p>
+                    <div className="error-actions">
+                        <Link href="/" className="btn-primary">홈으로</Link>
+                    </div>
+                </div>
+            </div>
         );
     }
 
+    // 템플릿 이미지 추가
+    const templateImages: Record<string, string> = {
+        basic: '/images/template-basic.png',
+        ribbon: '/images/template-ribbon.png',
+        border: '/images/template-border.png',
+        flower: '/images/template-flower.png',
+    };
+
     return (
-        <Box className={classes.wrapper}>
-            {/* 템플릿 헤더 */}
-            <Box className={classes.templateHeader}>
-                <Container size="sm">
-                    <Stack align="center" py={60} gap="md">
-                        <Text size="sm" c="dimmed">삼가 고인의 명복을 빕니다</Text>
-                        <Title order={1} className={classes.deceasedName}>
-                            故 {bugo.deceased_name}
-                        </Title>
+        <main className="bugo-view">
+            {/* 템플릿 헤더 이미지 */}
+            <div className="bugo-header">
+                <img
+                    src={templateImages[bugo.template] || templateImages.basic}
+                    alt="부고장"
+                />
+            </div>
+
+            <div className="bugo-content">
+                {/* 고인 정보 */}
+                <section className="content-section">
+                    <h3 className="content-title">고인</h3>
+                    <div className="info-list">
+                        <div className="info-row">
+                            <span className="info-label">고인</span>
+                            <span className="info-value">故 {bugo.deceased_name}</span>
+                        </div>
                         {bugo.age && (
-                            <Badge variant="light" size="lg">향년 {bugo.age}세</Badge>
+                            <div className="info-row">
+                                <span className="info-label">향년</span>
+                                <span className="info-value">{bugo.age}세</span>
+                            </div>
                         )}
-                    </Stack>
-                </Container>
-            </Box>
+                        {bugo.gender && (
+                            <div className="info-row">
+                                <span className="info-label">성별</span>
+                                <span className="info-value">{bugo.gender}</span>
+                            </div>
+                        )}
+                        {bugo.religion && (
+                            <div className="info-row">
+                                <span className="info-label">종교</span>
+                                <span className="info-value">{bugo.religion}</span>
+                            </div>
+                        )}
+                        {bugo.death_date && (
+                            <div className="info-row">
+                                <span className="info-label">별세일</span>
+                                <span className="info-value">{bugo.death_date}</span>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
-            <Container size="sm" py="xl">
-                <Stack gap="lg">
-                    {/* 고인 정보 */}
-                    <Paper p="lg" radius="md" withBorder>
-                        <Title order={4} mb="md" className={classes.sectionTitle}>
-                            고인 정보
-                        </Title>
-                        <Stack gap="sm">
-                            <InfoRow label="고인" value={`故 ${bugo.deceased_name}`} />
-                            {bugo.gender && <InfoRow label="성별" value={bugo.gender} />}
-                            {bugo.age && <InfoRow label="향년" value={`${bugo.age}세`} />}
-                            {bugo.religion && <InfoRow label="종교" value={bugo.religion} />}
-                            {bugo.death_date && <InfoRow label="별세일" value={bugo.death_date} />}
-                        </Stack>
-                    </Paper>
+                {/* 상주 정보 */}
+                <section className="content-section">
+                    <h3 className="content-title">상주</h3>
+                    <div className="mourners-list">
+                        {bugo.family_list ? (
+                            bugo.family_list.split('\n').filter(Boolean).map((line, index) => {
+                                const parts = line.match(/^(\S+)\s+(\S+)\s+\(([^)]+)\)$/);
+                                if (parts) {
+                                    return (
+                                        <div key={index} className="mourner-card">
+                                            <div className="mourner-main">
+                                                <span className="mourner-relation">{parts[1]}</span>
+                                                <span className="mourner-name">{parts[2]}</span>
+                                            </div>
+                                            <div className="mourner-contact">
+                                                <a href={`tel:${parts[3]}`}>{parts[3]}</a>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={index} className="mourner-card">
+                                        <div className="mourner-main">
+                                            <span className="mourner-name">{line}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="mourner-card">
+                                <div className="mourner-main">
+                                    <span className="mourner-name">{bugo.mourner_name}</span>
+                                </div>
+                                {bugo.contact && (
+                                    <div className="mourner-contact">
+                                        <a href={`tel:${bugo.contact}`}>{bugo.contact}</a>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </section>
 
-                    {/* 상주 정보 */}
-                    <Paper p="lg" radius="md" withBorder>
-                        <Title order={4} mb="md" className={classes.sectionTitle}>
-                            상주
-                        </Title>
-                        <Stack gap="sm">
-                            {bugo.family_list ? (
-                                bugo.family_list.split('\n').map((line, index) => (
-                                    <Text key={index}>{line}</Text>
-                                ))
-                            ) : (
-                                <>
-                                    {bugo.mourner_name && <Text>{bugo.mourner_name}</Text>}
-                                    {bugo.contact && (
-                                        <Group gap="xs">
-                                            <IconPhone size={16} />
-                                            <Anchor href={`tel:${bugo.contact}`}>{bugo.contact}</Anchor>
-                                        </Group>
-                                    )}
-                                </>
-                            )}
-                        </Stack>
-                    </Paper>
+                {/* 빈소 정보 */}
+                <section className="content-section">
+                    <h3 className="content-title">빈소</h3>
+                    <div className="info-list">
+                        <div className="info-row">
+                            <span className="info-label">장례식장</span>
+                            <span className="info-value">{bugo.funeral_home}</span>
+                        </div>
+                        {bugo.room_number && (
+                            <div className="info-row">
+                                <span className="info-label">호실</span>
+                                <span className="info-value">{bugo.room_number}</span>
+                            </div>
+                        )}
+                        {bugo.funeral_home_tel && (
+                            <div className="info-row">
+                                <span className="info-label">연락처</span>
+                                <span className="info-value">
+                                    <a href={`tel:${bugo.funeral_home_tel}`}>{bugo.funeral_home_tel}</a>
+                                </span>
+                            </div>
+                        )}
+                        {bugo.address && (
+                            <div className="info-row">
+                                <span className="info-label">주소</span>
+                                <span className="info-value">{bugo.address}</span>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
-                    {/* 장례식장 정보 */}
-                    <Paper p="lg" radius="md" withBorder>
-                        <Title order={4} mb="md" className={classes.sectionTitle}>
-                            빈소
-                        </Title>
-                        <Stack gap="sm">
-                            <InfoRow label="장례식장" value={bugo.funeral_home} />
-                            {bugo.room_number && <InfoRow label="호실" value={bugo.room_number} />}
-                            {bugo.funeral_home_tel && (
-                                <Group gap="xs">
-                                    <Text size="sm" c="dimmed" w={80}>연락처</Text>
-                                    <Group gap="xs">
-                                        <IconPhone size={16} />
-                                        <Anchor href={`tel:${bugo.funeral_home_tel}`}>{bugo.funeral_home_tel}</Anchor>
-                                    </Group>
-                                </Group>
-                            )}
-                            {bugo.address && (
-                                <Group gap="xs" align="flex-start">
-                                    <Text size="sm" c="dimmed" w={80}>주소</Text>
-                                    <Group gap="xs">
-                                        <IconMapPin size={16} />
-                                        <Text>{bugo.address}</Text>
-                                    </Group>
-                                </Group>
-                            )}
-                        </Stack>
-                    </Paper>
-
-                    {/* 일정 정보 */}
-                    <Paper p="lg" radius="md" withBorder>
-                        <Title order={4} mb="md" className={classes.sectionTitle}>
-                            일정
-                        </Title>
-                        <Stack gap="sm">
+                {/* 일정 정보 */}
+                {(bugo.funeral_date || bugo.burial_place) && (
+                    <section className="content-section">
+                        <h3 className="content-title">일정</h3>
+                        <div className="info-list">
                             {bugo.funeral_date && (
-                                <Group gap="xs">
-                                    <IconCalendar size={16} />
-                                    <Text>발인: {bugo.funeral_date} {bugo.funeral_time || ''}</Text>
-                                </Group>
+                                <div className="info-row">
+                                    <span className="info-label">발인</span>
+                                    <span className="info-value">
+                                        {bugo.funeral_date} {bugo.funeral_time || ''}
+                                    </span>
+                                </div>
                             )}
-                            {bugo.burial_place && <InfoRow label="장지" value={bugo.burial_place} />}
-                        </Stack>
-                    </Paper>
+                            {bugo.burial_place && (
+                                <div className="info-row">
+                                    <span className="info-label">장지</span>
+                                    <span className="info-value">{bugo.burial_place}</span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
 
-                    {/* 인사말 */}
-                    {bugo.message && (
-                        <Paper p="lg" radius="md" withBorder bg="gray.0">
-                            <Text ta="center" className={classes.message}>
-                                {bugo.message}
-                            </Text>
-                        </Paper>
-                    )}
+                {/* 인사말 */}
+                {bugo.message && (
+                    <section className="content-section">
+                        <div className="condolence-message">
+                            <p className="condolence-text">{bugo.message}</p>
+                        </div>
+                    </section>
+                )}
+            </div>
 
-                    {/* 공유 버튼 */}
-                    <Divider my="md" />
-                    <Stack gap="sm">
-                        <Button
-                            size="lg"
-                            fullWidth
-                            leftSection={<IconCopy size={18} />}
-                            onClick={copyShareUrl}
-                        >
-                            링크 복사하기
-                        </Button>
-                        <Button
-                            size="lg"
-                            fullWidth
-                            variant="light"
-                            color="yellow"
-                            leftSection={<IconBrandKakoTalk size={18} />}
-                        >
-                            카카오톡 공유
-                        </Button>
-                        <Button
-                            size="lg"
-                            fullWidth
-                            variant="light"
-                            leftSection={<IconMessage size={18} />}
-                        >
-                            문자로 공유
-                        </Button>
-                    </Stack>
-
-                    {/* 푸터 */}
-                    <Divider my="md" />
-                    <Group justify="center">
-                        <Anchor component={Link} href="/" size="sm" c="dimmed">
-                            도담부고 홈
-                        </Anchor>
-                    </Group>
-                </Stack>
-            </Container>
-        </Box>
-    );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-    return (
-        <Group gap="xs">
-            <Text size="sm" c="dimmed" w={80}>{label}</Text>
-            <Text fw={500}>{value}</Text>
-        </Group>
+            {/* 하단 공유 버튼 */}
+            <div className="bugo-actions">
+                <button className="action-btn btn-primary" onClick={copyShareUrl}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                        <polyline points="16,6 12,2 8,6" />
+                        <line x1="12" y1="2" x2="12" y2="15" />
+                    </svg>
+                    부고장 공유하기
+                </button>
+            </div>
+        </main>
     );
 }
