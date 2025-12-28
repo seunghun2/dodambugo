@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import {
     Container,
     Stepper,
@@ -73,7 +73,7 @@ interface Mourner {
     contact: string;
 }
 
-export default function CreatePage() {
+function CreatePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [active, setActive] = useState(0);
@@ -606,5 +606,13 @@ export default function CreatePage() {
                 )}
             </Container>
         </Box>
+    );
+}
+
+export default function CreatePage() {
+    return (
+        <Suspense fallback={<Box p="xl" ta="center">로딩 중...</Box>}>
+            <CreatePageContent />
+        </Suspense>
     );
 }
