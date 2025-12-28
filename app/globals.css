@@ -111,12 +111,15 @@ body {
     background: white;
     border-bottom: 1px solid var(--gray-200);
     z-index: 1000;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .nav-container {
+    width: 100%;
     max-width: 600px;
-    margin: 0 auto;
-    padding: 12px 20px;
+    padding: 12px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
