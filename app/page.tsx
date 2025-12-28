@@ -16,39 +16,38 @@ export default function HomePage() {
       setHasDraft(true);
     }
 
-    // 통계 애니메이션
+    // 통계 애니메이션 - easeOutQuad
     const animateStats = () => {
-      const statNumbers = document.querySelectorAll('.stat-number[data-count]');
+      const statNumbers = document.querySelectorAll('.stats-card .stat-number[data-count]');
       statNumbers.forEach(stat => {
         const target = parseInt(stat.getAttribute('data-count') || '0');
-        let current = 0;
-        const increment = target / 50;
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            current = target;
-            clearInterval(timer);
-          }
+        const suffix = target === 98 ? '%' : '+';
+        const duration = 1500; // 1.5초
+        const startTime = performance.now();
+
+        const easeOutQuad = (t: number) => t * (2 - t);
+
+        const animate = (currentTime: number) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easedProgress = easeOutQuad(progress);
+          const currentValue = Math.floor(easedProgress * target);
+
           if (stat.textContent !== null) {
-            stat.textContent = Math.floor(current).toLocaleString() + (target === 98 ? '%' : target === 3 ? '분' : '+');
+            stat.textContent = currentValue.toLocaleString() + suffix;
           }
-        }, 30);
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        };
+
+        requestAnimationFrame(animate);
       });
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateStats();
-          observer.disconnect();
-        }
-      });
-    });
-
-    const heroStats = document.querySelector('.hero-stats');
-    if (heroStats) {
-      observer.observe(heroStats);
-    }
+    // 페이지 로드 시 바로 애니메이션 시작
+    setTimeout(animateStats, 300);
   }, []);
 
   const checkDraftBeforeCreate = () => {
@@ -75,7 +74,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Navigation */}
+      {/* Navigation - 예지부고 스타일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
           <div className="nav-logo">도담부고</div>
@@ -123,28 +122,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Hero Section - KAKAOBUGO 스타일 */}
       <section className="hero" id="home">
         <div className="hero-content">
-          <div className="hero-badge">무료 · 광고없음 · 회원가입 없음</div>
-          <h1 className="hero-title">
-            품격있는<br />
-            <span className="gradient-text">모바일 부고장</span>
-          </h1>
-          <p className="hero-subtitle">
-            3분이면 완성되는 정중하고 세련된 부고장.<br />
-            고인의 품격을 지키는 가장 쉬운 방법입니다.
-          </p>
-          <div className="hero-cta">
-            <button className="btn-primary" onClick={checkDraftBeforeCreate}>
-              지금 무료로 만들기
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <button className="btn-secondary" onClick={() => router.push('/search')}>부고 검색</button>
-          </div>
-          <div className="hero-stats">
+          {/* 통계 카드 */}
+          <div className="stats-card">
             <div className="stat-item">
               <div className="stat-number" data-count="50000">0</div>
               <div className="stat-label">누적 부고장</div>
@@ -159,6 +141,33 @@ export default function HomePage() {
               <div className="stat-number" data-count="3">0</div>
               <div className="stat-label">분만에 완성</div>
             </div>
+          </div>
+
+          {/* 히어로 이미지 */}
+          <div className="hero-image">
+            <img src="/images/hero-image.png" alt="도담부고" />
+          </div>
+
+          {/* 세 개 버튼 */}
+          <div className="action-buttons">
+            <button className="action-btn" onClick={checkDraftBeforeCreate}>
+              <div className="action-icon">
+                <span className="material-symbols-outlined">edit_note</span>
+              </div>
+              <span>부고장 만들기</span>
+            </button>
+            <button className="action-btn" onClick={() => router.push('/view/sample')}>
+              <div className="action-icon">
+                <span className="material-symbols-outlined">article</span>
+              </div>
+              <span>샘플부고장</span>
+            </button>
+            <button className="action-btn" onClick={() => router.push('/search')}>
+              <div className="action-icon">
+                <span className="material-symbols-outlined">search</span>
+              </div>
+              <span>부고장 검색</span>
+            </button>
           </div>
         </div>
       </section>
