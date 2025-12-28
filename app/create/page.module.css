@@ -1,97 +1,36 @@
-/* 토스 디자인 시스템 - 부고 생성 페이지 */
-
 .wrapper {
     min-height: 100vh;
-    background: #FAFAFA;
+    background: var(--mantine-color-gray-0);
 }
 
-/* 헤더 */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     z-index: 100;
-    border-bottom: 1px solid #F2F4F6;
+    border-bottom: 1px solid var(--mantine-color-gray-2);
 }
 
 .logo {
     font-family: var(--mantine-font-family-headings);
-    color: #191F28;
-    letter-spacing: -0.5px;
+    color: var(--mantine-color-blue-6);
 }
 
-/* 템플릿 카드 */
 .templateCard {
     cursor: pointer;
     transition: all 0.2s ease;
     border: 2px solid transparent;
-    background: white;
-}
 
-.templateCard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mantine-shadow-md);
+    }
 
-.templateCard[data-selected="true"] {
-    border-color: #3182F6;
-    background: #F8FBFF;
-}
-
-/* 입력 필드 스타일 오버라이드 */
-:global(.mantine-TextInput-input),
-:global(.mantine-Select-input),
-:global(.mantine-NumberInput-input),
-:global(.mantine-Textarea-input) {
-    border: 1.5px solid #E5E8EB;
-    border-radius: 12px;
-    font-size: 15px;
-    transition: all 0.2s;
-}
-
-:global(.mantine-TextInput-input:focus),
-:global(.mantine-Select-input:focus),
-:global(.mantine-NumberInput-input:focus),
-:global(.mantine-Textarea-input:focus) {
-    border-color: #3182F6;
-    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1);
-}
-
-:global(.mantine-InputWrapper-label) {
-    font-size: 14px;
-    font-weight: 600;
-    color: #191F28;
-    margin-bottom: 6px;
-}
-
-/* 버튼 스타일 */
-:global(.mantine-Button-root) {
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-:global(.mantine-Button-root:active) {
-    transform: scale(0.98);
-}
-
-/* Stepper 스타일 */
-:global(.mantine-Stepper-step) {
-    color: #4E5968;
-}
-
-:global(.mantine-Stepper-stepIcon[data-progress]) {
-    background: #3182F6;
-    border-color: #3182F6;
-}
-
-:global(.mantine-Stepper-stepIcon[data-completed]) {
-    background: #3182F6;
-    border-color: #3182F6;
-}
-
-/* Paper 스타일 */
-:global(.mantine-Paper-root) {
-    border: 1px solid #F2F4F6;
+    &[data-selected="true"] {
+        border-color: var(--mantine-color-blue-6);
+        background: var(--mantine-color-blue-0);
+    }
 }

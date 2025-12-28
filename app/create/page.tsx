@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import {
     Container,
     Stepper,
@@ -22,8 +22,6 @@ import {
     Badge,
     Anchor,
     rem,
-    Loader,
-    Center,
 } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -75,7 +73,7 @@ interface Mourner {
     contact: string;
 }
 
-function CreatePageContent() {
+export default function CreatePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [active, setActive] = useState(0);
@@ -608,19 +606,5 @@ function CreatePageContent() {
                 )}
             </Container>
         </Box>
-    );
-}
-
-export default function CreatePage() {
-    return (
-        <Suspense
-            fallback={
-                <Center h="100vh">
-                    <Loader size="lg" />
-                </Center>
-            }
-        >
-            <CreatePageContent />
-        </Suspense>
     );
 }
