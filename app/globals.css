@@ -111,15 +111,13 @@ body {
     background: white;
     border-bottom: 1px solid var(--gray-200);
     z-index: 1000;
-    padding: 0 20px;
-    display: flex;
-    justify-content: center;
+    width: 100%;
 }
 
 .nav-container {
-    width: 100%;
     max-width: 600px;
-    padding: 12px 0;
+    margin: 0 auto;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -129,13 +127,15 @@ body {
     font-size: 20px;
     font-weight: 700;
     color: var(--primary);
+    white-space: nowrap;
 }
 
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-md);
 }
+
 
 .nav-link {
     color: var(--gray-700);
@@ -152,19 +152,20 @@ body {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 12px;
 }
 
 .nav-cta {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: var(--radius-full);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     transition: all var(--transition-base);
+    white-space: nowrap;
 }
 
 .nav-cta:hover {
@@ -174,17 +175,19 @@ body {
 .nav-toggle {
     display: none;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
+    padding: 4px;
 }
 
+
 .nav-toggle span {
-    width: 24px;
+    width: 22px;
     height: 2px;
     background: var(--gray-900);
+    border-radius: 2px;
 }
 
 /* 임시저장 배너 */
@@ -272,29 +275,6 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.nav-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-}
-
-.nav-toggle span {
-    width: 24px;
-    height: 2px;
-    background: var(--gray-900);
-    transition: all var(--transition-base);
-}
-
-.nav-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
 }
 
 /* ========================================
@@ -410,21 +390,20 @@ body {
    히어로 섹션 - 모바일 우선 컴팩트
    ======================================== */
 .hero {
+    width: 100%;
     min-height: auto;
-    padding: 70px 20px 16px;
     background: #FFFFFF;
-    display: flex;
-    justify-content: center;
+    padding: 70px 0 16px;
 }
 
 .hero-content {
-    width: 100%;
     max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-sizing: border-box;
 }
 
 /* 통계 카드 */
@@ -1044,6 +1023,8 @@ section {
    반응형 디자인
    ======================================== */
 @media (max-width: 768px) {
+
+    /* 네비게이션 모바일 */
     .nav-menu {
         display: none;
     }
@@ -1053,12 +1034,12 @@ section {
     }
 
     .nav-actions {
-        gap: var(--spacing-sm);
+        gap: 8px;
     }
 
     .nav-cta {
-        padding: 8px 16px;
-        font-size: 13px;
+        padding: 6px 12px;
+        font-size: 12px;
     }
 
     .draft-banner {
