@@ -1084,21 +1084,6 @@ section {
         font-size: 12px;
     }
 
-    .hero {
-        padding: 70px 20px 16px;
-    }
-
-    .hero-content {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .stats-card,
-    .hero-image,
-    .action-buttons {
-        width: 100%;
-    }
-
     .hero-cta {
         flex-direction: column;
     }
