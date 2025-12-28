@@ -4,7 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="도담부고 부고장 작성 - 3분 만에 품격있는 모바일 부고장 작성">
     <title>부고장 작성 - 도담부고</title>
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//t1.daumcdn.net">
+    <link rel="dns-prefetch" href="//dapi.kakao.com">
+    <link rel="dns-prefetch" href="//tbteghoppechzotdojna.supabase.co">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/create-detailed.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,15 +35,15 @@
     <!-- Navigation -->
     <nav class="nav" id="nav">
         <div class="nav-container">
-            <a href="index.html" class="nav-logo"
+            <a href="/" class="nav-logo"
                 style="cursor: pointer; text-decoration: none; color: inherit;">도담부고</a>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html#home" class="nav-link">홈</a></li>
-                <li><a href="search.html" class="nav-link">부고검색</a></li>
+                <li><a href="/search" class="nav-link">부고검색</a></li>
                 <li><a href="index.html#templates" class="nav-link">템플릿</a></li>
             </ul>
             <div class="nav-actions">
-                <button class="nav-cta" onclick="location.href='create.html'">부고장 만들기</button>
+                <button class="nav-cta" onclick="location.href='/create'">부고장 만들기</button>
                 <button class="nav-toggle" id="navToggle">
                     <span></span>
                     <span></span>
@@ -55,11 +64,11 @@
                 </button>
             </div>
             <nav class="side-menu-nav">
-                <a href="create.html" class="side-menu-item">
+                <a href="/create" class="side-menu-item">
                     <span class="material-symbols-outlined">add_circle</span>
                     <span>부고장 만들기</span>
                 </a>
-                <a href="search.html" class="side-menu-item">
+                <a href="/search" class="side-menu-item">
                     <span class="material-symbols-outlined">search</span>
                     <span>부고 검색</span>
                 </a>
@@ -688,11 +697,11 @@
             <div class="footer-content">
                 <div class="footer-logo">도담부고</div>
                 <div class="footer-links-horizontal">
-                    <a href="terms.html" target="_blank">이용약관</a>
+                    <a href="/terms" target="_blank">이용약관</a>
                     <span class="footer-separator">|</span>
-                    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+                    <a href="/privacy" target="_blank">개인정보처리방침</a>
                     <span class="footer-separator">|</span>
-                    <a href="contact.html" target="_blank">제휴/문의</a>
+                    <a href="/contact" target="_blank">제휴/문의</a>
                 </div>
                 <div class="footer-info">
                     <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
@@ -717,10 +726,10 @@
 
 
     <!-- Supabase 라이브러리 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="js/supabase-config.js"></script>
 
-    <script src="js/create-detailed.js"></script>
+    <script defer src="js/create-detailed.js"></script>
     <script>
         // 사이드 메뉴 관련 함수
         function openSideMenu() {
