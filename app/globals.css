@@ -298,14 +298,21 @@ body {
 }
 
 .side-menu-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
+    pointer-events: none;
     transition: opacity var(--transition-base);
+    z-index: 999;
+}
+
+.side-menu-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .side-menu.active .side-menu-overlay {
@@ -1506,23 +1513,32 @@ section {
     justify-content: center;
     gap: 8px;
     width: 100%;
-    padding: 14px 20px;
-    background: var(--primary);
+    padding: 16px 20px;
+    background: #2c4a6e;
     color: white;
     border: none;
-    border-radius: 10px;
-    font-size: 15px;
+    border-radius: 12px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(44, 74, 110, 0.3);
 }
 
 .btn-submit:hover {
-    background: var(--primary-dark);
+    background: #1e3a5f;
+    box-shadow: 0 4px 12px rgba(44, 74, 110, 0.4);
+}
+
+.btn-submit:disabled {
+    background: var(--gray-300);
+    color: var(--gray-500);
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .btn-submit .material-symbols-outlined {
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .success-container {
@@ -3034,6 +3050,8 @@ section {
 
 .create-main {
     padding: 68px 0 40px;
+    background: #f5f5f7;
+    min-height: 100vh;
 }
 
 .create-container {
@@ -3239,19 +3257,20 @@ section {
 }
 
 .btn-use-template {
+    display: block;
     width: 100%;
     padding: 14px;
     background: var(--gray-100);
     color: var(--gray-700);
     border: none;
-    border-bottom: none;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     text-decoration: none;
-    outline: none;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .btn-use-template:hover {
@@ -3456,44 +3475,79 @@ section {
     background: #2563eb;
 }
 
-/* Form Styles */
-.bugo-form {
+/* 선택된 템플릿 배너 */
+.selected-template-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.selected-template-banner strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.btn-change-template {
+    padding: 6px 12px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-change-template:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+/* Form Styles - 카드 기반 */
+/* Form Styles - 미니멀 디자인 */
+.bugo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 100px;
 }
 
 .form-section {
-    padding: 24px 32px;
-    border-bottom: 1px solid var(--gray-200);
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.form-section:last-of-type {
-    border-bottom: none;
-}
 
-.applicant-section {
-    background: linear-gradient(135deg, #EBF4FF 0%, #F0F9FF 100%);
-    border-left: 4px solid var(--primary);
+.form-section.applicant-section .form-input,
+.form-section.applicant-section .form-select {
+    background: white;
 }
 
 .section-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--gray-900);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .section-description {
-    font-size: 14px;
-    color: var(--gray-600);
-    margin-top: -16px;
-    margin-bottom: 20px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: -12px;
+    margin-bottom: 16px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group:last-child {
@@ -3503,22 +3557,23 @@ section {
 .form-label {
     display: block;
     font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-800);
+    font-weight: 500;
+    color: var(--gray-700);
     margin-bottom: 8px;
 }
 
 .form-label.required::after {
-    content: '*';
+    content: ' (필수)';
     color: #ef4444;
-    margin-left: 4px;
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .form-row:last-child {
@@ -3529,9 +3584,9 @@ section {
 .form-select,
 .form-textarea {
     width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--gray-300);
-    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
     font-size: 15px;
     color: var(--gray-900);
     background: white;
@@ -3541,15 +3596,17 @@ section {
 
 .form-select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 16px center;
-    padding-right: 40px;
+    background-position: right 14px center;
+    background-color: white;
+    padding-right: 38px;
 }
 
 .form-textarea {
-    min-height: 120px;
+    min-height: 100px;
     resize: vertical;
+    line-height: 1.5;
 }
 
 .form-input:focus,
@@ -3557,7 +3614,7 @@ section {
 .form-textarea:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
 }
 
 .form-input::placeholder,
@@ -3565,69 +3622,334 @@ section {
     color: var(--gray-400);
 }
 
-.form-help {
-    font-size: 13px;
+.form-hint {
+    font-size: 12px;
     color: var(--gray-500);
     margin-top: 6px;
 }
 
-/* Mourner Item */
-.mourner-item {
-    padding: 20px;
-    background: var(--gray-50);
-    border-radius: 12px;
-    margin-bottom: 16px;
-    border: 2px solid var(--gray-200);
+.datetime-row {
+    display: flex;
+    gap: 8px;
+}
+
+.datetime-row .form-input {
+    flex: 2;
+}
+
+.datetime-row .form-select {
+    flex: 1;
+}
+
+/* 주소 검색 */
+.address-search-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.address-search-row .form-input {
+    flex: 1;
+}
+
+.btn-address-search {
+    padding: 0 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-address-search:hover {
+    background: #1e40af;
+}
+
+/* Account fields */
+.account-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.account-row {
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 10px;
+    border: 1px solid #f0f0f0;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+    position: relative;
+}
+
+.account-row .form-input:last-of-type {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+    .account-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.account-row .form-select,
+.account-row .form-input {
+    margin-bottom: 0;
+}
+
+.btn-remove-account {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.btn-remove-account .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.btn-remove-account:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-add-account {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: var(--primary);
+    border: 1px dashed var(--gray-300);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-add-account:hover {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: var(--primary);
+    border-style: solid;
+}
+
+/* Mourner Item - 심플 */
+.mourner-item,
+.mourner-row {
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #f0f0f0;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    position: relative;
+}
+
+/* 관계 선택 */
+.mourner-row> :nth-child(1) {
+    grid-column: 1;
+}
+
+/* 이름 입력 */
+.mourner-row> :nth-child(2) {
+    grid-column: 2;
+}
+
+/* 연락처 입력 - 전체 너비 */
+.mourner-row> :nth-child(3) {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+    .mourner-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mourner-row> :nth-child(1),
+    .mourner-row> :nth-child(2),
+    .mourner-row> :nth-child(3) {
+        grid-column: 1;
+    }
+}
+
+.mourner-row .form-select,
+.mourner-row .form-input {
+    margin-bottom: 0;
 }
 
 .mourner-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .mourner-number {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
 }
 
 .btn-remove-mourner {
-    padding: 6px 12px;
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: 50%;
+    font-size: 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.btn-remove-mourner .material-symbols-outlined {
+    font-size: 16px;
 }
 
 .btn-remove-mourner:hover {
-    background: #dc2626;
+    background: #ef4444;
+    color: white;
 }
 
 .mourner-actions {
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
 .btn-add-mourner {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background: white;
     color: var(--primary);
-    border: 2px dashed var(--primary);
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
+    border: 1px dashed var(--gray-300);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .btn-add-mourner:hover {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(59, 130, 246, 0.04);
+    border-color: var(--primary);
     border-style: solid;
+}
+
+/* Toggle Switch - iOS 스타일 */
+.option-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.option-toggle:last-child {
+    border-bottom: none;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.toggle-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-label span {
+    font-size: 14px;
+    color: var(--gray-700);
+    font-weight: 500;
+    flex: 1;
+}
+
+/* 토글 스위치 트랙 */
+.toggle-label::after {
+    content: '';
+    width: 48px;
+    height: 28px;
+    background: var(--gray-300);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* 토글 스위치 핸들 */
+.toggle-label::before {
+    content: '';
+    position: absolute;
+    right: 26px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+/* 체크 시 트랙 색상 */
+.toggle-label input[type="checkbox"]:checked~.toggle-label::after {
+    background: var(--primary);
+}
+
+/* 실제로는 label 자체에 적용 */
+.toggle-label:has(input[type="checkbox"]:checked)::after {
+    background: var(--primary);
+}
+
+/* 체크 시 핸들 위치 */
+.toggle-label:has(input[type="checkbox"]:checked)::before {
+    right: 2px;
 }
 
 /* Toggle Switch */
@@ -3899,7 +4221,7 @@ section {
     color: var(--gray-700);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .create-main {
         padding: 70px 0 24px;
     }

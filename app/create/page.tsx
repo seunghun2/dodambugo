@@ -362,13 +362,12 @@ function CreatePageContent() {
                                                     미리보기
                                                 </Link>
                                             </div>
-                                            <button
-                                                type="button"
+                                            <Link
+                                                href={`/create/${template.id}`}
                                                 className="btn-use-template"
-                                                onClick={() => handleSelectTemplate(template.id)}
                                             >
                                                 이 양식으로 만들기
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 ))}
