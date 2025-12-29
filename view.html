@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>부고장 - 도담부고</title>
     <meta name="description" content="품격있는 모바일 부고장">
     <meta name="color-scheme" content="light dark">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Google Material Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+
     <!-- Styles -->
     <link rel="stylesheet" href="css/view-toss.css">
     <link rel="stylesheet" href="css/view-overlay.css">
-    
+
     <style>
         /* 라이트/다크 모드 토글 */
         .theme-toggle {
@@ -38,41 +43,41 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.2s;
         }
-        
+
         .theme-toggle:hover {
             transform: scale(1.05);
         }
-        
+
         .theme-toggle:active {
             transform: scale(0.95);
         }
-        
+
         .dark .theme-toggle {
             background: rgba(44, 44, 46, 0.9);
             border-color: #3A3A3C;
         }
-        
+
         .theme-toggle .material-symbols-outlined {
             font-size: 24px;
             color: #191F28;
         }
-        
+
         .dark .theme-toggle .material-symbols-outlined {
             color: #F9FAFB;
         }
-        
+
         .theme-toggle .moon {
             display: none;
         }
-        
+
         .dark .theme-toggle .sun {
             display: none;
         }
-        
+
         .dark .theme-toggle .moon {
             display: block;
         }
-        
+
         /* 근조화환 보내기 고정 버튼 */
         .fixed-flower-button {
             position: fixed;
@@ -84,11 +89,11 @@
             margin: 0 auto;
             pointer-events: none;
         }
-        
+
         .fixed-flower-button .flower-send-btn {
             pointer-events: auto;
         }
-        
+
         .flower-send-btn {
             width: 100%;
             display: flex;
@@ -107,48 +112,48 @@
             transition: all 0.3s ease;
             font-family: 'Noto Sans KR', sans-serif;
         }
-        
+
         .flower-send-btn:hover {
             background: #1b64da;
             transform: translateY(-2px);
             box-shadow: 0 6px 24px rgba(49, 130, 246, 0.4);
         }
-        
+
         .flower-send-btn:active {
             transform: translateY(0);
         }
-        
+
         .flower-send-btn .material-symbols-outlined {
             font-size: 24px;
         }
-        
+
         .dark .flower-send-btn {
             background: #4A9EFF;
             box-shadow: 0 4px 20px rgba(74, 158, 255, 0.3);
         }
-        
+
         .dark .flower-send-btn:hover {
             background: #68B0FF;
             box-shadow: 0 6px 24px rgba(104, 176, 255, 0.4);
         }
-        
+
         /* 컨텐츠 하단에 공간 확보 */
         .bugo-content {
             padding-bottom: 100px !important;
         }
-        
+
         @media (max-width: 768px) {
             .fixed-flower-button {
                 left: 16px;
                 right: 16px;
                 bottom: 78px;
             }
-            
+
             .flower-send-btn {
                 padding: 14px 20px;
                 font-size: 15px;
             }
-            
+
             .bugo-content,
             .guestbook-content {
                 padding-bottom: 160px !important;
@@ -156,6 +161,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- 테마 토글 -->
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="다크모드 토글">
@@ -189,13 +195,14 @@
             <img id="templateImage" src="" alt="부고장 템플릿">
             <div class="text-overlay" id="textOverlay">
                 <!-- 정중형 전체 메시지 -->
-                <p class="overlay-text overlay-full-message" id="overlayFullMessage" style="display: none; font-size: 16px; font-weight: 700; text-align: center !important; color: #1a1a1a; line-height: 1.8; width: 100%; margin: 0 auto; padding: 0; left: 0; right: 0;">
+                <p class="overlay-text overlay-full-message" id="overlayFullMessage"
+                    style="display: none; font-size: 16px; font-weight: 700; text-align: center !important; color: #1a1a1a; line-height: 1.8; width: 100%; margin: 0 auto; padding: 0; left: 0; right: 0;">
                     故홍길동님께서 11월 25일<br>
                     별세하셨기에 삼가 알려드립니다.<br>
                     마음으로 따뜻한 위로 부탁드리며<br>
                     고인의 명복을 빌어주시길 바랍니다.
                 </p>
-                
+
                 <!-- 기존 개별 요소 (다른 템플릿용) -->
                 <p class="overlay-text overlay-deceased-name" id="overlayDeceasedName">
                     故 홍길동 님
@@ -212,7 +219,7 @@
         <!-- 탭 네비게이션 -->
         <div class="tab-navigation">
             <button class="tab-btn active" onclick="switchTab('info')">
-                <span class="material-symbols-outlined">info</span>
+                <span class="material-symbols-outlined">description</span>
                 <span>부고정보</span>
             </button>
             <button class="tab-btn" onclick="switchTab('guestbook')">
@@ -323,16 +330,20 @@
                 </div>
                 <div class="map-actions">
                     <button class="map-btn" onclick="openKakaoMap()">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
-                            <path d="M10 2.5c-3.866 0-7 2.686-7 6 0 3.866 4.667 8.333 7 9.5 2.333-1.167 7-5.634 7-9.5 0-3.314-3.134-6-7-6z"/>
-                            <circle cx="10" cy="8.5" r="2"/>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path
+                                d="M10 2.5c-3.866 0-7 2.686-7 6 0 3.866 4.667 8.333 7 9.5 2.333-1.167 7-5.634 7-9.5 0-3.314-3.134-6-7-6z" />
+                            <circle cx="10" cy="8.5" r="2" />
                         </svg>
                         길찾기
                     </button>
                     <button class="map-btn primary" onclick="shareBugo()">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
-                            <path d="M15 6.667a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 18.333a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
-                            <path d="M7.083 11.25l5.834 3.167M12.917 5.583L7.083 8.75"/>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 20 20" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path
+                                d="M15 6.667a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 18.333a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+                            <path d="M7.083 11.25l5.834 3.167M12.917 5.583L7.083 8.75" />
                         </svg>
                         공유하기
                     </button>
@@ -376,10 +387,12 @@
                         <input type="text" id="guestName" class="form-input" placeholder="이름" required maxlength="20">
                     </div>
                     <div class="form-group">
-                        <input type="password" id="guestPassword" class="form-input" placeholder="비밀번호 4자리 (수정/삭제 시 필요)" required maxlength="4" pattern="[0-9]{4}">
+                        <input type="password" id="guestPassword" class="form-input" placeholder="비밀번호 4자리 (수정/삭제 시 필요)"
+                            required maxlength="4" pattern="[0-9]{4}">
                     </div>
                     <div class="form-group">
-                        <textarea id="guestMessage" class="form-textarea" placeholder="따뜻한 위로의 말씀을 전해주세요." required maxlength="500" rows="4"></textarea>
+                        <textarea id="guestMessage" class="form-textarea" placeholder="따뜻한 위로의 말씀을 전해주세요." required
+                            maxlength="500" rows="4"></textarea>
                     </div>
                     <button type="submit" class="btn-submit-guestbook">
                         <span class="material-symbols-outlined">edit</span>
@@ -438,28 +451,31 @@
             </div>
             <div class="edit-modal-body">
                 <p class="edit-modal-description">작성 시 입력한 비밀번호 4자리를 입력하세요.</p>
-                <input type="password" id="guestbookPassword" class="edit-password-input" placeholder="비밀번호 4자리" maxlength="4" pattern="[0-9]{4}">
+                <input type="password" id="guestbookPassword" class="edit-password-input" placeholder="비밀번호 4자리"
+                    maxlength="4" pattern="[0-9]{4}">
                 <div id="guestbookError" class="edit-error" style="display: none;"></div>
             </div>
             <div class="edit-modal-footer" style="display: flex; gap: 8px;">
                 <button class="btn-cancel" onclick="closeGuestbookActionModal()">취소</button>
-                <button class="btn-delete" onclick="deleteGuestbookEntry()" style="background: #E03131; color: white; flex: 1;">삭제</button>
+                <button class="btn-delete" onclick="deleteGuestbookEntry()"
+                    style="background: #E03131; color: white; flex: 1;">삭제</button>
                 <button class="btn-confirm" onclick="editGuestbookEntry()" style="flex: 1;">수정</button>
             </div>
         </div>
     </div>
 
     <!-- Kakao Map API -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
-    
+    <script type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
+
     <script src="js/view-new.js"></script>
-    
+
     <script>
         // 다크모드 토글
         function toggleTheme() {
             const html = document.documentElement;
             const isDark = html.classList.contains('dark');
-            
+
             if (isDark) {
                 html.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
@@ -468,17 +484,17 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-        
+
         // 페이지 로드 시 테마 복원
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
+
             if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                 document.documentElement.classList.add('dark');
             }
         });
-        
+
         // 시스템 다크모드 변경 감지
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
             if (!localStorage.getItem('theme')) {
@@ -491,4 +507,5 @@
         });
     </script>
 </body>
+
 </html>
