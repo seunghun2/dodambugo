@@ -509,6 +509,8 @@ body {
     background: white;
     color: var(--gray-700);
     border: 1px solid var(--gray-300);
+    width: 100%;
+    justify-content: center;
 }
 
 .action-btn.secondary:hover {
@@ -3224,6 +3226,7 @@ section {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .btn-preview-outline:hover {
@@ -3237,11 +3240,14 @@ section {
     background: var(--gray-100);
     color: var(--gray-700);
     border: none;
+    border-bottom: none;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
+    outline: none;
 }
 
 .btn-use-template:hover {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -33,7 +33,7 @@ interface Account {
     number: string;
 }
 
-export default function CreatePage() {
+function CreatePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -825,5 +825,13 @@ export default function CreatePage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function CreatePage() {
+    return (
+        <Suspense fallback={<div className="create-page"><div className="create-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}><span className="material-symbols-outlined spinning">progress_activity</span></div></div>}>
+            <CreatePageContent />
+        </Suspense>
     );
 }
