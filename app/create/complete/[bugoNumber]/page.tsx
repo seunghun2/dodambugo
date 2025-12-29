@@ -1,0 +1,187 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import './complete.css';
+
+interface BugoData {
+    bugo_number: string;
+    deceased_name: string;
+    age?: number;
+    mourner_name?: string;
+    mourners?: Array<{ relationship: string; name: string; contact: string }>;
+    funeral_home?: string;
+    room_number?: string;
+    funeral_date?: string;
+    funeral_time?: string;
+    address?: string;
+}
+
+export default function CompletePage() {
+    const params = useParams();
+    const router = useRouter();
+    const [bugo, setBugo] = useState<BugoData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [copied, setCopied] = useState(false);
+
+    const bugoUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/view/${params.bugoNumber}`
+        : `/view/${params.bugoNumber}`;
+
+    useEffect(() => {
+        const fetchBugo = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('bugo')
+                    .select('*')
+                    .eq('bugo_number', params.bugoNumber)
+                    .single();
+
+                if (error) throw error;
+                setBugo(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (params.bugoNumber) {
+            fetchBugo();
+        }
+    }, [params.bugoNumber]);
+
+    const formatDate = (dateStr?: string, timeStr?: string) => {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayName = dayNames[date.getDay()];
+        return `${date.getFullYear()}년 ${String(date.getMonth() + 1).padStart(2, '0')}월 ${String(date.getDate()).padStart(2, '0')}일 (${dayName}) ${timeStr || ''}`;
+    };
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(bugoUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const shareKakao = () => {
+        navigator.clipboard.writeText(bugoUrl);
+        alert('링크가 복사되었습니다. 카카오톡에서 붙여넣기 해주세요.');
+    };
+
+    const shareSms = () => {
+        const text = `[부고] 故${bugo?.deceased_name || ''}님의 부고장입니다.\n\n장례식장: ${bugo?.funeral_home || ''}\n발인일: ${formatDate(bugo?.funeral_date, bugo?.funeral_time)}\n\n부고장 보기: ${bugoUrl}`;
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+    };
+
+    if (loading) {
+        return (
+            <div className="complete-loading">
+                <div className="spinner"></div>
+                <p>부고장을 불러오는 중...</p>
+            </div>
+        );
+    }
+
+    if (!bugo) {
+        return (
+            <div className="complete-error">
+                <p>부고장을 찾을 수 없습니다.</p>
+                <Link href="/create" className="btn-home">돌아가기</Link>
+            </div>
+        );
+    }
+
+    const mournerName = bugo.mourners && bugo.mourners.length > 0
+        ? bugo.mourners[0].name
+        : bugo.mourner_name || '상주';
+
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(bugoUrl)}`;
+
+    return (
+        <div className="complete-page">
+            {/* 헤더 */}
+            <header className="complete-header">
+                <button className="btn-back" onClick={() => router.push('/')}>
+                    <span className="material-symbols-outlined">chevron_left</span>
+                </button>
+                <span className="header-spacer"></span>
+                <Link href={bugoUrl} className="btn-sample">부고장 샘플</Link>
+            </header>
+
+            {/* 메인 컨텐츠 */}
+            <main className="complete-main">
+                {/* 제목 섹션 */}
+                <div className="title-section">
+                    <h1 className="page-title">상주 {mournerName} 님의 부고장</h1>
+                    <p className="edit-prompt">
+                        부고장을 수정하시겠습니까? <Link href={`/create/edit/${params.bugoNumber}`} className="edit-link">수정하기</Link>
+                    </p>
+                </div>
+
+                {/* 정보 카드 */}
+                <div className="info-card">
+                    <div className="info-row">
+                        <span className="info-label">고인명</span>
+                        <span className="info-value">故{bugo.deceased_name}{bugo.age ? `[${bugo.age}세]` : ''}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="info-label">장례식장</span>
+                        <span className="info-value">{bugo.funeral_home || '-'} {bugo.room_number || ''}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="info-label">발인일</span>
+                        <span className="info-value">{formatDate(bugo.funeral_date, bugo.funeral_time)}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="info-label">빈소</span>
+                        <span className="info-value">{bugo.address || '-'}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="info-label">부고장 보기</span>
+                        <a href={bugoUrl} className="info-link" target="_blank">{bugoUrl}</a>
+                    </div>
+                </div>
+
+                {/* 공유 섹션 */}
+                <div className="share-section">
+                    <h2 className="section-title">모바일 부고장 보내기</h2>
+                    <div className="share-grid">
+                        {/* QR 코드 */}
+                        <div className="share-card" onClick={() => window.open(bugoUrl, '_blank')}>
+                            <div className="qr-wrapper">
+                                <img src={qrCodeUrl} alt="QR 코드" className="qr-image" />
+                            </div>
+                            <span className="share-label">모바일부고장 보기</span>
+                        </div>
+
+                        {/* 카카오톡 */}
+                        <div className="share-card" onClick={shareKakao}>
+                            <div className="share-icon-wrapper">
+                                <img src="/images/icon-kakao.png" alt="카카오톡" className="share-icon-img" />
+                            </div>
+                            <span className="share-label">카카오톡으로 보내기</span>
+                        </div>
+
+                        {/* 문자 */}
+                        <div className="share-card" onClick={shareSms}>
+                            <div className="share-icon-wrapper">
+                                <img src="/images/icon-sms.png" alt="문자" className="share-icon-img" />
+                            </div>
+                            <span className="share-label">메세지로 보내기</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 복제 배너 */}
+                <div className="copy-banner">
+                    <p>부고장을 복제하여 다른 이름으로 변경하여 사용하실 수 있습니다</p>
+                    <button className="btn-copy-bugo">복제하기</button>
+                </div>
+            </main>
+        </div>
+    );
+}

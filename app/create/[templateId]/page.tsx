@@ -282,8 +282,8 @@ export default function WriteFormPage() {
 
             if (error) throw error;
 
-            setCreatedBugo(data);
-            setCurrentStep(2);
+            // 완료 페이지로 리다이렉트
+            router.push(`/create/complete/${data.bugo_number}`);
         } catch (error) {
             console.error('Error:', error);
             alert('부고장 생성 중 오류가 발생했습니다.');
