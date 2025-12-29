@@ -9,6 +9,10 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 :root {
     /* mbugo 브랜드 컬러 - 네이비 기반 */
     --primary: #2C3E50;
@@ -111,7 +115,6 @@ body {
     background: white;
     border-bottom: 1px solid var(--gray-200);
     z-index: 1000;
-    width: 100%;
 }
 
 .nav-container {
@@ -390,7 +393,6 @@ body {
    히어로 섹션 - 모바일 우선 컴팩트
    ======================================== */
 .hero {
-    width: 100%;
     min-height: auto;
     background: #FFFFFF;
     padding: 70px 0 16px;
