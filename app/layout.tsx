@@ -12,9 +12,9 @@ import { ModalsProvider } from '@mantine/modals';
 // 도담부고 커스텀 테마
 const theme = createTheme({
   primaryColor: 'blue',
-  fontFamily: '"Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   headings: {
-    fontFamily: '"Noto Serif KR", Georgia, serif',
+    fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, sans-serif',
   },
   colors: {
     blue: [
@@ -73,7 +73,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&display=swap"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
           rel="stylesheet"
         />
         <link
