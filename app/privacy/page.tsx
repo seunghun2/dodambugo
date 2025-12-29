@@ -7,7 +7,7 @@ export default function PrivacyPage() {
         <div className="legal-page">
             <header className="legal-header">
                 <Link href="/" className="back-btn">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <span className="material-symbols-outlined">chevron_left</span>
                 </Link>
                 <h1>개인정보처리방침</h1>
             </header>

@@ -1412,6 +1412,15 @@ section {
     padding-right: 36px;
 }
 
+/* 모바일에서는 네이티브 셀렉트 사용 */
+@media (max-width: 768px) {
+    .form-select {
+        appearance: auto;
+        background-image: none;
+        padding-right: 14px;
+    }
+}
+
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
@@ -1511,23 +1520,62 @@ section {
     font-size: 18px;
 }
 
-.success-message {
+.success-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 40px 20px;
+    justify-content: center;
+    padding: 60px 20px;
     text-align: center;
+    min-height: 50vh;
 }
 
-.success-message .material-symbols-outlined {
-    font-size: 48px;
-    color: #22c55e;
+.success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
 }
 
-.success-message p {
+.success-icon .material-symbols-outlined {
+    font-size: 40px;
+    color: white;
+}
+
+.success-container h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+}
+
+.success-container p {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+.btn-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--primary);
+    color: white;
+    border-radius: 10px;
     font-size: 15px;
-    color: var(--gray-700);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-base);
+}
+
+.btn-home:hover {
+    background: var(--primary-dark);
 }
 
 .contact-info-box {
@@ -1552,4 +1600,150 @@ section {
     font-size: 14px;
     color: var(--gray-600);
     margin-bottom: 6px;
+}
+
+/* 반응형 유틸리티 */
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: flex !important;
+    }
+}
+
+/* 셀렉트 트리거 버튼 */
+.form-select-trigger {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+}
+
+.form-select-trigger .placeholder {
+    color: var(--gray-400);
+}
+
+.form-select-trigger .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--gray-500);
+}
+
+/* 바텀시트 */
+.bottom-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    z-index: 1001;
+    animation: slideUp 0.3s ease;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.bottom-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    background: white;
+}
+
+.bottom-sheet-header span {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.bottom-sheet-header button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottom-sheet-header button .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.bottom-sheet-options {
+    padding: 8px 0;
+}
+
+.bottom-sheet-option {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 15px;
+    color: var(--gray-700);
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.bottom-sheet-option:hover {
+    background: var(--gray-50);
+}
+
+.bottom-sheet-option.active {
+    color: var(--primary);
+    font-weight: 500;
+    background: var(--gray-50);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }

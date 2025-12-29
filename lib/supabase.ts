@@ -41,3 +41,14 @@ export interface GuestbookEntry {
     message: string;
     created_at: string;
 }
+
+export interface Inquiry {
+    id?: string;
+    name: string;
+    phone: string;
+    company?: string;
+    email: string;
+    inquiry_type: string;
+    message: string;
+    created_at?: string;
+}

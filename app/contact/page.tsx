@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -14,6 +15,15 @@ export default function ContactPage() {
         privacyAgree: false
     });
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [showSelectSheet, setShowSelectSheet] = useState(false);
+
+    const inquiryOptions = [
+        { value: '제휴 문의', label: '제휴 문의' },
+        { value: '서비스 문의', label: '서비스 문의' },
+        { value: '기술 지원', label: '기술 지원' },
+        { value: '기타', label: '기타' },
+    ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -34,161 +44,205 @@ export default function ContactPage() {
         setFormData(prev => ({ ...prev, phone: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
-        const emailBody = `
-이름: ${formData.name}
-연락처: ${formData.phone}
-회사명: ${formData.company || '(없음)'}
-이메일: ${formData.email}
-문의유형: ${formData.inquiry_type}
+        try {
+            const { error } = await supabase
+                .from('inquiries')
+                .insert([{
+                    name: formData.name,
+                    phone: formData.phone,
+                    company: formData.company || null,
+                    email: formData.email,
+                    inquiry_type: formData.inquiry_type,
+                    message: formData.message
+                }]);
 
-문의내용:
-${formData.message}
-    `.trim();
-
-        const subject = encodeURIComponent(`[도담부고 문의] ${formData.name}님의 ${formData.inquiry_type} 문의`);
-        const body = encodeURIComponent(emailBody);
-        const mailtoLink = `mailto:wsh9991@gmail.com?subject=${subject}&body=${body}`;
-
-        window.location.href = mailtoLink;
-        setSubmitted(true);
+            if (error) throw error;
+            setSubmitted(true);
+        } catch (error) {
+            console.error('Error submitting inquiry:', error);
+            alert('문의 접수 중 오류가 발생했습니다. 다시 시도해주세요.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="legal-page">
             <header className="legal-header">
                 <Link href="/" className="back-btn">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <span className="material-symbols-outlined">chevron_left</span>
                 </Link>
                 <h1>제휴/문의</h1>
             </header>
 
             <main className="legal-content">
-                <section className="contact-intro">
-                    <p>도담부고 서비스와 제휴를 원하시거나 문의사항이 있으신 경우 아래 양식을 작성해주세요.</p>
-                    <p>빠른 시일 내에 답변드리겠습니다.</p>
-                </section>
-
                 {submitted ? (
-                    <div className="success-message">
-                        <span className="material-symbols-outlined">check_circle</span>
-                        <p>문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.</p>
+                    <div className="success-container">
+                        <div className="success-icon">
+                            <span className="material-symbols-outlined">done</span>
+                        </div>
+                        <h2>문의가 접수되었습니다</h2>
+                        <p>빠른 시일 내에 답변드리겠습니다.<br />감사합니다.</p>
+                        <Link href="/" className="btn-home">
+                            홈으로 돌아가기
+                        </Link>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="contact-form">
-                        <div className="form-row">
+                    <>
+                        <section className="contact-intro">
+                            <p>도담부고 서비스 제휴 및 문의사항을 남겨주세요.</p>
+                        </section>
+
+                        <form onSubmit={handleSubmit} className="contact-form">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label className="form-label">이름 <span className="required">*</span></label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        className="form-input"
+                                        placeholder="이름"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">연락처 <span className="required">*</span></label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        className="form-input"
+                                        placeholder="010-0000-0000"
+                                        value={formData.phone}
+                                        onChange={formatPhone}
+                                        maxLength={13}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
                             <div className="form-group">
-                                <label className="form-label">이름 <span className="required">*</span></label>
+                                <label className="form-label">회사명</label>
                                 <input
                                     type="text"
-                                    name="name"
+                                    name="company"
                                     className="form-input"
-                                    placeholder="이름을 입력해주세요"
-                                    value={formData.name}
+                                    placeholder="회사명 (선택)"
+                                    value={formData.company}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">이메일 <span className="required">*</span></label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="form-input"
+                                    placeholder="example@email.com"
+                                    value={formData.email}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">연락처 <span className="required">*</span></label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    className="form-input"
-                                    placeholder="010-0000-0000"
-                                    value={formData.phone}
-                                    onChange={formatPhone}
+                                <label className="form-label">문의 유형 <span className="required">*</span></label>
+                                {/* PC: 기본 select */}
+                                <select
+                                    name="inquiry_type"
+                                    className="form-select desktop-only"
+                                    value={formData.inquiry_type}
+                                    onChange={handleChange}
                                     required
-                                />
+                                >
+                                    <option value="">선택해주세요</option>
+                                    {inquiryOptions.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                                {/* Mobile: 바텀시트 트리거 */}
+                                <button
+                                    type="button"
+                                    className="form-select-trigger mobile-only"
+                                    onClick={() => setShowSelectSheet(true)}
+                                >
+                                    <span className={formData.inquiry_type ? '' : 'placeholder'}>
+                                        {formData.inquiry_type || '선택해주세요'}
+                                    </span>
+                                    <span className="material-symbols-outlined">expand_more</span>
+                                </button>
                             </div>
-                        </div>
 
-                        <div className="form-group">
-                            <label className="form-label">회사명</label>
-                            <input
-                                type="text"
-                                name="company"
-                                className="form-input"
-                                placeholder="회사명을 입력해주세요 (선택)"
-                                value={formData.company}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">이메일 <span className="required">*</span></label>
-                            <input
-                                type="email"
-                                name="email"
-                                className="form-input"
-                                placeholder="example@email.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">문의 유형 <span className="required">*</span></label>
-                            <select
-                                name="inquiry_type"
-                                className="form-select"
-                                value={formData.inquiry_type}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">선택해주세요</option>
-                                <option value="제휴 문의">제휴 문의</option>
-                                <option value="서비스 문의">서비스 문의</option>
-                                <option value="기술 지원">기술 지원</option>
-                                <option value="기타">기타</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">문의 내용 <span className="required">*</span></label>
-                            <textarea
-                                name="message"
-                                className="form-textarea"
-                                rows={6}
-                                placeholder="문의하실 내용을 상세히 입력해주세요"
-                                value={formData.message}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-privacy">
-                            <label className="checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    name="privacyAgree"
-                                    checked={formData.privacyAgree}
+                            <div className="form-group">
+                                <label className="form-label">문의 내용 <span className="required">*</span></label>
+                                <textarea
+                                    name="message"
+                                    className="form-textarea"
+                                    rows={5}
+                                    placeholder="문의 내용을 입력해주세요"
+                                    value={formData.message}
                                     onChange={handleChange}
                                     required
                                 />
-                                <span>개인정보 수집 및 이용에 동의합니다. <Link href="/privacy">(자세히 보기)</Link></span>
-                            </label>
-                        </div>
+                            </div>
 
-                        <button type="submit" className="btn-submit">
-                            문의 전송
-                            <span className="material-symbols-outlined">arrow_forward</span>
-                        </button>
-                    </form>
+                            <div className="form-privacy">
+                                <label className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        name="privacyAgree"
+                                        checked={formData.privacyAgree}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <span>개인정보 수집 및 이용에 동의합니다. <Link href="/privacy">(자세히 보기)</Link></span>
+                                </label>
+                            </div>
+
+                            <button type="submit" className="btn-submit" disabled={loading}>
+                                {loading ? '접수 중...' : '문의 접수'}
+                                {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
+                            </button>
+                        </form>
+                    </>
                 )}
-
-                <div className="contact-info-box">
-                    <h3>📞 연락처 정보</h3>
-                    <ul>
-                        <li><strong>이메일:</strong> wsh9991@gmail.com</li>
-                        <li><strong>운영시간:</strong> 평일 09:00 - 18:00 (주말 및 공휴일 제외)</li>
-                    </ul>
-                </div>
             </main>
+
+            {/* 모바일 바텀시트 */}
+            {showSelectSheet && (
+                <>
+                    <div className="bottom-sheet-overlay" onClick={() => setShowSelectSheet(false)} />
+                    <div className="bottom-sheet">
+                        <div className="bottom-sheet-header">
+                            <span>문의 유형 선택</span>
+                            <button onClick={() => setShowSelectSheet(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="bottom-sheet-options">
+                            {inquiryOptions.map(opt => (
+                                <button
+                                    key={opt.value}
+                                    className={`bottom-sheet-option ${formData.inquiry_type === opt.value ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setFormData(prev => ({ ...prev, inquiry_type: opt.value }));
+                                        setShowSelectSheet(false);
+                                    }}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }
