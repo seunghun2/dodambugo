@@ -40,6 +40,9 @@ export default function CreatePage() {
     // Side menu
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
+    // 미리보기 모달
+    const [previewTemplate, setPreviewTemplate] = useState<{ id: string, name: string, image: string, preview: string } | null>(null);
+
     // Step 관리
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedTemplate, setSelectedTemplate] = useState('');
@@ -324,49 +327,48 @@ export default function CreatePage() {
 
             <main className="create-main">
                 <div className="create-container">
-                    {/* Progress Steps */}
-                    <div className="progress-steps">
-                        <div className={`progress-step ${currentStep >= 1 ? 'active' : ''}`} data-step="1">
-                            <div className="step-circle">1</div>
-                            <div className="step-label">템플릿 선택</div>
-                        </div>
-                        <div className="progress-line"></div>
-                        <div className={`progress-step ${currentStep >= 2 ? 'active' : ''}`} data-step="2">
-                            <div className="step-circle">2</div>
-                            <div className="step-label">정보 입력</div>
-                        </div>
-                        <div className="progress-line"></div>
-                        <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`} data-step="3">
-                            <div className="step-circle">3</div>
-                            <div className="step-label">공유하기</div>
-                        </div>
-                    </div>
-
                     {/* Step 1: 템플릿 선택 */}
                     {currentStep === 1 && (
                         <section className="step-section active">
-                            <div className="step-header">
-                                <h1>템플릿을 선택해주세요</h1>
-                                <p>고인께 어울리는 디자인을 선택하세요</p>
+                            <div className="template-notice" id="templateNotice">
+                                <span className="material-symbols-outlined">info</span>
+                                <span>간편하게 모바일 부고장을 만들어보세요.</span>
+                                <button type="button" className="notice-close" onClick={() => {
+                                    const notice = document.getElementById('templateNotice');
+                                    if (notice) notice.style.display = 'none';
+                                }}>
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
                             </div>
 
-                            <div className="template-grid">
+                            <div className="template-carousel">
                                 {[
-                                    { id: 'basic', name: '기본형 부고장', image: '/images/basic.png' },
-                                    { id: 'ribbon', name: '정중형 부고장', image: '/images/ribbon.png' },
-                                    { id: 'border', name: '안내형 부고장', image: '/images/border.png' },
-                                    { id: 'flower', name: '고급형 부고장', image: '/images/flower-detail.png' },
+                                    { id: 'basic', name: '부고장 기본형', image: '/images/basic.png', preview: '/templates/basic.html' },
+                                    { id: 'ribbon', name: '부고장 정중형', image: '/images/ribbon.png', preview: '/templates/ribbon.html' },
+                                    { id: 'border', name: '부고장 안내형', image: '/images/border.png', preview: '/templates/border.html' },
+                                    { id: 'flower', name: '부고장 국화', image: '/images/flower-detail.png', preview: '/templates/flower.html' },
                                 ].map(template => (
-                                    <div key={template.id} className="template-card">
-                                        <div className="template-image">
+                                    <div key={template.id} className="template-slide">
+                                        <div className="template-phone">
                                             <img src={template.image} alt={template.name} />
                                         </div>
-                                        <div className="template-info">
-                                            <div className="template-name">{template.name}</div>
-                                            <div className="template-actions">
-                                                <button className="btn-preview">미리보기</button>
-                                                <button className="btn-select" onClick={() => handleSelectTemplate(template.id)}>선택</button>
+                                        <div className="template-bottom">
+                                            <div className="template-meta">
+                                                <span className="template-name">{template.name}</span>
+                                                <Link
+                                                    href={`/create/preview/${template.id}`}
+                                                    className="btn-preview-outline"
+                                                >
+                                                    미리보기
+                                                </Link>
                                             </div>
+                                            <button
+                                                type="button"
+                                                className="btn-use-template"
+                                                onClick={() => handleSelectTemplate(template.id)}
+                                            >
+                                                이 양식으로 만들기
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
