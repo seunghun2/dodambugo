@@ -3696,12 +3696,6 @@ section {
     grid-column: 1 / -1;
 }
 
-@media (max-width: 480px) {
-    .account-row {
-        grid-template-columns: 1fr;
-    }
-}
-
 .account-row .form-select,
 .account-row .form-input {
     margin-bottom: 0;
@@ -3786,18 +3780,6 @@ section {
 /* 연락처 입력 - 전체 너비 */
 .mourner-row> :nth-child(3) {
     grid-column: 1 / -1;
-}
-
-@media (max-width: 480px) {
-    .mourner-row {
-        grid-template-columns: 1fr;
-    }
-
-    .mourner-row> :nth-child(1),
-    .mourner-row> :nth-child(2),
-    .mourner-row> :nth-child(3) {
-        grid-column: 1;
-    }
 }
 
 .mourner-row .form-select,
@@ -4236,11 +4218,6 @@ section {
 
     .section-title {
         font-size: 18px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
     }
 
     .form-actions {
