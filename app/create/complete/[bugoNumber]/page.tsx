@@ -25,6 +25,7 @@ export default function CompletePage() {
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
 
     const bugoUrl = typeof window !== 'undefined'
         ? `${window.location.origin}/view/${params.bugoNumber}`
@@ -69,7 +70,8 @@ export default function CompletePage() {
 
     const shareKakao = () => {
         navigator.clipboard.writeText(bugoUrl);
-        alert('링크가 복사되었습니다. 카카오톡에서 붙여넣기 해주세요.');
+        setToast('링크가 복사되었습니다');
+        setTimeout(() => setToast(null), 2500);
     };
 
     const shareSms = () => {
@@ -103,6 +105,14 @@ export default function CompletePage() {
 
     return (
         <div className="complete-page">
+            {/* 커스텀 토스트 */}
+            {toast && (
+                <div className="custom-toast">
+                    <span className="material-symbols-outlined">check_circle</span>
+                    {toast}
+                </div>
+            )}
+
             {/* 헤더 */}
             <header className="complete-header">
                 <button className="btn-back" onClick={() => router.push('/')}>

@@ -99,7 +99,8 @@
 /* ========================================
    기본형 (basic) - 나뭇가지 + 訃告
 ======================================== */
-.template-basic .text-overlay {
+.template-basic .text-overlay,
+html.template-basic .text-overlay {
     padding-top: 105% !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -112,7 +113,8 @@
     right: 0 !important;
 }
 
-.template-basic .overlay-full-message {
+.template-basic .overlay-full-message,
+html.template-basic .overlay-full-message {
     color: #1a1a1a !important;
 }
 
@@ -181,47 +183,47 @@
     .bugo-header {
         max-width: 100%;
     }
-    
+
     /* 정중형 - 전체 메시지 */
     .template-ribbon .overlay-full-message {
         font-size: 15px !important;
     }
-    
+
     /* 기본형 */
     .template-basic .overlay-deceased-name {
         font-size: 20px;
     }
-    
+
     .template-basic .overlay-death-info {
         font-size: 16px;
     }
-    
+
     .template-basic .overlay-condolence {
         font-size: 14px;
     }
-    
+
     /* 고급형 */
     .template-flower .overlay-deceased-name {
         font-size: 22px;
     }
-    
+
     .template-flower .overlay-death-info {
         font-size: 17px;
     }
-    
+
     .template-flower .overlay-condolence {
         font-size: 14px;
     }
-    
+
     /* 안내형 */
     .template-border .overlay-deceased-name {
         font-size: 19px;
     }
-    
+
     .template-border .overlay-death-info {
         font-size: 16px;
     }
-    
+
     .template-border .overlay-condolence {
         font-size: 13px;
     }
@@ -231,48 +233,48 @@
     .text-overlay {
         padding: 6%;
     }
-    
+
     /* 정중형 - 전체 메시지 */
     .template-ribbon .overlay-full-message {
         font-size: 14px !important;
         padding: 0 6% !important;
     }
-    
+
     /* 기본형 */
     .template-basic .overlay-deceased-name {
         font-size: 18px;
     }
-    
+
     .template-basic .overlay-death-info {
         font-size: 15px;
     }
-    
+
     .template-basic .overlay-condolence {
         font-size: 13px;
     }
-    
+
     /* 고급형 */
     .template-flower .overlay-deceased-name {
         font-size: 20px;
     }
-    
+
     .template-flower .overlay-death-info {
         font-size: 16px;
     }
-    
+
     .template-flower .overlay-condolence {
         font-size: 13px;
     }
-    
+
     /* 안내형 */
     .template-border .overlay-deceased-name {
         font-size: 17px;
     }
-    
+
     .template-border .overlay-death-info {
         font-size: 15px;
     }
-    
+
     .template-border .overlay-condolence {
         font-size: 12px;
     }
@@ -283,7 +285,7 @@
     .bugo-header {
         transition: all 0.3s;
     }
-    
+
     .bugo-header:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import SideMenu from '@/components/SideMenu';
 
 // 관계 옵션
 const relationOptions = [
@@ -357,32 +358,8 @@ export default function WriteFormPage() {
                     </div>
                 </nav>
 
-                {/* Side Menu */}
-                <div className={`side-menu ${sideMenuOpen ? 'active' : ''}`} id="sideMenu">
-                    <div className="side-menu-overlay" onClick={() => setSideMenuOpen(false)}></div>
-                    <div className="side-menu-content">
-                        <div className="side-menu-header">
-                            <div className="side-menu-logo">도담부고</div>
-                            <button className="side-menu-close" onClick={() => setSideMenuOpen(false)}>
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                        </div>
-                        <nav className="side-menu-nav">
-                            <Link href="/create" className="side-menu-item">
-                                <span className="material-symbols-outlined">add_circle</span>
-                                <span>부고장 만들기</span>
-                            </Link>
-                            <Link href="/search" className="side-menu-item">
-                                <span className="material-symbols-outlined">search</span>
-                                <span>부고 검색</span>
-                            </Link>
-                            <Link href="/contact" className="side-menu-item">
-                                <span className="material-symbols-outlined">contact_support</span>
-                                <span>문의하기</span>
-                            </Link>
-                        </nav>
-                    </div>
-                </div>
+                {/* Side Menu - 공통 컴포넌트 */}
+                <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
 
                 <main className="create-main">
                     <div className="create-container">
@@ -428,66 +405,50 @@ export default function WriteFormPage() {
                                             {!errors.phone_password && <p className="form-hint">부고장 수정 시 사용됩니다 (4자리 숫자)</p>}
                                         </div>
                                     </div>
-
-                                    {/* 고인 정보 */}
+                                    {/* 부고 정보 */}
                                     <div className="form-section">
-                                        <h2 className="section-title">고인 정보</h2>
+                                        <h2 className="section-title">부고 정보</h2>
 
                                         <div className="form-group" data-field="deceased_name">
-                                            <label className="form-label required">성함</label>
+                                            <label className="form-label required">고인명</label>
                                             <input
                                                 type="text"
                                                 name="deceased_name"
                                                 className={`form-input ${errors.deceased_name ? 'error' : ''}`}
-                                                placeholder="고인의 성함"
+                                                placeholder="고인명"
                                                 value={formData.deceased_name}
                                                 onChange={handleChange}
                                             />
                                             {errors.deceased_name && <p className="field-error">{errors.deceased_name}</p>}
                                         </div>
 
-                                        <div className="form-group" data-field="gender">
-                                            <label className="form-label required">성별</label>
-                                            <select
-                                                name="gender"
-                                                className={`form-select ${errors.gender ? 'error' : ''}`}
-                                                value={formData.gender}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="">선택</option>
-                                                <option value="남">남</option>
-                                                <option value="여">여</option>
-                                            </select>
-                                            {errors.gender && <p className="field-error">{errors.gender}</p>}
-                                        </div>
-
-                                        <div className="form-group" data-field="relationship">
-                                            <label className="form-label required">관계</label>
-                                            <select
-                                                name="relationship"
-                                                className={`form-select ${errors.relationship ? 'error' : ''}`}
-                                                value={formData.relationship}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="">선택</option>
-                                                {relationOptions.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
-                                            {errors.relationship && <p className="field-error">{errors.relationship}</p>}
-                                        </div>
-
-                                        <div className="form-row">
+                                        {/* 연세 + 성별 + 종교 */}
+                                        <div className="form-row form-row-3">
                                             <div className="form-group">
-                                                <label className="form-label">향년</label>
+                                                <label className="form-label">연세</label>
                                                 <input
                                                     type="number"
                                                     name="age"
                                                     className="form-input"
-                                                    placeholder="나이"
+                                                    placeholder="연세"
                                                     value={formData.age}
                                                     onChange={handleChange}
                                                 />
+                                            </div>
+
+                                            <div className="form-group" data-field="gender">
+                                                <label className="form-label required">성별</label>
+                                                <select
+                                                    name="gender"
+                                                    className={`form-select ${errors.gender ? 'error' : ''}`}
+                                                    value={formData.gender}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">선택</option>
+                                                    <option value="남">남</option>
+                                                    <option value="여">여</option>
+                                                </select>
+                                                {errors.gender && <p className="field-error">{errors.gender}</p>}
                                             </div>
 
                                             <div className="form-group">
@@ -504,6 +465,23 @@ export default function WriteFormPage() {
                                                     ))}
                                                 </select>
                                             </div>
+                                        </div>
+
+                                        {/* 고인과의 관계 */}
+                                        <div className="form-group" data-field="relationship">
+                                            <label className="form-label required">고인과의 관계</label>
+                                            <select
+                                                name="relationship"
+                                                className={`form-select ${errors.relationship ? 'error' : ''}`}
+                                                value={formData.relationship}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="">선택</option>
+                                                {relationOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                            {errors.relationship && <p className="field-error">{errors.relationship}</p>}
                                         </div>
                                     </div>
 
@@ -828,19 +806,21 @@ export default function WriteFormPage() {
                                 </div>
                             </section>
                         )}
-                    </div>
-                </main>
+                    </div >
+                </main >
 
                 {/* 로딩 오버레이 */}
-                {isSubmitting && (
-                    <div className="loading-overlay">
-                        <div className="loading-content">
-                            <span className="material-symbols-outlined spinning">progress_activity</span>
-                            <p>부고장을 생성하고 있습니다...</p>
+                {
+                    isSubmitting && (
+                        <div className="loading-overlay">
+                            <div className="loading-content">
+                                <span className="material-symbols-outlined spinning">progress_activity</span>
+                                <p>부고장을 생성하고 있습니다...</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )
+                }
+            </div >
         </>
     );
 }

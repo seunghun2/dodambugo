@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import SideMenu from '@/components/SideMenu';
 
 export default function HomePage() {
   const router = useRouter();
@@ -100,32 +101,8 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Side Menu */}
-      <div className={`side-menu ${sideMenuOpen ? 'active' : ''}`} id="sideMenu">
-        <div className="side-menu-overlay" onClick={closeSideMenu}></div>
-        <div className="side-menu-content">
-          <div className="side-menu-header">
-            <div className="side-menu-logo">도담부고</div>
-            <button className="side-menu-close" onClick={closeSideMenu}>
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <nav className="side-menu-nav">
-            <Link href="/create" className="side-menu-item">
-              <span className="material-symbols-outlined">add_circle</span>
-              <span>부고장 만들기</span>
-            </Link>
-            <Link href="/search" className="side-menu-item">
-              <span className="material-symbols-outlined">search</span>
-              <span>부고 검색</span>
-            </Link>
-            <a href="#faq" className="side-menu-item" onClick={closeSideMenu}>
-              <span className="material-symbols-outlined">contact_support</span>
-              <span>자주 묻는 질문</span>
-            </a>
-          </nav>
-        </div>
-      </div>
+      {/* Side Menu - 공통 컴포넌트 */}
+      <SideMenu isOpen={sideMenuOpen} onClose={closeSideMenu} />
 
       {/* Hero Section - KAKAOBUGO 스타일 */}
       <section className="hero" id="home">

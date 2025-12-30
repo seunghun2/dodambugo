@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import '@/public/css/view-toss.css';
+import '@/public/css/view-overlay.css';
 
 interface BugoData {
     id: string;
@@ -40,21 +41,49 @@ export default function ViewPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'info' | 'guestbook'>('info');
+    const [copySuccess, setCopySuccess] = useState(false);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchBugo = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('bugo')
-                    .select('*')
-                    .eq('bugo_number', params.id)
-                    .single();
+                const id = params.id as string;
 
-                if (error) throw error;
+                // UUID 형식인지 확인 (xxxx-xxxx-xxxx 패턴)
+                const isUUID = id.includes('-') && id.length > 10;
+
+                let data = null;
+                let error = null;
+
+                if (isUUID) {
+                    // UUID로 검색
+                    const result = await supabase
+                        .from('bugo')
+                        .select('*')
+                        .eq('id', id)
+                        .single();
+                    data = result.data;
+                    error = result.error;
+                } else {
+                    // 부고번호로 검색
+                    const result = await supabase
+                        .from('bugo')
+                        .select('*')
+                        .eq('bugo_number', id)
+                        .single();
+                    data = result.data;
+                    error = result.error;
+                }
+
+                if (error || !data) {
+                    setError('부고장을 찾을 수 없습니다.');
+                    return;
+                }
+
                 setBugo(data);
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
-                console.error(err);
+                console.log('Bugo not found:', params.id);
             } finally {
                 setLoading(false);
             }
@@ -67,7 +96,37 @@ export default function ViewPage() {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert('복사되었습니다.');
+        setCopySuccess(true);
+        setShareModalOpen(false);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    const shareViaKakao = () => {
+        // 카카오톡 공유 (카카오 SDK 필요)
+        const url = window.location.href;
+        if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
+            (window as any).Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `故 ${bugo?.deceased_name}님 부고`,
+                    description: bugo?.funeral_home || '부고장',
+                    imageUrl: 'https://dodambugo.com/images/og-image.png',
+                    link: { mobileWebUrl: url, webUrl: url }
+                },
+                buttons: [{ title: '부고장 보기', link: { mobileWebUrl: url, webUrl: url } }]
+            });
+        } else {
+            // 카카오톡 앱 직접 실행 (폴백)
+            window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}`);
+        }
+        setShareModalOpen(false);
+    };
+
+    const shareViaSMS = () => {
+        const url = window.location.href;
+        const text = `[부고] 故 ${bugo?.deceased_name}님 부고장입니다. ${url}`;
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+        setShareModalOpen(false);
     };
 
     const formatDate = (dateStr?: string) => {
@@ -107,11 +166,22 @@ export default function ViewPage() {
             ? [{ relationship: bugo.relationship || '상주', name: bugo.mourner_name, contact: bugo.contact || '' }]
             : [];
 
+    // 템플릿 설정
+    const templateClass = bugo.template ? `template-${bugo.template}` : 'template-basic';
+    const templateImage = bugo.template ? `/images/template-${bugo.template}.png` : '/images/template-basic.png';
+
     return (
-        <main className="bugo-view">
+        <main className={`bugo-view ${templateClass}`}>
+            {/* 복사 성공 토스트 */}
+            {copySuccess && (
+                <div className="copy-toast">
+                    ✓ 링크가 복사되었습니다
+                </div>
+            )}
+
             {/* 헤더 이미지 */}
             <div className="bugo-header">
-                <img src="/images/template-basic.png" alt="부고장" style={{ width: '100%' }} />
+                <img src={templateImage} alt="부고장" style={{ width: '100%' }} />
                 <div className="text-overlay">
                     <p className="overlay-text overlay-full-message" style={{ display: 'block' }}>
                         故{bugo.deceased_name}님께서 {bugo.death_date ? formatDate(bugo.death_date) : ''}<br />
@@ -308,11 +378,34 @@ export default function ViewPage() {
 
             {/* 하단 공유 버튼 */}
             <div className="bugo-actions">
-                <button className="action-btn btn-primary" onClick={() => copyToClipboard(window.location.href)}>
+                <button className="action-btn btn-primary" onClick={() => setShareModalOpen(true)}>
                     <span className="material-symbols-outlined">share</span>
                     공유하기
                 </button>
             </div>
+
+            {/* 공유 바텀시트 모달 */}
+            {shareModalOpen && (
+                <div className="share-modal">
+                    <div className="share-modal-overlay" onClick={() => setShareModalOpen(false)}></div>
+                    <div className="share-modal-content">
+                        <div className="share-options">
+                            <button className="share-option" onClick={shareViaKakao}>
+                                <img src="/images/icon-kakao.png" alt="카카오톡" className="share-icon-img" />
+                                <span>카카오톡으로 보내기</span>
+                            </button>
+                            <button className="share-option" onClick={shareViaSMS}>
+                                <img src="/images/icon-message.png" alt="메세지" className="share-icon-img" />
+                                <span>메세지로 보내기</span>
+                            </button>
+                            <button className="share-option" onClick={() => copyToClipboard(window.location.href)}>
+                                <img src="/images/icon-link.png" alt="링크" className="share-icon-img" />
+                                <span>링크 복사하기</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

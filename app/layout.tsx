@@ -5,49 +5,10 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import './globals.css';
 
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps, createTheme } from '@mantine/core';
+import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
-
-// 도담부고 커스텀 테마
-const theme = createTheme({
-  primaryColor: 'blue',
-  fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  headings: {
-    fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, sans-serif',
-  },
-  colors: {
-    blue: [
-      '#e7f5ff',
-      '#d0ebff',
-      '#a5d8ff',
-      '#74c0fc',
-      '#4dabf7',
-      '#339af0',
-      '#228be6',
-      '#1c7ed6',
-      '#1971c2',
-      '#1864ab',
-    ],
-  },
-  components: {
-    Button: {
-      defaultProps: {
-        radius: 'md',
-      },
-    },
-    TextInput: {
-      defaultProps: {
-        radius: 'md',
-      },
-    },
-    Select: {
-      defaultProps: {
-        radius: 'md',
-      },
-    },
-  },
-});
+import { dodamTheme } from '@/lib/theme';
 
 export const metadata = {
   title: '도담부고 - 품격있는 무료 모바일 부고장',
@@ -82,7 +43,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <MantineProvider theme={theme} defaultColorScheme="light">
+        <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
             <Notifications position="top-right" />
             {children}

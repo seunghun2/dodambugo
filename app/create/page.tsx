@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import SideMenu from '@/components/SideMenu';
 
 // 관계 옵션
 const relationOptions = [
@@ -298,32 +299,8 @@ function CreatePageContent() {
                 </div>
             </nav>
 
-            {/* Side Menu */}
-            <div className={`side-menu ${sideMenuOpen ? 'active' : ''}`} id="sideMenu">
-                <div className="side-menu-overlay" onClick={() => setSideMenuOpen(false)}></div>
-                <div className="side-menu-content">
-                    <div className="side-menu-header">
-                        <div className="side-menu-logo">도담부고</div>
-                        <button className="side-menu-close" onClick={() => setSideMenuOpen(false)}>
-                            <span className="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                    <nav className="side-menu-nav">
-                        <Link href="/create" className="side-menu-item">
-                            <span className="material-symbols-outlined">add_circle</span>
-                            <span>부고장 만들기</span>
-                        </Link>
-                        <Link href="/search" className="side-menu-item">
-                            <span className="material-symbols-outlined">search</span>
-                            <span>부고 검색</span>
-                        </Link>
-                        <Link href="/contact" className="side-menu-item">
-                            <span className="material-symbols-outlined">contact_support</span>
-                            <span>문의하기</span>
-                        </Link>
-                    </nav>
-                </div>
-            </div>
+            {/* Side Menu - 공통 컴포넌트 */}
+            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
 
             <main className="create-main">
                 <div className="create-container">

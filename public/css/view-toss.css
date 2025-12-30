@@ -21,6 +21,268 @@ body {
     padding-bottom: 80px;
 }
 
+/* 복사 토스트 메시지 */
+.copy-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #191F28;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    animation: toastFadeIn 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes toastFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* 공유 바텀시트 모달 */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.share-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.share-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 40px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.share-modal-close {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #191F28;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-top: -60px;
+    z-index: 10;
+}
+
+.share-modal-close .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 1px solid #F2F4F6;
+    font-size: 16px;
+    color: #191F28;
+    font-weight: 500;
+    font-family: 'Noto Sans KR', sans-serif;
+    text-align: left;
+    width: 100%;
+}
+
+.share-option:last-child {
+    border-bottom: none;
+}
+
+.share-option:active {
+    background: #F9FAFB;
+}
+
+.share-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-icon.kakao {
+    background: #FEE500;
+}
+
+.share-icon.message {
+    background: #34C759;
+    color: white;
+}
+
+.share-icon.link {
+    background: #3A3A3C;
+    color: white;
+}
+
+.share-icon .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.share-icon-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+/* ========================================
+   방명록 (Guestbook)
+======================================== */
+.tab-navigation {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid #F2F4F6;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 16px;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #8B95A1;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: #191F28;
+    border-bottom-color: #191F28;
+}
+
+.guestbook-content {
+    display: none;
+    max-width: 480px;
+    margin: 0 auto;
+    background: white;
+}
+
+.guestbook-content.active {
+    display: block;
+}
+
+.guestbook-form {
+    padding: 24px;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #E5E8EB;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.guestbook-form textarea {
+    min-height: 120px;
+    resize: none;
+}
+
+.guestbook-form .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #3182F6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.guestbook-empty {
+    text-align: center;
+    padding: 40px 24px;
+    color: #8B95A1;
+}
+
+.bugo-content.hidden {
+    display: none;
+}
+
 /* 메인 컨테이너 */
 .bugo-container {
     max-width: 480px;
@@ -396,7 +658,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-container p {
@@ -511,6 +775,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -624,19 +889,19 @@ body {
     .content-section {
         padding: 28px 20px;
     }
-    
+
     .map-header {
         padding: 28px 20px 16px;
     }
-    
+
     .map-actions {
         padding: 16px 20px 28px;
     }
-    
+
     .bugo-actions {
         padding: 12px;
     }
-    
+
     .floating-button {
         right: 16px;
         bottom: 85px;
@@ -648,48 +913,48 @@ body {
     body {
         background: #1C1C1E;
     }
-    
+
     .bugo-view,
     .bugo-container,
     .bugo-content {
         background: #1C1C1E;
     }
-    
+
     .content-section {
         border-bottom-color: #2C2C2E;
     }
-    
+
     .content-title {
         color: #FFFFFF;
     }
-    
+
     .info-label {
         color: #98989D;
     }
-    
+
     .info-value {
         color: #FFFFFF;
     }
-    
+
     .mourner-card,
     .account-card,
     .condolence-message,
     .footer-notice {
         background: #2C2C2E;
     }
-    
+
     .mourner-relation,
     .account-bank,
     .condolence-text,
     .notice-text {
         color: #98989D;
     }
-    
+
     .mourner-name,
     .account-number {
         color: #FFFFFF;
     }
-    
+
     .map-btn,
     .action-btn,
     .btn-copy-account {
@@ -697,7 +962,7 @@ body {
         border-color: #3A3A3C;
         color: #FFFFFF;
     }
-    
+
     .bugo-actions {
         background: #1C1C1E;
         border-top-color: #2C2C2E;
