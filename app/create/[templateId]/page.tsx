@@ -101,6 +101,9 @@ export default function WriteFormPage() {
         { holder: '', bank: '', number: '' }
     ]);
 
+    // 장지 정보
+    const [showBurial, setShowBurial] = useState(false);
+
     // 영정 사진
     const [showPhoto, setShowPhoto] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
@@ -110,6 +113,8 @@ export default function WriteFormPage() {
     const [createdBugo, setCreatedBugo] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(1); // 1: 입력, 2: 완료
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [privacyOpen, setPrivacyOpen] = useState(false);
 
     // 날짜 초기화
     useEffect(() => {
@@ -390,7 +395,7 @@ export default function WriteFormPage() {
                                     {/* 신청자 정보 */}
                                     <div className="form-section applicant-section">
                                         <h2 className="section-title">신청자 정보</h2>
-                                        <p className="section-description">부고장 수정 시 필요한 정보입니다</p>
+                                        <p className="section-desc">부고장 수정 시 필요한 정보입니다</p>
 
                                         <div className="form-group" data-field="applicant_name">
                                             <label className="form-label required">신청자명</label>
@@ -422,6 +427,7 @@ export default function WriteFormPage() {
                                     {/* 부고 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">부고 정보</h2>
+                                        <p className="section-desc">고인 및 유가족 정보를 입력해주세요</p>
 
                                         <div className="form-group" data-field="deceased_name">
                                             <label className="form-label required">고인명</label>
@@ -518,9 +524,10 @@ export default function WriteFormPage() {
                                     {/* 추가 상주 */}
                                     <div className="form-section">
                                         <h2 className="section-title">추가 상주</h2>
+                                        <p className="section-desc">함께 상을 치르는 유가족을 추가해주세요</p>
 
                                         {mourners.map((mourner, index) => (
-                                            <div key={index} className="mourner-row" data-field={index === 0 ? 'mourner_name' : undefined}>
+                                            <div key={index} className={`mourner-row ${mourners.length > 1 ? 'has-delete' : ''}`} data-field={index === 0 ? 'mourner_name' : undefined}>
                                                 <select
                                                     className="form-select mourner-relation"
                                                     value={mourner.relationship}
@@ -531,20 +538,13 @@ export default function WriteFormPage() {
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
-                                                <div className="input-with-delete">
-                                                    <input
-                                                        type="text"
-                                                        className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
-                                                        placeholder="성함"
-                                                        value={mourner.name}
-                                                        onChange={(e) => updateMourner(index, 'name', e.target.value)}
-                                                    />
-                                                    {mourners.length > 1 && (
-                                                        <button type="button" className="btn-delete-inline" onClick={() => removeMourner(index)}>
-                                                            <span className="material-symbols-outlined">close</span>
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                <input
+                                                    type="text"
+                                                    className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
+                                                    placeholder="성함"
+                                                    value={mourner.name}
+                                                    onChange={(e) => updateMourner(index, 'name', e.target.value)}
+                                                />
                                                 <input
                                                     type="tel"
                                                     className={`form-input mourner-contact ${index === 0 && errors.mourner_contact ? 'error' : ''}`}
@@ -552,6 +552,11 @@ export default function WriteFormPage() {
                                                     value={mourner.contact}
                                                     onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
                                                 />
+                                                {mourners.length > 1 && (
+                                                    <button type="button" className="btn-delete-mourner" onClick={() => removeMourner(index)}>
+                                                        <span className="material-symbols-outlined">close</span>
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                         {(errors.mourner_name || errors.mourner_contact) && (
@@ -566,6 +571,7 @@ export default function WriteFormPage() {
                                     {/* 빈소 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">빈소 정보</h2>
+                                        <p className="section-desc">조문객이 방문할 장례식장 정보입니다</p>
                                         {/* 장례식장 + 호실 */}
                                         <div className="form-row">
                                             <div className="form-group" data-field="funeral_home">
@@ -638,6 +644,7 @@ export default function WriteFormPage() {
                                     {/* 일정 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">발인/임종 일시</h2>
+                                        <p className="section-desc">장례 일정을 입력해주세요</p>
 
                                         <div className="form-group" data-field="funeral_date">
                                             <label className="form-label required">발인일</label>
@@ -651,6 +658,7 @@ export default function WriteFormPage() {
                                                         funeral_date: value || ''
                                                     }))}
                                                     valueFormat="YYYY년 MM월 DD일"
+                                                    rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--gray-400)' }}>calendar_today</span>}
                                                     styles={{
                                                         input: {
                                                             height: '44px',
@@ -695,6 +703,7 @@ export default function WriteFormPage() {
                                                         death_date: value || ''
                                                     }))}
                                                     valueFormat="YYYY년 MM월 DD일"
+                                                    rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--gray-400)' }}>calendar_today</span>}
                                                     styles={{
                                                         input: {
                                                             height: '44px',
@@ -726,51 +735,47 @@ export default function WriteFormPage() {
                                                 </select>
                                             </div>
                                         </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">장지</label>
-                                            <input
-                                                type="text"
-                                                name="burial_place"
-                                                className="form-input"
-                                                placeholder="장지 (예: OO공원묘지)"
-                                                value={formData.burial_place}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
                                     </div>
 
-                                    {/* 추가 옵션 */}
+                                    {/* 조문객에게 안내사항 */}
                                     <div className="form-section">
-                                        <h2 className="section-title">추가 옵션</h2>
+                                        <h2 className="section-title">조문객에게 안내사항</h2>
+                                        <p className="section-desc">조문객에게 전달할 메시지를 작성해주세요</p>
 
                                         <div className="form-group">
-                                            <label className="form-label">인사말</label>
+                                            <label className="form-label">안내사항</label>
                                             <textarea
                                                 name="message"
                                                 className="form-textarea"
-                                                placeholder="조문객들에게 전할 인사말"
+                                                placeholder="뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다."
                                                 rows={4}
                                                 value={formData.message}
                                                 onChange={handleChange}
                                             />
                                         </div>
+                                    </div>
 
-                                        <div className="option-toggle">
-                                            <label className="toggle-label">
+                                    {/* 부의금 계좌 */}
+                                    <div className="form-section">
+                                        <div className="toggle-row">
+                                            <div className="toggle-row-label">
+                                                <span className="material-symbols-outlined">account_balance</span>
+                                                <span>계좌번호 정보</span>
+                                            </div>
+                                            <label className="toggle-switch">
                                                 <input
                                                     type="checkbox"
                                                     checked={showAccount}
                                                     onChange={(e) => setShowAccount(e.target.checked)}
                                                 />
-                                                <span>부의금 계좌 추가</span>
+                                                <span className="toggle-slider"></span>
                                             </label>
                                         </div>
 
                                         {showAccount && (
                                             <div className="account-fields">
                                                 {accounts.map((acc, index) => (
-                                                    <div key={index} className="account-row">
+                                                    <div key={index} className={`account-row ${accounts.length > 1 ? 'has-delete' : ''}`}>
                                                         <input
                                                             type="text"
                                                             className="form-input"
@@ -796,8 +801,8 @@ export default function WriteFormPage() {
                                                             onChange={(e) => updateAccount(index, 'number', e.target.value)}
                                                         />
                                                         {accounts.length > 1 && (
-                                                            <button type="button" className="btn-remove-account" onClick={() => removeAccount(index)}>
-                                                                <span className="material-symbols-outlined">remove_circle</span>
+                                                            <button type="button" className="btn-delete-account" onClick={() => removeAccount(index)}>
+                                                                <span className="material-symbols-outlined">close</span>
                                                             </button>
                                                         )}
                                                     </div>
@@ -812,12 +817,80 @@ export default function WriteFormPage() {
                                         )}
                                     </div>
 
-                                    {/* 제출 버튼 */}
-                                    <div className="form-actions">
+                                    {/* 장지 정보 */}
+                                    <div className="form-section">
+                                        <div className="toggle-row">
+                                            <div className="toggle-row-label">
+                                                <span className="material-symbols-outlined">park</span>
+                                                <span>장지 정보</span>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={showBurial}
+                                                    onChange={(e) => setShowBurial(e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        {showBurial && (
+                                            <div className="toggle-content">
+                                                <input
+                                                    type="text"
+                                                    name="burial_place"
+                                                    className="form-input"
+                                                    placeholder="장지 (예: OO공원묘지)"
+                                                    value={formData.burial_place}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 개인정보 동의 안내 + 제출 버튼 */}
+                                    <div className="form-submit-area">
+                                        <button
+                                            type="button"
+                                            className="privacy-text-btn"
+                                            onClick={() => setPrivacyOpen(true)}
+                                        >
+                                            개인정보 수집/제공에 동의합니다.
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </button>
                                         <button type="submit" className="btn-submit" disabled={isSubmitting}>
                                             {isSubmitting ? '생성 중...' : '부고장 만들기'}
                                         </button>
                                     </div>
+
+                                    {/* 개인정보 동의 모달 */}
+                                    {privacyOpen && (
+                                        <div className="privacy-modal-overlay" onClick={() => setPrivacyOpen(false)}>
+                                            <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                                                <div className="privacy-modal-header">
+                                                    <h3>개인정보 수집/제공 동의</h3>
+                                                    <button type="button" className="modal-close" onClick={() => setPrivacyOpen(false)}>
+                                                        <span className="material-symbols-outlined">close</span>
+                                                    </button>
+                                                </div>
+                                                <div className="privacy-modal-content">
+                                                    <ul>
+                                                        <li>
+                                                            신청 및 수정 과정 중 본인식별 및 부정이용방지를 위해 개인정보를 수집 이용합니다.
+                                                            <Link href="/privacy" target="_blank" className="privacy-link">전문보기</Link>
+                                                        </li>
+                                                        <li>
+                                                            부고 수신자에게 계좌정보를 제공합니다.
+                                                            <a href="https://www.law.go.kr/LSW/lsLinkCommonInfo.do?lsJoLnkSeq=1020398517&chrClsCd=010202&ancYnChk=" target="_blank" className="law-reference">(개인정보 보호법 제17조 의거)</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <button type="button" className="privacy-modal-confirm" onClick={() => setPrivacyOpen(false)}>
+                                                    확인
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </form>
                             </section>
                         )}

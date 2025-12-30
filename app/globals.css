@@ -40,7 +40,7 @@ html {
     --gray-500: #95A5A6;
     --gray-400: #BDC3C7;
     --gray-300: #D5DBDB;
-    --gray-200: #ECF0F1;
+    --gray-200: #D0D5D6;
     --gray-100: #F4F6F7;
     --gray-50: #FAFAFA;
 
@@ -3759,7 +3759,8 @@ section {
     margin-bottom: 20px;
 }
 
-.section-description {
+.section-description,
+.section-desc {
     font-size: 13px;
     color: var(--gray-500);
     margin-top: -16px;
@@ -3863,7 +3864,7 @@ section {
 .form-select.error,
 .form-textarea.error {
     border-color: #EF4444 !important;
-    background-color: #FEF2F2;
+    background-color: white;
 }
 
 .form-input.error:focus,
@@ -3897,90 +3898,75 @@ section {
 }
 
 /* ========================================
-   날짜/시간 선택 - Subtle Heritage 스타일
+   날짜/시간 선택 - 상단 input과 동일한 스타일
    ======================================== */
 .datetime-row {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 .datetime-row .form-input {
     flex: 2;
 }
 
-/* 시간 선택 드롭다운 - Subtle Heritage */
+/* 시간 선택 드롭다운 - 상단 form-select와 동일 */
 .datetime-row .form-select,
 .datetime-row .time-select {
-    flex: 1;
-    height: 48px;
-    padding: 0 38px 0 16px;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--gray-700);
-    background-color: var(--gray-50);
+    width: 100%;
+    padding: 12px 38px 12px 14px;
     border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    cursor: pointer;
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--gray-900);
+    background: white;
     transition: all 0.2s ease;
+    font-family: inherit;
+    cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%232C3E50' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
-}
-
-.datetime-row .form-select:hover,
-.datetime-row .time-select:hover {
-    background-color: white;
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
 }
 
 .datetime-row .form-select:focus,
 .datetime-row .time-select:focus {
     outline: none;
-    background-color: white;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
 }
 
-/* Mantine DatePicker 커스텀 스타일 */
+/* Mantine DatePicker - 상단 form-input과 동일 */
 .datetime-row .mantine-DatePickerInput-root {
     flex: 1.5;
 }
 
 .datetime-row .mantine-DatePickerInput-input {
-    height: 48px !important;
-    min-height: 48px !important;
-    padding: 0 16px !important;
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: var(--gray-700) !important;
-    background-color: var(--gray-50) !important;
+    width: 100% !important;
+    padding: 12px 14px !important;
     border: 1px solid var(--gray-200) !important;
-    border-radius: 10px !important;
-    cursor: pointer !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    color: var(--gray-900) !important;
+    background: white !important;
     transition: all 0.2s ease !important;
-}
-
-.datetime-row .mantine-DatePickerInput-input:hover {
-    background-color: white !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08) !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+    min-height: unset !important;
+    height: auto !important;
 }
 
 .datetime-row .mantine-DatePickerInput-input:focus,
 .datetime-row .mantine-DatePickerInput-input:focus-within {
     outline: none !important;
-    background-color: white !important;
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08) !important;
 }
 
 /* DatePicker 캘린더 팝업 스타일 */
 .mantine-DatePickerInput-dropdown {
-    border-radius: 12px !important;
-    box-shadow: 0 8px 24px rgba(44, 62, 80, 0.15) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid var(--gray-200) !important;
 }
 
@@ -4042,14 +4028,28 @@ section {
     border-radius: 10px;
     border: 1px solid #f0f0f0;
     display: grid;
-    grid-template-columns: 120px 1fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     position: relative;
+    align-items: center;
 }
 
-.account-row .form-input:last-of-type {
+/* 예금주 - 1줄 */
+.account-row> :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+/* 은행 선택 - 1줄 */
+.account-row> :nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+/* 계좌번호 - 2줄, 기본: 전체 너비 */
+.account-row> :nth-child(3) {
     grid-column: 1 / -1;
+    grid-row: 2;
 }
 
 .account-row .form-select,
@@ -4057,33 +4057,47 @@ section {
     margin-bottom: 0;
 }
 
-.btn-remove-account {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: white;
-    color: #ef4444;
-    border: 1px solid #ef4444;
+/* has-delete 있을 때: 3컬럼 레이아웃 */
+.account-row.has-delete {
+    grid-template-columns: 1fr 1fr 40px;
+}
+
+.account-row.has-delete> :nth-child(2) {
+    grid-column: 2;
+}
+
+.account-row.has-delete> :nth-child(3) {
+    grid-column: 1 / 3;
+    grid-row: 2;
+}
+
+.account-row.has-delete> :nth-child(4) {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+/* 계좌 삭제 버튼 - 독립형 원형 */
+.btn-delete-account {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    font-size: 16px;
+    background: var(--gray-100);
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
-.btn-remove-account .material-symbols-outlined {
-    font-size: 16px;
+.btn-delete-account:hover {
+    background: var(--gray-200);
 }
 
-.btn-remove-account:hover {
-    background: #ef4444;
-    color: white;
+.btn-delete-account .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--gray-600);
 }
 
 .btn-add-account {
@@ -4109,7 +4123,7 @@ section {
     border-style: solid;
 }
 
-/* Mourner Item - 심플 */
+/* Mourner Item - 2줄 레이아웃 */
 .mourner-item,
 .mourner-row {
     padding: 0;
@@ -4118,29 +4132,76 @@ section {
     margin-bottom: 12px;
     border: none;
     display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 10px;
+    grid-template-columns: 100px 1fr;
+    gap: 8px;
     position: relative;
+    align-items: center;
 }
 
-/* 관계 선택 */
+/* 관계 선택 - 1줄 */
 .mourner-row> :nth-child(1) {
     grid-column: 1;
+    grid-row: 1;
 }
 
-/* 이름 입력 */
+/* 이름 입력 - 1줄 */
 .mourner-row> :nth-child(2) {
     grid-column: 2;
+    grid-row: 1;
 }
 
-/* 연락처 입력 - 전체 너비 */
+/* 연락처 입력 - 2줄, 기본: 전체 너비 */
 .mourner-row> :nth-child(3) {
     grid-column: 1 / -1;
+    grid-row: 2;
 }
 
 .mourner-row .form-select,
 .mourner-row .form-input {
     margin-bottom: 0;
+}
+
+/* has-delete 있을 때: 3컬럼 레이아웃 */
+.mourner-row.has-delete {
+    grid-template-columns: 100px 1fr 40px;
+}
+
+.mourner-row.has-delete> :nth-child(2) {
+    grid-column: 2 / 4;
+}
+
+.mourner-row.has-delete> :nth-child(3) {
+    grid-column: 1 / 3;
+    grid-row: 2;
+}
+
+.mourner-row.has-delete> :nth-child(4) {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+/* 상주 삭제 버튼 - 독립형 원형 */
+.btn-delete-mourner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-delete-mourner:hover {
+    background: var(--gray-200);
+}
+
+.btn-delete-mourner .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--gray-600);
 }
 
 .mourner-header {
@@ -4250,10 +4311,46 @@ section {
     gap: 6px;
 }
 
+.btn-add-mourner .material-symbols-outlined {
+    font-variation-settings: 'wght' 300;
+}
+
 .btn-add-mourner:hover {
     background: rgba(59, 130, 246, 0.04);
     border-color: var(--primary);
     border-style: solid;
+}
+
+/* 한 줄 토글 - 아이콘 + 텍스트 + 스위치 */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+}
+
+.toggle-row-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.toggle-row-label .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--gray-500);
+}
+
+/* 토글 콘텐츠 - 활성화 시 표시 */
+.toggle-content {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-100);
 }
 
 /* Toggle Switch - iOS 스타일 */
@@ -4419,13 +4516,311 @@ section {
     margin-bottom: 16px;
 }
 
-/* Form Actions */
-.form-actions {
-    padding: 32px;
+/* 개인정보 동의 */
+.privacy-agreement {
+    padding: 20px 24px;
     background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+
+.agreement-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.agreement-label input[type="checkbox"] {
+    display: none;
+}
+
+.agreement-label .checkmark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--gray-300);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: white;
+    position: relative;
+    margin-top: 1px;
+}
+
+.agreement-label .checkmark::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: none;
+}
+
+.agreement-label input[type="checkbox"]:checked+.checkmark {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.agreement-label input[type="checkbox"]:checked+.checkmark::after {
+    display: block;
+}
+
+.agreement-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
+.privacy-link {
+    color: var(--primary);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.privacy-link:hover {
+    color: var(--primary-dark);
+}
+
+/* 개인정보 동의 상세 */
+.agreement-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.agreement-header .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--gray-400);
+}
+
+.required-badge {
+    font-size: 12px;
+    font-weight: 500;
+    color: #EF4444;
+    background: #FEE2E2;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.agreement-details {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    list-style: disc;
+    padding-left: 40px;
+}
+
+.agreement-details li {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.agreement-details li:last-child {
+    margin-bottom: 0;
+}
+
+.law-reference {
+    color: var(--primary);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* 개인정보 동의 알림 */
+.privacy-notice {
+    padding: 16px 24px;
+    background: white;
+    border-top: 1px solid var(--gray-200);
+    text-align: center;
+}
+
+.privacy-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.privacy-toggle .material-symbols-outlined {
+    font-size: 18px;
+    color: var(--gray-400);
+    transition: transform 0.2s ease;
+}
+
+.privacy-toggle.open .material-symbols-outlined {
+    transform: rotate(180deg);
+}
+
+.privacy-details {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    list-style: disc;
+    padding-left: 40px;
+    text-align: left;
+}
+
+.privacy-details li {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.privacy-details li:last-child {
+    margin-bottom: 0;
+}
+
+/* Form Submit Area */
+.form-submit-area {
+    padding: 24px;
+    text-align: center;
+}
+
+.privacy-text {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+}
+
+.privacy-text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: var(--gray-500);
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 0;
+}
+
+.privacy-text-btn:hover {
+    color: var(--gray-700);
+}
+
+.privacy-text-btn .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* 개인정보 동의 모달 */
+.privacy-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+}
+
+.privacy-modal {
+    background: white;
+    border-radius: 20px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.privacy-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+}
+
+.privacy-modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.modal-close .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--gray-400);
+}
+
+.privacy-modal-content {
+    padding: 20px;
+}
+
+.privacy-modal-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.privacy-modal-content li {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.7;
+    margin-bottom: 12px;
+    padding-left: 16px;
+    position: relative;
+}
+
+.privacy-modal-content li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--gray-400);
+}
+
+.privacy-modal-content li:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-modal-confirm {
+    width: calc(100% - 40px);
+    margin: 0 20px 20px;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-actions {
+    padding: 24px;
+    background: white;
     display: flex;
     gap: 12px;
     justify-content: center;
+    border-top: 1px solid var(--gray-200);
 }
 
 .btn-primary,
