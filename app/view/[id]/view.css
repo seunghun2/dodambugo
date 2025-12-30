@@ -1,4 +1,8 @@
-/* XD 디자인 정밀 복제 - 360px 최적화 */
+/* ========================================
+   XD 디자인 정밀 복제 - view.css
+   Canvas: 360 x 1920px
+   Font: NanumMyeongjo
+======================================== */
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
 
 * {
@@ -13,12 +17,15 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* ========================================
+   기본 레이아웃
+======================================== */
 .view-page {
     max-width: 360px;
     margin: 0 auto;
     background: #FFFFFF;
     min-height: 100vh;
-    padding-bottom: 120px;
+    padding-bottom: 40px;
 }
 
 /* 토스트 */
@@ -27,16 +34,42 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #333;
-    color: white;
+    background: #333333;
+    color: #FFFFFF;
     padding: 12px 24px;
     border-radius: 8px;
-    font-size: 14px;
-    z-index: 1000;
     font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 1000;
+    animation: fadeInOut 2s ease-in-out;
 }
 
-/* 로딩/에러 */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    15% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    85% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+/* ========================================
+   로딩/에러 상태
+======================================== */
 .loading-container,
 .error-container {
     display: flex;
@@ -55,12 +88,18 @@ body {
     border-top: 3px solid #9E8566;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    margin-bottom: 16px;
 }
 
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
+}
+
+.loading-container p {
+    font-size: 14px;
+    color: #555555;
 }
 
 .error-content {
@@ -74,9 +113,9 @@ body {
 
 .error-content h2 {
     font-size: 18px;
+    font-weight: 800;
     color: #111111;
     margin-bottom: 8px;
-    font-weight: 800;
 }
 
 .error-content p {
@@ -89,9 +128,10 @@ body {
     display: inline-block;
     padding: 12px 32px;
     background: #9E8566;
-    color: white;
+    color: #FFFFFF;
     border-radius: 8px;
     text-decoration: none;
+    font-family: 'Nanum Myeongjo', serif;
     font-weight: 700;
 }
 
@@ -100,8 +140,9 @@ body {
 ======================================== */
 .header-section {
     position: relative;
-    width: 100%;
+    width: 360px;
     min-height: 500px;
+    overflow: hidden;
 }
 
 .header-bg {
@@ -119,26 +160,37 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px;
+    padding: 60px 32px;
     text-align: center;
 }
 
-.header-title {
+/* 한문 訃告 */
+.header-hanja {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 56px;
+    font-size: 48px;
     font-weight: 800;
-    color: #000000;
-    margin-bottom: 32px;
-    letter-spacing: 4px;
+    color: #111111;
+    letter-spacing: 8px;
+    margin-bottom: 40px;
 }
 
+/* 헤더 메시지 */
 .header-message {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 16px;
     font-weight: 700;
-    line-height: 26px;
-    color: #000000;
+    line-height: 28px;
+    color: #111111;
     text-align: center;
+}
+
+/* 어두운 배경 템플릿 (flower) */
+.header-dark .header-hanja {
+    color: #FFFFFF;
+}
+
+.header-dark .header-message {
+    color: #FFFFFF;
 }
 
 /* ========================================
@@ -153,6 +205,7 @@ body {
     border-bottom: none;
 }
 
+/* 섹션 타이틀 - NanumMyeongjo ExtraBold 18px #111111 */
 .section-title {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 18px;
@@ -168,34 +221,21 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    gap: 12px;
     margin-bottom: 16px;
 }
 
+/* 주소 텍스트 - NanumMyeongjo Bold 16px #555555 */
 .address-text {
-    display: flex;
-    gap: 8px;
     flex: 1;
-}
-
-.address-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.address-info p {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #555555;
     line-height: 1.5;
-    margin: 0;
 }
 
-.address-info .tel {
-    color: #9E8566;
-    margin-top: 4px;
-}
-
+/* 주소 복사 버튼 - 112 x 48px, bg #F5F5F5, radius 8px */
 .btn-copy-address {
     width: 112px;
     height: 48px;
@@ -214,28 +254,21 @@ body {
     background: #EBEBEB;
 }
 
-/* 지도 */
+/* 지도 - 360 x 209px */
 .map-container {
-    width: 100%;
+    width: calc(100% + 32px);
     height: 209px;
-    margin-bottom: 16px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.map-area {
-    width: 100%;
-    height: 100%;
+    margin: 0 -16px 16px -16px;
     background: #F0F0F0;
 }
 
-.map-area iframe {
+.map-container iframe {
     width: 100%;
     height: 100%;
     border: none;
 }
 
-/* 내비 버튼 */
+/* 내비 버튼 - 160 x 48px each */
 .navi-buttons {
     display: flex;
     gap: 8px;
@@ -265,37 +298,34 @@ body {
 }
 
 .navi-icon {
-    font-size: 18px;
-    font-weight: 700;
+    width: 32px;
+    height: 32px;
 }
 
-.navi-icon.tmap {
-    color: #EE3124;
-    font-family: Arial, sans-serif;
-}
-
-/* 장례식장 박스 */
+/* 장례식장 박스 - 328 x 72px */
 .funeral-box {
     width: 328px;
     height: 72px;
     margin: 0 auto;
     background: #FFFFFF;
-    border: 1px solid #F0F0F0;
+    border: 1px solid #F3F3F3;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
 }
 
+/* 장례식장 이름 - Bold 16px #555555 */
 .funeral-name {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 16px;
     font-weight: 700;
     color: #555555;
-    margin-bottom: 4px;
 }
 
+/* 호실 - Bold 22px #9E8566 (Gold) */
 .funeral-room {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 22px;
@@ -314,7 +344,7 @@ body {
 .mourner-row {
     display: flex;
     align-items: center;
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid #F5F5F5;
 }
 
@@ -322,6 +352,7 @@ body {
     border-bottom: none;
 }
 
+/* 관계 - Bold 16px #999999, width 65px */
 .mourner-rel {
     width: 65px;
     font-family: 'Nanum Myeongjo', serif;
@@ -331,7 +362,8 @@ body {
     flex-shrink: 0;
 }
 
-.mourner-names {
+/* 이름 - Regular 16px #444444 */
+.mourner-name {
     flex: 1;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 16px;
@@ -339,29 +371,41 @@ body {
     color: #444444;
 }
 
+/* 전화 아이콘 */
 .mourner-tel {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: #9E8566;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #FAF8F5;
+    border-radius: 50%;
     text-decoration: none;
 }
 
+.mourner-tel svg {
+    width: 20px;
+    height: 20px;
+}
+
 /* ========================================
-   발인 정보
+   발인 및 장지
 ======================================== */
-.info-table {
+.funeral-info-table {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+}
+
+.funeral-info-row {
+    display: flex;
+    align-items: center;
     gap: 12px;
 }
 
-.info-row {
-    display: flex;
-}
-
-.info-label {
-    width: 50px;
+/* 라벨 - Bold 14px #999999 */
+.funeral-info-label {
+    width: 40px;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     font-weight: 700;
@@ -369,12 +413,34 @@ body {
     flex-shrink: 0;
 }
 
-.info-value {
+/* 값 - Bold 14px #444444 */
+.funeral-info-value {
     flex: 1;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     font-weight: 700;
     color: #444444;
+}
+
+/* 장지 박스 - bg #686868, white text */
+.burial-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    background: #686868;
+    border-radius: 4px;
+}
+
+.burial-label {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.burial-text {
+    margin-left: 4px;
 }
 
 /* ========================================
@@ -434,8 +500,12 @@ body {
     cursor: pointer;
 }
 
+.btn-copy:active {
+    background: #F5F5F5;
+}
+
 /* ========================================
-   방명록
+   추모글 (방명록)
 ======================================== */
 .guestbook-section {
     background: #FAFAFA;
@@ -456,7 +526,7 @@ body {
     border-radius: 8px;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
-    color: #333;
+    color: #333333;
 }
 
 .form-input::placeholder {
@@ -471,7 +541,7 @@ body {
     border-radius: 8px;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
-    color: #333;
+    color: #333333;
     resize: none;
 }
 
@@ -487,7 +557,7 @@ body {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     font-weight: 700;
-    color: white;
+    color: #FFFFFF;
     cursor: pointer;
 }
 
@@ -507,7 +577,7 @@ body {
 }
 
 /* ========================================
-   하단 버튼
+   하단 버튼 - 328 x 82px
 ======================================== */
 .bottom-buttons {
     width: 328px;
@@ -546,11 +616,12 @@ body {
     background: #FAFAFA;
 }
 
-.btn-icon {
-    font-size: 24px;
+.bottom-icon {
+    width: 24px;
+    height: 24px;
 }
 
-.divider {
+.divider-vertical {
     width: 1px;
     height: 50px;
     background: #F3F3F3;
@@ -564,6 +635,7 @@ body {
     text-align: center;
 }
 
+/* Bold 16px #B4B4B4 */
 .footer-message p {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 16px;
@@ -600,9 +672,34 @@ body {
     position: relative;
     width: 100%;
     max-width: 360px;
-    background: white;
+    background: #FFFFFF;
     border-radius: 16px 16px 0 0;
-    padding: 24px 16px 40px;
+    padding: 0 0 40px 0;
+}
+
+.share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 16px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.share-header h3 {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.share-close {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #999999;
+    cursor: pointer;
 }
 
 .share-option {
@@ -618,7 +715,8 @@ body {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     font-weight: 700;
-    color: #333;
+    color: #333333;
+    text-align: left;
 }
 
 .share-option:last-child {
