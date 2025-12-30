@@ -104,6 +104,7 @@ export default function WriteFormPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createdBugo, setCreatedBugo] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(1); // 1: 입력, 2: 완료
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // 날짜 초기화
     useEffect(() => {
@@ -226,8 +227,28 @@ export default function WriteFormPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.applicant_name || !formData.phone_password || !formData.deceased_name || !formData.gender) {
-            alert('필수 항목을 모두 입력해주세요.');
+        // 유효성 검사
+        const newErrors: Record<string, string> = {};
+
+        if (!formData.applicant_name) newErrors.applicant_name = '신청자 성함을 입력해주세요';
+        if (!formData.phone_password) newErrors.phone_password = '휴대번호 뒷자리를 입력해주세요';
+        if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
+        if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
+        if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
+        if (!mourners[0].name) newErrors.mourner_name = '상주 성함을 입력해주세요';
+        if (!mourners[0].contact) newErrors.mourner_contact = '상주 연락처를 입력해주세요';
+        if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
+        if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            // 첫 번째 에러 필드로 스크롤
+            const firstErrorKey = Object.keys(newErrors)[0];
+            const errorElement = document.querySelector(`[data-field="${firstErrorKey}"]`);
+            if (errorElement) {
+                errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -255,7 +276,9 @@ export default function WriteFormPage() {
                 phone_password: formData.phone_password,
                 deceased_name: formData.deceased_name,
                 gender: formData.gender,
-                relationship: formData.relationship || null,
+                relationship: formData.relationship || mourners[0]?.relationship || null,
+                mourner_name: mourners[0]?.name || null,
+                contact: mourners[0]?.contact || null,
                 age: formData.age ? parseInt(formData.age) : null,
                 religion: formData.religion || null,
                 funeral_home: formData.funeral_home || null,
@@ -263,9 +286,12 @@ export default function WriteFormPage() {
                 funeral_home_tel: formData.funeral_home_tel || null,
                 address: formData.address || null,
                 address_detail: formData.address_detail || null,
-                death_datetime: deathDateTime,
-                encoffin_datetime: encoffinDateTime,
-                funeral_datetime: funeralDateTime,
+                death_date: formData.death_date || null,
+                death_time: formData.death_hour ? `${formData.death_hour}:${formData.death_minute}` : null,
+                encoffin_date: formData.encoffin_date || null,
+                encoffin_time: formData.encoffin_hour ? `${formData.encoffin_hour}:${formData.encoffin_minute}` : null,
+                funeral_date: formData.funeral_date || null,
+                funeral_time: formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null,
                 burial_place: formData.burial_place || null,
                 message: formData.message || null,
                 mourners: mourners.filter(m => m.name),
@@ -375,31 +401,31 @@ export default function WriteFormPage() {
                                         <h2 className="section-title">신청자 정보</h2>
                                         <p className="section-description">부고장 수정 시 필요한 정보입니다</p>
 
-                                        <div className="form-group">
+                                        <div className="form-group" data-field="applicant_name">
                                             <label className="form-label required">신청자명</label>
                                             <input
                                                 type="text"
                                                 name="applicant_name"
-                                                className="form-input"
+                                                className={`form-input ${errors.applicant_name ? 'error' : ''}`}
                                                 placeholder="신청자 성함"
                                                 value={formData.applicant_name}
                                                 onChange={handleChange}
-                                                required
                                             />
+                                            {errors.applicant_name && <p className="field-error">{errors.applicant_name}</p>}
                                         </div>
-                                        <div className="form-group">
+                                        <div className="form-group" data-field="phone_password">
                                             <label className="form-label required">휴대번호 뒷자리</label>
                                             <input
                                                 type="text"
                                                 name="phone_password"
-                                                className="form-input"
+                                                className={`form-input ${errors.phone_password ? 'error' : ''}`}
                                                 placeholder="휴대번호 뒷 4자리"
                                                 maxLength={4}
                                                 value={formData.phone_password}
                                                 onChange={handleChange}
-                                                required
                                             />
-                                            <p className="form-hint">부고장 수정 시 사용됩니다 (4자리 숫자)</p>
+                                            {errors.phone_password && <p className="field-error">{errors.phone_password}</p>}
+                                            {!errors.phone_password && <p className="form-hint">부고장 수정 시 사용됩니다 (4자리 숫자)</p>}
                                         </div>
                                     </div>
 
@@ -407,39 +433,39 @@ export default function WriteFormPage() {
                                     <div className="form-section">
                                         <h2 className="section-title">고인 정보</h2>
 
-                                        <div className="form-group">
+                                        <div className="form-group" data-field="deceased_name">
                                             <label className="form-label required">성함</label>
                                             <input
                                                 type="text"
                                                 name="deceased_name"
-                                                className="form-input"
+                                                className={`form-input ${errors.deceased_name ? 'error' : ''}`}
                                                 placeholder="고인의 성함"
                                                 value={formData.deceased_name}
                                                 onChange={handleChange}
-                                                required
                                             />
+                                            {errors.deceased_name && <p className="field-error">{errors.deceased_name}</p>}
                                         </div>
 
-                                        <div className="form-group">
+                                        <div className="form-group" data-field="gender">
                                             <label className="form-label required">성별</label>
                                             <select
                                                 name="gender"
-                                                className="form-select"
+                                                className={`form-select ${errors.gender ? 'error' : ''}`}
                                                 value={formData.gender}
                                                 onChange={handleChange}
-                                                required
                                             >
                                                 <option value="">선택</option>
                                                 <option value="남">남</option>
                                                 <option value="여">여</option>
                                             </select>
+                                            {errors.gender && <p className="field-error">{errors.gender}</p>}
                                         </div>
 
-                                        <div className="form-group">
-                                            <label className="form-label">관계</label>
+                                        <div className="form-group" data-field="relationship">
+                                            <label className="form-label required">관계</label>
                                             <select
                                                 name="relationship"
-                                                className="form-select"
+                                                className={`form-select ${errors.relationship ? 'error' : ''}`}
                                                 value={formData.relationship}
                                                 onChange={handleChange}
                                             >
@@ -448,6 +474,7 @@ export default function WriteFormPage() {
                                                     <option key={opt} value={opt}>{opt}</option>
                                                 ))}
                                             </select>
+                                            {errors.relationship && <p className="field-error">{errors.relationship}</p>}
                                         </div>
 
                                         <div className="form-row">
@@ -485,7 +512,7 @@ export default function WriteFormPage() {
                                         <h2 className="section-title">상주 정보</h2>
 
                                         {mourners.map((mourner, index) => (
-                                            <div key={index} className="mourner-row">
+                                            <div key={index} className="mourner-row" data-field={index === 0 ? 'mourner_name' : undefined}>
                                                 <select
                                                     className="form-select mourner-relation"
                                                     value={mourner.relationship}
@@ -498,14 +525,14 @@ export default function WriteFormPage() {
                                                 </select>
                                                 <input
                                                     type="text"
-                                                    className="form-input mourner-name"
+                                                    className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
                                                     placeholder="성함"
                                                     value={mourner.name}
                                                     onChange={(e) => updateMourner(index, 'name', e.target.value)}
                                                 />
                                                 <input
                                                     type="tel"
-                                                    className="form-input mourner-contact"
+                                                    className={`form-input mourner-contact ${index === 0 && errors.mourner_contact ? 'error' : ''}`}
                                                     placeholder="연락처"
                                                     value={mourner.contact}
                                                     onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
@@ -517,6 +544,9 @@ export default function WriteFormPage() {
                                                 )}
                                             </div>
                                         ))}
+                                        {(errors.mourner_name || errors.mourner_contact) && (
+                                            <p className="field-error">{errors.mourner_name || errors.mourner_contact}</p>
+                                        )}
                                         <button type="button" className="btn-add-mourner" onClick={addMourner}>
                                             <span className="material-symbols-outlined">add_circle</span>
                                             상주 추가
@@ -527,16 +557,17 @@ export default function WriteFormPage() {
                                     <div className="form-section">
                                         <h2 className="section-title">빈소 정보</h2>
 
-                                        <div className="form-group">
-                                            <label className="form-label">장례식장</label>
+                                        <div className="form-group" data-field="funeral_home">
+                                            <label className="form-label required">장례식장</label>
                                             <input
                                                 type="text"
                                                 name="funeral_home"
-                                                className="form-input"
+                                                className={`form-input ${errors.funeral_home ? 'error' : ''}`}
                                                 placeholder="장례식장명"
                                                 value={formData.funeral_home}
                                                 onChange={handleChange}
                                             />
+                                            {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
                                         </div>
 
                                         <div className="form-group">
@@ -635,13 +666,13 @@ export default function WriteFormPage() {
                                             </div>
                                         </div>
 
-                                        <div className="form-group">
-                                            <label className="form-label">발인일</label>
+                                        <div className="form-group" data-field="funeral_date">
+                                            <label className="form-label required">발인일</label>
                                             <div className="datetime-row">
                                                 <input
                                                     type="date"
                                                     name="funeral_date"
-                                                    className="form-input"
+                                                    className={`form-input ${errors.funeral_date ? 'error' : ''}`}
                                                     value={formData.funeral_date}
                                                     onChange={handleChange}
                                                 />
