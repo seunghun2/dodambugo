@@ -239,6 +239,54 @@ export default function WriteFormPage() {
         }).open();
     };
 
+    // 임시저장 모달
+    const [draftModalOpen, setDraftModalOpen] = useState(false);
+
+    const handleDraftClick = () => {
+        setDraftModalOpen(true);
+    };
+
+    const saveDraftAndGoHome = () => {
+        const draftData = {
+            formData,
+            mourners,
+            accounts,
+            showAccount,
+            showPhoto,
+            photoUrl,
+            templateId,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+        setDraftModalOpen(false);
+        router.push('/');
+    };
+
+    // 임시저장 자동 불러오기 (메인에서 "예" 선택 시 바로 복원)
+    useEffect(() => {
+        const draft = localStorage.getItem(`bugo_draft_${templateId}`);
+        if (draft) {
+            try {
+                const parsed = JSON.parse(draft);
+                const savedAt = new Date(parsed.savedAt);
+                const now = new Date();
+                const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
+
+                if (hoursDiff < 24) {
+                    // 자동 복원
+                    if (parsed.formData) setFormData(parsed.formData);
+                    if (parsed.mourners) setMourners(parsed.mourners);
+                    if (parsed.accounts) setAccounts(parsed.accounts);
+                    if (parsed.showAccount !== undefined) setShowAccount(parsed.showAccount);
+                    if (parsed.showPhoto !== undefined) setShowPhoto(parsed.showPhoto);
+                    if (parsed.photoUrl) setPhotoUrl(parsed.photoUrl);
+                }
+            } catch (e) {
+                console.log('Draft parse error');
+            }
+        }
+    }, [templateId]);
+
     // 폼 제출
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -253,8 +301,8 @@ export default function WriteFormPage() {
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
         if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
-        if (!mourners[0].name) newErrors.mourner_name = '상주 성함을 입력해주세요';
-        if (!mourners[0].contact) newErrors.mourner_contact = '상주 연락처를 입력해주세요';
+        if (!formData.primary_mourner) newErrors.primary_mourner = '대표상주 성함을 입력해주세요';
+        // 추가 상주는 선택이므로 유효성 검사 안 함
         if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
@@ -296,9 +344,9 @@ export default function WriteFormPage() {
                 phone_password: formData.phone_password,
                 deceased_name: formData.deceased_name,
                 gender: formData.gender,
-                relationship: formData.relationship || mourners[0]?.relationship || null,
-                mourner_name: mourners[0]?.name || null,
-                contact: mourners[0]?.contact || null,
+                relationship: formData.relationship || '',
+                mourner_name: formData.primary_mourner || '',
+                contact: mourners[0]?.contact || '', // 추가상주 첫번째의 연락처 사용
                 age: formData.age ? parseInt(formData.age) : null,
                 religion: formData.religion || null,
                 funeral_home: formData.funeral_home || null,
@@ -390,6 +438,7 @@ export default function WriteFormPage() {
                                     <span>선택된 양식: <strong>{template.name}</strong></span>
                                     <Link href="/create" className="btn-change-template">변경</Link>
                                 </div>
+
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>
                                     {/* 신청자 정보 */}
@@ -858,9 +907,18 @@ export default function WriteFormPage() {
                                             개인정보 수집/제공에 동의합니다.
                                             <span className="material-symbols-outlined">chevron_right</span>
                                         </button>
-                                        <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                                            {isSubmitting ? '생성 중...' : '부고장 만들기'}
-                                        </button>
+                                        <div className="submit-buttons">
+                                            <button
+                                                type="button"
+                                                className="btn-draft"
+                                                onClick={handleDraftClick}
+                                            >
+                                                임시저장
+                                            </button>
+                                            <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                                                {isSubmitting ? '생성 중...' : '부고장 만들기'}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* 개인정보 동의 모달 */}
@@ -932,16 +990,29 @@ export default function WriteFormPage() {
                 </main >
 
                 {/* 로딩 오버레이 */}
-                {
-                    isSubmitting && (
-                        <div className="loading-overlay">
-                            <div className="loading-content">
-                                <span className="material-symbols-outlined spinning">progress_activity</span>
-                                <p>부고장을 생성하고 있습니다...</p>
+                {isSubmitting && (
+                    <div className="loading-overlay">
+                        <div className="loading-content">
+                            <span className="material-symbols-outlined spinning">progress_activity</span>
+                            <p>부고장을 생성하고 있습니다...</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* 임시저장 확인 모달 */}
+                {draftModalOpen && (
+                    <div className="modal-overlay" onClick={() => setDraftModalOpen(false)}>
+                        <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+                            <h3>임시저장</h3>
+                            <p>작성 중인 내용을 임시저장하시겠습니까?</p>
+                            <div className="modal-buttons">
+                                <button className="modal-btn secondary" onClick={() => setDraftModalOpen(false)}>아니오</button>
+                                <button className="modal-btn primary" onClick={saveDraftAndGoHome}>예</button>
                             </div>
                         </div>
-                    )
-                }
+                    </div>
+                )}
+
             </div >
         </>
     );

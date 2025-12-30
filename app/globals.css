@@ -1761,6 +1761,151 @@ section {
     font-size: 20px;
 }
 
+.submit-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-draft {
+    flex: 0 0 90px;
+    padding: 16px 12px;
+    background: white;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-draft:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+}
+
+.submit-buttons .btn-submit {
+    flex: 1;
+}
+
+.draft-toast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #22c55e;
+    color: white;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    animation: slideDown 0.3s ease;
+}
+
+.draft-toast .material-symbols-outlined {
+    font-size: 20px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 확인 모달 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-box {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    animation: modalPop 0.2s ease;
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-box h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+}
+
+.modal-box p {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-btn.secondary {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: none;
+}
+
+.modal-btn.secondary:hover {
+    background: var(--gray-200);
+}
+
+.modal-btn.primary {
+    background: #2c4a6e;
+    color: white;
+    border: none;
+}
+
+.modal-btn.primary:hover {
+    background: #1e3a5f;
+}
+
 .success-container {
     display: flex;
     flex-direction: column;
@@ -2915,11 +3060,171 @@ section {
     font-size: 18px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.search-input:focus-within {
+    background: white;
+    border-color: var(--primary);
+}
+
+.search-input .material-symbols-outlined {
+    font-size: 20px;
+    color: #94a3b8;
+}
+
+.search-input input {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    width: 200px;
+    color: #334155;
+}
+
+.search-input input::placeholder {
+    color: #94a3b8;
+}
+
 .admin-content-area {
     display: flex;
     flex: 1;
     padding: 24px;
     gap: 24px;
+}
+
+.total-count {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* 테이블 래퍼 */
+.admin-table-wrapper {
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: auto;
+    margin: 24px;
+}
+
+.admin-full-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-full-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-full-table .header-row th {
+    border-bottom: none;
+}
+
+.admin-full-table .filter-row th {
+    padding: 8px 16px 12px;
+}
+
+.admin-full-table .filter-row input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+}
+
+.admin-full-table .filter-row input::placeholder {
+    color: #94a3b8;
+}
+
+.admin-full-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.admin-full-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.funeral-home-cell .funeral-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.funeral-home-cell .funeral-name {
+    font-weight: 500;
+}
+
+.number-cell {
+    text-align: center;
+}
+
+.date-cell {
+    white-space: nowrap;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.empty-cell {
+    text-align: center;
+    padding: 60px 20px !important;
+    color: #94a3b8;
+}
+
+.action-cell .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.btn-table-action {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    text-align: center;
+    color: #64748b;
+    background: white;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-table-action:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.btn-table-action.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-table-action.primary:hover {
+    opacity: 0.9;
 }
 
 /* 패널 공통 */
@@ -3030,6 +3335,38 @@ section {
 
 .inquiry-table tbody tr.selected {
     background: #eff6ff;
+}
+
+.inquiry-table .filter-row th {
+    padding: 6px 16px 12px;
+    background: #f8fafc;
+}
+
+.inquiry-table .filter-row input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+}
+
+.inquiry-table .filter-row input::placeholder {
+    color: #94a3b8;
+}
+
+.inquiry-table .number-cell {
+    text-align: center;
+}
+
+.inquiry-panel.wide {
+    flex: 2;
+}
+
+.bugo-num {
+    font-family: monospace;
+    color: var(--primary);
+    font-weight: 500;
 }
 
 .type-badge {
@@ -3757,6 +4094,23 @@ section {
     font-weight: 700;
     color: var(--gray-900);
     margin-bottom: 20px;
+}
+
+.section-title .optional-tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-400);
+    margin-left: 6px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-400);
+    font-size: 14px;
+    background: var(--gray-50);
+    border-radius: 12px;
+    margin-bottom: 12px;
 }
 
 .section-description,

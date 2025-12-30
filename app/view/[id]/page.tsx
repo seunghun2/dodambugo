@@ -10,13 +10,16 @@ import '@/public/css/view-overlay.css';
 interface BugoData {
     id: string;
     bugo_number: string;
-    template?: string;
+    template_id?: string;
     applicant_name: string;
     phone_password: string;
     deceased_name: string;
     gender?: string;
     age?: number;
     death_date?: string;
+    death_time?: string;
+    encoffin_date?: string;
+    encoffin_time?: string;
     religion?: string;
     relationship?: string;
     mourner_name?: string;
@@ -61,8 +64,8 @@ export default function ViewPage() {
                         .from('bugo')
                         .select('*')
                         .eq('id', id)
-                        .single();
-                    data = result.data;
+                        .limit(1);
+                    data = result.data?.[0] || null;
                     error = result.error;
                 } else {
                     // 부고번호로 검색
@@ -70,8 +73,9 @@ export default function ViewPage() {
                         .from('bugo')
                         .select('*')
                         .eq('bugo_number', id)
-                        .single();
-                    data = result.data;
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    data = result.data?.[0] || null;
                     error = result.error;
                 }
 
@@ -80,7 +84,38 @@ export default function ViewPage() {
                     return;
                 }
 
+                // 디버그: 데이터 확인
+                console.log('=== BUGO DATA DEBUG ===');
+                console.log('mourner_name:', data.mourner_name);
+                console.log('relationship:', data.relationship);
+                console.log('mourners:', data.mourners, typeof data.mourners);
+                console.log('account_info:', data.account_info, typeof data.account_info);
+                console.log('death_time:', data.death_time);
+                console.log('encoffin_time:', data.encoffin_time);
+                console.log('funeral_time:', data.funeral_time);
+                console.log('template_id:', data.template_id);
+                console.log('========================');
+
+                // mourners와 account_info가 문자열일 경우 파싱
+                if (data.mourners && typeof data.mourners === 'string') {
+                    try {
+                        data.mourners = JSON.parse(data.mourners);
+                    } catch (e) {
+                        console.log('mourners 파싱 실패:', e);
+                    }
+                }
+                if (data.account_info && typeof data.account_info === 'string') {
+                    try {
+                        data.account_info = JSON.parse(data.account_info);
+                    } catch (e) {
+                        console.log('account_info 파싱 실패:', e);
+                    }
+                }
+
                 setBugo(data);
+
+                // 방문자 수 증가 (비동기로 처리)
+                incrementViewCount(data.id);
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
                 console.log('Bugo not found:', params.id);
@@ -93,6 +128,16 @@ export default function ViewPage() {
             fetchBugo();
         }
     }, [params.id]);
+
+    // 방문자 수 증가 함수
+    const incrementViewCount = async (bugoId: string) => {
+        try {
+            await supabase.rpc('increment_view_count', { bugo_id: bugoId });
+        } catch (err) {
+            // view_count 증가 실패해도 무시 (사용자 경험에 영향 없음)
+            console.log('View count increment failed');
+        }
+    };
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -159,16 +204,30 @@ export default function ViewPage() {
         );
     }
 
-    // 상주 목록 생성
-    const mournersList = bugo.mourners && bugo.mourners.length > 0
-        ? bugo.mourners
-        : bugo.mourner_name
-            ? [{ relationship: bugo.relationship || '상주', name: bugo.mourner_name, contact: bugo.contact || '' }]
-            : [];
+    // 상주 목록 생성 (대표 상주 + 추가 상주)
+    const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
+
+    // 대표 상주 추가
+    if (bugo.mourner_name) {
+        mournersList.push({
+            relationship: bugo.relationship || '상주',
+            name: bugo.mourner_name,
+            contact: bugo.contact || ''
+        });
+    }
+
+    // 추가 상주들 추가
+    if (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.length > 0) {
+        bugo.mourners.forEach(m => {
+            if (m.name) {
+                mournersList.push(m);
+            }
+        });
+    }
 
     // 템플릿 설정
-    const templateClass = bugo.template ? `template-${bugo.template}` : 'template-basic';
-    const templateImage = bugo.template ? `/images/template-${bugo.template}.png` : '/images/template-basic.png';
+    const templateClass = bugo.template_id ? `template-${bugo.template_id}` : 'template-basic';
+    const templateImage = bugo.template_id ? `/images/template-${bugo.template_id}.png` : '/images/template-basic.png';
 
     return (
         <main className={`bugo-view ${templateClass}`}>
@@ -268,13 +327,7 @@ export default function ViewPage() {
                         {bugo.funeral_home && (
                             <div className="info-row">
                                 <span className="info-label">장례식장</span>
-                                <span className="info-value">{bugo.funeral_home}</span>
-                            </div>
-                        )}
-                        {bugo.room_number && (
-                            <div className="info-row">
-                                <span className="info-label">호실</span>
-                                <span className="info-value">{bugo.room_number}</span>
+                                <span className="info-value">{bugo.funeral_home} {bugo.room_number || ''}</span>
                             </div>
                         )}
                         {bugo.funeral_home_tel && (
@@ -301,7 +354,13 @@ export default function ViewPage() {
                         {bugo.death_date && (
                             <div className="info-row">
                                 <span className="info-label">별세</span>
-                                <span className="info-value">{formatDate(bugo.death_date)}</span>
+                                <span className="info-value">{formatDate(bugo.death_date)} {bugo.death_time || ''}</span>
+                            </div>
+                        )}
+                        {bugo.encoffin_date && (
+                            <div className="info-row">
+                                <span className="info-label">입관</span>
+                                <span className="info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
                             </div>
                         )}
                         {bugo.funeral_date && (
@@ -320,7 +379,7 @@ export default function ViewPage() {
                 </section>
 
                 {/* 계좌 정보 */}
-                {bugo.account_info && bugo.account_info.length > 0 && (
+                {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
                     <section className="content-section">
                         <h3 className="content-title">부의금 계좌</h3>
                         <div className="account-list">
@@ -352,15 +411,7 @@ export default function ViewPage() {
                     </section>
                 )}
 
-                {/* 마무리 */}
-                <section className="content-section">
-                    <div className="footer-notice">
-                        <p className="notice-text">
-                            황망한 마음에 일일이 연락드리지 못함을<br />
-                            너그러이 양해해 주시기 바랍니다.
-                        </p>
-                    </div>
-                </section>
+
             </div>
 
             {/* 방명록 탭 */}

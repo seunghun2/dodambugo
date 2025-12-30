@@ -114,6 +114,10 @@ export default function AdminInquiriesPage() {
                     <Link href="/">도담부고</Link>
                 </div>
                 <nav className="sidebar-nav">
+                    <Link href="/admin/bugo" className="nav-item">
+                        <span className="material-symbols-outlined">description</span>
+                        <span>부고장 관리</span>
+                    </Link>
                     <Link href="/admin/inquiries" className="nav-item active">
                         <span className="material-symbols-outlined">mail</span>
                         <span>문의 관리</span>
