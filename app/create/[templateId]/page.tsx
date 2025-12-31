@@ -113,6 +113,56 @@ export default function WriteFormPage() {
     const [createdBugo, setCreatedBugo] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(1); // 1: 입력, 2: 완료
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [privacyOpen, setPrivacyOpen] = useState(false);
+
+    // 임시저장 모달
+    const [draftModalOpen, setDraftModalOpen] = useState(false);
+
+    const handleDraftClick = () => {
+        setDraftModalOpen(true);
+    };
+
+    const saveDraftAndGoHome = () => {
+        const draftData = {
+            formData,
+            mourners,
+            accounts,
+            showAccount,
+            showPhoto,
+            photoUrl,
+            templateId,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+        setDraftModalOpen(false);
+        router.push('/');
+    };
+
+    // 임시저장 자동 불러오기 (메인에서 "예" 선택 시 바로 복원)
+    useEffect(() => {
+        const draft = localStorage.getItem(`bugo_draft_${templateId}`);
+        if (draft) {
+            try {
+                const parsed = JSON.parse(draft);
+                const savedAt = new Date(parsed.savedAt);
+                const now = new Date();
+                const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
+
+                if (hoursDiff < 24) {
+                    // 자동 복원
+                    if (parsed.formData) setFormData(parsed.formData);
+                    if (parsed.mourners) setMourners(parsed.mourners);
+                    if (parsed.accounts) setAccounts(parsed.accounts);
+                    if (parsed.showAccount !== undefined) setShowAccount(parsed.showAccount);
+                    if (parsed.showPhoto !== undefined) setShowPhoto(parsed.showPhoto);
+                    if (parsed.photoUrl) setPhotoUrl(parsed.photoUrl);
+                }
+            } catch (e) {
+                console.log('Draft parse error');
+            }
+        }
+    }, [templateId]);
 
     // 장례식장 검색 모달
     const [facilityModalOpen, setFacilityModalOpen] = useState(false);
@@ -819,12 +869,58 @@ export default function WriteFormPage() {
                                         )}
                                     </div>
 
-                                    {/* 제출 버튼 */}
-                                    <div className="form-actions">
-                                        <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                                            {isSubmitting ? '생성 중...' : '부고장 만들기'}
+                                    {/* 개인정보 동의 안내 + 제출 버튼 */}
+                                    <div className="form-submit-area">
+                                        <button
+                                            type="button"
+                                            className="privacy-text-btn"
+                                            onClick={() => setPrivacyOpen(true)}
+                                        >
+                                            개인정보 수집/제공에 동의합니다.
+                                            <span className="material-symbols-outlined">chevron_right</span>
                                         </button>
+                                        <div className="submit-buttons">
+                                            <button
+                                                type="button"
+                                                className="btn-draft"
+                                                onClick={handleDraftClick}
+                                            >
+                                                임시저장
+                                            </button>
+                                            <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                                                {isSubmitting ? '생성 중...' : '부고장 만들기'}
+                                            </button>
+                                        </div>
                                     </div>
+
+                                    {/* 개인정보 동의 모달 */}
+                                    {privacyOpen && (
+                                        <div className="privacy-modal-overlay" onClick={() => setPrivacyOpen(false)}>
+                                            <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                                                <div className="privacy-modal-header">
+                                                    <h3>개인정보 수집/제공 동의</h3>
+                                                    <button type="button" className="modal-close" onClick={() => setPrivacyOpen(false)}>
+                                                        <span className="material-symbols-outlined">close</span>
+                                                    </button>
+                                                </div>
+                                                <div className="privacy-modal-content">
+                                                    <ul>
+                                                        <li>
+                                                            신청 및 수정 과정 중 본인식별 및 부정이용방지를 위해 개인정보를 수집 이용합니다.
+                                                            <Link href="/privacy" target="_blank" className="privacy-link">전문보기</Link>
+                                                        </li>
+                                                        <li>
+                                                            부고 수신자에게 계좌정보를 제공합니다.
+                                                            <a href="https://www.law.go.kr/LSW/lsLinkCommonInfo.do?lsJoLnkSeq=1020398517&chrClsCd=010202&ancYnChk=" target="_blank" className="law-reference">(개인정보 보호법 제17조 의거)</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <button type="button" className="privacy-modal-confirm" onClick={() => setPrivacyOpen(false)}>
+                                                    확인
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </form>
                             </section>
                         )}
@@ -896,6 +992,20 @@ export default function WriteFormPage() {
                         }
                     }}
                 />
+
+                {/* 임시저장 확인 모달 */}
+                {draftModalOpen && (
+                    <div className="modal-overlay" onClick={() => setDraftModalOpen(false)}>
+                        <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+                            <h3>임시저장</h3>
+                            <p>작성 중인 내용을 임시저장하시겠습니까?</p>
+                            <div className="modal-buttons">
+                                <button className="modal-btn secondary" onClick={() => setDraftModalOpen(false)}>아니오</button>
+                                <button className="modal-btn primary" onClick={saveDraftAndGoHome}>예</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div >
         </>
     );
