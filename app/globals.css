@@ -1768,7 +1768,7 @@ section {
 }
 
 .btn-draft {
-    flex: 1;
+    flex: 3;
     padding: 18px 20px;
     background: white;
     color: var(--gray-600);
@@ -1786,7 +1786,7 @@ section {
 }
 
 .submit-buttons .btn-submit {
-    flex: 1;
+    flex: 7;
 }
 
 .draft-toast {
