@@ -510,6 +510,7 @@ export default function WriteFormPage() {
                                                 className={`form-input ${errors.phone_password ? 'error' : ''}`}
                                                 placeholder="휴대번호 뒷 4자리"
                                                 maxLength={4}
+                                                inputMode="numeric"
                                                 value={formData.phone_password}
                                                 onChange={handleChange}
                                             />
@@ -617,6 +618,7 @@ export default function WriteFormPage() {
                                                     className={`form-input ${errors.age ? 'error' : ''}`}
                                                     placeholder="연세"
                                                     max={999}
+                                                    inputMode="numeric"
                                                     value={formData.age}
                                                     onChange={handleChange}
                                                 />
@@ -823,6 +825,7 @@ export default function WriteFormPage() {
                                                         className="form-input time-input"
                                                         placeholder="00:00"
                                                         maxLength={5}
+                                                        inputMode="numeric"
                                                         value={formData.funeral_time || ''}
                                                         onChange={(e) => {
                                                             let val = e.target.value.replace(/[^0-9]/g, '');
@@ -867,6 +870,7 @@ export default function WriteFormPage() {
                                                         className="form-input time-input"
                                                         placeholder="00:00"
                                                         maxLength={5}
+                                                        inputMode="numeric"
                                                         value={formData.death_time || ''}
                                                         onChange={(e) => {
                                                             let val = e.target.value.replace(/[^0-9]/g, '');
@@ -1106,6 +1110,7 @@ export default function WriteFormPage() {
                                 type="text"
                                 className="account-modal-input-full"
                                 placeholder="계좌번호를 입력해주세요"
+                                inputMode="numeric"
                                 value={tempAccount.number}
                                 onChange={(e) => setTempAccount({ ...tempAccount, number: e.target.value })}
                             />
@@ -1183,6 +1188,7 @@ export default function WriteFormPage() {
                                 type="text"
                                 className="account-modal-input-full"
                                 placeholder="계좌번호를 입력해주세요"
+                                inputMode="numeric"
                                 value={tempMournerAccount.number}
                                 onChange={(e) => setTempMournerAccount({ ...tempMournerAccount, number: e.target.value })}
                             />

@@ -5394,6 +5394,9 @@ section {
     background: var(--gray-50);
     border-radius: 8px;
     margin-top: 12px;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .account-input-row .material-symbols-outlined {
@@ -5410,6 +5413,10 @@ section {
     color: var(--gray-500);
     outline: none;
     cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .account-input-field::placeholder {
