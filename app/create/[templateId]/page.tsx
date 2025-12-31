@@ -50,14 +50,6 @@ interface Account {
     number: string;
 }
 
-// 템플릿 목록
-const templates = [
-    { id: 'basic', name: '부고장 기본형', image: '/images/basic.png' },
-    { id: 'ribbon', name: '부고장 정중형', image: '/images/ribbon.png' },
-    { id: 'border', name: '부고장 안내형', image: '/images/border.png' },
-    { id: 'flower', name: '부고장 국화', image: '/images/flower-detail.png' },
-];
-
 export default function WriteFormPage() {
     const router = useRouter();
     const params = useParams();
@@ -137,9 +129,6 @@ export default function WriteFormPage() {
 
     // 임시저장 모달
     const [draftModalOpen, setDraftModalOpen] = useState(false);
-
-    // 템플릿 변경 모달
-    const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
     const handleDraftClick = () => {
         setDraftModalOpen(true);
@@ -492,7 +481,7 @@ export default function WriteFormPage() {
                                 {/* 선택된 템플릿 표시 */}
                                 <div className="selected-template-banner">
                                     <span>선택된 양식: <strong>{template.name}</strong></span>
-                                    <button type="button" className="btn-change-template" onClick={() => setTemplateModalOpen(true)}>변경</button>
+                                    <Link href="/create" className="btn-change-template">변경</Link>
                                 </div>
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>
@@ -1244,53 +1233,6 @@ export default function WriteFormPage() {
                                         지우기
                                     </button>
                                 )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* 템플릿 변경 모달 */}
-                {templateModalOpen && (
-                    <div className="modal-overlay" onClick={() => setTemplateModalOpen(false)}>
-                        <div className="template-modal" onClick={e => e.stopPropagation()}>
-                            <div className="template-modal-header">
-                                <button
-                                    type="button"
-                                    className="template-modal-back"
-                                    onClick={() => setTemplateModalOpen(false)}
-                                >
-                                    <span className="material-symbols-outlined">arrow_back</span>
-                                </button>
-                                <h2>양식 변경</h2>
-                            </div>
-                            <div className="template-modal-body">
-                                {templates.map(t => (
-                                    <div
-                                        key={t.id}
-                                        className={`template-modal-item ${t.id === templateId ? 'current' : ''}`}
-                                    >
-                                        <div className="template-modal-image">
-                                            <img src={t.image} alt={t.name} />
-                                        </div>
-                                        <div className="template-modal-info">
-                                            <span className="template-modal-name">{t.name}</span>
-                                            {t.id === templateId ? (
-                                                <span className="template-modal-badge">사용중</span>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    className="template-modal-change"
-                                                    onClick={() => {
-                                                        router.push(`/create/${t.id}`);
-                                                        setTemplateModalOpen(false);
-                                                    }}
-                                                >
-                                                    변경하기
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
                         </div>
                     </div>
