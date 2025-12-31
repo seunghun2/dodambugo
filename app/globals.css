@@ -4477,7 +4477,7 @@ section {
     border-style: solid;
 }
 
-/* Mourner Item - 2줄 레이아웃 */
+/* Mourner Item - 1줄 레이아웃 */
 .mourner-item,
 .mourner-row {
     padding: 0;
@@ -4485,59 +4485,58 @@ section {
     border-radius: 10px;
     margin-bottom: 12px;
     border: none;
-    display: grid;
-    grid-template-columns: 100px 1fr;
+    display: flex;
     gap: 8px;
     position: relative;
     align-items: center;
 }
 
-/* 관계 선택 - 1줄 */
-.mourner-row> :nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
+.mourner-row .mourner-relation {
+    width: 80px;
+    flex-shrink: 0;
 }
 
-/* 이름 입력 - 1줄 */
-.mourner-row> :nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
+.mourner-row .mourner-name {
+    flex: 0.8;
+    min-width: 50px;
 }
 
-/* 연락처 입력 - 2줄, 기본: 전체 너비 */
-.mourner-row> :nth-child(3) {
-    grid-column: 1 / -1;
-    grid-row: 2;
+.mourner-row .mourner-contact {
+    flex: 1.5;
+    min-width: 100px;
 }
 
 .mourner-row .form-select,
 .mourner-row .form-input {
     margin-bottom: 0;
+    padding: 10px 12px;
+    font-size: 14px;
 }
 
-/* has-delete 있을 때: 3컬럼 레이아웃 */
-.mourner-row.has-delete {
-    grid-template-columns: 100px 1fr 40px;
+/* 대표상주는 원래 스타일 유지 */
+.mourner-row.primary-mourner .mourner-relation {
+    width: 100px;
 }
 
-.mourner-row.has-delete> :nth-child(2) {
-    grid-column: 2 / 4;
+.mourner-row.primary-mourner .mourner-name {
+    flex: 1;
 }
 
-.mourner-row.has-delete> :nth-child(3) {
-    grid-column: 1 / 3;
-    grid-row: 2;
+.mourner-row.primary-mourner .form-select,
+.mourner-row.primary-mourner .form-input {
+    padding: 12px 14px;
+    font-size: 15px;
 }
 
-.mourner-row.has-delete> :nth-child(4) {
-    grid-column: 3;
-    grid-row: 2;
+/* has-delete 있을 때 */
+.mourner-row.has-delete .btn-delete-mourner {
+    flex-shrink: 0;
 }
 
 /* 상주 삭제 버튼 - 독립형 원형 */
 .btn-delete-mourner {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: var(--gray-100);
     border: none;
