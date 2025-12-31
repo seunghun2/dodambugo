@@ -19,8 +19,6 @@ body {
     background: #FAFAFA;
     min-height: 100vh;
     padding-bottom: 80px;
-    margin: 0;
-    padding-top: 0;
 }
 
 /* 복사 토스트 메시지 */
@@ -207,8 +205,6 @@ body {
     z-index: 100;
     max-width: 480px;
     margin: 0 auto;
-    margin-top: -1px;
-    /* 헤더와 붙이기 */
 }
 
 .tab-btn {
@@ -300,11 +296,7 @@ body {
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-}
-
-.bugo-header img {
-    display: block;
-    width: 100%;
+    background: white;
 }
 
 /* 컨텐츠 영역 */
@@ -916,7 +908,7 @@ body {
     }
 }
 
-/* 다크모드 대응 - 비활성화 (항상 라이트 모드 사용)
+/* 다크모드 대응 */
 @media (prefers-color-scheme: dark) {
     body {
         background: #1C1C1E;
@@ -976,9 +968,8 @@ body {
         border-top-color: #2C2C2E;
     }
 }
-*/
 
-/* 다크모드 수동 토글 - 비활성화 (항상 라이트 모드 사용)
+/* 다크모드 수동 토글 */
 .dark body {
     background: #1C1C1E;
 }
@@ -1052,6 +1043,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* 수정 모달 다크모드 */
 .dark .edit-modal-content {
     background: #2C2C2E;
 }
@@ -1083,6 +1075,7 @@ body {
     background: #3182F6;
 }
 
+/* 로딩/에러 화면 다크모드 */
 .dark .loading-container,
 .dark .error-container {
     background: #1C1C1E;
@@ -1098,7 +1091,6 @@ body {
     border-color: #3A3A3C;
     border-top-color: #3182F6;
 }
-*/
 
 /* ========================================
    탭 네비게이션

@@ -8,8 +8,6 @@ import SideMenu from '@/components/SideMenu';
 export default function HomePage() {
   const router = useRouter();
   const [hasDraft, setHasDraft] = useState(false);
-  const [draftTemplateId, setDraftTemplateId] = useState<string | null>(null);
-  const [draftModalOpen, setDraftModalOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -18,24 +16,10 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    // 템플릿별 임시저장 확인
-    const templates = ['basic', 'simple', 'ribbon', 'border', 'flower'];
-    for (const template of templates) {
-      const draft = localStorage.getItem(`bugo_draft_${template}`);
-      if (draft) {
-        try {
-          const parsed = JSON.parse(draft);
-          const savedAt = new Date(parsed.savedAt);
-          const now = new Date();
-          const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
-
-          if (hoursDiff < 24) {
-            setHasDraft(true);
-            setDraftTemplateId(template);
-            break;
-          }
-        } catch (e) { }
-      }
+    // 임시저장 확인
+    const draft = localStorage.getItem('bugo_draft');
+    if (draft) {
+      setHasDraft(true);
     }
 
     // 통계 애니메이션 - easeOutQuad
@@ -73,28 +57,17 @@ export default function HomePage() {
   }, []);
 
   const checkDraftBeforeCreate = () => {
-    if (hasDraft && draftTemplateId) {
-      setDraftModalOpen(true);
+    const draft = localStorage.getItem('bugo_draft');
+    if (draft) {
+      if (confirm('작성 중인 부고장이 있습니다. 이어서 작성하시겠습니까?')) {
+        router.push('/create');
+      } else {
+        localStorage.removeItem('bugo_draft');
+        router.push('/create');
+      }
     } else {
       router.push('/create');
     }
-  };
-
-  const continueDraft = () => {
-    if (draftTemplateId) {
-      router.push(`/create/${draftTemplateId}`);
-    }
-    setDraftModalOpen(false);
-  };
-
-  const discardDraft = () => {
-    if (draftTemplateId) {
-      localStorage.removeItem(`bugo_draft_${draftTemplateId}`);
-    }
-    setDraftModalOpen(false);
-    setHasDraft(false);
-    setDraftTemplateId(null);
-    router.push('/create');
   };
 
   const openSideMenu = () => setSideMenuOpen(true);
@@ -305,20 +278,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* 임시저장 확인 모달 */}
-      {draftModalOpen && (
-        <div className="modal-overlay" onClick={() => setDraftModalOpen(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3>임시저장된 정보</h3>
-            <p>임시저장된 정보가 있습니다.<br />계속 작성하시겠습니까?</p>
-            <div className="modal-buttons">
-              <button className="modal-btn secondary" onClick={discardDraft}>아니오</button>
-              <button className="modal-btn primary" onClick={continueDraft}>예</button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
