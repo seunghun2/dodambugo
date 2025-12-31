@@ -4,19 +4,21 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import '@/public/css/view-toss.css';
-import '@/public/css/view-overlay.css';
+import './view.css';
 
 interface BugoData {
     id: string;
     bugo_number: string;
-    template?: string;
+    template_id?: string;
     applicant_name: string;
     phone_password: string;
     deceased_name: string;
     gender?: string;
     age?: number;
     death_date?: string;
+    death_time?: string;
+    encoffin_date?: string;
+    encoffin_time?: string;
     religion?: string;
     relationship?: string;
     mourner_name?: string;
@@ -40,7 +42,6 @@ export default function ViewPage() {
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'info' | 'guestbook'>('info');
     const [copySuccess, setCopySuccess] = useState(false);
     const [shareModalOpen, setShareModalOpen] = useState(false);
 
@@ -48,91 +49,108 @@ export default function ViewPage() {
         const fetchBugo = async () => {
             try {
                 const id = params.id as string;
-
-                // UUID 형식인지 확인 (xxxx-xxxx-xxxx 패턴)
                 const isUUID = id.includes('-') && id.length > 10;
 
                 let data = null;
-                let error = null;
+                let queryError = null;
 
                 if (isUUID) {
-                    // UUID로 검색
-                    const result = await supabase
-                        .from('bugo')
-                        .select('*')
-                        .eq('id', id)
-                        .single();
-                    data = result.data;
-                    error = result.error;
+                    const result = await supabase.from('bugo').select('*').eq('id', id).limit(1);
+                    data = result.data?.[0] || null;
+                    queryError = result.error;
                 } else {
-                    // 부고번호로 검색
-                    const result = await supabase
-                        .from('bugo')
-                        .select('*')
-                        .eq('bugo_number', id)
-                        .single();
-                    data = result.data;
-                    error = result.error;
+                    const result = await supabase.from('bugo').select('*').eq('bugo_number', id).order('created_at', { ascending: false }).limit(1);
+                    data = result.data?.[0] || null;
+                    queryError = result.error;
                 }
 
-                if (error || !data) {
+                if (queryError || !data) {
                     setError('부고장을 찾을 수 없습니다.');
                     return;
+                }
+
+                if (data.mourners && typeof data.mourners === 'string') {
+                    try { data.mourners = JSON.parse(data.mourners); } catch (e) { }
+                }
+                if (data.account_info && typeof data.account_info === 'string') {
+                    try { data.account_info = JSON.parse(data.account_info); } catch (e) { }
                 }
 
                 setBugo(data);
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
-                console.log('Bugo not found:', params.id);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (params.id) {
-            fetchBugo();
-        }
+        if (params.id) fetchBugo();
     }, [params.id]);
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+        const weekDay = weekDays[date.getDay()];
+        return `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}(${weekDay})`;
+    };
+
+    const formatDateShort = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+    };
+
+    const copyAddress = async () => {
+        if (bugo?.address) {
+            await navigator.clipboard.writeText(bugo.address + (bugo.address_detail ? ' ' + bugo.address_detail : ''));
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    };
+
+    const copyToClipboard = async (text: string) => {
+        await navigator.clipboard.writeText(text);
         setCopySuccess(true);
-        setShareModalOpen(false);
         setTimeout(() => setCopySuccess(false), 2000);
     };
 
+    const openTmap = () => {
+        if (bugo?.address) {
+            const address = encodeURIComponent(bugo.address + (bugo.address_detail || ''));
+            window.location.href = `tmap://search?name=${encodeURIComponent(bugo.funeral_home || '')}&address=${address}`;
+        }
+    };
+
+    const openKakaoNavi = () => {
+        if (bugo?.address) {
+            window.open(`https://map.kakao.com/link/search/${encodeURIComponent(bugo.address)}`, '_blank');
+        }
+    };
+
     const shareViaKakao = () => {
-        // 카카오톡 공유 (카카오 SDK 필요)
         const url = window.location.href;
         if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
             (window as any).Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
                     title: `故 ${bugo?.deceased_name}님 부고`,
-                    description: bugo?.funeral_home || '부고장',
-                    imageUrl: 'https://dodambugo.com/images/og-image.png',
+                    description: bugo?.message || '삼가 고인의 명복을 빕니다.',
+                    imageUrl: '',
                     link: { mobileWebUrl: url, webUrl: url }
                 },
                 buttons: [{ title: '부고장 보기', link: { mobileWebUrl: url, webUrl: url } }]
             });
         } else {
-            // 카카오톡 앱 직접 실행 (폴백)
-            window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}`);
+            copyToClipboard(url);
         }
-        setShareModalOpen(false);
     };
 
     const shareViaSMS = () => {
         const url = window.location.href;
-        const text = `[부고] 故 ${bugo?.deceased_name}님 부고장입니다. ${url}`;
+        const text = `[부고] 故 ${bugo?.deceased_name}님께서 별세하셨습니다.\n\n${url}`;
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
-        setShareModalOpen(false);
-    };
-
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
     };
 
     if (loading) {
@@ -151,40 +169,41 @@ export default function ViewPage() {
                     <div className="error-icon">😢</div>
                     <h2>부고장을 찾을 수 없습니다</h2>
                     <p>요청하신 부고장이 존재하지 않거나 삭제되었습니다.</p>
-                    <div className="error-actions">
-                        <Link href="/" className="btn-primary">홈으로</Link>
-                    </div>
+                    <Link href="/" className="btn-home">홈으로</Link>
                 </div>
             </div>
         );
     }
 
-    // 상주 목록 생성
-    const mournersList = bugo.mourners && bugo.mourners.length > 0
-        ? bugo.mourners
-        : bugo.mourner_name
-            ? [{ relationship: bugo.relationship || '상주', name: bugo.mourner_name, contact: bugo.contact || '' }]
-            : [];
+    // 상주 목록
+    const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
+    if (bugo.mourner_name) {
+        mournersList.push({ relationship: bugo.relationship || '상주', name: bugo.mourner_name, contact: bugo.contact || '' });
+    }
+    if (bugo.mourners && Array.isArray(bugo.mourners)) {
+        bugo.mourners.forEach(m => { if (m.name) mournersList.push(m); });
+    }
 
-    // 템플릿 설정
-    const templateClass = bugo.template ? `template-${bugo.template}` : 'template-basic';
-    const templateImage = bugo.template ? `/images/template-${bugo.template}.png` : '/images/template-basic.png';
+    // 템플릿 이미지 결정
+    const getTemplateImage = () => {
+        const templateId = bugo.template_id || 'basic';
+        return `/images/template-${templateId}.png`;
+    };
 
     return (
-        <main className={`bugo-view ${templateClass}`}>
-            {/* 복사 성공 토스트 */}
-            {copySuccess && (
-                <div className="copy-toast">
-                    ✓ 링크가 복사되었습니다
-                </div>
-            )}
+        <main className="view-page">
+            {/* 토스트 */}
+            {copySuccess && <div className="toast">복사되었습니다</div>}
 
-            {/* 헤더 이미지 */}
-            <div className="bugo-header">
-                <img src={templateImage} alt="부고장" style={{ width: '100%' }} />
-                <div className="text-overlay">
-                    <p className="overlay-text overlay-full-message" style={{ display: 'block' }}>
-                        故{bugo.deceased_name}님께서 {bugo.death_date ? formatDate(bugo.death_date) : ''}<br />
+            {/* ========================================
+                헤더 섹션 - 템플릿 이미지 + 동적 텍스트
+            ======================================== */}
+            <div className={`header-section template-${bugo.template_id || 'basic'}`}>
+                <img src={getTemplateImage()} alt="" className="header-bg" />
+                {/* 동적 텍스트만 오버레이 - 이미지에 謹弔/부고 등 정적 텍스트 포함됨 */}
+                <div className="header-text-overlay">
+                    <p className="header-dynamic-text">
+                        故{bugo.deceased_name}님께서 {bugo.death_date ? formatDateShort(bugo.death_date) : ''}<br />
                         별세하셨기에 삼가 알려드립니다.<br />
                         마음으로 따뜻한 위로 부탁드리며<br />
                         고인의 명복을 빌어주시길 바랍니다.
@@ -192,217 +211,175 @@ export default function ViewPage() {
                 </div>
             </div>
 
-            {/* 탭 네비게이션 */}
-            <div className="tab-navigation">
-                <button
-                    className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('info')}
-                >
-                    <span className="material-symbols-outlined">description</span>
-                    <span>부고정보</span>
-                </button>
-                <button
-                    className={`tab-btn ${activeTab === 'guestbook' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('guestbook')}
-                >
-                    <span className="material-symbols-outlined">edit_note</span>
-                    <span>방명록</span>
-                </button>
-            </div>
+            {/* ========================================
+                빈소 오시는 길
+            ======================================== */}
+            <section className="section">
+                <h2 className="section-title">빈소 오시는 길</h2>
 
-            {/* 부고 정보 탭 */}
-            <div className={`bugo-content ${activeTab !== 'info' ? 'hidden' : ''}`}>
-                {/* 고인 정보 */}
-                <section className="content-section">
-                    <h3 className="content-title">고인</h3>
-                    <div className="info-list">
-                        <div className="info-row">
-                            <span className="info-label">고인</span>
-                            <span className="info-value">故 {bugo.deceased_name}</span>
+                <div className="address-row">
+                    <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
+                    <button className="btn-copy-address" onClick={copyAddress}>주소 복사</button>
+                </div>
+
+                {/* 지도 */}
+                <div className="map-container">
+                    <iframe
+                        src={`https://map.kakao.com/link/search/${encodeURIComponent(bugo.address || '')}`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                    ></iframe>
+                </div>
+
+                {/* 내비 버튼 */}
+                <div className="navi-buttons">
+                    <button className="navi-btn" onClick={openTmap}>
+                        <img src="/images/ic_tmap.svg" alt="티맵" className="navi-icon" />
+                        <span>티맵</span>
+                    </button>
+                    <button className="navi-btn" onClick={openKakaoNavi}>
+                        <img src="/images/ic_kakao_navi.svg" alt="카카오내비" className="navi-icon" />
+                        <span>카카오내비</span>
+                    </button>
+                </div>
+
+                {/* 장례식장 박스 */}
+                <div className="funeral-box">
+                    <p className="funeral-name">{bugo.funeral_home}</p>
+                    <p className="funeral-room">{bugo.room_number || ''}</p>
+                </div>
+            </section>
+
+            {/* ========================================
+                상주
+            ======================================== */}
+            <section className="section">
+                <h2 className="section-title">상주</h2>
+                <div className="mourners-table">
+                    {mournersList.map((m, i) => (
+                        <div className="mourner-row" key={i}>
+                            <span className="mourner-rel">{m.relationship}</span>
+                            <span className="mourner-name">{m.name}</span>
+                            {m.contact && (
+                                <a href={`tel:${m.contact}`} className="mourner-tel">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9E8566" strokeWidth="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                    </svg>
+                                </a>
+                            )}
                         </div>
-                        {bugo.age && (
-                            <div className="info-row">
-                                <span className="info-label">향년</span>
-                                <span className="info-value">{bugo.age}세</span>
-                            </div>
-                        )}
-                        {bugo.gender && (
-                            <div className="info-row">
-                                <span className="info-label">성별</span>
-                                <span className="info-value">{bugo.gender}</span>
-                            </div>
-                        )}
-                        {bugo.religion && (
-                            <div className="info-row">
-                                <span className="info-label">종교</span>
-                                <span className="info-value">{bugo.religion}</span>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                    ))}
+                </div>
+            </section>
 
-                {/* 상주 정보 */}
-                <section className="content-section">
-                    <h3 className="content-title">상주</h3>
-                    <div className="mourners-list">
-                        {mournersList.map((mourner, index) => (
-                            <div className="mourner-card" key={index}>
-                                <div className="mourner-main">
-                                    <span className="mourner-relation">{mourner.relationship}</span>
-                                    <span className="mourner-name">{mourner.name}</span>
+            {/* ========================================
+                발인 및 장지
+            ======================================== */}
+            <section className="section">
+                <h2 className="section-title">발인 및 장지</h2>
+                <div className="funeral-info-table">
+                    {bugo.funeral_date && (
+                        <div className="funeral-info-row">
+                            <span className="funeral-info-label">발인</span>
+                            <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
+                        </div>
+                    )}
+                    {bugo.burial_place && (
+                        <div className="funeral-info-row">
+                            <div className="burial-box">
+                                <span className="burial-label">1차장지</span>
+                            </div>
+                            <span className="funeral-info-value burial-text">{bugo.burial_place}</span>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ========================================
+                계좌 정보
+            ======================================== */}
+            {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
+                <section className="section">
+                    <h2 className="section-title">부의금 계좌</h2>
+                    <div className="account-list">
+                        {bugo.account_info.map((acc, i) => (
+                            <div className="account-row" key={i}>
+                                <div className="account-info">
+                                    <span className="account-bank">{acc.bank}</span>
+                                    <span className="account-number">{acc.number}</span>
+                                    <span className="account-holder">{acc.holder}</span>
                                 </div>
-                                {mourner.contact && (
-                                    <div className="mourner-contact">
-                                        <a href={`tel:${mourner.contact}`}>{mourner.contact}</a>
-                                    </div>
-                                )}
+                                <button className="btn-copy" onClick={() => copyToClipboard(acc.number)}>복사</button>
                             </div>
                         ))}
                     </div>
                 </section>
+            )}
 
-                {/* 빈소 정보 */}
-                <section className="content-section">
-                    <h3 className="content-title">빈소</h3>
-                    <div className="info-list">
-                        {bugo.funeral_home && (
-                            <div className="info-row">
-                                <span className="info-label">장례식장</span>
-                                <span className="info-value">{bugo.funeral_home}</span>
-                            </div>
-                        )}
-                        {bugo.room_number && (
-                            <div className="info-row">
-                                <span className="info-label">호실</span>
-                                <span className="info-value">{bugo.room_number}</span>
-                            </div>
-                        )}
-                        {bugo.funeral_home_tel && (
-                            <div className="info-row">
-                                <span className="info-label">연락처</span>
-                                <span className="info-value">
-                                    <a href={`tel:${bugo.funeral_home_tel}`}>{bugo.funeral_home_tel}</a>
-                                </span>
-                            </div>
-                        )}
-                        {bugo.address && (
-                            <div className="info-row">
-                                <span className="info-label">주소</span>
-                                <span className="info-value">{bugo.address} {bugo.address_detail || ''}</span>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* 일정 정보 */}
-                <section className="content-section">
-                    <h3 className="content-title">일정</h3>
-                    <div className="info-list">
-                        {bugo.death_date && (
-                            <div className="info-row">
-                                <span className="info-label">별세</span>
-                                <span className="info-value">{formatDate(bugo.death_date)}</span>
-                            </div>
-                        )}
-                        {bugo.funeral_date && (
-                            <div className="info-row">
-                                <span className="info-label">발인</span>
-                                <span className="info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
-                            </div>
-                        )}
-                        {bugo.burial_place && (
-                            <div className="info-row">
-                                <span className="info-label">장지</span>
-                                <span className="info-value">{bugo.burial_place}</span>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* 계좌 정보 */}
-                {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
-                    <section className="content-section">
-                        <h3 className="content-title">부의금 계좌</h3>
-                        <div className="account-list">
-                            {bugo.account_info.map((account, index) => (
-                                <div className="account-card" key={index}>
-                                    <div className="account-details">
-                                        <div className="account-bank">{account.bank}</div>
-                                        <div className="account-number">{account.number}</div>
-                                        <div className="account-holder">{account.holder}</div>
-                                    </div>
-                                    <button
-                                        className="btn-copy-account"
-                                        onClick={() => copyToClipboard(account.number)}
-                                    >
-                                        복사
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* 인사말 */}
-                {bugo.message && (
-                    <section className="content-section">
-                        <div className="condolence-message">
-                            <p className="condolence-text">{bugo.message}</p>
-                        </div>
-                    </section>
-                )}
-
-                {/* 마무리 */}
-                <section className="content-section">
-                    <div className="footer-notice">
-                        <p className="notice-text">
-                            황망한 마음에 일일이 연락드리지 못함을<br />
-                            너그러이 양해해 주시기 바랍니다.
-                        </p>
-                    </div>
-                </section>
-            </div>
-
-            {/* 방명록 탭 */}
-            <div className={`guestbook-content ${activeTab === 'guestbook' ? 'active' : ''}`}>
+            {/* ========================================
+                추모글 (방명록)
+            ======================================== */}
+            <section className="section guestbook-section">
+                <h2 className="section-title">추모글</h2>
                 <div className="guestbook-form">
-                    <input type="text" placeholder="이름" />
-                    <input type="password" placeholder="비밀번호 4자리" maxLength={4} />
-                    <textarea placeholder="따뜻한 위로의 말씀을 전해주세요."></textarea>
+                    <input type="text" placeholder="이름" className="form-input" />
+                    <input type="password" placeholder="비밀번호 4자리" maxLength={4} className="form-input" />
+                    <textarea placeholder="따뜻한 위로의 말씀을 전해주세요." className="form-textarea"></textarea>
                     <button className="btn-submit">조문 남기기</button>
                 </div>
                 <div className="guestbook-empty">
-                    <p>아직 작성된 방명록이 없습니다.</p>
+                    <p>아직 작성된 추모글이 없습니다.</p>
                 </div>
-            </div>
+            </section>
 
-            {/* 하단 공유 버튼 */}
-            <div className="bugo-actions">
-                <button className="action-btn btn-primary" onClick={() => setShareModalOpen(true)}>
-                    <span className="material-symbols-outlined">share</span>
-                    공유하기
+            {/* ========================================
+                하단 버튼
+            ======================================== */}
+            <div className="bottom-buttons">
+                <button className="bottom-btn" onClick={() => setShareModalOpen(true)}>
+                    <img src="/images/ic_writing.svg" alt="" className="bottom-icon" />
+                    <span>부고 알리기</span>
+                </button>
+                <div className="divider-vertical"></div>
+                <button className="bottom-btn" disabled>
+                    <img src="/images/ic_letter.svg" alt="" className="bottom-icon" />
+                    <span>부의금 보내기</span>
                 </button>
             </div>
 
-            {/* 공유 바텀시트 모달 */}
+            {/* ========================================
+                마무리 메시지
+            ======================================== */}
+            <div className="footer-message">
+                <p>따뜻한 마음의 위로 부탁드리며,<br />고인의 명복을 빌어주시길 바랍니다.</p>
+            </div>
+
+            {/* ========================================
+                공유 모달
+            ======================================== */}
             {shareModalOpen && (
                 <div className="share-modal">
-                    <div className="share-modal-overlay" onClick={() => setShareModalOpen(false)}></div>
-                    <div className="share-modal-content">
-                        <div className="share-options">
-                            <button className="share-option" onClick={shareViaKakao}>
-                                <img src="/images/icon-kakao.png" alt="카카오톡" className="share-icon-img" />
-                                <span>카카오톡으로 보내기</span>
-                            </button>
-                            <button className="share-option" onClick={shareViaSMS}>
-                                <img src="/images/icon-message.png" alt="메세지" className="share-icon-img" />
-                                <span>메세지로 보내기</span>
-                            </button>
-                            <button className="share-option" onClick={() => copyToClipboard(window.location.href)}>
-                                <img src="/images/icon-link.png" alt="링크" className="share-icon-img" />
-                                <span>링크 복사하기</span>
-                            </button>
+                    <div className="share-overlay" onClick={() => setShareModalOpen(false)}></div>
+                    <div className="share-content">
+                        <div className="share-header">
+                            <h3>공유하기</h3>
+                            <button className="share-close" onClick={() => setShareModalOpen(false)}>✕</button>
                         </div>
+                        <button className="share-option" onClick={shareViaKakao}>
+                            <img src="/images/icon-kakao.png" alt="카카오톡" />
+                            <span>카카오톡으로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={shareViaSMS}>
+                            <img src="/images/icon-message.png" alt="메세지" />
+                            <span>메세지로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={() => copyToClipboard(window.location.href)}>
+                            <img src="/images/icon-link.png" alt="링크" />
+                            <span>링크 복사하기</span>
+                        </button>
                     </div>
                 </div>
             )}
