@@ -360,9 +360,12 @@ function CreatePageContent() {
                                                 </Link>
                                             </div>
                                             {changeFrom === template.id ? (
-                                                <div className="btn-current-template">
+                                                <Link
+                                                    href={`/create/${template.id}`}
+                                                    className="btn-current-template"
+                                                >
                                                     사용중
-                                                </div>
+                                                </Link>
                                             ) : (
                                                 <Link
                                                     href={`/create/${template.id}`}
