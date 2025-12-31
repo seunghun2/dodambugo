@@ -5053,7 +5053,7 @@ section {
 
 /* Form Submit Area */
 .form-submit-area {
-    padding: 24px;
+    padding: 24px 8px;
     text-align: center;
 }
 
