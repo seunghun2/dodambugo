@@ -118,6 +118,10 @@ export default function AdminInquiriesPage() {
                         <span className="material-symbols-outlined">description</span>
                         <span>부고장 관리</span>
                     </Link>
+                    <Link href="/admin/facilities" className="nav-item">
+                        <span className="material-symbols-outlined">apartment</span>
+                        <span>장례식장 정보</span>
+                    </Link>
                     <Link href="/admin/inquiries" className="nav-item active">
                         <span className="material-symbols-outlined">mail</span>
                         <span>문의 관리</span>

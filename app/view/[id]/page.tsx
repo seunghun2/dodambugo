@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import NaverMap from '@/components/NaverMap';
 import './view.css';
 
 interface BugoData {
@@ -124,7 +125,10 @@ export default function ViewPage() {
     };
 
     const openKakaoNavi = () => {
-        if (bugo?.address) {
+        if (bugo?.funeral_home) {
+            // 장례식장명으로 검색하면 마커가 정확히 찍힘
+            window.open(`https://map.kakao.com/link/search/${encodeURIComponent(bugo.funeral_home)}`, '_blank');
+        } else if (bugo?.address) {
             window.open(`https://map.kakao.com/link/search/${encodeURIComponent(bugo.address)}`, '_blank');
         }
     };
@@ -224,14 +228,11 @@ export default function ViewPage() {
 
                 {/* 지도 */}
                 <div className="map-container">
-                    <iframe
-                        src={`https://map.kakao.com/link/search/${encodeURIComponent(bugo.address || '')}`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                    ></iframe>
+                    <NaverMap
+                        address={bugo.address || ''}
+                        placeName={bugo.funeral_home}
+                        height="200px"
+                    />
                 </div>
 
                 {/* 내비 버튼 */}
