@@ -53,7 +53,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
             } finally {
                 setIsLoading(false);
             }
-        }, 300);
+        }, 150);
 
         return () => clearTimeout(timer);
     }, [searchQuery, activeTab]);
