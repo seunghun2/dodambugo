@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import SideMenu from '@/components/SideMenu';
-import FacilitySearchModal from '@/components/FacilitySearchModal';
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
 import 'dayjs/locale/ko';
@@ -111,11 +110,6 @@ export default function WriteFormPage() {
     const [createdBugo, setCreatedBugo] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(1); // 1: 입력, 2: 완료
     const [errors, setErrors] = useState<Record<string, string>>({});
-
-    // 장례식장 검색 모달
-    const [facilityModalOpen, setFacilityModalOpen] = useState(false);
-    const roomNumberRef = useRef<HTMLInputElement>(null);
-    const funeralHomeRef = useRef<HTMLInputElement>(null);
 
     // 날짜 초기화
     useEffect(() => {
@@ -425,77 +419,6 @@ export default function WriteFormPage() {
                                             {!errors.phone_password && <p className="form-hint">부고장 수정 시 사용됩니다 (4자리 숫자)</p>}
                                         </div>
                                     </div>
-
-                                    {/* 장례식장 정보 */}
-                                    <div className="form-section">
-                                        <h2 className="section-title">장례식장 정보</h2>
-
-                                        {/* 장례식장 검색 입력 */}
-                                        <div className="form-group">
-                                            <div
-                                                className="input-with-button"
-                                                style={{ position: 'relative', cursor: 'pointer' }}
-                                                onClick={() => setFacilityModalOpen(true)}
-                                            >
-                                                <input
-                                                    type="text"
-                                                    className="form-input"
-                                                    placeholder="장례식장을 검색해주세요"
-                                                    style={{ paddingRight: '50px', cursor: 'pointer' }}
-                                                    value={formData.address || ''}
-                                                    readOnly
-                                                />
-                                                <button
-                                                    type="button"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '12px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        background: 'transparent',
-                                                        border: 'none',
-                                                        padding: '0',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">search</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* 장례식장명 + 호실 */}
-                                        <div className="form-row">
-                                            <div className="form-group" data-field="funeral_home">
-                                                <input
-                                                    ref={funeralHomeRef}
-                                                    type="text"
-                                                    name="funeral_home"
-                                                    className={`form-input ${errors.funeral_home ? 'error' : ''}`}
-                                                    placeholder="장례식장명"
-                                                    value={formData.funeral_home}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
-                                            </div>
-
-                                            <div className="form-group" data-field="room_number">
-                                                <input
-                                                    ref={roomNumberRef}
-                                                    type="text"
-                                                    name="room_number"
-                                                    className={`form-input ${errors.room_number ? 'error' : ''}`}
-                                                    placeholder="호실(예시:102호)"
-                                                    value={formData.room_number}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.room_number && <p className="field-error">{errors.room_number}</p>}
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     {/* 부고 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">부고 정보</h2>
@@ -638,6 +561,79 @@ export default function WriteFormPage() {
                                             <span className="material-symbols-outlined">add_circle</span>
                                             상주 추가
                                         </button>
+                                    </div>
+
+                                    {/* 장례식장 정보 */}
+                                    <div className="form-section">
+                                        <h2 className="section-title">장례식장 정보</h2>
+
+                                        <div className="form-group" data-field="address">
+                                            <label className="form-label required">주소</label>
+                                            <div className="input-with-button">
+                                                <input
+                                                    type="text"
+                                                    name="address"
+                                                    className="form-input"
+                                                    placeholder="주소찾기를 눌러주세요"
+                                                    value={formData.address}
+                                                    readOnly
+                                                    onClick={handleAddressSearch}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-inline-action"
+                                                    onClick={handleAddressSearch}
+                                                >
+                                                    <span className="material-symbols-outlined">search</span>
+                                                    주소찾기
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {formData.address && (
+                                            <div className="form-group">
+                                                <label className="form-label">상세주소</label>
+                                                <input
+                                                    type="text"
+                                                    name="address_detail"
+                                                    className="form-input"
+                                                    placeholder="상세주소 (예: 특1호실)"
+                                                    value={formData.address_detail}
+                                                    onChange={handleChange}
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* 장례식장 + 호실 */}
+                                        <div className="form-row">
+                                            <div className="form-group" data-field="funeral_home">
+                                                <label className="form-label required">장례식장</label>
+                                                <input
+                                                    type="text"
+                                                    name="funeral_home"
+                                                    className={`form-input ${errors.funeral_home ? 'error' : ''}`}
+                                                    placeholder="장례식장명"
+                                                    value={formData.funeral_home}
+                                                    onChange={handleChange}
+                                                />
+                                                {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
+                                            </div>
+
+                                            <div className="form-group" data-field="room_number">
+                                                <label className="form-label required">호실</label>
+                                                <input
+                                                    type="text"
+                                                    name="room_number"
+                                                    className={`form-input ${errors.room_number ? 'error' : ''}`}
+                                                    placeholder="예: 특1호"
+                                                    value={formData.room_number}
+                                                    onChange={handleChange}
+                                                />
+                                                {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* 일정 정보 */}
@@ -874,26 +870,6 @@ export default function WriteFormPage() {
                         </div>
                     )
                 }
-
-                {/* 장례식장 검색 모달 */}
-                <FacilitySearchModal
-                    isOpen={facilityModalOpen}
-                    onClose={() => setFacilityModalOpen(false)}
-                    onSelect={(facility, source) => {
-                        setFormData(prev => ({
-                            ...prev,
-                            funeral_home: facility.name,
-                            address: facility.address
-                        }));
-                        setFacilityModalOpen(false);
-                        // source에 따라 포커스 다르게
-                        if (source === 'address') {
-                            setTimeout(() => funeralHomeRef.current?.focus(), 100);
-                        } else {
-                            setTimeout(() => roomNumberRef.current?.focus(), 100);
-                        }
-                    }}
-                />
             </div >
         </>
     );

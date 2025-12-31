@@ -320,7 +320,7 @@ export default function ViewPage() {
                 </section>
 
                 {/* 계좌 정보 */}
-                {bugo.account_info && bugo.account_info.length > 0 && (
+                {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
                     <section className="content-section">
                         <h3 className="content-title">부의금 계좌</h3>
                         <div className="account-list">
