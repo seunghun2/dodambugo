@@ -613,12 +613,13 @@ export default function WriteFormPage() {
                                             <div className="form-group" data-field="age">
                                                 <label className="form-label required">연세</label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     name="age"
                                                     className={`form-input ${errors.age ? 'error' : ''}`}
                                                     placeholder="연세"
-                                                    max={999}
+                                                    maxLength={3}
                                                     inputMode="numeric"
+                                                    pattern="[0-9]*"
                                                     value={formData.age}
                                                     onChange={handleChange}
                                                 />
