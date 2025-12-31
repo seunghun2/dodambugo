@@ -5406,7 +5406,7 @@ section {
     flex: 1;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--gray-500);
     outline: none;
     cursor: pointer;
@@ -5417,9 +5417,9 @@ section {
 }
 
 .btn-account-edit {
-    padding: 2px 20px;
+    padding: 4px 18px;
     background: white;
-    color: var(--gray-600);
+    color: var(--gray-800);
     border: 1px solid var(--gray-300);
     border-radius: 6px;
     font-size: 13px;
@@ -5427,6 +5427,7 @@ section {
     cursor: pointer;
     flex-shrink: 0;
     transition: all 0.2s;
+    margin-right: -6px;
 }
 
 .btn-account-edit:hover {
@@ -5452,4 +5453,173 @@ section {
     flex: 1;
     padding: 10px 12px;
     font-size: 14px;
+}
+
+/* 계좌 입력 필드 filled 상태 */
+.account-input-field.filled {
+    color: var(--gray-800);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 아이콘 위치 조정 */
+.account-input-row .material-symbols-outlined {
+    margin-left: -2px;
+}
+
+/* 버튼 패딩 조정 - 위에서 이미 적용됨 */
+
+/* ========================================
+   계좌 등록 모달 (바텀시트)
+   ======================================== */
+
+.account-modal {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 32px;
+    z-index: 1001;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.account-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.account-modal-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.account-modal-row>* {
+    flex: 1;
+}
+
+.account-modal-select,
+.account-modal-input {
+    padding: 14px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.account-modal-select:focus,
+.account-modal-input:focus {
+    border-color: var(--primary);
+}
+
+.account-modal-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+.account-modal-input-full {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+.account-modal-input-full:focus {
+    border-color: var(--primary);
+}
+
+.account-modal-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.account-modal-submit:hover {
+    filter: brightness(0.95);
+}
+
+/* 모달 버튼 행 */
+.account-modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.account-modal-buttons .account-modal-submit {
+    flex: 1;
+    order: 2;
+}
+
+.account-modal-delete {
+    padding: 16px 20px;
+    background: white;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    order: 1;
+}
+
+.account-modal-delete:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-400);
+}
+
+/* 상주 블록 (정보 + 계좌) */
+.mourner-block {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.mourner-block:last-child {
+    border-bottom: none;
+    margin-bottom: 8px;
+    padding-bottom: 0;
+}
+
+.mourner-block .mourner-row {
+    margin-bottom: 8px;
+}
+
+.mourner-block .account-input-row {
+    margin-top: 0;
 }
