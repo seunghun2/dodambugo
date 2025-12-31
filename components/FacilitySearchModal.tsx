@@ -260,9 +260,9 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                                     검색 결과가 없습니다
                                 </div>
                             )}
-                            {results.map(facility => (
+                            {results.map((facility, index) => (
                                 <div
-                                    key={facility.id}
+                                    key={facility.id || index}
                                     onClick={() => handleFacilitySelect(facility)}
                                     style={{
                                         padding: '16px',
