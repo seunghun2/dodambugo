@@ -78,12 +78,14 @@ export default function WriteFormPage() {
         address: '',
         address_detail: '',
         death_date: '',
+        death_time: '',
         death_hour: '',
         death_minute: '00',
         encoffin_date: '',
         encoffin_hour: '',
         encoffin_minute: '00',
         funeral_date: '',
+        funeral_time: '',
         funeral_hour: '',
         funeral_minute: '00',
         burial_place: '',
@@ -645,90 +647,90 @@ export default function WriteFormPage() {
                                         <h2 className="section-title">발인/임종 일시</h2>
 
                                         <div className="form-group" data-field="funeral_date">
-                                            <label className="form-label required">발인일</label>
-                                            <div className="datetime-row">
-                                                <DatePickerInput
-                                                    locale="ko"
-                                                    placeholder="날짜 선택"
-                                                    value={formData.funeral_date || null}
-                                                    onChange={(value) => setFormData(prev => ({
-                                                        ...prev,
-                                                        funeral_date: value || ''
-                                                    }))}
-                                                    valueFormat="YYYY년 MM월 DD일"
-                                                    styles={{
-                                                        input: {
-                                                            height: '44px',
-                                                            borderRadius: '8px',
-                                                            border: errors.funeral_date ? '1px solid #ef4444' : '1px solid var(--gray-200)',
-                                                        }
-                                                    }}
-                                                />
-                                                <select
-                                                    name="funeral_hour"
-                                                    className="form-select time-select"
-                                                    value={formData.funeral_hour}
-                                                    onChange={handleChange}
-                                                >
-                                                    <option value="">00시</option>
-                                                    {Array.from({ length: 24 }, (_, i) => (
-                                                        <option key={i} value={i}>{String(i).padStart(2, '0')}시</option>
-                                                    ))}
-                                                </select>
-                                                <select
-                                                    name="funeral_minute"
-                                                    className="form-select time-select"
-                                                    value={formData.funeral_minute}
-                                                    onChange={handleChange}
-                                                >
-                                                    {['00', '10', '20', '30', '40', '50'].map(m => (
-                                                        <option key={m} value={m}>{m}분</option>
-                                                    ))}
-                                                </select>
+                                            <label className="form-label required">발인일시</label>
+                                            <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
+                                                <div style={{ flex: 6 }}>
+                                                    <DatePickerInput
+                                                        locale="ko"
+                                                        placeholder="날짜 선택"
+                                                        value={formData.funeral_date || null}
+                                                        onChange={(value) => setFormData(prev => ({
+                                                            ...prev,
+                                                            funeral_date: value || ''
+                                                        }))}
+                                                        valueFormat="YYYY년 MM월 DD일"
+                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                        styles={{
+                                                            input: {
+                                                                height: '48px',
+                                                                borderRadius: '8px',
+                                                                border: errors.funeral_date ? '1px solid #ef4444' : '1px solid var(--gray-200)',
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 4 }}>
+                                                    <input
+                                                        type="text"
+                                                        name="funeral_time"
+                                                        className="form-input time-input"
+                                                        placeholder="00:00"
+                                                        maxLength={5}
+                                                        value={formData.funeral_time || ''}
+                                                        onChange={(e) => {
+                                                            let val = e.target.value.replace(/[^0-9]/g, '');
+                                                            if (val.length >= 3) {
+                                                                val = val.slice(0, 2) + ':' + val.slice(2, 4);
+                                                            }
+                                                            setFormData(prev => ({ ...prev, funeral_time: val }));
+                                                        }}
+                                                        style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div className="form-group">
-                                            <label className="form-label">임종일</label>
-                                            <div className="datetime-row">
-                                                <DatePickerInput
-                                                    locale="ko"
-                                                    placeholder="날짜 선택"
-                                                    value={formData.death_date || null}
-                                                    onChange={(value) => setFormData(prev => ({
-                                                        ...prev,
-                                                        death_date: value || ''
-                                                    }))}
-                                                    valueFormat="YYYY년 MM월 DD일"
-                                                    styles={{
-                                                        input: {
-                                                            height: '44px',
-                                                            borderRadius: '8px',
-                                                            border: '1px solid var(--gray-200)',
-                                                        }
-                                                    }}
-                                                />
-                                                <select
-                                                    name="death_hour"
-                                                    className="form-select time-select"
-                                                    value={formData.death_hour}
-                                                    onChange={handleChange}
-                                                >
-                                                    <option value="">00시</option>
-                                                    {Array.from({ length: 24 }, (_, i) => (
-                                                        <option key={i} value={i}>{String(i).padStart(2, '0')}시</option>
-                                                    ))}
-                                                </select>
-                                                <select
-                                                    name="death_minute"
-                                                    className="form-select time-select"
-                                                    value={formData.death_minute}
-                                                    onChange={handleChange}
-                                                >
-                                                    {['00', '10', '20', '30', '40', '50'].map(m => (
-                                                        <option key={m} value={m}>{m}분</option>
-                                                    ))}
-                                                </select>
+                                            <label className="form-label">임종일시</label>
+                                            <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
+                                                <div style={{ flex: 6 }}>
+                                                    <DatePickerInput
+                                                        locale="ko"
+                                                        placeholder="날짜 선택"
+                                                        value={formData.death_date || null}
+                                                        onChange={(value) => setFormData(prev => ({
+                                                            ...prev,
+                                                            death_date: value || ''
+                                                        }))}
+                                                        valueFormat="YYYY년 MM월 DD일"
+                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                        styles={{
+                                                            input: {
+                                                                height: '48px',
+                                                                borderRadius: '8px',
+                                                                border: '1px solid var(--gray-200)',
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 4 }}>
+                                                    <input
+                                                        type="text"
+                                                        name="death_time"
+                                                        className="form-input time-input"
+                                                        placeholder="00:00"
+                                                        maxLength={5}
+                                                        value={formData.death_time || ''}
+                                                        onChange={(e) => {
+                                                            let val = e.target.value.replace(/[^0-9]/g, '');
+                                                            if (val.length >= 3) {
+                                                                val = val.slice(0, 2) + ':' + val.slice(2, 4);
+                                                            }
+                                                            setFormData(prev => ({ ...prev, death_time: val }));
+                                                        }}
+                                                        style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
