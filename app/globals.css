@@ -5642,3 +5642,20 @@ section {
 .mourner-block .account-input-row {
     margin-top: 0;
 }
+/* 사용중 버튼 스타일 */
+.btn-current-template {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 24px;
+    background: var(--gray-100);
+    color: var(--gray-500);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: default;
+}
+
+.template-slide.current {
+    border: 2px solid var(--primary);
+}

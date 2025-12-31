@@ -481,7 +481,7 @@ export default function WriteFormPage() {
                                 {/* 선택된 템플릿 표시 */}
                                 <div className="selected-template-banner">
                                     <span>선택된 양식: <strong>{template.name}</strong></span>
-                                    <Link href="/create" className="btn-change-template">변경</Link>
+                                    <Link href={`/create?change=${templateId}`} className="btn-change-template">변경</Link>
                                 </div>
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>

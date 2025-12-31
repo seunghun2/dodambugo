@@ -48,6 +48,9 @@ function CreatePageContent() {
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedTemplate, setSelectedTemplate] = useState('');
 
+    // 템플릿 변경 모드 (from query param)
+    const changeFrom = searchParams.get('change');
+
     // Form 데이터
     const [formData, setFormData] = useState({
         applicant_name: '',
@@ -280,15 +283,30 @@ function CreatePageContent() {
 
     return (
         <div className="create-page">
-            {/* Navigation - 메인과 동일 */}
+            {/* Navigation */}
             <nav className="nav" id="nav">
                 <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
-                    <ul className="nav-menu" id="navMenu">
-                        <li><Link href="/" className="nav-link">홈</Link></li>
-                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/#templates" className="nav-link">템플릿</Link></li>
-                    </ul>
+                    {changeFrom ? (
+                        <>
+                            <button
+                                onClick={() => router.back()}
+                                className="nav-back"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+                            >
+                                <span className="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>양식 변경</span>
+                        </>
+                    ) : (
+                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                    )}
+                    {!changeFrom && (
+                        <ul className="nav-menu" id="navMenu">
+                            <li><Link href="/" className="nav-link">홈</Link></li>
+                            <li><Link href="/search" className="nav-link">부고검색</Link></li>
+                            <li><Link href="/#templates" className="nav-link">템플릿</Link></li>
+                        </ul>
+                    )}
                     <div className="nav-actions">
                         <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
                             <span></span>
@@ -307,16 +325,18 @@ function CreatePageContent() {
                     {/* Step 1: 템플릿 선택 */}
                     {currentStep === 1 && (
                         <section className="step-section active">
-                            <div className="template-notice" id="templateNotice">
-                                <span className="material-symbols-outlined">info</span>
-                                <span>간편하게 모바일 부고장을 만들어보세요.</span>
-                                <button type="button" className="notice-close" onClick={() => {
-                                    const notice = document.getElementById('templateNotice');
-                                    if (notice) notice.style.display = 'none';
-                                }}>
-                                    <span className="material-symbols-outlined">close</span>
-                                </button>
-                            </div>
+                            {!changeFrom && (
+                                <div className="template-notice" id="templateNotice">
+                                    <span className="material-symbols-outlined">info</span>
+                                    <span>간편하게 모바일 부고장을 만들어보세요.</span>
+                                    <button type="button" className="notice-close" onClick={() => {
+                                        const notice = document.getElementById('templateNotice');
+                                        if (notice) notice.style.display = 'none';
+                                    }}>
+                                        <span className="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="template-carousel">
                                 {[
@@ -325,7 +345,7 @@ function CreatePageContent() {
                                     { id: 'border', name: '부고장 안내형', image: '/images/border.png', preview: '/templates/border.html' },
                                     { id: 'flower', name: '부고장 국화', image: '/images/flower-detail.png', preview: '/templates/flower.html' },
                                 ].map(template => (
-                                    <div key={template.id} className="template-slide">
+                                    <div key={template.id} className={`template-slide ${changeFrom === template.id ? 'current' : ''}`}>
                                         <div className="template-phone">
                                             <img src={template.image} alt={template.name} />
                                         </div>
@@ -339,12 +359,18 @@ function CreatePageContent() {
                                                     미리보기
                                                 </Link>
                                             </div>
-                                            <Link
-                                                href={`/create/${template.id}`}
-                                                className="btn-use-template"
-                                            >
-                                                이 양식으로 만들기
-                                            </Link>
+                                            {changeFrom === template.id ? (
+                                                <div className="btn-current-template">
+                                                    사용중
+                                                </div>
+                                            ) : (
+                                                <Link
+                                                    href={`/create/${template.id}`}
+                                                    className="btn-use-template"
+                                                >
+                                                    {changeFrom ? '변경하기' : '이 양식으로 만들기'}
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
