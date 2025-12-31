@@ -209,6 +209,15 @@ export default function WriteFormPage() {
         }
 
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // 입력 시 해당 필드 에러 클리어
+        if (errors[name]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
     };
 
     // 전화번호 포맷
@@ -236,6 +245,24 @@ export default function WriteFormPage() {
         const updated = [...mourners];
         updated[index][field] = value;
         setMourners(updated);
+
+        // 에러 클리어 (첫번째 상주의 name/contact 필드)
+        if (index === 0) {
+            if (field === 'name' && errors.mourner_name) {
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.mourner_name;
+                    return newErrors;
+                });
+            }
+            if (field === 'contact' && errors.mourner_contact) {
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.mourner_contact;
+                    return newErrors;
+                });
+            }
+        }
     };
 
     // 계좌 추가
@@ -1018,6 +1045,13 @@ export default function WriteFormPage() {
                             funeral_home: facility.name,
                             address: facility.address
                         }));
+                        // 에러 클리어
+                        setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.funeral_home;
+                            delete newErrors.address;
+                            return newErrors;
+                        });
                         setFacilityModalOpen(false);
                         // source에 따라 포커스 다르게
                         if (source === 'address') {
