@@ -196,20 +196,18 @@ export default function ViewPage() {
             {copySuccess && <div className="toast">복사되었습니다</div>}
 
             {/* ========================================
-                헤더 섹션 - 訃告
+                헤더 섹션 - 템플릿 이미지 + 동적 텍스트
             ======================================== */}
-            <div className={`header-section ${bugo.template_id === 'flower' ? 'header-dark' : ''}`}>
+            <div className={`header-section template-${bugo.template_id || 'basic'}`}>
                 <img src={getTemplateImage()} alt="" className="header-bg" />
-                <div className="header-overlay">
-                    <div className="ornament-top"></div>
-                    <h1 className="header-hanja">訃告</h1>
-                    <p className="header-message">
+                {/* 동적 텍스트만 오버레이 - 이미지에 謹弔/부고 등 정적 텍스트 포함됨 */}
+                <div className="header-text-overlay">
+                    <p className="header-dynamic-text">
                         故{bugo.deceased_name}님께서 {bugo.death_date ? formatDateShort(bugo.death_date) : ''}<br />
                         별세하셨기에 삼가 알려드립니다.<br />
                         마음으로 따뜻한 위로 부탁드리며<br />
                         고인의 명복을 빌어주시길 바랍니다.
                     </p>
-                    <div className="ornament-bottom"></div>
                 </div>
             </div>
 

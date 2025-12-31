@@ -1,9 +1,18 @@
 /* ========================================
    XD 디자인 정밀 복제 - view.css
-   Canvas: 360 x 1920px
-   Font: NanumMyeongjo
+   Canvas: 360 x 650px (헤더) / 전체 스크롤
+   Font: KoPubWorld바탕체 (XD 스펙), NanumMyeongjo (폴백)
 ======================================== */
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
+/* KoPub 바탕체 - 웹폰트 */
+@font-face {
+    font-family: 'KoPub Batang';
+    src: url('https://cdn.jsdelivr.net/gh/nicediy/kopubwebfonts@master/fonts/KoPubBatang-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
 
 * {
     box-sizing: border-box;
@@ -136,60 +145,79 @@ body {
 }
 
 /* ========================================
-   헤더 섹션 - 訃告
+   헤더 섹션 - 템플릿 이미지 + 동적 텍스트
+   XD 플로우 12 스펙: 360 x 650px 기준
 ======================================== */
 .header-section {
     position: relative;
     width: 360px;
-    min-height: 500px;
+    height: 650px;
     overflow: hidden;
 }
 
 .header-bg {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 
-.header-overlay {
+/* 동적 텍스트 오버레이 - 이미지 위에 고인명/날짜만 표시 */
+.header-text-overlay {
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 32px;
     text-align: center;
+    padding: 0 20px;
 }
 
-/* 한문 訃告 */
-.header-hanja {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 48px;
-    font-weight: 800;
-    color: #111111;
-    letter-spacing: 8px;
-    margin-bottom: 40px;
-}
-
-/* 헤더 메시지 */
-.header-message {
-    font-family: 'Nanum Myeongjo', serif;
+/* 동적 텍스트 스타일 - XD 스펙: KoPubWorld바탕체 Bold 16px, line-height 26px */
+.header-dynamic-text {
+    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
     font-size: 16px;
     font-weight: 700;
-    line-height: 28px;
-    color: #111111;
+    line-height: 26px;
     text-align: center;
 }
 
-/* 어두운 배경 템플릿 (flower) */
-.header-dark .header-hanja {
-    color: #FFFFFF;
+/* ========================================
+   템플릿별 텍스트 위치/색상 (XD 플로우 12 정밀 스펙)
+   위치는 top 기준으로 설정 (본문 텍스트 Y 위치)
+======================================== */
+
+/* Basic (아트보드 8) - 본문 Y: 375px, 색상: #000000 */
+.template-basic .header-text-overlay {
+    top: 375px;
 }
 
-.header-dark .header-message {
+.template-basic .header-dynamic-text {
+    color: #000000;
+}
+
+/* Border (아트보드 9) - 본문 Y: 339px, 색상: #1C1C1C */
+.template-border .header-text-overlay {
+    top: 339px;
+}
+
+.template-border .header-dynamic-text {
+    color: #1C1C1C;
+}
+
+/* Ribbon (아트보드 10) - 본문 Y: 377px, 색상: #3B4551 */
+.template-ribbon .header-text-overlay {
+    top: 377px;
+}
+
+.template-ribbon .header-dynamic-text {
+    color: #3B4551;
+}
+
+/* Flower (아트보드 11) - 본문 Y: 187px, 색상: #FFFFFF */
+.template-flower .header-text-overlay {
+    top: 187px;
+}
+
+.template-flower .header-dynamic-text {
     color: #FFFFFF;
 }
 
