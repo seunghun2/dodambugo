@@ -104,6 +104,9 @@ export default function WriteFormPage() {
         { holder: '', bank: '', number: '' }
     ]);
 
+    // 장지 정보
+    const [showBurial, setShowBurial] = useState(false);
+
     // 영정 사진
     const [showPhoto, setShowPhoto] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
@@ -129,6 +132,7 @@ export default function WriteFormPage() {
             mourners,
             accounts,
             showAccount,
+            showBurial,
             showPhoto,
             photoUrl,
             templateId,
@@ -155,6 +159,7 @@ export default function WriteFormPage() {
                     if (parsed.mourners) setMourners(parsed.mourners);
                     if (parsed.accounts) setAccounts(parsed.accounts);
                     if (parsed.showAccount !== undefined) setShowAccount(parsed.showAccount);
+                    if (parsed.showBurial !== undefined) setShowBurial(parsed.showBurial);
                     if (parsed.showPhoto !== undefined) setShowPhoto(parsed.showPhoto);
                     if (parsed.photoUrl) setPhotoUrl(parsed.photoUrl);
                 }
@@ -481,6 +486,7 @@ export default function WriteFormPage() {
                                     {/* 장례식장 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">장례식장 정보</h2>
+                                        <p className="section-desc">조문객이 방문할 장례식장 정보입니다</p>
 
                                         {/* 장례식장 검색 입력 */}
                                         <div className="form-group">
@@ -551,6 +557,7 @@ export default function WriteFormPage() {
                                     {/* 부고 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">부고 정보</h2>
+                                        <p className="section-desc">고인 및 유가족 정보를 입력해주세요</p>
 
                                         <div className="form-group" data-field="deceased_name">
                                             <label className="form-label required">고인명</label>
@@ -647,9 +654,10 @@ export default function WriteFormPage() {
                                     {/* 추가 상주 */}
                                     <div className="form-section">
                                         <h2 className="section-title">추가 상주</h2>
+                                        <p className="section-desc">함께 상을 치르는 유가족을 추가해주세요</p>
 
                                         {mourners.map((mourner, index) => (
-                                            <div key={index} className="mourner-row" data-field={index === 0 ? 'mourner_name' : undefined}>
+                                            <div key={index} className={`mourner-row ${mourners.length > 1 ? 'has-delete' : ''}`} data-field={index === 0 ? 'mourner_name' : undefined}>
                                                 <select
                                                     className="form-select mourner-relation"
                                                     value={mourner.relationship}
@@ -660,20 +668,13 @@ export default function WriteFormPage() {
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
-                                                <div className="input-with-delete">
-                                                    <input
-                                                        type="text"
-                                                        className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
-                                                        placeholder="성함"
-                                                        value={mourner.name}
-                                                        onChange={(e) => updateMourner(index, 'name', e.target.value)}
-                                                    />
-                                                    {mourners.length > 1 && (
-                                                        <button type="button" className="btn-delete-inline" onClick={() => removeMourner(index)}>
-                                                            <span className="material-symbols-outlined">close</span>
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                <input
+                                                    type="text"
+                                                    className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
+                                                    placeholder="성함"
+                                                    value={mourner.name}
+                                                    onChange={(e) => updateMourner(index, 'name', e.target.value)}
+                                                />
                                                 <input
                                                     type="tel"
                                                     className={`form-input mourner-contact ${index === 0 && errors.mourner_contact ? 'error' : ''}`}
@@ -681,6 +682,11 @@ export default function WriteFormPage() {
                                                     value={mourner.contact}
                                                     onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
                                                 />
+                                                {mourners.length > 1 && (
+                                                    <button type="button" className="btn-delete-mourner" onClick={() => removeMourner(index)}>
+                                                        <span className="material-symbols-outlined">close</span>
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                         {(errors.mourner_name || errors.mourner_contact) && (
@@ -695,6 +701,7 @@ export default function WriteFormPage() {
                                     {/* 일정 정보 */}
                                     <div className="form-section">
                                         <h2 className="section-title">발인/임종 일시</h2>
+                                        <p className="section-desc">장례 일정을 입력해주세요</p>
 
                                         <div className="form-group" data-field="funeral_date">
                                             <label className="form-label required">발인일시</label>
@@ -783,51 +790,47 @@ export default function WriteFormPage() {
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">장지</label>
-                                            <input
-                                                type="text"
-                                                name="burial_place"
-                                                className="form-input"
-                                                placeholder="장지 (예: OO공원묘지)"
-                                                value={formData.burial_place}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
                                     </div>
 
-                                    {/* 추가 옵션 */}
+                                    {/* 조문객에게 안내사항 */}
                                     <div className="form-section">
-                                        <h2 className="section-title">추가 옵션</h2>
+                                        <h2 className="section-title">조문객에게 안내사항</h2>
+                                        <p className="section-desc">조문객에게 전달할 메시지를 작성해주세요</p>
 
                                         <div className="form-group">
-                                            <label className="form-label">인사말</label>
+                                            <label className="form-label">안내사항</label>
                                             <textarea
                                                 name="message"
                                                 className="form-textarea"
-                                                placeholder="조문객들에게 전할 인사말"
+                                                placeholder="뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다."
                                                 rows={4}
                                                 value={formData.message}
                                                 onChange={handleChange}
                                             />
                                         </div>
+                                    </div>
 
-                                        <div className="option-toggle">
-                                            <label className="toggle-label">
+                                    {/* 부의금 계좌 */}
+                                    <div className="form-section">
+                                        <div className="toggle-row">
+                                            <div className="toggle-row-label">
+                                                <span className="material-symbols-outlined">account_balance</span>
+                                                <span>계좌번호 정보</span>
+                                            </div>
+                                            <label className="toggle-switch">
                                                 <input
                                                     type="checkbox"
                                                     checked={showAccount}
                                                     onChange={(e) => setShowAccount(e.target.checked)}
                                                 />
-                                                <span>부의금 계좌 추가</span>
+                                                <span className="toggle-slider"></span>
                                             </label>
                                         </div>
 
                                         {showAccount && (
                                             <div className="account-fields">
                                                 {accounts.map((acc, index) => (
-                                                    <div key={index} className="account-row">
+                                                    <div key={index} className={`account-row ${accounts.length > 1 ? 'has-delete' : ''}`}>
                                                         <input
                                                             type="text"
                                                             className="form-input"
@@ -853,8 +856,8 @@ export default function WriteFormPage() {
                                                             onChange={(e) => updateAccount(index, 'number', e.target.value)}
                                                         />
                                                         {accounts.length > 1 && (
-                                                            <button type="button" className="btn-remove-account" onClick={() => removeAccount(index)}>
-                                                                <span className="material-symbols-outlined">remove_circle</span>
+                                                            <button type="button" className="btn-delete-account" onClick={() => removeAccount(index)}>
+                                                                <span className="material-symbols-outlined">close</span>
                                                             </button>
                                                         )}
                                                     </div>
@@ -865,6 +868,37 @@ export default function WriteFormPage() {
                                                         계좌 추가 ({accounts.length}/5)
                                                     </button>
                                                 )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 장지 정보 */}
+                                    <div className="form-section">
+                                        <div className="toggle-row">
+                                            <div className="toggle-row-label">
+                                                <span className="material-symbols-outlined">park</span>
+                                                <span>장지 정보</span>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={showBurial}
+                                                    onChange={(e) => setShowBurial(e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        {showBurial && (
+                                            <div className="toggle-content">
+                                                <input
+                                                    type="text"
+                                                    name="burial_place"
+                                                    className="form-input"
+                                                    placeholder="장지 (예: OO공원묘지)"
+                                                    value={formData.burial_place}
+                                                    onChange={handleChange}
+                                                />
                                             </div>
                                         )}
                                     </div>
