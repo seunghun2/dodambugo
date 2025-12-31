@@ -34,29 +34,46 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
         }
     }, [isOpen, activeTab]);
 
-    // 장례식장 검색
+    const [allFacilities, setAllFacilities] = useState<Facility[]>([]);
+    const [facilitiesLoaded, setFacilitiesLoaded] = useState(false);
+
+    // 모달 열릴 때 전체 시설 한 번 로드
+    useEffect(() => {
+        if (isOpen && !facilitiesLoaded) {
+            const loadFacilities = async () => {
+                setIsLoading(true);
+                try {
+                    const res = await fetch('/facilities.json');
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setAllFacilities(data);
+                        setFacilitiesLoaded(true);
+                    }
+                } catch (err) {
+                    console.error('Load facilities error:', err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadFacilities();
+        }
+    }, [isOpen, facilitiesLoaded]);
+
+    // 장례식장 검색 (로컬 필터링)
     useEffect(() => {
         if (!searchQuery || searchQuery.length < 2 || activeTab !== 'facility') {
             setResults([]);
             return;
         }
 
-        const timer = setTimeout(async () => {
-            setIsLoading(true);
-            try {
-                const res = await fetch(`/api/facilities/search?q=${encodeURIComponent(searchQuery)}`);
-                const data = await res.json();
-                setResults(Array.isArray(data) ? data : []);
-            } catch (err) {
-                console.error('Search error:', err);
-                setResults([]);
-            } finally {
-                setIsLoading(false);
-            }
-        }, 150);
+        const query = searchQuery.toLowerCase();
+        const filtered = allFacilities.filter(f =>
+            f.name?.toLowerCase().includes(query) ||
+            f.address?.toLowerCase().includes(query)
+        ).slice(0, 20);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery, activeTab]);
+        setResults(filtered);
+    }, [searchQuery, activeTab, allFacilities]);
 
     // 다음 주소검색 초기화
     useEffect(() => {
