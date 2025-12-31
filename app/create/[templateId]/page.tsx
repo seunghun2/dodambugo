@@ -649,6 +649,22 @@ export default function WriteFormPage() {
                                         </div>
                                         {errors.relationship && <p className="field-error">{errors.relationship}</p>}
                                         {errors.primary_mourner && <p className="field-error">{errors.primary_mourner}</p>}
+
+                                        {/* 계좌 입력 */}
+                                        <div className="account-input-row">
+                                            <span className="material-symbols-outlined">account_balance</span>
+                                            <input
+                                                type="text"
+                                                className="account-input-field"
+                                                placeholder="계좌를 입력해주세요."
+                                                value={accounts[0]?.bank && accounts[0]?.number ? `${accounts[0].bank} ${accounts[0].number}` : ''}
+                                                readOnly
+                                                onClick={() => setShowAccount(true)}
+                                            />
+                                            <button type="button" className="btn-account-edit" onClick={() => setShowAccount(true)}>
+                                                {accounts[0]?.bank && accounts[0]?.number ? '변경하기' : '추가하기'}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* 추가 상주 */}

@@ -5381,3 +5381,75 @@ section {
         justify-content: center;
     }
 }
+
+/* ========================================
+   계좌 입력 행 (대표상주 아래)
+   ======================================== */
+
+.account-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 14px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.account-input-row .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--gray-400);
+    flex-shrink: 0;
+}
+
+.account-input-field {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--gray-500);
+    outline: none;
+    cursor: pointer;
+}
+
+.account-input-field::placeholder {
+    color: var(--gray-400);
+}
+
+.btn-account-edit {
+    padding: 2px 20px;
+    background: white;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.btn-account-edit:hover {
+    background: var(--gray-100);
+}
+
+/* 계좌 상세 입력 필드 */
+.account-detail-fields {
+    margin-top: 12px;
+    padding: 16px;
+    background: var(--gray-50);
+    border-radius: 8px;
+}
+
+.account-detail-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.account-detail-row .form-select,
+.account-detail-row .form-input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+}
