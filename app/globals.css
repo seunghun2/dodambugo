@@ -3612,7 +3612,7 @@ section {
 }
 
 .create-container {
-    max-width: 900px;
+    max-width: 500px;
     margin: 0 auto;
     padding: 0 16px;
 }
@@ -5642,6 +5642,7 @@ section {
 .mourner-block .account-input-row {
     margin-top: 0;
 }
+
 /* 사용중 버튼 스타일 */
 .btn-current-template {
     display: flex;
