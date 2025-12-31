@@ -5659,3 +5659,8 @@ section {
 .template-slide.current {
     border: 2px solid var(--primary);
 }
+
+/* 검색 하이라이트 밑줄 제거 */
+mark {
+    text-decoration: none;
+}
