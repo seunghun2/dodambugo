@@ -647,7 +647,7 @@ function initFormSubmit() {
     });
 }
 
-// 부고장 고유번호 생성 (4자리) - Supabase 사용
+// 부고장 고유번호 생성 (4자리)
 async function generateBugoNumber() {
     // 1000-9999 사이의 랜덤 숫자 생성
     let bugoNumber;
@@ -658,21 +658,16 @@ async function generateBugoNumber() {
     while (!isUnique && attempts < maxAttempts) {
         bugoNumber = String(Math.floor(1000 + Math.random() * 9000));
 
-        // Supabase로 중복 확인
+        // 중복 확인
         try {
-            const { data, error } = await supabase
-                .from('bugo')
-                .select('id')
-                .eq('bugo_number', bugoNumber)
-                .limit(1);
+            const response = await fetch(`tables/bugo?search=${bugoNumber}&limit=1`);
+            const data = await response.json();
 
-            if (error) {
-                console.error('부고번호 중복 확인 실패:', error);
-            } else if (!data || data.length === 0) {
+            if (data.data.length === 0) {
                 isUnique = true;
             }
         } catch (error) {
-            console.error('부고번호 중복 확인 오류:', error);
+            console.error('부고번호 중복 확인 실패:', error);
         }
 
         attempts++;
@@ -704,10 +699,10 @@ function hideLoading() {
     }
 }
 
-// 부고 데이터 저장 (Supabase 사용)
+// 부고 데이터 저장
 async function saveBugoData(data) {
     try {
-        console.log('✅ Supabase 저장 시작:', data);
+        console.log('saveBugoData 함수 시작:', data);
         showLoading(); // 로딩 표시
 
         // 부고장 고유번호 생성 (4자리)
@@ -747,38 +742,34 @@ async function saveBugoData(data) {
             photo_url: data.photo_url || null
         };
 
-        console.log('📤 Supabase로 전송할 데이터:', saveData);
+        console.log('서버로 전송할 데이터:', saveData);
 
-        // Supabase를 사용하여 데이터 저장
-        let result;
-        if (isEditMode && editBugoId) {
-            // 수정 모드: UPDATE
-            const { data: updatedData, error } = await supabase
-                .from('bugo')
-                .update(saveData)
-                .eq('id', editBugoId)
-                .select()
-                .single();
+        // 수정 모드면 PUT, 생성 모드면 POST
+        const url = isEditMode ? `tables/bugo/${editBugoId}` : 'tables/bugo';
+        const method = isEditMode ? 'PUT' : 'POST';
 
-            if (error) throw error;
-            result = updatedData;
-            console.log('✅ Supabase UPDATE 성공:', result);
-        } else {
-            // 생성 모드: INSERT
-            const { data: insertedData, error } = await supabase
-                .from('bugo')
-                .insert([saveData])
-                .select()
-                .single();
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        });
 
-            if (error) throw error;
-            result = insertedData;
-            console.log('✅ Supabase INSERT 성공:', result);
+        console.log('서버 응답 상태:', response.status, response.statusText);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('서버 응답 오류:', errorData);
+            throw new Error(errorData.message || '부고장 저장에 실패했습니다.');
         }
 
+        const savedData = await response.json();
+        console.log('부고장 저장 성공:', savedData);
+
         // ID가 없으면 오류
-        if (!result || !result.id) {
-            console.error('❌ 저장된 데이터에 ID가 없습니다:', result);
+        if (!savedData.id) {
+            console.error('저장된 데이터에 ID가 없습니다:', savedData);
             throw new Error('부고장 ID를 받지 못했습니다.');
         }
 
@@ -801,11 +792,11 @@ async function saveBugoData(data) {
 
         // Step 3으로 이동하여 공유 화면 표시
         setTimeout(() => {
-            displayShareScreen(result);
+            displayShareScreen(savedData);
         }, 500);
 
     } catch (error) {
-        console.error('❌ Supabase 저장 오류:', error);
+        console.error('부고장 저장 오류:', error);
         hideLoading(); // 오류 시에도 로딩 숨김
         showNotification('부고장 생성 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     }

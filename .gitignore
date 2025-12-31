@@ -11,3 +11,6 @@
 # Temporary files
 *.tmp
 *.swp
+
+# Design files
+*.xd

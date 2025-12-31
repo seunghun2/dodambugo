@@ -219,7 +219,7 @@
         <!-- 탭 네비게이션 -->
         <div class="tab-navigation">
             <button class="tab-btn active" onclick="switchTab('info')">
-                <span class="material-symbols-outlined">description</span>
+                <span class="material-symbols-outlined">info</span>
                 <span>부고정보</span>
             </button>
             <button class="tab-btn" onclick="switchTab('guestbook')">
@@ -475,7 +475,7 @@
         function toggleTheme() {
             const html = document.documentElement;
             const isDark = html.classList.contains('dark');
-
+            
             if (isDark) {
                 html.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
@@ -484,17 +484,17 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-
+        
         // 페이지 로드 시 테마 복원
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
+            
             if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                 document.documentElement.classList.add('dark');
             }
         });
-
+        
         // 시스템 다크모드 변경 감지
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
             if (!localStorage.getItem('theme')) {

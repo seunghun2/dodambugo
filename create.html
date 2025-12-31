@@ -4,16 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="도담부고 부고장 작성 - 3분 만에 품격있는 모바일 부고장 작성">
     <title>부고장 작성 - 도담부고</title>
-
-    <!-- DNS Prefetch -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-    <link rel="dns-prefetch" href="//t1.daumcdn.net">
-    <link rel="dns-prefetch" href="//dapi.kakao.com">
-    <link rel="dns-prefetch" href="//tbteghoppechzotdojna.supabase.co">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/create-detailed.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -240,9 +231,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">연세</label>
-                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="age" class="form-input"
-                                    placeholder="세" maxlength="3"
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                <input type="number" name="age" class="form-input" placeholder="세" min="1" max="999"
+                                    oninput="if(this.value.length > 3) this.value = this.value.slice(0, 3);">
                             </div>
                         </div>
 
