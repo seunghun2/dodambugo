@@ -1628,7 +1628,7 @@ section {
 .form-textarea {
     width: 100%;
     padding: 12px 14px;
-    font-size: 14px;
+    font-size: 16px;
     border: 1px solid var(--gray-300);
     border-radius: 8px;
     transition: all var(--transition-base);
@@ -4172,7 +4172,7 @@ section {
     padding: 12px 14px;
     border: 1px solid var(--gray-200);
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--gray-900);
     background: white;
     transition: all 0.2s ease;
@@ -5527,7 +5527,7 @@ section {
     padding: 14px 16px;
     border: 1px solid var(--gray-200);
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
     width: 100%;
@@ -5554,7 +5554,7 @@ section {
     padding: 14px 16px;
     border: 1px solid var(--gray-200);
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16px;
     outline: none;
     margin-bottom: 20px;
 }
