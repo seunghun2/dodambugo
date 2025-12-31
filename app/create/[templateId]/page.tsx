@@ -873,68 +873,6 @@ export default function WriteFormPage() {
                                         </div>
                                     </div>
 
-                                    {/* 부의금 계좌 */}
-                                    <div className="form-section">
-                                        <div className="toggle-row">
-                                            <div className="toggle-row-label">
-                                                <span className="material-symbols-outlined">account_balance</span>
-                                                <span>계좌번호 정보</span>
-                                            </div>
-                                            <label className="toggle-switch">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={showAccount}
-                                                    onChange={(e) => setShowAccount(e.target.checked)}
-                                                />
-                                                <span className="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        {showAccount && (
-                                            <div className="account-fields">
-                                                {accounts.map((acc, index) => (
-                                                    <div key={index} className={`account-row ${accounts.length > 1 ? 'has-delete' : ''}`}>
-                                                        <input
-                                                            type="text"
-                                                            className="form-input"
-                                                            placeholder="예금주"
-                                                            value={acc.holder}
-                                                            onChange={(e) => updateAccount(index, 'holder', e.target.value)}
-                                                        />
-                                                        <select
-                                                            className="form-select"
-                                                            value={acc.bank}
-                                                            onChange={(e) => updateAccount(index, 'bank', e.target.value)}
-                                                        >
-                                                            <option value="">은행 선택</option>
-                                                            {bankOptions.map(bank => (
-                                                                <option key={bank} value={bank}>{bank}</option>
-                                                            ))}
-                                                        </select>
-                                                        <input
-                                                            type="text"
-                                                            className="form-input"
-                                                            placeholder="계좌번호"
-                                                            value={acc.number}
-                                                            onChange={(e) => updateAccount(index, 'number', e.target.value)}
-                                                        />
-                                                        {accounts.length > 1 && (
-                                                            <button type="button" className="btn-delete-account" onClick={() => removeAccount(index)}>
-                                                                <span className="material-symbols-outlined">close</span>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                                {accounts.length < 5 && (
-                                                    <button type="button" className="btn-add-account" onClick={addAccount}>
-                                                        <span className="material-symbols-outlined">add_circle</span>
-                                                        계좌 추가 ({accounts.length}/5)
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
                                     {/* 장지 정보 */}
                                     <div className="form-section">
                                         <div className="toggle-row">
