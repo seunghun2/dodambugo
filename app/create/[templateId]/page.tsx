@@ -24,7 +24,10 @@ const religionOptions = ['불교', '기독교', '천주교', '무교', '기타']
 // 은행 옵션
 const bankOptions = [
     'KB국민은행', '신한은행', '우리은행', '하나은행', 'NH농협은행',
-    'IBK기업은행', 'SC제일은행', '카카오뱅크', '케이뱅크', '토스뱅크'
+    'IBK기업은행', 'SC제일은행', '카카오뱅크', '케이뱅크', '토스뱅크',
+    '새마을금고', '신협', '우체국', '수협', '광주은행', '전북은행',
+    '경남은행', '부산은행', '대구은행', '제주은행', '씨티은행',
+    'KDB산업은행', '저축은행', '산림조합'
 ];
 
 // 템플릿 정보
@@ -179,6 +182,38 @@ export default function WriteFormPage() {
             }
         }
     }, [templateId]);
+
+    // 복제 데이터 로드
+    useEffect(() => {
+        const duplicateData = sessionStorage.getItem('duplicateBugo');
+        if (duplicateData) {
+            try {
+                const parsed = JSON.parse(duplicateData);
+                setFormData(prev => ({
+                    ...prev,
+                    deceased_name: parsed.deceased_name || '',
+                    age: parsed.age || '',
+                    funeral_home: parsed.funeral_home || '',
+                    room_number: parsed.room_number || '',
+                    funeral_date: parsed.funeral_date || '',
+                    funeral_time: parsed.funeral_time || '',
+                    address: parsed.address || '',
+                    message: '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                }));
+                // 복제 데이터 삭제
+                sessionStorage.removeItem('duplicateBugo');
+                // 대표상주 입력란에 포커스
+                if (parsed.focusField === 'primary_mourner') {
+                    setTimeout(() => {
+                        const input = document.querySelector('input[name="primary_mourner"]') as HTMLInputElement;
+                        if (input) input.focus();
+                    }, 500);
+                }
+            } catch (e) {
+                console.log('Duplicate data parse error');
+            }
+        }
+    }, []);
 
     // 수정 모드: 기존 부고장 데이터 불러오기
     useEffect(() => {
@@ -407,6 +442,52 @@ export default function WriteFormPage() {
         }).open();
     };
 
+    // 은행별 계좌번호 자동 포맷팅
+    const formatAccountNumber = (bank: string, number: string): string => {
+        const digits = number.replace(/[^0-9]/g, '');
+
+        const formats: Record<string, number[]> = {
+            '국민은행': [6, 2, 6],
+            'KB국민은행': [6, 2, 6],
+            '신한은행': [3, 3, 6],
+            '우리은행': [4, 3, 6],
+            '하나은행': [3, 6, 5],
+            '농협': [3, 4, 4, 2],
+            'NH농협': [3, 4, 4, 2],
+            'NH농협은행': [3, 4, 4, 2],
+            '기업은행': [3, 6, 2, 3],
+            'IBK기업은행': [3, 6, 2, 3],
+            'SC제일은행': [3, 2, 6],
+            '카카오뱅크': [4, 2, 7],
+            '케이뱅크': [3, 3, 6],
+            '토스뱅크': [4, 4, 4],
+            '새마을금고': [4, 2, 6],
+            '신협': [3, 3, 6],
+            '우체국': [6, 2, 6],
+            '수협': [3, 4, 4, 2],
+            '광주은행': [3, 3, 6],
+            '전북은행': [3, 3, 6],
+            '경남은행': [3, 4, 6],
+            '부산은행': [3, 4, 6],
+            '대구은행': [3, 4, 6],
+            '제주은행': [3, 3, 6],
+            '씨티은행': [3, 6, 3],
+            'KDB산업은행': [3, 6, 4],
+        };
+
+        const pattern = formats[bank];
+        if (!pattern) return digits; // 패턴 없으면 그대로
+
+        let result = '';
+        let pos = 0;
+        for (let i = 0; i < pattern.length && pos < digits.length; i++) {
+            const chunk = digits.slice(pos, pos + pattern[i]);
+            result += (i > 0 ? '-' : '') + chunk;
+            pos += pattern[i];
+        }
+        return result;
+    };
+
     // 폼 제출
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -439,6 +520,7 @@ export default function WriteFormPage() {
         if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
         if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
         if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
+        if (!formData.death_time || formData.death_time === '00:00') newErrors.death_time = '임종 시간을 입력해주세요';
 
         // 시간 유효성 검사 (24시간 이상 불가)
         if (formData.funeral_time && formData.funeral_time !== '00:00') {
@@ -676,34 +758,36 @@ export default function WriteFormPage() {
                                             </div>
                                         </div>
 
-                                        {/* 장례식장명 + 호실 */}
-                                        <div className="form-row">
-                                            <div className="form-group" data-field="funeral_home">
-                                                <input
-                                                    ref={funeralHomeRef}
-                                                    type="text"
-                                                    name="funeral_home"
-                                                    className={`form-input ${errors.funeral_home ? 'error' : ''}`}
-                                                    placeholder="장례식장명"
-                                                    value={formData.funeral_home}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
-                                            </div>
+                                        {/* 장례식장명 + 호실 (주소 선택 후 표시) */}
+                                        {formData.address && (
+                                            <div className="form-row">
+                                                <div className="form-group" data-field="funeral_home">
+                                                    <input
+                                                        ref={funeralHomeRef}
+                                                        type="text"
+                                                        name="funeral_home"
+                                                        className={`form-input ${errors.funeral_home ? 'error' : ''}`}
+                                                        placeholder="장례식장명"
+                                                        value={formData.funeral_home}
+                                                        onChange={handleChange}
+                                                    />
+                                                    {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
+                                                </div>
 
-                                            <div className="form-group" data-field="room_number">
-                                                <input
-                                                    ref={roomNumberRef}
-                                                    type="text"
-                                                    name="room_number"
-                                                    className={`form-input ${errors.room_number ? 'error' : ''}`}
-                                                    placeholder="호실(예시:102호)"
-                                                    value={formData.room_number}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                <div className="form-group" data-field="room_number">
+                                                    <input
+                                                        ref={roomNumberRef}
+                                                        type="text"
+                                                        name="room_number"
+                                                        className={`form-input ${errors.room_number ? 'error' : ''}`}
+                                                        placeholder="호실(예시:102호)"
+                                                        value={formData.room_number}
+                                                        onChange={handleChange}
+                                                    />
+                                                    {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* 부고 정보 */}
@@ -961,7 +1045,7 @@ export default function WriteFormPage() {
                                         </div>
 
                                         <div className="form-group">
-                                            <label className="form-label">임종일시</label>
+                                            <label className="form-label required">임종일시</label>
                                             <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
                                                 <div style={{ flex: 6 }}>
                                                     <DatePickerInput
@@ -1263,7 +1347,19 @@ export default function WriteFormPage() {
                                 <select
                                     className="account-modal-select"
                                     value={tempAccount.bank}
-                                    onChange={(e) => setTempAccount({ ...tempAccount, bank: e.target.value })}
+                                    onChange={(e) => {
+                                        setTempAccount({ ...tempAccount, bank: e.target.value });
+                                        // 포커스 이동
+                                        setTimeout(() => {
+                                            const holderVal = tempAccount.holder || formData.primary_mourner;
+                                            if (holderVal) {
+                                                document.getElementById('account-number-input')?.focus();
+                                            } else {
+                                                document.getElementById('account-holder-input')?.focus();
+                                            }
+                                        }, 50);
+                                    }}
+                                    autoFocus
                                 >
                                     <option value="">은행명</option>
                                     {bankOptions.map(bank => (
@@ -1271,6 +1367,7 @@ export default function WriteFormPage() {
                                     ))}
                                 </select>
                                 <input
+                                    id="account-holder-input"
                                     type="text"
                                     className="account-modal-input"
                                     placeholder="예금주"
@@ -1280,12 +1377,16 @@ export default function WriteFormPage() {
                             </div>
 
                             <input
+                                id="account-number-input"
                                 type="text"
                                 className="account-modal-input-full"
                                 placeholder="계좌번호를 입력해주세요"
                                 inputMode="numeric"
                                 value={tempAccount.number}
-                                onChange={(e) => setTempAccount({ ...tempAccount, number: e.target.value })}
+                                onChange={(e) => {
+                                    const formatted = formatAccountNumber(tempAccount.bank, e.target.value);
+                                    setTempAccount({ ...tempAccount, number: formatted });
+                                }}
                             />
 
                             <div className="account-modal-buttons">
@@ -1341,7 +1442,18 @@ export default function WriteFormPage() {
                                 <select
                                     className="account-modal-select"
                                     value={tempMournerAccount.bank}
-                                    onChange={(e) => setTempMournerAccount({ ...tempMournerAccount, bank: e.target.value })}
+                                    onChange={(e) => {
+                                        setTempMournerAccount({ ...tempMournerAccount, bank: e.target.value });
+                                        // 포커스 이동
+                                        setTimeout(() => {
+                                            if (tempMournerAccount.holder) {
+                                                document.getElementById('mourner-account-number-input')?.focus();
+                                            } else {
+                                                document.getElementById('mourner-account-holder-input')?.focus();
+                                            }
+                                        }, 50);
+                                    }}
+                                    autoFocus
                                 >
                                     <option value="">은행명</option>
                                     {bankOptions.map(bank => (
@@ -1349,6 +1461,7 @@ export default function WriteFormPage() {
                                     ))}
                                 </select>
                                 <input
+                                    id="mourner-account-holder-input"
                                     type="text"
                                     className="account-modal-input"
                                     placeholder="예금주"
@@ -1358,12 +1471,16 @@ export default function WriteFormPage() {
                             </div>
 
                             <input
+                                id="mourner-account-number-input"
                                 type="text"
                                 className="account-modal-input-full"
                                 placeholder="계좌번호를 입력해주세요"
                                 inputMode="numeric"
                                 value={tempMournerAccount.number}
-                                onChange={(e) => setTempMournerAccount({ ...tempMournerAccount, number: e.target.value })}
+                                onChange={(e) => {
+                                    const formatted = formatAccountNumber(tempMournerAccount.bank, e.target.value);
+                                    setTempMournerAccount({ ...tempMournerAccount, number: formatted });
+                                }}
                             />
 
                             <div className="account-modal-buttons">

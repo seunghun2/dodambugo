@@ -79,6 +79,24 @@ export default function CompletePage() {
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 
+    const duplicateBugo = () => {
+        if (!bugo) return;
+        // 복제할 데이터 저장 (상주 정보 제외)
+        const duplicateData = {
+            deceased_name: bugo.deceased_name,
+            age: bugo.age,
+            funeral_home: bugo.funeral_home,
+            room_number: bugo.room_number,
+            funeral_date: bugo.funeral_date,
+            funeral_time: bugo.funeral_time,
+            address: bugo.address,
+            // 상주 정보는 비우고 포커스하도록
+            focusField: 'primary_mourner'
+        };
+        sessionStorage.setItem('duplicateBugo', JSON.stringify(duplicateData));
+        router.push('/create/1'); // 기본 템플릿으로 이동
+    };
+
     if (loading) {
         return (
             <div className="complete-loading">
@@ -116,10 +134,10 @@ export default function CompletePage() {
             {/* 헤더 */}
             <header className="complete-header">
                 <button className="btn-back" onClick={() => router.push('/')}>
-                    <span className="material-symbols-outlined">chevron_left</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
                 </button>
-                <span className="header-spacer"></span>
-                <Link href={bugoUrl} className="btn-sample">부고장 샘플</Link>
             </header>
 
             {/* 메인 컨텐츠 */}
@@ -144,11 +162,11 @@ export default function CompletePage() {
                         <span className="info-value">{bugo.funeral_home || '-'} {bugo.room_number || ''}</span>
                     </div>
                     <div className="info-row">
-                        <span className="info-label">발인일</span>
+                        <span className="info-label">발인일시</span>
                         <span className="info-value">{formatDate(bugo.funeral_date, bugo.funeral_time)}</span>
                     </div>
                     <div className="info-row">
-                        <span className="info-label">빈소</span>
+                        <span className="info-label">주소</span>
                         <span className="info-value">{bugo.address || '-'}</span>
                     </div>
                     <div className="info-row">
@@ -190,7 +208,7 @@ export default function CompletePage() {
                 {/* 복제 배너 */}
                 <div className="copy-banner">
                     <p>부고장을 복제하여 다른 이름으로 변경하여 사용하실 수 있습니다</p>
-                    <button className="btn-copy-bugo">복제하기</button>
+                    <button className="btn-copy-bugo" onClick={duplicateBugo}>복제하기</button>
                 </div>
             </main>
         </div>
