@@ -425,9 +425,10 @@ export default function WriteFormPage() {
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
         if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
+        if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
 
         // 시간 유효성 검사 (24시간 이상 불가)
-        if (formData.funeral_time) {
+        if (formData.funeral_time && formData.funeral_time !== '00:00') {
             const [hours] = formData.funeral_time.split(':');
             if (parseInt(hours) >= 24) newErrors.funeral_time = '시간을 잘못 입력했습니다 (00~23시)';
         }
