@@ -5672,11 +5672,15 @@ section {
 
 /* 검색 하이라이트 밑줄 제거 */
 mark {
-    text-decoration: none;
+    text-decoration: none !important;
 }
+
 /* iOS 모든 인풋 확대 방지 */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
         font-size: 16px !important;
     }
 }
