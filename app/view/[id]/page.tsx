@@ -260,19 +260,34 @@ export default function ViewPage() {
             <section className="section">
                 <h2 className="section-title">상주</h2>
                 <div className="mourners-table">
-                    {mournersList.map((m, i) => (
-                        <div className="mourner-row" key={i}>
-                            <span className="mourner-rel">{m.relationship}</span>
-                            <span className="mourner-name">{m.name}</span>
-                            {m.contact && (
-                                <a href={`tel:${m.contact}`} className="mourner-tel">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9E8566" strokeWidth="2">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                                    </svg>
-                                </a>
-                            )}
-                        </div>
-                    ))}
+                    {(() => {
+                        // 관계별로 그룹핑
+                        const grouped: Record<string, Array<{ name: string; contact: string }>> = {};
+                        mournersList.forEach(m => {
+                            if (!grouped[m.relationship]) grouped[m.relationship] = [];
+                            grouped[m.relationship].push({ name: m.name, contact: m.contact });
+                        });
+                        return Object.entries(grouped).map(([rel, names], i) => (
+                            <div className="mourner-row" key={i}>
+                                <span className="mourner-rel">{rel}</span>
+                                <span className="mourner-names">
+                                    {names.map((n, j) => (
+                                        <span key={j}>
+                                            {j > 0 && ', '}
+                                            {n.name}
+                                            {n.contact && (
+                                                <a href={`tel:${n.contact}`} className="mourner-tel-inline">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9E8566" strokeWidth="2">
+                                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                                    </svg>
+                                                </a>
+                                            )}
+                                        </span>
+                                    ))}
+                                </span>
+                            </div>
+                        ));
+                    })()}
                 </div>
             </section>
 

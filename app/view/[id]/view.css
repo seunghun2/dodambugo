@@ -399,6 +399,15 @@ body {
     color: #444444;
 }
 
+/* 이름들 (그룹핑) */
+.mourner-names {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
 /* 전화 아이콘 */
 .mourner-tel {
     display: flex;
@@ -414,6 +423,21 @@ body {
 .mourner-tel svg {
     width: 20px;
     height: 20px;
+}
+
+/* 인라인 전화 아이콘 (작게) */
+.mourner-tel-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+.mourner-tel-inline svg {
+    width: 14px;
+    height: 14px;
 }
 
 /* ========================================
