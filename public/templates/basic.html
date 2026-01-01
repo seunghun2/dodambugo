@@ -5,292 +5,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>기본형 부고장 미리보기 - 도담부고</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap"
-        rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        rel="stylesheet">
-    <link rel="stylesheet" href="../css/view-toss.css">
-    <link rel="stylesheet" href="../css/view-overlay.css">
-    <style>
-        .bugo-view {
-            display: block;
-            padding-bottom: 40px;
-        }
-
-        .bugo-actions,
-        .fixed-flower-button,
-        .bottom-actions {
-            display: none !important;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #E5E8EB;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .dark .theme-toggle {
-            background: rgba(44, 44, 46, 0.9);
-            border-color: #3A3A3C;
-        }
-
-        .theme-toggle .material-symbols-outlined {
-            font-size: 24px;
-            color: #191F28;
-        }
-
-        .dark .theme-toggle .material-symbols-outlined {
-            color: #F9FAFB;
-        }
-
-        .theme-toggle .moon {
-            display: none;
-        }
-
-        .dark .theme-toggle .sun {
-            display: none;
-        }
-
-        .dark .theme-toggle .moon {
-            display: block;
-        }
-
-        .tab-navigation {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #F2F4F6;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .dark .tab-navigation {
-            background: #1C1C1E;
-            border-color: #2C2C2E;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 16px;
-            background: none;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #8B95A1;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab-btn.active {
-            color: #191F28;
-            border-bottom-color: #191F28;
-        }
-
-        .dark .tab-btn.active {
-            color: #FFFFFF;
-            border-bottom-color: #FFFFFF;
-        }
-
-        .guestbook-content {
-            display: none;
-        }
-
-        .guestbook-content.active {
-            display: block;
-        }
-
-        .bugo-content {
-            display: block;
-        }
-
-        .bugo-content.hidden {
-            display: none;
-        }
-
-        .guestbook-empty {
-            text-align: center;
-            padding: 60px 24px;
-            color: #8B95A1;
-        }
-
-        .guestbook-empty .material-symbols-outlined {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .guestbook-form {
-            padding: 24px;
-        }
-
-        .guestbook-form input,
-        .guestbook-form textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #E5E8EB;
-            border-radius: 12px;
-            font-size: 15px;
-            margin-bottom: 12px;
-            box-sizing: border-box;
-        }
-
-        .dark .guestbook-form input,
-        .dark .guestbook-form textarea {
-            background: #2C2C2E;
-            border-color: #3A3A3C;
-            color: white;
-        }
-
-        .guestbook-form textarea {
-            min-height: 120px;
-            resize: none;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: #3182F6;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="preview.css">
 </head>
 
 <body>
-    <button class="theme-toggle" onclick="document.documentElement.classList.toggle('dark')">
-        <span class="material-symbols-outlined sun">light_mode</span>
-        <span class="material-symbols-outlined moon">dark_mode</span>
-    </button>
+    <main class="view-page">
+        <div class="funeral-home-header">서울 대한민국 장례식장</div>
 
-    <main class="bugo-view">
-        <div class="bugo-header">
-            <img src="../images/template-basic.png" alt="기본형 부고장">
-            <div class="text-overlay">
-                <p class="overlay-text overlay-full-message" style="display: block;">
-                    故홍길동님께서 11월 25일<br>별세하셨기에 삼가 알려드립니다.<br>마음으로 따뜻한 위로 부탁드리며<br>고인의 명복을 빌어주시길 바랍니다.
+        <div class="header-section">
+            <img src="../images/template-basic.png" alt="기본형 부고장" class="header-bg">
+            <div class="header-text-overlay">
+                <p class="header-dynamic-text">
+                    故홍길동님께서 12월 25일<br>
+                    별세하셨기에 삼가 알려드립니다.<br>
+                    마음으로 따뜻한 위로 부탁드리며<br>
+                    고인의 명복을 빌어주시길 바랍니다.
                 </p>
             </div>
         </div>
 
-        <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchTab('info')">
-                <span class="material-symbols-outlined">description</span>
-                <span>부고정보</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('guestbook')">
-                <span class="material-symbols-outlined">edit_note</span>
-                <span>방명록</span>
-            </button>
-        </div>
+        <div class="section-divider"></div>
 
-        <div class="bugo-content" id="infoContent">
-            <section class="content-section">
-                <h3 class="content-title">고인</h3>
-                <div class="info-list">
-                    <div class="info-row"><span class="info-label">고인</span><span class="info-value">故 홍길동</span></div>
-                    <div class="info-row"><span class="info-label">향년</span><span class="info-value">75세</span></div>
-                    <div class="info-row"><span class="info-label">성별</span><span class="info-value">남</span></div>
-                    <div class="info-row"><span class="info-label">종교</span><span class="info-value">불교</span></div>
+        <section class="section">
+            <h2 class="section-title">빈소 오시는 길</h2>
+            <div class="address-row">
+                <p class="address-text">서울특별시 용산구 한강대로 405</p>
+                <button class="btn-copy-address">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    주소 복사
+                </button>
+            </div>
+
+            <div class="map-container">
+                <img src="../images/map-preview.png" style="width:100%;height:100%;object-fit:cover;" alt="지도">
+            </div>
+
+            <div class="navi-buttons">
+                <button class="navi-btn">
+                    <img src="../images/ic_naver_map.png" alt="네이버지도" class="navi-icon">
+                    <span>네이버지도</span>
+                </button>
+                <button class="navi-btn">
+                    <img src="../images/ic_kakao_navi.png" alt="카카오내비" class="navi-icon">
+                    <span>카카오내비</span>
+                </button>
+            </div>
+
+            <div class="funeral-box">
+                <p class="funeral-name">서울 대한민국 장례식장</p>
+                <p class="funeral-room">특1호실</p>
+            </div>
+
+            <a href="tel:02-0000-0000" class="call-funeral-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#666" stroke="none">
+                    <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <div class="call-btn-text">
+                    <span class="call-btn-title">장례식장에 전화하기</span>
+                    <span class="call-btn-number">02-0000-0000</span>
                 </div>
-            </section>
-            <section class="content-section">
-                <h3 class="content-title">상주</h3>
-                <div class="mourners-list">
-                    <div class="mourner-card">
-                        <div class="mourner-main"><span class="mourner-relation">장남</span><span
-                                class="mourner-name">홍철수</span></div>
-                        <div class="mourner-contact"><a href="tel:010-1234-5678">010-1234-5678</a></div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+        </section>
+
+        <section class="section">
+            <div class="funeral-info-table">
+                <div class="funeral-info-row funeral-highlight">
+                    <span class="funeral-info-label">발인</span>
+                    <span class="funeral-info-value">2025.12.27(토) 09:00</span>
+                </div>
+                <div class="funeral-info-divider"></div>
+                <div class="funeral-info-row">
+                    <span class="funeral-info-label">입관</span>
+                    <span class="funeral-info-value">2025.12.26(금) 18:00</span>
+                </div>
+                <div class="funeral-info-divider"></div>
+                <div class="funeral-info-row burial-section">
+                    <span class="funeral-info-label">장지</span>
+                    <div class="burial-list">
+                        <div class="burial-item">
+                            <div class="burial-box"><span class="burial-label">1차장지</span></div>
+                            <span class="burial-text">분당묘지공원</span>
+                        </div>
                     </div>
                 </div>
-            </section>
-            <section class="content-section">
-                <h3 class="content-title">빈소</h3>
-                <div class="info-list">
-                    <div class="info-row"><span class="info-label">장례식장</span><span class="info-value">서울아산병원
-                            장례식장</span></div>
-                    <div class="info-row"><span class="info-label">호실</span><span class="info-value">특1호</span></div>
-                    <div class="info-row"><span class="info-label">연락처</span><span class="info-value"><a
-                                href="tel:02-3010-2000">02-3010-2000</a></span></div>
-                    <div class="info-row"><span class="info-label">주소</span><span class="info-value">서울시 송파구 올림픽로 43길
-                            88</span></div>
+                <div class="funeral-info-divider"></div>
+                <div class="funeral-info-row">
+                    <span class="funeral-info-label">안내사항</span>
+                    <span class="funeral-info-value">뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.</span>
                 </div>
-            </section>
-            <section class="content-section">
-                <h3 class="content-title">일정</h3>
-                <div class="info-list">
-                    <div class="info-row"><span class="info-label">별세</span><span class="info-value">2024년 11월 8일</span>
-                    </div>
-                    <div class="info-row"><span class="info-label">발인</span><span class="info-value">2024년 11월 10일 오전
-                            8시</span></div>
-                </div>
-            </section>
-            <section class="content-section">
-                <h3 class="content-title">오시는 길</h3>
-                <div
-                    style="background:#E9ECEF;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#8B95A1;">
-                    지도 영역</div>
-            </section>
-            <section class="content-section">
-                <div class="footer-notice">
-                    <p class="notice-text">황망한 마음에 일일이 연락드리지 못함을<br>너그러이 양해해 주시기 바랍니다.</p>
-                </div>
-            </section>
-        </div>
-
-        <div class="guestbook-content" id="guestbookContent">
-            <div class="guestbook-form">
-                <input type="text" placeholder="이름">
-                <input type="password" placeholder="비밀번호 4자리">
-                <textarea placeholder="따뜻한 위로의 말씀을 전해주세요."></textarea>
-                <button class="btn-submit">조문 남기기</button>
             </div>
-            <div class="guestbook-empty">
+        </section>
 
-                <p>아직 작성된 방명록이 없습니다.</p>
+        <div class="section-divider"></div>
+
+        <section class="section mourners-section">
+            <h2 class="section-title">상주</h2>
+            <div class="mourners-table">
+                <div class="mourner-row">
+                    <span class="mourner-rel">장남</span>
+                    <span class="mourner-names">
+                        홍철수
+                        <a href="tel:010-1234-5678" class="mourner-tel-inline">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#9E8566" stroke="none">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                        </a>
+                    </span>
+                </div>
+                <div class="mourner-row">
+                    <span class="mourner-rel">장녀</span>
+                    <span class="mourner-names">
+                        홍영희
+                        <a href="tel:010-2345-6789" class="mourner-tel-inline">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#9E8566" stroke="none">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                        </a>
+                    </span>
+                </div>
+                <div class="mourner-row">
+                    <span class="mourner-rel">차남</span>
+                    <span class="mourner-names">홍민수</span>
+                </div>
             </div>
-        </div>
+            <div class="mourner-action-btns">
+                <button class="mourner-action-btn" style="flex: none; width: 100%;">
+                    <img src="../images/ic_share.png" alt="공유" class="action-btn-icon">
+                    <span>부고 공유하기</span>
+                </button>
+            </div>
+        </section>
     </main>
-
-    <script>
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const infoContent = document.getElementById('infoContent');
-            const guestbookContent = document.getElementById('guestbookContent');
-
-            tabs.forEach((t, i) => {
-                t.classList.toggle('active', (tab === 'info' && i === 0) || (tab === 'guestbook' && i === 1));
-            });
-
-            if (tab === 'info') {
-                infoContent.classList.remove('hidden');
-                guestbookContent.classList.remove('active');
-            } else {
-                infoContent.classList.add('hidden');
-                guestbookContent.classList.add('active');
-            }
-        }
-    </script>
 </body>
 
 </html>

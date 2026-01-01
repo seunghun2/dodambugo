@@ -1,0 +1,447 @@
+/* ========================================
+   템플릿 미리보기 공통 CSS
+   도담부고 - view 페이지 스타일 복제
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
+@font-face {
+    font-family: 'KoPub Batang';
+    src: url('https://cdn.jsdelivr.net/gh/nicediy/kopubwebfonts@master/fonts/KoPubBatang-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Nanum Myeongjo', serif;
+    background: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+}
+
+.view-page {
+    max-width: 360px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+/* 장례식장명 헤더 바 */
+.funeral-home-header {
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* 섹션 구분선 */
+.section-divider {
+    height: 8px;
+    background: #F5F5F5;
+}
+
+/* 헤더 섹션 - 템플릿 이미지 */
+.header-section {
+    position: relative;
+    width: 360px;
+    height: 650px;
+    overflow: hidden;
+}
+
+.header-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.header-text-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.header-dynamic-text {
+    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+}
+
+/* 템플릿별 텍스트 위치/색상 */
+.template-basic .header-text-overlay {
+    top: 375px;
+}
+
+.template-basic .header-dynamic-text {
+    color: #000000;
+}
+
+.template-ribbon .header-text-overlay {
+    top: 377px;
+}
+
+.template-ribbon .header-dynamic-text {
+    color: #3B4551;
+}
+
+.template-border .header-text-overlay {
+    top: 339px;
+}
+
+.template-border .header-dynamic-text {
+    color: #1C1C1C;
+}
+
+.template-flower .header-text-overlay {
+    top: 187px;
+}
+
+.template-flower .header-dynamic-text {
+    color: #FFFFFF;
+}
+
+/* 섹션 공통 */
+.section {
+    padding: 24px 16px;
+}
+
+.section-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 16px;
+}
+
+.mourners-section .section-title {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+/* 주소 */
+.address-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.address-text {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #555555;
+    line-height: 1.5;
+}
+
+.btn-copy-address {
+    width: 112px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: #F5F5F5;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* 지도 */
+.map-container {
+    width: calc(100% + 32px);
+    height: 209px;
+    margin: 0 -16px 16px -16px;
+    background: #E9ECEF;
+    overflow: hidden;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 내비 버튼 */
+.navi-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 46px;
+}
+
+.navi-btn {
+    flex: 1;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 6px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+    cursor: pointer;
+}
+
+.navi-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* 장례식장 박스 */
+.funeral-box {
+    width: 100%;
+    padding: 16px 0;
+    margin: 0 auto;
+    background: #FAFAFA;
+    border: 1px solid #EEEEEE;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.funeral-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #555555;
+}
+
+.funeral-room {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+}
+
+/* 장례식장 전화 */
+.call-funeral-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.call-btn-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.call-btn-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.call-btn-number {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+}
+
+/* 상주 */
+.mourners-table {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+}
+
+.mourner-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #F5F5F5;
+    min-height: 40px;
+}
+
+.mourner-row:last-child {
+    border-bottom: none;
+}
+
+.mourner-rel {
+    width: 65px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.mourner-names {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.mourner-tel-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+/* 액션 버튼 */
+.mourner-action-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.mourner-action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: #FAFAFA;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.action-btn-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.mourner-action-btn span {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+}
+
+/* 발인 및 장지 */
+.funeral-info-table {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 10px;
+}
+
+.funeral-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.funeral-info-divider {
+    height: 1px;
+    background: #F5F5F5;
+    margin: 4px 0;
+}
+
+.funeral-highlight .funeral-info-label,
+.funeral-highlight .funeral-info-value {
+    font-weight: 800;
+    color: #111111;
+}
+
+.funeral-info-label {
+    width: 65px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+}
+
+.funeral-info-value {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+.burial-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    background: #686868;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.burial-label {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    white-space: nowrap;
+}
+
+.burial-text {
+    margin-left: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+.burial-section {
+    align-items: flex-start;
+}
+
+.burial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.burial-item {
+    display: flex;
+    align-items: center;
+}
