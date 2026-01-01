@@ -450,7 +450,6 @@ export default function WriteFormPage() {
         }
 
         setErrors(newErrors);
-        console.log('Validation errors:', newErrors);
 
         if (Object.keys(newErrors).length > 0) {
             // 첫 번째 에러 필드로 스크롤
