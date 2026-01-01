@@ -33,6 +33,7 @@ interface BugoData {
     funeral_date?: string;
     funeral_time?: string;
     burial_place?: string;
+    burial_place2?: string;
     message?: string;
     account_info?: Array<{ bank: string; holder: string; number: string }> | null;
     photo_url?: string;
@@ -297,6 +298,12 @@ export default function ViewPage() {
             <section className="section">
                 <h2 className="section-title">발인 및 장지</h2>
                 <div className="funeral-info-table">
+                    {bugo.encoffin_date && (
+                        <div className="funeral-info-row">
+                            <span className="funeral-info-label">입관</span>
+                            <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
+                        </div>
+                    )}
                     {bugo.funeral_date && (
                         <div className="funeral-info-row">
                             <span className="funeral-info-label">발인</span>
@@ -309,6 +316,14 @@ export default function ViewPage() {
                                 <span className="burial-label">1차장지</span>
                             </div>
                             <span className="funeral-info-value burial-text">{bugo.burial_place}</span>
+                        </div>
+                    )}
+                    {bugo.burial_place2 && (
+                        <div className="funeral-info-row">
+                            <div className="burial-box">
+                                <span className="burial-label">2차장지</span>
+                            </div>
+                            <span className="funeral-info-value burial-text">{bugo.burial_place2}</span>
                         </div>
                     )}
                 </div>
