@@ -438,6 +438,7 @@ export default function WriteFormPage() {
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
         if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
         if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
+        if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
 
         // 시간 유효성 검사 (24시간 이상 불가)
         if (formData.funeral_time && formData.funeral_time !== '00:00') {
