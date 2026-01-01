@@ -421,11 +421,8 @@ export default function WriteFormPage() {
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
         if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
-        if (!mourners[0].name) newErrors.mourner_name = '상주 성함을 입력해주세요';
-        if (!mourners[0].contact) newErrors.mourner_contact = '상주 연락처를 입력해주세요';
-        if (mourners[0].contact && !mourners[0].contact.replace(/-/g, '').startsWith('010')) {
-            newErrors.mourner_contact = '연락처를 잘못 입력했습니다';
-        }
+        if (!formData.primary_mourner) newErrors.primary_mourner = '대표상주 성함을 입력해주세요';
+        // 추가상주는 선택이므로 검증 제거
         if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
