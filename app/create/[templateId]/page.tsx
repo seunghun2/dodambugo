@@ -98,7 +98,7 @@ export default function WriteFormPage() {
         funeral_minute: '00',
         burial_place: '',
         burial_place2: '',
-        message: '',
+        message: '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
         primary_mourner: '',
     });
 
@@ -157,8 +157,11 @@ export default function WriteFormPage() {
         router.push('/');
     };
 
-    // 임시저장 자동 불러오기 (메인에서 "예" 선택 시 바로 복원)
+    // 임시저장 자동 불러오기 (수정 모드가 아닐 때만)
     useEffect(() => {
+        // URL에 edit 파라미터가 있으면 수정 모드 - 건너뛰기
+        if (typeof window !== 'undefined' && window.location.search.includes('edit=')) return;
+
         const draft = localStorage.getItem(`bugo_draft_${templateId}`);
         if (draft) {
             try {
@@ -168,7 +171,6 @@ export default function WriteFormPage() {
                 const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
 
                 if (hoursDiff < 24) {
-                    // 자동 복원
                     if (parsed.formData) setFormData(parsed.formData);
                     if (parsed.mourners) setMourners(parsed.mourners);
                     if (parsed.accounts) setAccounts(parsed.accounts);
@@ -193,20 +195,36 @@ export default function WriteFormPage() {
                     ...prev,
                     deceased_name: parsed.deceased_name || '',
                     age: parsed.age || '',
+                    gender: parsed.gender || '',
                     funeral_home: parsed.funeral_home || '',
+                    funeral_home_tel: parsed.funeral_home_tel || '',
                     room_number: parsed.room_number || '',
                     funeral_date: parsed.funeral_date || '',
                     funeral_time: parsed.funeral_time || '',
+                    death_date: parsed.death_date || '',
+                    death_time: parsed.death_time || '',
+                    encoffin_date: parsed.encoffin_date || '',
+                    encoffin_time: parsed.encoffin_time || '',
                     address: parsed.address || '',
-                    message: '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                    burial_place: parsed.burial_place || '',
+                    burial_place2: parsed.burial_place2 || '',
+                    message: parsed.message || '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                    // 상주 정보는 비움
+                    relationship: '',
+                    primary_mourner: '',
                 }));
+                // 계좌 정보 복사
+                if (parsed.account_info && Array.isArray(parsed.account_info)) {
+                    setAccounts(parsed.account_info);
+                    if (parsed.account_info.length > 0) setShowAccount(true);
+                }
                 // 복제 데이터 삭제
                 sessionStorage.removeItem('duplicateBugo');
-                // 대표상주 입력란에 포커스
-                if (parsed.focusField === 'primary_mourner') {
+                // 관계 선택에 포커스
+                if (parsed.focusField === 'relationship') {
                     setTimeout(() => {
-                        const input = document.querySelector('input[name="primary_mourner"]') as HTMLInputElement;
-                        if (input) input.focus();
+                        const select = document.querySelector('select[name="relationship"]') as HTMLSelectElement;
+                        if (select) select.focus();
                     }, 500);
                 }
             } catch (e) {
@@ -259,18 +277,55 @@ export default function WriteFormPage() {
                     burial_place: data.burial_place || '',
                     burial_place2: data.burial_place2 || '',
                     message: data.message || '',
-                    primary_mourner: data.primary_mourner || '',
+                    // DB에서 mourner_name 또는 primary_mourner로 저장됨
+                    primary_mourner: data.mourner_name || data.primary_mourner || '',
                 });
 
-                // 상주 목록
-                if (data.mourners && Array.isArray(data.mourners)) {
-                    setMourners(data.mourners);
+                // 상주 목록 파싱 (문자열인 경우)
+                let mournersData = data.mourners;
+                if (typeof mournersData === 'string') {
+                    try {
+                        mournersData = JSON.parse(mournersData);
+                    } catch (e) {
+                        mournersData = null;
+                    }
                 }
 
-                // 계좌 정보
-                if (data.accounts && Array.isArray(data.accounts)) {
-                    setAccounts(data.accounts);
-                    setShowAccount(data.accounts.length > 0);
+                // 상주 목록 (첫번째 상주가 대표상주)
+                if (mournersData && Array.isArray(mournersData) && mournersData.length > 0) {
+                    const firstMourner = mournersData[0];
+                    // 대표상주가 아직 설정 안됐으면 첫번째 상주에서 가져옴
+                    if (firstMourner && !(data.mourner_name || data.primary_mourner)) {
+                        setFormData(prev => ({
+                            ...prev,
+                            primary_mourner: firstMourner.name || '',
+                            relationship: firstMourner.relationship || '',
+                        }));
+                    }
+                    // 추가 상주들 (첫번째 제외)
+                    if (mournersData.length > 1) {
+                        setMourners(mournersData.slice(1));
+                    } else {
+                        setMourners([{ relationship: '', name: '', contact: '' }]);
+                    }
+                }
+
+                // 대표상주 계좌 정보 (문자열로 저장된 경우 파싱)
+                let accountData = data.account_info;
+                if (typeof accountData === 'string') {
+                    try {
+                        accountData = JSON.parse(accountData);
+                    } catch (e) {
+                        console.log('account_info 파싱 실패');
+                        accountData = null;
+                    }
+                }
+                console.log('파싱된 account_info:', accountData);
+                if (accountData && Array.isArray(accountData) && accountData.length > 0) {
+                    console.log('accounts 설정함:', accountData);
+                    setAccounts(accountData);
+                    // setShowAccount는 모달 열기용이라 여기서 설정 안함
+                    setIsAccountSaved(true);
                 }
 
                 // 기타 옵션
@@ -580,19 +635,43 @@ export default function WriteFormPage() {
                 address: formData.address || null,
                 address_detail: formData.address_detail || null,
                 death_date: formData.death_date || null,
-                death_time: formData.death_hour ? `${formData.death_hour}:${formData.death_minute}` : null,
+                death_time: formData.death_time || (formData.death_hour ? `${formData.death_hour}:${formData.death_minute}` : null),
                 encoffin_date: formData.encoffin_date || null,
                 encoffin_time: formData.encoffin_hour ? `${formData.encoffin_hour}:${formData.encoffin_minute}` : null,
                 funeral_date: formData.funeral_date || null,
-                funeral_time: formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null,
+                funeral_time: formData.funeral_time || (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
                 burial_place: formData.burial_place || null,
                 burial_place2: formData.burial_place2?.trim() || null,
                 message: formData.message || null,
-                mourners: mourners.filter(m => m.name),
-                account_info: showAccount && accounts.some(a => a.bank || a.holder || a.number) ? accounts.filter(a => a.bank && a.holder && a.number) : null,
+                // 대표상주 + 추가상주 전체 저장
+                mourners: [
+                    // 대표상주
+                    ...(formData.primary_mourner ? [{
+                        relationship: formData.relationship || '',
+                        name: formData.primary_mourner,
+                        contact: '',
+                    }] : []),
+                    // 추가상주들 (계좌정보 포함)
+                    ...mourners.filter(m => m.name).map(m => ({
+                        relationship: m.relationship || '',
+                        name: m.name,
+                        contact: m.contact || '',
+                        bank: m.bank || '',
+                        accountHolder: m.accountHolder || '',
+                        accountNumber: m.accountNumber || '',
+                    }))
+                ],
+                // 대표상주 계좌 - 계좌가 입력되어 있으면 저장
+                account_info: accounts.filter(a => a.bank && a.number).length > 0
+                    ? accounts.filter(a => a.bank && a.number)
+                    : null,
                 photo_url: showPhoto ? photoUrl : null,
                 status: 'active',
             };
+
+            // 디버깅: 계좌 정보 확인
+            console.log('저장할 계좌 정보:', bugoData.account_info);
+            console.log('accounts state:', accounts);
 
             let data, error;
 

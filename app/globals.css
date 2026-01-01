@@ -5494,22 +5494,24 @@ section {
 .account-modal {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
     background: white;
     border-radius: 20px 20px 0 0;
     padding: 24px 20px 32px;
     z-index: 1001;
-    animation: slideUp 0.3s ease;
+    animation: slideUp 0.3s ease forwards;
 }
 
 @keyframes slideUp {
     from {
-        transform: translateY(100%);
+        transform: translateX(-50%) translateY(100%);
     }
 
     to {
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
 }
 

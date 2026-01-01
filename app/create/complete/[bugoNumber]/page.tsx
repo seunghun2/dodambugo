@@ -17,6 +17,7 @@ interface BugoData {
     funeral_date?: string;
     funeral_time?: string;
     address?: string;
+    template_id?: string;
 }
 
 export default function CompletePage() {
@@ -81,20 +82,20 @@ export default function CompletePage() {
 
     const duplicateBugo = () => {
         if (!bugo) return;
-        // 복제할 데이터 저장 (상주 정보 제외)
+        // 전체 데이터 복사 (상주 정보만 제외)
         const duplicateData = {
-            deceased_name: bugo.deceased_name,
-            age: bugo.age,
-            funeral_home: bugo.funeral_home,
-            room_number: bugo.room_number,
-            funeral_date: bugo.funeral_date,
-            funeral_time: bugo.funeral_time,
-            address: bugo.address,
-            // 상주 정보는 비우고 포커스하도록
-            focusField: 'primary_mourner'
+            ...bugo,
+            // 상주 정보는 비움
+            primary_mourner: '',
+            relationship: '',
+            mourners: [],
+            // 관계 선택에 포커스
+            focusField: 'relationship'
         };
         sessionStorage.setItem('duplicateBugo', JSON.stringify(duplicateData));
-        router.push('/create/1'); // 기본 템플릿으로 이동
+        // 같은 템플릿으로 바로 이동
+        const templateId = bugo.template_id || '1';
+        router.push(`/create/${templateId}`);
     };
 
     if (loading) {
