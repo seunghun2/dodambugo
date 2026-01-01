@@ -70,9 +70,16 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
         const filtered = allFacilities.filter(f =>
             f.name?.toLowerCase().includes(query) ||
             f.address?.toLowerCase().includes(query)
-        ).slice(0, 20);
+        );
 
-        setResults(filtered);
+        // 이름 매칭 먼저, 주소 매칭 나중에
+        filtered.sort((a, b) => {
+            const aNameMatch = a.name?.toLowerCase().includes(query) ? 1 : 0;
+            const bNameMatch = b.name?.toLowerCase().includes(query) ? 1 : 0;
+            return bNameMatch - aNameMatch;
+        });
+
+        setResults(filtered.slice(0, 20));
     }, [searchQuery, activeTab, allFacilities]);
 
     // 다음 주소검색 초기화
