@@ -503,7 +503,6 @@ export default function WriteFormPage() {
                 funeral_date: formData.funeral_date || null,
                 funeral_time: formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null,
                 burial_place: formData.burial_place || null,
-                burial_place2: formData.burial_place2?.trim() || null,
                 message: formData.message || null,
                 mourners: mourners.filter(m => m.name),
                 account_info: showAccount && accounts.some(a => a.bank || a.holder || a.number) ? accounts.filter(a => a.bank && a.holder && a.number) : null,
