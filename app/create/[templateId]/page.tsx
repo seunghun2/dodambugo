@@ -582,6 +582,7 @@ export default function WriteFormPage() {
                                                     name="room_number"
                                                     className={`form-input ${errors.room_number ? 'error' : ''}`}
                                                     placeholder="호실(예시:102호)"
+                                                    inputMode="numeric"
                                                     value={formData.room_number}
                                                     onChange={handleChange}
                                                 />
