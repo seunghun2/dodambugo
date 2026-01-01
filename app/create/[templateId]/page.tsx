@@ -762,7 +762,7 @@ export default function WriteFormPage() {
                                                     value={formData.religion}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="">선택</option>
+                                                    <option value="없음">없음</option>
                                                     {religionOptions.map(opt => (
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
