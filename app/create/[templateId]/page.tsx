@@ -94,6 +94,7 @@ export default function WriteFormPage() {
         funeral_hour: '',
         funeral_minute: '00',
         burial_place: '',
+        burial_place2: '',
         message: '',
         primary_mourner: '',
     });
@@ -221,6 +222,7 @@ export default function WriteFormPage() {
                     funeral_hour: data.funeral_time?.split(':')[0] || '',
                     funeral_minute: data.funeral_time?.split(':')[1] || '00',
                     burial_place: data.burial_place || '',
+                    burial_place2: data.burial_place2 || '',
                     message: data.message || '',
                     primary_mourner: data.primary_mourner || '',
                 });
@@ -491,6 +493,7 @@ export default function WriteFormPage() {
                 funeral_date: formData.funeral_date || null,
                 funeral_time: formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null,
                 burial_place: formData.burial_place || null,
+                burial_place2: formData.burial_place2?.trim() || null,
                 message: formData.message || null,
                 mourners: mourners.filter(m => m.name),
                 account_info: showAccount && accounts.some(a => a.bank || a.holder || a.number) ? accounts.filter(a => a.bank && a.holder && a.number) : null,
@@ -1030,14 +1033,65 @@ export default function WriteFormPage() {
 
                                         {showBurial && (
                                             <div className="toggle-content">
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                    <span style={{ fontSize: '13px', color: '#666' }}>1차 장지</span>
+                                                    {!formData.burial_place2 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(prev => ({ ...prev, burial_place2: ' ' }))}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: 'var(--primary)',
+                                                                fontSize: '13px',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px'
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+                                                            장지 추가
+                                                        </button>
+                                                    )}
+                                                </div>
                                                 <input
                                                     type="text"
                                                     name="burial_place"
                                                     className="form-input"
-                                                    placeholder="장지 (예: OO공원묘지)"
+                                                    placeholder="1차 장지 (예: OO공원묘지)"
                                                     value={formData.burial_place}
                                                     onChange={handleChange}
                                                 />
+
+                                                {formData.burial_place2 && (
+                                                    <>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', marginBottom: '8px' }}>
+                                                            <span style={{ fontSize: '13px', color: '#666' }}>2차 장지</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData(prev => ({ ...prev, burial_place2: '' }))}
+                                                                style={{
+                                                                    background: 'none',
+                                                                    border: 'none',
+                                                                    color: '#999',
+                                                                    fontSize: '13px',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                            >
+                                                                삭제
+                                                            </button>
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            name="burial_place2"
+                                                            className="form-input"
+                                                            placeholder="2차 장지"
+                                                            value={formData.burial_place2.trim()}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </>
+                                                )}
                                             </div>
                                         )}
                                     </div>
