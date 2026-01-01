@@ -37,6 +37,23 @@ body {
     padding-bottom: 40px;
 }
 
+/* 장례식장명 헤더 바 */
+.funeral-home-header {
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* 섹션 구분선 */
+.section-divider {
+    height: 8px;
+    background: #F5F5F5;
+}
+
 /* 토스트 */
 .toast {
     position: fixed;
@@ -226,7 +243,6 @@ body {
 ======================================== */
 .section {
     padding: 24px 16px;
-    border-bottom: 1px solid #F0F0F0;
 }
 
 .section:last-of-type {
@@ -242,6 +258,12 @@ body {
     margin-bottom: 16px;
 }
 
+/* 상주 섹션 타이틀만 라인 */
+.mourners-section .section-title {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #CCCCCC;
+}
+
 /* ========================================
    빈소 오시는 길
 ======================================== */
@@ -253,20 +275,38 @@ body {
     margin-bottom: 16px;
 }
 
-/* 주소 텍스트 - NanumMyeongjo Bold 16px #555555 */
-.address-text {
+.address-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* 주소 텍스트 - NanumMyeongjo Bold 15px #555555 */
+.address-text {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #555555;
     line-height: 1.5;
+}
+
+/* 장례식장명 - 2px 작게 */
+.address-funeral-home {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888888;
 }
 
 /* 주소 복사 버튼 - 112 x 48px, bg #F5F5F5, radius 8px */
 .btn-copy-address {
     width: 112px;
     height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     background: #F5F5F5;
     border: none;
     border-radius: 8px;
@@ -300,24 +340,23 @@ body {
 .navi-buttons {
     display: flex;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 46px;
 }
 
 .navi-btn {
     flex: 1;
-    height: 48px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: #FFFFFF;
-    border: 1px solid #F5F5F5;
-    border-radius: 8px;
-    box-shadow: 0px 3px 6px rgba(197, 197, 197, 0.16);
+    border: 1px solid #EEEEEE;
+    border-radius: 6px;
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    color: #111111;
+    color: #333333;
     cursor: pointer;
 }
 
@@ -330,14 +369,14 @@ body {
     height: 32px;
 }
 
-/* 장례식장 박스 - 328 x 72px */
+/* 장례식장 박스 */
 .funeral-box {
-    width: 328px;
-    height: 72px;
+    width: 100%;
+    padding: 16px 0;
     margin: 0 auto;
-    background: #FFFFFF;
-    border: 1px solid #F3F3F3;
-    border-radius: 8px;
+    background: #FAFAFA;
+    border: 1px solid #EEEEEE;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -345,20 +384,20 @@ body {
     gap: 4px;
 }
 
-/* 장례식장 이름 - Bold 16px #555555 */
+/* 장례식장 이름 - 14px #555555 */
 .funeral-name {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 400;
     color: #555555;
 }
 
-/* 호실 - Bold 22px #9E8566 (Gold) */
+/* 호실 - Bold 18px */
 .funeral-room {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
-    color: #9E8566;
+    color: #333333;
 }
 
 /* ========================================
@@ -367,12 +406,13 @@ body {
 .mourners-table {
     display: flex;
     flex-direction: column;
+    padding-left: 10px;
 }
 
 .mourner-row {
     display: flex;
     align-items: center;
-    padding: 14px 0;
+    padding: 2px 0 12px 0;
     border-bottom: 1px solid #F5F5F5;
 }
 
@@ -446,7 +486,13 @@ body {
 .funeral-info-table {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    padding-left: 10px;
+}
+
+/* 장지 행들 간격 타이트하게 */
+.burial-row {
+    margin-top: -8px;
 }
 
 .funeral-info-row {
@@ -455,22 +501,28 @@ body {
     gap: 12px;
 }
 
-/* 라벨 - Bold 14px #999999 */
+.funeral-info-divider {
+    height: 1px;
+    background: #F5F5F5;
+    margin: 4px 0;
+}
+
+/* 라벨 - 16px #999999 (상주 관계와 동일) */
 .funeral-info-label {
-    width: 40px;
+    width: 65px;
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #999999;
     flex-shrink: 0;
 }
 
-/* 값 - Bold 14px #444444 */
+/* 값 - 16px #444444 */
 .funeral-info-value {
     flex: 1;
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 400;
     color: #444444;
 }
 
@@ -492,7 +544,26 @@ body {
 }
 
 .burial-text {
-    margin-left: 4px;
+    margin-left: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+.burial-section {
+    align-items: center;
+}
+
+.burial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.burial-item {
+    display: flex;
+    align-items: center;
 }
 
 /* ========================================

@@ -118,10 +118,11 @@ export default function ViewPage() {
         setTimeout(() => setCopySuccess(false), 2000);
     };
 
-    const openTmap = () => {
-        if (bugo?.address) {
-            const address = encodeURIComponent(bugo.address + (bugo.address_detail || ''));
-            window.location.href = `tmap://search?name=${encodeURIComponent(bugo.funeral_home || '')}&address=${address}`;
+    const openNaverMap = () => {
+        if (bugo?.funeral_home) {
+            window.open(`https://map.naver.com/v5/search/${encodeURIComponent(bugo.funeral_home)}`, '_blank');
+        } else if (bugo?.address) {
+            window.open(`https://map.naver.com/v5/search/${encodeURIComponent(bugo.address)}`, '_blank');
         }
     };
 
@@ -197,6 +198,11 @@ export default function ViewPage() {
 
     return (
         <main className="view-page">
+            {/* 장례식장명 헤더 바 */}
+            <div className="funeral-home-header">
+                {bugo.funeral_home}
+            </div>
+
             {/* 토스트 */}
             {copySuccess && <div className="toast">복사되었습니다</div>}
 
@@ -216,6 +222,9 @@ export default function ViewPage() {
                 </div>
             </div>
 
+            {/* 구분선 */}
+            <div className="section-divider"></div>
+
             {/* ========================================
                 빈소 오시는 길
             ======================================== */}
@@ -224,7 +233,13 @@ export default function ViewPage() {
 
                 <div className="address-row">
                     <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
-                    <button className="btn-copy-address" onClick={copyAddress}>주소 복사</button>
+                    <button className="btn-copy-address" onClick={copyAddress}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        주소 복사
+                    </button>
                 </div>
 
                 {/* 지도 */}
@@ -238,12 +253,12 @@ export default function ViewPage() {
 
                 {/* 내비 버튼 */}
                 <div className="navi-buttons">
-                    <button className="navi-btn" onClick={openTmap}>
-                        <img src="/images/ic_tmap.svg" alt="티맵" className="navi-icon" />
-                        <span>티맵</span>
+                    <button className="navi-btn" onClick={openNaverMap}>
+                        <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
+                        <span>네이버지도</span>
                     </button>
                     <button className="navi-btn" onClick={openKakaoNavi}>
-                        <img src="/images/ic_kakao_navi.svg" alt="카카오내비" className="navi-icon" />
+                        <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
                         <span>카카오내비</span>
                     </button>
                 </div>
@@ -258,7 +273,7 @@ export default function ViewPage() {
             {/* ========================================
                 상주
             ======================================== */}
-            <section className="section">
+            <section className="section mourners-section">
                 <h2 className="section-title">상주</h2>
                 <div className="mourners-table">
                     {(() => {
@@ -292,17 +307,22 @@ export default function ViewPage() {
                 </div>
             </section>
 
+            {/* 구분선 */}
+            <div className="section-divider"></div>
+
             {/* ========================================
                 발인 및 장지
             ======================================== */}
             <section className="section">
-                <h2 className="section-title">발인 및 장지</h2>
                 <div className="funeral-info-table">
                     {bugo.encoffin_date && (
-                        <div className="funeral-info-row">
-                            <span className="funeral-info-label">입관</span>
-                            <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
-                        </div>
+                        <>
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">입관</span>
+                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
+                            </div>
+                            <div className="funeral-info-divider"></div>
+                        </>
                     )}
                     {bugo.funeral_date && (
                         <div className="funeral-info-row">
@@ -310,20 +330,27 @@ export default function ViewPage() {
                             <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
                         </div>
                     )}
-                    {bugo.burial_place && (
-                        <div className="funeral-info-row">
-                            <div className="burial-box">
-                                <span className="burial-label">1차장지</span>
+                    {(bugo.burial_place || bugo.burial_place2) && (
+                        <div className="funeral-info-row burial-section">
+                            <span className="funeral-info-label">장지</span>
+                            <div className="burial-list">
+                                {bugo.burial_place && (
+                                    <div className="burial-item">
+                                        <div className="burial-box">
+                                            <span className="burial-label">1차장지</span>
+                                        </div>
+                                        <span className="burial-text">{bugo.burial_place}</span>
+                                    </div>
+                                )}
+                                {bugo.burial_place2 && (
+                                    <div className="burial-item">
+                                        <div className="burial-box">
+                                            <span className="burial-label">2차장지</span>
+                                        </div>
+                                        <span className="burial-text">{bugo.burial_place2}</span>
+                                    </div>
+                                )}
                             </div>
-                            <span className="funeral-info-value burial-text">{bugo.burial_place}</span>
-                        </div>
-                    )}
-                    {bugo.burial_place2 && (
-                        <div className="funeral-info-row">
-                            <div className="burial-box">
-                                <span className="burial-label">2차장지</span>
-                            </div>
-                            <span className="funeral-info-value burial-text">{bugo.burial_place2}</span>
                         </div>
                     )}
                 </div>
