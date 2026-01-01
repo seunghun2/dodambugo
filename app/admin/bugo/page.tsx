@@ -30,6 +30,8 @@ export default function AdminBugoPage() {
     const [bugos, setBugos] = useState<Bugo[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedBugo, setSelectedBugo] = useState<Bugo | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 50;
 
     // 필터 상태
     const [filters, setFilters] = useState({
@@ -65,6 +67,19 @@ export default function AdminBugoPage() {
         return true;
     });
 
+    // 페이지네이션
+    const totalPages = Math.ceil(filteredBugos.length / itemsPerPage);
+    const paginatedBugos = filteredBugos.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // 필터 변경 시 첫 페이지로
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
+
+
     const formatDate = (dateString: string) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -89,6 +104,24 @@ export default function AdminBugoPage() {
     const getSalesRate = (views: number, flowers: number) => {
         if (!views || views === 0) return '0%';
         return Math.round((flowers / views) * 100) + '%';
+    };
+
+    const deleteBugo = async (id: number) => {
+        if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+
+        const { error } = await supabase
+            .from('bugo')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert('삭제 중 오류가 발생했습니다.');
+            console.error(error);
+        } else {
+            alert('삭제되었습니다.');
+            setSelectedBugo(null);
+            fetchBugos();
+        }
     };
 
     return (
@@ -186,14 +219,14 @@ export default function AdminBugoPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredBugos.length === 0 ? (
+                                        {paginatedBugos.length === 0 ? (
                                             <tr>
                                                 <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                                                     부고장이 없습니다
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredBugos.map((bugo) => (
+                                            paginatedBugos.map((bugo) => (
                                                 <tr
                                                     key={bugo.id}
                                                     className={selectedBugo?.id === bugo.id ? 'selected' : ''}
@@ -214,6 +247,37 @@ export default function AdminBugoPage() {
                                         )}
                                     </tbody>
                                 </table>
+                                {/* 페이지네이션 */}
+                                {totalPages > 1 && (
+                                    <div className="pagination">
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="page-btn"
+                                        >
+                                            ←
+                                        </button>
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="page-btn"
+                                        >
+                                            →
+                                        </button>
+                                        <span className="page-info">
+                                            총 {filteredBugos.length}개
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -316,6 +380,13 @@ export default function AdminBugoPage() {
                                             <span className="material-symbols-outlined">edit</span>
                                             수정하기
                                         </Link>
+                                        <button
+                                            onClick={() => deleteBugo(selectedBugo.id)}
+                                            className="btn-action danger"
+                                        >
+                                            <span className="material-symbols-outlined">delete</span>
+                                            삭제하기
+                                        </button>
                                     </div>
                                 </div>
                             </>

@@ -80,6 +80,12 @@ export default function ViewPage() {
                 }
 
                 setBugo(data);
+
+                // 조회수 증가 (한 번만)
+                await supabase
+                    .from('bugo')
+                    .update({ view_count: (data.view_count || 0) + 1 })
+                    .eq('id', data.id);
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
             } finally {

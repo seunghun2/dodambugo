@@ -185,6 +185,36 @@ export default function WriteFormPage() {
         }
     }, [templateId]);
 
+    // 30초마다 자동 임시저장
+    useEffect(() => {
+        // 수정 모드에서는 자동저장 안 함
+        if (editBugoNumber) return;
+
+        const autoSave = () => {
+            // 최소 하나 이상 입력된 경우에만 저장
+            if (formData.deceased_name || formData.funeral_home || mourners[0]?.name) {
+                const draftData = {
+                    formData,
+                    mourners,
+                    accounts,
+                    showAccount,
+                    showBurial,
+                    showPhoto,
+                    photoUrl,
+                    templateId,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+                console.log('자동 저장 완료:', new Date().toLocaleTimeString());
+            }
+        };
+
+        const timer = setInterval(autoSave, 30000); // 30초
+
+        return () => clearInterval(timer);
+    }, [formData, mourners, accounts, showAccount, showBurial, showPhoto, photoUrl, templateId, editBugoNumber]);
+
+
     // 복제 데이터 로드
     useEffect(() => {
         const duplicateData = sessionStorage.getItem('duplicateBugo');
