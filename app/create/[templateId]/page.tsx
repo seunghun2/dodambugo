@@ -427,7 +427,9 @@ export default function WriteFormPage() {
             if (mourner.relationship && !mourner.name) {
                 newErrors[`mourner_${index}_name`] = '상주 성함을 입력해주세요';
             }
-            if (mourner.contact && !mourner.contact.replace(/-/g, '').startsWith('010')) {
+            // 연락처가 있고 010으로 시작하지 않으면 에러
+            const cleanContact = mourner.contact?.replace(/-/g, '').trim();
+            if (cleanContact && cleanContact.length > 0 && !cleanContact.startsWith('010')) {
                 newErrors[`mourner_${index}_contact`] = '연락처를 잘못 입력했습니다';
             }
         });
@@ -448,6 +450,7 @@ export default function WriteFormPage() {
         }
 
         setErrors(newErrors);
+        console.log('Validation errors:', newErrors);
 
         if (Object.keys(newErrors).length > 0) {
             // 첫 번째 에러 필드로 스크롤
@@ -831,47 +834,60 @@ export default function WriteFormPage() {
 
                                         {mourners.map((mourner, index) => (
                                             <div key={index} className="mourner-block">
-                                                <div className={`mourner-row ${mourners.length > 1 ? 'has-delete' : ''}`} data-field={index === 0 ? 'mourner_name' : undefined}>
-                                                    <select
-                                                        className="form-select mourner-relation"
-                                                        value={mourner.relationship}
-                                                        onChange={(e) => updateMourner(index, 'relationship', e.target.value)}
-                                                    >
-                                                        <option value="">관계</option>
-                                                        {relationOptions.map(opt => (
-                                                            <option key={opt} value={opt}>{opt}</option>
-                                                        ))}
-                                                    </select>
-                                                    <input
-                                                        type="text"
-                                                        className={`form-input mourner-name ${index === 0 && errors.mourner_name ? 'error' : ''}`}
-                                                        placeholder="성함"
-                                                        value={mourner.name}
-                                                        onChange={(e) => updateMourner(index, 'name', e.target.value)}
-                                                    />
-                                                    <input
-                                                        type="tel"
-                                                        className={`form-input mourner-contact ${index === 0 && errors.mourner_contact ? 'error' : ''}`}
-                                                        placeholder="연락처"
-                                                        value={mourner.contact}
-                                                        onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
-                                                    />
-                                                    {mourners.length > 1 && (
-                                                        <button type="button" className="btn-delete-mourner" onClick={() => removeMourner(index)}>
-                                                            <span className="material-symbols-outlined">close</span>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {/* 상주별 계좌 입력 (선택) */}
-                                                <div className="account-input-row mourner-account">
-                                                    <span className="material-symbols-outlined">account_balance</span>
-                                                    <input
-                                                        type="text"
-                                                        className={`account-input-field ${mourner.bank && mourner.accountNumber ? 'filled' : ''}`}
-                                                        placeholder="계좌를 입력해주세요."
-                                                        value={mourner.bank && mourner.accountNumber ? `${mourner.bank} : ${mourner.accountNumber}` : ''}
-                                                        readOnly
-                                                        onClick={() => {
+                                                <div key={index} className="mourner-card" data-field={`mourner_${index}_contact`}>
+                                                    <div className="mourner-row">
+                                                        <select
+                                                            className="form-select mourner-relation"
+                                                            value={mourner.relationship}
+                                                            onChange={(e) => updateMourner(index, 'relationship', e.target.value)}
+                                                        >
+                                                            <option value="">관계</option>
+                                                            {relationOptions.map(opt => (
+                                                                <option key={opt} value={opt}>{opt}</option>
+                                                            ))}
+                                                        </select>
+                                                        <input
+                                                            type="text"
+                                                            className={`form-input mourner-name ${errors[`mourner_${index}_name`] ? 'error' : ''}`}
+                                                            placeholder="성함"
+                                                            value={mourner.name}
+                                                            onChange={(e) => updateMourner(index, 'name', e.target.value)}
+                                                        />
+                                                        <input
+                                                            type="tel"
+                                                            className={`form-input mourner-contact ${errors[`mourner_${index}_contact`] ? 'error' : ''}`}
+                                                            placeholder="연락처"
+                                                            value={mourner.contact}
+                                                            onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
+                                                        />
+                                                        {mourners.length > 1 && (
+                                                            <button type="button" className="btn-delete-mourner" onClick={() => removeMourner(index)}>
+                                                                <span className="material-symbols-outlined">close</span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    {errors[`mourner_${index}_name`] && <p className="field-error">{errors[`mourner_${index}_name`]}</p>}
+                                                    {errors[`mourner_${index}_contact`] && <p className="field-error">{errors[`mourner_${index}_contact`]}</p>}
+                                                    {/* 상주별 계좌 입력 (선택) */}
+                                                    <div className="account-input-row mourner-account">
+                                                        <span className="material-symbols-outlined">account_balance</span>
+                                                        <input
+                                                            type="text"
+                                                            className={`account-input-field ${mourner.bank && mourner.accountNumber ? 'filled' : ''}`}
+                                                            placeholder="계좌를 입력해주세요."
+                                                            value={mourner.bank && mourner.accountNumber ? `${mourner.bank} : ${mourner.accountNumber}` : ''}
+                                                            readOnly
+                                                            onClick={() => {
+                                                                setTempMournerAccount({
+                                                                    bank: mourner.bank || '',
+                                                                    holder: mourner.accountHolder || mourner.name || '',
+                                                                    number: mourner.accountNumber || ''
+                                                                });
+                                                                setEditingMournerIndex(index);
+                                                                setShowMournerAccountModal(true);
+                                                            }}
+                                                        />
+                                                        <button type="button" className="btn-account-edit" onClick={() => {
                                                             setTempMournerAccount({
                                                                 bank: mourner.bank || '',
                                                                 holder: mourner.accountHolder || mourner.name || '',
@@ -879,33 +895,23 @@ export default function WriteFormPage() {
                                                             });
                                                             setEditingMournerIndex(index);
                                                             setShowMournerAccountModal(true);
-                                                        }}
-                                                    />
-                                                    <button type="button" className="btn-account-edit" onClick={() => {
-                                                        setTempMournerAccount({
-                                                            bank: mourner.bank || '',
-                                                            holder: mourner.accountHolder || mourner.name || '',
-                                                            number: mourner.accountNumber || ''
-                                                        });
-                                                        setEditingMournerIndex(index);
-                                                        setShowMournerAccountModal(true);
-                                                    }}>
-                                                        {mourner.bank && mourner.accountNumber ? '변경하기' : '추가하기'}
-                                                    </button>
+                                                        }}>
+                                                            {mourner.bank && mourner.accountNumber ? '변경하기' : '추가하기'}
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
                                         ))}
-                                        {(errors.mourner_name || errors.mourner_contact) && (
-                                            <p className="field-error">{errors.mourner_name || errors.mourner_contact}</p>
-                                        )}
-                                        <button type="button" className="btn-add-mourner" onClick={addMourner}>
-                                            <span className="material-symbols-outlined">add_circle</span>
-                                            상주 추가
-                                        </button>
-                                    </div>
+                                                {(errors.mourner_name || errors.mourner_contact) && (
+                                                    <p className="field-error">{errors.mourner_name || errors.mourner_contact}</p>
+                                                )}
+                                                <button type="button" className="btn-add-mourner" onClick={addMourner}>
+                                                    <span className="material-symbols-outlined">add_circle</span>
+                                                    상주 추가
+                                                </button>
+                                            </div>
 
-                                    {/* 일정 정보 */}
-                                    <div className="form-section">
+                                    {/* 일정 정보 */ }
+                                            < div className = "form-section" >
                                         <h2 className="section-title">발인/임종 일시</h2>
                                         <p className="section-desc">장례 일정을 입력해주세요</p>
 
