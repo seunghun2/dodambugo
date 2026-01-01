@@ -82,15 +82,10 @@ export default function CompletePage() {
 
     const duplicateBugo = () => {
         if (!bugo) return;
-        // 전체 데이터 복사 (상주 정보만 제외)
+        // 전체 데이터 복사 (bugo_number만 제외 - 새로 생성됨)
         const duplicateData = {
             ...bugo,
-            // 상주 정보는 비움
-            primary_mourner: '',
-            relationship: '',
-            mourners: [],
-            // 관계 선택에 포커스
-            focusField: 'relationship'
+            bugo_number: undefined, // 새로 생성될 것
         };
         sessionStorage.setItem('duplicateBugo', JSON.stringify(duplicateData));
         // 같은 템플릿으로 바로 이동
