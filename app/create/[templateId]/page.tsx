@@ -423,6 +423,9 @@ export default function WriteFormPage() {
         if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
         if (!mourners[0].name) newErrors.mourner_name = '상주 성함을 입력해주세요';
         if (!mourners[0].contact) newErrors.mourner_contact = '상주 연락처를 입력해주세요';
+        if (mourners[0].contact && !mourners[0].contact.replace(/-/g, '').startsWith('010')) {
+            newErrors.mourner_contact = '연락처를 잘못 입력했습니다';
+        }
         if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
