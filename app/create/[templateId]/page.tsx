@@ -353,6 +353,16 @@ export default function WriteFormPage() {
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
         if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
 
+        // 시간 유효성 검사 (24시간 이상 불가)
+        if (formData.funeral_time) {
+            const [hours] = formData.funeral_time.split(':');
+            if (parseInt(hours) >= 24) newErrors.funeral_time = '시간을 잘못 입력했습니다 (00~23시)';
+        }
+        if (formData.death_time) {
+            const [hours] = formData.death_time.split(':');
+            if (parseInt(hours) >= 24) newErrors.death_time = '시간을 잘못 입력했습니다 (00~23시)';
+        }
+
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length > 0) {
@@ -582,7 +592,6 @@ export default function WriteFormPage() {
                                                     name="room_number"
                                                     className={`form-input ${errors.room_number ? 'error' : ''}`}
                                                     placeholder="호실(예시:102호)"
-                                                    inputMode="numeric"
                                                     value={formData.room_number}
                                                     onChange={handleChange}
                                                 />
