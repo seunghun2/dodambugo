@@ -46,6 +46,7 @@ export default function ViewPage() {
     const [error, setError] = useState<string | null>(null);
     const [copySuccess, setCopySuccess] = useState(false);
     const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [accountModalOpen, setAccountModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchBugo = async () => {
@@ -327,12 +328,13 @@ export default function ViewPage() {
                         <img src="/images/ic_share.png" alt="공유" className="action-btn-icon" />
                         <span>부고 알리기</span>
                     </button>
-                    {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
-                        <a href="#account-section" className="mourner-action-btn">
-                            <img src="/images/ic_money.png" alt="부의금" className="action-btn-icon" />
-                            <span>부의금 보내기</span>
-                        </a>
-                    )}
+                    {((bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
+                        (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber))) && (
+                            <button className="mourner-action-btn" onClick={() => setAccountModalOpen(true)}>
+                                <img src="/images/ic_money.png" alt="부의금" className="action-btn-icon" />
+                                <span>부의금 보내기</span>
+                            </button>
+                        )}
                 </div>
             </section>
 
@@ -385,26 +387,7 @@ export default function ViewPage() {
                 </div>
             </section>
 
-            {/* ========================================
-                계좌 정보
-            ======================================== */}
-            {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
-                <section className="section">
-                    <h2 className="section-title">부의금 계좌</h2>
-                    <div className="account-list">
-                        {bugo.account_info.map((acc, i) => (
-                            <div className="account-row" key={i}>
-                                <div className="account-info">
-                                    <span className="account-bank">{acc.bank}</span>
-                                    <span className="account-number">{acc.number}</span>
-                                    <span className="account-holder">{acc.holder}</span>
-                                </div>
-                                <button className="btn-copy" onClick={() => copyToClipboard(acc.number)}>복사</button>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+            {/* 계좌 정보는 모달로 표시 */}
 
             {/* ========================================
                 추모글 (방명록)
@@ -421,21 +404,6 @@ export default function ViewPage() {
                     <p>아직 작성된 추모글이 없습니다.</p>
                 </div>
             </section>
-
-            {/* ========================================
-                하단 버튼
-            ======================================== */}
-            <div className="bottom-buttons">
-                <button className="bottom-btn" onClick={() => setShareModalOpen(true)}>
-                    <img src="/images/ic_writing.svg" alt="" className="bottom-icon" />
-                    <span>부고 알리기</span>
-                </button>
-                <div className="divider-vertical"></div>
-                <button className="bottom-btn" disabled>
-                    <img src="/images/ic_letter.svg" alt="" className="bottom-icon" />
-                    <span>부의금 보내기</span>
-                </button>
-            </div>
 
             {/* ========================================
                 마무리 메시지
@@ -467,6 +435,64 @@ export default function ViewPage() {
                             <img src="/images/icon-link.png" alt="링크" />
                             <span>링크 복사하기</span>
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ========================================
+                부의금 계좌 바텀시트 모달
+            ======================================== */}
+            {accountModalOpen && (
+                <div className="account-modal-overlay" onClick={() => setAccountModalOpen(false)}>
+                    <div className="account-bottom-sheet" onClick={(e) => e.stopPropagation()}>
+                        <div className="sheet-header">
+                            <h3>부의금 계좌</h3>
+                            <button className="sheet-close" onClick={() => setAccountModalOpen(false)}>✕</button>
+                        </div>
+                        <div className="account-list">
+                            {(() => {
+                                const allAccounts: Array<{ bank: string; holder: string; number: string; relationship?: string }> = [];
+
+                                // 대표상주 계좌 (account_info)
+                                if (bugo.account_info && Array.isArray(bugo.account_info)) {
+                                    bugo.account_info.forEach(acc => {
+                                        if (acc.bank && acc.number) {
+                                            allAccounts.push({
+                                                bank: acc.bank,
+                                                holder: acc.holder || bugo.mourner_name || '',
+                                                number: acc.number,
+                                                relationship: bugo.relationship || '상주'
+                                            });
+                                        }
+                                    });
+                                }
+
+                                // 추가 상주들 계좌 (mourners[0] 제외 - 대표상주와 중복 방지)
+                                if (bugo.mourners && Array.isArray(bugo.mourners)) {
+                                    bugo.mourners.slice(1).forEach((m: any) => {
+                                        if (m.bank && m.accountNumber) {
+                                            allAccounts.push({
+                                                bank: m.bank,
+                                                holder: m.accountHolder || m.name || '',
+                                                number: m.accountNumber,
+                                                relationship: m.relationship || ''
+                                            });
+                                        }
+                                    });
+                                }
+
+                                return allAccounts.map((acc, i) => (
+                                    <div className="account-row" key={i}>
+                                        <div className="account-info">
+                                            <span className="account-bank">{acc.bank}</span>
+                                            <span className="account-number">{acc.number}</span>
+                                            <span className="account-holder">{acc.holder}</span>
+                                        </div>
+                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number)}>복사</button>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
                     </div>
                 </div>
             )}

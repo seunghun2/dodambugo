@@ -275,13 +275,20 @@ export default function AdminBugoPage() {
                                         </div>
                                     </div>
 
-                                    {selectedBugo.mourners && selectedBugo.mourners.length > 0 && (
+                                    {selectedBugo.mourners && (
                                         <div className="detail-section">
                                             <label>상주 정보</label>
                                             <div className="message-box">
-                                                {selectedBugo.mourners.map((m: any, i: number) => (
-                                                    <div key={i}>{m.relationship} {m.name} ({m.contact})</div>
-                                                ))}
+                                                {(() => {
+                                                    let mourners = selectedBugo.mourners;
+                                                    if (typeof mourners === 'string') {
+                                                        try { mourners = JSON.parse(mourners); } catch { mourners = []; }
+                                                    }
+                                                    if (!Array.isArray(mourners)) return null;
+                                                    return mourners.map((m: any, i: number) => (
+                                                        <div key={i}>{m.relationship} {m.name} {m.contact ? `(${m.contact})` : ''}</div>
+                                                    ));
+                                                })()}
                                             </div>
                                         </div>
                                     )}
