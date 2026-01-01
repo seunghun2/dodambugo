@@ -422,7 +422,16 @@ export default function WriteFormPage() {
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
         if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
         if (!formData.primary_mourner) newErrors.primary_mourner = '대표상주 성함을 입력해주세요';
-        // 추가상주는 선택이므로 검증 제거
+
+        // 추가상주: 관계 선택 시 이름 필수, 연락처는 선택이지만 형식 검증
+        mourners.forEach((mourner, index) => {
+            if (mourner.relationship && !mourner.name) {
+                newErrors[`mourner_${index}_name`] = '상주 성함을 입력해주세요';
+            }
+            if (mourner.contact && !mourner.contact.replace(/-/g, '').startsWith('010')) {
+                newErrors[`mourner_${index}_contact`] = '연락처를 잘못 입력했습니다';
+            }
+        });
         if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
