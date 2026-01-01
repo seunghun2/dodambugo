@@ -943,9 +943,9 @@ export default function WriteFormPage() {
                                                         }}
                                                         style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                     />
-                                                    {errors.funeral_time && <p className="field-error">{errors.funeral_time}</p>}
                                                 </div>
                                             </div>
+                                            {errors.funeral_time && <p className="field-error" style={{ marginTop: '4px' }}>{errors.funeral_time}</p>}
                                         </div>
 
                                         <div className="form-group">
@@ -990,9 +990,9 @@ export default function WriteFormPage() {
                                                         }}
                                                         style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                     />
-                                                    {errors.death_time && <p className="field-error">{errors.death_time}</p>}
                                                 </div>
                                             </div>
+                                            {errors.death_time && <p className="field-error" style={{ marginTop: '4px' }}>{errors.death_time}</p>}
                                         </div>
                                     </div>
 
