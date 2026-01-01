@@ -127,9 +127,9 @@ export default function CompletePage() {
                 {/* 제목 섹션 */}
                 <div className="title-section">
                     <h1 className="page-title">상주 {mournerName} 님의 부고장</h1>
-                    <p className="edit-prompt">
-                        부고장을 수정하시겠습니까? <Link href={`/create/edit/${params.bugoNumber}`} className="edit-link">수정하기</Link>
-                    </p>
+                    <Link href={`/create/edit/${params.bugoNumber}`} className="btn-edit-light">
+                        수정하기
+                    </Link>
                 </div>
 
                 {/* 정보 카드 */}

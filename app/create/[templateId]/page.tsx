@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import SideMenu from '@/components/SideMenu';
 import FacilitySearchModal from '@/components/FacilitySearchModal';
@@ -53,7 +53,9 @@ interface Account {
 export default function WriteFormPage() {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const templateId = params.templateId as string;
+    const editBugoNumber = searchParams.get('edit');
 
     // 유효한 템플릿인지 확인
     useEffect(() => {
@@ -176,6 +178,77 @@ export default function WriteFormPage() {
             }
         }
     }, [templateId]);
+
+    // 수정 모드: 기존 부고장 데이터 불러오기
+    useEffect(() => {
+        if (!editBugoNumber) return;
+
+        const loadBugoData = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('bugo')
+                    .select('*')
+                    .eq('bugo_number', editBugoNumber)
+                    .single();
+
+                if (error) throw error;
+                if (!data) return;
+
+                // formData 설정
+                setFormData({
+                    applicant_name: data.applicant_name || '',
+                    phone_password: data.phone_password || '',
+                    deceased_name: data.deceased_name || '',
+                    gender: data.gender || '',
+                    relationship: data.relationship || '',
+                    age: data.age?.toString() || '',
+                    religion: data.religion || '',
+                    religion_custom: data.religion_custom || '',
+                    funeral_home: data.funeral_home || '',
+                    room_number: data.room_number || '',
+                    funeral_home_tel: data.funeral_home_tel || '',
+                    address: data.address || '',
+                    address_detail: data.address_detail || '',
+                    death_date: data.death_date || '',
+                    death_time: data.death_time || '',
+                    death_hour: data.death_time?.split(':')[0] || '',
+                    death_minute: data.death_time?.split(':')[1] || '00',
+                    encoffin_date: data.encoffin_date || '',
+                    encoffin_hour: data.encoffin_time?.split(':')[0] || '',
+                    encoffin_minute: data.encoffin_time?.split(':')[1] || '00',
+                    funeral_date: data.funeral_date || '',
+                    funeral_time: data.funeral_time || '',
+                    funeral_hour: data.funeral_time?.split(':')[0] || '',
+                    funeral_minute: data.funeral_time?.split(':')[1] || '00',
+                    burial_place: data.burial_place || '',
+                    message: data.message || '',
+                    primary_mourner: data.primary_mourner || '',
+                });
+
+                // 상주 목록
+                if (data.mourners && Array.isArray(data.mourners)) {
+                    setMourners(data.mourners);
+                }
+
+                // 계좌 정보
+                if (data.accounts && Array.isArray(data.accounts)) {
+                    setAccounts(data.accounts);
+                    setShowAccount(data.accounts.length > 0);
+                }
+
+                // 기타 옵션
+                if (data.burial_place) setShowBurial(true);
+                if (data.photo_url) {
+                    setPhotoUrl(data.photo_url);
+                    setShowPhoto(true);
+                }
+            } catch (err) {
+                console.error('Error loading bugo:', err);
+            }
+        };
+
+        loadBugoData();
+    }, [editBugoNumber]);
 
     // 장례식장 검색 모달
     const [facilityModalOpen, setFacilityModalOpen] = useState(false);
@@ -378,7 +451,8 @@ export default function WriteFormPage() {
         setIsSubmitting(true);
 
         try {
-            const bugoNumber = await generateBugoNumber();
+            // 수정 모드면 기존 번호 사용, 아니면 새 번호 생성
+            const bugoNumber = editBugoNumber || await generateBugoNumber();
 
             const deathDateTime = formData.death_date && formData.death_hour
                 ? new Date(`${formData.death_date}T${formData.death_hour.padStart(2, '0')}:${formData.death_minute}:00`).toISOString()
@@ -423,11 +497,28 @@ export default function WriteFormPage() {
                 status: 'active',
             };
 
-            const { data, error } = await supabase
-                .from('bugo')
-                .insert([bugoData])
-                .select()
-                .single();
+            let data, error;
+
+            if (editBugoNumber) {
+                // 수정 모드: update
+                const result = await supabase
+                    .from('bugo')
+                    .update(bugoData)
+                    .eq('bugo_number', editBugoNumber)
+                    .select()
+                    .single();
+                data = result.data;
+                error = result.error;
+            } else {
+                // 신규 생성: insert
+                const result = await supabase
+                    .from('bugo')
+                    .insert([bugoData])
+                    .select()
+                    .single();
+                data = result.data;
+                error = result.error;
+            }
 
             if (error) throw error;
 
@@ -435,7 +526,7 @@ export default function WriteFormPage() {
             router.push(`/create/complete/${data.bugo_number}`);
         } catch (error) {
             console.error('Error:', error);
-            alert('부고장 생성 중 오류가 발생했습니다.');
+            alert(editBugoNumber ? '부고장 수정 중 오류가 발생했습니다.' : '부고장 생성 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
