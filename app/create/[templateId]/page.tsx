@@ -668,7 +668,7 @@ export default function WriteFormPage() {
                 mourner_name: formData.primary_mourner || '',
                 contact: mourners[0]?.contact || '',
                 age: formData.age ? parseInt(formData.age) : null,
-                religion: formData.religion || null,
+                religion: formData.religion === '기타' ? formData.religion_custom : (formData.religion || null),
                 funeral_home: formData.funeral_home || null,
                 room_number: formData.room_number || null,
                 funeral_home_tel: formData.funeral_home_tel || null,
