@@ -920,11 +920,11 @@ export default function WriteFormPage() {
                                                         }}
                                                     />
                                                 </div>
-                                                <div style={{ flex: 4 }}>
+                                                <div style={{ flex: 4 }} data-field="funeral_time">
                                                     <input
                                                         type="text"
                                                         name="funeral_time"
-                                                        className="form-input time-input"
+                                                        className={`form-input time-input ${errors.funeral_time ? 'error' : ''}`}
                                                         placeholder="00:00"
                                                         maxLength={5}
                                                         inputMode="numeric"
@@ -935,9 +935,11 @@ export default function WriteFormPage() {
                                                                 val = val.slice(0, 2) + ':' + val.slice(2, 4);
                                                             }
                                                             setFormData(prev => ({ ...prev, funeral_time: val }));
+                                                            if (errors.funeral_time) setErrors(prev => ({ ...prev, funeral_time: '' }));
                                                         }}
                                                         style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                     />
+                                                    {errors.funeral_time && <p className="field-error">{errors.funeral_time}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -965,11 +967,11 @@ export default function WriteFormPage() {
                                                         }}
                                                     />
                                                 </div>
-                                                <div style={{ flex: 4 }}>
+                                                <div style={{ flex: 4 }} data-field="death_time">
                                                     <input
                                                         type="text"
                                                         name="death_time"
-                                                        className="form-input time-input"
+                                                        className={`form-input time-input ${errors.death_time ? 'error' : ''}`}
                                                         placeholder="00:00"
                                                         maxLength={5}
                                                         inputMode="numeric"
@@ -980,9 +982,11 @@ export default function WriteFormPage() {
                                                                 val = val.slice(0, 2) + ':' + val.slice(2, 4);
                                                             }
                                                             setFormData(prev => ({ ...prev, death_time: val }));
+                                                            if (errors.death_time) setErrors(prev => ({ ...prev, death_time: '' }));
                                                         }}
                                                         style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                     />
+                                                    {errors.death_time && <p className="field-error">{errors.death_time}</p>}
                                                 </div>
                                             </div>
                                         </div>
