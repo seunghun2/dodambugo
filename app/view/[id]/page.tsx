@@ -288,6 +288,67 @@ export default function ViewPage() {
             </section>
 
             {/* ========================================
+                발인 및 장지
+            ======================================== */}
+            <section className="section">
+                <div className="funeral-info-table">
+                    {bugo.funeral_date && (
+                        <div className="funeral-info-row funeral-highlight">
+                            <span className="funeral-info-label">발인</span>
+                            <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
+                        </div>
+                    )}
+                    {bugo.encoffin_date && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">입관</span>
+                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
+                            </div>
+                        </>
+                    )}
+                    {(bugo.burial_place || bugo.burial_place2) && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row burial-section">
+                                <span className="funeral-info-label">장지</span>
+                                <div className="burial-list">
+                                    {bugo.burial_place && (
+                                        <div className="burial-item">
+                                            <div className="burial-box">
+                                                <span className="burial-label">1차장지</span>
+                                            </div>
+                                            <span className="burial-text">{bugo.burial_place}</span>
+                                        </div>
+                                    )}
+                                    {bugo.burial_place2 && (
+                                        <div className="burial-item">
+                                            <div className="burial-box">
+                                                <span className="burial-label">2차장지</span>
+                                            </div>
+                                            <span className="burial-text">{bugo.burial_place2}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    {bugo.message && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">안내사항</span>
+                                <span className="funeral-info-value">{bugo.message}</span>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </section>
+
+            {/* 구분선 */}
+            <div className="section-divider"></div>
+
+            {/* ========================================
                 상주
             ======================================== */}
             <section className="section mourners-section">
@@ -322,11 +383,11 @@ export default function ViewPage() {
                         ));
                     })()}
                 </div>
-                {/* 부고 알리기 / 부의금 보내기 버튼 */}
+                {/* 부고 공유하기 / 부의금 보내기 버튼 */}
                 <div className="mourner-action-btns">
                     <button className="mourner-action-btn" onClick={() => setShareModalOpen(true)}>
                         <img src="/images/ic_share.png" alt="공유" className="action-btn-icon" />
-                        <span>부고 알리기</span>
+                        <span>부고 공유하기</span>
                     </button>
                     {((bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
                         (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber))) && (
@@ -338,79 +399,29 @@ export default function ViewPage() {
                 </div>
             </section>
 
-            {/* 구분선 */}
-            <div className="section-divider"></div>
-
-            {/* ========================================
-                발인 및 장지
-            ======================================== */}
-            <section className="section">
-                <div className="funeral-info-table">
-                    {bugo.encoffin_date && (
-                        <>
-                            <div className="funeral-info-row">
-                                <span className="funeral-info-label">입관</span>
-                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
-                            </div>
-                            <div className="funeral-info-divider"></div>
-                        </>
-                    )}
-                    {bugo.funeral_date && (
-                        <div className="funeral-info-row">
-                            <span className="funeral-info-label">발인</span>
-                            <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
-                        </div>
-                    )}
-                    {(bugo.burial_place || bugo.burial_place2) && (
-                        <div className="funeral-info-row burial-section">
-                            <span className="funeral-info-label">장지</span>
-                            <div className="burial-list">
-                                {bugo.burial_place && (
-                                    <div className="burial-item">
-                                        <div className="burial-box">
-                                            <span className="burial-label">1차장지</span>
-                                        </div>
-                                        <span className="burial-text">{bugo.burial_place}</span>
-                                    </div>
-                                )}
-                                {bugo.burial_place2 && (
-                                    <div className="burial-item">
-                                        <div className="burial-box">
-                                            <span className="burial-label">2차장지</span>
-                                        </div>
-                                        <span className="burial-text">{bugo.burial_place2}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </section>
-
             {/* 계좌 정보는 모달로 표시 */}
 
+
             {/* ========================================
-                추모글 (방명록)
+                꽃으로 마음을 보내신 분
             ======================================== */}
-            <section className="section guestbook-section">
-                <h2 className="section-title">추모글</h2>
-                <div className="guestbook-form">
-                    <input type="text" placeholder="이름" className="form-input" />
-                    <input type="password" placeholder="비밀번호 4자리" maxLength={4} className="form-input" />
-                    <textarea placeholder="따뜻한 위로의 말씀을 전해주세요." className="form-textarea"></textarea>
-                    <button className="btn-submit">조문 남기기</button>
-                </div>
-                <div className="guestbook-empty">
-                    <p>아직 작성된 추모글이 없습니다.</p>
+            <section className="section flower-section">
+                <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
+
+                {/* 화환 보내기 버튼 */}
+                <button className="flower-send-btn">
+                    <span className="flower-icon">🌸</span>
+                    <span>화환 보내기</span>
+                </button>
+
+                {/* 보내신 분 리스트 - 추후 DB 연동 */}
+                <div className="flower-list">
+                    <div className="flower-empty">
+                        <p>아직 보내신 분이 없습니다.</p>
+                    </div>
                 </div>
             </section>
 
-            {/* ========================================
-                마무리 메시지
-            ======================================== */}
-            <div className="footer-message">
-                <p>따뜻한 마음의 위로 부탁드리며,<br />고인의 명복을 빌어주시길 바랍니다.</p>
-            </div>
 
             {/* ========================================
                 공유 모달

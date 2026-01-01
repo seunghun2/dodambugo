@@ -659,7 +659,7 @@ body {
 
 .funeral-info-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
 
@@ -667,6 +667,13 @@ body {
     height: 1px;
     background: #F5F5F5;
     margin: 4px 0;
+}
+
+/* 발인 강조 */
+.funeral-highlight .funeral-info-label,
+.funeral-highlight .funeral-info-value {
+    font-weight: 800;
+    color: #111111;
 }
 
 /* 라벨 - 16px #999999 (상주 관계와 동일) */
@@ -714,7 +721,7 @@ body {
 }
 
 .burial-section {
-    align-items: center;
+    align-items: flex-start;
 }
 
 .burial-list {
@@ -726,6 +733,21 @@ body {
 .burial-item {
     display: flex;
     align-items: center;
+}
+
+/* ========================================
+   안내사항
+======================================== */
+.notice-section {
+    padding-left: 10px;
+}
+
+.notice-text {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+    line-height: 1.6;
 }
 
 /* ========================================
@@ -859,6 +881,87 @@ body {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     color: #B4B4B4;
+}
+
+/* ========================================
+   꽃으로 마음을 보내신 분
+======================================== */
+.flower-section {
+    background: #FAFAFA;
+}
+
+.flower-send-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.flower-send-btn:active {
+    background: #F5F5F5;
+}
+
+.flower-icon {
+    font-size: 18px;
+}
+
+.flower-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.flower-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.flower-item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.flower-item-content {
+    flex: 1;
+}
+
+.flower-item-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.flower-item-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+}
+
+.flower-empty {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.flower-empty p {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: #999999;
 }
 
 /* ========================================
