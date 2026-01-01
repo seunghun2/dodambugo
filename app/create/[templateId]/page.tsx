@@ -75,7 +75,7 @@ export default function WriteFormPage() {
         gender: '',
         relationship: '',
         age: '',
-        religion: '',
+        religion: '없음',
         religion_custom: '',
         funeral_home: '',
         room_number: '',
@@ -203,7 +203,7 @@ export default function WriteFormPage() {
                     gender: data.gender || '',
                     relationship: data.relationship || '',
                     age: data.age?.toString() || '',
-                    religion: data.religion || '',
+                    religion: data.religion || '없음',
                     religion_custom: data.religion_custom || '',
                     funeral_home: data.funeral_home || '',
                     room_number: data.room_number || '',
@@ -420,8 +420,7 @@ export default function WriteFormPage() {
         if (!formData.age) newErrors.age = '연세를 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
-        if (!formData.relationship) newErrors.relationship = '관계를 선택해주세요';
-        if (!formData.primary_mourner) newErrors.primary_mourner = '대표상주 성함을 입력해주세요';
+        if (!formData.relationship || !formData.primary_mourner) newErrors.primary_mourner = '상주를 입력해주세요';
 
         // 추가상주: 관계 선택 시 이름 필수, 연락처는 선택이지만 형식 검증
         mourners.forEach((mourner, index) => {
