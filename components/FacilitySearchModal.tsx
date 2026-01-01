@@ -174,7 +174,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                             justifyContent: 'center'
                         }}
                     >
-                        <span className="material-symbols-outlined">close</span>
+                        <span className="material-symbols-outlined" style={{ color: '#333' }}>close</span>
                     </button>
                     <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>주소 찾기</h2>
                 </div>
@@ -192,7 +192,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                             color: activeTab === 'facility' ? '#333' : '#888',
                             fontWeight: activeTab === 'facility' ? 600 : 400,
                             cursor: 'pointer',
-                            borderBottom: activeTab === 'facility' ? '2px solid #007aff' : '2px solid transparent'
+                            borderBottom: activeTab === 'facility' ? '2px solid #333' : '2px solid transparent'
                         }}
                     >
                         장례식장 검색
@@ -208,7 +208,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                             color: activeTab === 'address' ? '#333' : '#888',
                             fontWeight: activeTab === 'address' ? 600 : 400,
                             cursor: 'pointer',
-                            borderBottom: activeTab === 'address' ? '2px solid #007aff' : '2px solid transparent'
+                            borderBottom: activeTab === 'address' ? '2px solid #333' : '2px solid transparent'
                         }}
                     >
                         주소 검색
