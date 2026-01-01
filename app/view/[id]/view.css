@@ -400,6 +400,134 @@ body {
     color: #333333;
 }
 
+/* 장례식장 전화하기 버튼 */
+.call-funeral-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.call-btn-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.call-btn-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.call-btn-number {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+}
+
+/* 전화 바텀시트 모달 */
+.phone-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.phone-modal {
+    width: 100%;
+    max-width: 360px;
+    background: #FFFFFF;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.phone-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.phone-modal-header h3 {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.phone-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.phone-modal-content {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.phone-modal-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.phone-modal-number {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 24px;
+}
+
+.phone-modal-call-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    background: #4CAF50;
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
 /* ========================================
    상주
 ======================================== */
@@ -478,6 +606,40 @@ body {
 .mourner-tel-inline svg {
     width: 14px;
     height: 14px;
+}
+
+/* 부고 알리기 / 부의금 보내기 버튼 */
+.mourner-action-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.mourner-action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: #FAFAFA;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.action-btn-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.mourner-action-btn span {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
 }
 
 /* ========================================

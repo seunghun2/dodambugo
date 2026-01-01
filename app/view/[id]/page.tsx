@@ -268,6 +268,22 @@ export default function ViewPage() {
                     <p className="funeral-name">{bugo.funeral_home}</p>
                     <p className="funeral-room">{bugo.room_number || ''}</p>
                 </div>
+
+                {/* 장례식장 전화하기 버튼 */}
+                {bugo.funeral_home_tel && (
+                    <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <div className="call-btn-text">
+                            <span className="call-btn-title">장례식장에 전화하기</span>
+                            <span className="call-btn-number">{bugo.funeral_home_tel}</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                )}
             </section>
 
             {/* ========================================
@@ -304,6 +320,19 @@ export default function ViewPage() {
                             </div>
                         ));
                     })()}
+                </div>
+                {/* 부고 알리기 / 부의금 보내기 버튼 */}
+                <div className="mourner-action-btns">
+                    <button className="mourner-action-btn" onClick={() => setShareModalOpen(true)}>
+                        <img src="/images/ic_share.png" alt="공유" className="action-btn-icon" />
+                        <span>부고 알리기</span>
+                    </button>
+                    {bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0 && (
+                        <a href="#account-section" className="mourner-action-btn">
+                            <img src="/images/ic_money.png" alt="부의금" className="action-btn-icon" />
+                            <span>부의금 보내기</span>
+                        </a>
+                    )}
                 </div>
             </section>
 
