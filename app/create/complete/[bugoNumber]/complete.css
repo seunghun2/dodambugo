@@ -166,7 +166,7 @@
     margin-bottom: 20px;
 }
 
-.section-title {
+.complete-page .section-title {
     font-size: 14px;
     font-weight: 600;
     color: var(--gray-900);
