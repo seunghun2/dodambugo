@@ -5674,3 +5674,9 @@ section {
 mark {
     text-decoration: none;
 }
+/* iOS 모든 인풋 확대 방지 */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
