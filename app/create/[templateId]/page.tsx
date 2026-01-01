@@ -779,10 +779,10 @@ export default function WriteFormPage() {
                                         <label className="form-label required">상주</label>
 
                                         {/* 고인과의 관계 + 대표상주 */}
-                                        <div className="mourner-row primary-mourner" data-field="relationship">
+                                        <div className="mourner-row primary-mourner" data-field="primary_mourner">
                                             <select
                                                 name="relationship"
-                                                className={`form-select mourner-relation ${errors.relationship ? 'error' : ''}`}
+                                                className={`form-select mourner-relation ${errors.primary_mourner ? 'error' : ''}`}
                                                 value={formData.relationship}
                                                 onChange={handleChange}
                                             >
