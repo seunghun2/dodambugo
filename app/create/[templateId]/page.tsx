@@ -899,18 +899,16 @@ export default function WriteFormPage() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                        ))}
-                                                {(errors.mourner_name || errors.mourner_contact) && (
-                                                    <p className="field-error">{errors.mourner_name || errors.mourner_contact}</p>
-                                                )}
-                                                <button type="button" className="btn-add-mourner" onClick={addMourner}>
-                                                    <span className="material-symbols-outlined">add_circle</span>
-                                                    상주 추가
-                                                </button>
                                             </div>
+                                        ))}
+                                        <button type="button" className="btn-add-mourner" onClick={addMourner}>
+                                            <span className="material-symbols-outlined">add_circle</span>
+                                            상주 추가
+                                        </button>
+                                    </div>
 
-                                    {/* 일정 정보 */ }
-                                            < div className = "form-section" >
+                                    {/* 일정 정보 */}
+                                    <div className="form-section">
                                         <h2 className="section-title">발인/임종 일시</h2>
                                         <p className="section-desc">장례 일정을 입력해주세요</p>
 
