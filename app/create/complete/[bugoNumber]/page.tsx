@@ -128,6 +128,7 @@ export default function CompletePage() {
                 <div className="title-section">
                     <h1 className="page-title">상주 {mournerName} 님의 부고장</h1>
                     <Link href={`/create/edit/${params.bugoNumber}`} className="btn-edit-light">
+                        <span className="material-symbols-outlined">edit</span>
                         수정하기
                     </Link>
                 </div>
