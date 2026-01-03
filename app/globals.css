@@ -635,7 +635,7 @@ section {
 }
 
 .section-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
     color: var(--gray-900);
@@ -852,7 +852,7 @@ section {
 }
 
 .faq .section-title {
-    font-size: 34px;
+    font-size: 22px;
 }
 
 .faq-list {
@@ -1430,7 +1430,7 @@ section {
     }
 
     .section-title {
-        font-size: 28px;
+        font-size: 22px;
     }
 
     .section-subtitle {
@@ -5449,7 +5449,7 @@ section {
     }
 
     .section-title {
-        font-size: 18px;
+        font-size: 22px;
     }
 
     .form-actions {
