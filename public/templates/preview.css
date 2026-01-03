@@ -22,6 +22,16 @@ body {
     font-family: 'Nanum Myeongjo', serif;
     background: #FFFFFF;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE */
+}
+
+body::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari */
 }
 
 .view-page {
