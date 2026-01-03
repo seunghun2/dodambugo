@@ -167,9 +167,8 @@ export default function SearchPage() {
                                         key={bugo.id}
                                         href={`/create/complete/${bugo.bugo_number}`}
                                         style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            padding: '18px 20px',
+                                            display: 'block',
+                                            padding: '16px',
                                             background: 'white',
                                             borderRadius: '8px',
                                             border: '1px solid #e5e7eb',
@@ -180,38 +179,22 @@ export default function SearchPage() {
                                         onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'}
                                         onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
                                     >
-                                        {/* 번호 + 고인명 */}
-                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ color: '#6b7280', fontWeight: 500 }}>#{bugo.bugo_number}</span>
-                                            <span style={{ fontWeight: 600, color: '#1f2937' }}>{bugo.deceased_name}</span>
-                                            <span style={{ color: '#9ca3af', fontSize: '13px' }}>(故{bugo.deceased_name})</span>
+                                        {/* 첫 줄: 번호 + 상주명 (故고인명) */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                            <span style={{ color: '#374151', fontWeight: 500 }}>#{bugo.bugo_number}</span>
+                                            <span style={{ fontWeight: 600, color: '#1f2937', fontSize: '16px' }}>{bugo.mourner_name || bugo.applicant_name}</span>
+                                            <span style={{ color: '#6b7280', fontSize: '14px' }}>(故{bugo.deceased_name})</span>
                                         </div>
-
-                                        {/* 장례식장 */}
-                                        <div style={{
-                                            width: '150px',
-                                            color: '#6b7280',
-                                            fontSize: '14px',
-                                            textAlign: 'center'
-                                        }}>
-                                            {bugo.funeral_home || '-'}
-                                        </div>
-
-                                        {/* 발인일 + 마이너스 */}
-                                        <div style={{
-                                            width: '120px',
-                                            color: '#6b7280',
-                                            fontSize: '14px',
-                                            textAlign: 'right',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'flex-end',
-                                            gap: '8px'
-                                        }}>
+                                        {/* 둘째 줄: 장례유형 | 장례식장명 + 발인일 */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#6b7280', fontSize: '14px' }}>
                                             <span>
-                                                <span style={{ color: '#9ca3af' }}>발인:</span> {formatDate(bugo.funeral_date ?? null)}
+                                                {(bugo as any).funeral_type || '일반 장례'}
+                                                {((bugo as any).funeral_type === '일반 장례' || !(bugo as any).funeral_type) && bugo.funeral_home && ` | ${bugo.funeral_home}${bugo.room_number ? ` ${bugo.room_number}` : ''}`}
                                             </span>
-                                            <span style={{ color: '#d1d5db', fontSize: '16px' }}>−</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
+                                                발인: {formatDate(bugo.funeral_date ?? null)}
+                                            </span>
                                         </div>
                                     </Link>
                                 ))}
