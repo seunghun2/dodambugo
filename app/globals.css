@@ -5736,16 +5736,18 @@ section {
     align-items: center;
     justify-content: center;
     padding: 14px 24px;
-    background: var(--gray-100);
-    color: var(--gray-500);
+    background: #FFFFFF;
+    color: #333333;
+    border: 1px solid #666666;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: default;
+    text-decoration: none;
 }
 
 .template-slide.current {
-    border: 2px solid var(--primary);
+    border: 1px solid var(--gray-200);
 }
 
 /* 검색 하이라이트 밑줄 제거 */
