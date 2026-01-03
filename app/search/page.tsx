@@ -165,7 +165,7 @@ export default function SearchPage() {
                                 {displayList.map((bugo) => (
                                     <Link
                                         key={bugo.id}
-                                        href={`/view/${bugo.id}`}
+                                        href={`/create/complete/${bugo.bugo_number}`}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -209,7 +209,7 @@ export default function SearchPage() {
                                             gap: '8px'
                                         }}>
                                             <span>
-                                                <span style={{ color: '#9ca3af' }}>발인:</span> {formatDate(bugo.funeral_date)}
+                                                <span style={{ color: '#9ca3af' }}>발인:</span> {formatDate(bugo.funeral_date ?? null)}
                                             </span>
                                             <span style={{ color: '#d1d5db', fontSize: '16px' }}>−</span>
                                         </div>
