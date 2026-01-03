@@ -218,7 +218,7 @@ export default function CompletePage() {
 
                 {/* 복제 배너 */}
                 <div className="copy-banner">
-                    <p>부고장을 복제하여 다른 이름으로 변경하여 사용하실 수 있습니다</p>
+                    <p>부고장을 복제하여 다른 이름으로<br />변경하여 사용하실 수 있습니다</p>
                     <button className="btn-copy-bugo" onClick={duplicateBugo}>복제하기</button>
                 </div>
             </main>
