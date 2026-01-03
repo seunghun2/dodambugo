@@ -13,6 +13,7 @@ interface BugoData {
     age?: number;
     mourner_name?: string;
     mourners?: Array<{ relationship: string; name: string; contact: string }>;
+    funeral_type?: string;
     funeral_home?: string;
     room_number?: string;
     funeral_date?: string;
@@ -90,8 +91,13 @@ export default function CompletePage() {
             bugo_number: undefined, // 새로 생성될 것
         };
         sessionStorage.setItem('duplicateBugo', JSON.stringify(duplicateData));
-        // 같은 템플릿으로 바로 이동
-        const templateId = bugo.template_id || '1';
+
+        // 같은 템플릿으로 이동 - 기존 draft 삭제
+        const templateId = bugo.template_id || 'basic';
+        localStorage.removeItem(`bugo_draft_${templateId}`);
+        localStorage.removeItem('bugo_draft_basic');
+        localStorage.removeItem('bugo_draft_1');
+
         router.push(`/create/${templateId}`);
     };
 
@@ -138,7 +144,6 @@ export default function CompletePage() {
                         <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
                     </ul>
                     <div className="nav-actions">
-                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
                         <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
                             <span></span>
                             <span></span>
@@ -167,6 +172,10 @@ export default function CompletePage() {
                     <div className="info-row">
                         <span className="info-label">고인명</span>
                         <span className="info-value">故{bugo.deceased_name}{bugo.age ? `[${bugo.age}세]` : ''}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="info-label">장례종류</span>
+                        <span className="info-value">{bugo.funeral_type || '일반 장례'}</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">장례식장</span>

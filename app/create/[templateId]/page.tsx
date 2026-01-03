@@ -159,14 +159,102 @@ export default function WriteFormPage() {
     };
 
 
-    // 임시저장 자동 불러오기 (수정 모드가 아닐 때만)
+
+    // 초기 데이터 로드 (복제 > draft 순서)
     useEffect(() => {
         // URL에 edit 파라미터가 있으면 수정 모드 - 건너뛰기
         if (typeof window !== 'undefined' && window.location.search.includes('edit=')) return;
 
-        // 복제 데이터가 있으면 draft 로드 건너뛰기
-        if (sessionStorage.getItem('duplicateBugo')) return;
+        // 1. 복제 데이터 먼저 확인
+        const duplicateData = sessionStorage.getItem('duplicateBugo');
+        if (duplicateData) {
+            try {
+                const parsed = JSON.parse(duplicateData);
 
+                // 상주 정보 파싱
+                let mournersData = parsed.mourners;
+                if (typeof mournersData === 'string') {
+                    try { mournersData = JSON.parse(mournersData); } catch { mournersData = null; }
+                }
+
+                // 대표상주 정보
+                let primaryMourner = parsed.mourner_name || parsed.primary_mourner || '';
+                let relationship = parsed.relationship || '';
+                if (mournersData && Array.isArray(mournersData) && mournersData.length > 0) {
+                    primaryMourner = primaryMourner || mournersData[0].name || '';
+                    relationship = relationship || mournersData[0].relationship || '';
+                }
+
+                setFormData(prev => ({
+                    ...prev,
+                    deceased_name: parsed.deceased_name || '',
+                    age: parsed.age?.toString() || '',
+                    gender: parsed.gender || '',
+                    religion: parsed.religion || '없음',
+                    funeral_type: parsed.funeral_type || '일반 장례',
+                    funeral_home: parsed.funeral_home || '',
+                    funeral_home_tel: parsed.funeral_home_tel || '',
+                    room_number: parsed.room_number || '',
+                    funeral_date: parsed.funeral_date || '',
+                    funeral_time: parsed.funeral_time || '',
+                    funeral_hour: parsed.funeral_time?.split(':')[0] || '',
+                    funeral_minute: parsed.funeral_time?.split(':')[1] || '00',
+                    death_date: parsed.death_date || '',
+                    death_time: parsed.death_time || '',
+                    death_hour: parsed.death_time?.split(':')[0] || '',
+                    death_minute: parsed.death_time?.split(':')[1] || '00',
+                    encoffin_date: parsed.encoffin_date || '',
+                    encoffin_time: parsed.encoffin_time || '',
+                    encoffin_hour: parsed.encoffin_time?.split(':')[0] || '',
+                    encoffin_minute: parsed.encoffin_time?.split(':')[1] || '00',
+                    address: parsed.address || '',
+                    address_detail: parsed.address_detail || '',
+                    burial_place: parsed.burial_place || '',
+                    burial_place2: parsed.burial_place2 || '',
+                    message: parsed.message || '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                    relationship: relationship,
+                    primary_mourner: primaryMourner,
+                    applicant_name: parsed.applicant_name || '',
+                    phone_password: parsed.phone_password || '',
+                }));
+
+                // 추가 상주 복사
+                if (mournersData && Array.isArray(mournersData) && mournersData.length > 1) {
+                    setMourners(mournersData.slice(1));
+                }
+
+                // 계좌 정보 복사
+                let accountData = parsed.account_info;
+                if (typeof accountData === 'string') {
+                    try { accountData = JSON.parse(accountData); } catch { accountData = null; }
+                }
+                if (accountData && Array.isArray(accountData) && accountData.length > 0) {
+                    setAccounts(accountData);
+                    setIsAccountSaved(true);
+                }
+
+                // 사진 복사
+                if (parsed.photo_url) {
+                    setPhotoUrl(parsed.photo_url);
+                    setShowPhoto(true);
+                }
+
+                // 장지 복사
+                if (parsed.burial_place) {
+                    setShowBurial(true);
+                }
+
+                // 복제 데이터 삭제
+                sessionStorage.removeItem('duplicateBugo');
+
+                // 복제 완료 - draft는 로드하지 않음
+                return;
+            } catch (e) {
+                console.log('Duplicate data parse error');
+            }
+        }
+
+        // 2. 복제 데이터 없으면 draft 확인
         const draft = localStorage.getItem(`bugo_draft_${templateId}`);
         if (draft) {
             try {
@@ -177,7 +265,6 @@ export default function WriteFormPage() {
 
                 if (hoursDiff < 24) {
                     if (parsed.formData) {
-                        // funeral_type이 없으면 기본값 유지
                         setFormData(prev => ({
                             ...prev,
                             ...parsed.formData,
@@ -225,95 +312,6 @@ export default function WriteFormPage() {
 
         return () => clearInterval(timer);
     }, [formData, mourners, accounts, showAccount, showBurial, showPhoto, photoUrl, templateId, editBugoNumber]);
-
-
-    // 복제 데이터 로드
-    useEffect(() => {
-        const duplicateData = sessionStorage.getItem('duplicateBugo');
-        if (duplicateData) {
-            try {
-                const parsed = JSON.parse(duplicateData);
-
-                // 상주 정보 파싱
-                let mournersData = parsed.mourners;
-                if (typeof mournersData === 'string') {
-                    try { mournersData = JSON.parse(mournersData); } catch { mournersData = null; }
-                }
-
-                // 대표상주 정보
-                let primaryMourner = parsed.mourner_name || parsed.primary_mourner || '';
-                let relationship = parsed.relationship || '';
-                if (mournersData && Array.isArray(mournersData) && mournersData.length > 0) {
-                    primaryMourner = primaryMourner || mournersData[0].name || '';
-                    relationship = relationship || mournersData[0].relationship || '';
-                }
-
-                setFormData(prev => ({
-                    ...prev,
-                    deceased_name: parsed.deceased_name || '',
-                    age: parsed.age?.toString() || '',
-                    gender: parsed.gender || '',
-                    religion: parsed.religion || '없음',
-                    funeral_home: parsed.funeral_home || '',
-                    funeral_home_tel: parsed.funeral_home_tel || '',
-                    room_number: parsed.room_number || '',
-                    funeral_date: parsed.funeral_date || '',
-                    funeral_time: parsed.funeral_time || '',
-                    funeral_hour: parsed.funeral_time?.split(':')[0] || '',
-                    funeral_minute: parsed.funeral_time?.split(':')[1] || '00',
-                    death_date: parsed.death_date || '',
-                    death_time: parsed.death_time || '',
-                    death_hour: parsed.death_time?.split(':')[0] || '',
-                    death_minute: parsed.death_time?.split(':')[1] || '00',
-                    encoffin_date: parsed.encoffin_date || '',
-                    encoffin_time: parsed.encoffin_time || '',
-                    encoffin_hour: parsed.encoffin_time?.split(':')[0] || '',
-                    encoffin_minute: parsed.encoffin_time?.split(':')[1] || '00',
-                    address: parsed.address || '',
-                    address_detail: parsed.address_detail || '',
-                    burial_place: parsed.burial_place || '',
-                    burial_place2: parsed.burial_place2 || '',
-                    message: parsed.message || '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
-                    // 상주 정보도 복사
-                    relationship: relationship,
-                    primary_mourner: primaryMourner,
-                    applicant_name: parsed.applicant_name || '',
-                    phone_password: parsed.phone_password || '',
-                }));
-
-                // 추가 상주 복사
-                if (mournersData && Array.isArray(mournersData) && mournersData.length > 1) {
-                    setMourners(mournersData.slice(1));
-                }
-
-                // 계좌 정보 복사
-                let accountData = parsed.account_info;
-                if (typeof accountData === 'string') {
-                    try { accountData = JSON.parse(accountData); } catch { accountData = null; }
-                }
-                if (accountData && Array.isArray(accountData) && accountData.length > 0) {
-                    setAccounts(accountData);
-                    setIsAccountSaved(true);
-                }
-
-                // 사진 복사
-                if (parsed.photo_url) {
-                    setPhotoUrl(parsed.photo_url);
-                    setShowPhoto(true);
-                }
-
-                // 장지 복사
-                if (parsed.burial_place) {
-                    setShowBurial(true);
-                }
-
-                // 복제 데이터 삭제
-                sessionStorage.removeItem('duplicateBugo');
-            } catch (e) {
-                console.log('Duplicate data parse error');
-            }
-        }
-    }, []);
 
     // 수정 모드: 기존 부고장 데이터 불러오기
     useEffect(() => {
@@ -712,6 +710,7 @@ export default function WriteFormPage() {
                 contact: mourners[0]?.contact || '',
                 age: formData.age ? parseInt(formData.age) : null,
                 religion: formData.religion === '기타' ? formData.religion_custom : (formData.religion || null),
+                funeral_type: formData.funeral_type || '일반 장례',
                 funeral_home: formData.funeral_home || null,
                 room_number: formData.room_number || null,
                 funeral_home_tel: formData.funeral_home_tel || null,
@@ -820,7 +819,6 @@ export default function WriteFormPage() {
                             <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
                         </ul>
                         <div className="nav-actions">
-                            <Link href="/create" className="nav-cta">부고장 만들기</Link>
                             <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
                                 <span></span>
                                 <span></span>
