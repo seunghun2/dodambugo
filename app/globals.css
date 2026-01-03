@@ -3902,7 +3902,7 @@ section {
 
 .btn-use-template:hover {
     background: var(--primary);
-    color: white;
+    color: #000000;
 }
 
 /* Preview Page */
@@ -3987,7 +3987,7 @@ section {
     max-width: 360px;
     padding: 14px;
     background: var(--primary);
-    color: var(--primary-text);
+    color: #000000;
     border: none;
     border-radius: 12px;
     font-size: 16px;
@@ -4109,11 +4109,12 @@ section {
 
 .create-page .btn-select {
     background: var(--primary);
-    color: white;
+    color: #000000;
 }
 
 .create-page .btn-select:hover {
-    background: #2563eb;
+    background: var(--primary-dark);
+    color: #000000;
 }
 
 /* 선택된 템플릿 배너 */
