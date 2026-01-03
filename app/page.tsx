@@ -48,7 +48,7 @@ export default function HomePage() {
 
     // 통계 애니메이션 - easeOutQuad
     const animateStats = () => {
-      const statNumbers = document.querySelectorAll('.stats-card .stat-number[data-count]');
+      const statNumbers = document.querySelectorAll('.xd-stat-value[data-count]');
       statNumbers.forEach(stat => {
         const target = parseInt(stat.getAttribute('data-count') || '0');
         const suffix = stat.getAttribute('data-suffix') || '건';
@@ -115,7 +115,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Navigation - 예지부고 스타일 */}
+      {/* 상단 네비게이션 - 다른 페이지와 동일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
           <Link href="/" className="nav-logo">도담부고</Link>
@@ -134,43 +134,73 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Side Menu - 공통 컴포넌트 */}
-      <SideMenu isOpen={sideMenuOpen} onClose={closeSideMenu} />
+      {/* 메인 콘텐츠 - XD 스타일 */}
+      <div className="xd-main-wrapper">
 
-      {/* Hero Section - KAKAOBUGO 스타일 */}
-      <section className="hero" id="home">
-        <div className="hero-content">
-          {/* 통계 카드 - 미니멀 */}
-          <div className="stats-card">
-            <div className="stat-item">
-              <div className="stat-label">누적 부고장</div>
-              <div className="stat-number" data-count="15149" data-suffix="">0</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-label">만족도</div>
-              <div className="stat-number" data-count="99" data-suffix="%">0</div>
-            </div>
+        {/* 통계 섹션 */}
+        <div className="xd-stats">
+          <div className="xd-stat-item">
+            <span className="xd-stat-label">누적부고장</span>
+            <span className="xd-stat-value" data-count="15149" data-suffix="건">0</span>
           </div>
-
-          {/* 히어로 이미지 */}
-          <div className="hero-image">
-            <img src="/images/hero-image.png" alt="도담부고" />
-          </div>
-
-          {/* 두 개 버튼 */}
-          <div className="action-buttons">
-            <button className="action-btn primary" onClick={checkDraftBeforeCreate}>
-              <span className="material-symbols-outlined">edit_note</span>
-              <span>부고장 만들기</span>
-            </button>
-            <button className="action-btn secondary" onClick={() => router.push('/search')}>
-              <span className="material-symbols-outlined">search</span>
-              <span>부고 검색</span>
-            </button>
+          <div className="xd-stat-divider"></div>
+          <div className="xd-stat-item">
+            <span className="xd-stat-label">만족도</span>
+            <span className="xd-stat-value" data-count="99" data-suffix="%">0</span>
           </div>
         </div>
-      </section>
+
+        {/* 히어로 섹션 */}
+        <section className="xd-hero">
+          <h1 className="xd-hero-title">도담부고에서 부고장을 만드세요</h1>
+          <p className="xd-hero-subtitle">가장 간편하고 빠르게 부고장을 만드세요.</p>
+          <div className="xd-hero-image">
+            <img src="/images/hero-image.png" alt="도담부고 부고장 미리보기" />
+          </div>
+        </section>
+
+        {/* 검색바 */}
+        <div className="xd-search" onClick={() => router.push('/search')}>
+          <span className="xd-search-text">상주 / 고인을 검색하세요.</span>
+          <span className="material-symbols-outlined xd-search-icon">search</span>
+        </div>
+
+        {/* 액션 카드 */}
+        <div className="xd-action-cards">
+          <button className="xd-action-card" onClick={checkDraftBeforeCreate}>
+            <div className="xd-action-icon-circle">
+              <span className="material-symbols-outlined">edit_note</span>
+            </div>
+            <span className="xd-action-title">부고장 만들기</span>
+          </button>
+          <button className="xd-action-card" onClick={() => router.push('/search')}>
+            <div className="xd-action-icon-circle">
+              <span className="material-symbols-outlined">search</span>
+            </div>
+            <span className="xd-action-title">부고 검색</span>
+          </button>
+          <button className="xd-action-card xd-action-faq" onClick={() => router.push('/faq')}>
+            <div className="xd-action-icon-circle">
+              <span className="material-symbols-outlined">help</span>
+            </div>
+            <span className="xd-action-title">자주 묻는 질문</span>
+          </button>
+        </div>
+
+        {/* 부고장 작성방법 */}
+        <section className="xd-guide">
+          <h2 className="xd-guide-title">부고장 작성방법</h2>
+          <div className="xd-guide-card">
+            <p className="xd-guide-text">
+              고인 정보와 상주 연락처, 장례 일정만 입력하면 모바일 부고장이 완성됩니다.
+              간단한 정보 입력만으로 정중한 부고장을 만들 수 있습니다.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      {/* Side Menu */}
+      <SideMenu isOpen={sideMenuOpen} onClose={closeSideMenu} />
 
       {/* Features Section */}
       <section className="features" id="features">
@@ -245,7 +275,7 @@ export default function HomePage() {
 
 
       {/* FAQ Section */}
-      <section className="faq" id="faq">
+      <section className="faq faq-section-bottom" id="faq">
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">자주 묻는 질문</h2>

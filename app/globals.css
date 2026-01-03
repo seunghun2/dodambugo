@@ -92,7 +92,7 @@ html {
 body {
     font-family: var(--font-family);
     color: var(--gray-900);
-    background-color: var(--bg-white);
+    background-color: #F3F4F6;
     line-height: 1.6;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -3634,7 +3634,7 @@ section {
 }
 
 .create-nav .nav-container {
-    max-width: 1200px;
+    max-width: 600px;
     margin: 0 auto;
     padding: 0 20px;
     height: 100%;
@@ -5762,4 +5762,262 @@ mark {
     textarea {
         font-size: 16px !important;
     }
+}
+
+/* ========================================
+   XD 디자인 스펙 - 360px 기준 메인 페이지
+   ======================================== */
+
+/* 메인 래퍼 - 600px로 통일 */
+.xd-main-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: #F3F4F6;
+    min-height: 100vh;
+    padding-top: 70px;
+    transition: max-width 0.3s ease;
+}
+
+/* 헤더 - XD: 360x64, 배경 #FFFFFF */
+.xd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 0 18px;
+    background: #FFFFFF;
+}
+
+/* 로고 - XD: 88x22, #F2B146 */
+.xd-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #F2B146;
+    text-decoration: underline;
+}
+
+/* 메뉴 버튼 - XD: 32x32 */
+.xd-menu-btn {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0D0D0D;
+}
+
+.xd-menu-btn .material-symbols-outlined {
+    font-size: 28px;
+}
+
+/* 통계 섹션 */
+.xd-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding: 20px 0;
+    background: #F3F4F6;
+}
+
+.xd-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 통계 라벨 - XD: Bold 12px, #9F9F9F */
+.xd-stat-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9F9F9F;
+}
+
+/* 통계 값 - XD: Bold 22px, #0D0D0D */
+.xd-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0D0D0D;
+    line-height: 32px;
+}
+
+/* 통계 구분선 - XD: height 24px, #CAD4DE */
+.xd-stat-divider {
+    width: 1px;
+    height: 24px;
+    background: #CAD4DE;
+}
+
+/* 히어로 섹션 */
+.xd-hero {
+    text-align: center;
+    padding: 24px 16px 0;
+}
+
+/* 히어로 타이틀 - XD: Bold 22px */
+.xd-hero-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 32px;
+    margin-bottom: 8px;
+}
+
+/* 히어로 서브타이틀 - XD: Light 14px */
+.xd-hero-subtitle {
+    font-size: 14px;
+    font-weight: 300;
+    color: #000000;
+    margin-bottom: 16px;
+}
+
+/* 히어로 이미지 - XD: 328x244, radius 12px */
+.xd-hero-image {
+    width: 100%;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+.xd-hero-image img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 328 / 244;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+/* 검색바 - XD: 328x52, radius 8px */
+.xd-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 32px);
+    height: 52px;
+    margin: 16px auto 12px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border: 1px solid #F3F3F3;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.xd-search:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.xd-search-text {
+    font-size: 14px;
+    color: #9F9F9F;
+}
+
+.xd-search-icon {
+    font-size: 24px;
+    color: #9F9F9F;
+}
+
+/* 액션 카드 */
+.xd-action-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 16px;
+    margin-bottom: 20px;
+}
+
+/* 액션 카드 - XD: 160x180, radius 8px, border #CAD4DE */
+.xd-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 32px 16px;
+    background: #FFFFFF;
+    border: 1px solid #CAD4DE;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.xd-action-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* FAQ 카드 - 기본 숨김, 500px+ 에서 표시 */
+.xd-action-faq {
+    display: none;
+}
+
+@media (min-width: 500px) {
+
+    /* FAQ 카드 표시 */
+    .xd-action-faq {
+        display: flex;
+    }
+
+    /* 3열 그리드 - 너비 100%로 검색바/가이드와 맞춤 */
+    .xd-action-cards {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: none;
+    }
+
+    /* 아래 FAQ 섹션 숨김 */
+    .faq-section-bottom {
+        display: none;
+    }
+}
+
+/* 아이콘 원형 */
+.xd-action-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.xd-action-icon-circle .material-symbols-outlined {
+    font-size: 32px;
+    color: #364F6B;
+}
+
+/* 액션 타이틀 - XD: Bold 16px */
+.xd-action-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* 부고장 작성방법 */
+.xd-guide {
+    padding: 20px 16px 40px;
+}
+
+.xd-guide-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 12px;
+}
+
+.xd-guide-card {
+    background: #FFFFFF;
+    border: 1px solid #CAD4DE;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.xd-guide-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666666;
 }
