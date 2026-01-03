@@ -5742,8 +5742,15 @@ section {
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
-    cursor: default;
+    cursor: pointer;
     text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-current-template:hover {
+    background: var(--primary);
+    color: #000000;
+    border-color: var(--primary);
 }
 
 .template-slide.current {
