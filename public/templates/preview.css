@@ -249,6 +249,40 @@ body::-webkit-scrollbar {
     color: #333333;
 }
 
+/* 장례식장 박스 - 인라인 (한 줄) */
+.funeral-box-inline {
+    flex-direction: row;
+    gap: 0;
+    padding: 16px 20px;
+    background: #F7F7F7;
+    border: none;
+    border-radius: 12px;
+}
+
+.funeral-box-inline .funeral-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111111;
+}
+
+.funeral-box-inline .funeral-room {
+    font-size: 16px;
+    color: #2C3E50;
+}
+
+/* 장례식장 박스 - 헤더 아래 카드 형태 */
+.funeral-box-top {
+    margin: 20px auto;
+    width: calc(100% - 40px);
+}
+
+/* 구분선 */
+.funeral-divider {
+    margin: 0 12px;
+    color: #DDDDDD;
+    font-weight: 300;
+}
+
 /* 장례식장 전화 */
 .call-funeral-btn {
     width: 100%;
@@ -371,6 +405,45 @@ body::-webkit-scrollbar {
     color: #555555;
 }
 
+/* 액션 바 - 새 디자인 (부의금/공유) */
+.action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.action-bar-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.action-bar-btn svg {
+    flex-shrink: 0;
+    stroke: #333333;
+}
+
+.action-bar-divider {
+    width: 1px;
+    height: 24px;
+    background: #E5E5E5;
+}
+
 /* 발인 및 장지 */
 .funeral-info-table {
     display: flex;
@@ -393,7 +466,7 @@ body::-webkit-scrollbar {
 
 .funeral-highlight .funeral-info-label,
 .funeral-highlight .funeral-info-value {
-    font-weight: 800;
+    font-weight: 600;
     color: #111111;
 }
 
