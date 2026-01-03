@@ -3976,34 +3976,50 @@ section {
 
 .preview-footer {
     padding: 12px 16px;
-    background: white;
-    border-top: 1px solid var(--gray-100);
+    background: transparent;
+    border-top: none;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 20px;
+    left: 16px;
+    right: 16px;
     display: flex;
     justify-content: center;
     z-index: 100;
     touch-action: manipulation;
+    animation: slideUpFloat 0.5s ease-out forwards;
+}
+
+@keyframes slideUpFloat {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .btn-use-template-full {
     width: 100%;
     max-width: 360px;
-    padding: 14px;
+    padding: 16px 24px;
     background: var(--primary);
     color: #000000;
     border: none;
-    border-radius: 12px;
+    border-radius: 50px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btn-use-template-full:hover {
     background: var(--primary-dark);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .preview-error {
