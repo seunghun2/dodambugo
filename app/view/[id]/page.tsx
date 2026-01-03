@@ -363,20 +363,51 @@ export default function ViewPage() {
                         ));
                     })()}
                 </div>
-                {/* 부고 공유하기 / 부의금 보내기 버튼 */}
-                <div className="mourner-action-btns">
-                    <button className="mourner-action-btn" onClick={() => setShareModalOpen(true)}>
-                        <img src="/images/ic_share.png" alt="공유" className="action-btn-icon" />
-                        <span>부고 공유하기</span>
-                    </button>
-                    {((bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
-                        (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber))) && (
-                            <button className="mourner-action-btn" onClick={() => setAccountModalOpen(true)}>
-                                <img src="/images/ic_money.png" alt="부의금" className="action-btn-icon" />
-                                <span>부의금 보내기</span>
-                            </button>
-                        )}
-                </div>
+                {/* 부고 공유하기 / 부의금 보내기 버튼 - 새 디자인 */}
+                {(() => {
+                    const hasAccount = (bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
+                        (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber));
+
+                    if (hasAccount) {
+                        return (
+                            <div className="action-bar action-bar-split">
+                                <button className="action-bar-btn" onClick={() => setAccountModalOpen(true)}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    </svg>
+                                    <span>부의금보내기</span>
+                                </button>
+                                <div className="action-bar-divider"></div>
+                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                    <span>지인에게 공유하기</span>
+                                </button>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <div className="action-bar">
+                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                    <span>지인에게 공유하기</span>
+                                </button>
+                            </div>
+                        );
+                    }
+                })()}
             </section>
 
             {/* ========================================

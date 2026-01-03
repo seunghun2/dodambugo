@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import SideMenu from '@/components/SideMenu';
+import Header from '@/components/Header';
 import './complete.css';
 
 interface BugoData {
@@ -29,7 +29,6 @@ export default function CompletePage() {
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
-    const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
     const bugoUrl = typeof window !== 'undefined'
         ? `${window.location.origin}/view/${params.bugoNumber}`
@@ -135,26 +134,8 @@ export default function CompletePage() {
                 </div>
             )}
 
-            {/* Navigation - 통일된 헤더 */}
-            <nav className="nav" id="nav">
-                <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
-                    <ul className="nav-menu" id="navMenu">
-                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                    </ul>
-                    <div className="nav-actions">
-                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Side Menu */}
-            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
+            {/* 공통 헤더 */}
+            <Header showCTA={true} />
 
             {/* 메인 컨텐츠 */}
             <main className="complete-main">

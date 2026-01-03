@@ -664,6 +664,56 @@ body {
 }
 
 /* ========================================
+   액션 바 - 새 디자인 (부의금/공유)
+======================================== */
+.action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.action-bar-split {
+    /* 2분할일 때 */
+}
+
+.action-bar-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.action-bar-btn:active {
+    background: #F9F9F9;
+}
+
+.action-bar-btn svg {
+    flex-shrink: 0;
+    stroke: #333333;
+}
+
+.action-bar-divider {
+    width: 1px;
+    height: 24px;
+    background: #E5E5E5;
+}
+
+
+/* ========================================
    발인 및 장지
 ======================================== */
 .funeral-info-table {
