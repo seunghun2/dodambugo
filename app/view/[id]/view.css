@@ -683,10 +683,10 @@ body {
     margin: 4px 0;
 }
 
-/* 발인 강조 */
+/* 고인/발인 강조 */
 .funeral-highlight .funeral-info-label,
 .funeral-highlight .funeral-info-value {
-    font-weight: 800;
+    font-weight: 600;
     color: #111111;
 }
 
