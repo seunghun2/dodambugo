@@ -291,11 +291,11 @@ function CreatePageContent() {
                             <button
                                 onClick={() => router.back()}
                                 className="nav-back"
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', marginRight: '8px' }}
                             >
-                                <span className="material-symbols-outlined">arrow_back</span>
+                                <span className="material-symbols-outlined">chevron_left</span>
                             </button>
-                            <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>양식 변경</span>
+                            <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>테마 변경</span>
                         </>
                     ) : (
                         <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
@@ -307,7 +307,7 @@ function CreatePageContent() {
                         </ul>
                     )}
                     <div className="nav-actions">
-                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
+                        {!changeFrom && <Link href="/create" className="nav-cta">부고장 만들기</Link>}
                         <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
                             <span></span>
                             <span></span>
@@ -371,7 +371,7 @@ function CreatePageContent() {
                                                     href={`/create/${template.id}`}
                                                     className="btn-use-template"
                                                 >
-                                                    {changeFrom ? '변경하기' : '이 양식으로 만들기'}
+                                                    {changeFrom ? '변경하기' : '제작하기'}
                                                 </Link>
                                             )}
                                         </div>

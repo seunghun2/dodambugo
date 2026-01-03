@@ -14,18 +14,18 @@ html {
 }
 
 :root {
-    /* 도담부고 브랜드 컬러 - 카카오 옐로우 */
-    --primary: #FEE500;
-    --primary-dark: #E6CF00;
-    --primary-light: #FFF9C4;
-    --primary-text: #191919;
-    --accent: #2C3E50;
+    /* 도담부고 브랜드 컬러 - 골드 옐로우 */
+    --primary: #FFD43B;
+    --primary-dark: #FCC419;
+    --primary-light: #FFF3BF;
+    --primary-text: #1A1A1A;
+    --accent: #364F6B;
     --accent-light: #F5F5F5;
 
     /* 레거시 호환 */
-    --primary-blue: #2C3E50;
-    --primary-blue-dark: #1a252f;
-    --primary-blue-light: #ECEFF1;
+    --primary-blue: #364F6B;
+    --primary-blue-dark: #2A3F54;
+    --primary-blue-light: #E8EEF4;
 
     /* 세컨더리 컬러 */
     --teal: #1ABC9C;
@@ -130,8 +130,9 @@ body {
 .nav-logo {
     font-size: 20px;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--primary-text);
     white-space: nowrap;
+    text-decoration: none;
 }
 
 .nav-menu {

@@ -48,7 +48,7 @@ export default function PreviewPage() {
             {/* 하단 버튼 */}
             <div className="preview-footer">
                 <button className="btn-use-template-full" onClick={handleSelect}>
-                    이 양식으로 만들기
+                    제작하기
                 </button>
             </div>
         </div>
