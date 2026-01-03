@@ -30,10 +30,9 @@ interface MainLayoutProps {
 }
 
 const navItems = [
-    { label: '홈', href: '/', icon: IconHome },
+    { label: '부고검색', href: '/search', icon: IconSearch },
+    { label: '자주묻는 질문', href: '/faq', icon: IconFileText },
     { label: '부고장 만들기', href: '/create', icon: IconPencil },
-    { label: '부고장 검색', href: '/search', icon: IconSearch },
-    { label: '문의하기', href: '/contact', icon: IconPhone },
 ];
 
 const footerLinks = [

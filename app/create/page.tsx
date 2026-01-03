@@ -302,12 +302,12 @@ function CreatePageContent() {
                     )}
                     {!changeFrom && (
                         <ul className="nav-menu" id="navMenu">
-                            <li><Link href="/" className="nav-link">홈</Link></li>
                             <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                            <li><Link href="/#templates" className="nav-link">템플릿</Link></li>
+                            <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
                         </ul>
                     )}
                     <div className="nav-actions">
+                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
                         <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
                             <span></span>
                             <span></span>

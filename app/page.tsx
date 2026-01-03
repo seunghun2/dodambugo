@@ -11,10 +11,18 @@ export default function HomePage() {
   const [draftTemplateId, setDraftTemplateId] = useState<string | null>(null);
   const [draftModalOpen, setDraftModalOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
 
   const toggleFaq = (index: number) => {
-    setOpenFaq(openFaq === index ? null : index);
+    setOpenFaqs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -110,12 +118,10 @@ export default function HomePage() {
       {/* Navigation - 예지부고 스타일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
-          <div className="nav-logo">도담부고</div>
+          <Link href="/" className="nav-logo">도담부고</Link>
           <ul className="nav-menu" id="navMenu">
-            <li><a href="#home" className="nav-link">홈</a></li>
             <li><Link href="/search" className="nav-link">부고검색</Link></li>
-            <li><a href="#templates" className="nav-link">템플릿</a></li>
-            <li><a href="#guide" className="nav-link">이용안내</a></li>
+            <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
           </ul>
           <div className="nav-actions">
             <button className="nav-cta" onClick={checkDraftBeforeCreate}>부고장 만들기</button>
@@ -245,37 +251,37 @@ export default function HomePage() {
             <h2 className="section-title">자주 묻는 질문</h2>
           </div>
           <div className="faq-list">
-            <div className={`faq-item ${openFaq === 0 ? 'active' : ''}`} onClick={() => toggleFaq(0)}>
+            <div className={`faq-item ${openFaqs.has(0) ? 'active' : ''}`} onClick={() => toggleFaq(0)}>
               <div className="faq-question">
                 <span>정말 무료인가요?</span>
-                <span className="faq-icon">{openFaq === 0 ? '−' : '+'}</span>
+                <span className="faq-icon">{openFaqs.has(0) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
                 네, 도담부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다.
               </div>
             </div>
-            <div className={`faq-item ${openFaq === 1 ? 'active' : ''}`} onClick={() => toggleFaq(1)}>
+            <div className={`faq-item ${openFaqs.has(1) ? 'active' : ''}`} onClick={() => toggleFaq(1)}>
               <div className="faq-question">
                 <span>부고장은 얼마나 유지되나요?</span>
-                <span className="faq-icon">{openFaq === 1 ? '−' : '+'}</span>
+                <span className="faq-icon">{openFaqs.has(1) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
                 생성된 부고장은 영구적으로 유지됩니다. 언제든지 링크를 통해 조회할 수 있습니다.
               </div>
             </div>
-            <div className={`faq-item ${openFaq === 2 ? 'active' : ''}`} onClick={() => toggleFaq(2)}>
+            <div className={`faq-item ${openFaqs.has(2) ? 'active' : ''}`} onClick={() => toggleFaq(2)}>
               <div className="faq-question">
                 <span>수정은 가능한가요?</span>
-                <span className="faq-icon">{openFaq === 2 ? '−' : '+'}</span>
+                <span className="faq-icon">{openFaqs.has(2) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
                 네, 작성 시 입력한 비밀번호(휴대번호 뒷자리)로 언제든지 수정하실 수 있습니다.
               </div>
             </div>
-            <div className={`faq-item ${openFaq === 3 ? 'active' : ''}`} onClick={() => toggleFaq(3)}>
+            <div className={`faq-item ${openFaqs.has(3) ? 'active' : ''}`} onClick={() => toggleFaq(3)}>
               <div className="faq-question">
                 <span>개인정보는 안전한가요?</span>
-                <span className="faq-icon">{openFaq === 3 ? '−' : '+'}</span>
+                <span className="faq-icon">{openFaqs.has(3) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
                 입력하신 정보는 부고장 표시 목적으로만 사용되며, 별도로 수집하거나 제3자에게 제공하지 않습니다.

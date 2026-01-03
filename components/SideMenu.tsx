@@ -27,17 +27,17 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                         <span className="material-symbols-outlined">home</span>
                         <span>홈</span>
                     </Link>
-                    <Link href="/create" className="side-menu-item" onClick={onClose}>
-                        <span className="material-symbols-outlined">add_circle</span>
-                        <span>부고장 만들기</span>
-                    </Link>
                     <Link href="/search" className="side-menu-item" onClick={onClose}>
                         <span className="material-symbols-outlined">search</span>
-                        <span>부고 검색</span>
+                        <span>부고검색</span>
                     </Link>
-                    <Link href="/contact" className="side-menu-item" onClick={onClose}>
-                        <span className="material-symbols-outlined">contact_support</span>
-                        <span>문의하기</span>
+                    <Link href="/faq" className="side-menu-item" onClick={onClose}>
+                        <span className="material-symbols-outlined">help</span>
+                        <span>자주묻는 질문</span>
+                    </Link>
+                    <Link href="/create" className="side-menu-item primary" onClick={onClose}>
+                        <span className="material-symbols-outlined">add_circle</span>
+                        <span>부고장 만들기</span>
                     </Link>
                 </nav>
             </div>
