@@ -1318,7 +1318,7 @@ export default function WriteFormPage() {
                                                                 style={{
                                                                     background: 'none',
                                                                     border: 'none',
-                                                                    color: 'var(--primary)',
+                                                                    color: 'var(--accent)',
                                                                     fontSize: '13px',
                                                                     cursor: 'pointer',
                                                                     display: 'flex',

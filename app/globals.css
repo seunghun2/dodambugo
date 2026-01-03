@@ -14,17 +14,18 @@ html {
 }
 
 :root {
-    /* mbugo 브랜드 컬러 - 네이비 기반 */
-    --primary: #2C3E50;
-    --primary-dark: #1a252f;
-    --primary-light: #34495E;
-    --accent: #3498DB;
-    --accent-light: #EBF5FB;
+    /* 도담부고 브랜드 컬러 - 카카오 옐로우 */
+    --primary: #FEE500;
+    --primary-dark: #E6CF00;
+    --primary-light: #FFF9C4;
+    --primary-text: #191919;
+    --accent: #2C3E50;
+    --accent-light: #F5F5F5;
 
     /* 레거시 호환 */
-    --primary-blue: #3498DB;
-    --primary-blue-dark: #2980B9;
-    --primary-blue-light: #EBF5FB;
+    --primary-blue: #2C3E50;
+    --primary-blue-dark: #1a252f;
+    --primary-blue-light: #ECEFF1;
 
     /* 세컨더리 컬러 */
     --teal: #1ABC9C;
@@ -160,7 +161,7 @@ body {
 
 .nav-cta {
     background: var(--primary);
-    color: white;
+    color: var(--primary-text);
     border: none;
     padding: 8px 16px;
     border-radius: var(--radius-full);
@@ -504,14 +505,14 @@ body {
 /* Primary 버튼 - 부고 만들기 */
 .action-btn.primary {
     background: var(--primary);
-    color: white;
+    color: var(--primary-text);
     border: none;
 }
 
 .action-btn.primary:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+    box-shadow: 0 4px 12px rgba(254, 229, 0, 0.4);
 }
 
 /* Secondary 버튼 - 부고 검색 */
@@ -535,7 +536,7 @@ body {
    ======================================== */
 .btn-primary {
     background: var(--primary);
-    color: white;
+    color: var(--primary-text);
     border: none;
     padding: 16px 36px;
     border-radius: var(--radius-full);
@@ -689,7 +690,7 @@ section {
 
 .feature-icon .material-symbols-outlined {
     font-size: 24px;
-    color: var(--primary);
+    color: var(--accent);
     font-variation-settings: 'wght' 300;
 }
 
@@ -1036,7 +1037,7 @@ section {
 
 .search-input:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
 }
 
@@ -1661,7 +1662,7 @@ section {
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
 }
 
@@ -1738,20 +1739,20 @@ section {
     gap: 8px;
     width: 100%;
     padding: 18px 24px;
-    background: #2c4a6e;
-    color: white;
+    background: var(--primary);
+    color: var(--primary-text);
     border: none;
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(44, 74, 110, 0.3);
+    box-shadow: 0 2px 8px rgba(254, 229, 0, 0.3);
 }
 
 .btn-submit:hover {
-    background: #1e3a5f;
-    box-shadow: 0 4px 12px rgba(44, 74, 110, 0.4);
+    background: var(--primary-dark);
+    box-shadow: 0 4px 12px rgba(254, 229, 0, 0.4);
 }
 
 .btn-submit:disabled {
@@ -3082,7 +3083,7 @@ section {
 
 .search-input:focus-within {
     background: white;
-    border-color: var(--primary);
+    border-color: var(--accent);
 }
 
 .search-input .material-symbols-outlined {
@@ -3985,7 +3986,7 @@ section {
     max-width: 360px;
     padding: 14px;
     background: var(--primary);
-    color: white;
+    color: var(--primary-text);
     border: none;
     border-radius: 12px;
     font-size: 16px;
@@ -3995,7 +3996,7 @@ section {
 }
 
 .btn-use-template-full:hover {
-    background: #2563eb;
+    background: var(--primary-dark);
 }
 
 .preview-error {
@@ -4128,7 +4129,7 @@ section {
 }
 
 .selected-template-banner strong {
-    color: var(--primary);
+    color: var(--accent);
     font-weight: 600;
 }
 
@@ -4280,8 +4281,8 @@ section {
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.08);
 }
 
 .form-input::placeholder,
@@ -4395,8 +4396,8 @@ section {
 .datetime-row .mantine-DatePickerInput-input:focus,
 .datetime-row .mantine-DatePickerInput-input:focus-within {
     outline: none !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.08) !important;
 }
 
 /* DatePicker 캘린더 팝업 스타일 */
@@ -4661,7 +4662,7 @@ section {
 .input-with-button .form-input {
     padding-right: 100px;
     cursor: pointer;
-    border: 1px solid var(--primary);
+    border: 1px solid var(--accent);
 }
 
 .btn-inline-action {
@@ -4671,7 +4672,7 @@ section {
     transform: translateY(-50%);
     padding: 6px 12px;
     background: transparent;
-    color: var(--primary);
+    color: var(--accent);
     border: none;
     font-size: 14px;
     font-weight: 600;
@@ -4733,7 +4734,7 @@ section {
     width: 100%;
     padding: 12px;
     background: white;
-    color: var(--primary);
+    color: var(--accent);
     border: 1px dashed var(--gray-300);
     border-radius: 8px;
     font-size: 14px;
@@ -4751,8 +4752,8 @@ section {
 }
 
 .btn-add-mourner:hover {
-    background: rgba(59, 130, 246, 0.04);
-    border-color: var(--primary);
+    background: rgba(44, 62, 80, 0.04);
+    border-color: var(--accent);
     border-style: solid;
 }
 
@@ -4926,7 +4927,7 @@ section {
 }
 
 .toggle-switch input:checked+.toggle-slider {
-    background-color: var(--primary);
+    background-color: var(--accent);
 }
 
 .toggle-switch input:checked+.toggle-slider:before {
@@ -5424,7 +5425,7 @@ section {
 
 .loading-content .material-symbols-outlined {
     font-size: 48px;
-    color: var(--primary);
+    color: var(--accent);
 }
 
 .loading-content p {
@@ -5623,7 +5624,7 @@ section {
 
 .account-modal-select:focus,
 .account-modal-input:focus {
-    border-color: var(--primary);
+    border-color: var(--accent);
 }
 
 .account-modal-select {
@@ -5663,7 +5664,7 @@ section {
     width: 100%;
     padding: 16px;
     background: var(--primary);
-    color: white;
+    color: var(--primary-text);
     border: none;
     border-radius: 12px;
     font-size: 16px;
