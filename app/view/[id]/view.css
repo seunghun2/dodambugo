@@ -384,6 +384,13 @@ body {
     gap: 4px;
 }
 
+/* 장례식장 박스 - 인라인 (한 줄) */
+.funeral-box-inline {
+    flex-direction: row;
+    gap: 0;
+    padding: 12px 16px;
+}
+
 /* 장례식장 이름 - 14px #555555 */
 .funeral-name {
     font-family: 'Nanum Myeongjo', serif;
@@ -392,10 +399,17 @@ body {
     color: #555555;
 }
 
-/* 호실 - Bold 18px */
+/* 구분선 */
+.funeral-divider {
+    margin: 0 10px;
+    color: #CCCCCC;
+    font-weight: 300;
+}
+
+/* 호실 - Bold 16px */
 .funeral-room {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #333333;
 }
@@ -1260,4 +1274,96 @@ body {
 
 .account-bottom-sheet .btn-copy:active {
     background: #F5F5F5;
+}
+
+/* ========================================
+   기본 정보 테이블 (고인/상주/별세/발인/빈소)
+======================================== */
+.info-table-section {
+    padding: 24px 16px;
+}
+
+.info-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-table-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.info-table-row.mourner-info {
+    align-items: flex-start;
+}
+
+.info-table-label {
+    width: 45px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+}
+
+.info-table-value {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 1.5;
+}
+
+/* 상주 목록 */
+.info-table-value.mourner-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mourner-info-row {
+    display: flex;
+    align-items: center;
+}
+
+.mourner-rel-label {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.mourner-name-list {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+}
+
+/* 주소 복사 버튼 (인라인) */
+.address-copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #4A90D9;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.address-copy-btn:hover {
+    text-decoration: underline;
+}
+
+.address-copy-btn svg {
+    flex-shrink: 0;
 }

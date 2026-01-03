@@ -656,7 +656,7 @@ export default function WriteFormPage() {
         if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
         if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
         if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
-        if (!formData.death_time || formData.death_time === '00:00') newErrors.death_time = '임종 시간을 입력해주세요';
+        // death_time(임종 시간)은 선택 - 모를 수도 있음
 
         // 시간 유효성 검사 (24시간 이상 불가)
         if (formData.funeral_time && formData.funeral_time !== '00:00') {
@@ -1223,7 +1223,7 @@ export default function WriteFormPage() {
                                         </div>
 
                                         <div className="form-group">
-                                            <label className="form-label required">임종일시</label>
+                                            <label className="form-label required">임종(별세)일시</label>
                                             <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
                                                 <div style={{ flex: 6 }}>
                                                     <DatePickerInput
@@ -1288,8 +1288,9 @@ export default function WriteFormPage() {
                                         </div>
                                     </div>
 
-                                    {/* 장지 정보 - 일반 장례일 때만 표시 */}
-                                    {(formData.funeral_type === '일반 장례' || formData.funeral_type === '') && (
+
+                                    {/* 장지 정보 - 가족장 제외 (일반장례, 무빈소장례) */}
+                                    {formData.funeral_type !== '가족장' && (
                                         <div className="form-section">
                                             <div className="toggle-row">
                                                 <div className="toggle-row-label">

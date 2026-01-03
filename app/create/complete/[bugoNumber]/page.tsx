@@ -177,17 +177,22 @@ export default function CompletePage() {
                         <span className="info-label">장례종류</span>
                         <span className="info-value">{bugo.funeral_type || '일반 장례'}</span>
                     </div>
-                    <div className="info-row">
-                        <span className="info-label">장례식장</span>
-                        <span className="info-value">{bugo.funeral_home || '-'} {bugo.room_number || ''}</span>
-                    </div>
+                    {/* 일반 장례일 때만 장례식장/주소 표시 */}
+                    {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                        <>
+                            <div className="info-row">
+                                <span className="info-label">장례식장</span>
+                                <span className="info-value">{bugo.funeral_home || '-'} {bugo.room_number || ''}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">주소</span>
+                                <span className="info-value">{bugo.address || '-'}</span>
+                            </div>
+                        </>
+                    )}
                     <div className="info-row">
                         <span className="info-label">발인일시</span>
                         <span className="info-value">{formatDate(bugo.funeral_date, bugo.funeral_time)}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="info-label">주소</span>
-                        <span className="info-value">{bugo.address || '-'}</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">부고장 보기</span>

@@ -25,6 +25,7 @@ interface BugoData {
     mourner_name?: string;
     contact?: string;
     mourners?: Array<{ relationship: string; name: string; contact: string }>;
+    funeral_type?: string;
     funeral_home?: string;
     room_number?: string;
     funeral_home_tel?: string;
@@ -205,10 +206,12 @@ export default function ViewPage() {
 
     return (
         <main className="view-page">
-            {/* 장례식장명 헤더 바 */}
-            <div className="funeral-home-header">
-                {bugo.funeral_home}
-            </div>
+            {/* 장례식장명 헤더 바 - 일반 장례일 때만 표시 */}
+            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && bugo.funeral_home && (
+                <div className="funeral-home-header">
+                    {bugo.funeral_home}
+                </div>
+            )}
 
             {/* 토스트 */}
             {copySuccess && <div className="toast">복사되었습니다</div>}
@@ -233,108 +236,137 @@ export default function ViewPage() {
             <div className="section-divider"></div>
 
             {/* ========================================
-                빈소 오시는 길
+                빈소 오시는 길 - 일반 장례일 때만 표시
             ======================================== */}
-            <section className="section">
-                <h2 className="section-title">빈소 오시는 길</h2>
+            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                <section className="section">
+                    <h2 className="section-title">빈소 오시는 길</h2>
 
-                <div className="address-row">
-                    <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
-                    <button className="btn-copy-address" onClick={copyAddress}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        주소 복사
-                    </button>
-                </div>
+                    <div className="address-row">
+                        <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
+                        <button className="btn-copy-address" onClick={copyAddress}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            주소 복사
+                        </button>
+                    </div>
 
-                {/* 지도 */}
-                <div className="map-container">
-                    <NaverMap
-                        address={bugo.address || ''}
-                        placeName={bugo.funeral_home}
-                        height="200px"
-                    />
-                </div>
+                    {/* 지도 */}
+                    <div className="map-container">
+                        <NaverMap
+                            address={bugo.address || ''}
+                            placeName={bugo.funeral_home}
+                            height="200px"
+                        />
+                    </div>
 
-                {/* 내비 버튼 */}
-                <div className="navi-buttons">
-                    <button className="navi-btn" onClick={openNaverMap}>
-                        <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
-                        <span>네이버지도</span>
-                    </button>
-                    <button className="navi-btn" onClick={openKakaoNavi}>
-                        <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
-                        <span>카카오내비</span>
-                    </button>
-                </div>
+                    {/* 내비 버튼 */}
+                    <div className="navi-buttons">
+                        <button className="navi-btn" onClick={openNaverMap}>
+                            <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
+                            <span>네이버지도</span>
+                        </button>
+                        <button className="navi-btn" onClick={openKakaoNavi}>
+                            <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
+                            <span>카카오내비</span>
+                        </button>
+                    </div>
 
-                {/* 장례식장 박스 */}
-                <div className="funeral-box">
-                    <p className="funeral-name">{bugo.funeral_home}</p>
-                    <p className="funeral-room">{bugo.room_number || ''}</p>
-                </div>
+                    {/* 장례식장 박스 */}
+                    <div className="funeral-box funeral-box-inline">
+                        <span className="funeral-name">{bugo.funeral_home}</span>
+                        {bugo.room_number && (
+                            <>
+                                <span className="funeral-divider">|</span>
+                                <span className="funeral-room">{bugo.room_number}</span>
+                            </>
+                        )}
+                    </div>
 
-                {/* 장례식장 전화하기 버튼 */}
-                {bugo.funeral_home_tel && (
-                    <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
-                        <div className="call-btn-text">
-                            <span className="call-btn-title">장례식장에 전화하기</span>
-                            <span className="call-btn-number">{bugo.funeral_home_tel}</span>
-                        </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </a>
-                )}
-            </section>
+                    {/* 장례식장 전화하기 버튼 */}
+                    {bugo.funeral_home_tel && (
+                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <div className="call-btn-text">
+                                <span className="call-btn-title">장례식장에 전화하기</span>
+                                <span className="call-btn-number">{bugo.funeral_home_tel}</span>
+                            </div>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
+                    )}
+                </section>
+            )}
 
             {/* ========================================
                 발인 및 장지
             ======================================== */}
             <section className="section">
                 <div className="funeral-info-table">
+                    {/* 고인 */}
+                    <div className="funeral-info-row funeral-highlight">
+                        <span className="funeral-info-label">고인</span>
+                        <span className="funeral-info-value">故{bugo.deceased_name} {bugo.age ? `(향년 ${bugo.age}세)` : ''}</span>
+                    </div>
+                    <div className="funeral-info-divider"></div>
                     {bugo.funeral_date && (
                         <div className="funeral-info-row funeral-highlight">
                             <span className="funeral-info-label">발인</span>
                             <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
                         </div>
                     )}
-                    {bugo.encoffin_date && (
+                    {bugo.death_date && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
-                                <span className="funeral-info-label">입관</span>
-                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
+                                <span className="funeral-info-label">별세</span>
+                                <span className="funeral-info-value">{formatDate(bugo.death_date)} {bugo.death_time || ''}</span>
                             </div>
                         </>
                     )}
-                    {(bugo.burial_place || bugo.burial_place2) && (
+                    {/* 가족장일 때 빈소 표시 */}
+                    {bugo.funeral_type === '가족장' && (
                         <>
                             <div className="funeral-info-divider"></div>
-                            <div className="funeral-info-row burial-section">
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">빈소</span>
+                                <span className="funeral-info-value">가족의 뜻을 담아 조용히 가족장으로 모십니다.</span>
+                            </div>
+                        </>
+                    )}
+                    {/* 무빈소장례일 때 빈소 표시 */}
+                    {bugo.funeral_type === '무빈소장례' && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">빈소</span>
+                                <span className="funeral-info-value">조용한 배웅으로 빈소를 마련하지 않고 무빈소로 고인을 모십니다.</span>
+                            </div>
+                        </>
+                    )}
+                    {/* 장지 - 1개면 단순 표시, 2개면 1차/2차 표시 */}
+                    {bugo.burial_place && !bugo.burial_place2 && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row">
                                 <span className="funeral-info-label">장지</span>
-                                <div className="burial-list">
-                                    {bugo.burial_place && (
-                                        <div className="burial-item">
-                                            <div className="burial-box">
-                                                <span className="burial-label">1차장지</span>
-                                            </div>
-                                            <span className="burial-text">{bugo.burial_place}</span>
-                                        </div>
-                                    )}
-                                    {bugo.burial_place2 && (
-                                        <div className="burial-item">
-                                            <div className="burial-box">
-                                                <span className="burial-label">2차장지</span>
-                                            </div>
-                                            <span className="burial-text">{bugo.burial_place2}</span>
-                                        </div>
-                                    )}
+                                <span className="funeral-info-value">{bugo.burial_place}</span>
+                            </div>
+                        </>
+                    )}
+                    {bugo.burial_place && bugo.burial_place2 && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row burial-multi">
+                                <span className="funeral-info-label">장지</span>
+                                <div className="funeral-info-value">
+                                    <div>1차 장지 : {bugo.burial_place}</div>
+                                    <div>2차 장지 : {bugo.burial_place2}</div>
                                 </div>
                             </div>
                         </>
