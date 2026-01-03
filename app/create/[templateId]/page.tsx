@@ -931,7 +931,7 @@ export default function WriteFormPage() {
                                                                 justifyContent: 'center'
                                                             }}
                                                         >
-                                                            <span className="material-symbols-outlined">search</span>
+                                                            <span className="material-symbols-outlined" style={{ color: '#9CA3AF' }}>search</span>
                                                         </button>
                                                     </div>
                                                 </div>
