@@ -80,6 +80,7 @@ export default function WriteFormPage() {
         age: '',
         religion: '없음',
         religion_custom: '',
+        funeral_type: '일반 장례',
         funeral_home: '',
         room_number: '',
         funeral_home_tel: '',
@@ -157,10 +158,14 @@ export default function WriteFormPage() {
         router.push('/');
     };
 
+
     // 임시저장 자동 불러오기 (수정 모드가 아닐 때만)
     useEffect(() => {
         // URL에 edit 파라미터가 있으면 수정 모드 - 건너뛰기
         if (typeof window !== 'undefined' && window.location.search.includes('edit=')) return;
+
+        // 복제 데이터가 있으면 draft 로드 건너뛰기
+        if (sessionStorage.getItem('duplicateBugo')) return;
 
         const draft = localStorage.getItem(`bugo_draft_${templateId}`);
         if (draft) {
@@ -171,7 +176,14 @@ export default function WriteFormPage() {
                 const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
 
                 if (hoursDiff < 24) {
-                    if (parsed.formData) setFormData(parsed.formData);
+                    if (parsed.formData) {
+                        // funeral_type이 없으면 기본값 유지
+                        setFormData(prev => ({
+                            ...prev,
+                            ...parsed.formData,
+                            funeral_type: parsed.formData.funeral_type || '일반 장례'
+                        }));
+                    }
                     if (parsed.mourners) setMourners(parsed.mourners);
                     if (parsed.accounts) setAccounts(parsed.accounts);
                     if (parsed.showAccount !== undefined) setShowAccount(parsed.showAccount);
@@ -328,6 +340,7 @@ export default function WriteFormPage() {
                     age: data.age?.toString() || '',
                     religion: data.religion || '없음',
                     religion_custom: data.religion_custom || '',
+                    funeral_type: data.funeral_type || '일반 장례',
                     funeral_home: data.funeral_home || '',
                     room_number: data.room_number || '',
                     funeral_home_tel: data.funeral_home_tel || '',
@@ -871,71 +884,89 @@ export default function WriteFormPage() {
                                         <h2 className="section-title">장례식장 정보</h2>
                                         <p className="section-desc">조문객이 방문할 장례식장 정보입니다</p>
 
-                                        {/* 장례식장 검색 입력 */}
+                                        {/* 장례 형식 */}
                                         <div className="form-group">
-                                            <div
-                                                className="input-with-button"
-                                                style={{ position: 'relative', cursor: 'pointer' }}
-                                                onClick={() => setFacilityModalOpen(true)}
+                                            <label className="form-label required">장례 형식</label>
+                                            <select
+                                                name="funeral_type"
+                                                className="form-select"
+                                                value={formData.funeral_type}
+                                                onChange={handleChange}
                                             >
-                                                <input
-                                                    type="text"
-                                                    className="form-input"
-                                                    placeholder="장례식장을 검색해주세요"
-                                                    style={{ paddingRight: '50px', cursor: 'pointer' }}
-                                                    value={formData.address || ''}
-                                                    readOnly
-                                                />
-                                                <button
-                                                    type="button"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '12px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        background: 'transparent',
-                                                        border: 'none',
-                                                        padding: '0',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">search</span>
-                                                </button>
-                                            </div>
+                                                <option value="일반 장례">일반 장례</option>
+                                                <option value="가족장">가족장</option>
+                                                <option value="무빈소장례">무빈소장례</option>
+                                            </select>
                                         </div>
 
-                                        {/* 장례식장명 + 호실 (주소 선택 후 표시) */}
-                                        {formData.address && (
-                                            <div className="form-row">
-                                                <div className="form-group" data-field="funeral_home">
-                                                    <input
-                                                        ref={funeralHomeRef}
-                                                        type="text"
-                                                        name="funeral_home"
-                                                        className={`form-input ${errors.funeral_home ? 'error' : ''}`}
-                                                        placeholder="장례식장명"
-                                                        value={formData.funeral_home}
-                                                        onChange={handleChange}
-                                                    />
-                                                    {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
+                                        {/* 일반 장례일 때만 표시 */}
+                                        {(formData.funeral_type === '일반 장례' || formData.funeral_type === '') && (
+                                            <>
+                                                {/* 장례식장 검색 */}
+                                                <div className="form-group">
+                                                    <div
+                                                        className="input-with-button"
+                                                        style={{ position: 'relative', cursor: 'pointer' }}
+                                                        onClick={() => setFacilityModalOpen(true)}
+                                                    >
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            placeholder="장례식장을 검색해주세요"
+                                                            style={{ paddingRight: '50px', cursor: 'pointer' }}
+                                                            value={formData.address || ''}
+                                                            readOnly
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            style={{
+                                                                position: 'absolute',
+                                                                right: '12px',
+                                                                top: '50%',
+                                                                transform: 'translateY(-50%)',
+                                                                background: 'transparent',
+                                                                border: 'none',
+                                                                padding: '0',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">search</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
 
-                                                <div className="form-group" data-field="room_number">
-                                                    <input
-                                                        ref={roomNumberRef}
-                                                        type="text"
-                                                        name="room_number"
-                                                        className={`form-input ${errors.room_number ? 'error' : ''}`}
-                                                        placeholder="호실(예시:102호)"
-                                                        value={formData.room_number}
-                                                        onChange={handleChange}
-                                                    />
-                                                    {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                {/* 장례식장명 + 호실 */}
+                                                <div className="form-row">
+                                                    <div className="form-group" data-field="funeral_home">
+                                                        <input
+                                                            ref={funeralHomeRef}
+                                                            type="text"
+                                                            name="funeral_home"
+                                                            className={`form-input ${errors.funeral_home ? 'error' : ''}`}
+                                                            placeholder="장례식장명"
+                                                            value={formData.funeral_home}
+                                                            onChange={handleChange}
+                                                        />
+                                                        {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
+                                                    </div>
+
+                                                    <div className="form-group" data-field="room_number">
+                                                        <input
+                                                            ref={roomNumberRef}
+                                                            type="text"
+                                                            name="room_number"
+                                                            className={`form-input ${errors.room_number ? 'error' : ''}`}
+                                                            placeholder="호실(예시:102호)"
+                                                            value={formData.room_number}
+                                                            onChange={handleChange}
+                                                        />
+                                                        {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </>
                                         )}
                                     </div>
 
@@ -1259,87 +1290,89 @@ export default function WriteFormPage() {
                                         </div>
                                     </div>
 
-                                    {/* 장지 정보 */}
-                                    <div className="form-section">
-                                        <div className="toggle-row">
-                                            <div className="toggle-row-label">
-                                                <span className="material-symbols-outlined">park</span>
-                                                <span>장지 정보</span>
-                                            </div>
-                                            <label className="toggle-switch">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={showBurial}
-                                                    onChange={(e) => setShowBurial(e.target.checked)}
-                                                />
-                                                <span className="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        {showBurial && (
-                                            <div className="toggle-content">
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                                    <span style={{ fontSize: '13px', color: '#666' }}>1차 장지</span>
-                                                    {!formData.burial_place2 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setFormData(prev => ({ ...prev, burial_place2: ' ' }))}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                color: 'var(--primary)',
-                                                                fontSize: '13px',
-                                                                cursor: 'pointer',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '4px'
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
-                                                            장지 추가
-                                                        </button>
-                                                    )}
+                                    {/* 장지 정보 - 일반 장례일 때만 표시 */}
+                                    {(formData.funeral_type === '일반 장례' || formData.funeral_type === '') && (
+                                        <div className="form-section">
+                                            <div className="toggle-row">
+                                                <div className="toggle-row-label">
+                                                    <span className="material-symbols-outlined">park</span>
+                                                    <span>장지 정보</span>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    name="burial_place"
-                                                    className="form-input"
-                                                    placeholder="1차 장지 (예: OO공원묘지)"
-                                                    value={formData.burial_place}
-                                                    onChange={handleChange}
-                                                />
+                                                <label className="toggle-switch">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={showBurial}
+                                                        onChange={(e) => setShowBurial(e.target.checked)}
+                                                    />
+                                                    <span className="toggle-slider"></span>
+                                                </label>
+                                            </div>
 
-                                                {formData.burial_place2 && (
-                                                    <>
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', marginBottom: '8px' }}>
-                                                            <span style={{ fontSize: '13px', color: '#666' }}>2차 장지</span>
+                                            {showBurial && (
+                                                <div className="toggle-content">
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                        <span style={{ fontSize: '13px', color: '#666' }}>1차 장지</span>
+                                                        {!formData.burial_place2 && (
                                                             <button
                                                                 type="button"
-                                                                onClick={() => setFormData(prev => ({ ...prev, burial_place2: '' }))}
+                                                                onClick={() => setFormData(prev => ({ ...prev, burial_place2: ' ' }))}
                                                                 style={{
                                                                     background: 'none',
                                                                     border: 'none',
-                                                                    color: '#999',
+                                                                    color: 'var(--primary)',
                                                                     fontSize: '13px',
-                                                                    cursor: 'pointer'
+                                                                    cursor: 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
                                                                 }}
                                                             >
-                                                                삭제
+                                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+                                                                장지 추가
                                                             </button>
-                                                        </div>
-                                                        <input
-                                                            type="text"
-                                                            name="burial_place2"
-                                                            className="form-input"
-                                                            placeholder="2차 장지"
-                                                            value={formData.burial_place2.trim()}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                                                        )}
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        name="burial_place"
+                                                        className="form-input"
+                                                        placeholder="1차 장지 (예: OO공원묘지)"
+                                                        value={formData.burial_place}
+                                                        onChange={handleChange}
+                                                    />
+
+                                                    {formData.burial_place2 && (
+                                                        <>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', marginBottom: '8px' }}>
+                                                                <span style={{ fontSize: '13px', color: '#666' }}>2차 장지</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setFormData(prev => ({ ...prev, burial_place2: '' }))}
+                                                                    style={{
+                                                                        background: 'none',
+                                                                        border: 'none',
+                                                                        color: '#999',
+                                                                        fontSize: '13px',
+                                                                        cursor: 'pointer'
+                                                                    }}
+                                                                >
+                                                                    삭제
+                                                                </button>
+                                                            </div>
+                                                            <input
+                                                                type="text"
+                                                                name="burial_place2"
+                                                                className="form-input"
+                                                                placeholder="2차 장지"
+                                                                value={formData.burial_place2.trim()}
+                                                                onChange={handleChange}
+                                                            />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* 개인정보 동의 안내 + 제출 버튼 */}
                                     <div className="form-submit-area">
