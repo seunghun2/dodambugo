@@ -206,13 +206,6 @@ export default function ViewPage() {
 
     return (
         <main className="view-page">
-            {/* 장례식장명 헤더 바 - 일반 장례일 때만 표시 */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && bugo.funeral_home && (
-                <div className="funeral-home-header">
-                    {bugo.funeral_home}
-                </div>
-            )}
-
             {/* 토스트 */}
             {copySuccess && <div className="toast">복사되었습니다</div>}
 
@@ -235,47 +228,10 @@ export default function ViewPage() {
             {/* 구분선 */}
             <div className="section-divider"></div>
 
-            {/* ========================================
-                빈소 오시는 길 - 일반 장례일 때만 표시
-            ======================================== */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
-                <section className="section">
-                    <h2 className="section-title">빈소 오시는 길</h2>
-
-                    <div className="address-row">
-                        <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
-                        <button className="btn-copy-address" onClick={copyAddress}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            주소 복사
-                        </button>
-                    </div>
-
-                    {/* 지도 */}
-                    <div className="map-container">
-                        <NaverMap
-                            address={bugo.address || ''}
-                            placeName={bugo.funeral_home}
-                            height="200px"
-                        />
-                    </div>
-
-                    {/* 내비 버튼 */}
-                    <div className="navi-buttons">
-                        <button className="navi-btn" onClick={openNaverMap}>
-                            <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
-                            <span>네이버지도</span>
-                        </button>
-                        <button className="navi-btn" onClick={openKakaoNavi}>
-                            <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
-                            <span>카카오내비</span>
-                        </button>
-                    </div>
-
-                    {/* 장례식장 박스 */}
-                    <div className="funeral-box funeral-box-inline">
+            {/* 장례식장 박스 - 일반 장례일 때만, 헤더 바로 아래 */}
+            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && bugo.funeral_home && (
+                <>
+                    <div className="funeral-box funeral-box-inline funeral-box-top">
                         <span className="funeral-name">{bugo.funeral_home}</span>
                         {bugo.room_number && (
                             <>
@@ -284,23 +240,9 @@ export default function ViewPage() {
                             </>
                         )}
                     </div>
-
-                    {/* 장례식장 전화하기 버튼 */}
-                    {bugo.funeral_home_tel && (
-                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                            <div className="call-btn-text">
-                                <span className="call-btn-title">장례식장에 전화하기</span>
-                                <span className="call-btn-number">{bugo.funeral_home_tel}</span>
-                            </div>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </a>
-                    )}
-                </section>
+                    {/* 구분선 */}
+                    <div className="section-divider"></div>
+                </>
             )}
 
             {/* ========================================
@@ -436,6 +378,63 @@ export default function ViewPage() {
                         )}
                 </div>
             </section>
+
+            {/* ========================================
+                빈소 오시는 길 - 일반 장례일 때만 표시
+            ======================================== */}
+            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                <section className="section">
+                    <h2 className="section-title">빈소 오시는 길</h2>
+
+                    <div className="address-row">
+                        <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
+                        <button className="btn-copy-address" onClick={copyAddress}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            주소 복사
+                        </button>
+                    </div>
+
+                    {/* 지도 */}
+                    <div className="map-container">
+                        <NaverMap
+                            address={bugo.address || ''}
+                            placeName={bugo.funeral_home}
+                            height="200px"
+                        />
+                    </div>
+
+                    {/* 내비 버튼 */}
+                    <div className="navi-buttons">
+                        <button className="navi-btn" onClick={openNaverMap}>
+                            <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
+                            <span>네이버지도</span>
+                        </button>
+                        <button className="navi-btn" onClick={openKakaoNavi}>
+                            <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
+                            <span>카카오내비</span>
+                        </button>
+                    </div>
+
+                    {/* 장례식장 전화하기 버튼 */}
+                    {bugo.funeral_home_tel && (
+                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <div className="call-btn-text">
+                                <span className="call-btn-title">장례식장에 전화하기</span>
+                                <span className="call-btn-number">{bugo.funeral_home_tel}</span>
+                            </div>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
+                    )}
+                </section>
+            )}
 
             {/* 계좌 정보는 모달로 표시 */}
 
