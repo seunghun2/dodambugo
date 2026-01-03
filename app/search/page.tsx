@@ -107,7 +107,7 @@ export default function SearchPage() {
                     {/* 검색 헤더 */}
                     <div className="section-header">
                         <h2 className="section-title">부고 검색</h2>
-                        <p className="section-subtitle" style={{ color: '#666', marginTop: '8px' }}>
+                        <p className="section-subtitle" style={{ color: '#666', marginTop: '4px' }}>
                             부고를 확인하거나 수정하세요
                         </p>
                     </div>
@@ -181,7 +181,7 @@ export default function SearchPage() {
                                     >
                                         {/* 첫 줄: 번호 + 상주명 (故고인명) */}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                            <span style={{ color: '#374151', fontWeight: 500 }}>#{bugo.bugo_number}</span>
+                                            <span style={{ color: '#9ca3af', fontWeight: 500, fontSize: '13px' }}>#{bugo.bugo_number}</span>
                                             <span style={{ fontWeight: 600, color: '#1f2937', fontSize: '16px' }}>{bugo.mourner_name || bugo.applicant_name}</span>
                                             <span style={{ color: '#6b7280', fontSize: '14px' }}>(故{bugo.deceased_name})</span>
                                         </div>

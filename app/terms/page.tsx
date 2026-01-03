@@ -6,7 +6,7 @@ export default function TermsPage() {
     return (
         <div className="legal-page">
             <header className="legal-header">
-                <Link href="/" className="back-btn">
+                <Link href="/" className="back-btn" style={{ textDecoration: 'none' }}>
                     <span className="material-symbols-outlined">chevron_left</span>
                 </Link>
                 <h1>이용약관</h1>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import SideMenu from '@/components/SideMenu';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -70,150 +71,171 @@ export default function ContactPage() {
         }
     };
 
+    const [sideMenuOpen, setSideMenuOpen] = useState(false);
+
     return (
-        <div className="legal-page">
-            <header className="legal-header">
-                <Link href="/" className="back-btn">
-                    <span className="material-symbols-outlined">chevron_left</span>
-                </Link>
-                <h1>제휴/문의</h1>
-            </header>
-
-            <main className="legal-content">
-                {submitted ? (
-                    <div className="success-container">
-                        <div className="success-icon">
-                            <span className="material-symbols-outlined">done</span>
-                        </div>
-                        <h2>문의가 접수되었습니다</h2>
-                        <p>빠른 시일 내에 답변드리겠습니다.<br />감사합니다.</p>
-                        <Link href="/" className="btn-home">
-                            홈으로 돌아가기
-                        </Link>
+        <>
+            {/* Navigation - 다른 페이지와 동일 */}
+            <nav className="nav" id="nav">
+                <div className="nav-container">
+                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                    <ul className="nav-menu" id="navMenu">
+                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
+                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
+                    </ul>
+                    <div className="nav-actions">
+                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
+                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
                     </div>
-                ) : (
-                    <>
-                        <section className="contact-intro">
-                            <p>도담부고 서비스 제휴 및 문의사항을 남겨주세요.</p>
-                        </section>
+                </div>
+            </nav>
 
-                        <form onSubmit={handleSubmit} className="contact-form">
-                            <div className="form-row">
+            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
+
+            <section className="faq" style={{ paddingTop: '100px', minHeight: '100vh', background: '#f8f9fa' }}>
+                <div className="container">
+                    {submitted ? (
+                        <div className="success-container">
+                            <div className="success-icon">
+                                <span className="material-symbols-outlined">done</span>
+                            </div>
+                            <h2>문의가 접수되었습니다</h2>
+                            <p>빠른 시일 내에 답변드리겠습니다.<br />감사합니다.</p>
+                            <Link href="/" className="btn-home">
+                                홈으로 돌아가기
+                            </Link>
+                        </div>
+                    ) : (
+                        <>
+                            <section className="section-header" style={{ textAlign: 'center', marginBottom: '32px' }}>
+                                <h2 className="section-title">제휴/문의</h2>
+                                <p className="section-subtitle" style={{ color: '#666', marginTop: '4px' }}>
+                                    도담부고 서비스 제휴 및 문의사항을 남겨주세요
+                                </p>
+                            </section>
+
+                            <form onSubmit={handleSubmit} className="contact-form">
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label className="form-label">이름 <span className="required">*</span></label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            className="form-input"
+                                            placeholder="이름"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">연락처 <span className="required">*</span></label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            className="form-input"
+                                            placeholder="010-0000-0000"
+                                            value={formData.phone}
+                                            onChange={formatPhone}
+                                            maxLength={13}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="form-group">
-                                    <label className="form-label">이름 <span className="required">*</span></label>
+                                    <label className="form-label">회사명</label>
                                     <input
                                         type="text"
-                                        name="name"
+                                        name="company"
                                         className="form-input"
-                                        placeholder="이름"
-                                        value={formData.name}
+                                        placeholder="회사명 (선택)"
+                                        value={formData.company}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">이메일 <span className="required">*</span></label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        className="form-input"
+                                        placeholder="example@email.com"
+                                        value={formData.email}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">연락처 <span className="required">*</span></label>
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        className="form-input"
-                                        placeholder="010-0000-0000"
-                                        value={formData.phone}
-                                        onChange={formatPhone}
-                                        maxLength={13}
+                                    <label className="form-label">문의 유형 <span className="required">*</span></label>
+                                    {/* PC: 기본 select */}
+                                    <select
+                                        name="inquiry_type"
+                                        className="form-select desktop-only"
+                                        value={formData.inquiry_type}
+                                        onChange={handleChange}
                                         required
-                                    />
+                                    >
+                                        <option value="">선택해주세요</option>
+                                        {inquiryOptions.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                    {/* Mobile: 바텀시트 트리거 */}
+                                    <button
+                                        type="button"
+                                        className="form-select-trigger mobile-only"
+                                        onClick={() => setShowSelectSheet(true)}
+                                    >
+                                        <span className={formData.inquiry_type ? '' : 'placeholder'}>
+                                            {formData.inquiry_type || '선택해주세요'}
+                                        </span>
+                                        <span className="material-symbols-outlined">expand_more</span>
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div className="form-group">
-                                <label className="form-label">회사명</label>
-                                <input
-                                    type="text"
-                                    name="company"
-                                    className="form-input"
-                                    placeholder="회사명 (선택)"
-                                    value={formData.company}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">이메일 <span className="required">*</span></label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className="form-input"
-                                    placeholder="example@email.com"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">문의 유형 <span className="required">*</span></label>
-                                {/* PC: 기본 select */}
-                                <select
-                                    name="inquiry_type"
-                                    className="form-select desktop-only"
-                                    value={formData.inquiry_type}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">선택해주세요</option>
-                                    {inquiryOptions.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                </select>
-                                {/* Mobile: 바텀시트 트리거 */}
-                                <button
-                                    type="button"
-                                    className="form-select-trigger mobile-only"
-                                    onClick={() => setShowSelectSheet(true)}
-                                >
-                                    <span className={formData.inquiry_type ? '' : 'placeholder'}>
-                                        {formData.inquiry_type || '선택해주세요'}
-                                    </span>
-                                    <span className="material-symbols-outlined">expand_more</span>
-                                </button>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">문의 내용 <span className="required">*</span></label>
-                                <textarea
-                                    name="message"
-                                    className="form-textarea"
-                                    rows={5}
-                                    placeholder="문의 내용을 입력해주세요"
-                                    value={formData.message}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-privacy">
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        name="privacyAgree"
-                                        checked={formData.privacyAgree}
+                                <div className="form-group">
+                                    <label className="form-label">문의 내용 <span className="required">*</span></label>
+                                    <textarea
+                                        name="message"
+                                        className="form-textarea"
+                                        rows={5}
+                                        placeholder="문의 내용을 입력해주세요"
+                                        value={formData.message}
                                         onChange={handleChange}
                                         required
                                     />
-                                    <span>개인정보 수집 및 이용에 동의합니다. <Link href="/privacy">(자세히 보기)</Link></span>
-                                </label>
-                            </div>
+                                </div>
 
-                            <button type="submit" className="btn-submit" disabled={loading}>
-                                {loading ? '접수 중...' : '문의 접수'}
-                                {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
-                            </button>
-                        </form>
-                    </>
-                )}
-            </main>
+                                <div className="form-privacy">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            name="privacyAgree"
+                                            checked={formData.privacyAgree}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                        <span>개인정보 수집 및 이용에 동의합니다. <Link href="/privacy" style={{ color: 'var(--accent)' }}>(자세히 보기)</Link></span>
+                                    </label>
+                                </div>
+
+                                <button type="submit" className="btn-submit" disabled={loading}>
+                                    {loading ? '접수 중...' : '문의 접수'}
+                                    {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
+            </section>
 
             {/* 모바일 바텀시트 */}
             {showSelectSheet && (
@@ -243,6 +265,6 @@ export default function ContactPage() {
                     </div>
                 </>
             )}
-        </div>
+        </>
     );
 }
