@@ -26,7 +26,7 @@ export default function PreviewPage() {
     }
 
     const handleSelect = () => {
-        router.push(`/create?template=${templateId}`);
+        router.push(`/create/${templateId}`);
     };
 
     return (
