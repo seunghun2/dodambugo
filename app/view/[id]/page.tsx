@@ -45,7 +45,7 @@ export default function ViewPage() {
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [copySuccess, setCopySuccess] = useState(false);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [accountModalOpen, setAccountModalOpen] = useState(false);
 
@@ -115,15 +115,15 @@ export default function ViewPage() {
     const copyAddress = async () => {
         if (bugo?.address) {
             await navigator.clipboard.writeText(bugo.address + (bugo.address_detail ? ' ' + bugo.address_detail : ''));
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 2000);
+            setToastMessage('주소가 복사되었습니다');
+            setTimeout(() => setToastMessage(null), 2000);
         }
     };
 
-    const copyToClipboard = async (text: string) => {
+    const copyToClipboard = async (text: string, message?: string) => {
         await navigator.clipboard.writeText(text);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        setToastMessage(message || '복사되었습니다');
+        setTimeout(() => setToastMessage(null), 2000);
     };
 
     const openNaverMap = () => {
@@ -250,7 +250,7 @@ ${url}
     return (
         <main className="view-page">
             {/* 토스트 */}
-            {copySuccess && <div className="toast">복사되었습니다</div>}
+            {toastMessage && <div className="toast" style={{ color: '#FFFFFF', display: 'flex', alignItems: 'center', background: '#000000' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" style={{ marginRight: '8px' }}><polyline points="20 6 9 17 4 12"></polyline></svg>{toastMessage}</div>}
 
             {/* ========================================
                 헤더 섹션 - 템플릿 이미지 + 동적 텍스트
@@ -553,7 +553,7 @@ ${url}
                             <img src="/images/icon-message.png" alt="메세지" />
                             <span>메세지로 보내기</span>
                         </button>
-                        <button className="share-option" onClick={() => copyToClipboard(window.location.href)}>
+                        <button className="share-option" onClick={() => copyToClipboard(window.location.href, '모바일부고장이 복사되었습니다')}>
                             <img src="/images/icon-link.png" alt="링크" />
                             <span>링크 복사하기</span>
                         </button>
@@ -610,7 +610,7 @@ ${url}
                                             <span className="account-number">{acc.number}</span>
                                             <span className="account-holder">{acc.holder}</span>
                                         </div>
-                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number)}>복사</button>
+                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다')}>복사</button>
                                     </div>
                                 ));
                             })()}

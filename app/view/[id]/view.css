@@ -60,29 +60,31 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #333333;
-    color: #FFFFFF;
+    background: #000000 !important;
+    color: #FFFFFF !important;
     padding: 12px 24px;
     border-radius: 8px;
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     font-weight: 700;
-    z-index: 1000;
+    z-index: 99999;
     animation: fadeInOut 2s ease-in-out;
+    display: flex;
+    align-items: center;
 }
 
 @keyframes fadeInOut {
     0% {
-        opacity: 0;
+        opacity: 1;
         transform: translateX(-50%) translateY(-10px);
     }
 
-    15% {
+    10% {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
 
-    85% {
+    90% {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
