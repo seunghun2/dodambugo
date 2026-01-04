@@ -175,7 +175,7 @@ export default function ViewPage() {
                     description: bugo?.funeral_home
                         ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                         : '',
-                    imageUrl: 'https://dodambugo.com/og-bugo-v2.png',
+                    imageUrl: 'https://dodambugo.com/og-bugo-v3.png',
                     link: { mobileWebUrl: url, webUrl: url }
                 },
                 buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: url, webUrl: url } }]
