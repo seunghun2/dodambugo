@@ -293,7 +293,7 @@ function CreatePageContent() {
                                 className="nav-back"
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', marginRight: '8px' }}
                             >
-                                <span className="material-symbols-outlined">chevron_left</span>
+                                <span className="material-symbols-outlined" style={{ color: '#333333' }}>chevron_left</span>
                             </button>
                             <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>테마 변경</span>
                         </>

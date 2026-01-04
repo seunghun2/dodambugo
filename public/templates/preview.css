@@ -39,7 +39,7 @@ body::-webkit-scrollbar {
     margin: 0 auto;
     background: #FFFFFF;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 100px;
 }
 
 /* 장례식장명 헤더 바 */
