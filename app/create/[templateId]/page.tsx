@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -1506,7 +1507,7 @@ export default function WriteFormPage() {
 
                 {/* 임시저장 확인 모달 */}
                 {draftModalOpen && (
-                    <div className="modal-overlay" onClick={() => setDraftModalOpen(false)}>
+                    <div className="modal-overlay" style={{ zIndex: 99999 }} onClick={() => setDraftModalOpen(false)}>
                         <div className="modal-box" onClick={(e) => e.stopPropagation()}>
                             <h3>임시저장</h3>
                             <p>작성 중인 내용을 임시저장하시겠습니까?</p>
@@ -1520,7 +1521,7 @@ export default function WriteFormPage() {
 
                 {/* 대표상주 계좌 등록 모달 */}
                 {showAccount && (
-                    <div className="modal-overlay" onClick={() => setShowAccount(false)}>
+                    <div className="modal-overlay" style={{ zIndex: 99999 }} onClick={() => setShowAccount(false)}>
                         <div className="account-modal" onClick={(e) => e.stopPropagation()}>
                             <h3 className="account-modal-title">계좌를 등록해주세요.</h3>
 
@@ -1615,7 +1616,7 @@ export default function WriteFormPage() {
 
                 {/* 상주별 계좌 등록 모달 */}
                 {showMournerAccountModal && editingMournerIndex !== null && (
-                    <div className="modal-overlay" onClick={() => setShowMournerAccountModal(false)}>
+                    <div className="modal-overlay" style={{ zIndex: 99999 }} onClick={() => setShowMournerAccountModal(false)}>
                         <div className="account-modal" onClick={(e) => e.stopPropagation()}>
                             <h3 className="account-modal-title">계좌를 등록해주세요.</h3>
 
