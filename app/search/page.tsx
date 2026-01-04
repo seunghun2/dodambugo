@@ -105,9 +105,9 @@ export default function SearchPage() {
             <section className="faq" id="search" style={{ paddingTop: '100px', minHeight: '100vh', background: '#f8f9fa' }}>
                 <div className="container">
                     {/* 검색 헤더 */}
-                    <div className="section-header">
-                        <h2 className="section-title">부고 검색</h2>
-                        <p className="section-subtitle" style={{ color: '#666', marginTop: '4px' }}>
+                    <div className="section-header" style={{ marginBottom: '16px' }}>
+                        <h2 className="section-title" style={{ marginBottom: '4px' }}>부고 검색</h2>
+                        <p className="section-subtitle" style={{ color: '#666', marginTop: '0' }}>
                             부고를 확인하거나 수정하세요
                         </p>
                     </div>
@@ -150,11 +150,12 @@ export default function SearchPage() {
                                 color: '#6b7280',
                                 fontSize: '14px',
                                 cursor: 'pointer',
-                                padding: '4px 8px'
+                                padding: '4px 8px',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0
                             }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>search</span>
-                            검색
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>search</span>
                         </button>
                     </div>
 
@@ -179,22 +180,24 @@ export default function SearchPage() {
                                         onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'}
                                         onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
                                     >
-                                        {/* 첫 줄: 번호 + 상주명 (故고인명) */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                        {/* 첫 줄: 부고번호 + 발인일 */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                                             <span style={{ color: '#9ca3af', fontWeight: 500, fontSize: '13px' }}>#{bugo.bugo_number}</span>
-                                            <span style={{ fontWeight: 600, color: '#1f2937', fontSize: '16px' }}>{bugo.mourner_name || bugo.applicant_name}</span>
-                                            <span style={{ color: '#6b7280', fontSize: '14px' }}>(故{bugo.deceased_name})</span>
-                                        </div>
-                                        {/* 둘째 줄: 장례유형 | 장례식장명 + 발인일 */}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#6b7280', fontSize: '14px' }}>
-                                            <span>
-                                                {(bugo as any).funeral_type || '일반 장례'}
-                                                {((bugo as any).funeral_type === '일반 장례' || !(bugo as any).funeral_type) && bugo.funeral_home && ` | ${bugo.funeral_home}${bugo.room_number ? ` ${bugo.room_number}` : ''}`}
-                                            </span>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>event</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#9ca3af', fontSize: '13px' }}>
+                                                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>event</span>
                                                 발인: {formatDate(bugo.funeral_date ?? null)}
                                             </span>
+                                        </div>
+                                        {/* 둘째 줄: 상주 이름(故고인명) */}
+                                        <div style={{ marginBottom: '6px' }}>
+                                            <span style={{ color: '#9ca3af', fontSize: '13px', marginRight: '4px' }}>상주</span>
+                                            <span style={{ fontWeight: 600, color: '#1f2937', fontSize: '16px' }}>{bugo.mourner_name || bugo.applicant_name}</span>
+                                            <span style={{ color: '#6b7280', fontSize: '14px', marginLeft: '4px' }}>(故{bugo.deceased_name})</span>
+                                        </div>
+                                        {/* 셋째 줄: 장례유형 | 장례식장명 */}
+                                        <div style={{ color: '#6b7280', fontSize: '14px' }}>
+                                            {(bugo as any).funeral_type || '일반 장례'}
+                                            {((bugo as any).funeral_type === '일반 장례' || !(bugo as any).funeral_type) && bugo.funeral_home && ` | ${bugo.funeral_home}${bugo.room_number ? ` ${bugo.room_number}` : ''}`}
                                         </div>
                                     </Link>
                                 ))}
@@ -205,23 +208,26 @@ export default function SearchPage() {
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        gap: '8px',
+                                        gap: '6px',
                                         marginTop: '24px'
                                     }}>
                                         <button
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage === 1}
                                             style={{
-                                                padding: '8px 12px',
+                                                width: '36px',
+                                                height: '36px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
                                                 border: '1px solid #e5e7eb',
                                                 borderRadius: '6px',
                                                 background: 'white',
                                                 color: currentPage === 1 ? '#d1d5db' : '#374151',
-                                                cursor: currentPage === 1 ? 'default' : 'pointer',
-                                                fontSize: '14px'
+                                                cursor: currentPage === 1 ? 'default' : 'pointer'
                                             }}
                                         >
-                                            이전
+                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>chevron_left</span>
                                         </button>
 
                                         {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
@@ -233,8 +239,8 @@ export default function SearchPage() {
                                                     height: '36px',
                                                     border: currentPage === page ? 'none' : '1px solid #e5e7eb',
                                                     borderRadius: '6px',
-                                                    background: currentPage === page ? '#374151' : 'white',
-                                                    color: currentPage === page ? 'white' : '#374151',
+                                                    background: currentPage === page ? '#FFCC45' : 'white',
+                                                    color: currentPage === page ? '#191919' : '#374151',
                                                     cursor: 'pointer',
                                                     fontSize: '14px',
                                                     fontWeight: currentPage === page ? 600 : 400
@@ -248,16 +254,19 @@ export default function SearchPage() {
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage === totalPages}
                                             style={{
-                                                padding: '8px 12px',
+                                                width: '36px',
+                                                height: '36px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
                                                 border: '1px solid #e5e7eb',
                                                 borderRadius: '6px',
                                                 background: 'white',
                                                 color: currentPage === totalPages ? '#d1d5db' : '#374151',
-                                                cursor: currentPage === totalPages ? 'default' : 'pointer',
-                                                fontSize: '14px'
+                                                cursor: currentPage === totalPages ? 'default' : 'pointer'
                                             }}
                                         >
-                                            다음
+                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>chevron_right</span>
                                         </button>
                                     </div>
                                 )}
