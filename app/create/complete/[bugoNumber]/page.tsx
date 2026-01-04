@@ -18,6 +18,8 @@ interface BugoData {
     room_number?: string;
     funeral_date?: string;
     funeral_time?: string;
+    death_date?: string;
+    death_time?: string;
     address?: string;
     template_id?: string;
 }
@@ -55,6 +57,14 @@ export default function CompletePage() {
         if (params.bugoNumber) {
             fetchBugo();
         }
+
+        // 카카오 SDK 로드
+        if (typeof window !== 'undefined' && !(window as any).Kakao) {
+            const script = document.createElement('script');
+            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js';
+            script.async = true;
+            document.head.appendChild(script);
+        }
     }, [params.bugoNumber]);
 
     const formatDate = (dateStr?: string, timeStr?: string) => {
@@ -72,9 +82,48 @@ export default function CompletePage() {
     };
 
     const shareKakao = () => {
-        navigator.clipboard.writeText(bugoUrl);
-        setToast('링크가 복사되었습니다');
-        setTimeout(() => setToast(null), 2500);
+        if (typeof window !== 'undefined' && (window as any).Kakao) {
+            const Kakao = (window as any).Kakao;
+            if (!Kakao.isInitialized()) {
+                Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+            }
+
+            // 날짜/시간 포맷
+            const formatKakaoDate = () => {
+                if (!bugo?.death_date) return '';
+                const date = new Date(bugo.death_date);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                if (bugo.death_time) {
+                    const [hour, minute] = bugo.death_time.split(':');
+                    const ampm = parseInt(hour) < 12 ? '오전' : '오후';
+                    const h = parseInt(hour) % 12 || 12;
+                    return `${month}월 ${day}일 ${ampm} ${h}시 ${minute}분경`;
+                }
+                return `${month}월 ${day}일`;
+            };
+
+            const ageText = bugo?.age ? `(향년 ${bugo.age}세)` : '';
+            const kakaoTitle = `故 ${bugo?.deceased_name}님 부고${ageText}`;
+            const kakaoDesc = bugo?.funeral_home
+                ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''} | ${formatKakaoDate()} 별세하셨음을 삼가 알려드립니다.`
+                : `${formatKakaoDate()} 별세하셨음을 삼가 알려드립니다.`;
+
+            Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: kakaoTitle,
+                    description: kakaoDesc,
+                    imageUrl: 'https://dodambugo.com/og-bugo-v4.png',
+                    link: { mobileWebUrl: bugoUrl, webUrl: bugoUrl }
+                },
+                buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: bugoUrl, webUrl: bugoUrl } }]
+            });
+        } else {
+            navigator.clipboard.writeText(bugoUrl);
+            setToast('링크가 복사되었습니다');
+            setTimeout(() => setToast(null), 2500);
+        }
     };
 
     const shareSms = () => {
