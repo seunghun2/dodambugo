@@ -145,16 +145,25 @@ export default function ViewPage() {
 
     const shareViaKakao = () => {
         const url = window.location.href;
-        if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
-            (window as any).Kakao.Share.sendDefault({
+        if (typeof window !== 'undefined' && (window as any).Kakao) {
+            const Kakao = (window as any).Kakao;
+
+            // 초기화 안되어있으면 초기화
+            if (!Kakao.isInitialized()) {
+                Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+            }
+
+            Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
                     title: `故 ${bugo?.deceased_name}님 부고`,
-                    description: bugo?.message || '삼가 고인의 명복을 빕니다.',
-                    imageUrl: '',
+                    description: bugo?.funeral_home
+                        ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''} | 삼가 고인의 명복을 빕니다.`
+                        : '삼가 고인의 명복을 빕니다.',
+                    imageUrl: 'https://dodambugo.com/og-bugo.png',
                     link: { mobileWebUrl: url, webUrl: url }
                 },
-                buttons: [{ title: '부고장 보기', link: { mobileWebUrl: url, webUrl: url } }]
+                buttons: [{ title: '부고 보기', link: { mobileWebUrl: url, webUrl: url } }]
             });
         } else {
             copyToClipboard(url);
@@ -163,7 +172,41 @@ export default function ViewPage() {
 
     const shareViaSMS = () => {
         const url = window.location.href;
-        const text = `[부고] 故 ${bugo?.deceased_name}님께서 별세하셨습니다.\n\n${url}`;
+
+        // 날짜/시간 포맷
+        const formatDateTime = (dateStr?: string, timeStr?: string) => {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const ampm = timeStr ? (parseInt(timeStr.split(':')[0]) < 12 ? '오전' : '오후') : '';
+            const hour = timeStr ? (parseInt(timeStr.split(':')[0]) % 12 || 12) : '';
+            const minute = timeStr ? timeStr.split(':')[1] : '';
+            return timeStr
+                ? `${year}년 ${month}월 ${day}일 ${ampm} ${hour}시 ${minute}분`
+                : `${year}년 ${month}월 ${day}일`;
+        };
+
+        const deathDateTime = formatDateTime(bugo?.death_date, bugo?.death_time);
+        const funeralDateTime = formatDateTime(bugo?.funeral_date, bugo?.funeral_time);
+        const mournerName = bugo?.mourner_name || '';
+
+        const text = `[訃告]
+故 ${bugo?.deceased_name} 님께서${mournerName ? ` (상주 ${mournerName})` : ''}
+${deathDateTime}에
+별세하셨기에 아래와 같이 부고를 전해드립니다.
+
+[부고장 확인하기]
+${url}
+
+발인일: ${funeralDateTime || '추후 공지'}
+빈소: ${bugo?.funeral_home || ''}${bugo?.room_number ? ' ' + bugo.room_number : ''}
+
+갑작스러운 비보에 직접 연락드리지 못하고
+모바일 부고장으로 알려드리는 점
+너그러이 헤아려 주시기 바랍니다.`;
+
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 
