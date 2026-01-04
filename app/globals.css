@@ -5045,13 +5045,13 @@ section {
 }
 
 .privacy-link {
-    color: var(--primary);
+    color: #191919;
     text-decoration: underline;
     font-weight: 500;
 }
 
 .privacy-link:hover {
-    color: var(--primary-dark);
+    color: #333;
 }
 
 /* 개인정보 동의 상세 */
@@ -5275,7 +5275,7 @@ section {
     margin: 0 20px 20px;
     padding: 14px;
     background: var(--primary);
-    color: white;
+    color: #191919;
     border: none;
     border-radius: 12px;
     font-size: 15px;
