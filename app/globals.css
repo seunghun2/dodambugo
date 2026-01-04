@@ -2057,9 +2057,19 @@ section {
     background: white;
     border-radius: 16px 16px 0 0;
     z-index: 1001;
-    animation: slideUp 0.3s ease;
+    animation: slideUpFromBottom 0.25s ease-out;
     max-height: 70vh;
     overflow-y: auto;
+}
+
+@keyframes slideUpFromBottom {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
 .bottom-sheet-header {
