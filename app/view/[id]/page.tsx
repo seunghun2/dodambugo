@@ -153,13 +153,28 @@ export default function ViewPage() {
                 Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
             }
 
+            // 날짜/시간 포맷
+            const formatKakaoDate = () => {
+                if (!bugo?.death_date) return '';
+                const date = new Date(bugo.death_date);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                if (bugo.death_time) {
+                    const [hour, minute] = bugo.death_time.split(':');
+                    const ampm = parseInt(hour) < 12 ? '오전' : '오후';
+                    const h = parseInt(hour) % 12 || 12;
+                    return `${month}월 ${day}일 ${ampm} ${h}시 ${minute}분경`;
+                }
+                return `${month}월 ${day}일`;
+            };
+
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
-                    title: `故 ${bugo?.deceased_name}님 부고`,
+                    title: `故${bugo?.deceased_name}님께서 ${formatKakaoDate()}별세하셨음을 삼가 알려 드립니...`,
                     description: bugo?.funeral_home
-                        ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''} | 삼가 고인의 명복을 빕니다.`
-                        : '삼가 고인의 명복을 빕니다.',
+                        ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
+                        : '',
                     imageUrl: 'https://dodambugo.com/og-bugo.png',
                     link: { mobileWebUrl: url, webUrl: url }
                 },
