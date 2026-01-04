@@ -86,9 +86,9 @@ export default function FAQPage() {
             {/* FAQ Section */}
             <section className="faq" id="faq" style={{ paddingTop: '100px', minHeight: '100vh', background: '#f8f9fa' }}>
                 <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">자주 묻는 질문</h2>
-                        <p className="section-subtitle" style={{ color: '#666', marginTop: '4px' }}>
+                    <div className="section-header" style={{ marginBottom: '16px' }}>
+                        <h2 className="section-title" style={{ marginBottom: '4px' }}>자주 묻는 질문</h2>
+                        <p className="section-subtitle" style={{ color: '#666', marginTop: '0' }}>
                             궁금하신 점이 있으시면 아래에서 확인해보세요
                         </p>
                     </div>

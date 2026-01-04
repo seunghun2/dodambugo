@@ -111,12 +111,12 @@ export default function ContactPage() {
                         </div>
                     ) : (
                         <>
-                            <section className="section-header" style={{ textAlign: 'center', marginBottom: '32px' }}>
-                                <h2 className="section-title">제휴/문의</h2>
-                                <p className="section-subtitle" style={{ color: '#666', marginTop: '4px' }}>
+                            <div className="section-header" style={{ textAlign: 'center', marginBottom: '16px' }}>
+                                <h2 className="section-title" style={{ marginBottom: '4px' }}>제휴/문의</h2>
+                                <p className="section-subtitle" style={{ color: '#666', marginTop: '0' }}>
                                     도담부고 서비스 제휴 및 문의사항을 남겨주세요
                                 </p>
-                            </section>
+                            </div>
 
                             <form onSubmit={handleSubmit} className="contact-form">
                                 <div className="form-row">
