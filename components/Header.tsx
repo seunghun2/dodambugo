@@ -82,8 +82,8 @@ export default function Header({ showCTA = true }: HeaderProps) {
             {draftModalOpen && (
                 <div className="modal-overlay" onClick={() => setDraftModalOpen(false)}>
                     <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-                        <h3>임시저장된 정보</h3>
-                        <p>임시저장된 정보가 있습니다.<br />계속 작성하시겠습니까?</p>
+                        <h3>임시저장된 부고장</h3>
+                        <p>임시저장된 부고장이 있습니다.<br />계속 작성하시겠습니까?</p>
                         <div className="modal-buttons">
                             <button className="modal-btn secondary" onClick={discardDraft}>아니오</button>
                             <button className="modal-btn primary" onClick={continueDraft}>예</button>
