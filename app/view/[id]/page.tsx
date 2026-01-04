@@ -163,7 +163,7 @@ export default function ViewPage() {
                     imageUrl: 'https://dodambugo.com/og-bugo.png',
                     link: { mobileWebUrl: url, webUrl: url }
                 },
-                buttons: [{ title: '부고 보기', link: { mobileWebUrl: url, webUrl: url } }]
+                buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: url, webUrl: url } }]
             });
         } else {
             copyToClipboard(url);
