@@ -71,6 +71,7 @@ body {
     animation: fadeInOut 2s ease-in-out;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 @keyframes fadeInOut {
