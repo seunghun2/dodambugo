@@ -171,7 +171,7 @@ export default function ViewPage() {
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
-                    title: `故${bugo?.deceased_name}님께서 ${formatKakaoDate()}별세하셨음을 삼가 알려 드립니...`,
+                    title: `故${bugo?.deceased_name}님께서 ${formatKakaoDate()}별세하셨음을 삼가 알려 드립니다`,
                     description: bugo?.funeral_home
                         ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                         : '',
