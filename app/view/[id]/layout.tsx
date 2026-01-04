@@ -42,19 +42,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return `${month}월 ${day}일`;
     };
 
-    const title = `故${bugo.deceased_name}님께서 ${formatDate()}별세하셨음을 삼가 알려 드립니다`;
+    const ageText = bugo.age ? `(향년 ${bugo.age}세)` : '';
+    const title = `故 ${bugo.deceased_name}님 부고${ageText}`;
     const description = bugo.funeral_home
-        ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
-        : '';
+        ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''} | ${formatDate()} 별세하셨음을 삼가 알려드립니다.`
+        : `${formatDate()} 별세하셨음을 삼가 알려드립니다.`;
 
     return {
-        title: `故 ${bugo.deceased_name}님 부고 | 도담부고`,
-        description: title,
+        title: `${title} | 도담부고`,
+        description,
         openGraph: {
             title,
-            description: bugo.funeral_home
-                ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
-                : '삼가 고인의 명복을 빕니다.',
+            description,
             type: 'article',
             url: `https://dodambugo.com/view/${id}`,
             siteName: '도담부고',
