@@ -129,7 +129,7 @@ export default function AdminBugoPage() {
             {/* 사이드바 */}
             <aside className="admin-sidebar">
                 <div className="sidebar-logo">
-                    <Link href="/">도담부고</Link>
+                    <Link href="/">마음부고</Link>
                 </div>
                 <nav className="sidebar-nav">
                     <Link href="/admin/bugo" className="nav-item active">

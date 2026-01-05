@@ -78,7 +78,7 @@ export default function ContactPage() {
             {/* Navigation - 다른 페이지와 동일 */}
             <nav className="nav" id="nav">
                 <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>마음부고</Link>
                     <ul className="nav-menu" id="navMenu">
                         <li><Link href="/search" className="nav-link">부고검색</Link></li>
                         <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
@@ -114,7 +114,7 @@ export default function ContactPage() {
                             <div className="section-header" style={{ textAlign: 'center', marginBottom: '16px' }}>
                                 <h2 className="section-title" style={{ marginBottom: '4px' }}>제휴/문의</h2>
                                 <p className="section-subtitle" style={{ color: '#666', marginTop: '0' }}>
-                                    도담부고 서비스 제휴 및 문의사항을 남겨주세요
+                                    마음부고 서비스 제휴 및 문의사항을 남겨주세요
                                 </p>
                             </div>
 

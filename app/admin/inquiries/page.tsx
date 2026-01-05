@@ -111,7 +111,7 @@ export default function AdminInquiriesPage() {
             {/* 사이드바 */}
             <aside className="admin-sidebar">
                 <div className="sidebar-logo">
-                    <Link href="/">도담부고</Link>
+                    <Link href="/">마음부고</Link>
                 </div>
                 <nav className="sidebar-nav">
                     <Link href="/admin/bugo" className="nav-item">
@@ -272,7 +272,7 @@ export default function AdminInquiriesPage() {
 
                                     <div className="detail-actions">
                                         <a
-                                            href={`mailto:${selectedInquiry.email}?subject=Re: [도담부고] ${selectedInquiry.inquiry_type} 답변`}
+                                            href={`mailto:${selectedInquiry.email}?subject=Re: [마음부고] ${selectedInquiry.inquiry_type} 답변`}
                                             className="btn-action primary"
                                         >
                                             <span className="material-symbols-outlined">mail</span>

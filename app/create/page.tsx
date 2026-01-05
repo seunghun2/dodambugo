@@ -298,7 +298,7 @@ function CreatePageContent() {
                             <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>테마 변경</span>
                         </>
                     ) : (
-                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>마음부고</Link>
                     )}
                     {!changeFrom && (
                         <ul className="nav-menu" id="navMenu">

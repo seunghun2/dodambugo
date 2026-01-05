@@ -17,7 +17,7 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
             <div className="side-menu-overlay" onClick={onClose}></div>
             <div className="side-menu-content">
                 <div className="side-menu-header">
-                    <div className="side-menu-logo">도담부고</div>
+                    <div className="side-menu-logo">마음부고</div>
                     <button className="side-menu-close" onClick={onClose}>
                         <span className="material-symbols-outlined">close</span>
                     </button>

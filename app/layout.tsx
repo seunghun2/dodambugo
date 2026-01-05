@@ -12,28 +12,28 @@ import { dodamTheme } from '@/lib/theme';
 import KakaoInit from '@/components/KakaoInit';
 
 export const metadata = {
-  title: '도담부고 - 품격있는 무료 모바일 부고장',
+  title: '마음부고 - 품격있는 무료 모바일 부고장',
   description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료, 광고 없음, 간편한 공유',
   keywords: '부고장, 모바일 부고, 무료 부고장, 온라인 부고, 부고 작성, 장례식장, 부고 알림',
   openGraph: {
-    title: '도담부고 - 품격있는 무료 모바일 부고장',
+    title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 완전 무료, 광고 없음.',
     type: 'website',
     url: 'https://dodambugo.com',
-    siteName: '도담부고',
+    siteName: '마음부고',
     locale: 'ko_KR',
     images: [
       {
         url: 'https://dodambugo.com/og-image.png',
         width: 1200,
         height: 630,
-        alt: '도담부고 - 품격있는 무료 모바일 부고장',
+        alt: '마음부고 - 품격있는 무료 모바일 부고장',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '도담부고 - 품격있는 무료 모바일 부고장',
+    title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장',
     images: ['https://dodambugo.com/og-image.png'],
   },

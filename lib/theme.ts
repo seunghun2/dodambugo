@@ -1,5 +1,5 @@
 /**
- * 도담부고 통합 디자인 시스템
+ * 마음부고 통합 디자인 시스템
  * globals.css와 동기화된 Mantine 테마
  * 
  * Single Source of Truth: globals.css의 CSS 변수
@@ -36,7 +36,7 @@ const accent: MantineColorsTuple = [
     '#1B4F72',  // 9
 ];
 
-// 도담부고 통합 테마
+// 마음부고 통합 테마
 export const dodamTheme = createTheme({
     // 기본 색상 설정
     primaryColor: 'navy',

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!bugo) {
         return {
-            title: '부고장을 찾을 수 없습니다 | 도담부고',
+            title: '부고장을 찾을 수 없습니다 | 마음부고',
             description: '요청하신 부고장을 찾을 수 없습니다.',
         };
     }
@@ -49,14 +49,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : `${formatDate()} 별세하셨음을 삼가 알려드립니다.`;
 
     return {
-        title: `${title} | 도담부고`,
+        title: `${title} | 마음부고`,
         description,
         openGraph: {
             title,
             description,
             type: 'article',
             url: `https://dodambugo.com/view/${id}`,
-            siteName: '도담부고',
+            siteName: '마음부고',
             locale: 'ko_KR',
             images: [
                 {

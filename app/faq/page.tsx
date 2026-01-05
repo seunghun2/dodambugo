@@ -7,7 +7,7 @@ import SideMenu from '@/components/SideMenu';
 const faqData = [
     {
         question: '정말 무료로 이용할 수 있나요?',
-        answer: '네, 도담부고에서 모바일 부고장을 만드는 것은 완전 무료입니다. 숨겨진 비용이나 유료 업그레이드 없이 모든 기능을 이용하실 수 있습니다.',
+        answer: '네, 마음부고에서 모바일 부고장을 만드는 것은 완전 무료입니다. 숨겨진 비용이나 유료 업그레이드 없이 모든 기능을 이용하실 수 있습니다.',
     },
     {
         question: '회원가입 없이 이용 가능한가요?',
@@ -64,7 +64,7 @@ export default function FAQPage() {
             {/* Navigation - 다른 페이지와 동일 */}
             <nav className="nav" id="nav">
                 <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>마음부고</Link>
                     <ul className="nav-menu" id="navMenu">
                         <li><Link href="/search" className="nav-link">부고검색</Link></li>
                         <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>

@@ -814,7 +814,7 @@ export default function WriteFormPage() {
                 {/* Navigation - 메인과 동일 */}
                 <nav className="nav" id="nav">
                     <div className="nav-container">
-                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>도담부고</Link>
+                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>마음부고</Link>
                         <ul className="nav-menu" id="navMenu">
                             <li><Link href="/search" className="nav-link">부고검색</Link></li>
                             <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>

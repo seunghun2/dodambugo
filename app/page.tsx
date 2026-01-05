@@ -118,7 +118,7 @@ export default function HomePage() {
       {/* 상단 네비게이션 - 다른 페이지와 동일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
-          <Link href="/" className="nav-logo">도담부고</Link>
+          <Link href="/" className="nav-logo">마음부고</Link>
           <ul className="nav-menu" id="navMenu">
             <li><Link href="/search" className="nav-link">부고검색</Link></li>
             <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
@@ -152,10 +152,10 @@ export default function HomePage() {
 
         {/* 히어로 섹션 */}
         <section className="xd-hero">
-          <h1 className="xd-hero-title">도담부고에서 부고장을 만드세요</h1>
+          <h1 className="xd-hero-title">마음부고에서 부고장을 만드세요</h1>
           <p className="xd-hero-subtitle">가장 간편하고 빠르게 부고장을 만드세요.</p>
           <div className="xd-hero-image">
-            <img src="/images/hero-image.png" alt="도담부고 부고장 미리보기" />
+            <img src="/images/hero-image.png" alt="마음부고 부고장 미리보기" />
           </div>
         </section>
 
@@ -206,7 +206,7 @@ export default function HomePage() {
       <section className="features" id="features">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">왜 도담부고일까요?</h2>
+            <h2 className="section-title">왜 마음부고일까요?</h2>
             <p className="section-subtitle">다른 부고 서비스와는 다른 특별함</p>
           </div>
           <div className="features-grid">
@@ -287,7 +287,7 @@ export default function HomePage() {
                 <span className="faq-icon">{openFaqs.has(0) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
-                네, 도담부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다.
+                네, 마음부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다.
               </div>
             </div>
             <div className={`faq-item ${openFaqs.has(1) ? 'active' : ''}`} onClick={() => toggleFaq(1)}>
@@ -325,7 +325,7 @@ export default function HomePage() {
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
-            <div className="footer-logo">도담부고</div>
+            <div className="footer-logo">마음부고</div>
             <div className="footer-links-horizontal">
               <Link href="/terms">이용약관</Link>
               <span className="footer-separator">|</span>

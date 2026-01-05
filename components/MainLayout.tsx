@@ -65,7 +65,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             c="blue.6"
                             style={{ letterSpacing: '-0.5px' }}
                         >
-                            도담부고
+                            마음부고
                         </Text>
                     </Link>
 
@@ -102,7 +102,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 padding="md"
                 title={
                     <Text fw={700} size="lg" c="blue.6">
-                        도담부고
+                        마음부고
                     </Text>
                 }
                 hiddenFrom="sm"
