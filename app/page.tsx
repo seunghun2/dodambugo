@@ -27,6 +27,17 @@ export default function HomePage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // 누적 부고장 수 계산 (기준일: 2026-01-06, 기준값: 15149, 하루 +5건)
+  const calculateBugoCount = () => {
+    const baseDate = new Date('2026-01-06');
+    const baseCount = 15149;
+    const dailyIncrease = 5;
+    const today = new Date();
+    const daysPassed = Math.floor((today.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+    return baseCount + Math.max(0, daysPassed) * dailyIncrease;
+  };
+  const [bugoCount] = useState(calculateBugoCount());
+
   const toggleFaq = (index: number) => {
     setOpenFaqs(prev => {
       const newSet = new Set(prev);
@@ -285,7 +296,7 @@ export default function HomePage() {
         <div className="xd-stats">
           <div className="xd-stat-item">
             <span className="xd-stat-label">누적부고장</span>
-            <span className="xd-stat-value" data-count="15149" data-suffix="건">0</span>
+            <span className="xd-stat-value" data-count={bugoCount} data-suffix="건">0</span>
           </div>
           <div className="xd-stat-divider"></div>
           <div className="xd-stat-item">

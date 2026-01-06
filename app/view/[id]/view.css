@@ -20,11 +20,7 @@
     padding: 0;
 }
 
-body {
-    font-family: 'Nanum Myeongjo', serif;
-    background: #FFFFFF;
-    -webkit-font-smoothing: antialiased;
-}
+/* view-page 내에서만 명조체 적용 */
 
 /* ========================================
    기본 레이아웃
@@ -35,6 +31,8 @@ body {
     background: #FFFFFF;
     min-height: 100vh;
     padding-bottom: 40px;
+    font-family: 'Nanum Myeongjo', serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* 장례식장명 헤더 바 */
@@ -99,8 +97,7 @@ body {
 /* ========================================
    로딩/에러 상태
 ======================================== */
-.loading-container,
-.error-container {
+.loading-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -131,37 +128,59 @@ body {
     color: #555555;
 }
 
+/* 에러 화면 - 모던 스타일 */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #F8F9FA;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 .error-content {
     text-align: center;
+    max-width: 320px;
 }
 
 .error-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 64px;
+    margin-bottom: 24px;
 }
 
 .error-content h2 {
-    font-size: 18px;
-    font-weight: 800;
-    color: #111111;
-    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 12px;
 }
 
 .error-content p {
     font-size: 14px;
-    color: #555555;
-    margin-bottom: 24px;
+    color: #666666;
+    margin-bottom: 32px;
+    line-height: 1.6;
 }
 
 .btn-home {
     display: inline-block;
-    padding: 12px 32px;
-    background: #9E8566;
-    color: #FFFFFF;
-    border-radius: 8px;
+    padding: 14px 40px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    border-radius: 50px;
     text-decoration: none;
-    font-family: 'Nanum Myeongjo', serif;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-home:hover {
+    background: #FCC419;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ========================================
