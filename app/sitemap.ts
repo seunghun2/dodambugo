@@ -1,9 +1,11 @@
 import { MetadataRoute } from 'next'
+import { supabase } from '@/lib/supabase'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://maeumbugo.co.kr'
 
-    return [
+    // 정적 페이지들
+    const staticPages: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
             lastModified: new Date(),
@@ -41,4 +43,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.5,
         },
     ]
+
+    // 동적 부고 페이지들 (DB에서 가져오기)
+    let bugoPagges: MetadataRoute.Sitemap = []
+
+    try {
+        const { data: bugos, error } = await supabase
+            .from('bugo')
+            .select('bugo_number, created_at, updated_at')
+            .order('created_at', { ascending: false })
+            .limit(1000) // 최대 1000개
+
+        if (!error && bugos) {
+            bugoPagges = bugos.map((bugo) => ({
+                url: `${baseUrl}/view/${bugo.bugo_number}`,
+                lastModified: new Date(bugo.updated_at || bugo.created_at),
+                changeFrequency: 'monthly' as const,
+                priority: 0.7,
+            }))
+        }
+    } catch (e) {
+        console.error('Failed to fetch bugos for sitemap:', e)
+    }
+
+    return [...staticPages, ...bugoPagges]
 }

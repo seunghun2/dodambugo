@@ -10,6 +10,7 @@ import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
 import { dodamTheme } from '@/lib/theme';
 import KakaoInit from '@/components/KakaoInit';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 export const metadata = {
   title: '마음부고 - 품격있는 무료 모바일 부고장',
@@ -72,6 +73,7 @@ export default function RootLayout({
         <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" crossOrigin="anonymous" async />
       </head>
       <body suppressHydrationWarning>
+        <GoogleAnalytics />
         <KakaoInit />
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
