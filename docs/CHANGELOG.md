@@ -1,5 +1,45 @@
 # 마음부고 변경 이력
 
+## 2026-01-06
+
+### 검색엔진 등록 (SEO)
+- **네이버 서치어드바이저** 등록
+  - HTML 메타태그 인증 완료
+  - robots.txt 확인
+  - 사이트맵 제출
+- **구글 서치콘솔** 등록
+  - DNS TXT 레코드 인증 완료
+  - 사이트맵 제출
+
+### 동적 사이트맵 구현
+- `app/sitemap.ts` 동적 생성
+- 정적 페이지 7개 포함
+- 부고장 페이지 자동 포함 (현재 57개)
+- Supabase에서 실시간 조회
+
+### Google Analytics 4
+- GA4 설정 (ID: G-6H5TT2F5RB)
+- 이벤트 추적 구현:
+  - `select_template`: 템플릿 선택
+  - `complete_create`: 부고 생성 완료
+  - `view`: 부고 조회
+  - `share` (kakao/sms/link): 공유
+  - `click_map`: 지도/내비
+  - `copy_account`: 계좌 복사
+
+### AI 검색 최적화 (LLM SEO)
+- `llms.txt` 생성 (AI 크롤러용)
+- `llms-full.txt` 상세 문서 생성
+- `robots.txt` AI 봇 허용 규칙 추가
+- Schema.org JSON-LD 메인 페이지에 추가
+
+### 배포 자동화
+- Vercel Production 브랜치: `main` → `nextjs`
+- GitHub Default 브랜치: `main` → `nextjs`
+- 이제 `git push`만으로 자동 Production 배포
+
+---
+
 ## 2026-01-05
 
 ### 브랜드명 변경
@@ -7,10 +47,11 @@
 - 헤더, 푸터, 메타태그, OG 태그 등 50곳 이상 수정
 - 문서 파일 (README, CHANGELOG, TODO 등) 전체 수정
 
-### 다음 작업
-- [ ] 새 도메인 구매 및 연결
-- [ ] OG 이미지 교체
-- [ ] 카카오 API 도메인 변경
+### 도메인 & 카카오 설정
+- 도메인 구매: maeumbugo.co.kr (가비아)
+- Vercel 도메인 연결
+- 카카오 새 앱 생성 (마음부고, ID: 1364022)
+- 카카오 JS SDK 도메인 등록
 
 ---
 

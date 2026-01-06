@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 마음부고
 
-## Getting Started
+> 품격있는 무료 모바일 부고장 서비스
 
-First, run the development server:
+**[https://maeumbugo.co.kr](https://maeumbugo.co.kr)**
+
+---
+
+## 프로젝트 소개
+
+마음부고는 3분 만에 무료로 만드는 모바일 부고장 서비스입니다.
+
+### 주요 특징
+- ✅ **완전 무료** - 부고장 생성, 공유 모두 무료
+- ✅ **광고 없음** - 품격을 위해 광고를 넣지 않습니다
+- ✅ **4가지 템플릿** - 기본형, 정중형, 안내형, 국화 디자인
+- ✅ **간편 공유** - 카카오톡, 문자, 링크로 바로 공유
+- ✅ **회원가입 불필요** - 바로 작성 가능
+
+---
+
+## 기술 스택
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: CSS Modules + Global CSS
+- **Database**: Supabase (PostgreSQL)
+- **Hosting**: Vercel
+- **Maps**: 네이버 Maps API, 카카오 Maps API
+- **Analytics**: Google Analytics 4
+
+---
+
+## 개발 환경 설정
 
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 빌드
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 에서 확인
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 배포
 
-## Learn More
+`nextjs` 브랜치에 push하면 자동으로 Vercel Production에 배포됩니다.
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+git add .
+git commit -m "메시지"
+git push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 환경 변수
 
-## Deploy on Vercel
+`.env.local` 파일 필요:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_KAKAO_MAP_KEY=...
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=...
+NEXT_PUBLIC_KAKAO_JS_KEY=...
+NEXT_PUBLIC_GA_ID=G-6H5TT2F5RB
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 문서
+
+- [PROJECT_STRATEGY.md](./PROJECT_STRATEGY.md) - 프로젝트 전략
+- [docs/TODO.md](./docs/TODO.md) - 할 일 목록
+- [docs/CHANGELOG.md](./docs/CHANGELOG.md) - 변경 이력
+- [docs/FEATURES.md](./docs/FEATURES.md) - 기능 목록
+- [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) - 디자인 시스템
+- [docs/API.md](./docs/API.md) - API 문서
+
+---
+
+## 프로젝트 구조
+
+```
+dodam-next/
+├── app/                    # Next.js App Router
+│   ├── page.tsx           # 메인 페이지
+│   ├── create/            # 부고장 생성
+│   ├── view/              # 부고장 조회
+│   ├── search/            # 부고 검색
+│   ├── admin/             # 관리자
+│   └── api/               # API 라우트
+├── components/            # 공통 컴포넌트
+├── lib/                   # 유틸리티
+├── public/                # 정적 파일
+│   ├── css/              # 스타일시트
+│   ├── images/           # 이미지
+│   └── templates/        # 부고장 템플릿 HTML
+└── docs/                  # 문서
+```
+
+---
+
+*마지막 업데이트: 2026-01-06*
