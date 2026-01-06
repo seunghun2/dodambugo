@@ -51,6 +51,16 @@
   - `main` → `nextjs`
   - GitHub에서도 `nextjs`가 기본으로 표시
 
+### 개발/프로덕션 DB 분리
+- [x] **개발용 Supabase 프로젝트** 생성 (maeumbugo-dev)
+  - URL: `https://mnlyqhrjnpbkleenmszm.supabase.co`
+  - Region: Seoul (ap-northeast-2)
+- [x] **테이블 스키마 복사** (bugo, drafts, facilities, guestbook, inquiries)
+- [x] **테스트 데이터 30개** 생성
+- [x] **.env.local** 개발 DB 설정
+  - 로컬: 개발 DB (maeumbugo-dev)
+  - Production: 기존 DB (dodambugo)
+
 ---
 
 ## 🟡 나중에 할 것

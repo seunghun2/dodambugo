@@ -62,16 +62,32 @@ git push
 
 ## 환경 변수
 
-`.env.local` 파일 필요:
+### 로컬 개발 환경 (`.env.local`)
 
-```
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-NEXT_PUBLIC_KAKAO_MAP_KEY=...
-NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=...
-NEXT_PUBLIC_KAKAO_JS_KEY=...
+```bash
+# 개발용 Supabase (로컬용)
+NEXT_PUBLIC_SUPABASE_URL=https://mnlyqhrjnpbkleenmszm.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Naver Map
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=9ynkl22koz
+
+# Google Analytics
 NEXT_PUBLIC_GA_ID=G-6H5TT2F5RB
 ```
+
+### Production (Vercel 환경변수)
+
+```bash
+# Production Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://tbteghoppechzotdojna.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+| 환경 | Supabase 프로젝트 |
+|------|-------------------|
+| 로컬 (localhost) | maeumbugo-dev |
+| Production (maeumbugo.co.kr) | dodambugo |
 
 ---
 

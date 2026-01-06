@@ -4,6 +4,7 @@
 
 | 파일 | 설명 |
 |------|------|
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | ⭐ **개발 환경 가이드** (필독!) |
 | [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) | 디자인 시스템 (컬러, 폰트, 간격 등) |
 | [FEATURES.md](./FEATURES.md) | 구현된 기능 목록 |
 | [API.md](./API.md) | API 엔드포인트 문서 |
@@ -31,4 +32,5 @@
 
 ---
 
-*마지막 업데이트: 2026-01-04*
+*마지막 업데이트: 2026-01-06*
+

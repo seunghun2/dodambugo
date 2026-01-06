@@ -38,6 +38,16 @@
 - GitHub Default 브랜치: `main` → `nextjs`
 - 이제 `git push`만으로 자동 Production 배포
 
+### 개발/프로덕션 DB 분리
+- **개발용 Supabase 프로젝트 생성** (maeumbugo-dev)
+  - URL: `https://mnlyqhrjnpbkleenmszm.supabase.co`
+  - Region: Seoul (ap-northeast-2)
+- 테이블 스키마 복사 (bugo, drafts, facilities, guestbook, inquiries)
+- 테스트 데이터 30개 생성
+- `.env.local` 개발 DB 설정
+  - 로컬: 개발 DB (maeumbugo-dev)
+  - Production: 기존 DB (dodambugo)
+
 ---
 
 ## 2026-01-05
