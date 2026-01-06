@@ -258,13 +258,18 @@ ${url}
         );
     }
 
-    // 상주 목록
+    // 상주 목록 (대표상주 + 추가 상주들, 중복 방지)
     const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
     if (bugo.mourner_name) {
         mournersList.push({ relationship: bugo.relationship || '상주', name: bugo.mourner_name, contact: bugo.contact || '' });
     }
     if (bugo.mourners && Array.isArray(bugo.mourners)) {
-        bugo.mourners.forEach(m => { if (m.name) mournersList.push(m); });
+        // 대표상주와 이름+관계가 같으면 중복이므로 제외
+        bugo.mourners.forEach(m => {
+            if (m.name && !(m.name === bugo.mourner_name && m.relationship === bugo.relationship)) {
+                mournersList.push(m);
+            }
+        });
     }
 
     // 템플릿 이미지 결정

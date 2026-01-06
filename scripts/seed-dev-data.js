@@ -184,7 +184,7 @@ function generateBugoData() {
         mourner_name: mainMourner.name,
         contact: mainMourner.contact || '',
         mourners: JSON.stringify(mourners),
-        funeral_home: `${funeralHome.name} ${funeralHome.room}`,
+        funeral_home: funeralHome.name,
         room_number: funeralHome.room,
         funeral_home_tel: funeralHome.tel,
         address: funeralHome.address,
