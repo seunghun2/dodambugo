@@ -113,8 +113,80 @@ export default function HomePage() {
     alert(`${template} 템플릿 미리보기 준비 중`);
   };
 
+  // Schema.org JSON-LD 데이터
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "마음부고",
+        "url": "https://maeumbugo.co.kr",
+        "description": "3분 만에 만드는 품격있는 무료 모바일 부고장 서비스. 4가지 템플릿, 완전 무료, 광고 없음, 간편한 공유.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        },
+        "featureList": [
+          "무료 모바일 부고장 생성",
+          "4가지 템플릿 제공",
+          "카카오톡/문자 공유",
+          "QR코드 생성",
+          "지도 연동",
+          "회원가입 불필요"
+        ],
+        "inLanguage": "ko-KR"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "정말 무료인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "네, 마음부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "부고장은 얼마나 유지되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "생성된 부고장은 영구적으로 유지됩니다. 언제든지 링크를 통해 조회할 수 있습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "수정은 가능한가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "네, 작성 시 입력한 비밀번호(휴대번호 뒷자리)로 언제든지 수정하실 수 있습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "개인정보는 안전한가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "입력하신 정보는 부고장 표시 목적으로만 사용되며, 별도로 수집하거나 제3자에게 제공하지 않습니다."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <>
+      {/* Schema.org JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* 상단 네비게이션 - 다른 페이지와 동일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
