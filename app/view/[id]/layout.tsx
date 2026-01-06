@@ -55,12 +55,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             title,
             description,
             type: 'article',
-            url: `https://dodambugo.com/view/${id}`,
+            url: `https://maeumbugo.co.kr/view/${id}`,
             siteName: '마음부고',
             locale: 'ko_KR',
             images: [
                 {
-                    url: 'https://dodambugo.com/og-bugo-v4.png',
+                    url: 'https://maeumbugo.co.kr/og-bugo-v4.png',
                     width: 1200,
                     height: 630,
                     alt: `故 ${bugo.deceased_name}님 부고`,
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description: bugo.funeral_home
                 ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                 : '삼가 고인의 명복을 빕니다.',
-            images: ['https://dodambugo.com/og-bugo-v4.png'],
+            images: ['https://maeumbugo.co.kr/og-bugo-v4.png'],
         },
     };
 }

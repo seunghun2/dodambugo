@@ -2,7 +2,7 @@
 
 ## 기본 정보
 
-- **Base URL**: `https://dodambugo.com/api`
+- **Base URL**: `https://maeumbugo.co.kr/api`
 - **Database**: Supabase
 
 ---

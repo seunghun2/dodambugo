@@ -19,12 +19,12 @@ export const metadata = {
     title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 완전 무료, 광고 없음.',
     type: 'website',
-    url: 'https://dodambugo.com',
+    url: 'https://maeumbugo.co.kr',
     siteName: '마음부고',
     locale: 'ko_KR',
     images: [
       {
-        url: 'https://dodambugo.com/og-image.png',
+        url: 'https://maeumbugo.co.kr/og-image.png',
         width: 1200,
         height: 630,
         alt: '마음부고 - 품격있는 무료 모바일 부고장',
@@ -35,14 +35,14 @@ export const metadata = {
     card: 'summary_large_image',
     title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장',
-    images: ['https://dodambugo.com/og-image.png'],
+    images: ['https://maeumbugo.co.kr/og-image.png'],
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: 'https://dodambugo.com',
+    canonical: 'https://maeumbugo.co.kr',
   },
 };
 

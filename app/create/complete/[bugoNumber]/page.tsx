@@ -114,7 +114,7 @@ export default function CompletePage() {
                 content: {
                     title: kakaoTitle,
                     description: kakaoDesc,
-                    imageUrl: 'https://dodambugo.com/og-bugo-v4.png',
+                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v4.png',
                     link: { mobileWebUrl: bugoUrl, webUrl: bugoUrl }
                 },
                 buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: bugoUrl, webUrl: bugoUrl } }]
