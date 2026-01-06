@@ -55,6 +55,7 @@ export default function RootLayout({
     <html lang="ko" {...mantineHtmlProps}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="naver-site-verification" content="4f09b03be58e139284a268de39527d36c7439898" />
         <ColorSchemeScript defaultColorScheme="light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
