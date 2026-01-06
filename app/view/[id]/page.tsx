@@ -150,7 +150,7 @@ export default function ViewPage() {
 
             // 초기화 안되어있으면 초기화
             if (!Kakao.isInitialized()) {
-                Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
             }
 
             // 날짜/시간 포맷

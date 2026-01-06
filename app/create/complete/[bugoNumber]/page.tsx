@@ -85,7 +85,7 @@ export default function CompletePage() {
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
             if (!Kakao.isInitialized()) {
-                Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
             }
 
             // 날짜/시간 포맷

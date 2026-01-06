@@ -14,7 +14,7 @@ export default function KakaoInit() {
         const initKakao = () => {
             if (typeof window !== 'undefined' && window.Kakao) {
                 if (!window.Kakao.isInitialized()) {
-                    window.Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+                    window.Kakao.init('5aa868e69d68e913ed9da7c3def45151');
                     console.log('Kakao SDK initialized');
                 }
             }
@@ -52,7 +52,7 @@ export function shareKakao(options: {
     }
 
     if (!window.Kakao.isInitialized()) {
-        window.Kakao.init('e089c191f6b67a3b7a05531e949eea8d');
+        window.Kakao.init('5aa868e69d68e913ed9da7c3def45151');
     }
 
     const url = window.location.href;
