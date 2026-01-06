@@ -298,7 +298,7 @@ ${url}
             <div className="section-divider"></div>
 
             {/* 장례식장 박스 - 일반 장례일 때만, 헤더 바로 아래 */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && bugo.funeral_home && (
+            {(!bugo.funeral_type || bugo.funeral_type === '일반장례') && bugo.funeral_home && (
                 <>
                     <div className="funeral-box funeral-box-inline funeral-box-top">
                         <span className="funeral-name">{bugo.funeral_home}</span>
@@ -351,7 +351,7 @@ ${url}
                         </>
                     )}
                     {/* 무빈소장례일 때 빈소 표시 */}
-                    {bugo.funeral_type === '무빈소장례' && (
+                    {bugo.funeral_type === '무빈소' && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
@@ -482,7 +482,7 @@ ${url}
             {/* ========================================
                 빈소 오시는 길 - 일반 장례일 때만 표시
             ======================================== */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+            {(!bugo.funeral_type || bugo.funeral_type === '일반장례') && (
                 <section className="section">
                     <h2 className="section-title">빈소 오시는 길</h2>
 
