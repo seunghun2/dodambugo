@@ -62,7 +62,7 @@ export function shareKakao(options: {
         content: {
             title: options.title,
             description: options.description,
-            imageUrl: options.imageUrl || 'https://maeumbugo.co.kr/og-bugo.png',
+            imageUrl: options.imageUrl || 'https://maeumbugo.co.kr/og-bugo-v4.png',
             link: {
                 mobileWebUrl: url,
                 webUrl: url,
