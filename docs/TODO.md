@@ -1,12 +1,37 @@
 # 마음부고 할 일 목록
 
-## 🔴 긴급 (이번 주)
+## 🔴 긴급 - 지금 해야 할 것!
 
-### 브랜드 변경 완료
-- [ ] 새 도메인 구매 및 연결 (마음부고.kr / maeumbugo.com)
-- [ ] Vercel 도메인 연결
-- [ ] 카카오 API 도메인 변경
-- [ ] OG 이미지 교체 (`/images/og-image.png`)
+### Vercel Production 배포 (필수!)
+> 카카오 공유가 안 되는 이유: 새 배포가 Production에 적용 안 됨
+
+1. https://vercel.com/daedaesonsons-projects/dodam-next 접속
+2. **Deployments** 탭 클릭
+3. 최신 배포 (카카오 API 키 업데이트 - 마음부고 앱) 찾기
+4. 오른쪽 **점 세개(⋮)** 클릭 → **"Promote to Production"**
+5. 확인 후 완료
+6. https://www.maeumbugo.co.kr 에서 카카오 공유 테스트
+
+---
+
+## ✅ 오늘 완료한 것 (2026-01-06)
+
+- [x] 브랜드 변경: 도담부고 → 마음부고 (코드 전체)
+- [x] 도메인 구매: maeumbugo.co.kr (가비아)
+- [x] Vercel 도메인 연결 (maeumbugo.co.kr, www.maeumbugo.co.kr)
+- [x] 카카오 새 앱 생성 (마음부고, ID: 1364022)
+- [x] 카카오 JavaScript 키 코드에 적용 (5aa868e69d68e913ed9da7c3def45151)
+- [x] 카카오 JS SDK 도메인 등록 (www.maeumbugo.co.kr, maeumbugo.co.kr)
+- [x] 카카오 제품 링크 도메인 등록
+
+---
+
+## 🟡 나중에 할 것
+
+### OG 이미지 교체 (선택)
+- [ ] `/public/images/og-image.png` 새로 만들기 (마음부고 브랜드)
+
+### 화환 주문 (수익화)
 
 ---
 
