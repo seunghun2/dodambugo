@@ -2,8 +2,17 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import SideMenu from '@/components/SideMenu';
+import { supabase } from '@/lib/supabase';
+
+interface SearchResult {
+  id: string;
+  bugo_number: string;
+  deceased_name: string;
+  mourner_name?: string;
+  funeral_date?: string;
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,6 +21,11 @@ export default function HomePage() {
   const [draftModalOpen, setDraftModalOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const toggleFaq = (index: number) => {
     setOpenFaqs(prev => {
@@ -80,6 +94,58 @@ export default function HomePage() {
     setTimeout(animateStats, 300);
   }, []);
 
+  // 자동완성 검색
+  useEffect(() => {
+    const searchBugo = async () => {
+      if (searchQuery.trim().length < 1) {
+        setSearchResults([]);
+        setShowDropdown(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const { data, error } = await supabase
+          .from('bugo')
+          .select('id, bugo_number, deceased_name, mourner_name, funeral_date')
+          .or(`deceased_name.ilike.%${searchQuery}%,mourner_name.ilike.%${searchQuery}%`)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (!error && data) {
+          // 상주 매칭 우선 정렬
+          const query = searchQuery.toLowerCase();
+          const sorted = data.sort((a, b) => {
+            const aMournerMatch = a.mourner_name?.toLowerCase().includes(query) ? 1 : 0;
+            const bMournerMatch = b.mourner_name?.toLowerCase().includes(query) ? 1 : 0;
+            return bMournerMatch - aMournerMatch;
+          }).slice(0, 5);
+
+          setSearchResults(sorted);
+          setShowDropdown(sorted.length > 0);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounce = setTimeout(searchBugo, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery]);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const checkDraftBeforeCreate = () => {
     if (hasDraft && draftTemplateId) {
       setDraftModalOpen(true);
@@ -107,6 +173,12 @@ export default function HomePage() {
 
   const openSideMenu = () => setSideMenuOpen(true);
   const closeSideMenu = () => setSideMenuOpen(false);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const showTemplatePreview = (template: string) => {
     // 템플릿 미리보기 모달
@@ -232,9 +304,67 @@ export default function HomePage() {
         </section>
 
         {/* 검색바 */}
-        <div className="xd-search" onClick={() => router.push('/search')}>
-          <span className="xd-search-text">상주 / 고인을 검색하세요.</span>
-          <span className="material-symbols-outlined xd-search-icon">search</span>
+        <div className="xd-search-wrapper" ref={searchRef}>
+          <div className="xd-search">
+            <input
+              type="text"
+              className="xd-search-input"
+              placeholder="상주 / 고인을 검색하세요."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+            />
+            <button className="xd-search-btn" onClick={handleSearch}>
+              <span className="material-symbols-outlined">search</span>
+            </button>
+          </div>
+          {/* 자동완성 드롭다운 */}
+          {showDropdown && (
+            <div className="xd-search-dropdown">
+              {searchResults.map((result) => {
+                // 하이라이트 함수
+                const highlight = (text: string) => {
+                  if (!searchQuery.trim()) return text;
+                  const regex = new RegExp(`(${searchQuery.trim()})`, 'gi');
+                  const parts = text.split(regex);
+                  return parts.map((part, i) =>
+                    regex.test(part) ? <mark key={i}>{part}</mark> : part
+                  );
+                };
+
+                // 발인 날짜 포맷
+                const formatFuneralDate = (date?: string) => {
+                  if (!date) return '';
+                  const d = new Date(date);
+                  const month = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  return `${month}/${day}`;
+                };
+
+                return (
+                  <div
+                    key={result.id}
+                    className="xd-search-item"
+                    onClick={() => {
+                      router.push(`/view/${result.bugo_number}`);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <span className="xd-search-main">
+                      {result.mourner_name && (
+                        <>상주 {highlight(result.mourner_name)} </>
+                      )}
+                      <span className="xd-search-deceased">(故 {highlight(result.deceased_name)})</span>
+                    </span>
+                    {result.funeral_date && (
+                      <span className="xd-search-date">발인 {formatFuneralDate(result.funeral_date)}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* 액션 카드 */}
@@ -427,6 +557,17 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 모바일 플로팅 버튼 - 부고장 만들기 */}
+      <div className="mobile-floating-cta">
+        <div className="floating-tooltip">
+          링크형 <strong>부고장 무료</strong> 제작하기
+        </div>
+        <button className="btn-floating-create" onClick={checkDraftBeforeCreate}>
+          부고장 만들기
+          <span className="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
     </>
   );
 }
