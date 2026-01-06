@@ -8,6 +8,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import SideMenu from '@/components/SideMenu';
 import FacilitySearchModal from '@/components/FacilitySearchModal';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
 import 'dayjs/locale/ko';
@@ -65,6 +66,9 @@ export default function WriteFormPage() {
     useEffect(() => {
         if (!['basic', 'ribbon', 'border', 'flower'].includes(templateId)) {
             router.push('/create');
+        } else {
+            // GA: 템플릿 선택 이벤트
+            gaEvents.selectTemplate(templateId);
         }
     }, [templateId, router]);
 
@@ -780,6 +784,11 @@ export default function WriteFormPage() {
             }
 
             if (error) throw error;
+
+            // GA: 부고 생성 완료 이벤트
+            if (!editBugoNumber) {
+                gaEvents.completeBugo(data.bugo_number);
+            }
 
             // 완료 페이지로 리다이렉트
             router.push(`/create/complete/${data.bugo_number}`);

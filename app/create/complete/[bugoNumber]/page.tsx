@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import './complete.css';
 
 interface BugoData {
@@ -77,6 +78,7 @@ export default function CompletePage() {
 
     const copyLink = () => {
         navigator.clipboard.writeText(bugoUrl);
+        gaEvents.shareBugo('link');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -119,6 +121,7 @@ export default function CompletePage() {
                 },
                 buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: bugoUrl, webUrl: bugoUrl } }]
             });
+            gaEvents.shareBugo('kakao');
         } else {
             navigator.clipboard.writeText(bugoUrl);
             setToast('링크가 복사되었습니다');
@@ -161,6 +164,7 @@ ${bugoUrl}
 모바일 부고장으로 알려드리는 점
 너그러이 헤아려 주시기 바랍니다.`;
 
+        gaEvents.shareBugo('sms');
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 

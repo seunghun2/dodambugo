@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import NaverMap from '@/components/NaverMap';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import './view.css';
 
 interface BugoData {
@@ -82,6 +83,9 @@ export default function ViewPage() {
 
                 setBugo(data);
 
+                // GA 조회 이벤트
+                gaEvents.viewBugo(data.bugo_number || data.id);
+
                 // 조회수 증가 (한 번만)
                 await supabase
                     .from('bugo')
@@ -120,13 +124,15 @@ export default function ViewPage() {
         }
     };
 
-    const copyToClipboard = async (text: string, message?: string) => {
+    const copyToClipboard = async (text: string, message?: string, isAccount?: boolean) => {
         await navigator.clipboard.writeText(text);
+        if (isAccount) gaEvents.copyAccount();
         setToastMessage(message || '복사되었습니다');
         setTimeout(() => setToastMessage(null), 2000);
     };
 
     const openNaverMap = () => {
+        gaEvents.clickMap();
         if (bugo?.funeral_home) {
             window.open(`https://map.naver.com/v5/search/${encodeURIComponent(bugo.funeral_home)}`, '_blank');
         } else if (bugo?.address) {
@@ -135,6 +141,7 @@ export default function ViewPage() {
     };
 
     const openKakaoNavi = () => {
+        gaEvents.clickMap();
         if (bugo?.funeral_home) {
             // 장례식장명으로 검색하면 마커가 정확히 찍힘
             window.open(`https://map.kakao.com/link/search/${encodeURIComponent(bugo.funeral_home)}`, '_blank');
@@ -170,6 +177,7 @@ export default function ViewPage() {
 
             const ageText = bugo?.age ? `(향년 ${bugo.age}세)` : '';
 
+            gaEvents.shareBugo('kakao');
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
@@ -224,6 +232,7 @@ ${url}
 모바일 부고장으로 알려드리는 점
 너그러이 헤아려 주시기 바랍니다.`;
 
+        gaEvents.shareBugo('sms');
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 
@@ -627,7 +636,7 @@ ${url}
                                             <span className="account-number">{acc.number}</span>
                                             <span className="account-holder">{acc.holder}</span>
                                         </div>
-                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다')}>복사</button>
+                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>복사</button>
                                     </div>
                                 ));
                             })()}
