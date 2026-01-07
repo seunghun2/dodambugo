@@ -236,6 +236,17 @@ ${url}
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 
+    const shareViaBand = () => {
+        const url = window.location.href;
+        const title = `[訃告] 故 ${bugo?.deceased_name || ''} 부고장`;
+        const content = `故 ${bugo?.deceased_name || ''} 님의 부고장입니다.`;
+
+        gaEvents.shareBugo('band');
+        // 밴드 공유 URL 형식
+        const bandUrl = `https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + content)}&route=${encodeURIComponent(url)}`;
+        window.open(bandUrl, '_blank', 'width=500,height=700');
+    };
+
     if (loading) {
         return (
             <div className="loading-container">
@@ -605,6 +616,10 @@ ${url}
                         <button className="share-option" onClick={shareViaSMS}>
                             <img src="/images/icon-message.png" alt="메세지" />
                             <span>메세지로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={shareViaBand}>
+                            <img src="/images/icon-band.png" alt="밴드" />
+                            <span>밴드로 보내기</span>
                         </button>
                         <button className="share-option" onClick={() => copyToClipboard(window.location.href, '모바일부고장이 복사되었습니다')}>
                             <img src="/images/icon-link.png" alt="링크" />
