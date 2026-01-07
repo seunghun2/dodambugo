@@ -260,7 +260,7 @@ ${url}
         return (
             <div className="error-container">
                 <div className="error-content">
-                    <div className="error-icon">😢</div>
+                    <img src="/images/mourning-ribbon.png" alt="추모" className="error-ribbon" />
                     <h2>부고장을 찾을 수 없습니다</h2>
                     <p>요청하신 부고장이 존재하지 않거나 삭제되었습니다.</p>
                     <Link href="/" className="btn-home">홈으로</Link>
@@ -278,6 +278,15 @@ ${url}
         return funeralDate < oneMonthAgo;
     };
 
+    // 발인 후 7일 경과 여부
+    const isFuneralEnded = () => {
+        if (!bugo.funeral_date) return false;
+        const funeralDate = new Date(bugo.funeral_date);
+        const sevenDaysAfter = new Date(funeralDate);
+        sevenDaysAfter.setDate(sevenDaysAfter.getDate() + 7);
+        return new Date() > sevenDaysAfter;
+    };
+
     if (isExpired()) {
         return (
             <div className="error-container">
@@ -290,6 +299,8 @@ ${url}
             </div>
         );
     }
+
+    const showMemorialOverlay = isFuneralEnded();
 
     // 상주 목록 (대표상주 + 추가 상주들, 중복 방지)
     const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
@@ -313,6 +324,17 @@ ${url}
 
     return (
         <main className="view-page">
+            {/* 발인 완료 추모 오버레이 */}
+            {showMemorialOverlay && (
+                <div className="memorial-overlay">
+                    <div className="memorial-content">
+                        <img src="/images/mourning-ribbon.png" alt="추모" className="memorial-ribbon" />
+                        <p className="memorial-message">발인이 끝난 고인입니다.</p>
+                        <p className="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+                    </div>
+                </div>
+            )}
+
             {/* 토스트 */}
             {toastMessage && <div className="toast" style={{ color: '#FFFFFF', display: 'flex', alignItems: 'center', background: '#000000' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" style={{ marginRight: '8px' }}><polyline points="20 6 9 17 4 12"></polyline></svg>{toastMessage}</div>}
 

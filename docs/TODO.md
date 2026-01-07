@@ -88,8 +88,8 @@
 - [x] `/public/og-image.png` 새로 만들기 (마음부고 브랜드)
 
 ### 파비콘
-- [ ] 마음부고 로고로 파비콘 생성 (32x32 PNG 또는 ICO)
-- [ ] `/app/favicon.ico` 교체
+- [x] 마음부고 추모리본 파비콘 생성 (흰 원 배경)
+- [x] `/app/favicon.ico` 교체
 
 ---
 

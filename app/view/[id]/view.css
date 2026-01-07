@@ -150,6 +150,12 @@
     margin-bottom: 24px;
 }
 
+.error-ribbon {
+    width: 100px;
+    height: auto;
+    margin-bottom: 24px;
+}
+
 .error-content h2 {
     font-size: 20px;
     font-weight: 600;
@@ -1445,4 +1451,53 @@
 
 .address-copy-btn svg {
     flex-shrink: 0;
+}
+
+/* ========================================
+   발인 완료 추모 오버레이
+======================================== */
+.memorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 오버레이 표시 시 body 스크롤 방지 */
+body:has(.memorial-overlay) {
+    overflow: hidden;
+}
+
+.memorial-content {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+}
+
+.memorial-ribbon {
+    width: 120px;
+    height: auto;
+    margin-bottom: 32px;
+    filter: brightness(0) invert(1);
+}
+
+.memorial-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.memorial-sub {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
 }
