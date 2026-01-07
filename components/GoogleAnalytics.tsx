@@ -51,7 +51,7 @@ export const gaEvents = {
     completeBugo: (bugoNumber: string) => trackEvent('complete_create', 'bugo', bugoNumber),
 
     // 부고 공유
-    shareBugo: (method: 'kakao' | 'link' | 'sms') => trackEvent('share', 'bugo', method),
+    shareBugo: (method: 'kakao' | 'link' | 'sms' | 'band') => trackEvent('share', 'bugo', method),
 
     // 부고 조회
     viewBugo: (bugoNumber: string) => trackEvent('view', 'bugo', bugoNumber),
