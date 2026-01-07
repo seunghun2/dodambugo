@@ -116,10 +116,16 @@ export default function HomePage() {
 
       setIsSearching(true);
       try {
+        // 1달 전 날짜 계산
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+        const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
+
         const { data, error } = await supabase
           .from('bugo')
           .select('id, bugo_number, deceased_name, mourner_name, funeral_date')
           .or(`deceased_name.ilike.%${searchQuery}%,mourner_name.ilike.%${searchQuery}%`)
+          .gte('funeral_date', oneMonthAgoStr) // 1달 이내만
           .order('created_at', { ascending: false })
           .limit(10);
 
@@ -405,8 +411,8 @@ export default function HomePage() {
           <h2 className="xd-guide-title">부고장 작성방법</h2>
           <div className="xd-guide-card">
             <p className="xd-guide-text">
-              고인 정보와 상주 연락처, 장례 일정만 입력하면 모바일 부고장이 완성됩니다.
-              간단한 정보 입력만으로 정중한 부고장을 만들 수 있습니다.
+              고인 정보와 상주 연락처, 장례 일정만 입력하면 정중한 모바일 부고장이 완성됩니다.
+              카카오톡, 문자, 밴드로 간편하게 전달하세요.
             </p>
           </div>
         </section>
@@ -496,40 +502,47 @@ export default function HomePage() {
           <div className="faq-list">
             <div className={`faq-item ${openFaqs.has(0) ? 'active' : ''}`} onClick={() => toggleFaq(0)}>
               <div className="faq-question">
-                <span>정말 무료인가요?</span>
+                <span>회원가입 없이 이용 가능한가요?</span>
                 <span className="faq-icon">{openFaqs.has(0) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
-                네, 마음부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다.
+                네, 회원가입이나 로그인 없이 바로 부고장을 만들 수 있습니다. 간단한 정보 입력만으로 완성됩니다.
               </div>
             </div>
             <div className={`faq-item ${openFaqs.has(1) ? 'active' : ''}`} onClick={() => toggleFaq(1)}>
               <div className="faq-question">
-                <span>부고장은 얼마나 유지되나요?</span>
+                <span>앱 설치 없이도 사용할 수 있나요?</span>
                 <span className="faq-icon">{openFaqs.has(1) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
-                생성된 부고장은 영구적으로 유지됩니다. 언제든지 링크를 통해 조회할 수 있습니다.
+                네, 별도의 앱 설치 없이 모바일 웹에서 바로 이용 가능합니다. 카카오톡, 문자, 밴드로 공유하세요.
               </div>
             </div>
             <div className={`faq-item ${openFaqs.has(2) ? 'active' : ''}`} onClick={() => toggleFaq(2)}>
               <div className="faq-question">
-                <span>수정은 가능한가요?</span>
+                <span>부고장은 언제까지 유지되나요?</span>
                 <span className="faq-icon">{openFaqs.has(2) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
-                네, 작성 시 입력한 비밀번호(휴대번호 뒷자리)로 언제든지 수정하실 수 있습니다.
+                개인정보 보호를 위해 발인 후 30일까지 열람 가능합니다. 이후에는 자동으로 비공개 처리됩니다.
               </div>
             </div>
             <div className={`faq-item ${openFaqs.has(3) ? 'active' : ''}`} onClick={() => toggleFaq(3)}>
               <div className="faq-question">
-                <span>개인정보는 안전한가요?</span>
+                <span>서비스 이용 중 문의는 어떻게 하나요?</span>
                 <span className="faq-icon">{openFaqs.has(3) ? '−' : '+'}</span>
               </div>
               <div className="faq-answer">
-                입력하신 정보는 부고장 표시 목적으로만 사용되며, 별도로 수집하거나 제3자에게 제공하지 않습니다.
+                문의는 제휴/문의 페이지를 통해 가능합니다. 빠른 시간 내에 답변 드리겠습니다.
               </div>
             </div>
+          </div>
+          {/* 더보기 버튼 */}
+          <div className="faq-more-wrapper">
+            <Link href="/faq" className="faq-more-btn">
+              더보기
+              <span className="material-symbols-outlined">chevron_right</span>
+            </Link>
           </div>
         </div>
       </section>

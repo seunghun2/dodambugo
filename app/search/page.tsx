@@ -15,13 +15,21 @@ export default function SearchPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // 최근 부고 목록 불러오기
+    // 1달 전 날짜 계산
+    const getOneMonthAgo = () => {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+        return date.toISOString().split('T')[0];
+    };
+
+    // 최근 부고 목록 불러오기 (1달 이내만)
     useEffect(() => {
         const fetchRecentBugo = async () => {
             try {
                 const { data, error } = await supabase
                     .from('bugo')
                     .select('*')
+                    .gte('funeral_date', getOneMonthAgo())
                     .order('created_at', { ascending: false })
                     .limit(100);
 
@@ -47,6 +55,7 @@ export default function SearchPage() {
                 .from('bugo')
                 .select('*')
                 .or(`bugo_number.eq.${query},deceased_name.ilike.%${query}%,mourner_name.ilike.%${query}%`)
+                .gte('funeral_date', getOneMonthAgo())
                 .order('created_at', { ascending: false })
                 .limit(100);
 

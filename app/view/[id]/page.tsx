@@ -258,6 +258,28 @@ ${url}
         );
     }
 
+    // 1달 이상 지난 부고는 비공개 처리
+    const isExpired = () => {
+        if (!bugo.funeral_date) return false;
+        const funeralDate = new Date(bugo.funeral_date);
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+        return funeralDate < oneMonthAgo;
+    };
+
+    if (isExpired()) {
+        return (
+            <div className="error-container">
+                <div className="error-content">
+                    <div className="error-icon">🕊️</div>
+                    <h2>열람 기간이 종료되었습니다</h2>
+                    <p>개인정보 보호를 위해 발인 후 30일이 지난 부고장은 비공개 처리됩니다.</p>
+                    <Link href="/" className="btn-home">홈으로</Link>
+                </div>
+            </div>
+        );
+    }
+
     // 상주 목록 (대표상주 + 추가 상주들, 중복 방지)
     const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
     if (bugo.mourner_name) {

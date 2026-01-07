@@ -909,6 +909,35 @@ section {
     padding: 12px 16px 16px 32px;
 }
 
+/* FAQ 더보기 버튼 */
+.faq-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.faq-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 24px;
+    background: #F5F5F5;
+    color: #333333;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.faq-more-btn:hover {
+    background: #EEEEEE;
+}
+
+.faq-more-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
 /* ========================================
    Footer
    ======================================== */
