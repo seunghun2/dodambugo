@@ -562,7 +562,7 @@ export default function HomePage() {
             <div className="footer-info">
               <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
               <p>통신판매 제 2024-서울강서-1938</p>
-              <p>Copyright dodambugo Corp All right reserved.</p>
+              <p>Copyright maeumbugo Corp All right reserved.</p>
             </div>
           </div>
         </div>
