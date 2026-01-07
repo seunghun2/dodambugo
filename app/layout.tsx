@@ -25,7 +25,7 @@ export const metadata = {
     locale: 'ko_KR',
     images: [
       {
-        url: 'https://maeumbugo.co.kr/og-image.png',
+        url: 'https://maeumbugo.co.kr/og-maeumbugo.png',
         width: 1200,
         height: 630,
         alt: '마음부고 - 품격있는 무료 모바일 부고장',
@@ -36,7 +36,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장',
-    images: ['https://maeumbugo.co.kr/og-image.png'],
+    images: ['https://maeumbugo.co.kr/og-maeumbugo.png'],
   },
   robots: {
     index: true,
