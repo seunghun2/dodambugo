@@ -133,6 +133,20 @@ body {
     color: var(--primary-text);
     white-space: nowrap;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo-img {
+    height: 28px;
+    width: auto;
+    margin-left: -10px;
+}
+
+@media (min-width: 769px) {
+    .nav-logo-img {
+        height: 32px;
+    }
 }
 
 .nav-menu {
@@ -955,6 +969,13 @@ section {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: var(--spacing-lg);
+}
+
+.footer-logo-img {
+    height: 40px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    /* 어두운 배경용 흰색 필터 */
 }
 
 .footer-links {
