@@ -2,5 +2,29 @@
     "framework": "nextjs",
     "buildCommand": "npm run build",
     "outputDirectory": ".next",
-    "installCommand": "npm install"
+    "installCommand": "npm install",
+    "redirects": [
+        {
+            "source": "/:path*",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "dodambugo.com"
+                }
+            ],
+            "destination": "https://maeumbugo.co.kr/:path*",
+            "permanent": true
+        },
+        {
+            "source": "/:path*",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "www.dodambugo.com"
+                }
+            ],
+            "destination": "https://maeumbugo.co.kr/:path*",
+            "permanent": true
+        }
+    ]
 }
