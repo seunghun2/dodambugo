@@ -2,143 +2,57 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-    AppShell,
-    Burger,
-    Group,
-    NavLink,
-    Text,
-    Button,
-    Drawer,
-    Stack,
-    Divider,
-    rem,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import {
-    IconHome,
-    IconPencil,
-    IconSearch,
-    IconPhone,
-    IconFileText,
-    IconShield,
-} from '@tabler/icons-react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import SideMenu from '@/components/SideMenu';
 
 interface MainLayoutProps {
     children: React.ReactNode;
 }
 
-const navItems = [
-    { label: '부고검색', href: '/search', icon: IconSearch },
-    { label: '자주묻는 질문', href: '/faq', icon: IconFileText },
-    { label: '부고장 만들기', href: '/create', icon: IconPencil },
-];
-
-const footerLinks = [
-    { label: '이용약관', href: '/terms' },
-    { label: '개인정보처리방침', href: '/privacy' },
-];
-
 export default function MainLayout({ children }: MainLayoutProps) {
-    const [opened, { toggle, close }] = useDisclosure(false);
+    const [sideMenuOpen, setSideMenuOpen] = useState(false);
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-    // 뷰 페이지나 특정 페이지에서는 헤더 숨김
-    const hideHeader = pathname.startsWith('/view/') || pathname.startsWith('/create/complete/');
+    // changeFrom 모드 체크 (템플릿 변경 모드)
+    const isChangeMode = searchParams.get('change') !== null;
+
+    // 홈, 뷰 페이지, 완료 페이지, 템플릿 변경 모드에서는 헤더 숨김 (각자 관리)
+    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || isChangeMode;
 
     if (hideHeader) {
         return <>{children}</>;
     }
 
     return (
-        <AppShell
-            header={{ height: 60 }}
-            padding={0}
-        >
-            <AppShell.Header>
-                <Group h="100%" px="md" justify="space-between">
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                        <Text
-                            size="xl"
-                            fw={700}
-                            c="blue.6"
-                            style={{ letterSpacing: '-0.5px' }}
-                        >
-                            마음부고
-                        </Text>
+        <>
+            {/* Navigation - 공통 헤더 */}
+            <nav className="nav" id="nav">
+                <div className="nav-container">
+                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+                        <img src="/images/logo.png" alt="마음부고" className="nav-logo-img" />
                     </Link>
+                    <ul className="nav-menu" id="navMenu">
+                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
+                        <li><Link href="/faq" className="nav-link">자주 묻는 질문</Link></li>
+                        <li><Link href="/guide" className="nav-link">장례가이드</Link></li>
+                    </ul>
+                    <div className="nav-actions">
+                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
+                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
 
-                    {/* 데스크톱 네비게이션 */}
-                    <Group gap="xs" visibleFrom="sm">
-                        {navItems.map((item) => (
-                            <Button
-                                key={item.href}
-                                component={Link}
-                                href={item.href}
-                                variant={pathname === item.href ? 'light' : 'subtle'}
-                                size="sm"
-                            >
-                                {item.label}
-                            </Button>
-                        ))}
-                    </Group>
+            {/* Side Menu */}
+            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
 
-                    {/* 모바일 햄버거 */}
-                    <Burger
-                        opened={opened}
-                        onClick={toggle}
-                        hiddenFrom="sm"
-                        size="sm"
-                    />
-                </Group>
-            </AppShell.Header>
-
-            {/* 모바일 드로어 */}
-            <Drawer
-                opened={opened}
-                onClose={close}
-                size="280px"
-                padding="md"
-                title={
-                    <Text fw={700} size="lg" c="blue.6">
-                        마음부고
-                    </Text>
-                }
-                hiddenFrom="sm"
-                zIndex={1000}
-            >
-                <Stack gap="xs">
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.href}
-                            component={Link}
-                            href={item.href}
-                            label={item.label}
-                            leftSection={<item.icon size={20} />}
-                            active={pathname === item.href}
-                            onClick={close}
-                            style={{ borderRadius: rem(8) }}
-                        />
-                    ))}
-                    <Divider my="sm" />
-                    {footerLinks.map((item) => (
-                        <NavLink
-                            key={item.href}
-                            component={Link}
-                            href={item.href}
-                            label={item.label}
-                            onClick={close}
-                            c="dimmed"
-                            style={{ borderRadius: rem(8) }}
-                        />
-                    ))}
-                </Stack>
-            </Drawer>
-
-            <AppShell.Main>
-                {children}
-            </AppShell.Main>
-        </AppShell>
+            {/* Page Content */}
+            {children}
+        </>
     );
 }

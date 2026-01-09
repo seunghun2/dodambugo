@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import SideMenu from '@/components/SideMenu';
 
 const faqData = [
     {
@@ -44,7 +42,6 @@ const faqData = [
 ];
 
 export default function FAQPage() {
-    const [sideMenuOpen, setSideMenuOpen] = useState(false);
     const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
 
     const toggleFaq = (index: number) => {
@@ -61,28 +58,6 @@ export default function FAQPage() {
 
     return (
         <>
-            {/* Navigation - 다른 페이지와 동일 */}
-            <nav className="nav" id="nav">
-                <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
-                    <ul className="nav-menu" id="navMenu">
-                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                    </ul>
-                    <div className="nav-actions">
-                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
-                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Side Menu */}
-            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
-
             {/* FAQ Section */}
             <section className="faq" id="faq" style={{ paddingTop: '100px', minHeight: '100vh', background: '#f8f9fa' }}>
                 <div className="container">

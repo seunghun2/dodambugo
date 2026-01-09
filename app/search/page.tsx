@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase, Bugo } from '@/lib/supabase';
-import SideMenu from '@/components/SideMenu';
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
@@ -11,7 +10,6 @@ export default function SearchPage() {
     const [recentBugo, setRecentBugo] = useState<Bugo[]>([]);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
-    const [sideMenuOpen, setSideMenuOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -89,27 +87,6 @@ export default function SearchPage() {
 
     return (
         <>
-            {/* Navigation */}
-            <nav className="nav" id="nav">
-                <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
-                    <ul className="nav-menu" id="navMenu">
-                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                    </ul>
-                    <div className="nav-actions">
-                        <Link href="/create" className="nav-cta">부고장 만들기</Link>
-                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
-
             {/* 검색 섹션 */}
             <section className="faq" id="search" style={{ paddingTop: '100px', minHeight: '100vh', background: '#f8f9fa' }}>
                 <div className="container">

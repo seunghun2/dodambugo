@@ -33,7 +33,11 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                     </Link>
                     <Link href="/faq" className="side-menu-item" onClick={onClose}>
                         <span className="material-symbols-outlined">help</span>
-                        <span>자주묻는 질문</span>
+                        <span>자주 묻는 질문</span>
+                    </Link>
+                    <Link href="/guide" className="side-menu-item" onClick={onClose}>
+                        <span className="material-symbols-outlined">menu_book</span>
+                        <span>장례가이드</span>
                     </Link>
                 </nav>
             </div>

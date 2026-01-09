@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import SideMenu from '@/components/SideMenu';
 
 // 관계 옵션
 const relationOptions = [
@@ -37,9 +36,6 @@ interface Account {
 function CreatePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-
-    // Side menu
-    const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
     // 미리보기 모달
     const [previewTemplate, setPreviewTemplate] = useState<{ id: string, name: string, image: string, preview: string } | null>(null);
@@ -283,42 +279,21 @@ function CreatePageContent() {
 
     return (
         <div className="create-page">
-            {/* Navigation */}
-            <nav className="nav" id="nav">
-                <div className="nav-container">
-                    {changeFrom ? (
-                        <>
-                            <button
-                                onClick={() => router.back()}
-                                className="nav-back"
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', marginRight: '8px' }}
-                            >
-                                <span className="material-symbols-outlined" style={{ color: '#333333' }}>chevron_left</span>
-                            </button>
-                            <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>테마 변경</span>
-                        </>
-                    ) : (
-                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
-                    )}
-                    {!changeFrom && (
-                        <ul className="nav-menu" id="navMenu">
-                            <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                            <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                        </ul>
-                    )}
-                    <div className="nav-actions">
-                        {!changeFrom && <Link href="/create" className="nav-cta">부고장 만들기</Link>}
-                        <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
-                            <span></span>
-                            <span></span>
-                            <span></span>
+            {/* changeFrom 모드일 때만 특수 헤더 표시 */}
+            {changeFrom && (
+                <nav className="nav" id="nav">
+                    <div className="nav-container">
+                        <button
+                            onClick={() => router.back()}
+                            className="nav-back"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', marginRight: '8px' }}
+                        >
+                            <span className="material-symbols-outlined" style={{ color: '#333333' }}>chevron_left</span>
                         </button>
+                        <span className="nav-title" style={{ fontSize: '18px', fontWeight: 600 }}>테마 변경</span>
                     </div>
-                </div>
-            </nav>
-
-            {/* Side Menu - 공통 컴포넌트 */}
-            <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
+                </nav>
+            )}
 
             <main className="create-main">
                 <div className="create-container">
