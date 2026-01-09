@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SideMenu from '@/components/SideMenu';
+import NavMenu from '@/components/NavMenu';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -35,11 +36,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                         <img src="/images/logo.png" alt="마음부고" className="nav-logo-img" />
                     </Link>
-                    <ul className="nav-menu" id="navMenu">
-                        <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/guide" className="nav-link">장례가이드</Link></li>
-                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                    </ul>
+                    <NavMenu />
                     <div className="nav-actions">
                         <Link href="/create" className="nav-cta">부고장 만들기</Link>
                         <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
