@@ -1501,3 +1501,61 @@ body:has(.memorial-overlay) {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
 }
+
+/* ========================================
+   플로팅 화환 보내기 버튼 - 스크롤 시 표시
+   ======================================== */
+.floating-flower-cta {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    width: calc(100% - 32px);
+    max-width: 328px;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%) translateY(100px);
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.floating-flower-cta.show {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.floating-flower-cta.hide {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%) translateY(100px);
+}
+
+.btn-floating-flower {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 24px;
+    background: var(--primary, #FFD43B);
+    color: #000000;
+    border: none;
+    border-radius: 50px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+}
+
+.btn-floating-flower:hover,
+.btn-floating-flower:active {
+    background: var(--primary-dark, #FCC419);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.btn-floating-flower .material-symbols-outlined {
+    font-size: 18px;
+}

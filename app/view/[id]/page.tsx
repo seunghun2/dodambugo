@@ -51,6 +51,7 @@ export default function ViewPage() {
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [accountModalOpen, setAccountModalOpen] = useState(false);
+    const [showFloatingFlower, setShowFloatingFlower] = useState(false);
 
     useEffect(() => {
         const fetchBugo = async () => {
@@ -102,6 +103,23 @@ export default function ViewPage() {
 
         if (params.id) fetchBugo();
     }, [params.id]);
+
+    // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)
+    useEffect(() => {
+        if (isOwner) return; // 상주는 표시 안 함
+
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            if (scrollY > 100) {
+                setShowFloatingFlower(true);
+            } else {
+                setShowFloatingFlower(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [isOwner]);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -608,12 +626,6 @@ ${url}
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
-                    {/* 화환 보내기 버튼 */}
-                    <button className="flower-send-btn">
-                        <span className="flower-icon">🌸</span>
-                        <span>화환 보내기</span>
-                    </button>
-
                     {/* 보내신 분 리스트 - 추후 DB 연동 */}
                     <div className="flower-list">
                         <div className="flower-empty">
@@ -710,6 +722,15 @@ ${url}
                             })()}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* 모바일 플로팅 화환 보내기 버튼 - 스크롤 시 표시 (상주 제외) */}
+            {!isOwner && (
+                <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'}`}>
+                    <button className="btn-floating-flower">
+                        화환 보내기
+                    </button>
                 </div>
             )}
         </main>
