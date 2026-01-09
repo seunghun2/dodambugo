@@ -33,9 +33,16 @@ export default function CompletePage() {
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
 
-    const bugoUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/view/${params.bugoNumber}`
-        : `/view/${params.bugoNumber}`;
+    // 프로덕션 환경에서는 도메인 강제 고정 (www 제거, https 강제)
+    const getOrigin = () => {
+        if (typeof window === 'undefined') return '';
+        if (window.location.hostname.includes('maeumbugo.co.kr')) {
+            return 'https://maeumbugo.co.kr';
+        }
+        return window.location.origin;
+    };
+
+    const bugoUrl = `${getOrigin()}/view/${params.bugoNumber}`;
 
     useEffect(() => {
         const fetchBugo = async () => {
@@ -110,6 +117,9 @@ export default function CompletePage() {
             const kakaoDesc = bugo?.funeral_home
                 ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                 : '';
+
+            // 디버그: 공유되는 URL 확인
+            console.log('[카카오 공유] bugoUrl:', bugoUrl);
 
             Kakao.Share.sendDefault({
                 objectType: 'feed',
