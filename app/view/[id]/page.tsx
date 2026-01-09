@@ -44,7 +44,9 @@ interface BugoData {
 export default function ViewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
-    const isOwner = searchParams.get('owner') === 'true';
+
+    // owner=true 파라미터 처리: sessionStorage에 저장하고 URL에서 제거
+    const [isOwner, setIsOwner] = useState(false);
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,27 @@ export default function ViewPage() {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
+
+    // owner=true 파라미터 처리 (URL 정리)
+    useEffect(() => {
+        const ownerParam = searchParams.get('owner');
+        const bugoId = params.id as string;
+        const storageKey = `bugo_owner_${bugoId}`;
+
+        if (ownerParam === 'true') {
+            // sessionStorage에 저장
+            sessionStorage.setItem(storageKey, 'true');
+            setIsOwner(true);
+            // URL에서 owner 파라미터 제거 (history.replaceState로 새로고침 없이)
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+        } else {
+            // sessionStorage에서 확인
+            const savedOwner = sessionStorage.getItem(storageKey);
+            setIsOwner(savedOwner === 'true');
+        }
+    }, [searchParams, params.id]);
+
 
     useEffect(() => {
         const fetchBugo = async () => {
