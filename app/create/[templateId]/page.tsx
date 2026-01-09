@@ -1106,14 +1106,14 @@ export default function WriteFormPage() {
                                                             type="text"
                                                             className={`form-input mourner-name ${errors[`mourner_${index}_name`] ? 'error' : ''}`}
                                                             placeholder="성함"
-                                                            value={mourner.name}
+                                                            value={mourner.name || ''}
                                                             onChange={(e) => updateMourner(index, 'name', e.target.value)}
                                                         />
                                                         <input
                                                             type="tel"
                                                             className={`form-input mourner-contact ${errors[`mourner_${index}_contact`] ? 'error' : ''}`}
                                                             placeholder="연락처"
-                                                            value={mourner.contact}
+                                                            value={mourner.contact || ''}
                                                             onChange={(e) => updateMourner(index, 'contact', formatPhone(e.target.value))}
                                                         />
                                                         {mourners.length > 1 && (
