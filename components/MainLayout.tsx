@@ -52,7 +52,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
 
             {/* Page Content */}
-            {children}
+            {/* Page Content */}
+            <main style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: '#F3F4F6' }}>
+                {children}
+            </main>
         </>
     );
 }
