@@ -9,6 +9,7 @@ import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/c
 import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
 import { dodamTheme } from '@/lib/theme';
+import MainLayout from '@/components/MainLayout';
 import KakaoInit from '@/components/KakaoInit';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 
@@ -76,8 +77,12 @@ export default function RootLayout({
         <GoogleAnalytics />
         <KakaoInit />
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
-          <Notifications position="top-right" />
-          {children}
+          <ModalsProvider>
+            <Notifications position="top-right" />
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </ModalsProvider>
         </MantineProvider>
       </body>
     </html>
