@@ -851,6 +851,7 @@ export default function WriteFormPage() {
                                                 placeholder="신청자 성함"
                                                 value={formData.applicant_name}
                                                 onChange={handleChange}
+                                                autoFocus
                                             />
                                             {errors.applicant_name && <p className="field-error">{errors.applicant_name}</p>}
                                         </div>
