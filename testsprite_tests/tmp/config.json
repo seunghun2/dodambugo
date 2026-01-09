@@ -2,6 +2,6 @@
   "status": "init",
   "scope": "codebase",
   "type": "frontend",
-  "localEndpoint": "http://localhost:3000/search",
-  "serverPort": 60861
+  "localEndpoint": "http://localhost:3000/create/complete/9707",
+  "serverPort": 60080
 }
