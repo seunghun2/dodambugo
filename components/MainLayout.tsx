@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import SideMenu from '@/components/SideMenu';
 
 interface MainLayoutProps {
@@ -11,11 +11,14 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
+    const [isChangeMode, setIsChangeMode] = useState(false);
     const pathname = usePathname();
-    const searchParams = useSearchParams();
 
-    // changeFrom 모드 체크 (템플릿 변경 모드)
-    const isChangeMode = searchParams.get('change') !== null;
+    // 클라이언트에서만 change 파라미터 체크
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        setIsChangeMode(params.get('change') !== null);
+    }, [pathname]);
 
     // 홈, 뷰 페이지, 완료 페이지, 템플릿 변경 모드에서는 헤더 숨김 (각자 관리)
     const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || isChangeMode;
