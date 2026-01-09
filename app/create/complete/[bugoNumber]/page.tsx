@@ -263,7 +263,7 @@ ${bugoUrl}
                     </div>
                     <div className="info-row">
                         <span className="info-label">부고장 보기</span>
-                        <a href={bugoUrl} className="info-link" target="_blank">{bugoUrl}</a>
+                        <a href={`${bugoUrl}?owner=true`} className="info-link" target="_blank">{bugoUrl}</a>
                     </div>
                 </div>
 

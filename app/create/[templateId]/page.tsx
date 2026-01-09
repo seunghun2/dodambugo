@@ -820,23 +820,7 @@ export default function WriteFormPage() {
             />
 
             <div className="create-page">
-                {/* Navigation - 메인과 동일 */}
-                <nav className="nav" id="nav">
-                    <div className="nav-container">
-                        <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
-                        <ul className="nav-menu" id="navMenu">
-                            <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                            <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
-                        </ul>
-                        <div className="nav-actions">
-                            <button className="nav-toggle" onClick={() => setSideMenuOpen(true)}>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </button>
-                        </div>
-                    </div>
-                </nav>
+                {/* Navigation - MainLayout에서 공통 처리 */}
 
                 {/* Side Menu - 공통 컴포넌트 */}
                 <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />

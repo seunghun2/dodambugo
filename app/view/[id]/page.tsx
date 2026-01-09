@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
@@ -43,6 +43,8 @@ interface BugoData {
 
 export default function ViewPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
+    const isOwner = searchParams.get('owner') === 'true';
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -600,24 +602,26 @@ ${url}
 
 
             {/* ========================================
-                꽃으로 마음을 보내신 분
+                꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            <section className="section flower-section">
-                <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
+            {!isOwner && (
+                <section className="section flower-section">
+                    <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
-                {/* 화환 보내기 버튼 */}
-                <button className="flower-send-btn">
-                    <span className="flower-icon">🌸</span>
-                    <span>화환 보내기</span>
-                </button>
+                    {/* 화환 보내기 버튼 */}
+                    <button className="flower-send-btn">
+                        <span className="flower-icon">🌸</span>
+                        <span>화환 보내기</span>
+                    </button>
 
-                {/* 보내신 분 리스트 - 추후 DB 연동 */}
-                <div className="flower-list">
-                    <div className="flower-empty">
-                        <p>아직 보내신 분이 없습니다.</p>
+                    {/* 보내신 분 리스트 - 추후 DB 연동 */}
+                    <div className="flower-list">
+                        <div className="flower-empty">
+                            <p>아직 보내신 분이 없습니다.</p>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
 
             {/* ========================================

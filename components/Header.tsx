@@ -61,6 +61,7 @@ export default function Header({ showCTA = true }: HeaderProps) {
                     <Link href="/" className="nav-logo"><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
                     <ul className="nav-menu" id="navMenu">
                         <li><Link href="/search" className="nav-link">부고검색</Link></li>
+                        <li><Link href="/guide" className="nav-link">장례가이드</Link></li>
                         <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
                     </ul>
                     <div className="nav-actions">

@@ -37,8 +37,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     </Link>
                     <ul className="nav-menu" id="navMenu">
                         <li><Link href="/search" className="nav-link">부고검색</Link></li>
-                        <li><Link href="/faq" className="nav-link">자주 묻는 질문</Link></li>
                         <li><Link href="/guide" className="nav-link">장례가이드</Link></li>
+                        <li><Link href="/faq" className="nav-link">자주묻는 질문</Link></li>
                     </ul>
                     <div className="nav-actions">
                         <Link href="/create" className="nav-cta">부고장 만들기</Link>
