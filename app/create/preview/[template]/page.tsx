@@ -33,11 +33,13 @@ export default function PreviewPage() {
         <div className="preview-page">
             {/* 헤더 */}
             <header className="preview-header">
-                <button className="back-btn" onClick={() => router.back()}>
-                    <span className="material-symbols-outlined">chevron_left</span>
-                </button>
-                <h1>{template.name} 미리보기</h1>
-                <div style={{ width: 40 }}></div>
+                <div className="preview-header-inner">
+                    <button className="back-btn" onClick={() => router.back()}>
+                        <span className="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <h1>{template.name} 미리보기</h1>
+                    <div style={{ width: 40 }}></div>
+                </div>
             </header>
 
             {/* 미리보기 영역 */}
