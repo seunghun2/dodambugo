@@ -144,6 +144,15 @@ export default function ViewPage() {
         }
     };
 
+    // 공유용 URL: owner 파라미터 제거 + 프로덕션 도메인 강제
+    const getCleanShareUrl = () => {
+        const pathname = window.location.pathname;
+        if (window.location.hostname.includes('maeumbugo.co.kr')) {
+            return `https://maeumbugo.co.kr${pathname}`;
+        }
+        return `${window.location.origin}${pathname}`;
+    };
+
     const copyToClipboard = async (text: string, message?: string, isAccount?: boolean) => {
         await navigator.clipboard.writeText(text);
         if (isAccount) gaEvents.copyAccount();
@@ -171,15 +180,7 @@ export default function ViewPage() {
     };
 
     const shareViaKakao = () => {
-        // 공유 URL: owner 파라미터 제거 + 프로덕션 도메인 강제
-        const getShareUrl = () => {
-            const pathname = window.location.pathname;
-            if (window.location.hostname.includes('maeumbugo.co.kr')) {
-                return `https://maeumbugo.co.kr${pathname}`;
-            }
-            return `${window.location.origin}${pathname}`;
-        };
-        const shareUrl = getShareUrl();
+        const shareUrl = getCleanShareUrl();
 
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
@@ -268,13 +269,13 @@ ${url}
     };
 
     const shareViaBand = () => {
-        const url = window.location.href;
+        const shareUrl = getCleanShareUrl();
         const title = `[訃告] 故 ${bugo?.deceased_name || ''} 부고장`;
         const content = `故 ${bugo?.deceased_name || ''} 님의 부고장입니다.`;
 
         gaEvents.shareBugo('band');
         // 밴드 공유 URL 형식
-        const bandUrl = `https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + content)}&route=${encodeURIComponent(url)}`;
+        const bandUrl = `https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + content)}&route=${encodeURIComponent(shareUrl)}`;
         window.open(bandUrl, '_blank', 'width=500,height=700');
     };
 
@@ -670,7 +671,7 @@ ${url}
                             <img src="/images/icon-band.png" alt="밴드" />
                             <span>밴드로 보내기</span>
                         </button>
-                        <button className="share-option" onClick={() => copyToClipboard(window.location.href, '모바일부고장이 복사되었습니다')}>
+                        <button className="share-option" onClick={() => copyToClipboard(getCleanShareUrl(), '모바일부고장이 복사되었습니다')}>
                             <img src="/images/icon-link.png" alt="링크" />
                             <span>링크 복사하기</span>
                         </button>
