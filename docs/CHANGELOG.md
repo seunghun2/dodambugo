@@ -1,5 +1,32 @@
 # 마음부고 변경 이력
 
+## 2026-01-09
+
+### 장례가이드 페이지
+- `/guide` 페이지 신규 생성
+- 장례 절차, 비용, 예절, 장례식장 찾기 4가지 카드 UI
+- 헤더 네비게이션에 "장례가이드" 메뉴 추가
+
+### 공통 네비게이션 구조 개선
+- `MainLayout` 컴포넌트로 헤더 통합 관리
+- 홈, FAQ, Guide, Search, Create 페이지 공통 헤더 적용
+- 중복 코드 제거 및 유지보수성 향상
+- 모바일 `SideMenu`에 장례가이드 링크 추가
+
+### UI 수정
+- "자주묻는 질문" → "자주 묻는 질문" 띄어쓰기 수정
+
+### 빌드 오류 수정
+- `useSearchParams` Suspense boundary 오류 해결
+- `useEffect` + `window.location` 방식으로 변경
+
+### 서버 환경 복구
+- npm ghosting (npm install 무한 대기) 해결
+- ENOTEMPTY 오류 해결 (Finder 수동 삭제)
+- Deep Purge 프로토콜 적용
+
+---
+
 ## 2026-01-06
 
 ### 검색엔진 등록 (SEO)
