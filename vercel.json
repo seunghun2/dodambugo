@@ -12,7 +12,7 @@
                     "value": "dodambugo.com"
                 }
             ],
-            "destination": "https://maeumbugo.co.kr/:path*",
+            "destination": "https://maeumbugo.co.kr/",
             "permanent": true
         },
         {
@@ -23,7 +23,7 @@
                     "value": "www.dodambugo.com"
                 }
             ],
-            "destination": "https://maeumbugo.co.kr/:path*",
+            "destination": "https://maeumbugo.co.kr/",
             "permanent": true
         }
     ]
