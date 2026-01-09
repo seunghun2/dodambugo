@@ -21,8 +21,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setIsChangeMode(params.get('change') !== null);
     }, [pathname]);
 
-    // 홈, 뷰 페이지, 완료 페이지, 템플릿 변경 모드에서는 헤더 숨김 (각자 관리)
-    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || isChangeMode;
+    // 홈, 뷰 페이지, 완료 페이지, 미리보기 페이지, 템플릿 변경 모드에서는 헤더 숨김 (각자 관리)
+    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || pathname.startsWith('/create/preview/') || isChangeMode;
 
     if (hideHeader) {
         return <>{children}</>;
@@ -52,10 +52,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <SideMenu isOpen={sideMenuOpen} onClose={() => setSideMenuOpen(false)} />
 
             {/* Page Content */}
-            {/* Page Content */}
-            <main style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: '#F3F4F6' }}>
-                {children}
-            </main>
+            {children}
         </>
     );
 }

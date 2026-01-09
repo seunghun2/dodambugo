@@ -2,6 +2,15 @@
 
 ## 2026-01-09
 
+### 카카오 공유 링크 문제 해결
+- **문제**: 카카오톡에서 공유된 링크 클릭 시 메인 페이지(`/`)로 리다이렉트 되는 현상 발생
+- **원인 1**: 카카오 개발자 콘솔에서 도메인 설정 저장 누락 및 `https://maeumbugo.co.kr` (non-www) 불일치
+- **원인 2**: `app/layout.tsx`에서 모든 페이지를 `MainLayout`으로 감싸고 있어, 독립적이어야 할 `view` 페이지와 레이아웃 간섭 발생
+- **해결 1 (Fix)**: `app/create/complete/[bugoNumber]/page.tsx`에서 `bugoUrl` 생성 시 `https://maeumbugo.co.kr` 도메인 강제 적용
+- **해결 2 (Refactor)**: `MainLayout`을 전역(`app/layout.tsx`)에서 제거하고, 검색/FAQ/가이드/Contact 등 필요한 페이지의 `layout.tsx`에만 개별 적용하여 `view` 페이지의 완전한 독립성 확보
+
+### 2026-01-09 (오전)
+
 ### 장례가이드 페이지
 - `/guide` 페이지 신규 생성
 - 장례 절차, 비용, 예절, 장례식장 찾기 4가지 카드 UI
