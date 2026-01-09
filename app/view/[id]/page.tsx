@@ -45,7 +45,7 @@ export default function ViewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
 
-    // owner=true 파라미터 처리: sessionStorage에 저장하고 URL에서 제거
+    // owner=true 파라미터 처리: localStorage에 저장하고 URL에서 제거
     const [isOwner, setIsOwner] = useState(false);
     const [bugo, setBugo] = useState<BugoData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -62,15 +62,15 @@ export default function ViewPage() {
         const storageKey = `bugo_owner_${bugoId}`;
 
         if (ownerParam === 'true') {
-            // sessionStorage에 저장
-            sessionStorage.setItem(storageKey, 'true');
+            // localStorage에 저장
+            localStorage.setItem(storageKey, 'true');
             setIsOwner(true);
             // URL에서 owner 파라미터 제거 (history.replaceState로 새로고침 없이)
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, '', cleanUrl);
         } else {
-            // sessionStorage에서 확인
-            const savedOwner = sessionStorage.getItem(storageKey);
+            // localStorage에서 확인
+            const savedOwner = localStorage.getItem(storageKey);
             setIsOwner(savedOwner === 'true');
         }
     }, [searchParams, params.id]);
