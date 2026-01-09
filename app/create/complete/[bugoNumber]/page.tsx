@@ -64,6 +64,8 @@ export default function CompletePage() {
 
         if (params.bugoNumber) {
             fetchBugo();
+            // 상주임을 sessionStorage에 저장 (view 페이지에서 확인용)
+            sessionStorage.setItem(`bugo_owner_${params.bugoNumber}`, 'true');
         }
 
         // 카카오 SDK 로드
@@ -273,7 +275,7 @@ ${bugoUrl}
                     </div>
                     <div className="info-row">
                         <span className="info-label">부고장 보기</span>
-                        <a href={`${bugoUrl}?owner=true`} className="info-link" target="_blank">{bugoUrl}</a>
+                        <a href={bugoUrl} className="info-link" target="_blank">{bugoUrl}</a>
                     </div>
                 </div>
 
