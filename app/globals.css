@@ -5927,7 +5927,7 @@ mark {
     align-items: center;
     justify-content: center;
     gap: 48px;
-    padding: 20px 0;
+    padding: 40px 0 20px;
     background: #F3F4F6;
 }
 
@@ -5963,7 +5963,7 @@ mark {
 /* 히어로 섹션 */
 .xd-hero {
     text-align: center;
-    padding: 24px 16px 0;
+    padding: 14px 16px 0;
 }
 
 /* 히어로 타이틀 - XD: Bold 22px */
