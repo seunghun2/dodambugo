@@ -171,7 +171,16 @@ export default function ViewPage() {
     };
 
     const shareViaKakao = () => {
-        const url = window.location.href;
+        // 공유 URL: owner 파라미터 제거 + 프로덕션 도메인 강제
+        const getShareUrl = () => {
+            const pathname = window.location.pathname;
+            if (window.location.hostname.includes('maeumbugo.co.kr')) {
+                return `https://maeumbugo.co.kr${pathname}`;
+            }
+            return `${window.location.origin}${pathname}`;
+        };
+        const shareUrl = getShareUrl();
+
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
 
@@ -197,6 +206,8 @@ export default function ViewPage() {
 
             const ageText = bugo?.age ? `(향년 ${bugo.age}세)` : '';
 
+            console.log('[카카오 공유] shareUrl:', shareUrl);
+
             gaEvents.shareBugo('kakao');
             Kakao.Share.sendDefault({
                 objectType: 'feed',
@@ -206,12 +217,12 @@ export default function ViewPage() {
                         ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                         : '',
                     imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
-                    link: { mobileWebUrl: url, webUrl: url }
+                    link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
-                buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: url, webUrl: url } }]
+                buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
             });
         } else {
-            copyToClipboard(url);
+            copyToClipboard(shareUrl);
         }
     };
 
