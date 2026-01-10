@@ -55,6 +55,7 @@ export default function ViewPage() {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
+    const [selectedFlower, setSelectedFlower] = useState<number | null>(1); // 기본 선택: 1번
 
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
@@ -800,14 +801,13 @@ ${url}
                                 { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
                                 { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
                                 { id: 3, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
-                            ].map((product, index) => (
-                                <label key={product.id} className="flower-product-item">
-                                    <input
-                                        type="radio"
-                                        name="flower"
-                                        value={product.id}
-                                        defaultChecked={index === 0}
-                                    />
+                            ].map((product) => (
+                                <div
+                                    key={product.id}
+                                    className="flower-product-item"
+                                    onClick={() => setSelectedFlower(selectedFlower === product.id ? null : product.id)}
+                                >
+                                    <div className={`flower-radio ${selectedFlower === product.id ? 'checked' : ''}`} />
                                     <div className="flower-product-image">
                                         <img src={product.image} alt={product.name} />
                                     </div>
@@ -819,7 +819,7 @@ ${url}
                                             <span className="sale-price">{product.price.toLocaleString()}원</span>
                                         </div>
                                     </div>
-                                </label>
+                                </div>
                             ))}
                         </div>
                     </div>

@@ -1683,9 +1683,7 @@ body:has(.memorial-overlay) {
     border-bottom: none;
 }
 
-.flower-product-item input[type="radio"] {
-    appearance: none;
-    -webkit-appearance: none;
+.flower-product-item .flower-radio {
     width: 22px;
     height: 22px;
     margin-top: 4px;
@@ -1697,7 +1695,7 @@ body:has(.memorial-overlay) {
     transition: all 0.2s;
 }
 
-.flower-product-item input[type="radio"]:checked {
+.flower-product-item .flower-radio.checked {
     border-color: var(--primary, #FFD43B);
     background: #FFFFFF;
     box-shadow: inset 0 0 0 5px var(--primary, #FFD43B);
