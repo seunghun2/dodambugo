@@ -1508,39 +1508,43 @@ body:has(.memorial-overlay) {
 .floating-flower-cta {
     position: fixed;
     bottom: 20px;
-    right: 16px;
-    left: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    width: calc(100% - 32px);
+    max-width: 328px;
     z-index: 10001;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(100px);
     transition: all 0.3s ease-out;
     display: flex;
-    gap: 12px;
+    gap: 0;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .floating-flower-cta.show {
     pointer-events: auto;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .floating-flower-cta.hide {
     pointer-events: none;
     opacity: 0;
-    transform: translateY(100px);
+    transform: translateX(-50%) translateY(100px);
 }
 
 /* 모달 열렸을 때 */
-.floating-flower-cta.modal-open {}
+.floating-flower-cta.modal-open {
+    justify-content: flex-end;
+    max-width: 440px;
+}
 
 /* 돋보기 버튼 - 플로팅 */
 .btn-flower-search-floating {
     width: 0;
     height: 52px;
-    border: 1px solid #E5E5E5;
+    border: none;
     border-radius: 50%;
     background: #FFFFFF;
     cursor: pointer;
@@ -1550,13 +1554,16 @@ body:has(.memorial-overlay) {
     flex-shrink: 0;
     opacity: 0;
     overflow: hidden;
+    margin-right: 0;
     transition: all 0.3s ease-out;
     pointer-events: none;
 }
 
 .btn-flower-search-floating.show {
     width: 52px;
+    border: 1px solid #E5E5E5;
     opacity: 1;
+    margin-right: 12px;
     pointer-events: auto;
 }
 
@@ -1572,7 +1579,7 @@ body:has(.memorial-overlay) {
     justify-content: center;
     gap: 8px;
     padding: 16px 24px;
-    background: var(--primary, #FFD43B);
+    background: #FFD43B;
     color: #000000;
     border: none;
     border-radius: 50px;
@@ -1584,9 +1591,12 @@ body:has(.memorial-overlay) {
     transition: all 0.3s ease-out;
 }
 
-.btn-floating-flower:hover,
+.btn-floating-flower:hover {
+    background: #FCC419;
+}
+
 .btn-floating-flower:active {
-    background: var(--primary-dark, #FCC419);
+    background: #FFD43B;
 }
 
 .btn-floating-flower .material-symbols-outlined {
