@@ -15,7 +15,6 @@
     }
 }
 
-.flower-detail-loading,
 .flower-detail-error {
     display: flex;
     flex-direction: column;
@@ -24,22 +23,6 @@
     min-height: 100vh;
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.flower-detail-loading .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #E5E5E5;
-    border-top: 3px solid #FFD43B;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .flower-detail-error h2 {
@@ -88,97 +71,187 @@
     color: #1A1A1A;
 }
 
-/* 상품 이미지 */
-.flower-detail-image {
-    width: 100%;
-    aspect-ratio: 1;
-    background: #F5F5F5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+/* 상품명 */
+.product-title-section {
+    text-align: center;
+    padding: 24px 20px 16px;
 }
 
-.flower-detail-image img {
-    max-width: 80%;
-    max-height: 80%;
-    object-fit: contain;
-}
-
-/* 상품 정보 */
-.flower-detail-info {
-    padding: 24px 20px;
-}
-
-.flower-detail-name {
-    font-size: 22px;
+.product-name {
+    font-size: 20px;
     font-weight: 700;
     color: #1A1A1A;
     margin-bottom: 8px;
 }
 
-.flower-detail-desc {
+.product-subtitle {
     font-size: 14px;
-    color: #666666;
-    line-height: 1.5;
-    margin-bottom: 20px;
+    color: #888888;
 }
 
-.flower-detail-price {
+/* 이미지 */
+.product-image-section {
+    padding: 0 20px 24px;
+}
+
+.main-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #F9F9F9;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 12px;
 }
 
-.flower-detail-price .original-price {
+.main-image img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.image-thumbnails {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.thumbnail {
+    width: 56px;
+    height: 56px;
+    border: 2px solid #E5E5E5;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 4px;
+    background: #FFFFFF;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.thumbnail.active {
+    border-color: #1A1A1A;
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 상품설명 */
+.product-info-section {
+    padding: 20px;
+    border-top: 8px solid #F5F5F5;
+}
+
+.section-title {
     font-size: 16px;
-    color: #AAAAAA;
-    text-decoration: line-through;
-}
-
-.flower-detail-price .sale-price {
-    font-size: 24px;
     font-weight: 700;
     color: #1A1A1A;
+    margin-bottom: 16px;
 }
 
-/* 배송 정보 */
-.flower-detail-delivery {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    background: #F9F9F9;
-    border-radius: 12px;
+.info-item {
+    margin-bottom: 16px;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666666;
+    margin-bottom: 6px;
+}
+
+.info-content {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+/* 배송안내 */
+.delivery-section {
+    padding: 20px;
+    border-top: 8px solid #F5F5F5;
+}
+
+.delivery-notice {
+    font-size: 13px;
+    color: #888888;
+    line-height: 1.6;
     margin-bottom: 20px;
 }
 
 .delivery-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #555555;
+    margin-bottom: 16px;
 }
 
-.delivery-item .material-symbols-outlined {
-    font-size: 20px;
+.delivery-item:last-child {
+    margin-bottom: 0;
+}
+
+.delivery-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.delivery-item p {
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 교환/환불 안내 */
+.refund-section {
+    padding: 20px;
+    border-top: 1px solid #E5E5E5;
+}
+
+.refund-notice {
+    font-size: 13px;
     color: #888888;
+    line-height: 1.6;
+    margin-bottom: 16px;
 }
 
-/* 고인 정보 */
-.flower-detail-bugo {
-    padding: 16px;
-    background: #FFF9E6;
-    border-radius: 12px;
-    text-align: center;
-}
-
-.flower-detail-bugo p {
+.refund-desc {
     font-size: 14px;
-    color: #8B7355;
-    font-weight: 500;
+    color: #333333;
+    margin-bottom: 16px;
+}
+
+.refund-item {
+    margin-bottom: 16px;
+}
+
+.refund-item:last-child {
+    margin-bottom: 0;
+}
+
+.refund-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.refund-item p {
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.6;
+    margin: 0;
 }
 
 /* 하단 버튼 */
@@ -208,11 +281,13 @@
     height: 56px;
     background: #FFD43B;
     border: none;
-    border-radius: 12px;
+    border-radius: 50px;
     font-size: 16px;
     font-weight: 600;
     color: #1A1A1A;
     cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: background 0.2s;
 }
 
 .flower-detail-footer .btn-order:hover {
