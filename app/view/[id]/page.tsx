@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
@@ -76,6 +76,7 @@ function getDeceasedRelation(mournerRelation: string, deceasedGender: string): s
 export default function ViewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const router = useRouter();
 
     // owner=true 파라미터 처리: localStorage에 저장하고 URL에서 제거
     const [isOwner, setIsOwner] = useState(false);
@@ -797,14 +798,23 @@ ${url}
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주 제외) */}
             {!isOwner && (
                 <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
-                    {/* 돋보기 버튼 - 모달 열렸을 때만 표시 */}
-                    <button className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}>
+                    {/* 돋보기 버튼 - 상세 페이지로 이동 */}
+                    <button
+                        className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
+                        onClick={() => selectedFlower && router.push(`/view/${params.id}/flower/${selectedFlower}`)}
+                    >
                         <span className="material-symbols-outlined">search</span>
                     </button>
-                    {/* 메인 버튼 - 화환보내기 → 주문하기 변형 */}
+                    {/* 메인 버튼 - 화환보내기 → 주문하기 */}
                     <button
                         className="btn-floating-flower"
-                        onClick={() => setFlowerModalOpen(!flowerModalOpen)}
+                        onClick={() => {
+                            if (flowerModalOpen && selectedFlower) {
+                                router.push(`/view/${params.id}/order/${selectedFlower}`);
+                            } else {
+                                setFlowerModalOpen(true);
+                            }
+                        }}
                     >
                         {flowerModalOpen ? '주문하기' : '화환 보내기'}
                     </button>

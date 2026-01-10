@@ -1,0 +1,220 @@
+/* 화환 상세 페이지 스타일 */
+
+.flower-detail-page {
+    min-height: 100vh;
+    background: #FFFFFF;
+    padding-bottom: 100px;
+}
+
+/* PC 중앙 정렬 */
+@media (min-width: 481px) {
+    .flower-detail-page {
+        max-width: 360px;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.flower-detail-loading,
+.flower-detail-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.flower-detail-loading .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #E5E5E5;
+    border-top: 3px solid #FFD43B;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.flower-detail-error h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.flower-detail-error button {
+    padding: 12px 24px;
+    background: #FFD43B;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 헤더 */
+.flower-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.flower-detail-header .back-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.flower-detail-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+/* 상품 이미지 */
+.flower-detail-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.flower-detail-image img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+/* 상품 정보 */
+.flower-detail-info {
+    padding: 24px 20px;
+}
+
+.flower-detail-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 8px;
+}
+
+.flower-detail-desc {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.flower-detail-price {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.flower-detail-price .original-price {
+    font-size: 16px;
+    color: #AAAAAA;
+    text-decoration: line-through;
+}
+
+.flower-detail-price .sale-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+/* 배송 정보 */
+.flower-detail-delivery {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: #F9F9F9;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.delivery-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555555;
+}
+
+.delivery-item .material-symbols-outlined {
+    font-size: 20px;
+    color: #888888;
+}
+
+/* 고인 정보 */
+.flower-detail-bugo {
+    padding: 16px;
+    background: #FFF9E6;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.flower-detail-bugo p {
+    font-size: 14px;
+    color: #8B7355;
+    font-weight: 500;
+}
+
+/* 하단 버튼 */
+.flower-detail-footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 360px;
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border-top: 1px solid #F0F0F0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .flower-detail-footer {
+        left: 0;
+        transform: none;
+        max-width: 100%;
+    }
+}
+
+.flower-detail-footer .btn-order {
+    width: 100%;
+    height: 56px;
+    background: #FFD43B;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    cursor: pointer;
+}
+
+.flower-detail-footer .btn-order:hover {
+    background: #FCC419;
+}
