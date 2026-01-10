@@ -1559,3 +1559,216 @@ body:has(.memorial-overlay) {
 .btn-floating-flower .material-symbols-outlined {
     font-size: 18px;
 }
+
+/* ========================================
+   화환 주문 바텀시트 모달
+======================================== */
+.flower-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.flower-modal {
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    background: #FFFFFF;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* 헤더 */
+.flower-modal-header {
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.flower-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flower-modal-close .material-symbols-outlined {
+    font-size: 24px;
+    color: #666666;
+}
+
+.flower-modal-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #1A1A1A;
+    margin-bottom: 12px;
+}
+
+.flower-modal-subtitle {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* 상품 리스트 */
+.flower-product-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+}
+
+.flower-product-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #F0F0F0;
+    cursor: pointer;
+}
+
+.flower-product-item:last-child {
+    border-bottom: none;
+}
+
+.flower-product-item input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: 4px;
+    border: 2px solid #CCCCCC;
+    border-radius: 50%;
+    background: #FFFFFF;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.flower-product-item input[type="radio"]:checked {
+    border-color: var(--primary, #FFD43B);
+    background: #FFFFFF;
+    box-shadow: inset 0 0 0 5px var(--primary, #FFD43B);
+}
+
+.flower-product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F5F5F5;
+    flex-shrink: 0;
+}
+
+.flower-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flower-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.flower-product-name {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 4px;
+}
+
+.flower-product-desc {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.flower-product-price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flower-product-price .original-price {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #AAAAAA;
+    text-decoration: line-through;
+}
+
+.flower-product-price .sale-price {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+/* 하단 버튼 */
+.flower-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #F0F0F0;
+    background: #FFFFFF;
+}
+
+.btn-flower-search {
+    width: 56px;
+    height: 56px;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    background: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-flower-search .material-symbols-outlined {
+    font-size: 24px;
+    color: #666666;
+}
+
+.btn-flower-order {
+    flex: 1;
+    height: 56px;
+    background: var(--primary, #FFD43B);
+    border: none;
+    border-radius: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    cursor: pointer;
+}
+
+.btn-flower-order:hover,
+.btn-flower-order:active {
+    background: var(--primary-dark, #FCC419);
+}

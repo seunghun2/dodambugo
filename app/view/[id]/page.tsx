@@ -54,6 +54,7 @@ export default function ViewPage() {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
+    const [flowerModalOpen, setFlowerModalOpen] = useState(false);
 
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
@@ -763,9 +764,67 @@ ${url}
             {/* 모바일 플로팅 화환 보내기 버튼 - 스크롤 시 표시 (상주 제외) */}
             {!isOwner && (
                 <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'}`}>
-                    <button className="btn-floating-flower">
+                    <button className="btn-floating-flower" onClick={() => setFlowerModalOpen(true)}>
                         화환 보내기
                     </button>
+                </div>
+            )}
+
+            {/* 화환 주문 바텀시트 모달 */}
+            {flowerModalOpen && (
+                <div className="flower-modal-overlay" onClick={() => setFlowerModalOpen(false)}>
+                    <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
+                        {/* 헤더 */}
+                        <div className="flower-modal-header">
+                            <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                            <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
+                            <p className="flower-modal-subtitle">
+                                {bugo?.mourners?.[0]?.relation} {bugo?.mourners?.[0]?.name}님께서<br />
+                                {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
+                            </p>
+                        </div>
+
+                        {/* 상품 리스트 */}
+                        <div className="flower-product-list">
+                            {[
+                                { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
+                                { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
+                                { id: 3, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
+                            ].map((product, index) => (
+                                <label key={product.id} className="flower-product-item">
+                                    <input
+                                        type="radio"
+                                        name="flower"
+                                        value={product.id}
+                                        defaultChecked={index === 0}
+                                    />
+                                    <div className="flower-product-image">
+                                        <img src={product.image} alt={product.name} />
+                                    </div>
+                                    <div className="flower-product-info">
+                                        <h3 className="flower-product-name">{product.name}</h3>
+                                        <p className="flower-product-desc">{product.desc}</p>
+                                        <div className="flower-product-price">
+                                            <span className="original-price">{product.originalPrice.toLocaleString()}원</span>
+                                            <span className="sale-price">{product.price.toLocaleString()}원</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            ))}
+                        </div>
+
+                        {/* 하단 버튼 */}
+                        <div className="flower-modal-footer">
+                            <button className="btn-flower-search">
+                                <span className="material-symbols-outlined">search</span>
+                            </button>
+                            <button className="btn-flower-order">
+                                주문하기
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </main>
