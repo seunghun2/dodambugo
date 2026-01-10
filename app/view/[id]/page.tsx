@@ -41,6 +41,38 @@ interface BugoData {
     photo_url?: string;
 }
 
+// 상주 관계 + 고인 성별 → 고인-상주 관계 자동 매핑
+function getDeceasedRelation(mournerRelation: string, deceasedGender: string): string {
+    const gender = deceasedGender === '남' ? 'male' : 'female';
+
+    const relationMap: Record<string, { male: string; female: string }> = {
+        '배우자': { male: '남편', female: '아내' },
+        '아들': { male: '부친', female: '모친' },
+        '딸': { male: '부친', female: '모친' },
+        '며느리': { male: '시부', female: '시모' },
+        '사위': { male: '장인', female: '장모' },
+        '손': { male: '조부', female: '조모' },
+        '손자': { male: '조부', female: '조모' },
+        '손녀': { male: '조부', female: '조모' },
+        '외손': { male: '외조부', female: '외조모' },
+        '외손자': { male: '외조부', female: '외조모' },
+        '외손녀': { male: '외조부', female: '외조모' },
+        '증손': { male: '증조부', female: '증조모' },
+        '부친': { male: '아들', female: '딸' },
+        '모친': { male: '아들', female: '딸' },
+        '형': { male: '형', female: '누나' },
+        '오빠': { male: '오빠', female: '언니' },
+        '누나': { male: '남동생', female: '여동생' },
+        '언니': { male: '남동생', female: '여동생' },
+        '동생': { male: '형/오빠', female: '누나/언니' },
+        '형수': { male: '시동생', female: '시누이' },
+        '제수': { male: '형', female: '언니' },
+        '매형': { male: '처남', female: '처제' },
+        '자제': { male: '부친', female: '모친' },
+    };
+
+    return relationMap[mournerRelation]?.[gender] || mournerRelation;
+}
 export default function ViewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
@@ -790,7 +822,8 @@ ${url}
                             </button>
                             <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                             <p className="flower-modal-subtitle">
-                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님께서<br />
+                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')}<br />
+                                故{bugo?.deceased_name}님께서<br />
                                 {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
                             </p>
                         </div>
