@@ -115,10 +115,19 @@
 .image-thumbnails {
     display: flex;
     gap: 8px;
-    justify-content: center;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 0;
+    scrollbar-width: none;
+}
+
+.image-thumbnails::-webkit-scrollbar {
+    display: none;
 }
 
 .thumbnail {
+    flex-shrink: 0;
     width: 56px;
     height: 56px;
     border: 2px solid #E5E5E5;
@@ -128,10 +137,11 @@
     background: #FFFFFF;
     cursor: pointer;
     transition: border-color 0.2s;
+    scroll-snap-align: start;
 }
 
 .thumbnail.active {
-    border-color: #1A1A1A;
+    border-color: #FFD43B;
 }
 
 .thumbnail img {
