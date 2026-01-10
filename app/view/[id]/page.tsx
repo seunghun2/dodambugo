@@ -761,11 +761,19 @@ ${url}
                 </div>
             )}
 
-            {/* 모바일 플로팅 화환 보내기 버튼 - 스크롤 시 표시 (상주 제외) */}
+            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주 제외) */}
             {!isOwner && (
-                <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'}`}>
-                    <button className="btn-floating-flower" onClick={() => setFlowerModalOpen(true)}>
-                        화환 보내기
+                <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
+                    {/* 돋보기 버튼 - 모달 열렸을 때만 표시 */}
+                    <button className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}>
+                        <span className="material-symbols-outlined">search</span>
+                    </button>
+                    {/* 메인 버튼 - 화환보내기 → 주문하기 변형 */}
+                    <button
+                        className="btn-floating-flower"
+                        onClick={() => setFlowerModalOpen(!flowerModalOpen)}
+                    >
+                        {flowerModalOpen ? '주문하기' : '화환 보내기'}
                     </button>
                 </div>
             )}
@@ -781,7 +789,7 @@ ${url}
                             </button>
                             <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                             <p className="flower-modal-subtitle">
-                                {bugo?.mourners?.[0]?.relation} {bugo?.mourners?.[0]?.name}님께서<br />
+                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님께서<br />
                                 {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
                             </p>
                         </div>
@@ -813,16 +821,6 @@ ${url}
                                     </div>
                                 </label>
                             ))}
-                        </div>
-
-                        {/* 하단 버튼 */}
-                        <div className="flower-modal-footer">
-                            <button className="btn-flower-search">
-                                <span className="material-symbols-outlined">search</span>
-                            </button>
-                            <button className="btn-flower-order">
-                                주문하기
-                            </button>
                         </div>
                     </div>
                 </div>

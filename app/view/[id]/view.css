@@ -1511,11 +1511,14 @@ body:has(.memorial-overlay) {
     left: 50%;
     width: calc(100% - 32px);
     max-width: 328px;
-    z-index: 1000;
+    z-index: 10001;
     pointer-events: none;
     opacity: 0;
     transform: translateX(-50%) translateY(100px);
-    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    transition: all 0.3s ease-out;
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .floating-flower-cta.show {
@@ -1530,8 +1533,42 @@ body:has(.memorial-overlay) {
     transform: translateX(-50%) translateY(100px);
 }
 
+/* 모달 열렸을 때 - 폭 줄이기 */
+.floating-flower-cta.modal-open {
+    max-width: 360px;
+}
+
+/* 돋보기 버튼 - 플로팅 */
+.btn-flower-search-floating {
+    width: 0;
+    height: 52px;
+    border: 1px solid #E5E5E5;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+    pointer-events: none;
+}
+
+.btn-flower-search-floating.show {
+    width: 52px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.btn-flower-search-floating .material-symbols-outlined {
+    font-size: 22px;
+    color: #666666;
+}
+
 .btn-floating-flower {
-    width: 100%;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1546,14 +1583,12 @@ body:has(.memorial-overlay) {
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s;
+    transition: all 0.3s ease-out;
 }
 
 .btn-floating-flower:hover,
 .btn-floating-flower:active {
     background: var(--primary-dark, #FCC419);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
 }
 
 .btn-floating-flower .material-symbols-outlined {
@@ -1738,10 +1773,10 @@ body:has(.memorial-overlay) {
 }
 
 .btn-flower-search {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     border: 1px solid #E5E5E5;
-    border-radius: 12px;
+    border-radius: 50%;
     background: #FFFFFF;
     cursor: pointer;
     display: flex;
@@ -1751,16 +1786,16 @@ body:has(.memorial-overlay) {
 }
 
 .btn-flower-search .material-symbols-outlined {
-    font-size: 24px;
+    font-size: 22px;
     color: #666666;
 }
 
 .btn-flower-order {
     flex: 1;
-    height: 56px;
+    height: 52px;
     background: var(--primary, #FFD43B);
     border: none;
-    border-radius: 12px;
+    border-radius: 50px;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 16px;
     font-weight: 600;
