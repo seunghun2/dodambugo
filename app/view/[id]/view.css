@@ -1612,7 +1612,8 @@ body:has(.memorial-overlay) {
 .flower-modal {
     width: 100%;
     max-width: 480px;
-    max-height: 90vh;
+    height: calc(70vh + 30px);
+    max-height: calc(70vh + 30px);
     background: #FFFFFF;
     border-radius: 16px 16px 0 0;
     display: flex;
@@ -1667,7 +1668,8 @@ body:has(.memorial-overlay) {
 .flower-product-list {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 20px;
+    padding: 16px 20px 100px 20px;
+    /* 하단에 버튼 공간 */
 }
 
 .flower-product-item {
