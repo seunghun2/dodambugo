@@ -822,8 +822,7 @@ ${url}
                             </button>
                             <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                             <p className="flower-modal-subtitle">
-                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')}<br />
-                                故{bugo?.deceased_name}님께서<br />
+                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')} 故{bugo?.deceased_name}님께서<br />
                                 {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
                             </p>
                         </div>
