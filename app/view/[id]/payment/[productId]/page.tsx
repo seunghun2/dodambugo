@@ -201,17 +201,7 @@ export default function PaymentPage() {
 
             </div>
 
-            {/* 하단 결제 버튼 */}
-            <div className="order-footer">
-                <div className="privacy-notice-link" onClick={() => setPrivacyModalOpen(true)}>
-                    약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
-                </div>
-                <button className="btn-payment" onClick={handleSubmit}>
-                    {product.price.toLocaleString()}원 결제하기
-                </button>
-            </div>
-
-            {/* 개인정보 동의 모달 */}
+            {/* 개인정보 동의 모달 (바텀시트) */}
             {privacyModalOpen && (
                 <div className="modal-overlay" onClick={() => setPrivacyModalOpen(false)}>
                     <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
@@ -260,14 +250,21 @@ export default function PaymentPage() {
                                 </li>
                             </ul>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn-confirm" onClick={() => setPrivacyModalOpen(false)}>
-                                저장하기
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}
+
+            {/* 하단 결제 버튼 - 항상 최상단에 고정 */}
+            <div className="order-footer">
+                {!privacyModalOpen && (
+                    <div className="privacy-notice-link" onClick={() => setPrivacyModalOpen(true)}>
+                        약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
+                    </div>
+                )}
+                <button className="btn-payment" onClick={handleSubmit}>
+                    {product.price.toLocaleString()}원 결제하기
+                </button>
+            </div>
         </div>
     );
 }
