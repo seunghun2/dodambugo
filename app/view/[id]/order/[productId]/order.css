@@ -4,6 +4,7 @@
     min-height: 100vh;
     background: #F5F5F5;
     padding-bottom: 100px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* PC 중앙 정렬 */
@@ -430,4 +431,49 @@
 
 .btn-confirm:hover {
     background: #FCC419;
+}
+
+/* 결제방식 */
+.payment-methods {
+    display: flex;
+    gap: 10px;
+}
+
+.payment-method-btn {
+    flex: 1;
+    padding: 14px 8px;
+    background: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.payment-method-btn .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.payment-method-btn .material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+}
+
+.payment-method-btn:hover {
+    border-color: #FFD43B;
+}
+
+.payment-method-btn.active {
+    border-color: #FFD43B;
+    background: #FFF9E6;
+    color: #1A1A1A;
+}
+
+.payment-method-btn.active .material-symbols-outlined {
+    color: #F59F00;
 }

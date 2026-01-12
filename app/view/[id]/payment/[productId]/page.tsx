@@ -41,6 +41,7 @@ export default function PaymentPage() {
         senderName: '',
         senderPhone: '',
     });
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'easy' | 'virtual'>('card'); // 결제방식
 
     const product = flowerProducts.find(p => p.id === productId);
 
@@ -125,7 +126,7 @@ export default function PaymentPage() {
             <div className="order-content">
                 {/* 보내시는 분 */}
                 <section className="order-section">
-                    <h2 className="section-title">보내시는 분</h2>
+                    <h2 className="section-title">이름 및 연락처</h2>
                     <div className="form-group">
                         <input
                             type="text"
@@ -142,6 +143,34 @@ export default function PaymentPage() {
                             value={paymentForm.senderPhone}
                             onChange={(e) => setPaymentForm({ ...paymentForm, senderPhone: e.target.value })}
                         />
+                    </div>
+                </section>
+
+                {/* 결제방식 */}
+                <section className="order-section">
+                    <h2 className="section-title">결제방식</h2>
+                    <div className="payment-methods">
+                        <button
+                            type="button"
+                            className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('card')}
+                        >
+                            카드
+                        </button>
+                        <button
+                            type="button"
+                            className={`payment-method-btn ${paymentMethod === 'easy' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('easy')}
+                        >
+                            간편결제
+                        </button>
+                        <button
+                            type="button"
+                            className={`payment-method-btn ${paymentMethod === 'virtual' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('virtual')}
+                        >
+                            가상계좌
+                        </button>
                     </div>
                 </section>
 
