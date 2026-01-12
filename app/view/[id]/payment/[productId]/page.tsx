@@ -174,21 +174,24 @@ export default function PaymentPage() {
                     </div>
                 </section>
 
-                {/* 결제 금액 */}
-                <section className="order-section payment-section">
-                    <div className="payment-row">
-                        <span>상품 금액</span>
-                        <span>{product.price.toLocaleString()}원</span>
-                    </div>
-                    <div className="payment-row">
-                        <span>배송비</span>
-                        <span>무료</span>
-                    </div>
-                    <div className="payment-row total">
-                        <span>총 결제 금액</span>
-                        <span>{product.price.toLocaleString()}원</span>
-                    </div>
+                {/* 배송가능시간 안내 */}
+                <section className="order-section delivery-notice">
+                    <h2 className="section-title">
+                        <span className="material-symbols-outlined">info</span>
+                        배송 안내
+                    </h2>
+                    <p>평일/주말 오전 9시부터 오후 6시 사이 결제 완료 시, 약 4시간 내 배송해드립니다.</p>
+                    <p>오후 6시 이후 주문은 다음날 정오까지 도착합니다.</p>
+
+                    <p className="notice-warning">※ 기상 및 도로 상황에 따라 배송 시간이 변동될 수 있습니다.</p>
+
+                    <p className="notice-warning">※ 주말·공휴일 배송</p>
+                    <p>당일 배송은 오후 4시까지 주문 가능하며, 이후 주문은 다음날 정오까지 배송됩니다.</p>
+
+                    <p className="notice-warning">※ 상품 안내</p>
+                    <p>화환은 전국 제휴 화원에서 정성껏 제작됩니다. 지역 및 수급 상황에 따라 이미지와 구성이 일부 다를 수 있으나, 품질에는 차이가 없도록 최선을 다하겠습니다.</p>
                 </section>
+
             </div>
 
             {/* 하단 결제 버튼 */}

@@ -485,3 +485,34 @@
 .payment-method-btn.active .material-symbols-outlined {
     color: #F59F00;
 }
+
+/* 배송가능시간 안내 */
+.delivery-notice {
+    background: #FAFAFA;
+}
+
+.delivery-notice .section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666666;
+    font-size: 14px;
+}
+
+.delivery-notice .section-title .material-symbols-outlined {
+    font-size: 18px;
+    color: #999999;
+}
+
+.delivery-notice p {
+    font-size: 13px;
+    color: #888888;
+    line-height: 1.6;
+    margin: 0 0 4px 0;
+}
+
+.delivery-notice .notice-warning {
+    color: #666666;
+    margin-top: 12px;
+    font-weight: 500;
+}
