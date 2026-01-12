@@ -89,6 +89,7 @@ export default function ViewPage() {
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
     const [selectedFlower, setSelectedFlower] = useState<number | null>(1); // 기본 선택: 1번
+    const [flowerOrders, setFlowerOrders] = useState<Array<{ sender_name: string; ribbon_text1: string; ribbon_text2: string }>>([]);
 
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
@@ -168,7 +169,24 @@ export default function ViewPage() {
             }
         };
 
-        if (params.id) fetchBugo();
+        const fetchFlowerOrders = async () => {
+            try {
+                const id = params.id as string;
+                // bugo_id로 화환 주문 조회
+                const response = await fetch(`/api/flower-orders?bugo_id=${id}`);
+                const data = await response.json();
+                if (data.orders) {
+                    setFlowerOrders(data.orders);
+                }
+            } catch (err) {
+                console.log('Error fetching flower orders');
+            }
+        };
+
+        if (params.id) {
+            fetchBugo();
+            fetchFlowerOrders();
+        }
     }, [params.id]);
 
     // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)
@@ -718,11 +736,19 @@ ${url}
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
-                    {/* 보내신 분 리스트 - 추후 DB 연동 */}
                     <div className="flower-list">
-                        <div className="flower-empty">
-                            <p>아직 보내신 분이 없습니다.</p>
-                        </div>
+                        {flowerOrders.length > 0 ? (
+                            flowerOrders.map((order, idx) => (
+                                <div key={idx} className="flower-sender-item">
+                                    <div className="flower-sender-name">{order.ribbon_text2 || order.sender_name}</div>
+                                    <div className="flower-sender-message">{order.ribbon_text1}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flower-empty">
+                                <p>아직 보내신 분이 없습니다.</p>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}

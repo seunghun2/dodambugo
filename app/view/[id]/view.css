@@ -1063,6 +1063,28 @@
     color: #999999;
 }
 
+.flower-sender-item {
+    padding: 16px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #F0F0F0;
+}
+
+.flower-sender-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.flower-sender-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+}
+
 /* ========================================
    하단 버튼 - 328 x 82px
 ======================================== */
