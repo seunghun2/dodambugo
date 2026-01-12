@@ -728,3 +728,114 @@
 .terms-link .material-symbols-outlined {
     font-size: 20px;
 }
+
+/* 주문 완료 페이지 */
+.complete-body {
+    padding-top: 0;
+}
+
+.complete-banner {
+    background: #FFFFFF;
+    padding: 48px 20px;
+    text-align: center;
+    border-bottom: 8px solid #F0F0F0;
+}
+
+.complete-icon {
+    font-size: 100px;
+    color: #FFD43B;
+    margin-bottom: 24px;
+}
+
+.complete-banner h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row .label {
+    font-size: 14px;
+    color: #888888;
+    flex-shrink: 0;
+    width: 90px;
+}
+
+.detail-row .value {
+    font-size: 14px;
+    color: #1A1A1A;
+    text-align: right;
+    flex: 1;
+}
+
+.detail-row .value .sub-text {
+    font-size: 12px;
+    color: #888888;
+    margin-top: 4px;
+}
+
+.detail-row.total {
+    padding-top: 16px;
+    margin-top: 8px;
+    border-top: 1px solid #1A1A1A;
+}
+
+.detail-row .highlight {
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+.receipt-btn {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #888888;
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 아코디언 */
+.info-accordion {
+    background: #FFFFFF;
+    margin-top: 8px;
+}
+
+.accordion-item {
+    border-bottom: 1px solid #F0F0F0;
+    cursor: pointer;
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #1A1A1A;
+}
+
+.accordion-content {
+    padding: 0 20px 16px;
+}
+
+.accordion-content p {
+    font-size: 13px;
+    color: #666666;
+    margin: 8px 0;
+    line-height: 1.5;
+}

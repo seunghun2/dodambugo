@@ -122,11 +122,24 @@ export default function OrderPage() {
             alert('보내는 분 성함을 입력해주세요.');
             return;
         }
+        if (!product) {
+            alert('상품 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+        if (!bugo) {
+            alert('부고 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
         // sessionStorage에 주문 정보 저장
         sessionStorage.setItem(`order_${bugoId}_${productId}`, JSON.stringify({
             ribbonText1: orderForm.ribbonText1,
             ribbonText2: orderForm.ribbonText2,
             recipientName: orderForm.recipientName,
+            productName: product.name,
+            productPrice: product.price,
+            funeralHome: bugo.funeral_home || '',
+            room: bugo.room_number || '',
+            address: bugo.address || '',
         }));
         // payment 페이지로 이동
         router.push(`/view/${bugoId}/payment/${productId}`);

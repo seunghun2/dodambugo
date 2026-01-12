@@ -52,6 +52,19 @@ export default function PaymentPage() {
 
     const product = flowerProducts.find(p => p.id === productId);
 
+    // 전화번호 자동 포맷팅
+    const formatPhoneNumber = (value: string) => {
+        const numbers = value.replace(/[^\d]/g, '');
+        if (numbers.length <= 3) return numbers;
+        if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setPaymentForm({ ...paymentForm, senderPhone: formatted });
+    };
+
     useEffect(() => {
         // sessionStorage에서 주문 데이터 가져오기
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
@@ -88,7 +101,7 @@ export default function PaymentPage() {
         if (bugoId) fetchBugo();
     }, [bugoId]);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!paymentForm.senderName.trim()) {
             alert('이름을 입력해주세요.');
             return;
@@ -97,8 +110,57 @@ export default function PaymentPage() {
             alert('연락처를 입력해주세요.');
             return;
         }
-        // TODO: 결제 연동
-        alert('결제 기능은 준비 중입니다.');
+
+        // 주문 데이터 가져오기
+        const storedOrder = sessionStorage.getItem(`order_${bugoId}_${productId}`);
+        if (!storedOrder) {
+            alert('주문 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+            return;
+        }
+        const orderData = JSON.parse(storedOrder);
+
+        try {
+            // DB에 주문 저장
+            const response = await fetch('/api/flower-orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bugo_id: bugo?.id,
+                    product_id: productId,
+                    product_name: orderData.productName,
+                    product_price: orderData.productPrice,
+                    sender_name: paymentForm.senderName,
+                    sender_phone: paymentForm.senderPhone,
+                    recipient_name: orderData.recipientName,
+                    funeral_home: orderData.funeralHome,
+                    room: orderData.room,
+                    address: orderData.address,
+                    ribbon_text1: orderData.ribbonText1,
+                    ribbon_text2: orderData.ribbonText2,
+                    payment_method: paymentMethod,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || '주문 저장 실패');
+            }
+
+            // 결제 정보 저장 (완료 페이지용)
+            sessionStorage.setItem(`payment_${bugoId}`, JSON.stringify({
+                senderName: paymentForm.senderName,
+                senderPhone: paymentForm.senderPhone,
+                paymentMethod: paymentMethod,
+                marketingAgreed: termsAgreed.marketing,
+                orderNumber: result.order_number,
+            }));
+
+            // TODO: 실제 PG 연동 시 여기서 결제 처리
+            // 지금은 바로 완료 페이지로 이동
+            router.push(`/view/${bugoId}/order/complete`);
+        } catch (err: any) {
+            alert(err.message || '주문 처리 중 오류가 발생했습니다.');
+        }
     };
 
     if (loading) {
@@ -148,7 +210,8 @@ export default function PaymentPage() {
                             type="tel"
                             placeholder="연락처를 입력해주세요"
                             value={paymentForm.senderPhone}
-                            onChange={(e) => setPaymentForm({ ...paymentForm, senderPhone: e.target.value })}
+                            onChange={handlePhoneChange}
+                            maxLength={13}
                         />
                     </div>
                 </section>
