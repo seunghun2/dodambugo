@@ -35,6 +35,8 @@ export default function OrderPage() {
     const [loading, setLoading] = useState(true);
     const [step, setStep] = useState(1); // 1: 상품+리본+받는분, 2: 주문자+결제
     const [isCustomMessage, setIsCustomMessage] = useState(false); // 직접입력 여부
+    const [recipientModalOpen, setRecipientModalOpen] = useState(false); // 상주변경 모달
+    const [tempRecipientName, setTempRecipientName] = useState(''); // 임시 상주명
 
     // 문구 옵션
     const messageOptions = [
@@ -137,7 +139,7 @@ export default function OrderPage() {
         <div className="order-page">
             {/* 헤더 */}
             <header className="order-header">
-                <button className="back-btn" onClick={() => step === 1 ? router.back() : setStep(1)}>
+                <button className="back-btn" onClick={() => step === 1 ? router.push(`/view/${bugoId}?flower=open`) : setStep(1)}>
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <h1>주문하기 {step === 2 && '(2/2)'}</h1>
@@ -218,7 +220,16 @@ export default function OrderPage() {
                                     <span className="recipient-label">상주</span>
                                     <span className="recipient-value">
                                         {orderForm.recipientName || '상주'}
-                                        <button className="btn-change-recipient" type="button">상주변경</button>
+                                        <button
+                                            className="btn-change-recipient"
+                                            type="button"
+                                            onClick={() => {
+                                                setTempRecipientName(orderForm.recipientName);
+                                                setRecipientModalOpen(true);
+                                            }}
+                                        >
+                                            상주변경
+                                        </button>
                                     </span>
                                 </div>
                                 <div className="recipient-row">
@@ -288,6 +299,43 @@ export default function OrderPage() {
                     </button>
                 )}
             </div>
+
+            {/* 상주변경 바텀시트 모달 */}
+            {recipientModalOpen && (
+                <div className="recipient-modal-overlay" onClick={() => setRecipientModalOpen(false)}>
+                    <div className="recipient-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="recipient-modal-header">
+                            <h3>상주 변경</h3>
+                            <button className="btn-modal-close" onClick={() => setRecipientModalOpen(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="recipient-modal-content">
+                            <div className="form-group">
+                                <label>상주명</label>
+                                <input
+                                    type="text"
+                                    placeholder="상주명을 입력해주세요"
+                                    value={tempRecipientName}
+                                    onChange={(e) => setTempRecipientName(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+                        <div className="recipient-modal-footer">
+                            <button
+                                className="btn-confirm"
+                                onClick={() => {
+                                    setOrderForm({ ...orderForm, recipientName: tempRecipientName });
+                                    setRecipientModalOpen(false);
+                                }}
+                            >
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

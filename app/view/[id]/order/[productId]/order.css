@@ -189,7 +189,7 @@
     width: 50px;
     flex-shrink: 0;
     font-size: 14px;
-    color: #3B82F6;
+    color: #888888;
     font-weight: 500;
 }
 
@@ -336,5 +336,92 @@
 }
 
 .order-footer .btn-payment:hover {
+    background: #FCC419;
+}
+
+/* 상주변경 바텀시트 모달 */
+.recipient-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.recipient-modal {
+    width: 100%;
+    max-width: 500px;
+    background: #FFFFFF;
+    border-radius: 20px 20px 0 0;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.recipient-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.recipient-modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin: 0;
+}
+
+.btn-modal-close {
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666666;
+}
+
+.recipient-modal-content {
+    padding: 20px;
+}
+
+.recipient-modal-content .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
+.recipient-modal-footer {
+    padding: 16px 20px 24px;
+}
+
+.btn-confirm {
+    width: 100%;
+    padding: 16px;
+    background: #FFD43B;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
     background: #FCC419;
 }

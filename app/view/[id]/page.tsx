@@ -93,6 +93,7 @@ export default function ViewPage() {
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
         const ownerParam = searchParams.get('owner');
+        const flowerParam = searchParams.get('flower');
         const bugoId = params.id as string;
         const storageKey = `bugo_owner_${bugoId}`;
 
@@ -107,6 +108,14 @@ export default function ViewPage() {
             // localStorage에서 확인
             const savedOwner = localStorage.getItem(storageKey);
             setIsOwner(savedOwner === 'true');
+        }
+
+        // flower=open 파라미터 처리 (화환 모달 열기)
+        if (flowerParam === 'open') {
+            setFlowerModalOpen(true);
+            // URL에서 flower 파라미터 제거
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
         }
     }, [searchParams, params.id]);
 
@@ -810,7 +819,7 @@ ${url}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {!isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
-                <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
+                <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
                     {/* 돋보기 버튼 - 상세 페이지로 이동 */}
                     <button
                         className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
