@@ -4,7 +4,11 @@
     min-height: 100vh;
     background: #F5F5F5;
     padding-bottom: 100px;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.order-page * {
+    font-family: inherit !important;
 }
 
 /* PC 중앙 정렬 */
