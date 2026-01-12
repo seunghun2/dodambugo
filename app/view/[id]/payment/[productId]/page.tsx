@@ -244,7 +244,7 @@ export default function PaymentPage() {
                                         <span className="checkmark"></span>
                                         마케팅 수신 동의 약관(선택)
                                     </label>
-                                    <a href="/privacy" target="_blank" className="terms-link">
+                                    <a href="/marketing" target="_blank" className="terms-link">
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </a>
                                 </li>
