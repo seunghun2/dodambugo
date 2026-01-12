@@ -47,7 +47,7 @@ export default function PaymentPage() {
         privacy: false,
         electronic: false,
         thirdParty: false,
-        marketing: false,
+        marketing: true,
     });
 
     const product = flowerProducts.find(p => p.id === productId);
@@ -222,60 +222,24 @@ export default function PaymentPage() {
                             </button>
                         </div>
                         <div className="modal-content">
-                            {/* 전체 동의 */}
-                            <label className="terms-checkbox agree-all">
-                                <input
-                                    type="checkbox"
-                                    checked={termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty && termsAgreed.marketing}
-                                    onChange={(e) => setTermsAgreed({
-                                        privacy: e.target.checked,
-                                        electronic: e.target.checked,
-                                        thirdParty: e.target.checked,
-                                        marketing: e.target.checked,
-                                    })}
-                                />
-                                <span className="checkmark"></span>
-                                전체 동의하기
-                            </label>
                             <ul className="terms-list">
-                                <li>
-                                    <label className="terms-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={termsAgreed.privacy}
-                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, privacy: e.target.checked })}
-                                        />
-                                        <span className="checkmark"></span>
-                                        개인정보 수집 및 이용안내(필수)
-                                    </label>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
                                     <a href="/privacy" target="_blank" className="terms-link">
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <label className="terms-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={termsAgreed.electronic}
-                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, electronic: e.target.checked })}
-                                        />
-                                        <span className="checkmark"></span>
-                                        전자금융거래 이용약관(필수)
-                                    </label>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">전자금융거래 이용약관(필수)</span>
                                     <a href="/terms" target="_blank" className="terms-link">
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <label className="terms-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={termsAgreed.thirdParty}
-                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, thirdParty: e.target.checked })}
-                                        />
-                                        <span className="checkmark"></span>
-                                        개인정보 제3자 제공/위탁안내(필수)
-                                    </label>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
                                     <a href="/privacy" target="_blank" className="terms-link">
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </a>
@@ -297,12 +261,8 @@ export default function PaymentPage() {
                             </ul>
                         </div>
                         <div className="modal-footer">
-                            <button
-                                className={`btn-confirm ${!(termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty) ? 'disabled' : ''}`}
-                                onClick={() => setPrivacyModalOpen(false)}
-                                disabled={!(termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty)}
-                            >
-                                동의합니다
+                            <button className="btn-confirm" onClick={() => setPrivacyModalOpen(false)}>
+                                저장하기
                             </button>
                         </div>
                     </div>

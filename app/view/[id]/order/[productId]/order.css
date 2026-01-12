@@ -643,6 +643,24 @@
     border-bottom: 1px solid #F0F0F0;
 }
 
+.required-term {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.term-bullet {
+    font-size: 14px;
+    color: #1A1A1A;
+    margin-right: 8px;
+}
+
+.term-text {
+    font-size: 14px;
+    color: #1A1A1A;
+    flex: 1;
+}
+
 .terms-list li:last-child {
     border-bottom: none;
 }
