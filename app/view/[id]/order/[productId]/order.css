@@ -11,6 +11,10 @@
     font-family: inherit !important;
 }
 
+.order-page .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+}
+
 /* PC 중앙 정렬 */
 @media (min-width: 481px) {
     .order-page {
