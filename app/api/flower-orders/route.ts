@@ -1,14 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// 함수 내에서 supabase 클라이언트 생성 (빌드 타임 에러 방지)
+function getSupabase() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+}
 
 // GET: 주문 목록 조회
 export async function GET(request: NextRequest) {
     try {
+        const supabase = getSupabase();
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
         const bugoId = searchParams.get('bugo_id');
@@ -43,6 +47,7 @@ export async function GET(request: NextRequest) {
 // POST: 새 주문 생성
 export async function POST(request: NextRequest) {
     try {
+        const supabase = getSupabase();
         const body = await request.json();
 
         const orderNumber = `MG${Date.now()}`;
@@ -82,6 +87,7 @@ export async function POST(request: NextRequest) {
 // PATCH: 주문 상태 업데이트
 export async function PATCH(request: NextRequest) {
     try {
+        const supabase = getSupabase();
         const body = await request.json();
         const { id, status, partner_order_id, partner_data } = body;
 
