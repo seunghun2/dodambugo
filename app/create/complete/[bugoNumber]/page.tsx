@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
 import { gaEvents } from '@/components/GoogleAnalytics';
@@ -32,6 +33,7 @@ export default function CompletePage() {
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
     // 프로덕션 환경에서는 도메인 강제 고정 (www 제거, https 강제)
     const getOrigin = () => {
@@ -66,6 +68,12 @@ export default function CompletePage() {
             fetchBugo();
             // 상주임을 localStorage에 저장 (view 페이지에서 확인용)
             localStorage.setItem(`bugo_owner_${params.bugoNumber}`, 'true');
+
+            // QR 코드 생성 (클라이언트에서 즉시)
+            const url = `${getOrigin()}/view/${params.bugoNumber}`;
+            QRCode.toDataURL(url, { width: 180, margin: 1 })
+                .then(dataUrl => setQrDataUrl(dataUrl))
+                .catch(err => console.error('QR 생성 실패:', err));
         }
 
         // 카카오 SDK 로드
@@ -220,7 +228,7 @@ ${bugoUrl}
         ? bugo.mourners[0].name
         : bugo.mourner_name || '상주';
 
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(bugoUrl)}`;
+    // QR 코드는 이제 qrDataUrl 상태로 관리 (클라이언트 생성)
 
     return (
         <div className="complete-page">
@@ -286,7 +294,7 @@ ${bugoUrl}
                         {/* QR 코드 */}
                         <div className="share-card" onClick={() => window.open(bugoUrl, '_blank')}>
                             <div className="qr-wrapper">
-                                <img src={qrCodeUrl} alt="QR 코드" className="qr-image" />
+                                {qrDataUrl ? <img src={qrDataUrl} alt="QR 코드" className="qr-image" /> : <div className="qr-loading">로딩중...</div>}
                             </div>
                             <span className="share-label">모바일부고장 보기</span>
                         </div>
