@@ -368,13 +368,25 @@ ${url}
         return funeralDate < oneMonthAgo;
     };
 
-    // 발인 후 3일 경과 여부
+    // 발인 후 3일 경과 여부 (추모 오버레이용)
     const isFuneralEnded = () => {
         if (!bugo.funeral_date) return false;
         const funeralDate = new Date(bugo.funeral_date);
         const threeDaysAfter = new Date(funeralDate);
         threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
         return new Date() > threeDaysAfter;
+    };
+
+    // 발인 일시 경과 여부 (화환 버튼 숨김용 - 발인 시간 지나면 바로)
+    const isFuneralPassed = () => {
+        if (!bugo.funeral_date) return false;
+        const funeralDate = new Date(bugo.funeral_date);
+        // 발인 시간이 있으면 추가
+        if (bugo.funeral_time) {
+            const [hours, minutes] = bugo.funeral_time.split(':').map(Number);
+            funeralDate.setHours(hours || 0, minutes || 0, 0, 0);
+        }
+        return new Date() > funeralDate;
     };
 
     if (isExpired()) {
@@ -796,8 +808,8 @@ ${url}
                 </div>
             )}
 
-            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주 제외) */}
-            {!isOwner && (
+            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주 제외, 발인 일시 지나면 숨김) */}
+            {!isOwner && !isFuneralPassed() && (
                 <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
                     {/* 돋보기 버튼 - 상세 페이지로 이동 */}
                     <button
