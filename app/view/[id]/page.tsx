@@ -368,13 +368,13 @@ ${url}
         return funeralDate < oneMonthAgo;
     };
 
-    // 발인 후 7일 경과 여부
+    // 발인 후 3일 경과 여부
     const isFuneralEnded = () => {
         if (!bugo.funeral_date) return false;
         const funeralDate = new Date(bugo.funeral_date);
-        const sevenDaysAfter = new Date(funeralDate);
-        sevenDaysAfter.setDate(sevenDaysAfter.getDate() + 7);
-        return new Date() > sevenDaysAfter;
+        const threeDaysAfter = new Date(funeralDate);
+        threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
+        return new Date() > threeDaysAfter;
     };
 
     if (isExpired()) {
