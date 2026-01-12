@@ -162,6 +162,17 @@ export default function ViewPage() {
                     .from('bugo')
                     .update({ view_count: (data.view_count || 0) + 1 })
                     .eq('id', data.id);
+
+                // 화환 주문 조회 (bugo 로드 후)
+                try {
+                    const response = await fetch(`/api/flower-orders?bugo_id=${data.id}`);
+                    const orderData = await response.json();
+                    if (orderData.orders) {
+                        setFlowerOrders(orderData.orders);
+                    }
+                } catch (err) {
+                    console.log('Error fetching flower orders');
+                }
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
             } finally {
@@ -169,23 +180,8 @@ export default function ViewPage() {
             }
         };
 
-        const fetchFlowerOrders = async () => {
-            try {
-                const id = params.id as string;
-                // bugo_id로 화환 주문 조회
-                const response = await fetch(`/api/flower-orders?bugo_id=${id}`);
-                const data = await response.json();
-                if (data.orders) {
-                    setFlowerOrders(data.orders);
-                }
-            } catch (err) {
-                console.log('Error fetching flower orders');
-            }
-        };
-
         if (params.id) {
             fetchBugo();
-            fetchFlowerOrders();
         }
     }, [params.id]);
 
