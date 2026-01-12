@@ -213,10 +213,22 @@ export default function OrderPage() {
                         {/* Step 1: 받으시는 분 */}
                         <section className="order-section">
                             <h2 className="section-title">받으시는 분</h2>
-                            <div className="delivery-info">
-                                <p className="funeral-home">{bugo?.funeral_home || '장례식장'} {bugo?.room_number || ''}</p>
-                                <p className="address">{bugo?.address || ''}</p>
-                                <p className="deceased">故 {bugo?.deceased_name}님 ({orderForm.recipientName || '상주'})</p>
+                            <div className="recipient-info">
+                                <div className="recipient-row">
+                                    <span className="recipient-label">상주</span>
+                                    <span className="recipient-value">
+                                        {orderForm.recipientName || '상주'}
+                                        <button className="btn-change-recipient" type="button">상주변경</button>
+                                    </span>
+                                </div>
+                                <div className="recipient-row">
+                                    <span className="recipient-label">빈소</span>
+                                    <span className="recipient-value">{bugo?.funeral_home || '장례식장'} {bugo?.room_number || ''}</span>
+                                </div>
+                                <div className="recipient-row">
+                                    <span className="recipient-label">주소</span>
+                                    <span className="recipient-value">{bugo?.address || '-'}</span>
+                                </div>
                             </div>
                         </section>
                     </>

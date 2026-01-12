@@ -169,6 +169,49 @@
     font-weight: 500;
 }
 
+/* 받으시는 분 새 스타일 */
+.recipient-info {
+    background: #FFFFFF;
+}
+
+.recipient-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.recipient-row:last-child {
+    border-bottom: none;
+}
+
+.recipient-label {
+    width: 50px;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #3B82F6;
+    font-weight: 500;
+}
+
+.recipient-value {
+    flex: 1;
+    font-size: 15px;
+    color: #1A1A1A;
+    line-height: 1.4;
+}
+
+.btn-change-recipient {
+    display: inline;
+    margin-left: 12px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #3B82F6;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* 폼 */
 .form-group {
     margin-bottom: 16px;
