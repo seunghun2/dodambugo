@@ -174,6 +174,7 @@ export default function OrderPage() {
                                     placeholder="예시) 주식회사 대표 홍길동"
                                     value={orderForm.ribbonText2}
                                     onChange={(e) => setOrderForm({ ...orderForm, ribbonText2: e.target.value })}
+                                    autoFocus
                                 />
                             </div>
 
