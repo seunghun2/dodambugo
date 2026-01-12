@@ -808,8 +808,8 @@ ${url}
                 </div>
             )}
 
-            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주 제외, 발인 일시 지나면 숨김) */}
-            {!isOwner && !isFuneralPassed() && (
+            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
+            {!isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                 <div className={`floating-flower-cta ${showFloatingFlower ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
                     {/* 돋보기 버튼 - 상세 페이지로 이동 */}
                     <button
