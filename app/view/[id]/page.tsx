@@ -583,7 +583,8 @@ ${url}
                     })()}
                 </div>
                 {/* 부고 공유하기 / 부의금 보내기 버튼 - 새 디자인 */}
-                {(() => {
+                {/* 가족장/무빈소장례는 주소가 없으므로 숨김 */}
+                {bugo.funeral_type !== '가족장' && bugo.funeral_type !== '무빈소장례' && (() => {
                     const hasAccount = (bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
                         (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber));
 
