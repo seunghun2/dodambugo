@@ -230,7 +230,7 @@ export default function PaymentPage() {
                                 <li className="required-term">
                                     <span className="term-bullet">•</span>
                                     <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
-                                    <a href="/privacy" target="_blank" className="terms-link">
+                                    <a href="/privacy-third-party" target="_blank" className="terms-link">
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </a>
                                 </li>
