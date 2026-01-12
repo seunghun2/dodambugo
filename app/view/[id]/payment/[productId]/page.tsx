@@ -42,6 +42,13 @@ export default function PaymentPage() {
         senderPhone: '',
     });
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'easy' | 'virtual'>('card'); // 결제방식
+    const [privacyModalOpen, setPrivacyModalOpen] = useState(false); // 개인정보 동의 모달
+    const [termsAgreed, setTermsAgreed] = useState({
+        privacy: false,
+        electronic: false,
+        thirdParty: false,
+        marketing: false,
+    });
 
     const product = flowerProducts.find(p => p.id === productId);
 
@@ -196,10 +203,111 @@ export default function PaymentPage() {
 
             {/* 하단 결제 버튼 */}
             <div className="order-footer">
+                <div className="privacy-notice-link" onClick={() => setPrivacyModalOpen(true)}>
+                    약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
+                </div>
                 <button className="btn-payment" onClick={handleSubmit}>
                     {product.price.toLocaleString()}원 결제하기
                 </button>
             </div>
+
+            {/* 개인정보 동의 모달 */}
+            {privacyModalOpen && (
+                <div className="modal-overlay" onClick={() => setPrivacyModalOpen(false)}>
+                    <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>개인정보 수집/제공 동의</h3>
+                            <button className="modal-close" onClick={() => setPrivacyModalOpen(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="modal-content">
+                            {/* 전체 동의 */}
+                            <label className="terms-checkbox agree-all">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty && termsAgreed.marketing}
+                                    onChange={(e) => setTermsAgreed({
+                                        privacy: e.target.checked,
+                                        electronic: e.target.checked,
+                                        thirdParty: e.target.checked,
+                                        marketing: e.target.checked,
+                                    })}
+                                />
+                                <span className="checkmark"></span>
+                                전체 동의하기
+                            </label>
+                            <ul className="terms-list">
+                                <li>
+                                    <label className="terms-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={termsAgreed.privacy}
+                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, privacy: e.target.checked })}
+                                        />
+                                        <span className="checkmark"></span>
+                                        개인정보 수집 및 이용안내(필수)
+                                    </label>
+                                    <a href="/privacy" target="_blank" className="terms-link">
+                                        <span className="material-symbols-outlined">chevron_right</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <label className="terms-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={termsAgreed.electronic}
+                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, electronic: e.target.checked })}
+                                        />
+                                        <span className="checkmark"></span>
+                                        전자금융거래 이용약관(필수)
+                                    </label>
+                                    <a href="/terms" target="_blank" className="terms-link">
+                                        <span className="material-symbols-outlined">chevron_right</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <label className="terms-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={termsAgreed.thirdParty}
+                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, thirdParty: e.target.checked })}
+                                        />
+                                        <span className="checkmark"></span>
+                                        개인정보 제3자 제공/위탁안내(필수)
+                                    </label>
+                                    <a href="/privacy" target="_blank" className="terms-link">
+                                        <span className="material-symbols-outlined">chevron_right</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <label className="terms-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={termsAgreed.marketing}
+                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, marketing: e.target.checked })}
+                                        />
+                                        <span className="checkmark"></span>
+                                        마케팅 수신 동의 약관(선택)
+                                    </label>
+                                    <a href="/privacy" target="_blank" className="terms-link">
+                                        <span className="material-symbols-outlined">chevron_right</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="modal-footer">
+                            <button
+                                className={`btn-confirm ${!(termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty) ? 'disabled' : ''}`}
+                                onClick={() => setPrivacyModalOpen(false)}
+                                disabled={!(termsAgreed.privacy && termsAgreed.electronic && termsAgreed.thirdParty)}
+                            >
+                                동의합니다
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
