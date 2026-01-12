@@ -5166,7 +5166,7 @@ section {
 }
 
 .law-reference {
-    color: var(--primary);
+    color: #1A1A1A;
     text-decoration: underline;
     cursor: pointer;
 }
