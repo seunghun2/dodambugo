@@ -1,0 +1,171 @@
+/* 감사 페이지 스타일 */
+
+.thanks-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* 종교별 배경 - 일단 단색, 나중에 이미지로 교체 */
+.thanks-page.bg-general {
+    background: linear-gradient(180deg, #F5F5F5 0%, #E8E8E8 100%);
+    /* 나중에: background-image: url('/images/thanks/general.png'); */
+}
+
+.thanks-page.bg-christian {
+    background: linear-gradient(180deg, #F0F0F0 0%, #E0E0E0 100%);
+    /* 나중에: background-image: url('/images/thanks/christian.png'); */
+}
+
+.thanks-page.bg-catholic {
+    background: linear-gradient(180deg, #F8F6F0 0%, #E8E4D8 100%);
+    /* 나중에: background-image: url('/images/thanks/catholic.png'); */
+}
+
+.thanks-page.bg-buddhist {
+    background: linear-gradient(180deg, #FAF8F5 0%, #EDE8E0 100%);
+    /* 나중에: background-image: url('/images/thanks/buddhist.png'); */
+}
+
+.thanks-content {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+/* 감사 인사 */
+.thanks-message {
+    margin-bottom: 16px;
+}
+
+.thanks-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #222222;
+    margin: 0 0 16px 0;
+}
+
+.thanks-subtitle {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+    line-height: 1.8;
+    margin: 0;
+}
+
+/* 고인 정보 */
+.thanks-deceased {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.thanks-photo {
+    width: 120px;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.thanks-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thanks-deceased-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #222222;
+    margin: 0;
+}
+
+/* 상주 정보 */
+.thanks-mourner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.thanks-mourner-label {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #888888;
+    margin: 0;
+}
+
+.thanks-mourner-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    margin: 0;
+}
+
+/* 하단 안내 */
+.thanks-footer {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.thanks-footer p {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+    line-height: 1.8;
+    margin: 0;
+}
+
+/* CTA 버튼 */
+.thanks-cta {
+    margin-top: 32px;
+}
+
+.btn-thanks-cta {
+    padding: 16px 32px;
+    background: #333333;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-thanks-cta:active {
+    background: #444444;
+}
+
+/* 로딩/에러 */
+.thanks-loading,
+.thanks-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    color: #666666;
+}
