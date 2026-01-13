@@ -1322,7 +1322,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 24px 16px;
     background: #FAFAFA;
     border-radius: 12px;
     margin-bottom: 12px;
@@ -1336,6 +1336,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin: 0;
 }
 
 .account-rel {
@@ -1347,24 +1348,27 @@
 }
 
 .account-bottom-sheet .account-bank {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 12px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
     font-weight: 700;
-    color: #999999;
+    color: #111111;
+    line-height: 1.2;
 }
 
 .account-bottom-sheet .account-number {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 18px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
     font-weight: 700;
     color: #111111;
+    line-height: 1.2;
 }
 
 .account-bottom-sheet .account-holder {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 13px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 15px;
     font-weight: 700;
-    color: #9E8566;
+    color: #111111;
+    line-height: 1.2;
 }
 
 .account-bottom-sheet .btn-copy {
@@ -1377,6 +1381,7 @@
     font-weight: 700;
     color: #555555;
     cursor: pointer;
+    align-self: center;
 }
 
 .account-bottom-sheet .btn-copy:active {
