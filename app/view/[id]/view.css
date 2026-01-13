@@ -1312,47 +1312,83 @@
     cursor: pointer;
 }
 
+.account-bottom-sheet .account-intro {
+    padding: 24px 20px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.5;
+    background: #F8F8F8;
+}
+
 .account-bottom-sheet .account-list {
     padding: 16px 20px 60px;
     overflow-y: auto;
-    max-height: calc(70vh - 80px);
+    max-height: calc(70vh - 160px);
 }
 
-.account-bottom-sheet .account-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 16px;
-    background: #FAFAFA;
+.account-bottom-sheet .account-card {
+    background: #FFFFFF;
     border-radius: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #EEEEEE;
+    overflow: hidden;
 }
 
-.account-bottom-sheet .account-row:last-child {
+.account-bottom-sheet .account-card:last-child {
     margin-bottom: 0;
 }
 
-.account-bottom-sheet .account-info {
+.account-bottom-sheet .account-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 16px 20px 12px;
+}
+
+.account-bottom-sheet .account-rel {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+}
+
+.account-bottom-sheet .account-name {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.account-bottom-sheet .account-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 20px;
+}
+
+.account-bottom-sheet .account-detail {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin: 0;
+    gap: 0;
+    flex: 1;
 }
 
-.account-rel {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: #9E8566;
-    margin-bottom: 2px;
+.account-bottom-sheet .bank-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-right: 10px;
+    margin-left: -4px;
 }
 
-.account-bottom-sheet .account-bank {
+.account-bottom-sheet .account-bank-holder {
     font-family: 'Pretendard', sans-serif;
     font-size: 13px;
-    font-weight: 500;
-    color: #111111;
-    line-height: 1.2;
+    font-weight: 400;
+    color: #888888;
 }
 
 .account-bottom-sheet .account-number {
@@ -1360,31 +1396,24 @@
     font-size: 16px;
     font-weight: 600;
     color: #111111;
-    line-height: 1.2;
+    letter-spacing: 0.5px;
+    margin-top: -2px;
 }
 
-.account-bottom-sheet .account-holder {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: #111111;
-    line-height: 1.2;
-}
-
-.account-bottom-sheet .btn-copy {
-    padding: 10px 20px;
+.account-bottom-sheet .btn-copy-account {
+    padding: 6px 10px;
     background: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
-    font-weight: 700;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
     color: #555555;
     cursor: pointer;
-    align-self: center;
+    white-space: nowrap;
 }
 
-.account-bottom-sheet .btn-copy:active {
+.account-bottom-sheet .btn-copy-account:active {
     background: #F5F5F5;
 }
 

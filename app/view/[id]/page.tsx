@@ -8,6 +8,76 @@ import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
 import './view.css';
 
+// 은행명 → 로고 파일 매핑
+function getBankLogo(bankName: string): string | null {
+    const bankLogoMap: Record<string, string> = {
+        'KB국민': '/images/bankicon/국민은행.svg',
+        '국민': '/images/bankicon/국민은행.svg',
+        '국민은행': '/images/bankicon/국민은행.svg',
+        'KB국민은행': '/images/bankicon/국민은행.svg',
+        '신한': '/images/bankicon/신한은행.svg',
+        '신한은행': '/images/bankicon/신한은행.svg',
+        '우리': '/images/bankicon/우리은행.svg',
+        '우리은행': '/images/bankicon/우리은행.svg',
+        '하나': '/images/bankicon/하나은행.svg',
+        '하나은행': '/images/bankicon/하나은행.svg',
+        'NH농협': '/images/bankicon/NH농협은행.svg',
+        '농협': '/images/bankicon/NH농협은행.svg',
+        'NH농협은행': '/images/bankicon/NH농협은행.svg',
+        '기업': '/images/bankicon/기업은행.svg',
+        '기업은행': '/images/bankicon/기업은행.svg',
+        'IBK기업': '/images/bankicon/기업은행.svg',
+        'IBK기업은행': '/images/bankicon/기업은행.svg',
+        '카카오뱅크': '/images/bankicon/카카오뱅크.svg',
+        '카카오': '/images/bankicon/카카오뱅크.svg',
+        '케이뱅크': '/images/bankicon/케이뱅크.svg',
+        'SC제일': '/images/bankicon/제일은행.svg',
+        'SC제일은행': '/images/bankicon/제일은행.svg',
+        '씨티': '/images/bankicon/씨티은행.svg',
+        '씨티은행': '/images/bankicon/씨티은행.svg',
+        '우체국': '/images/bankicon/우체국.svg',
+        '새마을': '/images/bankicon/새마을.svg',
+        '새마을금고': '/images/bankicon/새마을.svg',
+        '신협': '/images/bankicon/신협은행.svg',
+        '수협': '/images/bankicon/수협은행.svg',
+        '수협은행': '/images/bankicon/수협은행.svg',
+        '대구': '/images/bankicon/대구은행.svg',
+        '대구은행': '/images/bankicon/대구은행.svg',
+        'DGB대구': '/images/bankicon/대구은행.svg',
+        '부산': '/images/bankicon/경남은행.svg',
+        '부산은행': '/images/bankicon/경남은행.svg',
+        'BNK부산': '/images/bankicon/경남은행.svg',
+        '경남': '/images/bankicon/경남은행.svg',
+        '경남은행': '/images/bankicon/경남은행.svg',
+        'BNK경남': '/images/bankicon/경남은행.svg',
+        '광주': '/images/bankicon/광주은행.svg',
+        '광주은행': '/images/bankicon/광주은행.svg',
+        '전북': '/images/bankicon/전북은행.svg',
+        '전북은행': '/images/bankicon/전북은행.svg',
+        '제주': '/images/bankicon/제주은행.svg',
+        '제주은행': '/images/bankicon/제주은행.svg',
+        '산업': '/images/bankicon/KDB산업은행.svg',
+        '산업은행': '/images/bankicon/KDB산업은행.svg',
+        'KDB산업': '/images/bankicon/KDB산업은행.svg',
+        'SBI저축': '/images/bankicon/SBI 저축은행.svg',
+        'SBI저축은행': '/images/bankicon/SBI 저축은행.svg',
+    };
+
+    // 정확한 매칭 먼저
+    if (bankLogoMap[bankName]) {
+        return bankLogoMap[bankName];
+    }
+
+    // 부분 매칭
+    for (const [key, value] of Object.entries(bankLogoMap)) {
+        if (bankName.includes(key) || key.includes(bankName)) {
+            return value;
+        }
+    }
+
+    return null;
+}
+
 interface BugoData {
     id: string;
     bugo_number: string;
@@ -793,7 +863,7 @@ ${url}
                         </div>
                         <div className="account-list">
                             {(() => {
-                                const allAccounts: Array<{ bank: string; holder: string; number: string; relationship?: string }> = [];
+                                const allAccounts: Array<{ bank: string; holder: string; number: string; relationship?: string; name?: string }> = [];
 
                                 // 대표상주 계좌 (account_info)
                                 if (bugo.account_info && Array.isArray(bugo.account_info)) {
@@ -803,7 +873,8 @@ ${url}
                                                 bank: acc.bank,
                                                 holder: acc.holder || bugo.mourner_name || '',
                                                 number: acc.number,
-                                                relationship: bugo.relationship || '상주'
+                                                relationship: bugo.relationship || '상주',
+                                                name: bugo.mourner_name || ''
                                             });
                                         }
                                     });
@@ -817,22 +888,34 @@ ${url}
                                                 bank: m.bank,
                                                 holder: m.accountHolder || m.name || '',
                                                 number: m.accountNumber,
-                                                relationship: m.relationship || ''
+                                                relationship: m.relationship || '',
+                                                name: m.name || ''
                                             });
                                         }
                                     });
                                 }
 
-                                return allAccounts.map((acc, i) => (
-                                    <div className="account-row" key={i}>
-                                        <div className="account-info">
-                                            <span className="account-bank">{acc.bank}</span>
-                                            <span className="account-number">{acc.number}</span>
-                                            <span className="account-holder">{acc.holder}</span>
+                                return allAccounts.map((acc, i) => {
+                                    const bankLogo = getBankLogo(acc.bank);
+                                    return (
+                                        <div className="account-card" key={i}>
+                                            <div className="account-card-header">
+                                                <span className="account-rel">{acc.relationship}</span>
+                                                <span className="account-name">{acc.name || acc.holder}</span>
+                                            </div>
+                                            <div className="account-card-body">
+                                                {bankLogo && (
+                                                    <img src={bankLogo} alt={acc.bank} className="bank-logo" />
+                                                )}
+                                                <div className="account-detail">
+                                                    <span className="account-bank-holder">{acc.bank}({acc.holder})</span>
+                                                    <span className="account-number">{acc.number}</span>
+                                                </div>
+                                                <button className="btn-copy-account" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>계좌 복사</button>
+                                            </div>
                                         </div>
-                                        <button className="btn-copy" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>복사</button>
-                                    </div>
-                                ));
+                                    )
+                                });
                             })()}
                         </div>
                     </div>
@@ -840,79 +923,83 @@ ${url}
             )}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
-            {!isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
-                <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
-                    {/* 돋보기 버튼 - 상세 페이지로 이동 */}
-                    <button
-                        className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
-                        onClick={() => selectedFlower && router.push(`/view/${params.id}/flower/${selectedFlower}`)}
-                    >
-                        <span className="material-symbols-outlined">search</span>
-                    </button>
-                    {/* 메인 버튼 - 화환보내기 → 주문하기 */}
-                    <button
-                        className="btn-floating-flower"
-                        onClick={() => {
-                            if (flowerModalOpen && selectedFlower) {
-                                router.push(`/view/${params.id}/order/${selectedFlower}`);
-                            } else {
-                                setFlowerModalOpen(true);
-                            }
-                        }}
-                    >
-                        {flowerModalOpen ? '주문하기' : '화환 보내기'}
-                    </button>
-                </div>
-            )}
+            {
+                !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                    <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
+                        {/* 돋보기 버튼 - 상세 페이지로 이동 */}
+                        <button
+                            className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
+                            onClick={() => selectedFlower && router.push(`/view/${params.id}/flower/${selectedFlower}`)}
+                        >
+                            <span className="material-symbols-outlined">search</span>
+                        </button>
+                        {/* 메인 버튼 - 화환보내기 → 주문하기 */}
+                        <button
+                            className="btn-floating-flower"
+                            onClick={() => {
+                                if (flowerModalOpen && selectedFlower) {
+                                    router.push(`/view/${params.id}/order/${selectedFlower}`);
+                                } else {
+                                    setFlowerModalOpen(true);
+                                }
+                            }}
+                        >
+                            {flowerModalOpen ? '주문하기' : '화환 보내기'}
+                        </button>
+                    </div>
+                )
+            }
 
             {/* 화환 주문 바텀시트 모달 */}
-            {flowerModalOpen && (
-                <div className="flower-modal-overlay" onClick={() => setFlowerModalOpen(false)}>
-                    <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
-                        {/* 헤더 */}
-                        <div className="flower-modal-header">
-                            <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                            <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
-                            <p className="flower-modal-subtitle">
-                                {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')} 故{bugo?.deceased_name}님께서<br />
-                                {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
-                            </p>
-                        </div>
+            {
+                flowerModalOpen && (
+                    <div className="flower-modal-overlay" onClick={() => setFlowerModalOpen(false)}>
+                        <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
+                            {/* 헤더 */}
+                            <div className="flower-modal-header">
+                                <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                                <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
+                                <p className="flower-modal-subtitle">
+                                    {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')} 故{bugo?.deceased_name}님께서<br />
+                                    {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
+                                </p>
+                            </div>
 
-                        {/* 상품 리스트 */}
-                        <div className="flower-product-list">
-                            {[
-                                { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
-                                { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 180000, price: 150000, image: '/images/flower-wreath.png' },
-                                { id: 3, name: '스탠다드 화환', desc: '복도에 비치되는 표준형 3단 화환입니다', originalPrice: 120000, price: 100000, image: '/images/flower-wreath.png' },
-                                { id: 4, name: '베이직 화환', desc: '간결하면서도 정성이 담긴 기본형 화환입니다', originalPrice: 100000, price: 80000, image: '/images/flower-wreath.png' },
-                                { id: 5, name: '고급 근조 화환', desc: '최고급 생화로 제작되는 프리미엄 화환입니다', originalPrice: 200000, price: 170000, image: '/images/flower-wreath.png' },
-                            ].map((product) => (
-                                <div
-                                    key={product.id}
-                                    className="flower-product-item"
-                                    onClick={() => setSelectedFlower(selectedFlower === product.id ? null : product.id)}
-                                >
-                                    <div className={`flower-radio ${selectedFlower === product.id ? 'checked' : ''}`} />
-                                    <div className="flower-product-image">
-                                        <img src={product.image} alt={product.name} />
-                                    </div>
-                                    <div className="flower-product-info">
-                                        <h3 className="flower-product-name">{product.name}</h3>
-                                        <p className="flower-product-desc">{product.desc}</p>
-                                        <div className="flower-product-price">
-                                            <span className="original-price">{product.originalPrice.toLocaleString()}원</span>
-                                            <span className="sale-price">{product.price.toLocaleString()}원</span>
+                            {/* 상품 리스트 */}
+                            <div className="flower-product-list">
+                                {[
+                                    { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
+                                    { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 180000, price: 150000, image: '/images/flower-wreath.png' },
+                                    { id: 3, name: '스탠다드 화환', desc: '복도에 비치되는 표준형 3단 화환입니다', originalPrice: 120000, price: 100000, image: '/images/flower-wreath.png' },
+                                    { id: 4, name: '베이직 화환', desc: '간결하면서도 정성이 담긴 기본형 화환입니다', originalPrice: 100000, price: 80000, image: '/images/flower-wreath.png' },
+                                    { id: 5, name: '고급 근조 화환', desc: '최고급 생화로 제작되는 프리미엄 화환입니다', originalPrice: 200000, price: 170000, image: '/images/flower-wreath.png' },
+                                ].map((product) => (
+                                    <div
+                                        key={product.id}
+                                        className="flower-product-item"
+                                        onClick={() => setSelectedFlower(selectedFlower === product.id ? null : product.id)}
+                                    >
+                                        <div className={`flower-radio ${selectedFlower === product.id ? 'checked' : ''}`} />
+                                        <div className="flower-product-image">
+                                            <img src={product.image} alt={product.name} />
+                                        </div>
+                                        <div className="flower-product-info">
+                                            <h3 className="flower-product-name">{product.name}</h3>
+                                            <p className="flower-product-desc">{product.desc}</p>
+                                            <div className="flower-product-price">
+                                                <span className="original-price">{product.originalPrice.toLocaleString()}원</span>
+                                                <span className="sale-price">{product.price.toLocaleString()}원</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </main>
+                )
+            }
+        </main >
     );
 }
