@@ -1401,6 +1401,9 @@
 }
 
 .account-bottom-sheet .btn-copy-account {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     padding: 6px 10px;
     background: #FFFFFF;
     border: 1px solid #DDDDDD;
@@ -1411,6 +1414,10 @@
     color: #555555;
     cursor: pointer;
     white-space: nowrap;
+}
+
+.account-bottom-sheet .btn-copy-account .material-symbols-outlined {
+    font-size: 14px;
 }
 
 .account-bottom-sheet .btn-copy-account:active {

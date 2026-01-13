@@ -911,7 +911,10 @@ ${url}
                                                     <span className="account-bank-holder">{acc.bank}({acc.holder})</span>
                                                     <span className="account-number">{acc.number}</span>
                                                 </div>
-                                                <button className="btn-copy-account" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>계좌 복사</button>
+                                                <button className="btn-copy-account" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>
+                                                    <span className="material-symbols-outlined">content_copy</span>
+                                                    계좌복사
+                                                </button>
                                             </div>
                                         </div>
                                     )
