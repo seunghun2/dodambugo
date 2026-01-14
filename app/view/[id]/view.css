@@ -1273,7 +1273,7 @@
     max-height: 70vh;
     background: #FFFFFF;
     border-radius: 20px 20px 0 0;
-    animation: slideUpModal 0.3s ease-out;
+    animation: slideUpModal 0.15s ease-out;
     overflow: hidden;
 }
 
