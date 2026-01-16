@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendFlowerOrderNotification } from '@/lib/slack';
 
 // 함수 내에서 supabase 클라이언트 생성 (빌드 타임 에러 방지)
 function getSupabase() {
@@ -77,6 +78,20 @@ export async function POST(request: NextRequest) {
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
+
+        // 🔔 슬랙 알림 전송 (비동기, 실패해도 주문은 성공)
+        sendFlowerOrderNotification({
+            id: orderNumber,
+            deceased_name: body.recipient_name || '미입력',
+            sender_name: body.sender_name,
+            sender_phone: body.sender_phone,
+            product_name: body.product_name,
+            price: body.product_price,
+            ribbon_text: body.ribbon_text1 ? `${body.ribbon_text1} / ${body.ribbon_text2 || ''}` : undefined,
+            funeral_hall: body.funeral_home,
+            payment_method: body.payment_method || 'card',
+            created_at: new Date().toISOString(),
+        }).catch(err => console.error('Slack 알림 실패:', err));
 
         return NextResponse.json({ order: data, order_number: orderNumber });
     } catch (err) {
