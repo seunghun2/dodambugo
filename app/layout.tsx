@@ -16,7 +16,15 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 export const metadata = {
   title: '마음부고 - 무료 모바일 부고장, 모바일부고, 부고문자, 부고, 부고장, 카카오톡 공유',
   description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료, 광고 없음, 카카오톡 공유',
-  keywords: '마음부고, 부고장, 모바일 부고장, 모바일부고, 부고문자, 부고, 무료 부고장, 온라인 부고, 카카오톡 공유, 장례식장',
+  keywords: '마음부고, 부고장, 모바일 부고장, 모바일부고, 부고문자, 부고, 무료 부고장, 온라인 부고, 카카오톡 공유, 장례식장, 조문, 화환, 근조화환',
+  authors: [{ name: '마음부고' }],
+  creator: '마음부고',
+  publisher: '마음부고',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     title: '마음부고 - 품격있는 무료 모바일 부고장',
     description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 완전 무료, 광고 없음.',
@@ -42,9 +50,22 @@ export const metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   alternates: {
     canonical: 'https://maeumbugo.co.kr',
+  },
+  verification: {
+    google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',
+    other: {
+      'naver-site-verification': '4f09b03be58e139284a268de39527d36c7439898',
+    },
   },
 };
 
@@ -58,8 +79,6 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="format-detection" content="telephone=no, address=no, email=no" />
-        <meta name="naver-site-verification" content="4f09b03be58e139284a268de39527d36c7439898" />
-        <meta name="google-site-verification" content="19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10" />
         <ColorSchemeScript defaultColorScheme="light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

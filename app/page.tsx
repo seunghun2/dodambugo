@@ -209,6 +209,42 @@ export default function HomePage() {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://maeumbugo.co.kr/#organization",
+        "name": "마음부고",
+        "url": "https://maeumbugo.co.kr",
+        "logo": "https://maeumbugo.co.kr/images/logo.png",
+        "sameAs": [],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "url": "https://maeumbugo.co.kr/contact"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "서울특별시",
+          "addressRegion": "강남구",
+          "streetAddress": "압구정로 306",
+          "addressCountry": "KR"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://maeumbugo.co.kr/#website",
+        "url": "https://maeumbugo.co.kr",
+        "name": "마음부고",
+        "description": "3분 만에 만드는 품격있는 무료 모바일 부고장",
+        "publisher": {
+          "@id": "https://maeumbugo.co.kr/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://maeumbugo.co.kr/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        },
+        "inLanguage": "ko-KR"
+      },
+      {
         "@type": "WebApplication",
         "name": "마음부고",
         "url": "https://maeumbugo.co.kr",
