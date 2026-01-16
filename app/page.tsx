@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import SideMenu from '@/components/SideMenu';
 import NavMenu from '@/components/NavMenu';
+import KBEscrow from '@/components/KBEscrow';
 import { supabase } from '@/lib/supabase';
 
 interface SearchResult {
@@ -558,8 +559,8 @@ export default function HomePage() {
               <Link href="/contact">제휴/문의</Link>
             </div>
             <div className="footer-info">
-              <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
-              <p>통신판매 제 2024-서울강서-1938</p>
+              <p>강남구 압구정로 306 | 대표: 김미연</p>
+              <p>사업자등록번호: 408-22-68851</p>
               <p>Copyright maeumbugo Corp All right reserved.</p>
             </div>
           </div>
