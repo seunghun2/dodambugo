@@ -788,6 +788,23 @@ export default function WriteFormPage() {
             // GA: 부고 생성 완료 이벤트
             if (!editBugoNumber) {
                 gaEvents.completeBugo(data.bugo_number);
+
+                // 🔔 슬랙 알림 전송 (신규 생성 시에만, 비동기)
+                fetch('/api/bugo-notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bugo_number: data.bugo_number,
+                        deceased_name: formData.deceased_name,
+                        funeral_home: formData.funeral_home,
+                        room_number: formData.room_number,
+                        address: formData.address,
+                        funeral_date: formData.funeral_date,
+                        funeral_time: formData.funeral_time,
+                        mourner_name: formData.primary_mourner,
+                        created_new: true,
+                    }),
+                }).catch(err => console.error('부고 알림 실패:', err));
             }
 
             // 완료 페이지로 리다이렉트
