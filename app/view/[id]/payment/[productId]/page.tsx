@@ -126,6 +126,7 @@ export default function PaymentPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     bugo_id: bugo?.id,
+                    bugo_number: bugo?.bugo_number || bugoId,
                     product_id: productId,
                     product_name: orderData.productName,
                     product_price: orderData.productPrice,
