@@ -1,22 +1,18 @@
 /**
  * Slack 알림 유틸리티
- * 주문 접수 시 슬랙으로 알림을 보내는 함수들
+ * 부고드림 스타일 텍스트 포맷
  */
 
 interface SlackMessage {
-    text?: string;
-    blocks?: any[];
-    attachments?: any[];
+    text: string;
 }
 
 /**
- * 슬랙으로 메시지 전송
+ * 슬랙으로 메시지 전송 (특정 webhook URL로)
  */
-export async function sendSlackMessage(message: SlackMessage): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-
+async function sendToWebhook(webhookUrl: string, message: SlackMessage): Promise<boolean> {
     if (!webhookUrl) {
-        console.error('❌ SLACK_WEBHOOK_URL이 설정되지 않았습니다.');
+        console.error('❌ Webhook URL이 설정되지 않았습니다.');
         return false;
     }
 
@@ -43,109 +39,69 @@ export async function sendSlackMessage(message: SlackMessage): Promise<boolean> 
 }
 
 /**
- * 화환 주문 알림 전송
+ * 부고 알림 전송 (#01_01_부고알림)
+ * 부고드림 스타일
  */
-export async function sendFlowerOrderNotification(order: {
-    id: string;
+export async function sendBugoNotification(bugo: {
+    bugo_number: string;
     deceased_name: string;
-    sender_name: string;
-    sender_phone: string;
-    product_name: string;
-    price: number;
-    ribbon_text?: string;
-    funeral_hall?: string;
-    payment_method?: string;
-    created_at?: string;
+    mourner_name?: string;
+    funeral_home?: string;
+    room_number?: string;
+    funeral_date?: string;
+    funeral_time?: string;
 }): Promise<boolean> {
-    const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
-    const orderTime = order.created_at
-        ? new Date(order.created_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
-        : new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO;
 
-    const message: SlackMessage = {
-        blocks: [
-            {
-                type: 'header',
-                text: {
-                    type: 'plain_text',
-                    text: '🌸 새 화환 주문이 접수되었습니다!',
-                    emoji: true
-                }
-            },
-            {
-                type: 'section',
-                fields: [
-                    {
-                        type: 'mrkdwn',
-                        text: `*고인:*\n${order.deceased_name}`
-                    },
-                    {
-                        type: 'mrkdwn',
-                        text: `*상품:*\n${order.product_name}`
-                    }
-                ]
-            },
-            {
-                type: 'section',
-                fields: [
-                    {
-                        type: 'mrkdwn',
-                        text: `*주문자:*\n${order.sender_name}`
-                    },
-                    {
-                        type: 'mrkdwn',
-                        text: `*연락처:*\n${order.sender_phone}`
-                    }
-                ]
-            },
-            {
-                type: 'section',
-                fields: [
-                    {
-                        type: 'mrkdwn',
-                        text: `*금액:*\n₩${priceFormatted}`
-                    },
-                    {
-                        type: 'mrkdwn',
-                        text: `*결제방법:*\n${order.payment_method || '미정'}`
-                    }
-                ]
-            },
-            ...(order.ribbon_text ? [{
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `*리본 문구:*\n${order.ribbon_text}`
-                }
-            }] : []),
-            ...(order.funeral_hall ? [{
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `*장례식장:*\n${order.funeral_hall}`
-                }
-            }] : []),
-            {
-                type: 'context',
-                elements: [
-                    {
-                        type: 'mrkdwn',
-                        text: `📅 주문시간: ${orderTime} | 주문번호: ${order.id}`
-                    }
-                ]
-            },
-            {
-                type: 'divider'
-            }
-        ]
-    };
+    const text = `[마음부고] 부고장이 등록되었습니다. (부고번호: ${bugo.bugo_number})
+- 고인: ${bugo.deceased_name || '미입력'}
+- 상주: ${bugo.mourner_name || '미입력'}
+- 장례식장: ${bugo.funeral_home || '미입력'} ${bugo.room_number || ''}
+- 발인일시: ${bugo.funeral_date || '미정'} ${bugo.funeral_time || ''}
+- 부고장: https://maeumbugo.co.kr/view/${bugo.bugo_number}`;
 
-    return sendSlackMessage(message);
+    return sendToWebhook(webhookUrl!, { text });
 }
 
 /**
- * 간단한 텍스트 알림 전송
+ * 화환 주문 알림 전송 (#01_02_화환구매)
+ * 부고드림 스타일
+ */
+export async function sendFlowerOrderNotification(order: {
+    id: string;
+    bugo_number?: string;
+    deceased_name: string;
+    sender_name: string;
+    sender_phone: string;
+    recipient_name?: string;
+    product_name: string;
+    price: number;
+    ribbon_text1?: string;
+    ribbon_text2?: string;
+    funeral_hall?: string;
+    room?: string;
+    payment_method?: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER;
+    const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
+
+    const text = `[마음부고] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
+- 상품명: ${order.product_name}
+- 금액: ${priceFormatted}원
+- 빈소: ${order.funeral_hall || '미입력'} ${order.room || ''}
+- 리본문구1: ${order.ribbon_text1 || '-'}
+- 리본문구2: ${order.ribbon_text2 || '-'}
+- 수신자: ${order.recipient_name || order.deceased_name}
+- 주문자: ${order.sender_name}(${order.sender_phone})
+- 결제수단: ${order.payment_method || '미정'}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
+ * 간단한 텍스트 알림 전송 (기본 webhook)
  */
 export async function sendSimpleNotification(text: string): Promise<boolean> {
-    return sendSlackMessage({ text });
+    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+    return sendToWebhook(webhookUrl!, { text });
 }

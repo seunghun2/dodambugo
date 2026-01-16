@@ -82,15 +82,18 @@ export async function POST(request: NextRequest) {
         // 🔔 슬랙 알림 전송 (비동기, 실패해도 주문은 성공)
         sendFlowerOrderNotification({
             id: orderNumber,
+            bugo_number: body.bugo_number,
             deceased_name: body.recipient_name || '미입력',
             sender_name: body.sender_name,
             sender_phone: body.sender_phone,
+            recipient_name: body.recipient_name,
             product_name: body.product_name,
             price: body.product_price,
-            ribbon_text: body.ribbon_text1 ? `${body.ribbon_text1} / ${body.ribbon_text2 || ''}` : undefined,
+            ribbon_text1: body.ribbon_text1,
+            ribbon_text2: body.ribbon_text2,
             funeral_hall: body.funeral_home,
+            room: body.room,
             payment_method: body.payment_method || 'card',
-            created_at: new Date().toISOString(),
         }).catch(err => console.error('Slack 알림 실패:', err));
 
         return NextResponse.json({ order: data, order_number: orderNumber });
