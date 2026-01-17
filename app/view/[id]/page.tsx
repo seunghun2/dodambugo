@@ -144,16 +144,28 @@ function getDeceasedRelation(mournerRelation: string, deceasedGender: string): s
     return relationMap[mournerRelation]?.[gender] || mournerRelation;
 }
 
-// 지역별 가격 계산 헬퍼
+// 지역별 가격 계산 헬퍼 (시/도 추가금 + 특수지역 추가금)
 const calculateRegionalPrice = (
     basePrice: number,
     discountPrice: number | null,
     regionalPrices: Record<string, number> | undefined,
-    region: string
+    specialSurcharges: Record<string, number> | undefined,
+    region: string,
+    address: string
 ): number => {
     const price = discountPrice || basePrice;
-    const surcharge = (regionalPrices && region && regionalPrices[region]) || 0;
-    return price + surcharge;
+    // 시/도별 추가금
+    const regionalSurcharge = (regionalPrices && region && regionalPrices[region]) || 0;
+    // 특수지역(산간/도서) 추가금 - 주소에 키워드가 포함되면 적용
+    let specialSurcharge = 0;
+    if (specialSurcharges && address) {
+        for (const [keyword, surcharge] of Object.entries(specialSurcharges)) {
+            if (address.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge); // 가장 높은 금액 적용
+            }
+        }
+    }
+    return price + regionalSurcharge + specialSurcharge;
 };
 
 export default function ViewPage() {
@@ -173,8 +185,9 @@ export default function ViewPage() {
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
     const [selectedFlower, setSelectedFlower] = useState<string | null>(null); // 선택된 상품 ID
     const [flowerOrders, setFlowerOrders] = useState<Array<{ sender_name: string; ribbon_text1: string; ribbon_text2: string }>>([]);
-    const [flowerProducts, setFlowerProducts] = useState<Array<{ id: string; name: string; description: string; price: number; discount_price: number | null; images: string[]; regional_prices?: Record<string, number> }>>([]);
+    const [flowerProducts, setFlowerProducts] = useState<Array<{ id: string; name: string; description: string; price: number; discount_price: number | null; images: string[]; regional_prices?: Record<string, number>; special_surcharges?: Record<string, number> }>>([]);
     const [bugoRegion, setBugoRegion] = useState<string>(''); // 부고 지역 (시/도)
+    const [bugoAddress, setBugoAddress] = useState<string>(''); // 부고 전체 주소 (특수지역 체크용)
 
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
@@ -276,6 +289,7 @@ export default function ViewPage() {
                         const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
                         const matchedRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
                         setBugoRegion(matchedRegion);
+                        setBugoAddress(funeralAddress); // 특수지역 체크용 전체 주소
 
                         const filteredProducts = productsData.filter(product => {
                             // 제외 장례식장 체크
@@ -1057,7 +1071,7 @@ ${url}
                                             <p className="flower-product-desc">{product.description}</p>
                                             <div className="flower-product-price">
                                                 <span className="sale-price">
-                                                    {calculateRegionalPrice(product.price, product.discount_price, product.regional_prices, bugoRegion).toLocaleString()}원
+                                                    {calculateRegionalPrice(product.price, product.discount_price, product.regional_prices, product.special_surcharges, bugoRegion, bugoAddress).toLocaleString()}원
                                                 </span>
                                             </div>
                                         </div>

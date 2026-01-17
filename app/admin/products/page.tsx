@@ -575,6 +575,66 @@ export default function AdminProductsPage() {
                                     </div>
 
                                     <div className="detail-section">
+                                        <label>특수지역 추가금</label>
+                                        <small>산간/도서 지역별 추가금 (시군구 키워드 입력)</small>
+
+                                        <div className="special-surcharge-input">
+                                            <input
+                                                type="text"
+                                                id="special-area-input"
+                                                placeholder="예: 울릉군, 영월군"
+                                            />
+                                            <input
+                                                type="number"
+                                                id="special-price-input"
+                                                placeholder="추가금"
+                                                style={{ width: '100px' }}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn-tag-add"
+                                                onClick={() => {
+                                                    const areaInput = document.getElementById('special-area-input') as HTMLInputElement;
+                                                    const priceInput = document.getElementById('special-price-input') as HTMLInputElement;
+                                                    const area = areaInput?.value.trim();
+                                                    const price = parseInt(priceInput?.value) || 0;
+                                                    if (area && price > 0) {
+                                                        setEditForm({
+                                                            ...editForm,
+                                                            special_surcharges: {
+                                                                ...(editForm.special_surcharges || {}),
+                                                                [area]: price
+                                                            }
+                                                        });
+                                                        areaInput.value = '';
+                                                        priceInput.value = '';
+                                                    }
+                                                }}
+                                            >
+                                                등록
+                                            </button>
+                                        </div>
+
+                                        {Object.keys(editForm.special_surcharges || {}).length > 0 && (
+                                            <div className="tag-list special">
+                                                {Object.entries(editForm.special_surcharges || {}).map(([area, price]) => (
+                                                    <span key={area} className="tag special">
+                                                        {area} +{(price as number).toLocaleString()}원
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newSurcharges = { ...(editForm.special_surcharges || {}) };
+                                                                delete newSurcharges[area];
+                                                                setEditForm({ ...editForm, special_surcharges: newSurcharges });
+                                                            }}
+                                                        >×</button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="detail-section">
                                         <label>노출 지역 설정</label>
                                         <small>비어있으면 전국 노출</small>
 
@@ -1052,6 +1112,30 @@ export default function AdminProductsPage() {
                 .price-input-wrap input:focus {
                     outline: none;
                     border-color: #f59e0b;
+                }
+                .special-surcharge-input {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+                }
+                .special-surcharge-input input {
+                    flex: 1;
+                    padding: 8px 12px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                }
+                .special-surcharge-input input:focus {
+                    outline: none;
+                    border-color: #f59e0b;
+                }
+                .tag-list.special {
+                    margin-top: 12px;
+                }
+                .tag.special {
+                    background: #fef3c7;
+                    color: #b45309;
+                    border: 1px solid #fcd34d;
                 }
             `}</style>
         </div>
