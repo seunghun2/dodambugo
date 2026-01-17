@@ -5,14 +5,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import '@/app/view/[id]/order/[productId]/order.css';
 
-// 임시 상품 데이터 (나중에 DB에서 가져오기)
-const flowerProducts = [
-    { id: 1, name: '프리미엄형 화환', price: 120000, image: '/images/flower-wreath.png' },
-    { id: 2, name: '대통령 화환', price: 150000, image: '/images/flower-wreath.png' },
-    { id: 3, name: '스탠다드 화환', price: 100000, image: '/images/flower-wreath.png' },
-    { id: 4, name: '베이직 화환', price: 80000, image: '/images/flower-wreath.png' },
-    { id: 5, name: '고급 근조 화환', price: 170000, image: '/images/flower-wreath.png' },
-];
+interface FlowerProduct {
+    id: string;
+    name: string;
+    price: number;
+    discount_price: number | null;
+    images: string[];
+}
 
 interface BugoData {
     id: string;
@@ -24,9 +23,10 @@ export default function PaymentPage() {
     const params = useParams();
     const router = useRouter();
     const bugoId = params.id as string;
-    const productId = parseInt(params.productId as string);
+    const productId = params.productId as string;
 
     const [bugo, setBugo] = useState<BugoData | null>(null);
+    const [product, setProduct] = useState<FlowerProduct | null>(null);
     const [loading, setLoading] = useState(true);
 
     // sessionStorage에서 주문 정보 가져오기
@@ -49,8 +49,6 @@ export default function PaymentPage() {
         thirdParty: false,
         marketing: true,
     });
-
-    const product = flowerProducts.find(p => p.id === productId);
 
     // 전화번호 자동 포맷팅
     const formatPhoneNumber = (value: string) => {
@@ -76,21 +74,32 @@ export default function PaymentPage() {
             }
         }
     }, [bugoId, productId]);
+
     useEffect(() => {
-        const fetchBugo = async () => {
+        const fetchData = async () => {
             try {
+                // 부고 조회
                 const isUUID = bugoId.includes('-') && bugoId.length > 10;
-                let data = null;
+                let bugoData = null;
 
                 if (isUUID) {
                     const result = await supabase.from('bugo').select('id, bugo_number, deceased_name').eq('id', bugoId).limit(1);
-                    data = result.data?.[0] || null;
+                    bugoData = result.data?.[0] || null;
                 } else {
                     const result = await supabase.from('bugo').select('id, bugo_number, deceased_name').eq('bugo_number', bugoId).order('created_at', { ascending: false }).limit(1);
-                    data = result.data?.[0] || null;
+                    bugoData = result.data?.[0] || null;
                 }
 
-                setBugo(data);
+                setBugo(bugoData);
+
+                // 상품 조회 (DB에서)
+                const { data: productData } = await supabase
+                    .from('flower_products')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
+
+                setProduct(productData);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -98,8 +107,8 @@ export default function PaymentPage() {
             }
         };
 
-        if (bugoId) fetchBugo();
-    }, [bugoId]);
+        if (bugoId && productId) fetchData();
+    }, [bugoId, productId]);
 
     const handleSubmit = async () => {
         if (!paymentForm.senderName.trim()) {

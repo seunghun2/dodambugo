@@ -5,14 +5,14 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import './order.css';
 
-// 임시 상품 데이터 (나중에 DB에서 가져오기)
-const flowerProducts = [
-    { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
-    { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 180000, price: 150000, image: '/images/flower-wreath.png' },
-    { id: 3, name: '스탠다드 화환', desc: '복도에 비치되는 표준형 3단 화환입니다', originalPrice: 120000, price: 100000, image: '/images/flower-wreath.png' },
-    { id: 4, name: '베이직 화환', desc: '간결하면서도 정성이 담긴 기본형 화환입니다', originalPrice: 100000, price: 80000, image: '/images/flower-wreath.png' },
-    { id: 5, name: '고급 근조 화환', desc: '최고급 생화로 제작되는 프리미엄 화환입니다', originalPrice: 200000, price: 170000, image: '/images/flower-wreath.png' },
-];
+interface FlowerProduct {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    discount_price: number | null;
+    images: string[];
+}
 
 interface BugoData {
     id: string;
@@ -29,9 +29,10 @@ export default function OrderPage() {
     const params = useParams();
     const router = useRouter();
     const bugoId = params.id as string;
-    const productId = parseInt(params.productId as string);
+    const productId = params.productId as string;
 
     const [bugo, setBugo] = useState<BugoData | null>(null);
+    const [product, setProduct] = useState<FlowerProduct | null>(null);
     const [loading, setLoading] = useState(true);
     const [isCustomMessage, setIsCustomMessage] = useState(false); // 직접입력 여부
     const [recipientModalOpen, setRecipientModalOpen] = useState(false); // 상주변경 모달
@@ -58,31 +59,39 @@ export default function OrderPage() {
         recipientName: '', // 받으시는 분 (상주)
     });
 
-    const product = flowerProducts.find(p => p.id === productId);
-
-    // 부고 정보 조회
+    // 부고 및 상품 정보 조회
     useEffect(() => {
-        const fetchBugo = async () => {
+        const fetchData = async () => {
             try {
+                // 부고 조회
                 const isUUID = bugoId.includes('-') && bugoId.length > 10;
-                let data = null;
+                let bugoData = null;
 
                 if (isUUID) {
                     const result = await supabase.from('bugo').select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name').eq('id', bugoId).limit(1);
-                    data = result.data?.[0] || null;
+                    bugoData = result.data?.[0] || null;
                 } else {
                     const result = await supabase.from('bugo').select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name').eq('bugo_number', bugoId).order('created_at', { ascending: false }).limit(1);
-                    data = result.data?.[0] || null;
+                    bugoData = result.data?.[0] || null;
                 }
 
-                setBugo(data);
+                setBugo(bugoData);
+
+                // 상품 조회 (DB에서)
+                const { data: productData } = await supabase
+                    .from('flower_products')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
+
+                setProduct(productData);
 
                 // 상주 이름 자동 설정 (저장된 데이터가 없을 때만)
                 const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
-                if (data && !storedData) {
-                    const mournerName = data.mourners && data.mourners.length > 0
-                        ? data.mourners[0].name
-                        : data.mourner_name || '';
+                if (bugoData && !storedData) {
+                    const mournerName = bugoData.mourners && bugoData.mourners.length > 0
+                        ? bugoData.mourners[0].name
+                        : bugoData.mourner_name || '';
                     setOrderForm(prev => ({ ...prev, recipientName: mournerName }));
                 }
             } catch (err) {
@@ -92,7 +101,7 @@ export default function OrderPage() {
             }
         };
 
-        if (bugoId) fetchBugo();
+        if (bugoId && productId) fetchData();
     }, [bugoId, productId]);
 
     // sessionStorage에서 이전 입력값 복원
@@ -136,7 +145,7 @@ export default function OrderPage() {
             ribbonText2: orderForm.ribbonText2,
             recipientName: orderForm.recipientName,
             productName: product.name,
-            productPrice: product.price,
+            productPrice: product.discount_price || product.price,
             funeralHome: bugo.funeral_home || '',
             room: bugo.room_number || '',
             address: bugo.address || '',
@@ -181,11 +190,11 @@ export default function OrderPage() {
                     <h2 className="section-title">선택한 상품</h2>
                     <div className="selected-product">
                         <div className="product-image">
-                            <img src={product.image} alt={product.name} />
+                            <img src={product.images?.[0] || '/images/flower-wreath.png'} alt={product.name} />
                         </div>
                         <div className="product-info">
                             <h3>{product.name}</h3>
-                            <p className="price">{product.price.toLocaleString()}원</p>
+                            <p className="price">{(product.discount_price || product.price).toLocaleString()}원</p>
                         </div>
                     </div>
                 </section>

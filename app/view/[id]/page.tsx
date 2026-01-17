@@ -158,8 +158,9 @@ export default function ViewPage() {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
-    const [selectedFlower, setSelectedFlower] = useState<number | null>(1); // 기본 선택: 1번
+    const [selectedFlower, setSelectedFlower] = useState<string | null>(null); // 선택된 상품 ID
     const [flowerOrders, setFlowerOrders] = useState<Array<{ sender_name: string; ribbon_text1: string; ribbon_text2: string }>>([]);
+    const [flowerProducts, setFlowerProducts] = useState<Array<{ id: string; name: string; description: string; price: number; discount_price: number | null; images: string[] }>>([]);
 
     // owner=true 파라미터 처리 (URL 정리)
     useEffect(() => {
@@ -242,6 +243,21 @@ export default function ViewPage() {
                     }
                 } catch (err) {
                     console.log('Error fetching flower orders');
+                }
+
+                // 화환 상품 조회 (DB에서)
+                try {
+                    const { data: productsData } = await supabase
+                        .from('flower_products')
+                        .select('*')
+                        .eq('is_active', true)
+                        .order('sort_order', { ascending: true });
+                    if (productsData && productsData.length > 0) {
+                        setFlowerProducts(productsData);
+                        setSelectedFlower(productsData[0].id); // 첫 번째 상품 ID 선택
+                    }
+                } catch (err) {
+                    console.log('Error fetching flower products');
                 }
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
@@ -972,13 +988,7 @@ ${url}
 
                             {/* 상품 리스트 */}
                             <div className="flower-product-list">
-                                {[
-                                    { id: 1, name: '프리미엄형 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 150000, price: 120000, image: '/images/flower-wreath.png' },
-                                    { id: 2, name: '대통령 화환', desc: '복도에 비치되는 고급근조 3단 특대 형태로 제작됩니다', originalPrice: 180000, price: 150000, image: '/images/flower-wreath.png' },
-                                    { id: 3, name: '스탠다드 화환', desc: '복도에 비치되는 표준형 3단 화환입니다', originalPrice: 120000, price: 100000, image: '/images/flower-wreath.png' },
-                                    { id: 4, name: '베이직 화환', desc: '간결하면서도 정성이 담긴 기본형 화환입니다', originalPrice: 100000, price: 80000, image: '/images/flower-wreath.png' },
-                                    { id: 5, name: '고급 근조 화환', desc: '최고급 생화로 제작되는 프리미엄 화환입니다', originalPrice: 200000, price: 170000, image: '/images/flower-wreath.png' },
-                                ].map((product) => (
+                                {flowerProducts.map((product) => (
                                     <div
                                         key={product.id}
                                         className="flower-product-item"
@@ -986,14 +996,20 @@ ${url}
                                     >
                                         <div className={`flower-radio ${selectedFlower === product.id ? 'checked' : ''}`} />
                                         <div className="flower-product-image">
-                                            <img src={product.image} alt={product.name} />
+                                            <img src={product.images?.[0] || '/images/flower-wreath.png'} alt={product.name} />
                                         </div>
                                         <div className="flower-product-info">
                                             <h3 className="flower-product-name">{product.name}</h3>
-                                            <p className="flower-product-desc">{product.desc}</p>
+                                            <p className="flower-product-desc">{product.description}</p>
                                             <div className="flower-product-price">
-                                                <span className="original-price">{product.originalPrice.toLocaleString()}원</span>
-                                                <span className="sale-price">{product.price.toLocaleString()}원</span>
+                                                {product.discount_price && product.discount_price < product.price ? (
+                                                    <>
+                                                        <span className="original-price">{product.price.toLocaleString()}원</span>
+                                                        <span className="sale-price">{product.discount_price.toLocaleString()}원</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="sale-price">{product.price.toLocaleString()}원</span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

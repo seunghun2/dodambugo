@@ -1,96 +1,54 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import './flower-detail.css';
 
-// 상품 데이터
-const flowerProducts = [
-    {
-        id: 1,
-        name: '프리미엄형 화환',
-        subtitle: '복도에 비치되는 고급근조 3단 특대 형태',
-        price: 120000,
-        images: [
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-        ],
-        origin: '생화 (국화, 백합, 글라디올라스 등): 중국산, 베트남산\n리본 및 부자재: 국산',
-        usage: '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품',
-        features: '이미지의 포인트는 달라질 수 있으며 계절에 맞는 소재로 변경될 수 있습니다. 고인에 대한 보내는 분의 애도의 마음을 담아 정성껏 제작 배송해 드립니다.',
-    },
-    {
-        id: 2,
-        name: '대통령 화환',
-        subtitle: '복도에 비치되는 고급근조 3단 특대 형태',
-        price: 150000,
-        images: [
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-        ],
-        origin: '생화 (국화, 백합, 글라디올라스 등): 중국산, 베트남산\n리본 및 부자재: 국산',
-        usage: '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품',
-        features: '국가급 품격을 갖춘 최고급 화환입니다. 대형 근조화환으로 정성을 표현하세요.',
-    },
-    {
-        id: 3,
-        name: '스탠다드 화환',
-        subtitle: '복도에 비치되는 표준형 3단 화환',
-        price: 100000,
-        images: [
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-        ],
-        origin: '생화 (국화, 백합, 글라디올라스 등): 중국산, 베트남산\n리본 및 부자재: 국산',
-        usage: '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품',
-        features: '가장 기본적이면서도 품격 있는 표준형 화환입니다.',
-    },
-    {
-        id: 4,
-        name: '베이직 화환',
-        subtitle: '간결하면서도 정성이 담긴 기본형 화환',
-        price: 80000,
-        images: [
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-        ],
-        origin: '생화 (국화, 백합 등): 중국산, 베트남산\n리본 및 부자재: 국산',
-        usage: '부의, 추모, 추도, 장례식장등 고인의 명복을 비는 장소에 쓰이는 상품',
-        features: '깔끔하고 정갈한 디자인의 기본형 화환입니다.',
-    },
-    {
-        id: 5,
-        name: '고급 근조 화환',
-        subtitle: '최고급 생화로 제작되는 프리미엄 화환',
-        price: 170000,
-        images: [
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-            '/images/flower-wreath.png',
-        ],
-        origin: '생화 (국화, 백합, 글라디올라스, 카네이션 등): 국산, 수입산\n리본 및 부자재: 국산',
-        usage: '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품',
-        features: '최고급 생화만을 사용하여 제작하는 프리미엄 근조 화환입니다.',
-    },
-];
+interface FlowerProduct {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    discount_price: number | null;
+    images: string[];
+}
 
 export default function FlowerDetailPage() {
     const params = useParams();
     const router = useRouter();
     const bugoId = params.id as string;
-    const productId = parseInt(params.productId as string);
+    const productId = params.productId as string;
     const [selectedImage, setSelectedImage] = useState(0);
+    const [product, setProduct] = useState<FlowerProduct | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const product = flowerProducts.find(p => p.id === productId);
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const { data } = await supabase
+                    .from('flower_products')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
+                setProduct(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (productId) fetchProduct();
+    }, [productId]);
+
+    if (loading) {
+        return (
+            <div className="flower-detail-error">
+                <p>로딩 중...</p>
+            </div>
+        );
+    }
 
     if (!product) {
         return (
@@ -100,6 +58,11 @@ export default function FlowerDetailPage() {
             </div>
         );
     }
+
+    // 상품 상세 정보 (기본값 사용)
+    const origin = '생화 (국화, 백합, 글라디올라스 등): 중국산, 베트남산\n리본 및 부자재: 국산';
+    const usage = '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품';
+    const features = product.description || '정성을 담아 제작되는 화환입니다.';
 
     return (
         <div className="flower-detail-page">
@@ -115,15 +78,15 @@ export default function FlowerDetailPage() {
             {/* 상품명 */}
             <div className="product-title-section">
                 <h2 className="product-name">{product.name}</h2>
-                <p className="product-subtitle">{product.subtitle}</p>
+                <p className="product-subtitle">{product.description}</p>
             </div>
 
             {/* 이미지 */}
             <div className="product-image-section">
                 <div className="main-image">
-                    <img src={product.images[selectedImage]} alt={product.name} />
+                    <img src={product.images?.[selectedImage] || '/images/flower-wreath.png'} alt={product.name} />
                 </div>
-                {product.images.length > 1 && (
+                {product.images && product.images.length > 1 && (
                     <div className="image-thumbnails">
                         {product.images.map((img, idx) => (
                             <button
@@ -144,17 +107,17 @@ export default function FlowerDetailPage() {
 
                 <div className="info-item">
                     <span className="info-label">[ 원산지 ]</span>
-                    <p className="info-content">{product.origin}</p>
+                    <p className="info-content">{origin}</p>
                 </div>
 
                 <div className="info-item">
                     <span className="info-label">[ 상품용도 ]</span>
-                    <p className="info-content">{product.usage}</p>
+                    <p className="info-content">{usage}</p>
                 </div>
 
                 <div className="info-item">
                     <span className="info-label">[ 상품특징 ]</span>
-                    <p className="info-content">{product.features}</p>
+                    <p className="info-content">{features}</p>
                 </div>
             </div>
 
