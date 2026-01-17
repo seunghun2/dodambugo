@@ -178,19 +178,61 @@ export default function AdminProductsPage() {
         }
     };
 
+    const [uploading, setUploading] = useState(false);
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (!files) return;
+        if (!files || files.length === 0) return;
 
-        // 실제 구현 시 Supabase Storage로 업로드
-        // 지금은 placeholder URL 사용
+        setUploading(true);
         const newImages = [...(editForm.images || [])];
-        for (let i = 0; i < files.length; i++) {
-            // TODO: 실제 업로드 구현
-            newImages.push(`/images/flower-${Date.now()}-${i}.png`);
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `product_${Date.now()}_${i}.${fileExt}`;
+                const filePath = `products/${fileName}`;
+
+                // Supabase Storage에 업로드
+                const { error: uploadError } = await supabase.storage
+                    .from('images')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    // Storage 버킷이 없으면 안내
+                    if (uploadError.message.includes('not found') || uploadError.message.includes('Bucket')) {
+                        alert('Supabase Storage에 "images" 버킷을 먼저 생성해주세요.\n\nStorage > New Bucket > "images" (public)');
+                        break;
+                    }
+                    throw uploadError;
+                }
+
+                // Public URL 가져오기
+                const { data: urlData } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(filePath);
+
+                if (urlData?.publicUrl) {
+                    newImages.push(urlData.publicUrl);
+                }
+            }
+
+            setEditForm({ ...editForm, images: newImages });
+        } catch (err: any) {
+            console.error('Image upload failed:', err);
+            alert('이미지 업로드 실패: ' + (err.message || '알 수 없는 오류'));
+        } finally {
+            setUploading(false);
+            // 파일 인풋 초기화
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
-        setEditForm({ ...editForm, images: newImages });
-        alert('이미지 업로드는 추후 Supabase Storage 연동 후 활성화됩니다.');
     };
 
     const removeImage = (index: number) => {
@@ -461,9 +503,19 @@ export default function AdminProductsPage() {
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
                                                 className="btn-add-image"
+                                                disabled={uploading}
                                             >
-                                                <span className="material-symbols-outlined">add_photo_alternate</span>
-                                                이미지 추가
+                                                {uploading ? (
+                                                    <>
+                                                        <span className="material-symbols-outlined spinning">progress_activity</span>
+                                                        업로드중...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="material-symbols-outlined">add_photo_alternate</span>
+                                                        이미지 추가
+                                                    </>
+                                                )}
                                             </button>
                                             <input
                                                 ref={fileInputRef}
