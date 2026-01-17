@@ -479,41 +479,182 @@ export default function AdminProductsPage() {
                                     <div className="detail-section">
                                         <label>노출 지역 설정</label>
                                         <small>비어있으면 전국 노출</small>
-                                        <div className="form-group">
-                                            <label>노출 지역 (쉼표로 구분)</label>
-                                            <input
-                                                type="text"
-                                                value={(editForm.include_regions || []).join(', ')}
-                                                onChange={(e) => setEditForm({
-                                                    ...editForm,
-                                                    include_regions: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                                                })}
-                                                placeholder="예: 서울, 경기, 인천"
-                                            />
+
+                                        {/* 노출 지역 */}
+                                        <div className="form-group tag-input-group">
+                                            <label>노출 지역</label>
+                                            <div className="input-with-btn">
+                                                <input
+                                                    type="text"
+                                                    id="include-region-input"
+                                                    placeholder="예: 서울"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            const input = e.target as HTMLInputElement;
+                                                            const value = input.value.trim();
+                                                            if (value && !(editForm.include_regions || []).includes(value)) {
+                                                                setEditForm({
+                                                                    ...editForm,
+                                                                    include_regions: [...(editForm.include_regions || []), value]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-tag-add"
+                                                    onClick={() => {
+                                                        const input = document.getElementById('include-region-input') as HTMLInputElement;
+                                                        const value = input?.value.trim();
+                                                        if (value && !(editForm.include_regions || []).includes(value)) {
+                                                            setEditForm({
+                                                                ...editForm,
+                                                                include_regions: [...(editForm.include_regions || []), value]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                >
+                                                    등록
+                                                </button>
+                                            </div>
+                                            {(editForm.include_regions || []).length > 0 && (
+                                                <div className="tag-list">
+                                                    {(editForm.include_regions || []).map((region, i) => (
+                                                        <span key={i} className="tag include">
+                                                            {region}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setEditForm({
+                                                                    ...editForm,
+                                                                    include_regions: (editForm.include_regions || []).filter((_, idx) => idx !== i)
+                                                                })}
+                                                            >×</button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="form-group">
-                                            <label>제외 지역 (쉼표로 구분)</label>
-                                            <input
-                                                type="text"
-                                                value={(editForm.exclude_regions || []).join(', ')}
-                                                onChange={(e) => setEditForm({
-                                                    ...editForm,
-                                                    exclude_regions: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                                                })}
-                                                placeholder="예: 제주, 울릉도"
-                                            />
+
+                                        {/* 제외 지역 */}
+                                        <div className="form-group tag-input-group">
+                                            <label>제외 지역</label>
+                                            <div className="input-with-btn">
+                                                <input
+                                                    type="text"
+                                                    id="exclude-region-input"
+                                                    placeholder="예: 제주"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            const input = e.target as HTMLInputElement;
+                                                            const value = input.value.trim();
+                                                            if (value && !(editForm.exclude_regions || []).includes(value)) {
+                                                                setEditForm({
+                                                                    ...editForm,
+                                                                    exclude_regions: [...(editForm.exclude_regions || []), value]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-tag-add"
+                                                    onClick={() => {
+                                                        const input = document.getElementById('exclude-region-input') as HTMLInputElement;
+                                                        const value = input?.value.trim();
+                                                        if (value && !(editForm.exclude_regions || []).includes(value)) {
+                                                            setEditForm({
+                                                                ...editForm,
+                                                                exclude_regions: [...(editForm.exclude_regions || []), value]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                >
+                                                    등록
+                                                </button>
+                                            </div>
+                                            {(editForm.exclude_regions || []).length > 0 && (
+                                                <div className="tag-list">
+                                                    {(editForm.exclude_regions || []).map((region, i) => (
+                                                        <span key={i} className="tag exclude">
+                                                            {region}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setEditForm({
+                                                                    ...editForm,
+                                                                    exclude_regions: (editForm.exclude_regions || []).filter((_, idx) => idx !== i)
+                                                                })}
+                                                            >×</button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="form-group">
-                                            <label>제외 장례식장 ID (쉼표로 구분)</label>
-                                            <input
-                                                type="text"
-                                                value={(editForm.exclude_facilities || []).join(', ')}
-                                                onChange={(e) => setEditForm({
-                                                    ...editForm,
-                                                    exclude_facilities: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                                                })}
-                                                placeholder="장례식장 ID 입력"
-                                            />
+
+                                        {/* 제외 장례식장 */}
+                                        <div className="form-group tag-input-group">
+                                            <label>제외 장례식장</label>
+                                            <div className="input-with-btn">
+                                                <input
+                                                    type="text"
+                                                    id="exclude-facility-input"
+                                                    placeholder="장례식장명 입력"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            const input = e.target as HTMLInputElement;
+                                                            const value = input.value.trim();
+                                                            if (value && !(editForm.exclude_facilities || []).includes(value)) {
+                                                                setEditForm({
+                                                                    ...editForm,
+                                                                    exclude_facilities: [...(editForm.exclude_facilities || []), value]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-tag-add"
+                                                    onClick={() => {
+                                                        const input = document.getElementById('exclude-facility-input') as HTMLInputElement;
+                                                        const value = input?.value.trim();
+                                                        if (value && !(editForm.exclude_facilities || []).includes(value)) {
+                                                            setEditForm({
+                                                                ...editForm,
+                                                                exclude_facilities: [...(editForm.exclude_facilities || []), value]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                >
+                                                    등록
+                                                </button>
+                                            </div>
+                                            {(editForm.exclude_facilities || []).length > 0 && (
+                                                <div className="tag-list">
+                                                    {(editForm.exclude_facilities || []).map((facility, i) => (
+                                                        <span key={i} className="tag facility">
+                                                            {facility}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setEditForm({
+                                                                    ...editForm,
+                                                                    exclude_facilities: (editForm.exclude_facilities || []).filter((_, idx) => idx !== i)
+                                                                })}
+                                                            >×</button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -526,6 +667,15 @@ export default function AdminProductsPage() {
                                             <span className="material-symbols-outlined">save</span>
                                             {saving ? '저장 중...' : (isCreating ? '등록하기' : '저장하기')}
                                         </button>
+                                        {!isCreating && selectedProduct && (
+                                            <button
+                                                onClick={() => window.open(`/view/test/flower/${selectedProduct.id}`, '_blank')}
+                                                className="btn-action preview"
+                                            >
+                                                <span className="material-symbols-outlined">visibility</span>
+                                                미리보기
+                                            </button>
+                                        )}
                                         {!isCreating && (
                                             <button onClick={handleDelete} className="btn-action danger">
                                                 <span className="material-symbols-outlined">delete</span>
@@ -691,6 +841,79 @@ export default function AdminProductsPage() {
                 .btn-add-image:hover {
                     border-color: #f59e0b;
                     color: #f59e0b;
+                }
+                .input-with-btn {
+                    display: flex;
+                    gap: 8px;
+                }
+                .input-with-btn input {
+                    flex: 1;
+                }
+                .btn-tag-add {
+                    padding: 8px 16px;
+                    background: #3b82f6;
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    cursor: pointer;
+                    white-space: nowrap;
+                }
+                .btn-tag-add:hover {
+                    background: #2563eb;
+                }
+                .tag-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    margin-top: 8px;
+                }
+                .tag {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 13px;
+                }
+                .tag.include {
+                    background: #dcfce7;
+                    color: #16a34a;
+                }
+                .tag.exclude {
+                    background: #fee2e2;
+                    color: #dc2626;
+                }
+                .tag.facility {
+                    background: #fef3c7;
+                    color: #d97706;
+                }
+                .tag button {
+                    width: 16px;
+                    height: 16px;
+                    background: rgba(0,0,0,0.2);
+                    border: none;
+                    border-radius: 50%;
+                    color: currentColor;
+                    font-size: 12px;
+                    line-height: 1;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .tag button:hover {
+                    background: rgba(0,0,0,0.3);
+                }
+                .tag-input-group {
+                    margin-bottom: 16px;
+                }
+                .btn-action.preview {
+                    background: #3b82f6;
+                    color: #fff;
+                }
+                .btn-action.preview:hover {
+                    background: #2563eb;
                 }
             `}</style>
         </div>
