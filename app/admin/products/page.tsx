@@ -17,6 +17,8 @@ interface FlowerProduct {
     exclude_regions: string[];
     exclude_facilities: string[];
     sort_order: number;
+    regional_prices: Record<string, number>;
+    special_surcharges: Record<string, number>;
     created_at: string;
     updated_at: string;
 }
@@ -26,6 +28,16 @@ interface Category {
     name: string;
     sort_order: number;
 }
+
+const REGIONS = [
+    '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
+    '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'
+];
+
+const DEFAULT_REGIONAL_PRICES: Record<string, number> = {
+    '서울': 0, '경기': 0, '인천': 0, '부산': 0, '대구': 0, '광주': 0, '대전': 0, '울산': 0, '세종': 0,
+    '강원': 0, '충북': 0, '충남': 0, '전북': 0, '전남': 0, '경북': 0, '경남': 0, '제주': 0
+};
 
 const emptyProduct: Partial<FlowerProduct> = {
     name: '',
@@ -39,6 +51,8 @@ const emptyProduct: Partial<FlowerProduct> = {
     exclude_regions: [],
     exclude_facilities: [],
     sort_order: 0,
+    regional_prices: { ...DEFAULT_REGIONAL_PRICES },
+    special_surcharges: {},
 };
 
 export default function AdminProductsPage() {
@@ -121,6 +135,8 @@ export default function AdminProductsPage() {
                         exclude_regions: editForm.exclude_regions || [],
                         exclude_facilities: editForm.exclude_facilities || [],
                         sort_order: editForm.sort_order || 0,
+                        regional_prices: editForm.regional_prices || DEFAULT_REGIONAL_PRICES,
+                        special_surcharges: editForm.special_surcharges || {},
                     });
 
                 if (error) throw error;
@@ -140,6 +156,8 @@ export default function AdminProductsPage() {
                         exclude_regions: editForm.exclude_regions || [],
                         exclude_facilities: editForm.exclude_facilities || [],
                         sort_order: editForm.sort_order || 0,
+                        regional_prices: editForm.regional_prices || DEFAULT_REGIONAL_PRICES,
+                        special_surcharges: editForm.special_surcharges || {},
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', selectedProduct.id);
@@ -525,6 +543,34 @@ export default function AdminProductsPage() {
                                                 onChange={handleImageUpload}
                                                 style={{ display: 'none' }}
                                             />
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <label>시/도별 추가금</label>
+                                        <small>기본가격에 더해지는 지역별 추가금 (0이면 기본가 적용)</small>
+                                        <div className="regional-price-grid">
+                                            {REGIONS.map(region => (
+                                                <div key={region} className="regional-price-item">
+                                                    <span className="region-name">{region}</span>
+                                                    <div className="price-input-wrap">
+                                                        <span>+</span>
+                                                        <input
+                                                            type="number"
+                                                            value={(editForm.regional_prices || {})[region] || 0}
+                                                            onChange={(e) => setEditForm({
+                                                                ...editForm,
+                                                                regional_prices: {
+                                                                    ...(editForm.regional_prices || DEFAULT_REGIONAL_PRICES),
+                                                                    [region]: parseInt(e.target.value) || 0
+                                                                }
+                                                            })}
+                                                            placeholder="0"
+                                                        />
+                                                        <span>원</span>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
@@ -966,6 +1012,46 @@ export default function AdminProductsPage() {
                 }
                 .btn-action.preview:hover {
                     background: #2563eb;
+                }
+                .regional-price-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                    margin-top: 12px;
+                }
+                .regional-price-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    padding: 8px 10px;
+                    background: #f8fafc;
+                    border-radius: 6px;
+                }
+                .region-name {
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: #374151;
+                    min-width: 40px;
+                }
+                .price-input-wrap {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 13px;
+                    color: #6b7280;
+                }
+                .price-input-wrap input {
+                    width: 70px;
+                    padding: 4px 6px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    text-align: right;
+                }
+                .price-input-wrap input:focus {
+                    outline: none;
+                    border-color: #f59e0b;
                 }
             `}</style>
         </div>
