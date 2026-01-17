@@ -1,0 +1,698 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+
+interface FlowerProduct {
+    id: string;
+    name: string;
+    price: number;
+    discount_price: number | null;
+    category: string;
+    images: string[];
+    description: string | null;
+    is_active: boolean;
+    include_regions: string[];
+    exclude_regions: string[];
+    exclude_facilities: string[];
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Category {
+    id: string;
+    name: string;
+    sort_order: number;
+}
+
+const emptyProduct: Partial<FlowerProduct> = {
+    name: '',
+    price: 0,
+    discount_price: null,
+    category: '근조화환',
+    images: [],
+    description: '',
+    is_active: true,
+    include_regions: [],
+    exclude_regions: [],
+    exclude_facilities: [],
+    sort_order: 0,
+};
+
+export default function AdminProductsPage() {
+    const [products, setProducts] = useState<FlowerProduct[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedProduct, setSelectedProduct] = useState<FlowerProduct | null>(null);
+    const [editForm, setEditForm] = useState<Partial<FlowerProduct>>(emptyProduct);
+    const [isCreating, setIsCreating] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [categoryFilter, setCategoryFilter] = useState('전체');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        fetchProducts();
+        fetchCategories();
+    }, []);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('flower_products')
+            .select('*')
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching products:', error);
+        } else {
+            setProducts(data || []);
+        }
+        setLoading(false);
+    };
+
+    const fetchCategories = async () => {
+        const { data } = await supabase
+            .from('flower_categories')
+            .select('*')
+            .order('sort_order');
+        setCategories(data || []);
+    };
+
+    const filteredProducts = products.filter(p =>
+        categoryFilter === '전체' || p.category === categoryFilter
+    );
+
+    const handleSelectProduct = (product: FlowerProduct) => {
+        setSelectedProduct(product);
+        setEditForm(product);
+        setIsCreating(false);
+    };
+
+    const handleCreateNew = () => {
+        setSelectedProduct(null);
+        setEditForm(emptyProduct);
+        setIsCreating(true);
+    };
+
+    const handleSave = async () => {
+        if (!editForm.name || !editForm.price) {
+            alert('상품명과 가격은 필수입니다.');
+            return;
+        }
+
+        setSaving(true);
+
+        try {
+            if (isCreating) {
+                const { error } = await supabase
+                    .from('flower_products')
+                    .insert({
+                        name: editForm.name,
+                        price: editForm.price,
+                        discount_price: editForm.discount_price || null,
+                        category: editForm.category,
+                        images: editForm.images || [],
+                        description: editForm.description || '',
+                        is_active: editForm.is_active ?? true,
+                        include_regions: editForm.include_regions || [],
+                        exclude_regions: editForm.exclude_regions || [],
+                        exclude_facilities: editForm.exclude_facilities || [],
+                        sort_order: editForm.sort_order || 0,
+                    });
+
+                if (error) throw error;
+                alert('상품이 등록되었습니다.');
+            } else if (selectedProduct) {
+                const { error } = await supabase
+                    .from('flower_products')
+                    .update({
+                        name: editForm.name,
+                        price: editForm.price,
+                        discount_price: editForm.discount_price || null,
+                        category: editForm.category,
+                        images: editForm.images || [],
+                        description: editForm.description || '',
+                        is_active: editForm.is_active,
+                        include_regions: editForm.include_regions || [],
+                        exclude_regions: editForm.exclude_regions || [],
+                        exclude_facilities: editForm.exclude_facilities || [],
+                        sort_order: editForm.sort_order || 0,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', selectedProduct.id);
+
+                if (error) throw error;
+                alert('상품이 수정되었습니다.');
+            }
+
+            fetchProducts();
+            setIsCreating(false);
+            setSelectedProduct(null);
+            setEditForm(emptyProduct);
+        } catch (err: any) {
+            alert('저장 중 오류: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedProduct) return;
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+
+        const { error } = await supabase
+            .from('flower_products')
+            .delete()
+            .eq('id', selectedProduct.id);
+
+        if (error) {
+            alert('삭제 오류: ' + error.message);
+        } else {
+            alert('삭제되었습니다.');
+            setSelectedProduct(null);
+            setEditForm(emptyProduct);
+            fetchProducts();
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        // 실제 구현 시 Supabase Storage로 업로드
+        // 지금은 placeholder URL 사용
+        const newImages = [...(editForm.images || [])];
+        for (let i = 0; i < files.length; i++) {
+            // TODO: 실제 업로드 구현
+            newImages.push(`/images/flower-${Date.now()}-${i}.png`);
+        }
+        setEditForm({ ...editForm, images: newImages });
+        alert('이미지 업로드는 추후 Supabase Storage 연동 후 활성화됩니다.');
+    };
+
+    const removeImage = (index: number) => {
+        const newImages = [...(editForm.images || [])];
+        newImages.splice(index, 1);
+        setEditForm({ ...editForm, images: newImages });
+    };
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('ko-KR').format(price);
+    };
+
+    return (
+        <div className="admin-pc">
+            {/* 사이드바 */}
+            <aside className="admin-sidebar">
+                <div className="sidebar-logo">
+                    <Link href="/">마음부고</Link>
+                </div>
+                <nav className="sidebar-nav">
+                    <Link href="/admin/bugo" className="nav-item">
+                        <span className="material-symbols-outlined">description</span>
+                        <span>부고장 관리</span>
+                    </Link>
+                    <Link href="/admin/flower-orders" className="nav-item">
+                        <span className="material-symbols-outlined">local_florist</span>
+                        <span>화환 주문</span>
+                    </Link>
+                    <Link href="/admin/facilities" className="nav-item">
+                        <span className="material-symbols-outlined">apartment</span>
+                        <span>장례식장 정보</span>
+                    </Link>
+                    <Link href="/admin/products" className="nav-item active">
+                        <span className="material-symbols-outlined">inventory_2</span>
+                        <span>상품 등록</span>
+                    </Link>
+                    <Link href="/admin/inquiries" className="nav-item">
+                        <span className="material-symbols-outlined">mail</span>
+                        <span>문의 관리</span>
+                    </Link>
+                </nav>
+            </aside>
+
+            {/* 메인 콘텐츠 */}
+            <main className="admin-main">
+                <header className="admin-top-header">
+                    <h1>상품 관리</h1>
+                    <div className="header-actions">
+                        <span className="total-count">총 {filteredProducts.length}건</span>
+                        <button onClick={handleCreateNew} className="btn-primary">
+                            <span className="material-symbols-outlined">add</span>
+                            상품 등록
+                        </button>
+                        <button onClick={fetchProducts} className="btn-refresh">
+                            <span className="material-symbols-outlined">refresh</span>
+                            새로고침
+                        </button>
+                    </div>
+                </header>
+
+                <div className="admin-content-area">
+                    {/* 상품 목록 */}
+                    <div className="inquiry-panel wide">
+                        <div className="panel-header">
+                            <span>상품 목록</span>
+                            <div className="category-filter">
+                                <select
+                                    value={categoryFilter}
+                                    onChange={(e) => setCategoryFilter(e.target.value)}
+                                >
+                                    <option value="전체">전체</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {loading ? (
+                            <div className="panel-loading">
+                                <span className="material-symbols-outlined spinning">progress_activity</span>
+                                불러오는 중...
+                            </div>
+                        ) : (
+                            <div className="inquiry-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ width: '60px' }}>이미지</th>
+                                            <th>상품명</th>
+                                            <th>카테고리</th>
+                                            <th>가격</th>
+                                            <th>할인가</th>
+                                            <th>상태</th>
+                                            <th>등록일</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredProducts.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                                    등록된 상품이 없습니다
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredProducts.map((product) => (
+                                                <tr
+                                                    key={product.id}
+                                                    className={selectedProduct?.id === product.id ? 'selected' : ''}
+                                                    onClick={() => handleSelectProduct(product)}
+                                                >
+                                                    <td>
+                                                        <div className="product-thumb">
+                                                            {product.images?.[0] ? (
+                                                                <img src={product.images[0]} alt={product.name} />
+                                                            ) : (
+                                                                <span className="material-symbols-outlined">image</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="name-cell">{product.name}</td>
+                                                    <td>{product.category}</td>
+                                                    <td className="number-cell">{formatPrice(product.price)}원</td>
+                                                    <td className="number-cell">
+                                                        {product.discount_price ? formatPrice(product.discount_price) + '원' : '-'}
+                                                    </td>
+                                                    <td>
+                                                        <span className={`status-badge ${product.is_active ? 'active' : 'inactive'}`}>
+                                                            {product.is_active ? '노출' : '숨김'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="date-cell">{formatDate(product.created_at)}</td>
+                                                    <td className="arrow-cell">
+                                                        <span className="material-symbols-outlined">chevron_right</span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 상품 상세/등록 패널 */}
+                    <div className="detail-panel">
+                        {(selectedProduct || isCreating) ? (
+                            <>
+                                <div className="panel-header">
+                                    <span>{isCreating ? '상품 등록' : '상품 수정'}</span>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedProduct(null);
+                                            setIsCreating(false);
+                                            setEditForm(emptyProduct);
+                                        }}
+                                        className="btn-close"
+                                    >
+                                        <span className="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                                <div className="detail-content">
+                                    <div className="detail-section">
+                                        <div className="form-group">
+                                            <label>상품명 *</label>
+                                            <input
+                                                type="text"
+                                                value={editForm.name || ''}
+                                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                                placeholder="상품명 입력"
+                                            />
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>가격 *</label>
+                                                <input
+                                                    type="number"
+                                                    value={editForm.price || ''}
+                                                    onChange={(e) => setEditForm({ ...editForm, price: parseInt(e.target.value) || 0 })}
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>할인가격</label>
+                                                <input
+                                                    type="number"
+                                                    value={editForm.discount_price || ''}
+                                                    onChange={(e) => setEditForm({ ...editForm, discount_price: parseInt(e.target.value) || null })}
+                                                    placeholder="할인 없음"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>카테고리</label>
+                                            <select
+                                                value={editForm.category || '근조화환'}
+                                                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                                            >
+                                                {categories.map(cat => (
+                                                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>상품 설명</label>
+                                            <textarea
+                                                value={editForm.description || ''}
+                                                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                                placeholder="상품 설명 입력"
+                                                rows={3}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>노출 상태</label>
+                                            <div className="toggle-group">
+                                                <label className="toggle-label">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={editForm.is_active ?? true}
+                                                        onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
+                                                    />
+                                                    <span className="toggle-text">
+                                                        {editForm.is_active ? '노출 중' : '숨김 처리'}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>정렬 순서</label>
+                                            <input
+                                                type="number"
+                                                value={editForm.sort_order || 0}
+                                                onChange={(e) => setEditForm({ ...editForm, sort_order: parseInt(e.target.value) || 0 })}
+                                                placeholder="0"
+                                            />
+                                            <small>숫자가 작을수록 먼저 표시됩니다</small>
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <label>상품 이미지</label>
+                                        <div className="image-upload-area">
+                                            {editForm.images?.map((img, i) => (
+                                                <div key={i} className="image-preview">
+                                                    <img src={img} alt={`이미지 ${i + 1}`} />
+                                                    <button onClick={() => removeImage(i)} className="btn-remove-img">
+                                                        <span className="material-symbols-outlined">close</span>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="btn-add-image"
+                                            >
+                                                <span className="material-symbols-outlined">add_photo_alternate</span>
+                                                이미지 추가
+                                            </button>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={handleImageUpload}
+                                                style={{ display: 'none' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <label>노출 지역 설정</label>
+                                        <small>비어있으면 전국 노출</small>
+                                        <div className="form-group">
+                                            <label>노출 지역 (쉼표로 구분)</label>
+                                            <input
+                                                type="text"
+                                                value={(editForm.include_regions || []).join(', ')}
+                                                onChange={(e) => setEditForm({
+                                                    ...editForm,
+                                                    include_regions: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                                                })}
+                                                placeholder="예: 서울, 경기, 인천"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>제외 지역 (쉼표로 구분)</label>
+                                            <input
+                                                type="text"
+                                                value={(editForm.exclude_regions || []).join(', ')}
+                                                onChange={(e) => setEditForm({
+                                                    ...editForm,
+                                                    exclude_regions: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                                                })}
+                                                placeholder="예: 제주, 울릉도"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>제외 장례식장 ID (쉼표로 구분)</label>
+                                            <input
+                                                type="text"
+                                                value={(editForm.exclude_facilities || []).join(', ')}
+                                                onChange={(e) => setEditForm({
+                                                    ...editForm,
+                                                    exclude_facilities: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                                                })}
+                                                placeholder="장례식장 ID 입력"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-actions">
+                                        <button
+                                            onClick={handleSave}
+                                            className="btn-action primary"
+                                            disabled={saving}
+                                        >
+                                            <span className="material-symbols-outlined">save</span>
+                                            {saving ? '저장 중...' : (isCreating ? '등록하기' : '저장하기')}
+                                        </button>
+                                        {!isCreating && (
+                                            <button onClick={handleDelete} className="btn-action danger">
+                                                <span className="material-symbols-outlined">delete</span>
+                                                삭제하기
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="panel-empty">
+                                <span className="material-symbols-outlined">inventory_2</span>
+                                <p>상품을 선택하거나<br />새 상품을 등록하세요</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            <style jsx>{`
+                .btn-primary {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 16px;
+                    background: #f59e0b;
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    cursor: pointer;
+                }
+                .btn-primary:hover {
+                    background: #d97706;
+                }
+                .category-filter select {
+                    padding: 6px 12px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                }
+                .product-thumb {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 6px;
+                    background: #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+                .product-thumb img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .product-thumb .material-symbols-outlined {
+                    color: #94a3b8;
+                }
+                .status-badge {
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                }
+                .status-badge.active {
+                    background: #dcfce7;
+                    color: #16a34a;
+                }
+                .status-badge.inactive {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+                .form-group {
+                    margin-bottom: 16px;
+                }
+                .form-group label {
+                    display: block;
+                    font-size: 13px;
+                    color: #64748b;
+                    margin-bottom: 6px;
+                }
+                .form-group input,
+                .form-group select,
+                .form-group textarea {
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                }
+                .form-group small {
+                    display: block;
+                    font-size: 12px;
+                    color: #94a3b8;
+                    margin-top: 4px;
+                }
+                .form-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                }
+                .toggle-group {
+                    display: flex;
+                    gap: 12px;
+                }
+                .toggle-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                }
+                .image-upload-area {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-top: 8px;
+                }
+                .image-preview {
+                    position: relative;
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+                .image-preview img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .btn-remove-img {
+                    position: absolute;
+                    top: 4px;
+                    right: 4px;
+                    width: 20px;
+                    height: 20px;
+                    background: rgba(0,0,0,0.6);
+                    color: #fff;
+                    border: none;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                }
+                .btn-remove-img .material-symbols-outlined {
+                    font-size: 14px;
+                }
+                .btn-add-image {
+                    width: 80px;
+                    height: 80px;
+                    border: 2px dashed #e2e8f0;
+                    border-radius: 8px;
+                    background: transparent;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
+                    cursor: pointer;
+                    color: #94a3b8;
+                    font-size: 11px;
+                }
+                .btn-add-image:hover {
+                    border-color: #f59e0b;
+                    color: #f59e0b;
+                }
+            `}</style>
+        </div>
+    );
+}

@@ -144,6 +144,10 @@ export default function AdminBugoPage() {
                         <span className="material-symbols-outlined">apartment</span>
                         <span>장례식장 정보</span>
                     </Link>
+                    <Link href="/admin/products" className="nav-item">
+                        <span className="material-symbols-outlined">inventory_2</span>
+                        <span>상품 등록</span>
+                    </Link>
                     <Link href="/admin/inquiries" className="nav-item">
                         <span className="material-symbols-outlined">mail</span>
                         <span>문의 관리</span>
