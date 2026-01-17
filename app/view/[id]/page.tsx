@@ -245,16 +245,51 @@ export default function ViewPage() {
                     console.log('Error fetching flower orders');
                 }
 
-                // 화환 상품 조회 (DB에서)
+                // 화환 상품 조회 (DB에서) + 지역 필터링
                 try {
                     const { data: productsData } = await supabase
                         .from('flower_products')
                         .select('*')
                         .eq('is_active', true)
                         .order('sort_order', { ascending: true });
+
                     if (productsData && productsData.length > 0) {
-                        setFlowerProducts(productsData);
-                        setSelectedFlower(productsData[0].id); // 첫 번째 상품 ID 선택
+                        // 장례식장 주소 기반 필터링
+                        const funeralAddress = data.address || data.funeral_home || '';
+                        const funeralHomeName = data.funeral_home || '';
+
+                        const filteredProducts = productsData.filter(product => {
+                            // 제외 장례식장 체크
+                            if (product.exclude_facilities && product.exclude_facilities.length > 0) {
+                                const isExcludedFacility = product.exclude_facilities.some((facility: string) =>
+                                    funeralHomeName.includes(facility) || facility.includes(funeralHomeName)
+                                );
+                                if (isExcludedFacility) return false;
+                            }
+
+                            // 제외 지역 체크 (시/군/구 키워드 매칭)
+                            if (product.exclude_regions && product.exclude_regions.length > 0) {
+                                const isExcludedRegion = product.exclude_regions.some((region: string) =>
+                                    funeralAddress.includes(region)
+                                );
+                                if (isExcludedRegion) return false;
+                            }
+
+                            // 노출 지역 체크 (비어있으면 전국 노출)
+                            if (product.include_regions && product.include_regions.length > 0) {
+                                const isIncludedRegion = product.include_regions.some((region: string) =>
+                                    funeralAddress.includes(region)
+                                );
+                                if (!isIncludedRegion) return false;
+                            }
+
+                            return true;
+                        });
+
+                        setFlowerProducts(filteredProducts);
+                        if (filteredProducts.length > 0) {
+                            setSelectedFlower(filteredProducts[0].id);
+                        }
                     }
                 } catch (err) {
                     console.log('Error fetching flower products');
