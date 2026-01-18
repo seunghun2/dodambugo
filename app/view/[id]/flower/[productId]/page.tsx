@@ -22,6 +22,8 @@ export default function FlowerDetailPage() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [product, setProduct] = useState<FlowerProduct | null>(null);
     const [loading, setLoading] = useState(true);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -65,8 +67,6 @@ export default function FlowerDetailPage() {
     const features = product.description || '정성을 담아 제작되는 화환입니다.';
 
     // 터치 스와이프 로직
-    const [touchStart, setTouchStart] = useState(0);
-    const [touchEnd, setTouchEnd] = useState(0);
 
     const handleTouchStart = (e: React.TouchEvent) => {
         setTouchStart(e.targetTouches[0].clientX);
