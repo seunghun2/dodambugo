@@ -78,7 +78,7 @@ export default function WriteFormPage() {
     // Form 데이터
     const [formData, setFormData] = useState({
         applicant_name: '',
-        phone_password: '',
+        applicant_phone: '',
         deceased_name: '',
         gender: '',
         relationship: '',
@@ -220,7 +220,7 @@ export default function WriteFormPage() {
                     relationship: relationship,
                     primary_mourner: primaryMourner,
                     applicant_name: parsed.applicant_name || '',
-                    phone_password: parsed.phone_password || '',
+                    applicant_phone: parsed.applicant_phone || '',
                 }));
 
                 // 추가 상주 복사
@@ -336,7 +336,7 @@ export default function WriteFormPage() {
                 // formData 설정
                 setFormData({
                     applicant_name: data.applicant_name || '',
-                    phone_password: data.phone_password || '',
+                    applicant_phone: data.applicant_phone || '',
                     deceased_name: data.deceased_name || '',
                     gender: data.gender || '',
                     relationship: data.relationship || '',
@@ -637,7 +637,7 @@ export default function WriteFormPage() {
         const newErrors: Record<string, string> = {};
 
         if (!formData.applicant_name) newErrors.applicant_name = '신청자 성함을 입력해주세요';
-        if (!formData.phone_password) newErrors.phone_password = '휴대번호 뒷자리를 입력해주세요';
+        if (!formData.applicant_phone || formData.applicant_phone.replace(/-/g, '').length !== 11) newErrors.applicant_phone = '휴대번호를 정확히 입력해주세요';
         if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
         if (!formData.age) newErrors.age = '연세를 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
@@ -707,7 +707,7 @@ export default function WriteFormPage() {
                 bugo_number: bugoNumber,
                 template_id: templateId,
                 applicant_name: formData.applicant_name,
-                phone_password: formData.phone_password,
+                applicant_phone: formData.applicant_phone,
                 deceased_name: formData.deceased_name,
                 gender: formData.gender,
                 relationship: formData.relationship || '',
@@ -872,20 +872,26 @@ export default function WriteFormPage() {
                                             />
                                             {errors.applicant_name && <p className="field-error">{errors.applicant_name}</p>}
                                         </div>
-                                        <div className="form-group" data-field="phone_password">
-                                            <label className="form-label required">휴대번호 뒷자리</label>
+                                        <div className="form-group" data-field="applicant_phone">
+                                            <label className="form-label required">휴대번호</label>
                                             <input
-                                                type="text"
-                                                name="phone_password"
-                                                className={`form-input ${errors.phone_password ? 'error' : ''}`}
-                                                placeholder="휴대번호 뒷 4자리"
-                                                maxLength={4}
+                                                type="tel"
+                                                name="applicant_phone"
+                                                className={`form-input ${errors.applicant_phone ? 'error' : ''}`}
+                                                placeholder="010-1234-5678"
+                                                maxLength={13}
                                                 inputMode="numeric"
-                                                value={formData.phone_password}
-                                                onChange={handleChange}
+                                                value={formData.applicant_phone}
+                                                onChange={(e) => {
+                                                    const formatted = formatPhone(e.target.value);
+                                                    setFormData(prev => ({ ...prev, applicant_phone: formatted }));
+                                                    if (errors.applicant_phone) {
+                                                        setErrors(prev => ({ ...prev, applicant_phone: '' }));
+                                                    }
+                                                }}
                                             />
-                                            {errors.phone_password && <p className="field-error">{errors.phone_password}</p>}
-                                            {!errors.phone_password && <p className="form-hint">부고장 수정 시 사용됩니다 (4자리 숫자)</p>}
+                                            {errors.applicant_phone && <p className="field-error">{errors.applicant_phone}</p>}
+                                            {!errors.applicant_phone && <p className="form-hint">화환 주문 알림 및 부고장 수정 시 사용됩니다</p>}
                                         </div>
                                     </div>
 
