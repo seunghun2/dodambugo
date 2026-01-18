@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendFlowerOrderNotification } from '@/lib/slack';
+import { sendFlowerOrderNotification as sendSMSNotification } from '@/lib/solapi';
 
 // 함수 내에서 supabase 클라이언트 생성 (빌드 타임 에러 방지)
 function getSupabase() {
