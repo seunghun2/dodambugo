@@ -891,7 +891,7 @@ export default function WriteFormPage() {
                                                 }}
                                             />
                                             {errors.applicant_phone && <p className="field-error">{errors.applicant_phone}</p>}
-                                            {!errors.applicant_phone && <p className="form-hint">화환 주문 알림 및 부고장 수정 시 사용됩니다</p>}
+                                            {!errors.applicant_phone && <p className="form-hint">부고장 수정 시 비밀번호로 사용됩니다</p>}
                                         </div>
                                     </div>
 
