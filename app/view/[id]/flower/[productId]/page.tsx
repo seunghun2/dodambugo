@@ -64,6 +64,39 @@ export default function FlowerDetailPage() {
     const usage = '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품';
     const features = product.description || '정성을 담아 제작되는 화환입니다.';
 
+    // 터치 스와이프 로직
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+        const maxIndex = (product.images?.length || 1) - 1;
+
+        if (isLeftSwipe && selectedImage < maxIndex) {
+            // 다음 사진
+            setSelectedImage(prev => prev + 1);
+        } else if (isRightSwipe && selectedImage > 0) {
+            // 이전 사진
+            setSelectedImage(prev => prev - 1);
+        }
+
+        // 초기화
+        setTouchStart(0);
+        setTouchEnd(0);
+    };
+
     return (
         <div className="flower-detail-page">
             {/* 헤더 */}
@@ -83,7 +116,12 @@ export default function FlowerDetailPage() {
 
             {/* 이미지 */}
             <div className="product-image-section">
-                <div className="main-image">
+                <div
+                    className="main-image"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                >
                     <img src={product.images?.[selectedImage] || '/images/flower-wreath.png'} alt={product.name} />
                 </div>
                 {product.images && product.images.length > 1 && (
