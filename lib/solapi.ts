@@ -58,7 +58,7 @@ export async function sendAlimtalk(
                     to,
                     from: '01048375076', // 마음부고 발신번호
                     kakaoOptions: {
-                        pfId: '', // 카카오 채널 ID (등록 필요)
+                        pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
                         templateId,
                         variables,
                     },
