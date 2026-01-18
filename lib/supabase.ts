@@ -11,7 +11,8 @@ export interface Bugo {
     bugo_number: string;
     template: string;
     applicant_name: string;
-    phone_password: string;
+    phone_password?: string; // 기존 데이터 (4자리)
+    applicant_phone?: string; // 새 데이터 (전체번호)
     deceased_name: string;
     gender: string;
     relationship: string;

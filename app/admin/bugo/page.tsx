@@ -8,7 +8,8 @@ interface Bugo {
     id: number;
     bugo_number: string;
     applicant_name: string;
-    phone_password: string;
+    phone_password?: string;
+    applicant_phone?: string;
     deceased_name: string;
     funeral_home: string;
     room_number: string;
@@ -312,7 +313,7 @@ export default function AdminBugoPage() {
                                         </div>
                                         <div className="detail-row">
                                             <label>신청자</label>
-                                            <span>{selectedBugo.applicant_name} (#{selectedBugo.phone_password})</span>
+                                            <span>{selectedBugo.applicant_name} ({selectedBugo.applicant_phone || selectedBugo.phone_password || '-'})</span>
                                         </div>
                                         <div className="detail-row">
                                             <label>장례식장</label>
