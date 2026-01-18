@@ -255,77 +255,69 @@ export default function ViewPage() {
                 // GA 조회 이벤트
                 gaEvents.viewBugo(data.bugo_number || data.id);
 
-                // 조회수 증가 (한 번만)
-                await supabase
+                // 조회수 증가 (백그라운드 - await 제거)
+                supabase
                     .from('bugo')
                     .update({ view_count: (data.view_count || 0) + 1 })
                     .eq('id', data.id);
 
-                // 화환 주문 조회 (bugo 로드 후)
-                try {
-                    const response = await fetch(`/api/flower-orders?bugo_id=${data.id}`);
-                    const orderData = await response.json();
-                    if (orderData.orders) {
-                        setFlowerOrders(orderData.orders);
-                    }
-                } catch (err) {
-                    console.log('Error fetching flower orders');
+                // 화환 주문 & 상품 병렬 조회 (성능 최적화)
+                const [ordersResult, productsResult] = await Promise.all([
+                    // 화환 주문 조회
+                    fetch(`/api/flower-orders?bugo_id=${data.id}`).then(res => res.json()).catch(() => ({ orders: [] })),
+                    // 화환 상품 조회
+                    supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true })
+                ]);
+
+                // 화환 주문 설정
+                if (ordersResult.orders) {
+                    setFlowerOrders(ordersResult.orders);
                 }
 
-                // 화환 상품 조회 (DB에서) + 지역 필터링
-                try {
-                    const { data: productsData } = await supabase
-                        .from('flower_products')
-                        .select('*')
-                        .eq('is_active', true)
-                        .order('sort_order', { ascending: true });
+                // 화환 상품 필터링 및 설정
+                const productsData = productsResult.data;
+                if (productsData && productsData.length > 0) {
+                    const funeralAddress = data.address || data.funeral_home || '';
+                    const funeralHomeName = data.funeral_home || '';
 
-                    if (productsData && productsData.length > 0) {
-                        // 장례식장 주소 기반 필터링
-                        const funeralAddress = data.address || data.funeral_home || '';
-                        const funeralHomeName = data.funeral_home || '';
+                    // 시/도 추출 (지역별 가격 적용용)
+                    const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+                    const matchedRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
+                    setBugoRegion(matchedRegion);
+                    setBugoAddress(funeralAddress);
 
-                        // 시/도 추출 (지역별 가격 적용용)
-                        const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
-                        const matchedRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
-                        setBugoRegion(matchedRegion);
-                        setBugoAddress(funeralAddress); // 특수지역 체크용 전체 주소
-
-                        const filteredProducts = productsData.filter(product => {
-                            // 제외 장례식장 체크
-                            if (product.exclude_facilities && product.exclude_facilities.length > 0) {
-                                const isExcludedFacility = product.exclude_facilities.some((facility: string) =>
-                                    funeralHomeName.includes(facility) || facility.includes(funeralHomeName)
-                                );
-                                if (isExcludedFacility) return false;
-                            }
-
-                            // 제외 지역 체크 (시/군/구 키워드 매칭)
-                            if (product.exclude_regions && product.exclude_regions.length > 0) {
-                                const isExcludedRegion = product.exclude_regions.some((region: string) =>
-                                    funeralAddress.includes(region)
-                                );
-                                if (isExcludedRegion) return false;
-                            }
-
-                            // 노출 지역 체크 (비어있으면 전국 노출)
-                            if (product.include_regions && product.include_regions.length > 0) {
-                                const isIncludedRegion = product.include_regions.some((region: string) =>
-                                    funeralAddress.includes(region)
-                                );
-                                if (!isIncludedRegion) return false;
-                            }
-
-                            return true;
-                        });
-
-                        setFlowerProducts(filteredProducts);
-                        if (filteredProducts.length > 0) {
-                            setSelectedFlower(filteredProducts[0].id);
+                    const filteredProducts = productsData.filter(product => {
+                        // 제외 장례식장 체크
+                        if (product.exclude_facilities && product.exclude_facilities.length > 0) {
+                            const isExcludedFacility = product.exclude_facilities.some((facility: string) =>
+                                funeralHomeName.includes(facility) || facility.includes(funeralHomeName)
+                            );
+                            if (isExcludedFacility) return false;
                         }
+
+                        // 제외 지역 체크
+                        if (product.exclude_regions && product.exclude_regions.length > 0) {
+                            const isExcludedRegion = product.exclude_regions.some((region: string) =>
+                                funeralAddress.includes(region)
+                            );
+                            if (isExcludedRegion) return false;
+                        }
+
+                        // 노출 지역 체크 (비어있으면 전국 노출)
+                        if (product.include_regions && product.include_regions.length > 0) {
+                            const isIncludedRegion = product.include_regions.some((region: string) =>
+                                funeralAddress.includes(region)
+                            );
+                            if (!isIncludedRegion) return false;
+                        }
+
+                        return true;
+                    });
+
+                    setFlowerProducts(filteredProducts);
+                    if (filteredProducts.length > 0) {
+                        setSelectedFlower(filteredProducts[0].id);
                     }
-                } catch (err) {
-                    console.log('Error fetching flower products');
                 }
             } catch (err: any) {
                 setError('부고장을 찾을 수 없습니다.');
