@@ -13,9 +13,9 @@ function getSupabase() {
 }
 
 // 메타데이터 생성 (SEO)
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export async function generateMetadata({ params }: { params: { id: string } }) {
     const supabase = getSupabase();
+    const id = params.id;
     const isUUID = id.includes('-') && id.length > 10;
 
     let data = null;
@@ -38,9 +38,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 // 서버 컴포넌트 - 데이터를 서버에서 미리 불러옴
-export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export default async function ViewPage({ params }: { params: { id: string } }) {
     const supabase = getSupabase();
+    const id = params.id;
     const isUUID = id.includes('-') && id.length > 10;
 
     // 부고 데이터 조회
