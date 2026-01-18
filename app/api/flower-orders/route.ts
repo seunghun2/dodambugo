@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
             .from('flower_orders')
             .insert({
                 bugo_id: body.bugo_id,
-                product_id: body.product_id,
+                // product_id는 UUID지만 DB가 integer를 기대하므로 제외 (product_name으로 충분)
                 product_name: body.product_name,
                 product_price: body.product_price,
                 sender_name: body.sender_name,
