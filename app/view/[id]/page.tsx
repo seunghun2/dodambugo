@@ -261,17 +261,17 @@ export default function ViewPage() {
                     .update({ view_count: (data.view_count || 0) + 1 })
                     .eq('id', data.id);
 
-                // 화환 주문 & 상품 병렬 조회 (성능 최적화)
+                // 화환 주문 & 상품 병렬 조회 (성능 최적화 - 직접 Supabase 조회)
                 const [ordersResult, productsResult] = await Promise.all([
-                    // 화환 주문 조회
-                    fetch(`/api/flower-orders?bugo_id=${data.id}`).then(res => res.json()).catch(() => ({ orders: [] })),
+                    // 화환 주문 조회 (API 거치지 않고 직접 조회 → 더 빠름)
+                    supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', data.id).order('created_at', { ascending: false }),
                     // 화환 상품 조회
                     supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true })
                 ]);
 
                 // 화환 주문 설정
-                if (ordersResult.orders) {
-                    setFlowerOrders(ordersResult.orders);
+                if (ordersResult.data) {
+                    setFlowerOrders(ordersResult.data);
                 }
 
                 // 화환 상품 필터링 및 설정
