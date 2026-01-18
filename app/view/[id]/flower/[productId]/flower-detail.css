@@ -112,6 +112,39 @@
     object-fit: contain;
 }
 
+/* 슬라이드 애니메이션 */
+.main-image img.slide-left {
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+.main-image img.slide-right {
+    animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 .image-thumbnails {
     display: flex;
     gap: 8px;
