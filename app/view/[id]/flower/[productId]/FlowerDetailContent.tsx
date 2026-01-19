@@ -72,12 +72,9 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                         {product.images?.map((img, idx) => (
                             <SwiperSlide key={idx}>
                                 <div className="swiper-image-wrapper">
-                                    <Image
+                                    <img
                                         src={img}
                                         alt={`${product.name} ${idx + 1}`}
-                                        width={500}
-                                        height={600}
-                                        priority={idx === 0}
                                         draggable={false}
                                         style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                                     />
