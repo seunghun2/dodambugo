@@ -29,8 +29,8 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
     const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
 
     // 상품 상세 정보 (기본값 사용)
-    const origin = '생화 (국화, 백합, 글라디올라스 등): 중국산, 베트남산\n리본 및 부자재: 국산';
-    const usage = '부의, 추모, 추도, 장례식장, 영결식장등 삼가 고인의 명복을 비는 장소에 쓰이는 상품';
+    const origin = '• 국산: 장미, 국화, 카네이션, 백합, 튤립, 글라디올러스 등\n• 수입산: 중국, 대만, 베트남, 일본, 콜롬비아, 네덜란드 등\n• 리본 및 부자재: 국산';
+    const usage = '장례식장, 영결식, 추모식 등 고인의 명복을 기원하는 자리에 보내드리는 조화입니다.';
     const features = product.description || '정성을 담아 제작되는 화환입니다.';
 
     // 터치 스와이프 로직
@@ -142,29 +142,30 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
             {/* 배송안내 */}
             <div className="delivery-section">
                 <h3 className="section-title">배송안내</h3>
-                <p className="delivery-notice">* 계절 및 배송 지역에 따라 실제 배송 상품은 이미지와 다소 차이가 있을 수 있습니다.</p>
+                <p className="delivery-notice">* 계절, 지역 상황에 따라 배송 상품이 이미지와 다소 다를 수 있습니다.</p>
 
                 <div className="delivery-item">
-                    <span className="delivery-label">1) 배송비용</span>
-                    <p>기본적인 배송비는 무료 (단, 지역에 따라 별도 배송비가 추가될 수 있습니다.)</p>
+                    <span className="delivery-label">1) 배송비</span>
+                    <p>전국 무료배송</p>
+                    <p>(도서산간 지역은 추가 비용이 발생할 수 있습니다)</p>
                 </div>
 
                 <div className="delivery-item">
-                    <span className="delivery-label">2) 배송시간</span>
-                    <p>상품배송은 전국 어디든 4시간 이내 배송가능</p>
-                    <p>주말 및 교통상황에 따라 일부 지연될 수 있습니다.</p>
+                    <span className="delivery-label">2) 배송 소요시간</span>
+                    <p>주문 후 전국 어디든 4시간 내 도착</p>
+                    <p>교통 및 기상 상황에 따라 다소 지연될 수 있습니다.</p>
                 </div>
 
                 <div className="delivery-item">
-                    <span className="delivery-label">3) 배송가능시간</span>
-                    <p>오전 8시 ~ 오후 6시 주문건에 한하여 당일 배송가능합니다.</p>
-                    <p>오후 6시 이후 주문 건은 다음날 오후 1시 전으로 배송해드립니다.</p>
+                    <span className="delivery-label">3) 당일배송 안내</span>
+                    <p>오전 8시 ~ 오후 6시 주문 시 당일 배송됩니다.</p>
+                    <p>이후 주문 건은 익일 오후 1시 전 배송됩니다.</p>
                 </div>
 
                 <div className="delivery-item">
-                    <span className="delivery-label">4) 영업시간</span>
-                    <p>오전 8시 ~ 오후 8시</p>
-                    <p>온라인 주문은 24시간 가능하며, 전화상담은 영업시간에만 가능</p>
+                    <span className="delivery-label">4) 고객센터</span>
+                    <p>운영시간: 오전 8시 ~ 오후 8시</p>
+                    <p>온라인 주문은 24시간 가능합니다.</p>
                 </div>
             </div>
 
