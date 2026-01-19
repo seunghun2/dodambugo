@@ -895,7 +895,17 @@ ${url}
                         {/* 돋보기 버튼 - 상세 페이지로 이동 */}
                         <button
                             className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
-                            onClick={() => selectedFlower && router.push(`/view/${params.id}/flower/${selectedFlower}`)}
+                            onClick={() => {
+                                if (selectedFlower) {
+                                    // 캐시: 선택된 상품 데이터 저장
+                                    const product = flowerProducts.find(p => p.sort_order === selectedFlower);
+                                    if (product) {
+                                        sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
+                                        sessionStorage.setItem(`bugo_cache_${params.id}`, JSON.stringify(bugo));
+                                    }
+                                    router.push(`/view/${params.id}/flower/${selectedFlower}`);
+                                }
+                            }}
                         >
                             <span className="material-symbols-outlined">search</span>
                         </button>
@@ -904,6 +914,12 @@ ${url}
                             className="btn-floating-flower"
                             onClick={() => {
                                 if (flowerModalOpen && selectedFlower) {
+                                    // 캐시: 선택된 상품 + 부고 데이터 저장
+                                    const product = flowerProducts.find(p => p.sort_order === selectedFlower);
+                                    if (product) {
+                                        sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
+                                        sessionStorage.setItem(`bugo_cache_${params.id}`, JSON.stringify(bugo));
+                                    }
                                     router.push(`/view/${params.id}/order/${selectedFlower}`);
                                 } else {
                                     setFlowerModalOpen(true);

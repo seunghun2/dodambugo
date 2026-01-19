@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { unstable_cache } from 'next/cache';
 import PaymentContent from './PaymentContent';
 import '@/app/view/[id]/order/[productId]/order.css';
 
@@ -9,28 +10,56 @@ function getSupabase() {
     );
 }
 
-// 서버 컴포넌트 - 부고 및 상품 데이터를 서버에서 미리 불러옴
+// 캐시된 부고 조회 (5분)
+const getCachedBugo = unstable_cache(
+    async (bugoId: string, isUUID: boolean) => {
+        const supabase = getSupabase();
+        if (isUUID) {
+            const { data } = await supabase
+                .from('bugo')
+                .select('id, bugo_number, deceased_name')
+                .eq('id', bugoId)
+                .limit(1);
+            return data?.[0] || null;
+        } else {
+            const { data } = await supabase
+                .from('bugo')
+                .select('id, bugo_number, deceased_name')
+                .eq('bugo_number', bugoId)
+                .order('created_at', { ascending: false })
+                .limit(1);
+            return data?.[0] || null;
+        }
+    },
+    ['bugo-payment'],
+    { revalidate: 300 } // 5분 캐시
+);
+
+// 캐시된 상품 조회 (1시간)
+const getCachedProduct = unstable_cache(
+    async (productNumber: string) => {
+        const supabase = getSupabase();
+        const { data } = await supabase
+            .from('flower_products')
+            .select('*')
+            .eq('sort_order', parseInt(productNumber))
+            .single();
+        return data;
+    },
+    ['flower-product-payment'],
+    { revalidate: 3600 } // 1시간 캐시
+);
+
+// 서버 컴포넌트 - 캐시된 데이터 사용
 export default async function PaymentPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
     const { id, productId } = await params;
-    const supabase = getSupabase();
     const isUUID = id.includes('-') && id.length > 10;
 
-    // 부고 조회
-    let bugoData = null;
-    if (isUUID) {
-        const result = await supabase.from('bugo').select('id, bugo_number, deceased_name').eq('id', id).limit(1);
-        bugoData = result.data?.[0] || null;
-    } else {
-        const result = await supabase.from('bugo').select('id, bugo_number, deceased_name').eq('bugo_number', id).order('created_at', { ascending: false }).limit(1);
-        bugoData = result.data?.[0] || null;
-    }
-
-    // 상품 조회 (sort_order로)
-    const { data: productData } = await supabase
-        .from('flower_products')
-        .select('*')
-        .eq('sort_order', parseInt(productId))
-        .single();
+    // 병렬 캐시 조회
+    const [bugoData, productData] = await Promise.all([
+        getCachedBugo(id, isUUID),
+        getCachedProduct(productId)
+    ]);
 
     if (!productData) {
         return (
