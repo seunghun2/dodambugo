@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { unstable_cache } from 'next/cache';
 import ViewContent from './ViewContent';
 import Link from 'next/link';
+import Image from 'next/image';
 import './view.css';
 
 // 서버 사이드 Supabase 클라이언트
@@ -91,7 +92,7 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
         return (
             <div className="error-container">
                 <div className="error-content">
-                    <img src="/images/mourning-ribbon.png" alt="추모" className="error-ribbon" />
+                    <Image src="/images/mourning-ribbon.png" alt="추모" className="error-ribbon" width={80} height={100} />
                     <h2>부고장을 찾을 수 없습니다</h2>
                     <p>요청하신 부고장이 존재하지 않거나 삭제되었습니다.</p>
                     <Link href="/" className="btn-home">홈으로</Link>

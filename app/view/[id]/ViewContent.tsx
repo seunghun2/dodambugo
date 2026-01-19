@@ -755,11 +755,11 @@ ${url}
                     {/* 내비 버튼 */}
                     <div className="navi-buttons">
                         <button className="navi-btn" onClick={openNaverMap}>
-                            <img src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" />
+                            <Image src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" width={24} height={24} />
                             <span>네이버지도</span>
                         </button>
                         <button className="navi-btn" onClick={openKakaoNavi}>
-                            <img src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" />
+                            <Image src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" width={24} height={24} />
                             <span>카카오내비</span>
                         </button>
                     </div>
@@ -822,19 +822,19 @@ ${url}
                             <button className="share-close" onClick={() => setShareModalOpen(false)}>✕</button>
                         </div>
                         <button className="share-option" onClick={shareViaKakao}>
-                            <img src="/images/icon-kakao.png" alt="카카오톡" />
+                            <Image src="/images/icon-kakao.png" alt="카카오톡" width={32} height={32} />
                             <span>카카오톡으로 보내기</span>
                         </button>
                         <button className="share-option" onClick={shareViaSMS}>
-                            <img src="/images/icon-message.png" alt="메세지" />
+                            <Image src="/images/icon-message.png" alt="메세지" width={32} height={32} />
                             <span>메세지로 보내기</span>
                         </button>
                         <button className="share-option" onClick={shareViaBand}>
-                            <img src="/images/icon-band.png" alt="밴드" />
+                            <Image src="/images/icon-band.png" alt="밴드" width={32} height={32} />
                             <span>밴드로 보내기</span>
                         </button>
                         <button className="share-option" onClick={() => copyToClipboard(getCleanShareUrl(), '모바일부고장이 복사되었습니다')}>
-                            <img src="/images/icon-link.png" alt="링크" />
+                            <Image src="/images/icon-link.png" alt="링크" width={32} height={32} />
                             <span>링크 복사하기</span>
                         </button>
                     </div>

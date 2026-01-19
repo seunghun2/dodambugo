@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import SideMenu from '@/components/SideMenu';
@@ -79,7 +80,7 @@ export default function ContactPage() {
             {/* Navigation - 다른 페이지와 동일 */}
             <nav className="nav" id="nav">
                 <div className="nav-container">
-                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
+                    <Link href="/" className="nav-logo" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}><Image src="/images/logo.png" alt="마음부고" className="nav-logo-img" width={120} height={32} /></Link>
                     <NavMenu />
                     <div className="nav-actions">
                         <Link href="/create" className="nav-cta">부고장 만들기</Link>

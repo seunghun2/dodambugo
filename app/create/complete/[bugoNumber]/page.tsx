@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import QRCode from 'qrcode';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
@@ -302,7 +303,7 @@ ${bugoUrl}
                         {/* 카카오톡 */}
                         <div className="share-card" onClick={shareKakao}>
                             <div className="share-icon-wrapper">
-                                <img src="/images/icon-kakao.png" alt="카카오톡" className="share-icon-img" />
+                                <Image src="/images/icon-kakao.png" alt="카카오톡" className="share-icon-img" width={40} height={40} />
                             </div>
                             <span className="share-label">카카오톡으로 보내기</span>
                         </div>
@@ -310,7 +311,7 @@ ${bugoUrl}
                         {/* 문자 */}
                         <div className="share-card" onClick={shareSms}>
                             <div className="share-icon-wrapper">
-                                <img src="/images/icon-sms.png" alt="문자" className="share-icon-img" />
+                                <Image src="/images/icon-sms.png" alt="문자" className="share-icon-img" width={40} height={40} />
                             </div>
                             <span className="share-label">메세지로 보내기</span>
                         </div>
