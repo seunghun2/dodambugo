@@ -1,4 +1,4 @@
-import './view.css';
+'use client';
 
 export default function ViewLoading() {
     return (
@@ -7,7 +7,7 @@ export default function ViewLoading() {
                 <div className="loading-spinner"></div>
                 <p>부고장을 불러오는 중...</p>
             </div>
-            <style jsx>{`
+            <style>{`
                 .loading-container {
                     display: flex;
                     align-items: center;

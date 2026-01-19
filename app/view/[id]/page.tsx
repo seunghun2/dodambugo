@@ -42,6 +42,9 @@ const getCachedProducts = unstable_cache(
     { revalidate: 300 }
 );
 
+// ISR: 60초마다 재생성 (CDN 캐싱)
+export const revalidate = 60;
+
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
