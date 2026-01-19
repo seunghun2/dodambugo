@@ -62,6 +62,12 @@
 - [x] 도메인 연결 (maeumbugo.co.kr)
 - [x] 자동 배포 (git push → Production)
 
+### 성능 최적화 ⚡
+- [x] **ISR** (Incremental Static Regeneration) - 60초 CDN 캐싱
+- [x] **이미지 최적화** (next/image + WebP 자동 변환)
+- [x] **데이터 캐싱** (부고 60초, 상품 5분)
+- [x] **loading.tsx** - 즉각 로딩 UI
+
 ---
 
 ## 🔧 진행 중
