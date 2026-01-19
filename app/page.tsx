@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import SideMenu from '@/components/SideMenu';
@@ -317,7 +318,7 @@ export default function HomePage() {
       {/* 상단 네비게이션 - 다른 페이지와 동일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
-          <Link href="/" className="nav-logo"><img src="/images/logo.png" alt="마음부고" className="nav-logo-img" /></Link>
+          <Link href="/" className="nav-logo"><Image src="/images/logo.png" alt="마음부고" className="nav-logo-img" width={120} height={32} /></Link>
           <NavMenu />
           <div className="nav-actions">
             <button className="nav-cta" onClick={checkDraftBeforeCreate}>부고장 만들기</button>
@@ -351,7 +352,7 @@ export default function HomePage() {
           <h1 className="xd-hero-title">마음부고에서 부고장을 만드세요</h1>
           <p className="xd-hero-subtitle">가장 간편하고 빠르게 부고장을 만드세요.</p>
           <div className="xd-hero-image">
-            <img src="/images/hero-image.png" alt="마음부고 부고장 미리보기" />
+            <Image src="/images/hero-image.png" alt="마음부고 부고장 미리보기" width={400} height={600} priority />
           </div>
         </section>
 
@@ -586,7 +587,7 @@ export default function HomePage() {
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
-            <div className="footer-logo"><img src="/images/logo.png" alt="마음부고" className="footer-logo-img" /></div>
+            <div className="footer-logo"><Image src="/images/logo.png" alt="마음부고" className="footer-logo-img" width={100} height={28} /></div>
             <div className="footer-links-horizontal">
               <Link href="/terms">이용약관</Link>
               <span className="footer-separator">|</span>

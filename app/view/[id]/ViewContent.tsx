@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import NaverMap from '@/components/NaverMap';
@@ -512,7 +513,7 @@ ${url}
             {showMemorialOverlay && (
                 <div className="memorial-overlay">
                     <div className="memorial-content">
-                        <img src="/images/mourning-ribbon.png" alt="추모" className="memorial-ribbon" />
+                        <Image src="/images/mourning-ribbon.png" alt="추모" className="memorial-ribbon" width={80} height={100} />
                         <p className="memorial-message">발인이 끝난 고인입니다.</p>
                         <p className="memorial-sub">삼가 고인의 명복을 빕니다.</p>
                     </div>
@@ -526,7 +527,7 @@ ${url}
                 헤더 섹션 - 템플릿 이미지 + 동적 텍스트
             ======================================== */}
             <div className={`header-section template-${bugo.template_id || 'basic'}`}>
-                <img src={getTemplateImage()} alt="" className="header-bg" />
+                <Image src={getTemplateImage()} alt="" className="header-bg" width={600} height={800} priority />
                 {/* 동적 텍스트만 오버레이 - 이미지에 謹弔/부고 등 정적 텍스트 포함됨 */}
                 <div className="header-text-overlay">
                     <p className="header-dynamic-text">
