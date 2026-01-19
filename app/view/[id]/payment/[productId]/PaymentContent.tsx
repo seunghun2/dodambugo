@@ -102,7 +102,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 body: JSON.stringify({
                     bugo_id: bugo?.id,
                     bugo_number: bugo?.bugo_number || bugoId,
-                    product_id: productId,
+                    product_id: parseInt(productId),
                     product_name: orderData.productName,
                     product_price: orderData.productPrice,
                     sender_name: paymentForm.senderName,
