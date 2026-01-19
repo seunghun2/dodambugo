@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
 import ViewContent from './ViewContent';
 import Link from 'next/link';
 import './view.css';
@@ -11,6 +12,35 @@ function getSupabase() {
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 }
+
+// 캐시된 부고 조회 (60초)
+const getCachedBugo = unstable_cache(
+    async (id: string) => {
+        const supabase = getSupabase();
+        const isUUID = id.includes('-') && id.length > 10;
+
+        if (isUUID) {
+            const result = await supabase.from('bugo').select('*').eq('id', id).limit(1);
+            return result.data?.[0] || null;
+        } else {
+            const result = await supabase.from('bugo').select('*').eq('bugo_number', id).order('created_at', { ascending: false }).limit(1);
+            return result.data?.[0] || null;
+        }
+    },
+    ['bugo-data'],
+    { revalidate: 60 }
+);
+
+// 캐시된 상품 조회 (5분)
+const getCachedProducts = unstable_cache(
+    async () => {
+        const supabase = getSupabase();
+        const result = await supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true });
+        return result.data || [];
+    },
+    ['flower-products'],
+    { revalidate: 300 }
+);
 
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
