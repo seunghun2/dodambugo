@@ -190,7 +190,8 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
 
                 <div className="refund-item">
                     <span className="refund-label">3) 교환/환불 불가</span>
-                    <p>• 생화는 제작 후 재사용이 불가하여, 제작 완료 후 단순 변심에 의한 교환/환불이 어렵습니다.</p>
+                    <p>• 생화는 한번 잘리면 재사용이 불가하여, 제작 완료 후 단순 변심에 의한 교환/환불이 어렵습니다.</p>
+                    <p>• 주문자의 배송정보 오류 또는 수취 거부로 인한 교환/환불은 불가합니다.</p>
                 </div>
 
                 <div className="refund-item">
