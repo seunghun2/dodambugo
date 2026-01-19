@@ -3,6 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
+import 'swiper/css';
 import './flower-detail.css';
 
 interface FlowerProduct {
@@ -24,49 +27,18 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
     const product = initialProduct;
     const productId = product.id;
     const [selectedImage, setSelectedImage] = useState(0);
-    const [touchStart, setTouchStart] = useState(0);
-    const [touchEnd, setTouchEnd] = useState(0);
-    const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+    const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
 
     // 상품 상세 정보 (기본값 사용)
     const origin = '• 국산: 장미, 국화, 카네이션, 백합, 튤립, 글라디올러스 등\n• 수입산: 중국, 대만, 베트남, 일본, 콜롬비아, 네덜란드 등\n• 리본 및 부자재: 국산';
     const usage = '장례식장, 영결식, 추모식 등 고인의 명복을 기원하는 자리에 보내드리는 조화입니다.';
     const features = product.description || '정성을 담아 제작되는 화환입니다.';
 
-    // 터치 스와이프 로직
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        setTouchStart(e.targetTouches[0].clientX);
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        setTouchEnd(e.targetTouches[0].clientX);
-    };
-
-    const handleTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > 50;
-        const isRightSwipe = distance < -50;
-        const imageCount = product.images?.length || 1;
-
-        if (isLeftSwipe) {
-            // 다음 사진 (무한 루프)
-            setSlideDirection('left');
-            setSelectedImage(prev => (prev + 1) % imageCount);
-        } else if (isRightSwipe) {
-            // 이전 사진 (무한 루프)
-            setSlideDirection('right');
-            setSelectedImage(prev => (prev - 1 + imageCount) % imageCount);
+    // 다음 이미지로 이동
+    const handleNextImage = () => {
+        if (swiperRef) {
+            swiperRef.slideNext();
         }
-
-        // 초기화
-        setTouchStart(0);
-        setTouchEnd(0);
-
-        // 애니메이션 후 방향 초기화
-        setTimeout(() => setSlideDirection(null), 300);
     };
 
     return (
@@ -86,37 +58,65 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                 <p className="product-subtitle">{product.description}</p>
             </div>
 
-            {/* 이미지 */}
-            <div className="product-image-section">
-                <div
-                    className="main-image"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    <Image
-                        src={product.images?.[selectedImage] || '/images/flower-wreath.png'}
-                        alt={product.name}
-                        width={400}
-                        height={500}
-                        className={slideDirection ? `slide-${slideDirection}` : ''}
-                        priority
-                        style={{ objectFit: 'contain', width: '100%', height: 'auto' }}
-                    />
-                </div>
-                {product.images && product.images.length > 1 && (
-                    <div className="image-thumbnails">
-                        {product.images.map((img, idx) => (
-                            <button
-                                key={idx}
-                                className={`thumbnail ${selectedImage === idx ? 'active' : ''}`}
-                                onClick={() => setSelectedImage(idx)}
-                            >
-                                <img src={img} alt="" />
-                            </button>
+            {/* 이미지 - Swiper 캐러셀 */}
+            <div className="product-image-section musinsa-style">
+                <div className="swiper-container">
+                    <Swiper
+                        onSwiper={setSwiperRef}
+                        onSlideChange={(swiper) => setSelectedImage(swiper.realIndex)}
+                        loop={true}
+                        grabCursor={true}
+                        slidesPerView={1}
+                        className="main-swiper"
+                    >
+                        {product.images?.map((img, idx) => (
+                            <SwiperSlide key={idx}>
+                                <div className="swiper-image-wrapper">
+                                    <Image
+                                        src={img}
+                                        alt={`${product.name} ${idx + 1}`}
+                                        width={500}
+                                        height={600}
+                                        priority={idx === 0}
+                                        draggable={false}
+                                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                    />
+                                </div>
+                            </SwiperSlide>
                         ))}
-                    </div>
-                )}
+                    </Swiper>
+
+                    {/* 하단 오버레이 */}
+                    {product.images && product.images.length > 1 && (
+                        <div className="image-overlay">
+                            {/* 왼쪽: 3개 썸네일 슬라이드 */}
+                            <div className="thumbnail-strip">
+                                {[-1, 0, 1].map((offset) => {
+                                    const idx = (selectedImage + offset + product.images.length) % product.images.length;
+                                    return (
+                                        <button
+                                            key={offset}
+                                            className={`strip-thumb ${offset === 0 ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (offset === 1 && swiperRef) swiperRef.slideNext();
+                                                if (offset === -1 && swiperRef) swiperRef.slidePrev();
+                                            }}
+                                        >
+                                            <img src={product.images[idx]} alt="" />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* 오른쪽: 페이지 인디케이터 */}
+                            <div className="page-indicator">
+                                <span>{selectedImage + 1}</span>
+                                <span className="divider">/</span>
+                                <span>{product.images.length}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* 상품설명 */}
