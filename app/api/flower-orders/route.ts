@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
         let query = supabase
             .from('flower_orders')
-            .select('*, bugo:bugo_id(deceased_name, bugo_number)')
+            .select('*')
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
 
