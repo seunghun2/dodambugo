@@ -37,12 +37,12 @@ export async function POST(request: NextRequest) {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('applicant_phone, applicant_name')
+                .select('phone_password, applicant_name')  // phone_password에 전화번호 저장됨
                 .eq('bugo_number', bugo_number)
                 .single();
 
-            if (bugo?.applicant_phone) {
-                const phoneNumber = bugo.applicant_phone.replace(/-/g, '');
+            if (bugo?.phone_password) {
+                const phoneNumber = bugo.phone_password.replace(/-/g, '');
                 const bugoLink = `https://maeumbugo.co.kr/view/${bugo_number}`;
 
                 const message = `[마음부고] 부고장이 생성되었습니다.
