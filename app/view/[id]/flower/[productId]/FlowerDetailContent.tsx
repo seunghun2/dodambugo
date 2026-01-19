@@ -10,6 +10,7 @@ import './flower-detail.css';
 
 interface FlowerProduct {
     id: string;
+    sort_order: number;
     name: string;
     description: string;
     price: number;
@@ -25,7 +26,7 @@ interface FlowerDetailContentProps {
 export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDetailContentProps) {
     const router = useRouter();
     const product = initialProduct;
-    const productId = product.id;
+    const productNumber = product.sort_order; // URL용 (정수)
     const [selectedImage, setSelectedImage] = useState(0);
     const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
 
@@ -202,7 +203,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
             <div className="flower-detail-footer">
                 <button
                     className="btn-order"
-                    onClick={() => router.push(`/view/${bugoId}/order/${productId}`)}
+                    onClick={() => router.push(`/view/${bugoId}/order/${productNumber}`)}
                 >
                     주문하기
                 </button>
