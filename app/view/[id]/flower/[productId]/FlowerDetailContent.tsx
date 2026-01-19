@@ -112,7 +112,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                                 className={`thumbnail ${selectedImage === idx ? 'active' : ''}`}
                                 onClick={() => setSelectedImage(idx)}
                             >
-                                <Image src={img} alt="" width={60} height={60} style={{ objectFit: 'cover' }} />
+                                <img src={img} alt="" />
                             </button>
                         ))}
                     </div>
