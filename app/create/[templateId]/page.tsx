@@ -707,7 +707,7 @@ export default function WriteFormPage() {
                 bugo_number: bugoNumber,
                 template_id: templateId,
                 applicant_name: formData.applicant_name,
-                applicant_phone: formData.applicant_phone,
+                phone_password: formData.applicant_phone, // applicant_phone 값을 phone_password 컬럼에 저장
                 deceased_name: formData.deceased_name,
                 gender: formData.gender,
                 relationship: formData.relationship || '',
