@@ -227,12 +227,14 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                 </section>
             </div>
 
-            {/* 하단 버튼 */}
-            <div className="order-footer">
-                <button className="btn-payment" onClick={handleNext}>
-                    다음
-                </button>
-            </div>
+            {/* 하단 버튼 - 모달 열릴 때 숨김 */}
+            {!recipientModalOpen && (
+                <div className="order-footer">
+                    <button className="btn-payment" onClick={handleNext}>
+                        다음
+                    </button>
+                </div>
+            )}
 
             {/* 상주변경 바텀시트 모달 */}
             {
