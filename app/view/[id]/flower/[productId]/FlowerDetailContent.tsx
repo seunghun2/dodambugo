@@ -172,26 +172,30 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
             {/* 교환/환불 안내 */}
             <div className="refund-section">
                 <h3 className="section-title">교환/환불 안내</h3>
-                <p className="refund-notice">* 교환 및 환불은 인터넷 쇼핑몰 상에서는 불가능 하므로 교환환불건은 고객센터 1877-4133으로 전화 요청하셔야합니다. *</p>
+                <p className="refund-notice">* 온라인에서는 교환/환불 접수가 불가하며, 고객센터로 문의해주세요. *</p>
 
-                <p className="refund-desc">교환과 환불은 아래와 같은 요인이 발생했을 시 100%가능합니다.</p>
+                <p className="refund-desc">아래의 경우 교환 및 환불이 가능합니다.</p>
 
                 <div className="refund-item">
-                    <span className="refund-label">1) 교환이 가능한 경우</span>
-                    <p>배송된 상품이 파손되었거나 오염되었을 경우.</p>
-                    <p>배송된 상품이 주문한 내용과 다를 경우.</p>
-                    <p>쇼핑몰이 제공한 정보와 다를 경우.</p>
+                    <span className="refund-label">1) 교환 가능</span>
+                    <p>• 배송 중 상품이 파손 또는 훼손된 경우</p>
+                    <p>• 주문 내용과 다른 상품이 배송된 경우</p>
                 </div>
 
                 <div className="refund-item">
-                    <span className="refund-label">2) 환불이 가능한 경우</span>
-                    <p>입금완료 후 주문접수 전 주문을 취소한 경우.</p>
-                    <p>상품이 품절되었거나 기타 사유로 인해 배송이 불가능한 경우.</p>
+                    <span className="refund-label">2) 환불 가능</span>
+                    <p>• 결제 후 제작 시작 전 취소 요청 시</p>
+                    <p>• 품절 또는 배송 불가 지역인 경우</p>
                 </div>
 
                 <div className="refund-item">
-                    <span className="refund-label">3) 교환 및 환불 불가</span>
-                    <p>생화 상품의 경우 한번 잘리면 다시 사용할 수 없는 꽃의 특성상 제작이 완료된 상품은 고객님의 변심에 의한 교환 및 환불이 불가능합니다.</p>
+                    <span className="refund-label">3) 교환/환불 불가</span>
+                    <p>• 생화는 제작 후 재사용이 불가하여, 제작 완료 후 단순 변심에 의한 교환/환불이 어렵습니다.</p>
+                </div>
+
+                <div className="refund-item">
+                    <span className="refund-label">4) 이미지 관련 안내</span>
+                    <p>• 화분, 바구니, 포장지 등 부속품은 시즌 및 지역에 따라 이미지와 다를 수 있습니다.</p>
                 </div>
             </div>
 
