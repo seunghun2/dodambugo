@@ -175,9 +175,13 @@ export default function OrderCompletePage() {
                             <div className="accordion-content">
                                 <p>• 품명: 근조 화환</p>
                                 <p>• 소재: 생화</p>
+                                <p>• 원산지</p>
+                                <p style={{ paddingLeft: '12px' }}>- 국산: 장미, 국화, 카네이션, 백합, 튤립, 글라디올러스 등</p>
+                                <p style={{ paddingLeft: '12px' }}>- 수입산: 중국, 대만, 베트남, 일본, 콜롬비아, 네덜란드 등</p>
+                                <p style={{ paddingLeft: '12px' }}>- 리본 및 부자재: 국산</p>
                                 <p>• 크기: 상품별 상이</p>
                                 <p>• 제조사: 전국 제휴 화원</p>
-                                <p>• 배송: 전국 당일 배송</p>
+                                <p>• 배송: 전국 당일 배송 (4시간 내)</p>
                             </div>
                         )}
                     </div>
@@ -187,16 +191,23 @@ export default function OrderCompletePage() {
                         onClick={() => setIsExpanded({ ...isExpanded, refund: !isExpanded.refund })}
                     >
                         <div className="accordion-header">
-                            <span>취소/환불 안내</span>
+                            <span>교환/환불 안내</span>
                             <span className="material-symbols-outlined">
                                 {isExpanded.refund ? 'expand_less' : 'expand_more'}
                             </span>
                         </div>
                         {isExpanded.refund && (
                             <div className="accordion-content">
-                                <p>• 배송 전: 전액 환불 가능</p>
-                                <p>• 배송 후: 환불 불가</p>
-                                <p>• 취소 문의: contact@maeumbugo.co.kr</p>
+                                <p style={{ color: '#999', marginBottom: '8px' }}>※ 온라인에서는 교환/환불 접수가 불가하며, 고객센터로 문의해주세요.</p>
+                                <p><strong>1) 교환 가능</strong></p>
+                                <p>• 배송 중 상품이 파손 또는 훼손된 경우</p>
+                                <p>• 주문 내용과 다른 상품이 배송된 경우</p>
+                                <p style={{ marginTop: '8px' }}><strong>2) 환불 가능</strong></p>
+                                <p>• 결제 후 제작 시작 전 취소 요청 시</p>
+                                <p>• 품절 또는 배송 불가 지역인 경우</p>
+                                <p style={{ marginTop: '8px' }}><strong>3) 교환/환불 불가</strong></p>
+                                <p>• 생화는 한번 잘리면 재사용이 불가하여, 제작 완료 후 단순 변심에 의한 교환/환불이 어렵습니다.</p>
+                                <p>• 주문자의 배송정보 오류 또는 수취 거부로 인한 교환/환불은 불가합니다.</p>
                             </div>
                         )}
                     </div>
@@ -215,6 +226,7 @@ export default function OrderCompletePage() {
                             <div className="accordion-content">
                                 <p>• 생화 특성상 단순 변심에 의한 청약철회가 제한될 수 있습니다.</p>
                                 <p>• 상품 하자 시 교환 또는 환불이 가능합니다.</p>
+                                <p>• 화분, 바구니, 포장지 등 부속품은 시즌 및 지역에 따라 이미지와 다를 수 있습니다.</p>
                                 <p>• 자세한 사항은 고객센터로 문의해 주세요.</p>
                             </div>
                         )}
