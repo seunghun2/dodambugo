@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
 import FlowerDetailContent from './FlowerDetailContent';
 import './flower-detail.css';
 
@@ -10,26 +10,27 @@ function getSupabase() {
     );
 }
 
-interface FlowerProduct {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    discount_price: number | null;
-    images: string[];
-}
+// 캐시된 상품 조회 (1시간)
+const getCachedProduct = unstable_cache(
+    async (productId: string) => {
+        const supabase = getSupabase();
+        const { data } = await supabase
+            .from('flower_products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+        return data;
+    },
+    ['flower-product'],
+    { revalidate: 3600 } // 1시간 캐시
+);
 
 // 서버 컴포넌트 - 상품 데이터를 서버에서 미리 불러옴
 export default async function FlowerDetailPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
     const { id, productId } = await params;
-    const supabase = getSupabase();
 
-    // 상품 데이터 조회
-    const { data: product } = await supabase
-        .from('flower_products')
-        .select('*')
-        .eq('id', productId)
-        .single();
+    // 캐시된 상품 데이터 조회
+    const product = await getCachedProduct(productId);
 
     if (!product) {
         return (

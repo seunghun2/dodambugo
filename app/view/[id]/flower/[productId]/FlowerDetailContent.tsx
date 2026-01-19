@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 import './flower-detail.css';
 
 interface FlowerProduct {
@@ -93,10 +94,14 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                 >
-                    <img
+                    <Image
                         src={product.images?.[selectedImage] || '/images/flower-wreath.png'}
                         alt={product.name}
+                        width={400}
+                        height={500}
                         className={slideDirection ? `slide-${slideDirection}` : ''}
+                        priority
+                        style={{ objectFit: 'contain', width: '100%', height: 'auto' }}
                     />
                 </div>
                 {product.images && product.images.length > 1 && (
@@ -107,7 +112,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                                 className={`thumbnail ${selectedImage === idx ? 'active' : ''}`}
                                 onClick={() => setSelectedImage(idx)}
                             >
-                                <img src={img} alt="" />
+                                <Image src={img} alt="" width={60} height={60} style={{ objectFit: 'cover' }} />
                             </button>
                         ))}
                     </div>
