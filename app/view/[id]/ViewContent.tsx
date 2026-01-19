@@ -255,6 +255,32 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isOwner]);
 
+    // 🚀 Prefetch: 모달 열릴 때 주문/상세 페이지 미리 로드
+    useEffect(() => {
+        if (flowerModalOpen && selectedFlower) {
+            router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
+            router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
+        }
+    }, [flowerModalOpen, selectedFlower, router, params.id]);
+
+    // 🚀 Prefetch: 상품 변경 시 해당 페이지 미리 로드
+    useEffect(() => {
+        if (selectedFlower) {
+            router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
+            router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
+        }
+    }, [selectedFlower, router, params.id]);
+
+    // 🚀 초기 Prefetch: 모든 상품 페이지 미리 로드 (페이지 로드 시)
+    useEffect(() => {
+        if (flowerProducts.length > 0) {
+            flowerProducts.forEach(product => {
+                router.prefetch(`/view/${params.id}/order/${product.sort_order}`);
+                router.prefetch(`/view/${params.id}/flower/${product.sort_order}`);
+            });
+        }
+    }, [flowerProducts, router, params.id]);
+
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
         const year = date.getFullYear();
