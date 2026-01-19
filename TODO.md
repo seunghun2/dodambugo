@@ -73,6 +73,8 @@
 - [x] **SMS 알림 수정** (Solapi IP 화이트리스트 문제 해결)
 - [x] **성능 최적화** (Next.js Image, font-display: swap, CDN 캐싱)
 - [x] **구글 Search Console 재색인 요청** (파비콘 반영)
+- [x] **flower-orders API 500 에러 수정** (FK 관계 쿼리 제거)
+- [x] **관리자 비밀번호 보호 추가** (세션 기반 인증, /admin/*)
 
 ### 2026-01-16
 - [x] 사업자등록 완료 (408-22-68851, 대표: 김미연)
