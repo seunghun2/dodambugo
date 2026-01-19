@@ -10,14 +10,14 @@ function getSupabase() {
     );
 }
 
-// 캐시된 상품 조회 (1시간)
+// 캐시된 상품 조회 (1시간) - sort_order로 조회
 const getCachedProduct = unstable_cache(
-    async (productId: string) => {
+    async (productNumber: string) => {
         const supabase = getSupabase();
         const { data } = await supabase
             .from('flower_products')
             .select('*')
-            .eq('id', productId)
+            .eq('sort_order', parseInt(productNumber))
             .single();
         return data;
     },

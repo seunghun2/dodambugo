@@ -75,6 +75,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                                     <img
                                         src={img}
                                         alt={`${product.name} ${idx + 1}`}
+                                        loading={idx === 0 ? 'eager' : 'lazy'}
                                         draggable={false}
                                         style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                                     />

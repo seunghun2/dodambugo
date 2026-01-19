@@ -25,11 +25,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         bugoData = result.data?.[0] || null;
     }
 
-    // 상품 조회
+    // 상품 조회 (sort_order로)
     const { data: productData } = await supabase
         .from('flower_products')
         .select('*')
-        .eq('id', productId)
+        .eq('sort_order', parseInt(productId))
         .single();
 
     if (!productData) {

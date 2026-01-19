@@ -171,7 +171,7 @@ const calculateRegionalPrice = (
 export interface ViewContentProps {
     initialBugo: BugoData;
     initialFlowerOrders?: Array<{ sender_name: string; ribbon_text1: string; ribbon_text2: string }>;
-    initialFlowerProducts?: Array<{ id: string; name: string; description: string; price: number; discount_price: number | null; images: string[]; regional_prices?: Record<string, number>; special_surcharges?: Record<string, number> }>;
+    initialFlowerProducts?: Array<{ id: string; sort_order: number; name: string; description: string; price: number; discount_price: number | null; images: string[]; regional_prices?: Record<string, number>; special_surcharges?: Record<string, number> }>;
 }
 
 export default function ViewContent({ initialBugo, initialFlowerOrders = [], initialFlowerProducts = [] }: ViewContentProps) {
@@ -187,7 +187,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
-    const [selectedFlower, setSelectedFlower] = useState<string | null>(initialFlowerProducts[0]?.id || null); // 선택된 상품 ID
+    const [selectedFlower, setSelectedFlower] = useState<number | null>(initialFlowerProducts[0]?.sort_order || null); // 선택된 상품 순번
     const [flowerOrders] = useState(initialFlowerOrders);
     const [flowerProducts] = useState(initialFlowerProducts);
 
@@ -939,9 +939,9 @@ ${url}
                                     <div
                                         key={product.id}
                                         className="flower-product-item"
-                                        onClick={() => setSelectedFlower(selectedFlower === product.id ? null : product.id)}
+                                        onClick={() => setSelectedFlower(selectedFlower === product.sort_order ? null : product.sort_order)}
                                     >
-                                        <div className={`flower-radio ${selectedFlower === product.id ? 'checked' : ''}`} />
+                                        <div className={`flower-radio ${selectedFlower === product.sort_order ? 'checked' : ''}`} />
                                         <div className="flower-product-image">
                                             <img src={product.images?.[0] || '/images/flower-wreath.png'} alt={product.name} />
                                         </div>
