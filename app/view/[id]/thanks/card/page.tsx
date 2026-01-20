@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
-import ShareContent from './ShareContent';
-import './share.css';
+import CardContent from './CardContent';
+import './card.css';
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
@@ -11,11 +11,14 @@ function getSupabase() {
     );
 }
 
+// ISR: 60초마다 재생성
+export const revalidate = 60;
+
 interface PageProps {
     params: Promise<{ id: string }>;
 }
 
-export default async function ThanksSharePage({ params }: PageProps) {
+export default async function ThanksCardPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = getSupabase();
 
@@ -43,5 +46,5 @@ export default async function ThanksSharePage({ params }: PageProps) {
         notFound();
     }
 
-    return <ShareContent bugo={data} bugoId={id} />;
+    return <CardContent bugo={data} bugoId={id} />;
 }

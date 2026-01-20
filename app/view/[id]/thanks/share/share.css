@@ -1,85 +1,168 @@
-/* Share Page CSS */
+/* Share Page CSS - 감사장 공유 페이지 */
 
 .share-page {
+    position: relative;
     min-height: 100vh;
-    max-width: 360px;
+    width: 100%;
+    max-width: 430px;
     margin: 0 auto;
-    background: #FFFFFF;
+    background: #F5F5F5;
+    padding-bottom: 140px;
 }
 
-.share-header {
-    display: flex;
+/* 수정하기 버튼 - 카드 위에 겹치게 */
+.share-edit-pill {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid #EEEEEE;
-}
-
-.share-back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.share-title {
+    gap: 4px;
+    padding: 10px 16px;
+    background: rgba(100, 100, 100, 0.85);
+    border: none;
+    border-radius: 24px;
     font-family: 'Pretendard', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+    color: #FFFFFF;
+    cursor: pointer;
 }
 
-.share-content {
-    padding: 60px 24px;
+.share-edit-pill:active {
+    background: rgba(80, 80, 80, 0.9);
+}
+
+.share-edit-pill svg {
+    color: #FFFFFF;
+}
+
+/* 미리보기 카드 */
+.share-preview {
+    padding: 16px 20px 24px;
+}
+
+.share-preview-card {
+    position: relative;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.share-card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.share-card-content {
+    position: relative;
+    z-index: 1;
+    padding: 160px 3px 32px;
     text-align: center;
 }
 
-.share-description {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 18px;
-    font-weight: 400;
+.share-card-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 22px;
+    font-weight: 800;
     color: #333333;
-    line-height: 1.6;
-    margin-bottom: 48px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
 }
 
-.share-buttons {
+.share-card-body {
+    margin-bottom: 24px;
+}
+
+.share-card-body p {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333333;
+    line-height: 1.8;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+}
+
+.share-card-body p:last-child {
+    margin-bottom: 0;
+}
+
+.share-card-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+}
+
+.share-card-date {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #666666;
+    margin-bottom: 4px;
+}
+
+.share-card-mourner {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+}
+
+/* 하단 고정 공유 바 */
+.share-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: #FFFFFF;
+    padding: 16px 24px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.share-bottom-label {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 16px;
+}
+
+.share-bottom-buttons {
     display: flex;
-    justify-content: center;
-    gap: 32px;
+    justify-content: flex-start;
+    gap: 24px;
 }
 
-.share-btn {
+.share-bottom-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
 }
 
-.share-btn img {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+.share-bottom-btn img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
 }
 
-.share-btn span {
+.share-bottom-btn span {
     font-family: 'Pretendard', sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
-    color: #666666;
-}
-
-.share-kakao img {
-    background: #FEE500;
-}
-
-.share-sms img {
-    background: #4CAF50;
-}
-
-.share-link img {
-    background: #666666;
+    color: #CCCCCC;
 }
