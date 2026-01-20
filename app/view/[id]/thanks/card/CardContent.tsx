@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -139,18 +138,6 @@ export default function CardContent({ bugo, bugoId }: CardContentProps) {
                         <p className="card-mourner">{bugo.mourner_name || '상주'} 배상</p>
                     </div>
                 </div>
-
-                {/* 감사장 보내기 버튼 */}
-                <div className="card-bottom">
-                    <Link href={`/view/${bugoId}/thanks`} className="card-cta-btn">
-                        감사장 보내기
-                    </Link>
-                </div>
-
-                {/* 푸터 */}
-                <footer className="card-site-footer">
-                    <p>©maeumbugo.co.kr, all rights reserved</p>
-                </footer>
             </div>
         </div>
     );

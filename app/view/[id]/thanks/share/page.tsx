@@ -13,10 +13,12 @@ function getSupabase() {
 
 interface PageProps {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ religion?: string }>;
 }
 
-export default async function ThanksSharePage({ params }: PageProps) {
+export default async function ThanksSharePage({ params, searchParams }: PageProps) {
     const { id } = await params;
+    const { religion } = await searchParams;
     const supabase = getSupabase();
 
     // 데이터 조회
@@ -43,5 +45,8 @@ export default async function ThanksSharePage({ params }: PageProps) {
         notFound();
     }
 
-    return <ShareContent bugo={data} bugoId={id} />;
+    // URL에서 religion 파라미터 받으면 우선 적용
+    const selectedReligion = religion || data.religion;
+
+    return <ShareContent bugo={data} bugoId={id} selectedReligion={selectedReligion} />;
 }

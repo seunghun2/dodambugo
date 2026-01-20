@@ -107,9 +107,56 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<ReligionType>(getReligionType(bugo.religion));
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [customMessages, setCustomMessages] = useState<ThanksMessages>(parseCustomMessages(bugo.thanks_message));
     const [editingMessage, setEditingMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // 공유 URL (card 페이지로)
+    const getShareUrl = () => {
+        if (typeof window !== 'undefined') {
+            return `${window.location.origin}/view/${bugoId}/thanks/card?religion=${activeTab}`;
+        }
+        return '';
+    };
+
+    // 카카오 공유
+    const shareKakao = () => {
+        const shareUrl = getShareUrl();
+        if (typeof window !== 'undefined' && (window as any).Kakao) {
+            const Kakao = (window as any).Kakao;
+            if (!Kakao.isInitialized()) {
+                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
+            }
+            Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `故${bugo.deceased_name}님 감사장`,
+                    description: '감사의 마음을 전합니다.',
+                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                    link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+                },
+                buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
+            });
+        }
+        setIsShareModalOpen(false);
+    };
+
+    // SMS 공유
+    const shareSMS = () => {
+        const shareUrl = getShareUrl();
+        const text = `[감사장]\n故${bugo.deceased_name}님 감사장입니다.\n\n${shareUrl}`;
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+        setIsShareModalOpen(false);
+    };
+
+    // 링크 복사
+    const copyLink = () => {
+        navigator.clipboard.writeText(getShareUrl()).then(() => {
+            alert('링크가 복사되었습니다.');
+        });
+        setIsShareModalOpen(false);
+    };
 
     // 날짜 포맷
     const formatDate = () => {
@@ -225,7 +272,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                 </button>
                 <button
                     className="thanks-cta-btn"
-                    onClick={() => router.push(`/view/${bugoId}/thanks/share`)}
+                    onClick={() => setIsShareModalOpen(true)}
                 >
                     감사장 전달하기
                 </button>
@@ -265,6 +312,32 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                                 disabled={isSaving}
                             >
                                 {isSaving ? '저장 중...' : '저장하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 공유 모달 - 바텀시트 */}
+            {isShareModalOpen && (
+                <div className="thanks-share-overlay" onClick={() => setIsShareModalOpen(false)}>
+                    <div className="thanks-share-sheet" onClick={(e) => e.stopPropagation()}>
+                        <div className="thanks-share-header">
+                            <h3>감사장 공유하기</h3>
+                            <button className="thanks-share-close" onClick={() => setIsShareModalOpen(false)}>✕</button>
+                        </div>
+                        <div className="thanks-share-buttons">
+                            <button className="thanks-share-btn" onClick={shareKakao}>
+                                <img src="/images/icon-kakao.png" alt="카카오톡" />
+                                <span>카카오톡</span>
+                            </button>
+                            <button className="thanks-share-btn" onClick={shareSMS}>
+                                <img src="/images/icon-message.png" alt="메시지" />
+                                <span>메시지</span>
+                            </button>
+                            <button className="thanks-share-btn" onClick={copyLink}>
+                                <img src="/images/icon-link.png" alt="링크복사" />
+                                <span>링크복사</span>
                             </button>
                         </div>
                     </div>

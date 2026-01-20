@@ -25,6 +25,7 @@ interface BugoData {
 interface ShareContentProps {
     bugo: BugoData;
     bugoId: string;
+    selectedReligion?: string;
 }
 
 // 종교별 심볼 이미지
@@ -82,9 +83,9 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
     }
 };
 
-export default function ShareContent({ bugo, bugoId }: ShareContentProps) {
+export default function ShareContent({ bugo, bugoId, selectedReligion }: ShareContentProps) {
     const router = useRouter();
-    const religionType = getReligionType(bugo.religion);
+    const religionType = getReligionType(selectedReligion || bugo.religion);
     const customMessages = parseCustomMessages(bugo.thanks_message);
     const customMessage = customMessages[religionType];
     const [dateStr, setDateStr] = useState('');
