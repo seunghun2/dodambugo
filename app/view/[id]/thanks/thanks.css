@@ -3,7 +3,7 @@
 .thanks-page {
     position: relative;
     min-height: 100vh;
-    max-width: 360px;
+    width: 100%;
     margin: 0 auto;
     background: #F5F5F5;
 }
@@ -28,16 +28,17 @@
     right: 0;
     bottom: 0;
     width: 100%;
-    max-width: 360px;
-    margin: 0 auto;
     z-index: 0;
 }
 
 /* 탭 네비게이션 */
 .thanks-tabs {
+    position: sticky;
+    top: 0;
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #EEEEEE;
+    z-index: 10;
 }
 
 .thanks-tab {
@@ -135,9 +136,9 @@
 .thanks-bottom {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 360px;
+    left: 0;
+    right: 0;
+    width: 100%;
     padding: 16px 20px;
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
     background: #FFFFFF;
