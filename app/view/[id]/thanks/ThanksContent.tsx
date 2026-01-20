@@ -12,6 +12,7 @@ interface BugoData {
     mourner_name?: string;
     religion?: string;
     funeral_date?: string;
+    thanks_message?: string;
 }
 
 interface ThanksContentProps {
@@ -86,6 +87,9 @@ const getReligionType = (religion?: string): ReligionType => {
 export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<ReligionType>(getReligionType(bugo.religion));
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [customMessage, setCustomMessage] = useState(bugo.thanks_message || '');
+    const [isSaving, setIsSaving] = useState(false);
 
     // 날짜 포맷
     const formatDate = () => {
@@ -102,6 +106,34 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     };
 
     const currentMessage = messages[activeTab];
+
+    // 기본 메시지를 텍스트로 변환
+    const getDefaultMessageText = () => {
+        return currentMessage.body
+            .map(t => replaceDeceased(t).replace(/<br\/?>/g, '\n'))
+            .join('\n\n');
+    };
+
+    // 메시지 저장
+    const handleSaveMessage = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch(`/api/bugo/${bugo.id}/thanks-message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: customMessage }),
+            });
+            if (res.ok) {
+                setIsEditModalOpen(false);
+                window.location.reload();
+            } else {
+                alert('저장에 실패했습니다.');
+            }
+        } catch (error) {
+            alert('저장 중 오류가 발생했습니다.');
+        }
+        setIsSaving(false);
+    };
 
     return (
         <div className="thanks-page">
@@ -136,9 +168,15 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                     <h1 className="thanks-title">{currentMessage.title}</h1>
 
                     <div className="thanks-body">
-                        {currentMessage.body.map((text, i) => (
-                            <p key={i} dangerouslySetInnerHTML={{ __html: replaceDeceased(text) }} />
-                        ))}
+                        {customMessage ? (
+                            customMessage.split('\n\n').map((paragraph, i) => (
+                                <p key={i} dangerouslySetInnerHTML={{ __html: paragraph.replace(/\n/g, '<br/>') || '&nbsp;' }} />
+                            ))
+                        ) : (
+                            currentMessage.body.map((text, i) => (
+                                <p key={i} dangerouslySetInnerHTML={{ __html: replaceDeceased(text) }} />
+                            ))
+                        )}
                     </div>
 
                     <div className="thanks-footer">
@@ -151,12 +189,58 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
             {/* 하단 버튼 */}
             <div className="thanks-bottom">
                 <button
+                    className="thanks-edit-btn-bottom"
+                    onClick={() => {
+                        if (!customMessage) {
+                            setCustomMessage(getDefaultMessageText());
+                        }
+                        setIsEditModalOpen(true);
+                    }}
+                >
+                    문구 수정
+                </button>
+                <button
                     className="thanks-cta-btn"
                     onClick={() => router.push(`/view/${bugoId}/thanks/share`)}
                 >
-                    메세지 전달하기
+                    감사장 전달하기
                 </button>
             </div>
+
+            {/* 편집 모달 */}
+            {isEditModalOpen && (
+                <div className="thanks-modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+                    <div className="thanks-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="thanks-modal-header">
+                            <h2>감사장 문구 수정</h2>
+                            <button className="thanks-modal-close" onClick={() => setIsEditModalOpen(false)}>✕</button>
+                        </div>
+                        <div className="thanks-modal-body">
+                            <textarea
+                                value={customMessage}
+                                onChange={(e) => setCustomMessage(e.target.value)}
+                                placeholder="감사 인사 문구를 입력하세요..."
+                                rows={12}
+                            />
+                        </div>
+                        <div className="thanks-modal-footer">
+                            <button
+                                className="thanks-modal-cancel"
+                                onClick={() => setIsEditModalOpen(false)}
+                            >
+                                취소
+                            </button>
+                            <button
+                                className="thanks-modal-save"
+                                onClick={handleSaveMessage}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? '저장 중...' : '저장하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
