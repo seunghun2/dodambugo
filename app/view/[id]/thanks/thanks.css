@@ -35,8 +35,10 @@
 
 /* 탭 네비게이션 */
 .thanks-tabs {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #EEEEEE;
@@ -68,7 +70,7 @@
 .thanks-content {
     position: relative;
     z-index: 1;
-    padding: 210px 20px 120px;
+    padding: 260px 20px 120px;
     max-width: 430px;
     margin: 0 auto;
     min-height: calc(100vh - 52px - 80px);
