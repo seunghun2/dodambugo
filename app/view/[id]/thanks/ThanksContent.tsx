@@ -141,30 +141,27 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
         setIsEditModalOpen(true);
     };
 
-    // 메시지 저장
+    // 메시지 저장 (Optimistic Update)
     const handleSaveMessage = async () => {
-        setIsSaving(true);
-        try {
-            const updatedMessages = {
-                ...customMessages,
-                [activeTab]: editingMessage,
-            };
+        const updatedMessages = {
+            ...customMessages,
+            [activeTab]: editingMessage,
+        };
 
-            const res = await fetch(`/api/bugo/${bugo.id}/thanks-message`, {
+        // 즉시 UI 업데이트
+        setCustomMessages(updatedMessages);
+        setIsEditModalOpen(false);
+
+        // 백그라운드에서 저장
+        try {
+            await fetch(`/api/bugo/${bugo.id}/thanks-message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: updatedMessages }),
             });
-            if (res.ok) {
-                setCustomMessages(updatedMessages);
-                setIsEditModalOpen(false);
-            } else {
-                alert('저장에 실패했습니다.');
-            }
         } catch (error) {
-            alert('저장 중 오류가 발생했습니다.');
+            console.error('저장 실패:', error);
         }
-        setIsSaving(false);
     };
 
     return (
@@ -245,9 +242,14 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                         <div className="thanks-modal-body">
                             <textarea
                                 value={editingMessage}
-                                onChange={(e) => setEditingMessage(e.target.value)}
+                                onChange={(e) => {
+                                    const lines = e.target.value.split('\n');
+                                    if (lines.length <= 14) {
+                                        setEditingMessage(e.target.value);
+                                    }
+                                }}
                                 placeholder="감사 인사 문구를 입력하세요..."
-                                rows={12}
+                                rows={14}
                             />
                         </div>
                         <div className="thanks-modal-footer">
