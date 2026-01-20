@@ -66,7 +66,7 @@
 .thanks-content {
     position: relative;
     z-index: 1;
-    padding: 200px 20px 120px;
+    padding: 210px 20px 120px;
     max-width: 430px;
     margin: 0 auto;
     min-height: calc(100vh - 52px - 80px);
@@ -93,8 +93,8 @@
 
 .thanks-title {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
     color: #333333;
     margin-bottom: 20px;
     letter-spacing: 1px;
@@ -102,9 +102,9 @@
 
 .thanks-body {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: #444444;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333333;
     line-height: 1.8;
 }
 
@@ -123,7 +123,7 @@
 
 .thanks-date {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     color: #666666;
     margin-bottom: 4px;
@@ -131,7 +131,7 @@
 
 .thanks-mourner {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #333333;
 }
