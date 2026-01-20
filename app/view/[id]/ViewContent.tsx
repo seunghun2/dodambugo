@@ -686,7 +686,7 @@ ${url}
                     if (hasAccount) {
                         return (
                             <div className="action-bar action-bar-split">
-                                <button className="action-bar-btn" onClick={() => setAccountModalOpen(true)}>
+                                <button className="action-bar-btn" onClick={() => setAccountModalOpen(true)} style={{ fontFamily: "'Pretendard', sans-serif" }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                                         <line x1="1" y1="10" x2="23" y2="10"></line>
@@ -694,7 +694,7 @@ ${url}
                                     <span>부의금보내기</span>
                                 </button>
                                 <div className="action-bar-divider"></div>
-                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)}>
+                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)} style={{ fontFamily: "'Pretendard', sans-serif" }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="18" cy="5" r="3"></circle>
                                         <circle cx="6" cy="12" r="3"></circle>
@@ -709,7 +709,7 @@ ${url}
                     } else {
                         return (
                             <div className="action-bar">
-                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)}>
+                                <button className="action-bar-btn" onClick={() => setShareModalOpen(true)} style={{ fontFamily: "'Pretendard', sans-serif" }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="18" cy="5" r="3"></circle>
                                         <circle cx="6" cy="12" r="3"></circle>
@@ -734,7 +734,7 @@ ${url}
 
                     <div className="address-row">
                         <p className="address-text">{bugo.address} {bugo.address_detail || ''}</p>
-                        <button className="btn-copy-address" onClick={copyAddress}>
+                        <button className="btn-copy-address" onClick={copyAddress} style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -754,11 +754,11 @@ ${url}
 
                     {/* 내비 버튼 */}
                     <div className="navi-buttons">
-                        <button className="navi-btn" onClick={openNaverMap}>
+                        <button className="navi-btn" onClick={openNaverMap} style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
                             <Image src="/images/ic_naver_map.png" alt="네이버지도" className="navi-icon" width={24} height={24} />
                             <span>네이버지도</span>
                         </button>
-                        <button className="navi-btn" onClick={openKakaoNavi}>
+                        <button className="navi-btn" onClick={openKakaoNavi} style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
                             <Image src="/images/ic_kakao_navi.png" alt="카카오내비" className="navi-icon" width={24} height={24} />
                             <span>카카오내비</span>
                         </button>
@@ -766,13 +766,13 @@ ${url}
 
                     {/* 장례식장 전화하기 버튼 */}
                     {bugo.funeral_home_tel && (
-                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn">
+                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn" style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
                             <div className="call-btn-text">
-                                <span className="call-btn-title">장례식장에 전화하기</span>
-                                <span className="call-btn-number">{bugo.funeral_home_tel}</span>
+                                <span className="call-btn-title" style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>장례식장에 전화하기</span>
+                                <span className="call-btn-number" style={{ fontFamily: "'Pretendard', sans-serif" }}>{bugo.funeral_home_tel}</span>
                             </div>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2">
                                 <polyline points="9 18 15 12 9 6"></polyline>

@@ -473,14 +473,14 @@
 }
 
 .call-btn-title {
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     color: #333333;
 }
 
 .call-btn-number {
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #666666;
@@ -719,7 +719,7 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    font-family: 'Nanum Myeongjo', serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #333333;
