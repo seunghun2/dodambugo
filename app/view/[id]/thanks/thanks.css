@@ -103,7 +103,7 @@
 .thanks-body {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     color: #333333;
     line-height: 1.8;
 }
@@ -152,16 +152,16 @@
 .thanks-cta-btn {
     width: 100%;
     padding: 16px;
-    background: #2196F3;
+    background: #FFCC45;
     border: none;
     border-radius: 8px;
     font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 600;
-    color: #FFFFFF;
+    color: #000000;
     cursor: pointer;
 }
 
 .thanks-cta-btn:active {
-    background: #1976D2;
+    background: #E6B83D;
 }
