@@ -166,20 +166,20 @@ export default function ShareContent({ bugo, bugoId }: ShareContentProps) {
 
     return (
         <div className="share-page">
+            {/* 헤더 */}
+            <header className="share-header">
+                <button className="share-back" onClick={() => router.push(`/view/${bugoId}/thanks`)}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <h1 className="share-header-title">감사장 공유하기</h1>
+                <div style={{ width: 24 }}></div>
+            </header>
+
             {/* 미리보기 카드 */}
             <div className="share-preview">
                 <div className="share-preview-card">
-                    {/* 수정하기 버튼 */}
-                    <button
-                        className="share-edit-pill"
-                        onClick={() => router.push(`/view/${bugoId}/thanks`)}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                        수정하기
-                    </button>
-
                     {/* 배경 이미지 */}
                     <div className="share-card-bg">
                         <Image
@@ -215,18 +215,18 @@ export default function ShareContent({ bugo, bugoId }: ShareContentProps) {
                 </div>
                 <div className="share-bottom-buttons">
                     <button className="share-bottom-btn" onClick={shareKakao}>
-                        <Image src="/images/icon-kakao.png" alt="카카오톡" width={44} height={44} />
+                        <Image src="/images/icon-kakao.png" alt="카카오톡" width={48} height={48} />
                         <span>카카오톡</span>
                     </button>
 
                     <button className="share-bottom-btn" onClick={shareSMS}>
-                        <Image src="/images/icon-message.png" alt="메세지" width={44} height={44} />
-                        <span>메세지</span>
+                        <Image src="/images/icon-message.png" alt="메시지" width={48} height={48} />
+                        <span>메시지</span>
                     </button>
 
                     <button className="share-bottom-btn" onClick={copyLink}>
-                        <Image src="/images/icon-link.png" alt="주소복사" width={44} height={44} />
-                        <span>주소복사</span>
+                        <Image src="/images/icon-link.png" alt="링크복사" width={48} height={48} />
+                        <span>링크복사</span>
                     </button>
                 </div>
             </div>
