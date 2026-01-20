@@ -32,10 +32,10 @@ const messages: Record<ReligionType, { title: string; body: string[] }> = {
     general: {
         title: '삼가 감사 인사 드립니다',
         body: [
-            '바쁘신 중에도 故{deceased}님의 장례식을 찾아 주심에 고개 숙여 감사드립니다.',
-            '전해 주신 따뜻한 위로와 격려의 말씀은 가슴에 새기고 잊지 않겠습니다.',
-            '찾아 뵙고 감사의 인사를 드려야 옳으나 여의치 못해 우선 이렇게 글로 대신합니다.',
-            '조만간 찾아 뵙고 인사 올리겠습니다. 내내 건강하시고 귀댁에 행운이 있길 빌겠습니다.',
+            '귀한 시간 내시어 故{deceased}님의 마지막 길에<br/>함께해 주셔서 감사드립니다.',
+            '보내주신 따뜻한 마음과 위로가<br/>슬픔 속에서 큰 힘이 되었습니다.',
+            '직접 찾아뵙고 인사드려야 하나,<br/>이렇게 글로 먼저 감사의 말씀을 전합니다.',
+            '건강하시고 좋은 일만 가득하시기를 기원합니다.',
         ],
     },
     christian: {
@@ -137,7 +137,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
 
                     <div className="thanks-body">
                         {currentMessage.body.map((text, i) => (
-                            <p key={i}>{replaceDeceased(text)}</p>
+                            <p key={i} dangerouslySetInnerHTML={{ __html: replaceDeceased(text) }} />
                         ))}
                     </div>
 
