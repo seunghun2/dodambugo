@@ -1,0 +1,85 @@
+/* Share Page CSS */
+
+.share-page {
+    min-height: 100vh;
+    max-width: 360px;
+    margin: 0 auto;
+    background: #FFFFFF;
+}
+
+.share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #EEEEEE;
+}
+
+.share-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-title {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.share-content {
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.share-description {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 48px;
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+}
+
+.share-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.share-btn img {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+}
+
+.share-btn span {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+}
+
+.share-kakao img {
+    background: #FEE500;
+}
+
+.share-sms img {
+    background: #4CAF50;
+}
+
+.share-link img {
+    background: #666666;
+}
