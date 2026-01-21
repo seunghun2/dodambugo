@@ -1,62 +1,66 @@
-/* Thanks Card (Public) CSS */
+/* Thanks Card (Public) CSS - 담백한 카드 디자인 */
 
 .card-page {
     position: relative;
     min-height: 100vh;
     width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-    background: #F5F5F5;
-}
-
-/* 배경 이미지 */
-.card-bg {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
-    width: 100%;
-    max-width: 430px;
-    z-index: 0;
-}
-
-/* 카드 내용 */
-.card-content {
-    position: relative;
-    z-index: 1;
-    padding: 200px 20px 40px;
-    min-height: 100vh;
+    background: #4A4A4A;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
 }
 
+/* 배경 이미지 (사용 안함 - 담백한 디자인) */
+.card-bg {
+    display: none;
+}
+
+/* 카드 컨테이너 */
+.card-content {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 카드 메시지 박스 */
 .card-message {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 32px 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, #E8E8E8 0%, #D8D8D8 100%);
+    border-radius: 0;
+    padding: 60px 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     text-align: center;
+    width: 100%;
+}
+
+/* 종교 심볼 이미지 */
+.card-symbol {
+    width: 60px;
+    height: auto;
+    margin: 0 auto 30px;
+    opacity: 0.7;
 }
 
 .card-title {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 700;
     color: #333333;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
+    letter-spacing: 2px;
 }
 
 .card-body {
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 }
 
 .card-body p {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #333333;
-    line-height: 1.9;
+    font-size: 14px;
+    font-weight: 400;
+    color: #444444;
+    line-height: 2;
     margin-bottom: 20px;
 }
 
@@ -65,58 +69,20 @@
 }
 
 .card-footer {
-    padding-top: 24px;
-    border-top: 1px solid #EEEEEE;
+    padding-top: 28px;
+    border-top: none;
 }
 
 .card-date {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 15px;
-    color: #666666;
+    font-size: 14px;
+    color: #555555;
     margin-bottom: 8px;
 }
 
 .card-mourner {
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: #333333;
-}
-
-/* 감사장 보내기 버튼 */
-.card-bottom {
-    margin-top: 24px;
-}
-
-.card-cta-btn {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    background: #FFCC45;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Pretendard', sans-serif;
     font-size: 16px;
     font-weight: 600;
-    color: #000000;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.card-cta-btn:active {
-    background: #E6B83D;
-}
-
-/* 푸터 */
-.card-site-footer {
-    margin-top: auto;
-    padding-top: 40px;
-    text-align: center;
-}
-
-.card-site-footer p {
-    font-family: 'Pretendard', sans-serif;
-    font-size: 12px;
-    color: #999999;
+    color: #333333;
 }

@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
 interface ThanksMessages {
@@ -25,13 +23,6 @@ interface CardContentProps {
     bugoId: string;
 }
 
-// 종교별 심볼 이미지
-const symbolImages: Record<ReligionType, string> = {
-    general: '/images/thanks/thanks-general.jpg',
-    christian: '/images/thanks/thanks-christian.jpg',
-    catholic: '/images/thanks/thanks-catholic.jpg',
-    buddhist: '/images/thanks/thanks-buddhist.jpg',
-};
 
 // 종교별 기본 문구
 const defaultMessages: Record<ReligionType, string[]> = {
@@ -109,22 +100,26 @@ export default function CardContent({ bugo, bugoId }: CardContentProps) {
 
     const displayMessage = getDisplayMessage();
 
+    // 종교별 심볼 이미지 (카드 내부용)
+    const symbolImages: Record<ReligionType, string> = {
+        general: '/images/thanks/symbol-general.png',
+        christian: '/images/thanks/symbol-christian.png',
+        catholic: '/images/thanks/symbol-catholic.png',
+        buddhist: '/images/thanks/symbol-buddhist.png',
+    };
+
     return (
         <div className="card-page">
-            {/* 배경 이미지 */}
-            <div className="card-bg">
-                <Image
-                    src={symbolImages[religionType]}
-                    alt=""
-                    fill
-                    style={{ objectFit: 'cover', objectPosition: 'top' }}
-                    priority
-                />
-            </div>
-
             {/* 카드 내용 */}
             <div className="card-content">
                 <div className="card-message">
+                    {/* 종교 심볼 */}
+                    <img
+                        src={symbolImages[religionType]}
+                        alt=""
+                        className="card-symbol"
+                    />
+
                     <h1 className="card-title">삼가 감사 인사 드립니다</h1>
 
                     <div className="card-body">
