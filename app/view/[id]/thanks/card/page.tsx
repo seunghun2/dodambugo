@@ -16,10 +16,12 @@ export const revalidate = 60;
 
 interface PageProps {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ religion?: string }>;
 }
 
-export default async function ThanksCardPage({ params }: PageProps) {
+export default async function ThanksCardPage({ params, searchParams }: PageProps) {
     const { id } = await params;
+    const { religion } = await searchParams;
     const supabase = getSupabase();
 
     // 데이터 조회
@@ -46,5 +48,5 @@ export default async function ThanksCardPage({ params }: PageProps) {
         notFound();
     }
 
-    return <CardContent bugo={data} bugoId={id} />;
+    return <CardContent bugo={data} bugoId={id} religionParam={religion} />;
 }

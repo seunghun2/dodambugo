@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -24,6 +23,7 @@ interface BugoData {
 interface CardContentProps {
     bugo: BugoData;
     bugoId: string;
+    religionParam?: string; // 서버에서 전달받은 종교 파라미터
 }
 
 // 종교별 심볼 이미지 (thanks 페이지와 동일)
@@ -93,13 +93,10 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
     }
 };
 
-export default function CardContent({ bugo, bugoId }: CardContentProps) {
-    const searchParams = useSearchParams();
-
-    // URL에서 religion 파라미터 가져오기, 없으면 DB의 thanks_religion, 그것도 없으면 religion 사용
-    const religionParam = searchParams.get('religion') as ReligionType | null;
+export default function CardContent({ bugo, bugoId, religionParam }: CardContentProps) {
+    // 종교 우선순위: URL 파라미터 > DB의 thanks_religion > 기본 religion
     const savedReligion = (bugo as any).thanks_religion as ReligionType | null;
-    const religionType = religionParam || savedReligion || getReligionType(bugo.religion);
+    const religionType = (religionParam as ReligionType) || savedReligion || getReligionType(bugo.religion);
 
     const customMessages = parseCustomMessages(bugo.thanks_message);
     const currentCustomMessage = customMessages[religionType];
