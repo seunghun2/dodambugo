@@ -105,12 +105,30 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
 
 export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<ReligionType>(getReligionType(bugo.religion));
+    // thanks_religion이 저장되어 있으면 그걸 사용, 없으면 기존 religion 사용
+    const initialReligion = (bugo as any).thanks_religion || getReligionType(bugo.religion);
+    const [activeTab, setActiveTab] = useState<ReligionType>(initialReligion);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [customMessages, setCustomMessages] = useState<ThanksMessages>(parseCustomMessages(bugo.thanks_message));
     const [editingMessage, setEditingMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // 탭 변경 시 DB에 저장
+    const handleTabChange = async (tab: ReligionType) => {
+        setActiveTab(tab);
+
+        // 백그라운드에서 저장
+        try {
+            await fetch(`/api/bugo/${bugo.id}/thanks-religion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ religion: tab }),
+            });
+        } catch (error) {
+            console.error('종교 저장 실패:', error);
+        }
+    };
 
     // 공유 URL (card 페이지로)
     const getShareUrl = () => {
@@ -219,7 +237,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                     <button
                         key={tab.key}
                         className={`thanks-tab ${activeTab === tab.key ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab.key)}
+                        onClick={() => handleTabChange(tab.key)}
                     >
                         {tab.label}
                     </button>

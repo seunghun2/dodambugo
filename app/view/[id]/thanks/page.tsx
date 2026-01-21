@@ -29,14 +29,14 @@ export default async function ThanksPage({ params }: PageProps) {
     if (isUUID) {
         const result = await supabase
             .from('bugo')
-            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
             .eq('id', id)
             .single();
         data = result.data;
     } else {
         const result = await supabase
             .from('bugo')
-            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
             .eq('bugo_number', id)
             .single();
         data = result.data;
