@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
                     {
                         '장례식장': funeralHomeInfo,
                         '발인일시': funeralDateTime,
-                        '부고번호': bugo_number,
+                        '부고번호': String(bugo_number),
                     }
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
