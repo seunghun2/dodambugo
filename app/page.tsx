@@ -596,9 +596,10 @@ export default function HomePage() {
               <Link href="/contact">제휴/문의</Link>
             </div>
             <div className="footer-info">
-              <p>강남구 압구정로 306 | 대표: 김미연</p>
-              <p>사업자등록번호: 408-22-68851</p>
-              <p>Copyright maeumbugo Corp All right reserved.</p>
+              <p>서울특별시 강남구 압구정로 306, B1층 4-S36호(신사동)</p>
+              <p>대표: 김미연 | 대표번호: 010-4837-5076</p>
+              <p>사업자등록번호: 408-22-68851 | 통신판매업: 2026-서울강남-00502</p>
+              <p>© maeumbugo Corp. All rights reserved.</p>
             </div>
           </div>
         </div>
