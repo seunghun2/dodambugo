@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
 import CardContent from './CardContent';
-import '../thanks.css';
+import './card.css';
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
@@ -16,12 +16,10 @@ export const revalidate = 60;
 
 interface PageProps {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ religion?: string }>;
 }
 
-export default async function ThanksCardPage({ params, searchParams }: PageProps) {
+export default async function ThanksCardPage({ params }: PageProps) {
     const { id } = await params;
-    const { religion } = await searchParams;
     const supabase = getSupabase();
 
     // 데이터 조회
@@ -31,14 +29,14 @@ export default async function ThanksCardPage({ params, searchParams }: PageProps
     if (isUUID) {
         const result = await supabase
             .from('bugo')
-            .select('*')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
             .eq('id', id)
             .single();
         data = result.data;
     } else {
         const result = await supabase
             .from('bugo')
-            .select('*')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
             .eq('bugo_number', id)
             .single();
         data = result.data;
@@ -48,5 +46,5 @@ export default async function ThanksCardPage({ params, searchParams }: PageProps
         notFound();
     }
 
-    return <CardContent bugo={data} bugoId={id} religionParam={religion} />;
+    return <CardContent bugo={data} bugoId={id} />;
 }

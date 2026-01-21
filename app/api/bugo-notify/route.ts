@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
             funeral_time,
         });
 
-        // 📱 신청자에게 알림톡 발송 (비동기)
+        // 📱 신청자에게 알림톡 발송 (알림톡 실패 시 SMS 대체)
         try {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
@@ -43,31 +43,27 @@ export async function POST(request: NextRequest) {
             if (bugo?.phone_password) {
                 const phoneNumber = bugo.phone_password.replace(/-/g, '');
 
-                // 발인일시 포맷팅
-                const funeralDateTime = funeral_date
-                    ? `${funeral_date} ${funeral_time || ''}`.trim()
-                    : '미정';
+                // 장례식장 정보 조합
+                const funeralLocation = `${funeral_home || ''} ${room_number || ''}`.trim();
 
-                // 장례식장 정보
-                const funeralHomeInfo = room_number
-                    ? `${funeral_home} ${room_number}`
-                    : funeral_home || '미정';
+                // 발인일시 포맷
+                const funeralDateTime = `${funeral_date || ''} ${funeral_time || ''}`.trim();
 
-                // 카카오 알림톡 발송
+                // 알림톡 발송
                 const { sendAlimtalk } = await import('@/lib/solapi');
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP260118135823678PREE2wpc4c2', // 부고장 생성 완료 템플릿
+                    'KA01TP260118135823678PREE2wpc4c2',  // 부고장 생성 완료 템플릿
                     {
-                        '장례식장': funeralHomeInfo,
+                        '장례식장': funeralLocation,
                         '발인일시': funeralDateTime,
-                        '부고번호': String(bugo_number),
+                        '부고번호': bugo_number,
                     }
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
             }
         } catch (alimtalkErr) {
-            console.error('알림톡 발송 실패 (무시):', alimtalkErr);
+            console.error('알림톡 발송 실패:', alimtalkErr);
         }
 
         return NextResponse.json({ success: true });

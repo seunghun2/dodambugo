@@ -50,6 +50,14 @@ export async function sendAlimtalk(
     variables: Record<string, string>
 ) {
     try {
+        // SOLAPI는 변수 키에 #{} 래퍼가 필요함
+        const wrappedVariables: Record<string, string> = {};
+        for (const [key, value] of Object.entries(variables)) {
+            // 이미 #{} 형태면 그대로, 아니면 래핑
+            const wrappedKey = key.startsWith('#{') ? key : `#{${key}}`;
+            wrappedVariables[wrappedKey] = value;
+        }
+
         const response = await fetch(`${SOLAPI_URL}/messages/v4/send`, {
             method: 'POST',
             headers: getAuthHeader(),
@@ -57,12 +65,10 @@ export async function sendAlimtalk(
                 message: {
                     to,
                     from: '01048375076', // 마음부고 발신번호
-                    type: 'ATA', // 알림톡 타입
                     kakaoOptions: {
                         pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
                         templateId,
-                        variables,
-                        disableSms: false, // 알림톡 실패 시 SMS 대체 발송
+                        variables: wrappedVariables,
                     },
                 },
             }),

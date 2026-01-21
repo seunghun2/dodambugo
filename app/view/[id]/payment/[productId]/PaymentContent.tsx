@@ -44,7 +44,6 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     });
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'easy' | 'virtual'>('card'); // 결제방식
     const [privacyModalOpen, setPrivacyModalOpen] = useState(false); // 개인정보 동의 모달
-    const [sdkLoaded, setSdkLoaded] = useState(false); // SDK 로드 상태
     const [termsAgreed, setTermsAgreed] = useState({
         privacy: false,
         electronic: false,
@@ -66,26 +65,6 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     };
 
     useEffect(() => {
-        // 이노페이 SDK 스크립트 로드 (tpay v2)
-        const existingScript = document.querySelector('script[src="https://pg.innopay.co.kr/tpay/js/innopay.js"]');
-
-        if (existingScript) {
-            // 이미 로드됨
-            setSdkLoaded(true);
-        } else {
-            const script = document.createElement('script');
-            script.src = 'https://pg.innopay.co.kr/tpay/js/innopay.js';
-            script.async = true;
-            script.onload = () => {
-                console.log('이노페이 SDK 로드 완료');
-                setSdkLoaded(true);
-            };
-            script.onerror = () => {
-                console.error('이노페이 SDK 로드 실패');
-            };
-            document.head.appendChild(script);
-        }
-
         // sessionStorage에서 주문 데이터 가져오기
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (storedData) {
@@ -97,68 +76,26 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         }
     }, [bugoId, productId]);
 
-    // 주문번호 생성
-    const generateOrderId = () => {
-        const now = new Date();
-        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-        const timeStr = now.getTime().toString().slice(-6);
-        return `MBG${dateStr}${timeStr}`;
-    };
-
-    // 이노페이 결제 호출
-    const callInnopay = (orderId: string) => {
-        if (!sdkLoaded) {
-            alert('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+    const handleSubmit = async () => {
+        if (!paymentForm.senderName.trim()) {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+        if (!paymentForm.senderPhone.trim()) {
+            alert('연락처를 입력해주세요.');
             return;
         }
 
-        const innopay = (window as any).innopay;
-        if (!innopay) {
-            alert('결제 모듈 초기화 중입니다. 잠시 후 다시 시도해주세요.');
-            return;
-        }
-
-        // 결제 수단 매핑
-        const payMethodMap: Record<string, string> = {
-            card: 'CARD',
-            easy: 'EPAY',      // 간편결제
-            virtual: 'VBANK',  // 가상계좌
-        };
-
-        innopay.goPay({
-            // 테스트 MID (실제 운영 시 변경 필요)
-            mid: 'testpay01m',
-            // 결제 정보
-            payMethod: payMethodMap[paymentMethod] || 'CARD',
-            goodsName: product.name,
-            amt: product.discount_price || product.price,
-            moid: orderId,
-            buyerName: paymentForm.senderName,
-            buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
-            buyerEmail: '',
-            // 결제 결과 URL (서버에서 처리)
-            returnUrl: `${window.location.origin}/api/payment/innopay/callback`,
-            // 결과 처리
-            onSuccess: async (result: any) => {
-                console.log('결제 성공:', result);
-                // DB 저장 후 완료 페이지로 이동
-                await saveOrder(orderId, result);
-            },
-            onFail: (result: any) => {
-                console.log('결제 실패:', result);
-                alert(`결제 실패: ${result.resultMsg || '알 수 없는 오류'}`);
-            },
-        });
-    };
-
-    // 주문 저장 함수 (결제 성공 후 호출)
-    const saveOrder = async (orderId: string, paymentResult: any) => {
+        // 주문 데이터 가져오기
         const storedOrder = sessionStorage.getItem(`order_${bugoId}_${productId}`);
-        if (!storedOrder) return;
-
+        if (!storedOrder) {
+            alert('주문 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+            return;
+        }
         const orderData = JSON.parse(storedOrder);
 
         try {
+            // DB에 주문 저장
             const response = await fetch('/api/flower-orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -177,8 +114,6 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     ribbon_text1: orderData.ribbonText1,
                     ribbon_text2: orderData.ribbonText2,
                     payment_method: paymentMethod,
-                    payment_status: 'paid',
-                    payment_tid: paymentResult?.tid || orderId,
                 }),
             });
 
@@ -196,33 +131,12 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 orderNumber: result.order_number,
             }));
 
-            // 완료 페이지로 이동
+            // TODO: 실제 PG 연동 시 여기서 결제 처리
+            // 지금은 바로 완료 페이지로 이동
             router.push(`/view/${bugoId}/order/complete`);
         } catch (err: any) {
-            alert(err.message || '주문 저장 중 오류가 발생했습니다.');
+            alert(err.message || '주문 처리 중 오류가 발생했습니다.');
         }
-    };
-
-    const handleSubmit = () => {
-        if (!paymentForm.senderName.trim()) {
-            alert('이름을 입력해주세요.');
-            return;
-        }
-        if (!paymentForm.senderPhone.trim()) {
-            alert('연락처를 입력해주세요.');
-            return;
-        }
-
-        // 주문 데이터 확인
-        const storedOrder = sessionStorage.getItem(`order_${bugoId}_${productId}`);
-        if (!storedOrder) {
-            alert('주문 정보를 찾을 수 없습니다. 다시 시도해주세요.');
-            return;
-        }
-
-        // 주문번호 생성 후 이노페이 결제 호출
-        const orderId = generateOrderId();
-        callInnopay(orderId);
     };
 
     // 로딩/에러 처리는 서버 컴포넌트에서 담당
