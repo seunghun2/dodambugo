@@ -130,10 +130,10 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
         }
     };
 
-    // 공유 URL (card 페이지로)
+    // 공유 URL (card 페이지로 - DB의 thanks_religion 사용)
     const getShareUrl = () => {
         if (typeof window !== 'undefined') {
-            return `${window.location.origin}/view/${bugoId}/thanks/card?religion=${activeTab}`;
+            return `${window.location.origin}/view/${bugoId}/thanks/card`;
         }
         return '';
     };
