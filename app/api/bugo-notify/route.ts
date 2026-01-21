@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendBugoNotification } from '@/lib/slack';
 import { createClient } from '@supabase/supabase-js';
-import { sendSMS } from '@/lib/solapi';
 
 function getSupabase() {
     return createClient(
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
             funeral_time,
         });
 
-        // 📱 신청자에게 SMS 알림 (비동기)
+        // 📱 신청자에게 알림톡 발송 (비동기)
         try {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
@@ -43,24 +42,32 @@ export async function POST(request: NextRequest) {
 
             if (bugo?.phone_password) {
                 const phoneNumber = bugo.phone_password.replace(/-/g, '');
-                const bugoLink = `https://maeumbugo.co.kr/view/${bugo_number}`;
 
-                const message = `[마음부고] 부고장이 생성되었습니다.
+                // 발인일시 포맷팅
+                const funeralDateTime = funeral_date
+                    ? `${funeral_date} ${funeral_time || ''}`.trim()
+                    : '미정';
 
-■ 고인: ${deceased_name}
-■ 장례식장: ${funeral_home} ${room_number || ''}
-■ 발인: ${funeral_date || ''} ${funeral_time || ''}
+                // 장례식장 정보
+                const funeralHomeInfo = room_number
+                    ? `${funeral_home} ${room_number}`
+                    : funeral_home || '미정';
 
-▶ 부고장 보기
-${bugoLink}
-
-※ 수정 시 위 링크에서 '수정하기' 클릭`;
-
-                await sendSMS(phoneNumber, message);
-                console.log('✅ 부고 생성 SMS 발송 완료:', phoneNumber);
+                // 카카오 알림톡 발송
+                const { sendAlimtalk } = await import('@/lib/solapi');
+                await sendAlimtalk(
+                    phoneNumber,
+                    'KA01TP260118135823678PREE2wpc4c2', // 부고장 생성 완료 템플릿
+                    {
+                        '장례식장': funeralHomeInfo,
+                        '발인일시': funeralDateTime,
+                        '부고번호': bugo_number,
+                    }
+                );
+                console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
             }
-        } catch (smsErr) {
-            console.error('SMS 발송 실패 (무시):', smsErr);
+        } catch (alimtalkErr) {
+            console.error('알림톡 발송 실패 (무시):', alimtalkErr);
         }
 
         return NextResponse.json({ success: true });
