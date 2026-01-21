@@ -57,17 +57,19 @@ export async function sendAlimtalk(
                 message: {
                     to,
                     from: '01048375076', // 마음부고 발신번호
+                    type: 'ATA', // 알림톡 타입
                     kakaoOptions: {
                         pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
                         templateId,
                         variables,
+                        disableSms: false, // 알림톡 실패 시 SMS 대체 발송
                     },
                 },
             }),
         });
 
         const data = await response.json();
-        console.log('알림톡 발송 결과:', data);
+        console.log('알림톡 발송 결과:', JSON.stringify(data, null, 2));
         return data;
     } catch (error) {
         console.error('알림톡 발송 실패:', error);
