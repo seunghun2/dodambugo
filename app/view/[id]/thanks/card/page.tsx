@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
 import CardContent from './CardContent';
-import './card.css';
+import '../thanks.css';
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
