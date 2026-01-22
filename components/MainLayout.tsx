@@ -22,7 +22,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     }, [pathname]);
 
     // 홈, 뷰 페이지, 완료 페이지, 미리보기 페이지, 템플릿 변경 모드, 어드민, 약관 페이지에서는 헤더 숨김 (각자 관리)
-    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || pathname.startsWith('/create/preview/') || pathname.startsWith('/admin') || pathname === '/privacy' || pathname === '/terms' || pathname === '/privacy-third-party' || pathname === '/marketing' || isChangeMode;
+    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || pathname.startsWith('/create/preview/') || pathname.startsWith('/admin') || pathname === '/privacy' || pathname === '/terms' || pathname === '/privacy-third-party' || pathname === '/marketing' || pathname === '/condolence-refund' || isChangeMode;
 
     if (hideHeader) {
         return <>{children}</>;

@@ -282,6 +282,15 @@ export default function CondolenceContent() {
                                         </svg>
                                     </a>
                                 </li>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">[부의금]환불 불가 약관(필수)</span>
+                                    <a href="/condolence-refund" target="_blank" className="terms-link">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M9 18l6-6-6-6" />
+                                        </svg>
+                                    </a>
+                                </li>
                             </ul>
                             <p className="agreement-note">* 부의금 카드결제는 장례식장과 무관합니다.</p>
                         </div>
