@@ -302,6 +302,17 @@
     color: #F59F00;
 }
 
+.payment-notices {
+    margin-top: 12px;
+}
+
+.payment-notices p {
+    font-size: 11px;
+    color: #888888;
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
 /* 동의 */
 .agreement-section {
     background: #FFFFFF;

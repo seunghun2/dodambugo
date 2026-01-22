@@ -95,14 +95,14 @@ export default function CondolenceContent() {
     };
 
     const handlePayment = () => {
-        if (!buyerName || !buyerPhone || !selectedAmount || !agreed) {
-            alert('모든 정보를 입력하고 동의해주세요.');
+        if (!buyerName || !buyerPhone || !selectedAmount) {
+            alert('모든 정보를 입력해주세요.');
             return;
         }
         alert('카드결제 서비스 준비 중입니다.\n이노페이 PG 연동 완료 후 사용 가능합니다.');
     };
 
-    const canSubmit = buyerName && buyerPhone && selectedAmount && agreed;
+    const canSubmit = buyerName && buyerPhone && selectedAmount && paymentMethod;
 
     if (!account) {
         return (
@@ -173,6 +173,7 @@ export default function CondolenceContent() {
                             placeholder="보내시는 분 성함"
                             value={buyerName}
                             onChange={(e) => setBuyerName(e.target.value)}
+                            autoFocus
                         />
                     </div>
                     <div className="form-group">
@@ -238,6 +239,10 @@ export default function CondolenceContent() {
                             간편결제
                         </button>
                     </div>
+                    <div className="payment-notices">
+                        <p>* 법인카드로 결제하시면 접대비 증빙이 가능합니다.</p>
+                        <p>* 본 서비스는 장례식장과 별개로 운영됩니다.</p>
+                    </div>
                 </section>
             </div>
 
@@ -292,7 +297,6 @@ export default function CondolenceContent() {
                                     </a>
                                 </li>
                             </ul>
-                            <p className="agreement-note">* 부의금 카드결제는 장례식장과 무관합니다.</p>
                         </div>
                     </div>
                 </div>
