@@ -911,13 +911,22 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 카드결제 버튼 */}
                                             <button
-                                                className="btn-card-payment"
-                                                onClick={() => {
-                                                    // TODO: PG 연동 후 결제 페이지로 이동
-                                                    alert('카드결제 서비스 준비 중입니다.');
+                                                style={{
+                                                    width: 'calc(100% - 40px)',
+                                                    margin: '6px 20px 20px',
+                                                    padding: '10px',
+                                                    background: '#FFFFFF',
+                                                    border: '1px solid #333333',
+                                                    borderRadius: '8px',
+                                                    textAlign: 'center',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                    fontFamily: "'Pretendard', -apple-system, sans-serif",
+                                                    color: '#333',
+                                                    fontWeight: 500
                                                 }}
+                                                onClick={() => alert('카드결제 서비스 준비 중입니다.')}
                                             >
                                                 카드결제
                                             </button>
