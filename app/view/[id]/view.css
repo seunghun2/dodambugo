@@ -1912,12 +1912,13 @@ body:has(.memorial-overlay) {
     font-size: 10px !important;
     color: #AAAAAA !important;
 }
+
 /* ========================================
    카드결제 버튼 - 부의금 모달
 ======================================== */
 .btn-card-payment {
-    width: 100%;
-    margin-top: 12px;
+    width: calc(100% - 40px);
+    margin: 0 20px 20px 20px;
     padding: 14px;
     background: #FFFFFF;
     border: 1px solid #E5E5E5;
