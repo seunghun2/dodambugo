@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface FlowerOrder {
     id: string;
@@ -111,34 +112,7 @@ export default function AdminFlowerOrdersPage() {
 
     return (
         <div className="admin-pc">
-            {/* 사이드바 */}
-            <aside className="admin-sidebar">
-                <div className="sidebar-logo">
-                    <Link href="/">마음부고</Link>
-                </div>
-                <nav className="sidebar-nav">
-                    <Link href="/admin/bugo" className="nav-item">
-                        <span className="material-symbols-outlined">description</span>
-                        <span>부고장 관리</span>
-                    </Link>
-                    <Link href="/admin/flower-orders" className="nav-item active">
-                        <span className="material-symbols-outlined">local_florist</span>
-                        <span>화환 주문</span>
-                    </Link>
-                    <Link href="/admin/facilities" className="nav-item">
-                        <span className="material-symbols-outlined">apartment</span>
-                        <span>장례식장 정보</span>
-                    </Link>
-                    <Link href="/admin/products" className="nav-item">
-                        <span className="material-symbols-outlined">inventory_2</span>
-                        <span>상품 등록</span>
-                    </Link>
-                    <Link href="/admin/inquiries" className="nav-item">
-                        <span className="material-symbols-outlined">mail</span>
-                        <span>문의 관리</span>
-                    </Link>
-                </nav>
-            </aside>
+            <AdminSidebar />
 
             {/* 메인 콘텐츠 */}
             <main className="admin-main">
