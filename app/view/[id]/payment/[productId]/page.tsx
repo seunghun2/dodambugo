@@ -3,6 +3,9 @@ import { unstable_cache } from 'next/cache';
 import PaymentContent from './PaymentContent';
 import '@/app/view/[id]/order/[productId]/order.css';
 
+// Edge Runtime - Cold Start 최소화
+export const runtime = 'edge';
+
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import CardContent from './CardContent';
 import './card.css';
 
+// Edge Runtime - Cold Start 최소화
+export const runtime = 'edge';
+
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
     return createClient(

@@ -3,6 +3,9 @@ import { unstable_cache } from 'next/cache';
 import FlowerDetailContent from './FlowerDetailContent';
 import './flower-detail.css';
 
+// Edge Runtime - Cold Start 최소화
+export const runtime = 'edge';
+
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
