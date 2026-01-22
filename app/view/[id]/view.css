@@ -1880,3 +1880,36 @@ body:has(.memorial-overlay) {
 .btn-flower-order:active {
     background: var(--primary-dark, #FCC419);
 }
+/* ========================================
+   Footer - PG 승인용 사업자 정보
+======================================== */
+.view-footer {
+    margin-top: 40px;
+    padding: 32px 20px;
+    background: #1A1A1A;
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+}
+
+.view-footer-content {
+    text-align: center;
+}
+
+.view-footer-content p {
+    font-size: 12px;
+    color: #888888;
+    line-height: 1.8;
+    margin: 0;
+}
+
+.view-footer-company {
+    font-size: 14px !important;
+    font-weight: 600;
+    color: #FFFFFF !important;
+    margin-bottom: 12px !important;
+}
+
+.view-footer-copyright {
+    margin-top: 16px !important;
+    font-size: 11px !important;
+    color: #666666 !important;
+}
