@@ -30,7 +30,7 @@
     margin: 0 auto;
     background: #FFFFFF;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 0;
     font-family: 'Nanum Myeongjo', serif;
     -webkit-font-smoothing: antialiased;
 }
@@ -1887,6 +1887,7 @@ body:has(.memorial-overlay) {
 .view-footer {
     margin-top: 40px;
     padding: 24px 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 20px));
     background: #F5F5F5;
     font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
 }
