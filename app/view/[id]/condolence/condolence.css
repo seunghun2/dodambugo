@@ -513,12 +513,131 @@
 
 /* 사업자 정보 푸터 - 컴팩트 */
 .condolence-page .view-footer {
+    margin-top: 10px;
     padding: 16px 20px;
-    margin-top: 0;
-    padding-bottom: 100px;
+    padding-bottom: 10px;
 }
 
 .condolence-page .view-footer p {
-    margin: 2px 0;
     font-size: 11px;
+}
+
+/* 결제 확인 모달 */
+.confirm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+}
+
+.confirm-modal {
+    position: relative;
+    background: #FFFFFF;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 320px;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.confirm-modal-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999999;
+}
+
+.confirm-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 16px;
+}
+
+.confirm-modal-desc {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.confirm-modal-desc strong {
+    color: #1A1A1A;
+}
+
+.confirm-modal-sub {
+    font-size: 13px;
+    color: #888888;
+    margin-bottom: 20px;
+}
+
+.confirm-modal-info {
+    background: #F8F8F8;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.confirm-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.confirm-info-row:first-child {
+    padding-top: 0;
+}
+
+.confirm-info-row:last-child {
+    padding-bottom: 0;
+}
+
+.confirm-info-label {
+    font-size: 13px;
+    color: #666666;
+}
+
+.confirm-info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.confirm-modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.confirm-modal-close {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #888888;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
 }

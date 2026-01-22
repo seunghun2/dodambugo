@@ -86,6 +86,7 @@ export default function CondolenceContent() {
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agreed, setAgreed] = useState(false);
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
     const formatPhone = (value: string) => {
         const numbers = value.replace(/[^\d]/g, '');
@@ -94,11 +95,16 @@ export default function CondolenceContent() {
         return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
     };
 
-    const handlePayment = () => {
+    const handlePaymentClick = () => {
         if (!buyerName || !buyerPhone || !selectedAmount) {
             alert('모든 정보를 입력해주세요.');
             return;
         }
+        setConfirmModalOpen(true);
+    };
+
+    const handleConfirmPayment = () => {
+        setConfirmModalOpen(false);
         alert('카드결제 서비스 준비 중입니다.\n이노페이 PG 연동 완료 후 사용 가능합니다.');
     };
 
@@ -314,12 +320,50 @@ export default function CondolenceContent() {
                 <button
                     type="button"
                     className={`submit-button ${canSubmit ? 'active' : ''}`}
-                    onClick={handlePayment}
+                    onClick={handlePaymentClick}
                     disabled={!canSubmit}
                 >
                     {selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원 결제하기` : '결제하기'}
                 </button>
             </div>
+
+            {/* 결제 확인 모달 */}
+            {confirmModalOpen && (
+                <div className="confirm-modal-overlay" onClick={() => setConfirmModalOpen(false)}>
+                    <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="confirm-modal-x" onClick={() => setConfirmModalOpen(false)}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h3 className="confirm-modal-title">주의사항</h3>
+                        <p className="confirm-modal-desc">
+                            부의금 결제는 상주님의 계좌로<br />
+                            <strong>즉시 입금되어 환불이 불가능합니다.</strong>
+                        </p>
+                        <p className="confirm-modal-sub">결제금액이 맞는지 한 번 더 확인해주세요.</p>
+
+                        <div className="confirm-modal-info">
+                            <div className="confirm-info-row">
+                                <span className="confirm-info-label">받는 분에게 표시</span>
+                                <span className="confirm-info-value">{buyerName}</span>
+                            </div>
+                            <div className="confirm-info-row">
+                                <span className="confirm-info-label">결제금액</span>
+                                <span className="confirm-info-value">{selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원` : ''}</span>
+                            </div>
+                            <div className="confirm-info-row">
+                                <span className="confirm-info-label">결제수단</span>
+                                <span className="confirm-info-value">{paymentMethod === 'card' ? '카드결제' : '간편결제'}</span>
+                            </div>
+                        </div>
+
+                        <button className="confirm-modal-btn" onClick={handleConfirmPayment}>
+                            동의하고 결제하기
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Footer - PG 승인용 사업자 정보 */}
             <footer className="view-footer">
