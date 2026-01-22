@@ -1882,60 +1882,28 @@ body:has(.memorial-overlay) {
 }
 
 /* ========================================
-   Footer - PG 승인용 사업자 정보 (접기/열기)
+   Footer - PG 승인용 사업자 정보
 ======================================== */
 .view-footer {
     margin-top: 40px;
-    padding: 20px;
+    padding: 24px 20px;
     background: #F5F5F5;
     font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
 }
 
-.view-footer-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-}
-
-.view-footer-toggle svg {
-    color: #888888;
-    transition: transform 0.2s ease;
-}
-
-.view-footer-toggle.open svg {
-    transform: rotate(180deg);
-}
-
-.view-footer-company {
-    font-size: 13px;
-    font-weight: 600;
-    color: #666666;
-}
-
-.view-footer-details {
-    max-height: 0;
-    overflow: hidden;
-    text-align: center;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-    padding-top: 0;
-}
-
-.view-footer-details.open {
-    max-height: 200px;
-    padding-top: 16px;
-}
-
-.view-footer-details p {
+.view-footer p {
     font-size: 11px;
     color: #888888;
     line-height: 1.8;
     margin: 0;
+    text-align: left;
+}
+
+.view-footer-company {
+    font-size: 13px !important;
+    font-weight: 600;
+    color: #555555 !important;
+    margin-bottom: 8px !important;
 }
 
 .view-footer-copyright {
