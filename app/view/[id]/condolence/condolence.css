@@ -510,3 +510,15 @@
     align-items: center;
     text-decoration: none;
 }
+
+/* 사업자 정보 푸터 - 컴팩트 */
+.condolence-page .view-footer {
+    padding: 16px 20px;
+    margin-top: 0;
+    padding-bottom: 100px;
+}
+
+.condolence-page .view-footer p {
+    margin: 2px 0;
+    font-size: 11px;
+}
