@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase, Bugo } from '@/lib/supabase';
+import type { Bugo } from '@/lib/supabase';
+// supabase는 동적 로드
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
@@ -24,6 +25,7 @@ export default function SearchPage() {
     useEffect(() => {
         const fetchRecentBugo = async () => {
             try {
+                const { supabase } = await import('@/lib/supabase');
                 const { data, error } = await supabase
                     .from('bugo')
                     .select('*')
@@ -49,6 +51,7 @@ export default function SearchPage() {
         setCurrentPage(1);
 
         try {
+            const { supabase } = await import('@/lib/supabase');
             const { data, error } = await supabase
                 .from('bugo')
                 .select('*')
