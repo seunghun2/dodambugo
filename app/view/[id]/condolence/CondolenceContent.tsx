@@ -107,11 +107,12 @@ export default function CondolenceContent() {
             <main className="condolence-page">
                 <header className="condolence-header">
                     <button className="back-button" onClick={() => router.back()}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M15 18l-6-6 6-6" />
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
                     <h1>부의금 카드결제</h1>
+                    <div style={{ width: 40 }} />
                 </header>
                 <div className="loading-container">
                     계좌 정보가 없습니다.<br />
@@ -130,11 +131,12 @@ export default function CondolenceContent() {
         <main className="condolence-page">
             <header className="condolence-header">
                 <button className="back-button" onClick={() => router.back()}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M15 18l-6-6 6-6" />
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
                 <h1>부의금 카드결제</h1>
+                <div style={{ width: 40 }} />
             </header>
 
             <div className="condolence-content">
@@ -161,26 +163,26 @@ export default function CondolenceContent() {
                 </section>
 
                 <section className="form-section">
-                    <label className="form-label">보내시는 분 성함</label>
-                    <input
-                        type="text"
-                        className="form-input"
-                        placeholder="성함을 입력해주세요"
-                        value={buyerName}
-                        onChange={(e) => setBuyerName(e.target.value)}
-                    />
-                </section>
-
-                <section className="form-section">
-                    <label className="form-label">보내시는 분 연락처</label>
-                    <input
-                        type="tel"
-                        className="form-input"
-                        placeholder="010-0000-0000"
-                        value={buyerPhone}
-                        onChange={(e) => setBuyerPhone(formatPhone(e.target.value))}
-                        maxLength={13}
-                    />
+                    <h2 className="section-title">이름 및 연락처</h2>
+                    <div className="form-group">
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="보내시는 분 성함"
+                            value={buyerName}
+                            onChange={(e) => setBuyerName(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <input
+                            type="tel"
+                            className="form-input"
+                            placeholder="010-0000-0000"
+                            value={buyerPhone}
+                            onChange={(e) => setBuyerPhone(formatPhone(e.target.value))}
+                            maxLength={13}
+                        />
+                    </div>
                 </section>
 
                 <section className="form-section">
@@ -210,7 +212,9 @@ export default function CondolenceContent() {
                     </label>
                     <p className="agreement-note">* 부의금 카드결제는 장례식장과 무관합니다.</p>
                 </section>
+            </div>
 
+            <div className="condolence-footer">
                 <button
                     type="button"
                     className={`submit-button ${canSubmit ? 'active' : ''}`}
