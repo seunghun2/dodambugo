@@ -904,10 +904,23 @@ ${url}
                                                     <span className="account-number">{acc.number}</span>
                                                 </div>
                                                 <button className="btn-copy-account" onClick={() => copyToClipboard(acc.number, '계좌번호가 복사되었습니다', true)}>
-                                                    <span className="material-symbols-outlined">content_copy</span>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                    </svg>
                                                     계좌복사
                                                 </button>
                                             </div>
+                                            {/* 카드결제 버튼 */}
+                                            <button
+                                                className="btn-card-payment"
+                                                onClick={() => {
+                                                    // TODO: PG 연동 후 결제 페이지로 이동
+                                                    alert('카드결제 서비스 준비 중입니다.');
+                                                }}
+                                            >
+                                                카드결제
+                                            </button>
                                         </div>
                                     )
                                 });

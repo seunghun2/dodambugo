@@ -1912,3 +1912,29 @@ body:has(.memorial-overlay) {
     font-size: 10px !important;
     color: #AAAAAA !important;
 }
+/* ========================================
+   카드결제 버튼 - 부의금 모달
+======================================== */
+.btn-card-payment {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-card-payment:hover {
+    background: #F9F9F9;
+    border-color: #CCCCCC;
+}
+
+.btn-card-payment:active {
+    background: #F0F0F0;
+}
