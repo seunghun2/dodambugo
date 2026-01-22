@@ -7,7 +7,7 @@ import { useEffect, useState, useRef } from 'react';
 import SideMenu from '@/components/SideMenu';
 import NavMenu from '@/components/NavMenu';
 import KBEscrow from '@/components/KBEscrow';
-import { supabase } from '@/lib/supabase';
+// supabase는 검색 시에만 동적 로드 (초기 번들 크기 감소)
 import {
   SearchIcon,
   EditNoteIcon,
@@ -132,6 +132,9 @@ export default function HomePage() {
 
       setIsSearching(true);
       try {
+        // 동적 import로 Supabase 로드 (초기 번들에서 제외)
+        const { supabase } = await import('@/lib/supabase');
+
         // 1달 전 날짜 계산
         const oneMonthAgo = new Date();
         oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
