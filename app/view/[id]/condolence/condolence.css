@@ -1,0 +1,244 @@
+/* 부의금 카드결제 페이지 */
+
+.condolence-page {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #F5F5F5;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
+/* Header */
+.condolence-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #EEEEEE;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 12px;
+    cursor: pointer;
+    display: flex;
+    color: #333;
+}
+
+.condolence-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+}
+
+/* Content */
+.condolence-content {
+    padding: 20px;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    font-size: 16px;
+    color: #666;
+}
+
+/* 계좌 선택 탭 */
+.account-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.account-tab {
+    padding: 10px 16px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    background: #FFF;
+    font-size: 14px;
+    font-family: inherit;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.account-tab.selected {
+    background: #FFF9E6;
+    border-color: #FCC419;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 상주 정보 카드 */
+.account-info-card {
+    background: #FFF;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.account-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.account-rel {
+    font-size: 14px;
+    color: #666;
+}
+
+.account-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+}
+
+.account-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bank-name {
+    font-size: 13px;
+    color: #888;
+}
+
+.account-number-display {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Form */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #333;
+    background: #FFF;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #FCC419;
+}
+
+.form-input::placeholder {
+    color: #AAA;
+}
+
+/* 금액 선택 */
+.amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.amount-button {
+    padding: 14px 8px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    background: #FFF;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.amount-button:hover {
+    border-color: #FCC419;
+}
+
+.amount-button.selected {
+    background: #FFF9E6;
+    border-color: #FCC419;
+    font-weight: 600;
+}
+
+.amount-button:last-child {
+    grid-column: span 3;
+}
+
+/* 동의 */
+.agreement-section {
+    margin: 24px 0;
+    padding: 16px;
+    background: #FFF;
+    border-radius: 8px;
+}
+
+.agreement-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.agreement-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #FCC419;
+}
+
+.agreement-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* 결제 버튼 */
+.submit-button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #E0E0E0;
+    color: #888;
+}
+
+.submit-button.active {
+    background: #FCC419;
+    color: #333;
+}
+
+.submit-button:disabled {
+    cursor: not-allowed;
+}

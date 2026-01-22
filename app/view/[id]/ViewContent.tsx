@@ -926,7 +926,17 @@ ${url}
                                                     color: '#333',
                                                     fontWeight: 500
                                                 }}
-                                                onClick={() => alert('카드결제 서비스 준비 중입니다.')}
+                                                onClick={() => {
+                                                    // sessionStorage에 계좌 정보 저장
+                                                    sessionStorage.setItem('condolence_account', JSON.stringify({
+                                                        relationship: acc.relationship || '',
+                                                        name: acc.name || acc.holder || '',
+                                                        bank: acc.bank || '',
+                                                        holder: acc.holder || '',
+                                                        number: acc.number || ''
+                                                    }));
+                                                    window.location.href = `/view/${params.id}/condolence`;
+                                                }}
                                             >
                                                 카드결제
                                             </button>
