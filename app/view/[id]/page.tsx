@@ -6,6 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
+// Edge Runtime - Cold Start 거의 없음!
+export const runtime = 'edge';
+
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
     return createClient(
