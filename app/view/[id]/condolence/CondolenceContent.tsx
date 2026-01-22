@@ -2,7 +2,58 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import './condolence.css';
+
+// 은행명 → 로고 파일 매핑
+function getBankLogo(bankName: string): string | null {
+    const bankLogoMap: Record<string, string> = {
+        'KB국민': '/images/bankicon/국민은행.svg',
+        '국민': '/images/bankicon/국민은행.svg',
+        '국민은행': '/images/bankicon/국민은행.svg',
+        '신한': '/images/bankicon/신한은행.svg',
+        '신한은행': '/images/bankicon/신한은행.svg',
+        '우리': '/images/bankicon/우리은행.svg',
+        '우리은행': '/images/bankicon/우리은행.svg',
+        '하나': '/images/bankicon/하나은행.svg',
+        '하나은행': '/images/bankicon/하나은행.svg',
+        'NH농협': '/images/bankicon/NH농협은행.svg',
+        '농협': '/images/bankicon/NH농협은행.svg',
+        '농협은행': '/images/bankicon/NH농협은행.svg',
+        'IBK기업': '/images/bankicon/기업은행.svg',
+        '기업': '/images/bankicon/기업은행.svg',
+        '기업은행': '/images/bankicon/기업은행.svg',
+        'SC제일': '/images/bankicon/SC제일은행.svg',
+        '제일은행': '/images/bankicon/SC제일은행.svg',
+        '케이뱅크': '/images/bankicon/케이뱅크.svg',
+        '카카오뱅크': '/images/bankicon/카카오뱅크.svg',
+        '카카오': '/images/bankicon/카카오뱅크.svg',
+        '토스뱅크': '/images/bankicon/토스뱅크.svg',
+        '토스': '/images/bankicon/토스뱅크.svg',
+        '새마을금고': '/images/bankicon/새마을금고.svg',
+        '새마을': '/images/bankicon/새마을금고.svg',
+        '우체국': '/images/bankicon/우체국.svg',
+        '부산': '/images/bankicon/부산은행.svg',
+        '부산은행': '/images/bankicon/부산은행.svg',
+        '대구': '/images/bankicon/대구은행.svg',
+        '대구은행': '/images/bankicon/대구은행.svg',
+        '경남': '/images/bankicon/경남은행.svg',
+        '경남은행': '/images/bankicon/경남은행.svg',
+        '수협': '/images/bankicon/수협은행.svg',
+        '수협은행': '/images/bankicon/수협은행.svg',
+        '신협': '/images/bankicon/신협은행.svg',
+        '신협은행': '/images/bankicon/신협은행.svg',
+    };
+
+    if (bankLogoMap[bankName]) return bankLogoMap[bankName];
+
+    for (const key in bankLogoMap) {
+        if (bankName.includes(key) || key.includes(bankName)) {
+            return bankLogoMap[key];
+        }
+    }
+    return null;
+}
 
 interface AccountInfo {
     relationship: string;
@@ -15,7 +66,6 @@ interface AccountInfo {
 const AMOUNT_OPTIONS = [
     { value: 50000, label: '5만원' },
     { value: 100000, label: '10만원' },
-    { value: 150000, label: '15만원' },
     { value: 200000, label: '20만원' },
     { value: 300000, label: '30만원' },
     { value: 500000, label: '50만원' },
@@ -93,9 +143,20 @@ export default function CondolenceContent() {
                         <span className="account-rel">{account.relationship}</span>
                         <span className="account-name">{account.name}</span>
                     </div>
-                    <div className="account-detail">
-                        <span className="bank-name">{account.bank}({account.holder})</span>
-                        <span className="account-number-display">{account.number}</span>
+                    <div className="account-body">
+                        {getBankLogo(account.bank) && (
+                            <Image
+                                src={getBankLogo(account.bank)!}
+                                alt={account.bank}
+                                width={32}
+                                height={32}
+                                className="bank-logo"
+                            />
+                        )}
+                        <div className="account-text">
+                            <span className="bank-name">{account.bank}({account.holder})</span>
+                            <span className="account-number-display">{account.number}</span>
+                        </div>
                     </div>
                 </section>
 

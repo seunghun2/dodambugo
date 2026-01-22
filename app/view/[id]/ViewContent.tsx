@@ -935,7 +935,7 @@ ${url}
                                                         holder: acc.holder || '',
                                                         number: acc.number || ''
                                                     }));
-                                                    window.location.href = `/view/${params.id}/condolence`;
+                                                    router.push(`/view/${params.id}/condolence`);
                                                 }}
                                             >
                                                 카드결제
