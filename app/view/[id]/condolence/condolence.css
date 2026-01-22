@@ -207,6 +207,48 @@
     font-weight: 600;
 }
 
+/* 결제 방식 */
+.payment-methods {
+    display: flex;
+    gap: 10px;
+}
+
+.payment-method-btn {
+    flex: 1;
+    padding: 16px 8px;
+    background: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.payment-method-btn svg {
+    color: #888888;
+}
+
+.payment-method-btn:hover {
+    border-color: #FFD43B;
+}
+
+.payment-method-btn.active {
+    border-color: #FFD43B;
+    background: #FFF9E6;
+    color: #1A1A1A;
+}
+
+.payment-method-btn.active svg {
+    color: #F59F00;
+}
+
 /* 동의 */
 .agreement-section {
     background: #FFFFFF;

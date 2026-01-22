@@ -83,6 +83,7 @@ export default function CondolenceContent() {
     const [buyerName, setBuyerName] = useState('');
     const [buyerPhone, setBuyerPhone] = useState('');
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agreed, setAgreed] = useState(false);
 
     const formatPhone = (value: string) => {
@@ -198,6 +199,26 @@ export default function CondolenceContent() {
                                 {option.label}
                             </button>
                         ))}
+                    </div>
+                </section>
+
+                <section className="form-section">
+                    <h2 className="section-title">결제 방식</h2>
+                    <div className="payment-methods">
+                        <button
+                            type="button"
+                            className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('card')}
+                        >
+                            카드
+                        </button>
+                        <button
+                            type="button"
+                            className={`payment-method-btn ${paymentMethod === 'simple' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('simple')}
+                        >
+                            간편결제
+                        </button>
                     </div>
                 </section>
 
