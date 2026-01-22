@@ -8,6 +8,19 @@ import SideMenu from '@/components/SideMenu';
 import NavMenu from '@/components/NavMenu';
 import KBEscrow from '@/components/KBEscrow';
 import { supabase } from '@/lib/supabase';
+import {
+  SearchIcon,
+  EditNoteIcon,
+  HelpIcon,
+  ScheduleIcon,
+  CheckCircleIcon,
+  PaletteIcon,
+  BlockIcon,
+  PersonOffIcon,
+  ShareIcon,
+  ChevronRightIcon,
+  ArrowForwardIcon
+} from '@/components/icons';
 
 interface SearchResult {
   id: string;
@@ -369,7 +382,7 @@ export default function HomePage() {
               onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
             />
             <button className="xd-search-btn" onClick={handleSearch}>
-              <span className="material-symbols-outlined">search</span>
+              <SearchIcon size={24} />
             </button>
           </div>
           {/* 자동완성 드롭다운 */}
@@ -424,19 +437,19 @@ export default function HomePage() {
         <div className="xd-action-cards">
           <button className="xd-action-card" onClick={checkDraftBeforeCreate}>
             <div className="xd-action-icon-circle">
-              <span className="material-symbols-outlined">edit_note</span>
+              <EditNoteIcon size={24} />
             </div>
             <span className="xd-action-title">부고장 만들기</span>
           </button>
           <button className="xd-action-card" onClick={() => router.push('/search')}>
             <div className="xd-action-icon-circle">
-              <span className="material-symbols-outlined">search</span>
+              <SearchIcon size={24} />
             </div>
             <span className="xd-action-title">부고 검색</span>
           </button>
           <button className="xd-action-card xd-action-faq" onClick={() => router.push('/faq')}>
             <div className="xd-action-icon-circle">
-              <span className="material-symbols-outlined">help</span>
+              <HelpIcon size={24} />
             </div>
             <span className="xd-action-title">자주 묻는 질문</span>
           </button>
@@ -467,7 +480,7 @@ export default function HomePage() {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">schedule</span>
+                <ScheduleIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">3분 만에 완성</h3>
@@ -477,7 +490,7 @@ export default function HomePage() {
 
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">check_circle</span>
+                <CheckCircleIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">완전 무료</h3>
@@ -487,7 +500,7 @@ export default function HomePage() {
 
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">palette</span>
+                <PaletteIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">품격있는 디자인</h3>
@@ -497,7 +510,7 @@ export default function HomePage() {
 
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">block</span>
+                <BlockIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">광고 없음</h3>
@@ -507,7 +520,7 @@ export default function HomePage() {
 
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">person_off</span>
+                <PersonOffIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">회원가입 불필요</h3>
@@ -517,7 +530,7 @@ export default function HomePage() {
 
             <div className="feature-card">
               <div className="feature-icon">
-                <span className="material-symbols-outlined">share</span>
+                <ShareIcon size={24} />
               </div>
               <div className="feature-text">
                 <h3 className="feature-title">쉬운 공유</h3>
@@ -577,7 +590,7 @@ export default function HomePage() {
           <div className="faq-more-wrapper">
             <Link href="/faq" className="faq-more-btn">
               더보기
-              <span className="material-symbols-outlined">chevron_right</span>
+              <ChevronRightIcon size={24} />
             </Link>
           </div>
         </div>
@@ -626,7 +639,7 @@ export default function HomePage() {
         </div>
         <button className="btn-floating-create" onClick={checkDraftBeforeCreate}>
           부고장 만들기
-          <span className="material-symbols-outlined">arrow_forward</span>
+          <ArrowForwardIcon size={24} />
         </button>
       </div>
     </>
