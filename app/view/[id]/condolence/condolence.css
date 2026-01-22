@@ -207,6 +207,59 @@
     font-weight: 600;
 }
 
+/* 결제 금액 요약 */
+.payment-summary {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.summary-row:nth-last-child(2) {
+    border-bottom: none;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #666666;
+}
+
+.summary-value {
+    font-size: 13px;
+    color: #888888;
+}
+
+.summary-row.total {
+    padding-top: 10px;
+    margin-top: 2px;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: none;
+}
+
+.summary-row.total .summary-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+.summary-row.total .summary-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+}
+
 /* 결제 방식 */
 .payment-methods {
     display: flex;
@@ -291,7 +344,7 @@
     background: #FFFFFF;
     border-top: 1px solid #F0F0F0;
     box-sizing: border-box;
-    z-index: 1001;
+    z-index: 2001;
 }
 
 @media (max-width: 480px) {
@@ -324,4 +377,125 @@
 
 .submit-button.active:hover {
     background: #FCC419;
+}
+
+/* 약관 링크 */
+.privacy-notice-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #888888;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.privacy-notice-link:hover {
+    color: #666666;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.privacy-modal {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    max-width: 360px;
+    width: 100%;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+    max-height: 60vh;
+    margin-bottom: 80px;
+}
+
+@media (max-width: 480px) {
+    .privacy-modal {
+        max-width: 100%;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #888888;
+}
+
+.modal-content {
+    padding: 16px 20px 24px;
+}
+
+/* 약관 리스트 */
+.terms-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+}
+
+.terms-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.terms-list li:last-child {
+    border-bottom: none;
+}
+
+.term-bullet {
+    font-size: 14px;
+    color: #1A1A1A;
+    margin-right: 8px;
+}
+
+.term-text {
+    font-size: 14px;
+    color: #1A1A1A;
+    flex: 1;
+}
+
+.terms-link {
+    color: #888888;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
 }

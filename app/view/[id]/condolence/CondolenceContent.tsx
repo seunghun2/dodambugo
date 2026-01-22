@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import '@/app/view/[id]/order/[productId]/order.css';
 import './condolence.css';
 
 // 은행명 → 로고 파일 매핑
@@ -202,6 +203,23 @@ export default function CondolenceContent() {
                     </div>
                 </section>
 
+                {selectedAmount && (
+                    <section className="payment-summary">
+                        <div className="summary-row">
+                            <span className="summary-label">결제금액</span>
+                            <span className="summary-value">{selectedAmount.toLocaleString()}원</span>
+                        </div>
+                        <div className="summary-row">
+                            <span className="summary-label">이용수수료(8.6%)</span>
+                            <span className="summary-value">{Math.round(selectedAmount * 0.086).toLocaleString()}원</span>
+                        </div>
+                        <div className="summary-row total">
+                            <span className="summary-label">총 결제금액</span>
+                            <span className="summary-value">{Math.round(selectedAmount * 1.086).toLocaleString()}원</span>
+                        </div>
+                    </section>
+                )}
+
                 <section className="form-section">
                     <h2 className="section-title">결제 방식</h2>
                     <div className="payment-methods">
@@ -221,28 +239,72 @@ export default function CondolenceContent() {
                         </button>
                     </div>
                 </section>
-
-                <section className="agreement-section">
-                    <label className="agreement-label">
-                        <input
-                            type="checkbox"
-                            checked={agreed}
-                            onChange={(e) => setAgreed(e.target.checked)}
-                        />
-                        <span>결제에 동의합니다</span>
-                    </label>
-                    <p className="agreement-note">* 부의금 카드결제는 장례식장과 무관합니다.</p>
-                </section>
             </div>
 
+            {/* 개인정보 동의 모달 */}
+            {agreed && (
+                <div className="modal-overlay" onClick={() => setAgreed(false)}>
+                    <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>개인정보 수집/제공 동의</h3>
+                            <button className="modal-close" onClick={() => setAgreed(false)}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="modal-content">
+                            <ul className="terms-list">
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
+                                    <a href="/privacy" target="_blank" className="terms-link">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M9 18l6-6-6-6" />
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">전자금융거래 이용약관(필수)</span>
+                                    <a href="/terms" target="_blank" className="terms-link">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M9 18l6-6-6-6" />
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li className="required-term">
+                                    <span className="term-bullet">•</span>
+                                    <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
+                                    <a href="/privacy-third-party" target="_blank" className="terms-link">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M9 18l6-6-6-6" />
+                                        </svg>
+                                    </a>
+                                </li>
+                            </ul>
+                            <p className="agreement-note">* 부의금 카드결제는 장례식장과 무관합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="condolence-footer">
+                {!agreed && (
+                    <div className="privacy-notice-link" onClick={() => setAgreed(true)}>
+                        약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </div>
+                )}
                 <button
                     type="button"
                     className={`submit-button ${canSubmit ? 'active' : ''}`}
                     onClick={handlePayment}
                     disabled={!canSubmit}
                 >
-                    결제하기 {selectedAmount ? `(${(selectedAmount / 10000).toLocaleString()}만원)` : ''}
+                    {selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원 결제하기` : '결제하기'}
                 </button>
             </div>
         </main>
