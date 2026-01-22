@@ -1007,11 +1007,26 @@ ${url}
                 )
             }
             {/* ========================================
-                Footer - PG 승인용 사업자 정보
+                Footer - PG 승인용 사업자 정보 (접기/열기)
             ======================================== */}
             <footer className="view-footer">
-                <div className="view-footer-content">
-                    <p className="view-footer-company">마음부고</p>
+                <button
+                    className="view-footer-toggle"
+                    onClick={() => {
+                        const content = document.querySelector('.view-footer-details');
+                        const toggle = document.querySelector('.view-footer-toggle');
+                        if (content && toggle) {
+                            content.classList.toggle('open');
+                            toggle.classList.toggle('open');
+                        }
+                    }}
+                >
+                    <span className="view-footer-company">마음부고</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div className="view-footer-details">
                     <p>서울특별시 강남구 압구정로 306, 지하 1층 4-S36호</p>
                     <p>대표: 김미연 | 대표번호: 010-4837-5076</p>
                     <p>사업자등록번호: 408-22-68851 | 통신판매업신고: 2026-서울강남-00502</p>

@@ -1880,36 +1880,66 @@ body:has(.memorial-overlay) {
 .btn-flower-order:active {
     background: var(--primary-dark, #FCC419);
 }
+
 /* ========================================
-   Footer - PG 승인용 사업자 정보
+   Footer - PG 승인용 사업자 정보 (접기/열기)
 ======================================== */
 .view-footer {
     margin-top: 40px;
-    padding: 32px 20px;
-    background: #1A1A1A;
+    padding: 20px;
+    background: #F5F5F5;
     font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
 }
 
-.view-footer-content {
-    text-align: center;
+.view-footer-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
 }
 
-.view-footer-content p {
-    font-size: 12px;
+.view-footer-toggle svg {
+    color: #888888;
+    transition: transform 0.2s ease;
+}
+
+.view-footer-toggle.open svg {
+    transform: rotate(180deg);
+}
+
+.view-footer-company {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666666;
+}
+
+.view-footer-details {
+    max-height: 0;
+    overflow: hidden;
+    text-align: center;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding-top: 0;
+}
+
+.view-footer-details.open {
+    max-height: 200px;
+    padding-top: 16px;
+}
+
+.view-footer-details p {
+    font-size: 11px;
     color: #888888;
     line-height: 1.8;
     margin: 0;
 }
 
-.view-footer-company {
-    font-size: 14px !important;
-    font-weight: 600;
-    color: #FFFFFF !important;
-    margin-bottom: 12px !important;
-}
-
 .view-footer-copyright {
-    margin-top: 16px !important;
-    font-size: 11px !important;
-    color: #666666 !important;
+    margin-top: 12px !important;
+    font-size: 10px !important;
+    color: #AAAAAA !important;
 }
