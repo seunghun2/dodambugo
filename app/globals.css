@@ -3316,12 +3316,13 @@ section {
 }
 
 .inquiry-panel {
-    flex: 2;
+    flex: 3;
 }
 
 .detail-panel {
     flex: 1;
-    min-width: 400px;
+    min-width: 320px;
+    max-width: 360px;
 }
 
 .panel-header {
