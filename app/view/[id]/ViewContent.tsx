@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+// supabase는 필요할 때만 동적 로드
 import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
 import './view.css';
@@ -232,11 +232,13 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     useEffect(() => {
         gaEvents.viewBugo(bugo.bugo_number || bugo.id);
 
-        // 조회수 증가 (백그라운드)
-        supabase
-            .from('bugo')
-            .update({ view_count: ((bugo as any).view_count || 0) + 1 })
-            .eq('id', bugo.id);
+        // 조회수 증가 (백그라운드, 동적 로드)
+        import('@/lib/supabase').then(({ supabase }) => {
+            supabase
+                .from('bugo')
+                .update({ view_count: ((bugo as any).view_count || 0) + 1 })
+                .eq('id', bugo.id);
+        });
     }, [bugo.id]);
 
     // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)
