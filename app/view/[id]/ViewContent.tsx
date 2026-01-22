@@ -237,7 +237,8 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
             supabase
                 .from('bugo')
                 .update({ view_count: ((bugo as any).view_count || 0) + 1 })
-                .eq('id', bugo.id);
+                .eq('id', bugo.id)
+                .then(); // 실행 트리거
         });
     }, [bugo.id]);
 
