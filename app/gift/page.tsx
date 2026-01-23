@@ -76,16 +76,6 @@ export default function GiftPage() {
 
     return (
         <div className="gift-page">
-            {/* 헤더 */}
-            <header className="gift-header">
-                <button className="back-btn" onClick={() => router.back()}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-                <h1>감사답례품 신청하기</h1>
-            </header>
-
             {/* 상단 배너 */}
             <div className="gift-banner">
                 <div className="banner-content">

@@ -298,14 +298,14 @@
 .submit-section .submit-btn {
     flex: 1;
     padding: 16px 24px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
+    background: #FFD43B;
+    color: #1A1A1A;
     font-size: 16px;
     font-weight: 600;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: background 0.2s;
 }
 
 .submit-section .submit-btn.full {
@@ -313,15 +313,13 @@
 }
 
 .submit-section .submit-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    background: #FCC419;
 }
 
 .submit-section .submit-btn:disabled {
-    background: #9ca3af;
+    background: #E0E0E0;
+    color: #999999;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
 /* 상품 없음 */
