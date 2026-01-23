@@ -155,12 +155,8 @@ export default function GiftDetailPage() {
 
             {/* 하단 고정 버튼 */}
             <div className="submit-section">
-                <div className="price-summary">
-                    <span className="label">결제 금액</span>
-                    <span className="amount">{formatPrice(finalPrice)}원</span>
-                </div>
                 <button
-                    className="submit-btn"
+                    className="submit-btn full"
                     onClick={() => router.push(`/gift/${productId}/order`)}
                 >
                     구매하기
