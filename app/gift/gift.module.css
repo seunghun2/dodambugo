@@ -1,0 +1,171 @@
+/* 답례품 목록 페이지 - CSS Module */
+
+.giftPage {
+    min-height: 100vh;
+    background: #fff;
+    padding-bottom: 40px;
+}
+
+/* 상단 배너 */
+.giftBanner {
+    background: linear-gradient(135deg, #fce7e7, #fdf2f2);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bannerContent {
+    flex: 1;
+}
+
+.bannerText {
+    font-size: 15px;
+    font-weight: 600;
+    color: #be123c;
+    line-height: 1.5;
+}
+
+.giftIcon {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.giftIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+/* 상품 섹션 */
+.giftProducts {
+    padding: 20px;
+    border-top: 8px solid #f5f5f5;
+}
+
+/* 상품 그리드 */
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.productCard {
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.productCard:hover {
+    transform: translateY(-2px);
+}
+
+.productImage {
+    position: relative;
+    aspect-ratio: 1;
+    background: #f9fafb;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e5e7eb;
+}
+
+.productImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.discountBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #dc2626;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* 상품 정보 */
+.productInfo {
+    padding: 10px 4px;
+}
+
+.productName {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.productDesc {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.productPrice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.original {
+    font-size: 12px;
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.sale {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* 안내사항 */
+.giftNotice {
+    margin: 20px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.giftNotice h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.giftNotice ul {
+    padding-left: 20px;
+}
+
+.giftNotice li {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+/* 반응형 */
+@media (max-width: 380px) {
+    .productGrid {
+        gap: 12px;
+    }
+
+    .productName {
+        font-size: 12px;
+    }
+}

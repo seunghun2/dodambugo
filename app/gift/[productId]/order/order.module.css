@@ -1,19 +1,15 @@
-/* 주문 페이지 스타일 */
+/* 주문 페이지 - CSS Module */
 
-.gift-order-page {
+.orderPage {
     min-height: 100vh;
     background: #F5F5F5;
     padding-bottom: 100px;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-.gift-order-page * {
-    font-family: inherit !important;
-}
-
 /* PC 중앙 정렬 */
 @media (min-width: 481px) {
-    .gift-order-page {
+    .orderPage {
         max-width: 360px;
         margin: 0 auto;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -21,7 +17,7 @@
 }
 
 /* 헤더 */
-.order-header {
+.orderHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -33,7 +29,7 @@
     z-index: 100;
 }
 
-.order-header .back-btn {
+.backBtn {
     width: 40px;
     height: 40px;
     display: flex;
@@ -45,13 +41,13 @@
     color: #1A1A1A;
 }
 
-.order-header h1 {
+.headerTitle {
     font-size: 18px;
     font-weight: 600;
     color: #1A1A1A;
 }
 
-.order-header .spacer {
+.spacer {
     width: 40px;
 }
 
@@ -64,11 +60,7 @@
     margin-bottom: 12px;
 }
 
-.section:first-of-type {
-    margin-top: 16px;
-}
-
-.section-title {
+.sectionTitle {
     font-size: 16px;
     font-weight: 700;
     color: #1A1A1A;
@@ -76,13 +68,13 @@
 }
 
 /* 주문상품정보 */
-.product-card {
+.productCard {
     display: flex;
     gap: 16px;
     align-items: center;
 }
 
-.product-card .product-image {
+.productImage {
     width: 80px;
     height: 80px;
     background: #F5F5F5;
@@ -91,38 +83,38 @@
     flex-shrink: 0;
 }
 
-.product-card .product-image img {
+.productImage img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.product-card .product-details {
+.productDetails {
     flex: 1;
 }
 
-.product-card .product-name {
+.productName {
     font-size: 15px;
     font-weight: 600;
     color: #1A1A1A;
     margin-bottom: 4px;
 }
 
-.product-card .product-price {
+.productPrice {
     font-size: 16px;
     font-weight: 700;
     color: #1A1A1A;
 }
 
 /* 받는분 연락처 */
-.recipient-row {
+.recipientRow {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.recipient-input {
+.recipientInput {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -134,7 +126,7 @@
     gap: 8px;
 }
 
-.recipient-label {
+.recipientLabel {
     font-size: 13px;
     color: #888888;
     font-weight: 500;
@@ -142,7 +134,7 @@
     flex-shrink: 0;
 }
 
-.recipient-input input {
+.recipientInput input {
     flex: 1;
     min-width: 0;
     border: none;
@@ -152,11 +144,11 @@
     outline: none;
 }
 
-.recipient-input input::placeholder {
+.recipientInput input::placeholder {
     color: #AAAAAA;
 }
 
-.clear-btn {
+.clearBtn {
     padding: 0;
     background: none;
     border: none;
@@ -167,7 +159,7 @@
     flex-shrink: 0;
 }
 
-.remove-btn {
+.removeBtn {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -181,39 +173,25 @@
     flex-shrink: 0;
 }
 
-.add-recipient-btn {
+.addRecipientBtn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     width: 100%;
     padding: 14px;
-    border: 1px dashed #FFD43B;
-    background: #FFFBEB;
+    border: 1px solid #E0E0E0;
+    background: #F5F5F5;
     border-radius: 8px;
-    color: #1A1A1A;
+    color: #666666;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     margin-top: 4px;
 }
 
-.add-recipient-btn.gray {
-    border: 1px solid #E0E0E0;
-    background: #F5F5F5;
-    color: #666666;
-}
-
-.add-recipient-btn svg path {
-    stroke: #F59E0B;
-}
-
-.add-recipient-btn.gray svg path {
-    stroke: #666666;
-}
-
 /* 안내 박스 */
-.notice-box {
+.noticeBox {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -222,12 +200,12 @@
     border-radius: 8px;
 }
 
-.notice-box svg {
+.noticeBox svg {
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-.notice-box p {
+.noticeBox p {
     font-size: 13px;
     color: #92400e;
     line-height: 1.5;
@@ -235,13 +213,13 @@
 }
 
 /* 답례글 탭 */
-.message-tabs {
+.messageTabs {
     display: flex;
     gap: 8px;
     margin-bottom: 16px;
 }
 
-.tab-btn {
+.tabBtn {
     flex: 1;
     padding: 12px 16px;
     border: 1px solid #E5E5E5;
@@ -254,14 +232,14 @@
     transition: all 0.2s;
 }
 
-.tab-btn.active {
+.tabBtnActive {
     border-color: #FFD43B;
     background: #FFFBEB;
     color: #1A1A1A;
 }
 
 /* 답례글 입력 */
-.message-input {
+.messageInput {
     width: 100%;
     padding: 16px;
     border: 1px solid #E5E5E5;
@@ -273,17 +251,17 @@
     box-sizing: border-box;
 }
 
-.message-input:focus {
+.messageInput:focus {
     outline: none;
     border-color: #FFD43B;
 }
 
-.message-input::placeholder {
+.messageInput::placeholder {
     color: #AAAAAA;
 }
 
 /* 하단 고정 버튼 */
-.submit-section {
+.submitSection {
     position: fixed;
     bottom: 0;
     left: 50%;
@@ -302,32 +280,32 @@
 }
 
 @media (max-width: 480px) {
-    .submit-section {
+    .submitSection {
         left: 0;
         transform: none;
         max-width: 100%;
     }
 }
 
-.submit-section .price-summary {
+.priceSummary {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.submit-section .label {
+.priceLabel {
     font-size: 12px;
     color: #888888;
 }
 
-.submit-section .amount {
+.priceAmount {
     font-size: 18px;
     font-weight: 700;
     color: #1A1A1A;
 }
 
-.submit-section .submit-btn {
+.submitBtn {
     flex: 1;
     height: 56px;
     background: #FFD43B;
@@ -339,27 +317,18 @@
     cursor: pointer;
 }
 
-.submit-section.center {
-    justify-content: center;
-}
-
-.submit-section.center .submit-btn {
-    width: 100%;
-    flex: none;
-}
-
-.submit-section .submit-btn:hover {
+.submitBtn:hover {
     background: #FCC419;
 }
 
-.submit-section .submit-btn:disabled {
+.submitBtn:disabled {
     background: #E0E0E0;
     color: #999999;
     cursor: not-allowed;
 }
 
 /* 상품 없음 */
-.not-found {
+.notFound {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -368,12 +337,12 @@
     gap: 16px;
 }
 
-.not-found p {
+.notFound p {
     font-size: 16px;
     color: #666666;
 }
 
-.not-found button {
+.notFound button {
     padding: 12px 24px;
     background: #FFD43B;
     color: #1A1A1A;

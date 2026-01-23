@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import './order.css';
+import styles from './order.module.css';
 
 interface GiftProduct {
     id: string;
@@ -160,8 +160,8 @@ export default function GiftOrderPage() {
 
     if (!product) {
         return (
-            <div className="gift-order-page">
-                <div className="not-found">
+            <div className={styles.orderPage}>
+                <div className={styles.notFound}>
                     <p>상품을 찾을 수 없습니다.</p>
                     <button onClick={() => router.push('/gift')}>목록으로</button>
                 </div>
@@ -173,40 +173,40 @@ export default function GiftOrderPage() {
     const totalPrice = finalPrice * recipients.length;
 
     return (
-        <div className="gift-order-page">
+        <div className={styles.orderPage}>
             {/* 헤더 */}
-            <header className="order-header">
-                <button className="back-btn" onClick={() => router.back()}>
+            <header className={styles.orderHeader}>
+                <button className={styles.backBtn} onClick={() => router.back()}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <h1>답례품 주문</h1>
-                <div className="spacer"></div>
+                <h1 className={styles.headerTitle}>답례품 주문</h1>
+                <div className={styles.spacer}></div>
             </header>
 
             {/* 주문상품정보 */}
-            <div className="section product-info-section">
-                <h3 className="section-title">주문상품정보</h3>
-                <div className="product-card">
-                    <div className="product-image">
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>주문상품정보</h3>
+                <div className={styles.productCard}>
+                    <div className={styles.productImage}>
                         <img src={product.image} alt={product.name} />
                     </div>
-                    <div className="product-details">
-                        <p className="product-name">{product.name}</p>
-                        <p className="product-price">{formatPrice(finalPrice)}원</p>
+                    <div className={styles.productDetails}>
+                        <p className={styles.productName}>{product.name}</p>
+                        <p className={styles.productPrice}>{formatPrice(finalPrice)}원</p>
                     </div>
                 </div>
             </div>
 
             {/* 답례품 받는분 */}
-            <div className="section recipients-section">
-                <h3 className="section-title">답례품 받는분</h3>
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>답례품 받는분</h3>
 
                 {recipients.map((recipient, index) => (
-                    <div key={recipient.id} className="recipient-row">
-                        <div className="recipient-input">
-                            <span className="recipient-label">
+                    <div key={recipient.id} className={styles.recipientRow}>
+                        <div className={styles.recipientInput}>
+                            <span className={styles.recipientLabel}>
                                 {recipients.length > 1 ? `${index + 1}. 연락처` : '연락처'}
                             </span>
                             <input
@@ -219,7 +219,7 @@ export default function GiftOrderPage() {
                             />
                             {recipient.phone && (
                                 <button
-                                    className="clear-btn"
+                                    className={styles.clearBtn}
                                     onClick={() => clearRecipient(recipient.id)}
                                     type="button"
                                 >
@@ -232,7 +232,7 @@ export default function GiftOrderPage() {
                         </div>
                         {recipients.length > 1 && (
                             <button
-                                className="remove-btn"
+                                className={styles.removeBtn}
                                 onClick={() => removeRecipient(recipient.id)}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -243,7 +243,7 @@ export default function GiftOrderPage() {
                     </div>
                 ))}
 
-                <button className="add-recipient-btn gray" onClick={addRecipient}>
+                <button className={styles.addRecipientBtn} onClick={addRecipient}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M12 5V19M5 12H19" stroke="#666666" strokeWidth="2" strokeLinecap="round" />
                     </svg>
@@ -252,8 +252,8 @@ export default function GiftOrderPage() {
             </div>
 
             {/* 답례글 발송 안내 */}
-            <div className="section notice-section">
-                <div className="notice-box">
+            <div className={styles.section}>
+                <div className={styles.noticeBox}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="10" stroke="#f59e0b" strokeWidth="2" />
                         <path d="M12 8V12M12 16H12.01" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
@@ -263,15 +263,15 @@ export default function GiftOrderPage() {
             </div>
 
             {/* 답례글 작성 */}
-            <div className="section message-section">
-                <h3 className="section-title">답례글 작성</h3>
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>답례글 작성</h3>
 
                 {/* 탭 */}
-                <div className="message-tabs">
+                <div className={styles.messageTabs}>
                     {MESSAGE_TABS.map(tab => (
                         <button
                             key={tab.id}
-                            className={`tab-btn ${selectedTab === tab.id ? 'active' : ''}`}
+                            className={`${styles.tabBtn} ${selectedTab === tab.id ? styles.tabBtnActive : ''}`}
                             onClick={() => handleTabChange(tab.id)}
                         >
                             {tab.label}
@@ -281,7 +281,7 @@ export default function GiftOrderPage() {
 
                 {/* 텍스트 영역 */}
                 <textarea
-                    className="message-input"
+                    className={styles.messageInput}
                     placeholder="답례글을 입력해주세요"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -290,13 +290,13 @@ export default function GiftOrderPage() {
             </div>
 
             {/* 하단 고정 버튼 */}
-            <div className="submit-section">
-                <div className="price-summary">
-                    <span className="label">총 결제 금액 ({recipients.length}건)</span>
-                    <span className="amount">{formatPrice(totalPrice)}원</span>
+            <div className={styles.submitSection}>
+                <div className={styles.priceSummary}>
+                    <span className={styles.priceLabel}>총 결제 금액 ({recipients.length}건)</span>
+                    <span className={styles.priceAmount}>{formatPrice(totalPrice)}원</span>
                 </div>
                 <button
-                    className="submit-btn"
+                    className={styles.submitBtn}
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                 >

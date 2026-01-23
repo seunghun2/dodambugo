@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import './detail.css';
+import styles from './detail.module.css';
 
 interface GiftProduct {
     id: string;
@@ -75,8 +75,8 @@ export default function GiftDetailPage() {
 
     if (!product) {
         return (
-            <div className="gift-detail-page">
-                <div className="not-found">
+            <div className={styles.detailPage}>
+                <div className={styles.notFound}>
                     <p>상품을 찾을 수 없습니다.</p>
                     <button onClick={() => router.push('/gift')}>목록으로</button>
                 </div>
@@ -90,40 +90,40 @@ export default function GiftDetailPage() {
         : 0;
 
     return (
-        <div className="gift-detail-page">
+        <div className={styles.detailPage}>
             {/* 헤더 */}
-            <header className="detail-header">
-                <button className="back-btn" onClick={() => router.back()}>
+            <header className={styles.detailHeader}>
+                <button className={styles.backBtn} onClick={() => router.back()}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <h1>답례품 신청</h1>
+                <h1 className={styles.headerTitle}>답례품 신청</h1>
             </header>
 
             {/* 상품 정보 */}
-            <div className="product-section">
-                <div className="product-image">
+            <div className={styles.productSection}>
+                <div className={styles.productImage}>
                     <img src={product.image} alt={product.name} />
                 </div>
-                <div className="product-info">
-                    <h2 className="product-name">{product.name}</h2>
-                    <p className="product-desc">{product.description}</p>
-                    <div className="product-price">
+                <div className={styles.productInfo}>
+                    <h2 className={styles.productName}>{product.name}</h2>
+                    <p className={styles.productDesc}>{product.description}</p>
+                    <div className={styles.productPrice}>
                         {discountPercent > 0 && (
                             <>
-                                <span className="discount-percent">{discountPercent}%</span>
-                                <span className="original-price">{formatPrice(product.price)}원</span>
+                                <span className={styles.discountPercent}>{discountPercent}%</span>
+                                <span className={styles.originalPrice}>{formatPrice(product.price)}원</span>
                             </>
                         )}
-                        <span className="final-price">{formatPrice(finalPrice)}원</span>
+                        <span className={styles.finalPrice}>{formatPrice(finalPrice)}원</span>
                     </div>
                 </div>
             </div>
 
             {/* 상품 정보 테이블 */}
-            <div className="info-table-section">
-                <table className="info-table">
+            <div className={styles.infoTableSection}>
+                <table className={styles.infoTable}>
                     <tbody>
                         <tr>
                             <th>유효기간</th>
@@ -141,9 +141,9 @@ export default function GiftDetailPage() {
             </div>
 
             {/* 이용방법 */}
-            <div className="usage-section">
-                <h3 className="section-title">□ 이용방법</h3>
-                <ul className="usage-list">
+            <div className={styles.usageSection}>
+                <h3 className={styles.sectionTitle}>□ 이용방법</h3>
+                <ul className={styles.usageList}>
                     <li>본 상품은 모바일 상품권에 추가해 편리하게 사용하실 수 있습니다.</li>
                     <li>상기 이미지는 연출된 것으로 실제와 다를 수 있습니다.</li>
                     <li>해당 상품은 받으시는 분이 직접 배송지를 입력하여 배송되는 상품입니다. (배송비 무료)</li>
@@ -154,9 +154,9 @@ export default function GiftDetailPage() {
             </div>
 
             {/* 하단 고정 버튼 */}
-            <div className="submit-section">
+            <div className={styles.submitSection}>
                 <button
-                    className="submit-btn full"
+                    className={styles.submitBtn}
                     onClick={() => router.push(`/gift/${productId}/order`)}
                 >
                     구매하기
