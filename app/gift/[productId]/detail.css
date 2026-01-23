@@ -94,6 +94,79 @@
     color: #1f2937;
 }
 
+/* 정보 테이블 */
+.info-table-section {
+    background: white;
+    padding: 20px;
+    border-bottom: 8px solid #f1f5f9;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-table tr:last-child {
+    border-bottom: none;
+}
+
+.info-table th {
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    text-align: left;
+    vertical-align: top;
+    width: 80px;
+}
+
+.info-table td {
+    padding: 12px 0;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* 이용방법 */
+.usage-section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.usage-section .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.usage-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.usage-list li {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.7;
+    padding: 4px 0;
+    padding-left: 12px;
+    position: relative;
+}
+
+.usage-list li::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: #9ca3af;
+}
+
 /* 폼 섹션 */
 .form-section {
     background: white;

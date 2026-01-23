@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
 import './detail.css';
 
 interface GiftProduct {
@@ -70,38 +69,8 @@ export default function GiftDetailPage() {
     const productId = params?.productId as string;
     const product = SAMPLE_GIFTS[productId];
 
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [address, setAddress] = useState('');
-    const [addressDetail, setAddressDetail] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('ko-KR').format(price);
-    };
-
-    const handleSubmit = async () => {
-        if (!name.trim()) {
-            alert('성함을 입력해주세요.');
-            return;
-        }
-        if (!phone.trim()) {
-            alert('연락처를 입력해주세요.');
-            return;
-        }
-        if (!address.trim()) {
-            alert('배송지를 입력해주세요.');
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        // TODO: API 연동
-        setTimeout(() => {
-            alert('답례품 신청이 완료되었습니다. 감사합니다.');
-            router.push('/gift');
-            setIsSubmitting(false);
-        }, 1000);
     };
 
     if (!product) {
@@ -152,61 +121,35 @@ export default function GiftDetailPage() {
                 </div>
             </div>
 
-            {/* 배송지 입력 */}
-            <div className="form-section">
-                <h3 className="form-title">배송지 정보</h3>
-
-                <div className="form-group">
-                    <label>받으시는 분 <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        placeholder="성함을 입력해주세요"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>연락처 <span className="required">*</span></label>
-                    <input
-                        type="tel"
-                        placeholder="010-0000-0000"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>배송지 주소 <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        placeholder="주소를 입력해주세요"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="상세 주소 (동/호수)"
-                        value={addressDetail}
-                        onChange={(e) => setAddressDetail(e.target.value)}
-                        className="mt-8"
-                    />
-                </div>
+            {/* 상품 정보 테이블 */}
+            <div className="info-table-section">
+                <table className="info-table">
+                    <tbody>
+                        <tr>
+                            <th>유효기간</th>
+                            <td>구매일로부터 30일</td>
+                        </tr>
+                        <tr>
+                            <th>이용안내</th>
+                            <td>
+                                본 모바일 쿠폰은 유효기간 만료 후 연장 및 환불 대상이 아닙니다.<br />
+                                쿠폰은 답례글과 함께 문자로 발송됩니다.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            {/* 안내사항 */}
-            <div className="notice-section">
-                <h3>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" />
-                        <path d="M12 16V12M12 8H12.01" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    안내사항
-                </h3>
-                <ul>
-                    <li>답례품은 입력하신 주소로 배송됩니다</li>
-                    <li>배송은 신청 후 2-3일 내 출고됩니다</li>
-                    <li>배송 관련 문의는 고객센터로 연락해 주세요</li>
+            {/* 이용방법 */}
+            <div className="usage-section">
+                <h3 className="section-title">□ 이용방법</h3>
+                <ul className="usage-list">
+                    <li>본 상품은 모바일 상품권에 추가해 편리하게 사용하실 수 있습니다.</li>
+                    <li>상기 이미지는 연출된 것으로 실제와 다를 수 있습니다.</li>
+                    <li>해당 상품은 받으시는 분이 직접 배송지를 입력하여 배송되는 상품입니다. (배송비 무료)</li>
+                    <li>동일 상품 교환이 불가한 경우 다른 상품으로 교환이 가능합니다. (차액 발생 시 차액 지불)</li>
+                    <li>해당 쿠폰을 무단으로 가공하는 등의 행위는 관계 법령에 위반될 수 있습니다.</li>
+                    <li>본 쿠폰은 무상 제공된 상품으로 유효기간 연장 및 환불 대상이 아닙니다.</li>
                 </ul>
             </div>
 
@@ -218,10 +161,9 @@ export default function GiftDetailPage() {
                 </div>
                 <button
                     className="submit-btn"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
+                    onClick={() => router.push(`/gift/${productId}/order`)}
                 >
-                    {isSubmitting ? '신청 중...' : '답례품 신청하기'}
+                    구매하기
                 </button>
             </div>
         </div>
