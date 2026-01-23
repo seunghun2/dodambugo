@@ -7,13 +7,11 @@ import './gift.css';
 
 interface GiftProduct {
     id: string;
-    brand: string;
     name: string;
     price: number;
     discount_price?: number;
-    discount_percent?: number;
     image: string;
-    badge?: string;
+    description?: string;
 }
 
 interface BugoInfo {
@@ -25,53 +23,50 @@ interface BugoInfo {
 const SAMPLE_GIFTS: GiftProduct[] = [
     {
         id: 'gift-1',
-        brand: '광동',
-        name: '비타500 데일리스틱(70포)',
-        price: 20000,
-        discount_price: 18900,
-        discount_percent: 5.5,
-        image: '/images/gift-vita.jpg',
-        badge: '특가상품'
+        name: '프리미엄 한우 세트',
+        price: 150000,
+        discount_price: 129000,
+        image: '/images/gift-hanwoo.jpg',
+        description: '1++ 등급 한우 선물세트'
     },
     {
         id: 'gift-2',
-        brand: '천호엔케어',
-        name: '껍질째 통째로 담은 양파프리미엄 80ml*30팩',
-        price: 42000,
-        discount_price: 39900,
-        discount_percent: 5.0,
-        image: '/images/gift-onion.jpg',
-        badge: '사은품증정'
+        name: '고급 과일 선물세트',
+        price: 80000,
+        discount_price: 69000,
+        image: '/images/gift-fruit.jpg',
+        description: '제철 과일 프리미엄 세트'
     },
     {
         id: 'gift-3',
-        brand: '천호엔케어',
-        name: '아름다운 여성을 위한 석류프리미엄 100ml*30팩',
-        price: 47000,
-        discount_price: 44900,
-        discount_percent: 4.5,
-        image: '/images/gift-pomegranate.jpg',
-        badge: '특가상품'
+        name: '홍삼 선물세트',
+        price: 100000,
+        discount_price: 89000,
+        image: '/images/gift-ginseng.jpg',
+        description: '6년근 홍삼 정과 세트'
     },
     {
         id: 'gift-4',
-        brand: '천호엔케어',
-        name: '우먼솔루션 75ml*30팩(석류농축액)',
-        price: 53000,
-        discount_price: 49900,
-        discount_percent: 5.8,
-        image: '/images/gift-woman.jpg',
-        badge: '1+1증정'
+        name: '명품 수건 세트',
+        price: 50000,
+        discount_price: 45000,
+        image: '/images/gift-towel.jpg',
+        description: '호텔식 명품 타월 세트'
     },
     {
         id: 'gift-5',
-        brand: '천호엔케어',
-        name: '환하고 밝은 에너지 블루베리프리미엄 80ml*30팩',
-        price: 68000,
-        discount_price: 64900,
-        discount_percent: 4.6,
-        image: '/images/gift-blueberry.jpg',
-        badge: '특가상품'
+        name: '참기름 선물세트',
+        price: 60000,
+        image: '/images/gift-oil.jpg',
+        description: '국산 100% 참기름·들기름 세트'
+    },
+    {
+        id: 'gift-6',
+        name: '꿀 선물세트',
+        price: 70000,
+        discount_price: 59000,
+        image: '/images/gift-honey.jpg',
+        description: '국산 천연 벌꿀 세트'
     },
 ];
 
@@ -128,7 +123,9 @@ export default function GiftPage() {
             {/* 헤더 */}
             <header className="gift-header">
                 <button className="back-btn" onClick={() => router.back()}>
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                 </button>
                 <h1>감사답례품 신청하기</h1>
             </header>
@@ -137,41 +134,15 @@ export default function GiftPage() {
             <div className="gift-banner">
                 <div className="banner-content">
                     <p className="banner-text">
-                        답례메세지와 함께<br />
-                        조문객분들께 마음을 전달해보세요.
+                        조문해 주신 분들께<br />
+                        감사의 마음을 전해보세요.
                     </p>
                 </div>
                 <div className="gift-icon">
-                    <span className="material-symbols-outlined">redeem</span>
+                    <img src="/images/gift-banner-icon.png" alt="선물" />
                 </div>
             </div>
-
-            {/* 상품 리스트 섹션 */}
             <div className="gift-products">
-                <h2 className="section-title">
-                    조문객분들께 감사의 마음을 전하세요
-                </h2>
-
-                {/* 카테고리 아이콘 */}
-                <div className="category-icons">
-                    <div className="category-icon">
-                        <div className="icon-circle">
-                            <span className="material-symbols-outlined">local_shipping</span>
-                        </div>
-                        <span>배송상품</span>
-                    </div>
-                </div>
-
-                {/* 필터 바 */}
-                <div className="filter-bar">
-                    <span className="product-count">총 {SAMPLE_GIFTS.length}개</span>
-                    <select className="sort-select">
-                        <option>추천순</option>
-                        <option>낮은가격순</option>
-                        <option>높은가격순</option>
-                    </select>
-                </div>
-
                 {/* 상품 그리드 */}
                 <div className="product-grid">
                     {SAMPLE_GIFTS.map((product) => (
@@ -182,27 +153,32 @@ export default function GiftPage() {
                         >
                             <div className="product-image">
                                 <div className="placeholder">
-                                    <span className="material-symbols-outlined">redeem</span>
+                                    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                                        <rect x="8" y="20" width="32" height="22" rx="2" fill="#E5E7EB" />
+                                        <rect x="6" y="14" width="36" height="8" rx="2" fill="#D1D5DB" />
+                                        <rect x="22" y="14" width="4" height="28" fill="#9CA3AF" />
+                                        <path d="M24 14C24 14 20 9 17 9C14 9 12 11 12 13C12 15 14 16 17 16C20 16 24 14 24 14Z" fill="#9CA3AF" />
+                                        <path d="M24 14C24 14 28 9 31 9C34 9 36 11 36 13C36 15 34 16 31 16C28 16 24 14 24 14Z" fill="#9CA3AF" />
+                                    </svg>
                                 </div>
+                                {product.discount_price && (
+                                    <span className="discount-badge">
+                                        {Math.round((1 - product.discount_price / product.price) * 100)}%
+                                    </span>
+                                )}
                             </div>
                             <div className="product-info">
-                                <p className="product-brand">{product.brand}</p>
-                                <h3 className="product-name">
-                                    {product.name}
-                                    {product.badge && <span className="badge">{product.badge}</span>}
-                                </h3>
+                                <h3 className="product-name">{product.name}</h3>
+                                <p className="product-desc">{product.description}</p>
                                 <div className="product-price">
-                                    {product.discount_price && (
-                                        <span className="original">{formatPrice(product.price)}원</span>
+                                    {product.discount_price ? (
+                                        <>
+                                            <span className="original">{formatPrice(product.price)}원</span>
+                                            <span className="sale">{formatPrice(product.discount_price)}원</span>
+                                        </>
+                                    ) : (
+                                        <span className="sale">{formatPrice(product.price)}원</span>
                                     )}
-                                    <div className="sale-row">
-                                        {product.discount_percent && (
-                                            <span className="discount-percent">{product.discount_percent}%</span>
-                                        )}
-                                        <span className="sale">
-                                            {formatPrice(product.discount_price || product.price)}원
-                                        </span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -213,7 +189,10 @@ export default function GiftPage() {
             {/* 안내 */}
             <div className="gift-notice">
                 <h3>
-                    <span className="material-symbols-outlined">info</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" />
+                        <path d="M12 16V12M12 8H12.01" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
                     안내사항
                 </h3>
                 <ul>
