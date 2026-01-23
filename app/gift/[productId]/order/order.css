@@ -156,6 +156,7 @@
 .remove-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;
     border: none;
     background: #F5F5F5;
     border-radius: 8px;
@@ -163,6 +164,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .add-recipient-btn {
@@ -182,8 +184,18 @@
     margin-top: 4px;
 }
 
+.add-recipient-btn.gray {
+    border: 1px solid #E0E0E0;
+    background: #F5F5F5;
+    color: #666666;
+}
+
 .add-recipient-btn svg path {
     stroke: #F59E0B;
+}
+
+.add-recipient-btn.gray svg path {
+    stroke: #666666;
 }
 
 /* 안내 박스 */
@@ -311,6 +323,15 @@
     font-weight: 600;
     color: #1A1A1A;
     cursor: pointer;
+}
+
+.submit-section.center {
+    justify-content: center;
+}
+
+.submit-section.center .submit-btn {
+    width: 100%;
+    flex: none;
 }
 
 .submit-section .submit-btn:hover {

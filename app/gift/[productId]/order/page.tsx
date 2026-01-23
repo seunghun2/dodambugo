@@ -167,6 +167,7 @@ export default function GiftOrderPage() {
                     </svg>
                 </button>
                 <h1>답례품 주문</h1>
+                <div className="spacer"></div>
             </header>
 
             {/* 주문상품정보 */}
@@ -190,30 +191,32 @@ export default function GiftOrderPage() {
                 {recipients.map((recipient, index) => (
                     <div key={recipient.id} className="recipient-row">
                         <div className="recipient-input">
-                            <span className="recipient-label">연락처</span>
+                            <span className="recipient-label">{index + 1}. 연락처</span>
                             <input
                                 type="tel"
+                                inputMode="numeric"
                                 placeholder="010-0000-0000"
                                 value={recipient.phone}
-                                onChange={(e) => updateRecipient(recipient.id, e.target.value)}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9-]/g, '');
+                                    updateRecipient(recipient.id, value);
+                                }}
                             />
                         </div>
-                        {recipients.length > 1 && (
-                            <button
-                                className="remove-btn"
-                                onClick={() => removeRecipient(recipient.id)}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18 6L6 18M6 6L18 18" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                            </button>
-                        )}
+                        <button
+                            className="remove-btn"
+                            onClick={() => removeRecipient(recipient.id)}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </button>
                     </div>
                 ))}
 
-                <button className="add-recipient-btn" onClick={addRecipient}>
+                <button className="add-recipient-btn gray" onClick={addRecipient}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 5V19M5 12H19" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M12 5V19M5 12H19" stroke="#666666" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                     연락처 추가하기
                 </button>
