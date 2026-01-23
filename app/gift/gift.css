@@ -181,23 +181,23 @@
 }
 
 /* 상품 그리드 */
-.product-grid {
+.gift-page .product-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
 }
 
-.product-card {
+.gift-page .product-card {
     background: white;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.product-card:hover {
+.gift-page .product-card:hover {
     transform: translateY(-2px);
 }
 
-.product-image {
+.gift-page .product-image {
     position: relative;
     aspect-ratio: 1;
     background: #f9fafb;
@@ -209,24 +209,24 @@
     border: 1px solid #e5e7eb;
 }
 
-.product-image img {
+.gift-page .product-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.product-image .placeholder {
+.gift-page .product-image .placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.product-image .placeholder .material-symbols-outlined {
+.gift-page .product-image .placeholder .material-symbols-outlined {
     font-size: 48px;
     color: #d1d5db;
 }
 
-.product-image .discount-badge {
+.gift-page .product-image .discount-badge {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -239,17 +239,17 @@
 }
 
 /* 상품 정보 */
-.product-info {
+.gift-page .product-info {
     padding: 10px 4px;
 }
 
-.product-brand {
+.gift-page .product-brand {
     font-size: 12px;
     color: #9ca3af;
     margin-bottom: 4px;
 }
 
-.product-name {
+.gift-page .product-name {
     font-size: 14px;
     font-weight: 600;
     color: #1f2937;
@@ -257,39 +257,39 @@
     line-height: 1.4;
 }
 
-.product-desc {
+.gift-page .product-desc {
     font-size: 12px;
     color: #64748b;
     margin-bottom: 8px;
     line-height: 1.4;
 }
 
-.product-price {
+.gift-page .product-price {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
 }
 
-.product-price .original {
+.gift-page .product-price .original {
     font-size: 12px;
     color: #9ca3af;
     text-decoration: line-through;
 }
 
-.product-price .sale-row {
+.gift-page .product-price .sale-row {
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-.product-price .discount-percent {
+.gift-page .product-price .discount-percent {
     font-size: 14px;
     font-weight: 700;
     color: #dc2626;
 }
 
-.product-price .sale {
+.gift-page .product-price .sale {
     font-size: 14px;
     font-weight: 700;
     color: #1f2937;
@@ -330,11 +330,11 @@
 
 /* 반응형 */
 @media (max-width: 380px) {
-    .product-grid {
+    .gift-page .product-grid {
         gap: 12px;
     }
 
-    .product-name {
+    .gift-page .product-name {
         font-size: 12px;
     }
 }
