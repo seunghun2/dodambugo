@@ -105,3 +105,39 @@ export async function sendSimpleNotification(text: string): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
     return sendToWebhook(webhookUrl!, { text });
 }
+
+/**
+ * 부의금 결제 알림 전송 (#01_03_부의금결제)
+ */
+export async function sendCondolenceNotification(payment: {
+    order_number: string;
+    bugo_number: string;
+    deceased_name?: string;
+    buyer_name: string;
+    buyer_phone: string;
+    recipient_name: string;
+    amount: number;
+    fee: number;
+    total_amount: number;
+    payment_method?: string;
+    funeral_home?: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_BUGO;
+
+    const amountFormatted = new Intl.NumberFormat('ko-KR').format(payment.amount);
+    const feeFormatted = new Intl.NumberFormat('ko-KR').format(payment.fee);
+    const totalFormatted = new Intl.NumberFormat('ko-KR').format(payment.total_amount);
+
+    const text = `[마음부고] 💰 부의금이 접수되었습니다. (부고번호: ${payment.bugo_number} / 주문번호: ${payment.order_number})
+- 고인: ${payment.deceased_name || '미입력'}
+- 장례식장: ${payment.funeral_home || '미입력'}
+- 부의금액: ${amountFormatted}원
+- 수수료: ${feeFormatted}원
+- 결제금액: ${totalFormatted}원
+- 입금자명: ${payment.recipient_name}
+- 결제자: ${payment.buyer_name}(${payment.buyer_phone})
+- 결제수단: ${payment.payment_method || '카드'}
+- 부고장: https://maeumbugo.co.kr/view/${payment.bugo_number}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
