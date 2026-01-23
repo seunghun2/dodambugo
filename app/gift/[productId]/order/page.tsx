@@ -100,6 +100,14 @@ export default function GiftOrderPage() {
         return new Intl.NumberFormat('ko-KR').format(price);
     };
 
+    // 전화번호 자동 하이픈 포맷
+    const formatPhoneNumber = (value: string) => {
+        const numbers = value.replace(/[^0-9]/g, '');
+        if (numbers.length <= 3) return numbers;
+        if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+    };
+
     const addRecipient = () => {
         const newId = String(recipients.length + 1);
         setRecipients([...recipients, { id: newId, phone: '' }]);
@@ -112,8 +120,15 @@ export default function GiftOrderPage() {
     };
 
     const updateRecipient = (id: string, phone: string) => {
+        const formatted = formatPhoneNumber(phone);
         setRecipients(recipients.map(r =>
-            r.id === id ? { ...r, phone } : r
+            r.id === id ? { ...r, phone: formatted } : r
+        ));
+    };
+
+    const clearRecipient = (id: string) => {
+        setRecipients(recipients.map(r =>
+            r.id === id ? { ...r, phone: '' } : r
         ));
     };
 
@@ -191,26 +206,40 @@ export default function GiftOrderPage() {
                 {recipients.map((recipient, index) => (
                     <div key={recipient.id} className="recipient-row">
                         <div className="recipient-input">
-                            <span className="recipient-label">{index + 1}. 연락처</span>
+                            <span className="recipient-label">
+                                {recipients.length > 1 ? `${index + 1}. 연락처` : '연락처'}
+                            </span>
                             <input
                                 type="tel"
                                 inputMode="numeric"
                                 placeholder="010-0000-0000"
                                 value={recipient.phone}
-                                onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9-]/g, '');
-                                    updateRecipient(recipient.id, value);
-                                }}
+                                onChange={(e) => updateRecipient(recipient.id, e.target.value)}
+                                autoFocus={index === 0}
                             />
+                            {recipient.phone && (
+                                <button
+                                    className="clear-btn"
+                                    onClick={() => clearRecipient(recipient.id)}
+                                    type="button"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" fill="#D1D5DB" />
+                                        <path d="M15 9L9 15M9 9L15 15" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
-                        <button
-                            className="remove-btn"
-                            onClick={() => removeRecipient(recipient.id)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M18 6L6 18M6 6L18 18" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                        </button>
+                        {recipients.length > 1 && (
+                            <button
+                                className="remove-btn"
+                                onClick={() => removeRecipient(recipient.id)}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 ))}
 
