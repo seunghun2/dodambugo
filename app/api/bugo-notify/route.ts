@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
                     phoneNumber,
                     'KA01TP260122110120730mPhOlSAUi3r',  // 부고장 생성 완료 템플릿 (검수완료)
                     {
-                        '고인명': deceased_name || '',
+                        '고인명': deceased_name ? `故 ${deceased_name}` : '',
                         '장례식장': funeralLocation,
                         '발인일시': funeralDateTime,
                         '부고번호': bugo_number,
