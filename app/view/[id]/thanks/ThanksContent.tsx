@@ -141,6 +141,9 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     // 카카오 공유
     const shareKakao = () => {
         const shareUrl = getShareUrl();
+        // 동적 OG 이미지 URL
+        const ogImageUrl = `https://maeumbugo.co.kr/api/og/thanks/${bugoId}`;
+
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
             if (!Kakao.isInitialized()) {
@@ -149,12 +152,12 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
-                    title: `故${bugo.deceased_name}님 감사장`,
-                    description: '감사의 마음을 전합니다.',
-                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                    title: '삼가 감사 인사 드립니다',
+                    description: `故 ${bugo.deceased_name}님의 마지막 가시는 길을 함께해 주셔서\n진심으로 감사드립니다.`,
+                    imageUrl: ogImageUrl,
                     link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
-                buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
+                buttons: [{ title: '답례글 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
             });
         }
         setIsShareModalOpen(false);
@@ -163,7 +166,18 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     // SMS 공유
     const shareSMS = () => {
         const shareUrl = getShareUrl();
-        const text = `[감사장]\n故${bugo.deceased_name}님 감사장입니다.\n\n${shareUrl}`;
+        const mournerName = bugo.mourner_name || '상주';
+        const text = `[감사 인사]
+
+故 ${bugo.deceased_name}님의 마지막 길을 함께해 주셔서 진심으로 감사드립니다.
+
+보내주신 따뜻한 위로가 저희 가족에게 큰 힘이 되었습니다.
+
+아래 링크를 통해 감사장을 확인해 주세요.
+
+${shareUrl}
+
+${mournerName} 배상`;
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
         setIsShareModalOpen(false);
     };
