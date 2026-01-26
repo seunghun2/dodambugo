@@ -408,3 +408,90 @@
     font-weight: 500;
     color: #333333;
 }
+
+/* 공유 모달 - ViewContent 스타일 */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.share-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.share-content {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    background: #FFFFFF;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    animation: slideUp 0.3s ease-out;
+}
+
+.share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.share-header h3 {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    margin: 0;
+}
+
+.share-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999999;
+    cursor: pointer;
+    padding: 0;
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #F0F0F0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.share-option:last-child {
+    border-bottom: none;
+}
+
+.share-option img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.share-option span {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333333;
+}

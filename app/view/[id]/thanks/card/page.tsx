@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
 import CardContent from './CardContent';
+import '../thanks.css';
 import './card.css';
 
 // Edge Runtime - Cold Start 최소화
@@ -32,14 +33,14 @@ export default async function ThanksCardPage({ params }: PageProps) {
     if (isUUID) {
         const result = await supabase
             .from('bugo')
-            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
             .eq('id', id)
             .single();
         data = result.data;
     } else {
         const result = await supabase
             .from('bugo')
-            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
             .eq('bugo_number', id)
             .single();
         data = result.data;

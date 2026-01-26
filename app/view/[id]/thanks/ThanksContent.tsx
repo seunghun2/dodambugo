@@ -105,11 +105,86 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
 
 export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<ReligionType>(getReligionType(bugo.religion));
+    // thanks_religion이 저장되어 있으면 그걸 사용, 없으면 기존 religion 사용
+    const initialReligion = (bugo as any).thanks_religion || getReligionType(bugo.religion);
+    const [activeTab, setActiveTab] = useState<ReligionType>(initialReligion);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [customMessages, setCustomMessages] = useState<ThanksMessages>(parseCustomMessages(bugo.thanks_message));
     const [editingMessage, setEditingMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // 탭 변경 시 DB에 저장
+    const handleTabChange = async (tab: ReligionType) => {
+        setActiveTab(tab);
+
+        // 백그라운드에서 저장
+        try {
+            await fetch(`/api/bugo/${bugo.id}/thanks-religion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ religion: tab }),
+            });
+        } catch (error) {
+            console.error('종교 저장 실패:', error);
+        }
+    };
+
+    // 공유 URL (card 페이지로 - DB의 thanks_religion 사용)
+    const getShareUrl = () => {
+        if (typeof window !== 'undefined') {
+            return `${window.location.origin}/view/${bugoId}/thanks/card`;
+        }
+        return '';
+    };
+
+    // 카카오 공유
+    const shareKakao = () => {
+        const shareUrl = getShareUrl();
+        if (typeof window !== 'undefined' && (window as any).Kakao) {
+            const Kakao = (window as any).Kakao;
+            if (!Kakao.isInitialized()) {
+                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
+            }
+            Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `故${bugo.deceased_name}님 감사장`,
+                    description: '감사의 마음을 전합니다.',
+                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                    link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+                },
+                buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
+            });
+        }
+        setIsShareModalOpen(false);
+    };
+
+    // SMS 공유
+    const shareSMS = () => {
+        const shareUrl = getShareUrl();
+        const text = `[감사장]\n故${bugo.deceased_name}님 감사장입니다.\n\n${shareUrl}`;
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+        setIsShareModalOpen(false);
+    };
+
+    // 밴드 공유
+    const shareBand = () => {
+        const shareUrl = getShareUrl();
+        const title = `[감사장] 故 ${bugo.deceased_name || ''} 감사장`;
+        const content = `故 ${bugo.deceased_name || ''} 님의 감사장입니다.`;
+        const bandUrl = `https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + content)}&route=${encodeURIComponent(shareUrl)}`;
+        window.open(bandUrl, '_blank', 'width=500,height=700');
+        setIsShareModalOpen(false);
+    };
+
+    // 링크 복사
+    const copyLink = () => {
+        navigator.clipboard.writeText(getShareUrl()).then(() => {
+            alert('링크가 복사되었습니다.');
+        });
+        setIsShareModalOpen(false);
+    };
 
     // 날짜 포맷
     const formatDate = () => {
@@ -172,7 +247,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                     <button
                         key={tab.key}
                         className={`thanks-tab ${activeTab === tab.key ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab.key)}
+                        onClick={() => handleTabChange(tab.key)}
                     >
                         {tab.label}
                     </button>
@@ -225,7 +300,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                 </button>
                 <button
                     className="thanks-cta-btn"
-                    onClick={() => router.push(`/view/${bugoId}/thanks/share`)}
+                    onClick={() => setIsShareModalOpen(true)}
                 >
                     감사장 전달하기
                 </button>
@@ -267,6 +342,35 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
                                 {isSaving ? '저장 중...' : '저장하기'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 공유 모달 - ViewContent 스타일 */}
+            {isShareModalOpen && (
+                <div className="share-modal">
+                    <div className="share-overlay" onClick={() => setIsShareModalOpen(false)}></div>
+                    <div className="share-content">
+                        <div className="share-header">
+                            <h3>공유하기</h3>
+                            <button className="share-close" onClick={() => setIsShareModalOpen(false)}>✕</button>
+                        </div>
+                        <button className="share-option" onClick={shareKakao}>
+                            <Image src="/images/icon-kakao.png" alt="카카오톡" width={32} height={32} />
+                            <span>카카오톡으로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={shareSMS}>
+                            <Image src="/images/icon-message.png" alt="메세지" width={32} height={32} />
+                            <span>메세지로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={shareBand}>
+                            <Image src="/images/icon-band.png" alt="밴드" width={32} height={32} />
+                            <span>밴드로 보내기</span>
+                        </button>
+                        <button className="share-option" onClick={copyLink}>
+                            <Image src="/images/icon-link.png" alt="링크" width={32} height={32} />
+                            <span>링크 복사하기</span>
+                        </button>
                     </div>
                 </div>
             )}
