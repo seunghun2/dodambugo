@@ -141,9 +141,6 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     // 카카오 공유
     const shareKakao = () => {
         const shareUrl = getShareUrl();
-        // 동적 OG 이미지 URL (캐시 방지)
-        const ogImageUrl = `https://maeumbugo.co.kr/api/og/thanks/${bugoId}?v=${Date.now()}`;
-
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
             if (!Kakao.isInitialized()) {
@@ -152,14 +149,12 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
-                    title: '삼가 감사 인사 드립니다',
-                    description: `故 ${bugo.deceased_name}님의 마지막 가시는 길을 함께해 주셔서\n진심으로 감사드립니다.`,
-                    imageUrl: ogImageUrl,
-                    imageWidth: 800,
-                    imageHeight: 400,
+                    title: `故${bugo.deceased_name}님 감사장`,
+                    description: '감사의 마음을 전합니다.',
+                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
                     link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
-                buttons: [{ title: '답례글 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
+                buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
             });
         }
         setIsShareModalOpen(false);

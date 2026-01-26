@@ -43,11 +43,12 @@ export async function sendSMS(to: string, text: string) {
     }
 }
 
-// 알림톡 발송
+// 알림톡 발송 (예약 발송 지원)
 export async function sendAlimtalk(
     to: string,
     templateId: string,
-    variables: Record<string, string>
+    variables: Record<string, string>,
+    scheduledDate?: Date  // 예약 발송 시간 (선택)
 ) {
     try {
         // SOLAPI는 변수 키에 #{} 래퍼가 필요함
@@ -58,20 +59,28 @@ export async function sendAlimtalk(
             wrappedVariables[wrappedKey] = value;
         }
 
+        const messageBody: Record<string, unknown> = {
+            message: {
+                to,
+                from: '01048375076', // 마음부고 발신번호
+                kakaoOptions: {
+                    pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
+                    templateId,
+                    variables: wrappedVariables,
+                },
+            },
+        };
+
+        // 예약 발송 시간 설정 (message 바깥에!)
+        if (scheduledDate) {
+            messageBody.scheduledDate = scheduledDate.toISOString();
+            console.log('📅 예약 발송 설정:', scheduledDate.toISOString());
+        }
+
         const response = await fetch(`${SOLAPI_URL}/messages/v4/send`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({
-                message: {
-                    to,
-                    from: '01048375076', // 마음부고 발신번호
-                    kakaoOptions: {
-                        pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
-                        templateId,
-                        variables: wrappedVariables,
-                    },
-                },
-            }),
+            body: JSON.stringify(messageBody),
         });
 
         const data = await response.json();
