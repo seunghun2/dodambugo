@@ -3,6 +3,12 @@
     "buildCommand": "npm run build",
     "outputDirectory": ".next",
     "installCommand": "npm install",
+    "crons": [
+        {
+            "path": "/api/cron/thanks-notify",
+            "schedule": "0 1 * * *"
+        }
+    ],
     "redirects": [
         {
             "source": "/:path*",

@@ -9,37 +9,6 @@ function getSupabase() {
     );
 }
 
-// 발인 다음날 오전 10시 계산
-function getThanksSendDate(funeralDateStr: string): Date | null {
-    if (!funeralDateStr) return null;
-
-    try {
-        // "2026-01-27" 또는 "01월 27일" 형식 처리
-        let funeralDate: Date;
-
-        if (funeralDateStr.includes('-')) {
-            funeralDate = new Date(funeralDateStr);
-        } else {
-            // "01월 27일" 형식 파싱
-            const match = funeralDateStr.match(/(\d+)월\s*(\d+)일/);
-            if (!match) return null;
-            const month = parseInt(match[1]) - 1;
-            const day = parseInt(match[2]);
-            const year = new Date().getFullYear();
-            funeralDate = new Date(year, month, day);
-        }
-
-        // 발인 다음날 오전 10시 (한국시간)
-        const nextDay = new Date(funeralDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        nextDay.setHours(10, 0, 0, 0);
-
-        return nextDay;
-    } catch {
-        return null;
-    }
-}
-
 // POST: 부고 생성 알림 (부고 생성 후 호출)
 export async function POST(request: NextRequest) {
     try {
@@ -62,12 +31,12 @@ export async function POST(request: NextRequest) {
             funeral_time,
         });
 
-        // 📱 신청자에게 알림톡 발송 (알림톡 실패 시 SMS 대체)
+        // 📱 신청자에게 알림톡 발송
         try {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('phone_password, applicant_name')  // phone_password에 전화번호 저장됨
+                .select('phone_password, applicant_name')
                 .eq('bugo_number', bugo_number)
                 .single();
 
@@ -84,7 +53,7 @@ export async function POST(request: NextRequest) {
                 const { sendAlimtalk } = await import('@/lib/solapi');
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP260122110120730mPhOlSAUi3r',  // 부고장 생성 완료 템플릿 (검수완료)
+                    'KA01TP260122110120730mPhOlSAUi3r',  // 부고장 생성 완료 템플릿
                     {
                         '고인명': deceased_name ? `故 ${deceased_name}` : '',
                         '장례식장': funeralLocation,
@@ -93,22 +62,6 @@ export async function POST(request: NextRequest) {
                     }
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
-
-                // 📅 감사장 알림톡 예약 발송 (발인 다음날 오전 10시)
-                const thanksSendDate = getThanksSendDate(funeral_date);
-                if (thanksSendDate && thanksSendDate > new Date()) {
-                    await sendAlimtalk(
-                        phoneNumber,
-                        'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿 (검수완료)
-                        {
-                            '상주명': mourner_name || '',
-                            '고인명': deceased_name || '',
-                            '부고ID': bugo_number,
-                        },
-                        thanksSendDate  // 예약 발송!
-                    );
-                    console.log('📅 감사장 알림톡 예약 완료:', thanksSendDate.toISOString());
-                }
             }
         } catch (alimtalkErr) {
             console.error('알림톡 발송 실패:', alimtalkErr);
