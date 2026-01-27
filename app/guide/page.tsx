@@ -22,7 +22,7 @@ const guides = [
         description: '조문객과 상주가 지켜야 할 복장과 기본 예절을 알아봅니다.',
         icon: 'checkroom',
         color: '#777',
-        href: '',
+        href: '/guide/etiquette',
     },
     {
         title: '장례식장 찾기',

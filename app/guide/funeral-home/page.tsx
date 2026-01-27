@@ -52,19 +52,28 @@ export default function FuneralHomePage() {
         }
     };
 
-    // 데이터 로드
+    // 데이터 로드 - 처음 5개 빠르게, 나머지 백그라운드
     useEffect(() => {
         const fetchFacilities = async () => {
             try {
-                const res = await fetch('/api/facilities?all=true');
-                const json = await res.json();
-                if (json.data) {
-                    setFacilities(json.data);
-                    setFilteredFacilities(json.data);
+                // 1단계: 처음 5개만 빠르게 로드
+                const initialRes = await fetch('/api/facilities?pageSize=5');
+                const initialJson = await initialRes.json();
+                if (initialJson.data) {
+                    setFacilities(initialJson.data);
+                    setFilteredFacilities(initialJson.data);
+                    setLoading(false);
+                }
+
+                // 2단계: 전체 데이터 백그라운드 로드
+                const allRes = await fetch('/api/facilities?all=true');
+                const allJson = await allRes.json();
+                if (allJson.data) {
+                    setFacilities(allJson.data);
+                    setFilteredFacilities(allJson.data);
                 }
             } catch (err) {
                 console.error('장례식장 로드 실패:', err);
-            } finally {
                 setLoading(false);
             }
         };

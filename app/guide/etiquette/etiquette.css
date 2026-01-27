@@ -1,0 +1,231 @@
+/* 복장 및 예절 페이지 스타일 - mbugo 디자인 시스템 */
+
+.etiquette-page {
+    padding-top: 60px;
+    min-height: 100vh;
+    background: var(--bg-gray);
+}
+
+/* 헤더 */
+.etiquette-header {
+    background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+    padding: 48px 20px;
+    text-align: center;
+}
+
+.etiquette-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px;
+    line-height: 1.3;
+}
+
+.etiquette-header p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* 콘텐츠 영역 */
+.etiquette-content {
+    padding: 24px 16px 100px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* 목차 */
+.etiquette-toc {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.etiquette-toc h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 12px;
+}
+
+.etiquette-toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.etiquette-toc li {
+    margin-bottom: 8px;
+}
+
+.etiquette-toc li:last-child {
+    margin-bottom: 0;
+}
+
+.etiquette-toc a {
+    color: var(--gray-700);
+    text-decoration: none;
+    font-size: 14px;
+    transition: var(--transition-fast);
+}
+
+.etiquette-toc a:hover {
+    color: var(--primary-dark);
+}
+
+/* 섹션 */
+.etiquette-section {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.etiquette-section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.etiquette-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 20px 0 10px;
+}
+
+.etiquette-section h3:first-of-type {
+    margin-top: 0;
+}
+
+.etiquette-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--gray-700);
+    margin: 0 0 12px;
+}
+
+.etiquette-section ul,
+.etiquette-section ol {
+    margin: 0 0 12px;
+    padding-left: 20px;
+}
+
+.etiquette-section li {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+}
+
+/* 이미지 */
+.etiquette-image {
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin: 16px 0;
+    background: var(--gray-100);
+    overflow: hidden;
+}
+
+.etiquette-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.etiquette-image span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16/9;
+    color: var(--gray-500);
+    font-size: 13px;
+}
+
+/* 강조 박스 */
+.etiquette-highlight {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin: 16px 0;
+}
+
+.etiquette-highlight p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--gray-800);
+}
+
+/* 테이블 */
+.etiquette-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+}
+
+.etiquette-table th,
+.etiquette-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.etiquette-table th {
+    background: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.etiquette-table td {
+    color: var(--gray-700);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 480px) {
+    .etiquette-header {
+        padding: 40px 16px;
+    }
+
+    .etiquette-header h1 {
+        font-size: 22px;
+    }
+
+    .etiquette-content {
+        padding: 16px 12px 80px;
+    }
+
+    .etiquette-section {
+        padding: 20px 16px;
+        border-radius: var(--radius-md);
+    }
+
+    .etiquette-section h2 {
+        font-size: 17px;
+    }
+
+    .etiquette-section h3 {
+        font-size: 15px;
+    }
+
+    .etiquette-section p,
+    .etiquette-section li {
+        font-size: 14px;
+    }
+
+    .etiquette-toc {
+        padding: 16px;
+    }
+
+    .etiquette-table th,
+    .etiquette-table td {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
