@@ -6308,12 +6308,24 @@ mark {
         text-align: center;
         margin-bottom: 4px;
         position: relative;
-        animation: fadeInDown 0.4s ease-out forwards;
-        animation-delay: 1s;
+        animation: fadeInDown 0.4s ease-out forwards, subtleShimmer 4s ease-in-out infinite;
+        animation-delay: 1s, 1.5s;
         opacity: 0;
         width: fit-content;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    @keyframes subtleShimmer {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.89;
+        }
     }
 
     .floating-tooltip strong {
