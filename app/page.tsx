@@ -54,6 +54,17 @@ export default function HomePage() {
   };
   const [bugoCount] = useState(calculateBugoCount());
 
+  // 누적 답례글 수 계산 (기준일: 2026-01-27, 기준값: 10204, 하루 +3건)
+  const calculateThanksCount = () => {
+    const baseDate = new Date('2026-01-27');
+    const baseCount = 10204;
+    const dailyIncrease = 3;
+    const today = new Date();
+    const daysPassed = Math.floor((today.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+    return baseCount + Math.max(0, daysPassed) * dailyIncrease;
+  };
+  const [thanksCount] = useState(calculateThanksCount());
+
   const toggleFaq = (index: number) => {
     setOpenFaqs(prev => {
       const newSet = new Set(prev);
@@ -358,8 +369,13 @@ export default function HomePage() {
           </div>
           <div className="xd-stat-divider"></div>
           <div className="xd-stat-item">
-            <span className="xd-stat-label">만족도</span>
-            <span className="xd-stat-value" data-count="99" data-suffix="%">0</span>
+            <span className="xd-stat-label">누적답례글</span>
+            <span className="xd-stat-value" data-count={thanksCount} data-suffix="건">0</span>
+          </div>
+          <div className="xd-stat-divider"></div>
+          <div className="xd-stat-item">
+            <span className="xd-stat-label">상주만족도</span>
+            <span className="xd-stat-value" data-count={99} data-suffix="%">0</span>
           </div>
         </div>
 
