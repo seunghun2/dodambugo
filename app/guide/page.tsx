@@ -21,7 +21,7 @@ const guides = [
         title: '복장 및 예절',
         description: '조문객과 상주가 지켜야 할 복장과 기본 예절을 알아봅니다.',
         icon: 'checkroom',
-        color: '#777',
+        color: '#9CA3AF',
         href: '/guide/etiquette',
     },
     {

@@ -99,6 +99,20 @@ export default function RootLayout({
         />
         {/* 카카오 SDK */}
         <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" crossOrigin="anonymous" async />
+        {/* Material Symbols 폰트 로딩 감지 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (document.fonts) {
+                document.fonts.load('24px "Material Symbols Outlined"').then(function() {
+                  document.documentElement.classList.add('fonts-loaded');
+                });
+              } else {
+                document.documentElement.classList.add('fonts-loaded');
+              }
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <GoogleAnalytics />
