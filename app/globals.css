@@ -5953,8 +5953,8 @@ mark {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 48px;
-    padding: 40px 0 20px;
+    gap: 24px;
+    padding: 40px 16px 20px;
     background: #F3F4F6;
 }
 
@@ -5967,17 +5967,18 @@ mark {
 
 /* 통계 라벨 - XD: Bold 12px, #9F9F9F */
 .xd-stat-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: #9F9F9F;
+    white-space: nowrap;
 }
 
 /* 통계 값 - XD: Bold 22px, #0D0D0D */
 .xd-stat-value {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: #0D0D0D;
-    line-height: 32px;
+    line-height: 28px;
 }
 
 /* 통계 구분선 - XD: height 24px, #CAD4DE */
@@ -5985,6 +5986,22 @@ mark {
     width: 1px;
     height: 24px;
     background: #CAD4DE;
+}
+
+/* 더 작은 화면 대응 */
+@media (max-width: 360px) {
+    .xd-stats {
+        gap: 16px;
+        padding: 32px 12px 16px;
+    }
+
+    .xd-stat-label {
+        font-size: 10px;
+    }
+
+    .xd-stat-value {
+        font-size: 18px;
+    }
 }
 
 /* 히어로 섹션 */
