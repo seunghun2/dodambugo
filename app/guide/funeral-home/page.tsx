@@ -44,12 +44,19 @@ export default function FuneralHomePage() {
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     const observerRef = useRef<HTMLDivElement>(null);
+    const regionsRef = useRef<HTMLDivElement>(null);
+
+    const scrollRegions = () => {
+        if (regionsRef.current) {
+            regionsRef.current.scrollBy({ left: 150, behavior: 'smooth' });
+        }
+    };
 
     // 데이터 로드
     useEffect(() => {
         const fetchFacilities = async () => {
             try {
-                const res = await fetch('/api/facilities?pageSize=2000');
+                const res = await fetch('/api/facilities?all=true');
                 const json = await res.json();
                 if (json.data) {
                     setFacilities(json.data);
@@ -157,6 +164,10 @@ export default function FuneralHomePage() {
             {/* 검색 */}
             <div className="funeral-home-search">
                 <div className="funeral-home-search-box">
+                    <svg className="funeral-home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
                     <input
                         type="text"
                         className="funeral-home-search-input"
@@ -164,18 +175,12 @@ export default function FuneralHomePage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <button className="funeral-home-search-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="M21 21l-4.35-4.35" />
-                        </svg>
-                    </button>
                 </div>
             </div>
 
             {/* 지역 필터 - 가로 스크롤 */}
             <div className="funeral-home-regions-wrapper">
-                <div className="funeral-home-regions">
+                <div className="funeral-home-regions" ref={regionsRef}>
                     {REGIONS.map((region) => (
                         <button
                             key={region}
@@ -186,6 +191,7 @@ export default function FuneralHomePage() {
                         </button>
                     ))}
                 </div>
+                <button className="funeral-home-regions-arrow" onClick={scrollRegions}>›</button>
             </div>
 
             {/* 결과 카운트 */}
