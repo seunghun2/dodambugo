@@ -1111,11 +1111,6 @@ export default function AdminProductsPage() {
                     color: #b45309;
                     border: 1px solid #fcd34d;
                 }
-                /* 상품 페이지 전용: 상품 수정 패널 확장 */
-                :global(.admin-content-area) .detail-panel {
-                    min-width: 520px;
-                    max-width: 580px;
-                }
             `}</style>
         </div>
     );

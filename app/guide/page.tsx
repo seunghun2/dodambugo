@@ -1,33 +1,40 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 const guides = [
     {
         title: '장례 절차',
         description: '임종부터 발인까지, 3일간의 장례 절차를 상세히 안내해 드립니다.',
         icon: 'church',
         color: '#4A90A4',
+        href: '',
     },
     {
         title: '장례 비용',
         description: '장례식장, 상조, 장지 등 항목별 예상 비용을 확인해 보세요.',
         icon: 'payments',
         color: '#5CB85C',
+        href: '',
     },
     {
         title: '복장 및 예절',
         description: '조문객과 상주가 지켜야 할 복장과 기본 예절을 알아봅니다.',
         icon: 'checkroom',
         color: '#777',
+        href: '',
     },
     {
         title: '장례식장 찾기',
         description: '지역별, 시설별 조건에 맞는 장례식장을 쉽고 빠르게 찾아보세요.',
         icon: 'location_on',
         color: '#F0AD4E',
+        href: '/guide/funeral-home',
     },
 ];
 
 export default function GuidePage() {
+    const router = useRouter();
     return (
         <>
             {/* Guide Section */}
@@ -51,13 +58,15 @@ export default function GuidePage() {
                             <div
                                 key={guide.title}
                                 className="guide-card"
+                                onClick={() => guide.href && router.push(guide.href)}
                                 style={{
                                     background: '#fff',
                                     borderRadius: '12px',
                                     padding: '24px',
                                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.2s, box-shadow 0.2s'
+                                    cursor: guide.href ? 'pointer' : 'default',
+                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                    opacity: guide.href ? 1 : 0.7,
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
