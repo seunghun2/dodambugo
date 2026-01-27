@@ -6015,6 +6015,8 @@ mark {
     width: 100%;
     margin: 0 auto;
     transition: all 0.3s ease;
+    overflow: hidden;
+    border-radius: 12px;
 }
 
 .xd-hero-image img {
@@ -6024,6 +6026,17 @@ mark {
     object-fit: cover;
     border-radius: 12px;
     transition: all 0.3s ease;
+    animation: heroZoom 3s ease-out forwards;
+}
+
+@keyframes heroZoom {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.02);
+    }
 }
 
 /* 검색바 - XD: 328x52, radius 8px */
