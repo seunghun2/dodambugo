@@ -1,0 +1,25 @@
+{
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
+  "polyfillFiles": [
+    "static/chunks/47f86_next_dist_build_polyfills_polyfill-nomodule.js"
+  ],
+  "lowPriorityFiles": [
+    "static/development/_ssgManifest.js",
+    "static/development/_buildManifest.js"
+  ],
+  "rootMainFiles": [
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_77f52bda._.js",
+    "static/chunks/47f86_next_dist_compiled_react-dom_90f62de0._.js",
+    "static/chunks/47f86_next_dist_compiled_react-server-dom-turbopack_94068fa8._.js",
+    "static/chunks/47f86_next_dist_compiled_next-devtools_index_e48fe0d3.js",
+    "static/chunks/47f86_next_dist_compiled_01b667fb._.js",
+    "static/chunks/47f86_next_dist_client_ae2b1f75._.js",
+    "static/chunks/47f86_next_dist_2e9d0e7b._.js",
+    "static/chunks/47f86_@swc_helpers_cjs_8d463175._.js",
+    "static/chunks/Desktop_dodam_dodam-next_a0ff3932._.js",
+    "static/chunks/turbopack-Desktop_dodam_dodam-next_1ae97217._.js"
+  ]
+}
