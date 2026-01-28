@@ -671,6 +671,11 @@ export default function WriteFormPage() {
         if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
         // death_time(임종 시간)은 선택 - 모를 수도 있음
 
+        // 일포 토글 ON일 때 시간 필수
+        if (showIlpo && (!formData.ilpo_time || formData.ilpo_time === '00:00')) {
+            newErrors.ilpo_time = '일포 시간을 입력해주세요';
+        }
+
         // 시간 유효성 검사 (24시간 이상 불가)
         if (formData.funeral_time && formData.funeral_time !== '00:00') {
             const [hours] = formData.funeral_time.split(':');
@@ -1220,7 +1225,7 @@ export default function WriteFormPage() {
 
                                             {showIlpo && (
                                                 <div className="toggle-content">
-                                                    <label className="form-label" style={{ marginBottom: '8px', display: 'block' }}>일포일시</label>
+                                                    <label className="form-label required" style={{ marginBottom: '8px', display: 'block' }}>일포일시</label>
                                                     <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
                                                         <div style={{ flex: 6 }}>
                                                             <DatePickerInput
@@ -1246,7 +1251,7 @@ export default function WriteFormPage() {
                                                             <input
                                                                 type="text"
                                                                 name="ilpo_time"
-                                                                className="form-input time-input"
+                                                                className={`form-input time-input ${errors.ilpo_time ? 'error' : ''}`}
                                                                 placeholder="00:00"
                                                                 maxLength={5}
                                                                 inputMode="numeric"
@@ -1258,10 +1263,17 @@ export default function WriteFormPage() {
                                                                     }
                                                                     setFormData(prev => ({ ...prev, ilpo_time: val }));
                                                                 }}
-                                                                style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    height: '48px',
+                                                                    textAlign: 'center',
+                                                                    fontSize: '16px',
+                                                                    borderColor: errors.ilpo_time ? '#ef4444' : undefined
+                                                                }}
                                                             />
                                                         </div>
                                                     </div>
+                                                    {errors.ilpo_time && <p className="field-error" style={{ marginTop: '4px' }}>{errors.ilpo_time}</p>}
                                                 </div>
                                             )}
                                         </div>
