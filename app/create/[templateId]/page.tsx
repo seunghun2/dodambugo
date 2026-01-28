@@ -365,6 +365,8 @@ export default function WriteFormPage() {
                     funeral_time: data.funeral_time || '',
                     funeral_hour: data.funeral_time?.split(':')[0] || '',
                     funeral_minute: data.funeral_time?.split(':')[1] || '00',
+                    ilpo_date: data.ilpo_date || '',
+                    ilpo_time: data.ilpo_time || '',
                     burial_place: data.burial_place || '',
                     burial_place2: data.burial_place2 || '',
                     message: data.message || '',
@@ -452,7 +454,7 @@ export default function WriteFormPage() {
             death_date: formatDate(today),
             encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
-            ilpo_date: formatDate(dayAfter), // 일포일시 = 발인일과 동일
+            ilpo_date: formatDate(tomorrow), // 일포 = 발인 전날
         }));
     }, []);
 
@@ -1201,7 +1203,7 @@ export default function WriteFormPage() {
                                         <div className="form-section">
                                             <div className="toggle-row" style={{ flexWrap: 'wrap' }}>
                                                 <div className="toggle-row-label" style={{ flex: 1 }}>
-                                                    <span>일포일시</span>
+                                                    <span>'일포'일을 사용하시겠습니까?</span>
                                                 </div>
                                                 <label className="toggle-switch">
                                                     <input
@@ -1212,12 +1214,13 @@ export default function WriteFormPage() {
                                                     <span className="toggle-slider"></span>
                                                 </label>
                                                 <div style={{ width: '100%', marginTop: '-4px' }}>
-                                                    <span style={{ fontSize: '13px', color: '#888' }}>제주도 장례문화</span>
+                                                    <span style={{ fontSize: '13px', color: '#888' }}>발인 전날, 조문을 집중적으로 받는 날</span>
                                                 </div>
                                             </div>
 
                                             {showIlpo && (
                                                 <div className="toggle-content">
+                                                    <label className="form-label" style={{ marginBottom: '8px', display: 'block' }}>일포일시</label>
                                                     <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
                                                         <div style={{ flex: 6 }}>
                                                             <DatePickerInput
