@@ -75,6 +75,15 @@ export default function CompletePage() {
             QRCode.toDataURL(url, { width: 180, margin: 1 })
                 .then(dataUrl => setQrDataUrl(dataUrl))
                 .catch(err => console.error('QR 생성 실패:', err));
+
+            // Google Ads 전환 추적
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17911391889/UwRrCNfliO4bEJHN6NxC',
+                    'value': 1.0,
+                    'currency': 'KRW'
+                });
+            }
         }
 
         // 카카오 SDK 로드
