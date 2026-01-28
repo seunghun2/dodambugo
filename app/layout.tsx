@@ -103,13 +103,28 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if (document.fonts) {
-                document.fonts.load('24px "Material Symbols Outlined"').then(function() {
+              (function() {
+                function checkFont() {
+                  if (document.fonts && document.fonts.check('24px "Material Symbols Outlined"')) {
+                    document.documentElement.classList.add('fonts-loaded');
+                    return true;
+                  }
+                  return false;
+                }
+                
+                if (checkFont()) return;
+                
+                if (document.fonts && document.fonts.ready) {
+                  document.fonts.ready.then(function() {
+                    document.documentElement.classList.add('fonts-loaded');
+                  });
+                }
+                
+                // Fallback: 최대 3초 후 강제 표시
+                setTimeout(function() {
                   document.documentElement.classList.add('fonts-loaded');
-                });
-              } else {
-                document.documentElement.classList.add('fonts-loaded');
-              }
+                }, 3000);
+              })();
             `,
           }}
         />

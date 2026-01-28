@@ -114,13 +114,14 @@ body {
     direction: ltr;
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
-    /* 폰트 로딩 전 텍스트 숨김 */
-    color: transparent;
+    /* 폰트 로딩 전 완전 숨김 */
+    opacity: 0;
+    transition: opacity 0.1s ease;
 }
 
 /* 폰트 로딩 완료 후 표시 */
 .fonts-loaded .material-symbols-outlined {
-    color: inherit;
+    opacity: 1;
 }
 
 .container {

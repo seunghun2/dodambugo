@@ -1212,9 +1212,12 @@ export default function WriteFormPage() {
                                     {/* 제주 일포일시 - 주소에 제주가 포함될 때만 표시 */}
                                     {formData.address.includes('제주') && (
                                         <div className="form-section">
-                                            <div className="toggle-row" style={{ flexWrap: 'wrap' }}>
-                                                <div className="toggle-row-label" style={{ flex: 1 }}>
-                                                    <span>'일포'일을 사용하시겠습니까?</span>
+                                            <div className="toggle-row" style={{ alignItems: 'center' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <div className="toggle-row-label">
+                                                        <span>'일포'일을 사용하시겠습니까?</span>
+                                                    </div>
+                                                    <span style={{ fontSize: '13px', color: '#888', marginTop: 0, display: 'block' }}>발인 전날, 조문을 집중적으로 받는 날</span>
                                                 </div>
                                                 <label className="toggle-switch">
                                                     <input
@@ -1230,9 +1233,6 @@ export default function WriteFormPage() {
                                                     />
                                                     <span className="toggle-slider"></span>
                                                 </label>
-                                                <div style={{ width: '100%', marginTop: '-4px' }}>
-                                                    <span style={{ fontSize: '13px', color: '#888' }}>발인 전날, 조문을 집중적으로 받는 날</span>
-                                                </div>
                                             </div>
 
                                             {showIlpo && (
