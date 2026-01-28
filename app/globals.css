@@ -6057,7 +6057,7 @@ mark {
 .xd-hero-image img {
     width: 100%;
     height: auto;
-    aspect-ratio: 328 / 244;
+    aspect-ratio: 1024 / 764;
     object-fit: cover;
     border-radius: 12px;
     transition: all 0.3s ease;
