@@ -837,6 +837,24 @@ export default function WriteFormPage() {
                         created_new: true,
                     }),
                 }).catch(err => console.error('부고 알림 실패:', err));
+            } else {
+                // 📱 수정 모드: 연락처 변경 시 알림톡 발송
+                fetch('/api/bugo-notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bugo_number: data.bugo_number,
+                        deceased_name: formData.deceased_name,
+                        funeral_home: formData.funeral_home,
+                        room_number: formData.room_number,
+                        address: formData.address,
+                        funeral_date: formData.funeral_date,
+                        funeral_time: formData.funeral_time,
+                        mourner_name: formData.primary_mourner,
+                        created_new: false,
+                        phone_changed: true,  // 수정 시 연락처 변경 알림
+                    }),
+                }).catch(err => console.error('부고 수정 알림 실패:', err));
             }
 
             // 완료 페이지로 리다이렉트
