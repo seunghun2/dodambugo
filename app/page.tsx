@@ -384,7 +384,7 @@ export default function HomePage() {
           <h1 className="xd-hero-title">마음부고에서 부고장을 만드세요</h1>
           <p className="xd-hero-subtitle">가장 간편하고 빠르게 부고장을 만드세요.</p>
           <div className="xd-hero-image">
-            <Image src="/images/hero-image.jpg" alt="마음부고 부고장 미리보기" width={400} height={600} priority />
+            <Image src="/images/hero-image.jpg" alt="마음부고 부고장 미리보기" width={1024} height={764} priority />
           </div>
         </section>
 
