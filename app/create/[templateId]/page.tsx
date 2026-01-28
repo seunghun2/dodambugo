@@ -173,7 +173,7 @@ export default function WriteFormPage() {
 
     // 초기 데이터 로드 (복제 > draft 순서)
     useEffect(() => {
-        // URL에 edit 파라미터가 있으면 수정 모드 - 건너뛰기
+        // 수정 모드에서는 draft/복제 데이터 로드하지 않음
         if (typeof window !== 'undefined' && window.location.search.includes('edit=')) return;
 
         // 1. 복제 데이터 먼저 확인
@@ -342,7 +342,7 @@ export default function WriteFormPage() {
                 // formData 설정
                 setFormData({
                     applicant_name: data.applicant_name || '',
-                    applicant_phone: data.applicant_phone || '',
+                    applicant_phone: data.applicant_phone || data.phone_password || '',
                     deceased_name: data.deceased_name || '',
                     gender: data.gender || '',
                     relationship: data.relationship || '',
@@ -731,7 +731,8 @@ export default function WriteFormPage() {
                 bugo_number: bugoNumber,
                 template_id: templateId,
                 applicant_name: formData.applicant_name,
-                phone_password: formData.applicant_phone, // applicant_phone 값을 phone_password 컬럼에 저장
+                applicant_phone: formData.applicant_phone,
+                phone_password: formData.applicant_phone, // 비밀번호로도 사용
                 deceased_name: formData.deceased_name,
                 gender: formData.gender,
                 relationship: formData.relationship || '',
@@ -1233,6 +1234,12 @@ export default function WriteFormPage() {
                                                             setShowIlpo(e.target.checked);
                                                             if (!e.target.checked) {
                                                                 setHideFuneral(false);
+                                                                // 일포 OFF하면 일포 날짜/시간 초기화
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    ilpo_date: '',
+                                                                    ilpo_time: ''
+                                                                }));
                                                             }
                                                         }}
                                                     />
@@ -1533,7 +1540,7 @@ export default function WriteFormPage() {
                                                 임시저장
                                             </button>
                                             <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                                                {isSubmitting ? '생성 중...' : '부고장 만들기'}
+                                                {isSubmitting ? (editBugoNumber ? '수정 중...' : '생성 중...') : (editBugoNumber ? '수정하기' : '부고장 만들기')}
                                             </button>
                                         </div>
                                     </div>
