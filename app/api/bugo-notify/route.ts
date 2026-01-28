@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('phone_password, applicant_name')
+                .select('phone_password, applicant_name, ilpo_date, ilpo_time')
                 .eq('bugo_number', bugo_number)
                 .single();
 
@@ -46,8 +46,15 @@ export async function POST(request: NextRequest) {
                 // 장례식장 정보 조합
                 const funeralLocation = `${funeral_home || ''} ${room_number || ''}`.trim();
 
-                // 발인일시 포맷
-                const funeralDateTime = `${funeral_date || ''} ${funeral_time || ''}`.trim();
+                // 일포가 있으면 일포일시를, 없으면 발인일시를 표시
+                let dateTimeInfo = '';
+                if (bugo.ilpo_date) {
+                    const ilpoDateTime = `${bugo.ilpo_date || ''} ${bugo.ilpo_time || ''}`.trim();
+                    const funeralDateTime = `${funeral_date || ''} ${funeral_time || ''}`.trim();
+                    dateTimeInfo = `일포: ${ilpoDateTime}${funeralDateTime ? ` / 발인: ${funeralDateTime}` : ''}`;
+                } else {
+                    dateTimeInfo = `${funeral_date || ''} ${funeral_time || ''}`.trim();
+                }
 
                 // 알림톡 발송
                 const { sendAlimtalk } = await import('@/lib/solapi');
@@ -57,7 +64,7 @@ export async function POST(request: NextRequest) {
                     {
                         '고인명': deceased_name ? `故 ${deceased_name}` : '',
                         '장례식장': funeralLocation,
-                        '발인일시': funeralDateTime,
+                        '발인일시': dateTimeInfo,
                         '부고번호': bugo_number,
                     }
                 );
