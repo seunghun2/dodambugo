@@ -4546,6 +4546,24 @@ section {
     background-color: var(--gray-100) !important;
 }
 
+/* 달력 모든 날짜 검은색으로 통일 (토요일/일요일 포함) */
+.mantine-DatePickerInput-day,
+.mantine-DatePicker-day {
+    color: #191919 !important;
+}
+
+/* 선택된 날짜는 흰색 */
+.mantine-DatePickerInput-day[data-selected],
+.mantine-DatePicker-day[data-selected] {
+    color: #191919 !important;
+}
+
+/* 요일 헤더도 검은색 */
+.mantine-DatePickerInput-weekday,
+.mantine-DatePicker-weekday {
+    color: #191919 !important;
+}
+
 /* 주소 검색 */
 .address-search-row {
     display: flex;
