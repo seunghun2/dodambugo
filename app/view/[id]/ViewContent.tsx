@@ -110,6 +110,9 @@ interface BugoData {
     message?: string;
     account_info?: Array<{ bank: string; holder: string; number: string }> | null;
     photo_url?: string;
+    ilpo_date?: string;
+    ilpo_time?: string;
+    hide_funeral?: boolean;
 }
 
 // 상주 관계 + 고인 성별 → 고인-상주 관계 자동 매핑
