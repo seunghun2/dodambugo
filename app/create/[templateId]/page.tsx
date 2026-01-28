@@ -1079,7 +1079,7 @@ export default function WriteFormPage() {
                                         <hr className="form-divider" />
 
                                         {/* 상주 라벨 */}
-                                        <label className="form-label required">상주</label>
+                                        <label className="form-label required" style={{ marginBottom: '8px' }}>상주</label>
 
                                         {/* 고인과의 관계 + 대표상주 */}
                                         <div className="mourner-row primary-mourner" data-field="primary_mourner">
