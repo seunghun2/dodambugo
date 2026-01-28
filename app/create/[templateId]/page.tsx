@@ -141,6 +141,9 @@ export default function WriteFormPage() {
     const [mounted, setMounted] = useState(false);
     useEffect(() => { setMounted(true); }, []);
 
+    // 원래 연락처 (수정 모드에서 변경 감지용)
+    const [originalPhone, setOriginalPhone] = useState('');
+
     // 제출 상태
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createdBugo, setCreatedBugo] = useState<any>(null);
@@ -432,6 +435,9 @@ export default function WriteFormPage() {
                     setShowIlpo(true);
                     setHideFuneral(data.hide_funeral || false);
                 }
+
+                // 원래 연락처 저장 (변경 감지용)
+                setOriginalPhone(data.applicant_phone || data.phone_password || '');
                 if (data.photo_url) {
                     setPhotoUrl(data.photo_url);
                     setShowPhoto(true);
@@ -838,23 +844,26 @@ export default function WriteFormPage() {
                     }),
                 }).catch(err => console.error('부고 알림 실패:', err));
             } else {
-                // 📱 수정 모드: 연락처 변경 시 알림톡 발송
-                fetch('/api/bugo-notify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        bugo_number: data.bugo_number,
-                        deceased_name: formData.deceased_name,
-                        funeral_home: formData.funeral_home,
-                        room_number: formData.room_number,
-                        address: formData.address,
-                        funeral_date: formData.funeral_date,
-                        funeral_time: formData.funeral_time,
-                        mourner_name: formData.primary_mourner,
-                        created_new: false,
-                        phone_changed: true,  // 수정 시 연락처 변경 알림
-                    }),
-                }).catch(err => console.error('부고 수정 알림 실패:', err));
+                // 📱 수정 모드: 연락처 변경됐을 때만 알림톡 발송
+                const phoneChanged = formData.applicant_phone !== originalPhone;
+                if (phoneChanged) {
+                    fetch('/api/bugo-notify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            bugo_number: data.bugo_number,
+                            deceased_name: formData.deceased_name,
+                            funeral_home: formData.funeral_home,
+                            room_number: formData.room_number,
+                            address: formData.address,
+                            funeral_date: formData.funeral_date,
+                            funeral_time: formData.funeral_time,
+                            mourner_name: formData.primary_mourner,
+                            created_new: false,
+                            phone_changed: true,
+                        }),
+                    }).catch(err => console.error('부고 수정 알림 실패:', err));
+                }
             }
 
             // 완료 페이지로 리다이렉트
