@@ -67,8 +67,6 @@ export async function sendAlimtalk(
                     pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
                     templateId,
                     variables: wrappedVariables,
-                    // 알림톡 실패 시 SMS 대체 발송
-                    resendType: 'SMS',
                 },
             },
         };
