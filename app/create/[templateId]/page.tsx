@@ -137,6 +137,10 @@ export default function WriteFormPage() {
     const [showPhoto, setShowPhoto] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
 
+    // 클라이언트 마운트 상태 (hydration 에러 방지)
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+
     // 제출 상태
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createdBugo, setCreatedBugo] = useState<any>(null);
@@ -1217,7 +1221,7 @@ export default function WriteFormPage() {
                                     </div>
 
                                     {/* 제주 일포일시 - 주소에 제주가 포함될 때만 표시 */}
-                                    {formData.address.includes('제주') && (
+                                    {mounted && formData.address.includes('제주') && (
                                         <div className="form-section">
                                             <div className="toggle-row" style={{ alignItems: 'center' }}>
                                                 <div style={{ flex: 1 }}>
