@@ -573,11 +573,22 @@ ${url}
                         <span className="funeral-info-value">故{bugo.deceased_name} {bugo.age ? `(향년 ${bugo.age}세)` : ''}</span>
                     </div>
                     <div className="funeral-info-divider"></div>
-                    {bugo.funeral_date && (
+                    {/* 일포일시 - 있으면 진하게 표시 (발인보다 먼저) */}
+                    {bugo.ilpo_date && (
                         <div className="funeral-info-row funeral-highlight">
-                            <span className="funeral-info-label">발인</span>
-                            <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
+                            <span className="funeral-info-label">일포</span>
+                            <span className="funeral-info-value">{formatDate(bugo.ilpo_date)} {bugo.ilpo_time || ''}</span>
                         </div>
+                    )}
+                    {/* 발인 - 일포가 있으면 연하게, hide_funeral이 true면 숨김 */}
+                    {bugo.funeral_date && !bugo.hide_funeral && (
+                        <>
+                            {bugo.ilpo_date && <div className="funeral-info-divider"></div>}
+                            <div className={`funeral-info-row ${bugo.ilpo_date ? '' : 'funeral-highlight'}`}>
+                                <span className="funeral-info-label">발인</span>
+                                <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
+                            </div>
+                        </>
                     )}
                     {bugo.death_date && (
                         <>

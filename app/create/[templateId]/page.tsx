@@ -424,6 +424,10 @@ export default function WriteFormPage() {
 
                 // 기타 옵션
                 if (data.burial_place) setShowBurial(true);
+                if (data.ilpo_date) {
+                    setShowIlpo(true);
+                    setHideFuneral(data.hide_funeral || false);
+                }
                 if (data.photo_url) {
                     setPhotoUrl(data.photo_url);
                     setShowPhoto(true);
@@ -749,6 +753,7 @@ export default function WriteFormPage() {
                 funeral_time: formData.funeral_time || (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
                 ilpo_date: formData.ilpo_date || null,
                 ilpo_time: formData.ilpo_time || null,
+                hide_funeral: hideFuneral || false,
                 burial_place: formData.burial_place || null,
                 burial_place2: formData.burial_place2?.trim() || null,
                 message: formData.message || null,
