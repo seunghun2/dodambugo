@@ -46,12 +46,12 @@ export async function POST(request: NextRequest) {
                 // 장례식장 정보 조합
                 const funeralLocation = `${funeral_home || ''} ${room_number || ''}`.trim();
 
-                // 일포가 있으면 일포일시를, 없으면 발인일시를 표시
+                // 일포가 있으면 줄바꿈 포맷, 없으면 기존 포맷
                 let dateTimeInfo = '';
                 if (bugo.ilpo_date) {
                     const ilpoDateTime = `${bugo.ilpo_date || ''} ${bugo.ilpo_time || ''}`.trim();
                     const funeralDateTime = `${funeral_date || ''} ${funeral_time || ''}`.trim();
-                    dateTimeInfo = `일포: ${ilpoDateTime}${funeralDateTime ? ` / 발인: ${funeralDateTime}` : ''}`;
+                    dateTimeInfo = `\n(일포) ${ilpoDateTime}${funeralDateTime ? `\n(발인) ${funeralDateTime}` : ''}`;
                 } else {
                     dateTimeInfo = `${funeral_date || ''} ${funeral_time || ''}`.trim();
                 }
