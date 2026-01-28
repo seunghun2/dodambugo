@@ -102,6 +102,8 @@ export default function WriteFormPage() {
         funeral_time: '',
         funeral_hour: '',
         funeral_minute: '00',
+        ilpo_date: '',
+        ilpo_time: '',
         burial_place: '',
         burial_place2: '',
         message: '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
@@ -126,6 +128,9 @@ export default function WriteFormPage() {
 
     // 장지 정보
     const [showBurial, setShowBurial] = useState(false);
+
+    // 일포일시 (제주)
+    const [showIlpo, setShowIlpo] = useState(false);
 
     // 영정 사진
     const [showPhoto, setShowPhoto] = useState(false);
@@ -447,6 +452,7 @@ export default function WriteFormPage() {
             death_date: formatDate(today),
             encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
+            ilpo_date: formatDate(dayAfter), // 일포일시 = 발인일과 동일
         }));
     }, []);
 
@@ -727,6 +733,8 @@ export default function WriteFormPage() {
                 encoffin_time: formData.encoffin_hour ? `${formData.encoffin_hour}:${formData.encoffin_minute}` : null,
                 funeral_date: formData.funeral_date || null,
                 funeral_time: formData.funeral_time || (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
+                ilpo_date: formData.ilpo_date || null,
+                ilpo_time: formData.ilpo_time || null,
                 burial_place: formData.burial_place || null,
                 burial_place2: formData.burial_place2?.trim() || null,
                 message: formData.message || null,
@@ -1187,6 +1195,74 @@ export default function WriteFormPage() {
                                             상주 추가
                                         </button>
                                     </div>
+
+                                    {/* 제주 일포일시 - 주소에 제주가 포함될 때만 표시 */}
+                                    {formData.address.includes('제주') && (
+                                        <div className="form-section">
+                                            <div className="toggle-row" style={{ flexWrap: 'wrap' }}>
+                                                <div className="toggle-row-label" style={{ flex: 1 }}>
+                                                    <span>일포일시</span>
+                                                </div>
+                                                <label className="toggle-switch">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={showIlpo}
+                                                        onChange={(e) => setShowIlpo(e.target.checked)}
+                                                    />
+                                                    <span className="toggle-slider"></span>
+                                                </label>
+                                                <div style={{ width: '100%', marginTop: '-4px' }}>
+                                                    <span style={{ fontSize: '13px', color: '#888' }}>제주도 장례문화</span>
+                                                </div>
+                                            </div>
+
+                                            {showIlpo && (
+                                                <div className="toggle-content">
+                                                    <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
+                                                        <div style={{ flex: 6 }}>
+                                                            <DatePickerInput
+                                                                locale="ko"
+                                                                placeholder="날짜 선택"
+                                                                value={formData.ilpo_date || null}
+                                                                onChange={(value) => setFormData(prev => ({
+                                                                    ...prev,
+                                                                    ilpo_date: value || ''
+                                                                }))}
+                                                                valueFormat="YYYY년 MM월 DD일"
+                                                                rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                                styles={{
+                                                                    input: {
+                                                                        height: '48px',
+                                                                        borderRadius: '8px',
+                                                                        border: '1px solid var(--gray-200)',
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div style={{ flex: 4 }} data-field="ilpo_time">
+                                                            <input
+                                                                type="text"
+                                                                name="ilpo_time"
+                                                                className="form-input time-input"
+                                                                placeholder="00:00"
+                                                                maxLength={5}
+                                                                inputMode="numeric"
+                                                                value={formData.ilpo_time || ''}
+                                                                onChange={(e) => {
+                                                                    let val = e.target.value.replace(/[^0-9]/g, '');
+                                                                    if (val.length >= 3) {
+                                                                        val = val.slice(0, 2) + ':' + val.slice(2, 4);
+                                                                    }
+                                                                    setFormData(prev => ({ ...prev, ilpo_time: val }));
+                                                                }}
+                                                                style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* 일정 정보 */}
                                     <div className="form-section">

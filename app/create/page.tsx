@@ -71,6 +71,9 @@ function CreatePageContent() {
         funeral_date: '',
         funeral_hour: '',
         funeral_minute: '00',
+        ilpo_date: '',
+        ilpo_hour: '',
+        ilpo_minute: '00',
         burial_place: '',
         message: '',
     });
@@ -218,6 +221,11 @@ function CreatePageContent() {
             // 종교
             const religion = formData.religion === '기타' ? formData.religion_custom : formData.religion;
 
+            // 일포 시간 조합 (제주도)
+            const ilpoTime = formData.ilpo_hour && formData.ilpo_minute
+                ? `${formData.ilpo_hour}:${formData.ilpo_minute}`
+                : null;
+
             const saveData = {
                 bugo_number: bugoNumber,
                 template: selectedTemplate,
@@ -239,6 +247,8 @@ function CreatePageContent() {
                 death_date: formData.death_date || null,
                 funeral_date: formData.funeral_date || null,
                 funeral_time: funeralTime,
+                ilpo_date: formData.ilpo_date || null,
+                ilpo_time: ilpoTime,
                 burial_place: formData.burial_place || null,
                 message: formData.message || null,
                 family_list: mournersText || null,
@@ -601,6 +611,55 @@ function CreatePageContent() {
                                         />
                                     </div>
                                 </div>
+
+                                {/* 제주 일포일시 - 주소에 제주가 포함될 때만 표시 */}
+                                {formData.address.includes('제주') && (
+                                    <div className="form-section jeju-ilpo-section">
+                                        <h2 className="section-title">일포일시</h2>
+                                        <p className="section-description">제주도 장례문화에 맞춰 일포 일시를 입력해주세요</p>
+
+                                        <div className="form-group">
+                                            <label className="form-label">일포 날짜</label>
+                                            <input
+                                                type="date"
+                                                name="ilpo_date"
+                                                className="form-input"
+                                                value={formData.ilpo_date}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label className="form-label">시</label>
+                                                <select
+                                                    name="ilpo_hour"
+                                                    className="form-select"
+                                                    value={formData.ilpo_hour}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">선택</option>
+                                                    {hourOptions.map(h => (
+                                                        <option key={h} value={h}>{parseInt(h)}시</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="form-group">
+                                                <label className="form-label">분</label>
+                                                <select
+                                                    name="ilpo_minute"
+                                                    className="form-select"
+                                                    value={formData.ilpo_minute}
+                                                    onChange={handleChange}
+                                                >
+                                                    {minuteOptions.map(m => (
+                                                        <option key={m} value={m}>{m}분</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* 발인일시 */}
                                 <div className="form-section">

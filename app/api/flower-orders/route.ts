@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendFlowerOrderNotification } from '@/lib/slack';
-import { sendFlowerOrderNotification as sendSMSNotification } from '@/lib/solapi';
+import { sendAlimtalk } from '@/lib/solapi';
+
+// 알림톡 템플릿 ID
+const ALIMTALK_TEMPLATES = {
+    FLOWER_PAYMENT_COMPLETE: 'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료
+    FLOWER_DELIVERY_COMPLETE: 'KA01TP260127010157157MBMxvZX3qUI', // 화환 배송완료
+};
 
 // 함수 내에서 supabase 클라이언트 생성 (빌드 타임 에러 방지)
 function getSupabase() {
@@ -97,6 +103,24 @@ export async function POST(request: NextRequest) {
             payment_method: body.payment_method || 'card',
         }).catch(err => console.error('Slack 알림 실패:', err));
 
+        // 📱 화환 결제완료 알림톡 발송 (주문자에게)
+        if (body.sender_phone) {
+            const phoneNumber = body.sender_phone.replace(/-/g, '');
+            sendAlimtalk(
+                phoneNumber,
+                ALIMTALK_TEMPLATES.FLOWER_PAYMENT_COMPLETE,
+                {
+                    '상품명': body.product_name || '',
+                    '금액': body.product_price?.toLocaleString() || '0',
+                    '주문번호': orderNumber,
+                    '받는분': body.recipient_name || '',
+                    '장례식장': `${body.funeral_home || ''} ${body.room || ''}`.trim(),
+                }
+            ).then(() => {
+                console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
+            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err));
+        }
+
         return NextResponse.json({ order: data, order_number: orderNumber });
     } catch (err) {
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -123,11 +147,37 @@ export async function PATCH(request: NextRequest) {
             .from('flower_orders')
             .update(updateData)
             .eq('id', id)
-            .select()
+            .select(`
+                *,
+                bugo:bugo_id (
+                    deceased_name,
+                    bugo_number
+                )
+            `)
             .single();
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        // 📱 배송완료 알림톡 발송 (주문자에게)
+        if (status === 'delivered' && data?.sender_phone) {
+            const phoneNumber = data.sender_phone.replace(/-/g, '');
+            const deceasedName = data.bugo?.deceased_name || '';
+
+            sendAlimtalk(
+                phoneNumber,
+                ALIMTALK_TEMPLATES.FLOWER_DELIVERY_COMPLETE,
+                {
+                    '상품명': data.product_name || '',
+                    '받는분': data.recipient_name || '',
+                    '장례식장': `${data.funeral_home || ''} ${data.room || ''}`.trim(),
+                    '주문번호': data.order_number || '',
+                    '고인명': deceasedName,
+                }
+            ).then(() => {
+                console.log('✅ 화환 배송완료 알림톡 발송:', phoneNumber);
+            }).catch(err => console.error('❌ 화환 배송완료 알림톡 실패:', err));
         }
 
         return NextResponse.json({ order: data });
