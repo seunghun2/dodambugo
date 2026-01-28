@@ -131,6 +131,8 @@ export default function WriteFormPage() {
 
     // 일포일시 (제주)
     const [showIlpo, setShowIlpo] = useState(false);
+    const [hideFuneral, setHideFuneral] = useState(false); // 발인일시 노출안함
+    const [hideDeath, setHideDeath] = useState(false); // 임종일시 노출안함
 
     // 영정 사진
     const [showPhoto, setShowPhoto] = useState(false);
@@ -666,9 +668,13 @@ export default function WriteFormPage() {
         if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
         if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
         if (!formData.address) newErrors.address = '주소를 입력해주세요';
-        if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
-        if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
-        if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
+
+        // 일포 OFF일 때만 발인일시 필수
+        if (!showIlpo) {
+            if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
+            if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
+            if (!formData.death_date) newErrors.death_date = '임종 날짜를 선택해주세요';
+        }
         // death_time(임종 시간)은 선택 - 모를 수도 있음
 
         // 일포 토글 ON일 때 시간 필수
@@ -1214,7 +1220,13 @@ export default function WriteFormPage() {
                                                     <input
                                                         type="checkbox"
                                                         checked={showIlpo}
-                                                        onChange={(e) => setShowIlpo(e.target.checked)}
+                                                        onChange={(e) => {
+                                                            setShowIlpo(e.target.checked);
+                                                            if (!e.target.checked) {
+                                                                setHideFuneral(false);
+                                                                setHideDeath(false);
+                                                            }
+                                                        }}
                                                     />
                                                     <span className="toggle-slider"></span>
                                                 </label>
@@ -1285,97 +1297,127 @@ export default function WriteFormPage() {
                                         <p className="section-desc">장례 일정을 입력해주세요</p>
 
                                         <div className="form-group" data-field="funeral_date">
-                                            <label className="form-label required">발인일시</label>
-                                            <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
-                                                <div style={{ flex: 6 }}>
-                                                    <DatePickerInput
-                                                        locale="ko"
-                                                        placeholder="날짜 선택"
-                                                        value={formData.funeral_date || null}
-                                                        onChange={(value) => setFormData(prev => ({
-                                                            ...prev,
-                                                            funeral_date: value || ''
-                                                        }))}
-                                                        valueFormat="YYYY년 MM월 DD일"
-                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
-                                                        styles={{
-                                                            input: {
-                                                                height: '48px',
-                                                                borderRadius: '8px',
-                                                                border: errors.funeral_date ? '1px solid #ef4444' : '1px solid var(--gray-200)',
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ flex: 4 }} data-field="funeral_time">
-                                                    <input
-                                                        type="text"
-                                                        name="funeral_time"
-                                                        className={`form-input time-input ${errors.funeral_time ? 'error' : ''}`}
-                                                        placeholder="00:00"
-                                                        maxLength={5}
-                                                        inputMode="numeric"
-                                                        value={formData.funeral_time || ''}
-                                                        onChange={(e) => {
-                                                            let val = e.target.value.replace(/[^0-9]/g, '');
-                                                            if (val.length >= 3) {
-                                                                val = val.slice(0, 2) + ':' + val.slice(2, 4);
-                                                            }
-                                                            setFormData(prev => ({ ...prev, funeral_time: val }));
-                                                            if (errors.funeral_time) setErrors(prev => ({ ...prev, funeral_time: '' }));
-                                                        }}
-                                                        style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
-                                                    />
-                                                </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <label className={`form-label ${!showIlpo ? 'required' : ''}`} style={{ marginBottom: 0 }}>발인일시</label>
+                                                {showIlpo && (
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--accent)', cursor: 'pointer', fontWeight: '500' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={hideFuneral}
+                                                            onChange={(e) => setHideFuneral(e.target.checked)}
+                                                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
+                                                        />
+                                                        노출안함
+                                                    </label>
+                                                )}
                                             </div>
-                                            {errors.funeral_time && <p className="field-error" style={{ marginTop: '4px' }}>{errors.funeral_time}</p>}
+                                            {!hideFuneral && (
+                                                <div className="datetime-row" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                                    <div style={{ flex: 6 }}>
+                                                        <DatePickerInput
+                                                            locale="ko"
+                                                            placeholder="날짜 선택"
+                                                            value={formData.funeral_date || null}
+                                                            onChange={(value) => setFormData(prev => ({
+                                                                ...prev,
+                                                                funeral_date: value || ''
+                                                            }))}
+                                                            valueFormat="YYYY년 MM월 DD일"
+                                                            rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                            styles={{
+                                                                input: {
+                                                                    height: '48px',
+                                                                    borderRadius: '8px',
+                                                                    border: errors.funeral_date ? '1px solid #ef4444' : '1px solid var(--gray-200)',
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 4 }} data-field="funeral_time">
+                                                        <input
+                                                            type="text"
+                                                            name="funeral_time"
+                                                            className={`form-input time-input ${errors.funeral_time ? 'error' : ''}`}
+                                                            placeholder="00:00"
+                                                            maxLength={5}
+                                                            inputMode="numeric"
+                                                            value={formData.funeral_time || ''}
+                                                            onChange={(e) => {
+                                                                let val = e.target.value.replace(/[^0-9]/g, '');
+                                                                if (val.length >= 3) {
+                                                                    val = val.slice(0, 2) + ':' + val.slice(2, 4);
+                                                                }
+                                                                setFormData(prev => ({ ...prev, funeral_time: val }));
+                                                                if (errors.funeral_time) setErrors(prev => ({ ...prev, funeral_time: '' }));
+                                                            }}
+                                                            style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {errors.funeral_time && !hideFuneral && <p className="field-error" style={{ marginTop: '4px' }}>{errors.funeral_time}</p>}
                                         </div>
 
                                         <div className="form-group">
-                                            <label className="form-label required">임종(별세)일시</label>
-                                            <div className="datetime-row" style={{ display: 'flex', gap: '8px' }}>
-                                                <div style={{ flex: 6 }}>
-                                                    <DatePickerInput
-                                                        locale="ko"
-                                                        placeholder="날짜 선택"
-                                                        value={formData.death_date || null}
-                                                        onChange={(value) => setFormData(prev => ({
-                                                            ...prev,
-                                                            death_date: value || ''
-                                                        }))}
-                                                        valueFormat="YYYY년 MM월 DD일"
-                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
-                                                        styles={{
-                                                            input: {
-                                                                height: '48px',
-                                                                borderRadius: '8px',
-                                                                border: '1px solid var(--gray-200)',
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ flex: 4 }} data-field="death_time">
-                                                    <input
-                                                        type="text"
-                                                        name="death_time"
-                                                        className={`form-input time-input ${errors.death_time ? 'error' : ''}`}
-                                                        placeholder="00:00"
-                                                        maxLength={5}
-                                                        inputMode="numeric"
-                                                        value={formData.death_time || ''}
-                                                        onChange={(e) => {
-                                                            let val = e.target.value.replace(/[^0-9]/g, '');
-                                                            if (val.length >= 3) {
-                                                                val = val.slice(0, 2) + ':' + val.slice(2, 4);
-                                                            }
-                                                            setFormData(prev => ({ ...prev, death_time: val }));
-                                                            if (errors.death_time) setErrors(prev => ({ ...prev, death_time: '' }));
-                                                        }}
-                                                        style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
-                                                    />
-                                                </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <label className={`form-label ${!showIlpo ? 'required' : ''}`} style={{ marginBottom: 0 }}>임종(별세)일시</label>
+                                                {showIlpo && (
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--accent)', cursor: 'pointer', fontWeight: '500' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={hideDeath}
+                                                            onChange={(e) => setHideDeath(e.target.checked)}
+                                                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
+                                                        />
+                                                        노출안함
+                                                    </label>
+                                                )}
                                             </div>
-                                            {errors.death_time && <p className="field-error" style={{ marginTop: '4px' }}>{errors.death_time}</p>}
+                                            {!hideDeath && (
+                                                <div className="datetime-row" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                                    <div style={{ flex: 6 }}>
+                                                        <DatePickerInput
+                                                            locale="ko"
+                                                            placeholder="날짜 선택"
+                                                            value={formData.death_date || null}
+                                                            onChange={(value) => setFormData(prev => ({
+                                                                ...prev,
+                                                                death_date: value || ''
+                                                            }))}
+                                                            valueFormat="YYYY년 MM월 DD일"
+                                                            rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                            styles={{
+                                                                input: {
+                                                                    height: '48px',
+                                                                    borderRadius: '8px',
+                                                                    border: '1px solid var(--gray-200)',
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 4 }} data-field="death_time">
+                                                        <input
+                                                            type="text"
+                                                            name="death_time"
+                                                            className={`form-input time-input ${errors.death_time ? 'error' : ''}`}
+                                                            placeholder="00:00"
+                                                            maxLength={5}
+                                                            inputMode="numeric"
+                                                            value={formData.death_time || ''}
+                                                            onChange={(e) => {
+                                                                let val = e.target.value.replace(/[^0-9]/g, '');
+                                                                if (val.length >= 3) {
+                                                                    val = val.slice(0, 2) + ':' + val.slice(2, 4);
+                                                                }
+                                                                setFormData(prev => ({ ...prev, death_time: val }));
+                                                                if (errors.death_time) setErrors(prev => ({ ...prev, death_time: '' }));
+                                                            }}
+                                                            style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {errors.death_time && !hideDeath && <p className="field-error" style={{ marginTop: '4px' }}>{errors.death_time}</p>}
                                         </div>
                                     </div>
 
