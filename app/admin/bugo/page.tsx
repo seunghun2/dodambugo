@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface Bugo {
-    id: number;
+    id: string;
     bugo_number: string;
     applicant_name: string;
     phone_password?: string;
