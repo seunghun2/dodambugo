@@ -4558,11 +4558,26 @@ section {
     color: #191919 !important;
 }
 
+/* 오늘 날짜 표시 - 파란 테두리 원 */
+.mantine-DatePickerInput-day[data-today],
+.mantine-DatePicker-day[data-today] {
+    border: 2px solid var(--primary) !important;
+    border-radius: 50% !important;
+    font-weight: 600 !important;
+}
+
+/* 오늘이면서 선택된 날짜 */
+.mantine-DatePickerInput-day[data-today][data-selected],
+.mantine-DatePicker-day[data-today][data-selected] {
+    border: 2px solid var(--primary-dark) !important;
+}
+
 /* 요일 헤더도 검은색 */
 .mantine-DatePickerInput-weekday,
 .mantine-DatePicker-weekday {
     color: #191919 !important;
 }
+
 
 /* 주소 검색 */
 .address-search-row {
