@@ -90,7 +90,8 @@ export default function AdminBugoPage() {
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'Asia/Seoul'
         }).replace(/\. /g, '-').replace('.', '');
     };
 
