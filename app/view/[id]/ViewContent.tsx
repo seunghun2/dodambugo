@@ -306,6 +306,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const copyAddress = async () => {
         if (bugo?.address) {
             await navigator.clipboard.writeText(bugo.address + (bugo.address_detail ? ' ' + bugo.address_detail : ''));
+            gaEvents.copyAddress();
             setToastMessage('주소가 복사되었습니다');
             setTimeout(() => setToastMessage(null), 2000);
         }
@@ -703,7 +704,7 @@ ${url}
                     if (hasAccount) {
                         return (
                             <div className="action-bar action-bar-split">
-                                <button className="action-bar-btn" onClick={() => setAccountModalOpen(true)} style={{ fontFamily: "'Pretendard', sans-serif" }}>
+                                <button className="action-bar-btn" onClick={() => { gaEvents.openAccountModal(); setAccountModalOpen(true); }} style={{ fontFamily: "'Pretendard', sans-serif" }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                                         <line x1="1" y1="10" x2="23" y2="10"></line>
@@ -783,7 +784,7 @@ ${url}
 
                     {/* 장례식장 전화하기 버튼 */}
                     {bugo.funeral_home_tel && (
-                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn" style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
+                        <a href={`tel:${bugo.funeral_home_tel}`} className="call-funeral-btn" onClick={() => gaEvents.clickCall()} style={{ fontFamily: "'Pretendard', sans-serif", fontWeight: 600 }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
