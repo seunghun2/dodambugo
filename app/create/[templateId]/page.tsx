@@ -469,7 +469,7 @@ export default function WriteFormPage() {
             death_date: formatDate(today),
             encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
-            ilpo_date: formatDate(tomorrow), // 일포 = 발인 전날
+            // ilpo_date는 showIlpo 토글 ON일 때만 설정 (제주도 전용)
         }));
     }, []);
 
@@ -762,8 +762,9 @@ export default function WriteFormPage() {
                 encoffin_time: formData.encoffin_hour ? `${formData.encoffin_hour}:${formData.encoffin_minute}` : null,
                 funeral_date: formData.funeral_date || null,
                 funeral_time: formData.funeral_time || (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
-                ilpo_date: formData.ilpo_date || null,
-                ilpo_time: formData.ilpo_time || null,
+                // 일포는 showIlpo가 ON일 때만 저장 (제주도 전용)
+                ilpo_date: showIlpo && formData.ilpo_date ? formData.ilpo_date : null,
+                ilpo_time: showIlpo && formData.ilpo_time ? formData.ilpo_time : null,
                 hide_funeral: hideFuneral || false,
                 burial_place: formData.burial_place || null,
                 burial_place2: formData.burial_place2?.trim() || null,
