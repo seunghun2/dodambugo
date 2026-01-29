@@ -35,9 +35,11 @@ export async function GET(request: NextRequest) {
         const supabase = getSupabase();
 
         // 어제 발인한 부고 조회 (한국시간 기준)
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0]; // "2026-01-25"
+        const now = new Date();
+        // 한국시간으로 변환 (UTC+9)
+        const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+        koreaTime.setDate(koreaTime.getDate() - 1);
+        const yesterdayStr = koreaTime.toISOString().split('T')[0];
 
         console.log('🔍 어제 발인한 부고 검색:', yesterdayStr);
 
