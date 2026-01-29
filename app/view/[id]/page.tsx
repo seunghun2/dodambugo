@@ -77,18 +77,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 // 서버 컴포넌트 - 데이터를 서버에서 미리 불러옴
 export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const supabase = getSupabase();
-    const isUUID = id.includes('-') && id.length > 10;
 
-    // 부고 데이터 조회
-    let bugoData = null;
-    if (isUUID) {
-        const result = await supabase.from('bugo').select('*').eq('id', id).limit(1);
-        bugoData = result.data?.[0] || null;
-    } else {
-        const result = await supabase.from('bugo').select('*').eq('bugo_number', id).order('created_at', { ascending: false }).limit(1);
-        bugoData = result.data?.[0] || null;
-    }
+    // 캐시된 부고 데이터 조회 (60초 캐시)
+    const bugoData = await getCachedBugo(id);
 
     // 부고를 찾을 수 없는 경우
     if (!bugoData) {
@@ -112,16 +103,16 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
         try { bugoData.account_info = JSON.parse(bugoData.account_info); } catch (e) { }
     }
 
-    // 화환 주문 & 상품 병렬 조회
-    const [ordersResult, productsResult] = await Promise.all([
+    // 화환 주문 & 상품 병렬 조회 (상품은 캐시 사용)
+    const supabase = getSupabase();
+    const [ordersResult, productsData] = await Promise.all([
         supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).order('created_at', { ascending: false }),
-        supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true })
+        getCachedProducts()
     ]);
 
     const flowerOrders = ordersResult.data || [];
 
     // 화환 상품 필터링
-    const productsData = productsResult.data || [];
     const funeralAddress = bugoData.address || bugoData.funeral_home || '';
     const funeralHomeName = bugoData.funeral_home || '';
 
