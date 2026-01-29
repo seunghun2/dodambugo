@@ -4561,7 +4561,7 @@ section {
 /* 오늘 날짜 표시 - 파란 테두리 라운드 사각 */
 .mantine-DatePickerInput-day[data-today],
 .mantine-DatePicker-day[data-today] {
-    border: 2px solid var(--primary) !important;
+    border: 1px solid var(--primary) !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
 }
@@ -4569,7 +4569,7 @@ section {
 /* 오늘이면서 선택된 날짜 */
 .mantine-DatePickerInput-day[data-today][data-selected],
 .mantine-DatePicker-day[data-today][data-selected] {
-    border: 2px solid var(--primary-dark) !important;
+    border: 1px solid var(--primary-dark) !important;
 }
 
 /* 요일 헤더도 검은색 */
