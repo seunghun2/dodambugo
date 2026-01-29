@@ -111,7 +111,7 @@ export default function AdminBugoPage() {
         return Math.round((flowers / views) * 100) + '%';
     };
 
-    const deleteBugo = async (id: number) => {
+    const deleteBugo = async (id: string) => {
         if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
 
         const { error } = await supabase
