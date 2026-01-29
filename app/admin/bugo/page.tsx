@@ -84,15 +84,17 @@ export default function AdminBugoPage() {
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Asia/Seoul'
-        }).replace(/\. /g, '-').replace('.', '');
+        // Supabase 타임스탬프에 Z 없음 → UTC로 해석되므로 +9시간 추가
+        const date = new Date(dateString + 'Z'); // Z 추가해서 UTC로 해석
+        const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+        const year = kstDate.getUTCFullYear();
+        const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(kstDate.getUTCDate()).padStart(2, '0');
+        const hours = kstDate.getUTCHours();
+        const minutes = String(kstDate.getUTCMinutes()).padStart(2, '0');
+        const period = hours < 12 ? '오전' : '오후';
+        const hour12 = hours % 12 || 12;
+        return `${year}-${month}-${day}-${period} ${hour12}:${minutes}`;
     };
 
     const formatShortDate = (dateString: string) => {
