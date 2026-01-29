@@ -805,8 +805,8 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            {/* 임시 비활성화 */}
-            {false && !isOwner && (
+            {/* 임시 비활성화
+            {!isOwner && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
@@ -826,6 +826,7 @@ ${url}
                     </div>
                 </section>
             )}
+            */}
 
 
             {/* ========================================
@@ -927,8 +928,8 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 카드결제 버튼 임시 비활성화 */}
-                                            {false && <button
+                                            {/* 카드결제 버튼 임시 비활성화
+                                            <button
                                                 style={{
                                                     width: 'calc(100% - 40px)',
                                                     margin: '6px 20px 20px',
@@ -944,7 +945,6 @@ ${url}
                                                     fontWeight: 500
                                                 }}
                                                 onClick={() => {
-                                                    // sessionStorage에 계좌 정보 저장
                                                     sessionStorage.setItem('condolence_account', JSON.stringify({
                                                         relationship: acc.relationship || '',
                                                         name: acc.name || acc.holder || '',
@@ -956,7 +956,8 @@ ${url}
                                                 }}
                                             >
                                                 카드결제
-                                            </button>}
+                                            </button>
+                                            */}
                                         </div>
                                     )
                                 });
@@ -967,16 +968,14 @@ ${url}
             )}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
-            {/* 임시 비활성화 */}
+            {/* 임시 비활성화
             {
-                false && !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
-                        {/* 돋보기 버튼 - 상세 페이지로 이동 */}
                         <button
                             className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
                             onClick={() => {
                                 if (selectedFlower) {
-                                    // 캐시: 선택된 상품 데이터 저장
                                     const product = flowerProducts.find(p => p.sort_order === selectedFlower);
                                     if (product) {
                                         sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
@@ -988,12 +987,10 @@ ${url}
                         >
                             <span className="material-symbols-outlined">search</span>
                         </button>
-                        {/* 메인 버튼 - 화환보내기 → 주문하기 */}
                         <button
                             className="btn-floating-flower"
                             onClick={() => {
                                 if (flowerModalOpen && selectedFlower) {
-                                    // 캐시: 선택된 상품 + 부고 데이터 저장
                                     const product = flowerProducts.find(p => p.sort_order === selectedFlower);
                                     if (product) {
                                         sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
@@ -1010,6 +1007,7 @@ ${url}
                     </div>
                 )
             }
+            */}
 
             {/* 화환 주문 바텀시트 모달 */}
             {
