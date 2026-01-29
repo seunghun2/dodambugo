@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { unstable_cache } from 'next/cache';
 import ViewContent from './ViewContent';
 import Link from 'next/link';
@@ -74,10 +74,37 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-// 서버 컴포넌트 - 데이터를 서버에서 미리 불러옴
-export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+// 스켈레톤 컴포넌트 (Suspense fallback용)
+function BugoSkeleton() {
+    return (
+        <div className="view-container">
+            <div className="skeleton-header" />
+            <section className="section deceased-section" style={{ padding: '24px 16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                    <div className="skeleton-box skeleton-title" />
+                    <div className="skeleton-box skeleton-text-lg" />
+                    <div className="skeleton-box skeleton-text-md" />
+                </div>
+            </section>
+            <section className="section" style={{ padding: '20px 16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} style={{ display: 'flex', gap: '12px' }}>
+                            <div className="skeleton-box skeleton-label" />
+                            <div className="skeleton-box skeleton-value" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+            <div style={{ padding: '16px', borderTop: '1px solid #eee' }}>
+                <div className="skeleton-box skeleton-button" />
+            </div>
+        </div>
+    );
+}
 
+// 데이터 fetch + 렌더링 담당 (async server component)
+async function BugoContentLoader({ id }: { id: string }) {
     // 캐시된 부고 데이터 조회 (60초 캐시)
     const bugoData = await getCachedBugo(id);
 
@@ -150,5 +177,16 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
             initialFlowerOrders={flowerOrders}
             initialFlowerProducts={filteredProducts}
         />
+    );
+}
+
+// 메인 페이지 컴포넌트 - Suspense로 Streaming 적용
+export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+
+    return (
+        <Suspense fallback={<BugoSkeleton />}>
+            <BugoContentLoader id={id} />
+        </Suspense>
     );
 }
