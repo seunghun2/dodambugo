@@ -4558,11 +4558,11 @@ section {
     color: #191919 !important;
 }
 
-/* 오늘 날짜 표시 - 파란 테두리 원 */
+/* 오늘 날짜 표시 - 파란 테두리 라운드 사각 */
 .mantine-DatePickerInput-day[data-today],
 .mantine-DatePicker-day[data-today] {
     border: 2px solid var(--primary) !important;
-    border-radius: 50% !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
 }
 
