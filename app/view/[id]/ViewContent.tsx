@@ -185,6 +185,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
 
     // owner=true 파라미터 처리: localStorage에 저장하고 URL에서 제거
     const [isOwner, setIsOwner] = useState(false);
+    const [mounted, setMounted] = useState(false); // hydration 완료 여부
     const [bugo] = useState<BugoData>(initialBugo); // 서버에서 받은 데이터 사용
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -194,6 +195,11 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const [selectedFlower, setSelectedFlower] = useState<number | null>(initialFlowerProducts[0]?.sort_order || null); // 선택된 상품 순번
     const [flowerOrders] = useState(initialFlowerOrders);
     const [flowerProducts] = useState(initialFlowerProducts);
+
+    // Hydration 완료 후 mounted 상태 true
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // 지역 정보 계산
     const funeralAddress = bugo.address || bugo.funeral_home || '';
@@ -806,24 +812,26 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            <section className="section flower-section" style={{ display: isOwner ? 'none' : 'block' }} suppressHydrationWarning>
-                <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
+            {mounted && !isOwner && (
+                <section className="section flower-section">
+                    <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
-                <div className="flower-list">
-                    {flowerOrders.length > 0 ? (
-                        flowerOrders.map((order, idx) => (
-                            <div key={idx} className="flower-sender-item">
-                                <div className="flower-sender-name">{order.ribbon_text2 || order.sender_name}</div>
-                                <div className="flower-sender-message">{order.ribbon_text1}</div>
+                    <div className="flower-list">
+                        {flowerOrders.length > 0 ? (
+                            flowerOrders.map((order, idx) => (
+                                <div key={idx} className="flower-sender-item">
+                                    <div className="flower-sender-name">{order.ribbon_text2 || order.sender_name}</div>
+                                    <div className="flower-sender-message">{order.ribbon_text1}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flower-empty">
+                                <p>아직 보내신 분이 없습니다.</p>
                             </div>
-                        ))
-                    ) : (
-                        <div className="flower-empty">
-                            <p>아직 보내신 분이 없습니다.</p>
-                        </div>
-                    )}
-                </div>
-            </section>
+                        )}
+                    </div>
+                </section>
+            )}
 
 
             {/* ========================================
@@ -964,11 +972,9 @@ ${url}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                mounted && !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
-                        style={{ display: isOwner ? 'none' : undefined }}
-                        suppressHydrationWarning
                     >
                         <button
                             className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
