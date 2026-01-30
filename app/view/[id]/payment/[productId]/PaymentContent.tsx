@@ -109,9 +109,6 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     }, [bugoId, productId]);
 
     const handleSubmit = async () => {
-        // 임시: 결제 준비중 알럿
-        alert('결제 서비스 준비중입니다. 곧 오픈 예정입니다!');
-        return;
 
         if (!paymentForm.senderName.trim()) {
             alert('이름을 입력해주세요.');
