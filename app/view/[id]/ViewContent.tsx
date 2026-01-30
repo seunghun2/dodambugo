@@ -806,7 +806,6 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            {/* 임시 비활성화
             {!isOwner && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
@@ -827,7 +826,6 @@ ${url}
                     </div>
                 </section>
             )}
-            */}
 
 
             {/* ========================================
@@ -929,7 +927,6 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 카드결제 버튼 임시 비활성화
                                             <button
                                                 style={{
                                                     width: 'calc(100% - 40px)',
@@ -958,7 +955,6 @@ ${url}
                                             >
                                                 카드결제
                                             </button>
-                                            */}
                                         </div>
                                     )
                                 });
@@ -969,7 +965,6 @@ ${url}
             )}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
-            {/* 임시 비활성화
             {
                 !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
@@ -1008,7 +1003,6 @@ ${url}
                     </div>
                 )
             }
-            */}
 
             {/* 화환 주문 바텀시트 모달 */}
             {
