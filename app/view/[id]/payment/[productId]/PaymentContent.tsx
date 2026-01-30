@@ -218,6 +218,19 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 strategy="afterInteractive"
                 onLoad={() => {
                     console.log('INNOPAY SDK loaded');
+                    // SDK가 const로 선언되어 window에 자동 부착 안 되므로 명시적 할당
+                    if (typeof (window as any).innopay === 'undefined') {
+                        try {
+                            // globalThis에서 innopay 가져와서 window에 할당
+                            const script = document.createElement('script');
+                            script.textContent = 'window.innopay = innopay;';
+                            document.body.appendChild(script);
+                            document.body.removeChild(script);
+                            console.log('INNOPAY attached to window');
+                        } catch (e) {
+                            console.error('Failed to attach innopay to window:', e);
+                        }
+                    }
                     setSdkLoaded(true);
                 }}
             />
