@@ -844,6 +844,10 @@ export default function WriteFormPage() {
                         created_new: true,
                     }),
                 }).catch(err => console.error('부고 알림 실패:', err));
+
+                // 🎉 알림톡 모달용 세션 저장 (신규 생성 시에만)
+                sessionStorage.setItem('new_bugo_created', 'true');
+                sessionStorage.setItem('new_bugo_phone', formData.applicant_phone.replace(/-/g, ''));
             } else {
                 // 📱 수정 모드: 연락처 변경됐을 때만 알림톡 발송
                 const phoneChanged = formData.applicant_phone !== originalPhone;

@@ -391,3 +391,110 @@
 .btn-edit-light .material-symbols-outlined {
     font-size: 16px;
 }
+
+/* 알림톡 발송 완료 모달 */
+.alimtalk-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.alimtalk-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 24px;
+    width: 90%;
+    max-width: 320px;
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alimtalk-modal-icon {
+    width: 64px;
+    height: 64px;
+    background: #FEE500;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.alimtalk-modal-icon img {
+    width: 40px;
+    height: 40px;
+}
+
+.alimtalk-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #191919;
+    margin: 0 0 12px;
+}
+
+.alimtalk-modal-desc {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 8px;
+    line-height: 1.5;
+}
+
+.alimtalk-modal-phone {
+    font-size: 15px;
+    font-weight: 600;
+    color: #191919;
+    margin: 0 0 20px;
+}
+
+.alimtalk-modal-hint {
+    font-size: 12px;
+    color: #999;
+    margin: 0 0 24px;
+}
+
+.alimtalk-modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: #FFCC45;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #191919;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.alimtalk-modal-btn:hover {
+    background: #f0bf3a;
+}

@@ -35,6 +35,8 @@ export default function CompletePage() {
     const [copied, setCopied] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const [qrDataUrl, setQrDataUrl] = useState<string>('');
+    const [showAlimtalkModal, setShowAlimtalkModal] = useState(false);
+    const [applicantPhone, setApplicantPhone] = useState<string>('');
 
     // 프로덕션 환경에서는 도메인 강제 고정 (www 제거, https 강제)
     const getOrigin = () => {
@@ -83,6 +85,19 @@ export default function CompletePage() {
                     'value': 1.0,
                     'currency': 'KRW'
                 });
+            }
+
+            // 신규 생성 시 알림톡 모달 표시
+            const isNewBugo = sessionStorage.getItem('new_bugo_created');
+            const savedPhone = sessionStorage.getItem('new_bugo_phone');
+            if (isNewBugo) {
+                sessionStorage.removeItem('new_bugo_created');
+                sessionStorage.removeItem('new_bugo_phone');
+                if (savedPhone) setApplicantPhone(savedPhone);
+                // 잠시 후 모달 표시 (페이지 로딩 후)
+                setTimeout(() => {
+                    setShowAlimtalkModal(true);
+                }, 500);
             }
         }
 
@@ -333,6 +348,30 @@ ${bugoUrl}
                     <button className="btn-copy-bugo" onClick={duplicateBugo}>복제하기</button>
                 </div>
             </main>
+
+            {/* 알림톡 발송 완료 모달 */}
+            {showAlimtalkModal && (
+                <div className="alimtalk-modal-overlay" onClick={() => setShowAlimtalkModal(false)}>
+                    <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="alimtalk-modal-icon">
+                            <Image src="/images/icon-kakao.png" alt="카카오톡" width={40} height={40} />
+                        </div>
+                        <h2 className="alimtalk-modal-title">알림톡 발송 완료</h2>
+                        <p className="alimtalk-modal-desc">
+                            카카오톡으로 모바일부고장을<br />보내드렸습니다
+                        </p>
+                        {applicantPhone && (
+                            <p className="alimtalk-modal-phone">
+                                📱 {applicantPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')}
+                            </p>
+                        )}
+                        <p className="alimtalk-modal-hint">잠시 후 알림톡이 도착합니다</p>
+                        <button className="alimtalk-modal-btn" onClick={() => setShowAlimtalkModal(false)}>
+                            확인
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
