@@ -112,35 +112,36 @@ export default function AdminBugoPage() {
     };
 
     const deleteBugo = async (id: string) => {
-        console.log('🗑️ 삭제 시도:', id);
-        if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-            console.log('❌ 사용자가 취소함');
-            return;
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+
+        const { error } = await supabase
+            .from('bugo')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', id);
+
+        if (error) {
+            alert('삭제 중 오류가 발생했습니다.');
+            console.error(error);
+        } else {
+            alert('삭제되었습니다.');
+            fetchBugos();
         }
+    };
 
-        try {
-            console.log('📡 API 삭제 요청 중...');
-            const response = await fetch('/api/admin/delete-bugo', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id }),
-            });
+    const restoreBugo = async (id: string) => {
+        if (!confirm('복구하시겠습니까?')) return;
 
-            const result = await response.json();
-            console.log('📡 응답:', result);
+        const { error } = await supabase
+            .from('bugo')
+            .update({ deleted_at: null })
+            .eq('id', id);
 
-            if (!response.ok) {
-                alert('삭제 중 오류가 발생했습니다: ' + result.error);
-                console.error('❌ 삭제 에러:', result.error);
-            } else {
-                alert('삭제되었습니다.');
-                console.log('✅ 삭제 완료');
-                setSelectedBugo(null);
-                fetchBugos();
-            }
-        } catch (error) {
-            console.error('❌ 네트워크 에러:', error);
-            alert('삭제 중 네트워크 오류가 발생했습니다.');
+        if (error) {
+            alert('복구 중 오류가 발생했습니다.');
+            console.error(error);
+        } else {
+            alert('복구되었습니다.');
+            fetchBugos();
         }
     };
 
@@ -230,10 +231,13 @@ export default function AdminBugoPage() {
                                             paginatedBugos.map((bugo) => (
                                                 <tr
                                                     key={bugo.id}
-                                                    className={selectedBugo?.id === bugo.id ? 'selected' : ''}
+                                                    className={`${selectedBugo?.id === bugo.id ? 'selected' : ''} ${bugo.deleted_at ? 'deleted-row' : ''}`}
                                                     onClick={() => setSelectedBugo(bugo)}
                                                 >
-                                                    <td className="name-cell">{bugo.funeral_home}</td>
+                                                    <td className="name-cell">
+                                                        {bugo.deleted_at && <span className="material-symbols-outlined deleted-icon" title="삭제됨">delete</span>}
+                                                        {bugo.funeral_home}
+                                                    </td>
                                                     <td>{bugo.deceased_name}</td>
                                                     <td className="company-cell">{bugo.applicant_name}</td>
                                                     <td className="number-cell">{bugo.flower_count || 0}</td>
@@ -381,13 +385,23 @@ export default function AdminBugoPage() {
                                             <span className="material-symbols-outlined">edit</span>
                                             수정하기
                                         </Link>
-                                        <button
-                                            onClick={() => deleteBugo(selectedBugo.id)}
-                                            className="btn-action danger"
-                                        >
-                                            <span className="material-symbols-outlined">delete</span>
-                                            삭제하기
-                                        </button>
+                                        {selectedBugo.deleted_at ? (
+                                            <button
+                                                onClick={() => restoreBugo(selectedBugo.id)}
+                                                className="btn-action success"
+                                            >
+                                                <span className="material-symbols-outlined">restore</span>
+                                                복구하기
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => deleteBugo(selectedBugo.id)}
+                                                className="btn-action danger"
+                                            >
+                                                <span className="material-symbols-outlined">delete</span>
+                                                삭제하기
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </>

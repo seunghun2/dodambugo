@@ -3611,6 +3611,32 @@ section {
     background: #b91c1c;
 }
 
+.detail-actions .btn-action.success {
+    background: #16a34a;
+    color: #FFFFFF;
+}
+
+.detail-actions .btn-action.success:hover {
+    background: #15803d;
+}
+
+/* 삭제된 행 스타일 */
+.deleted-row {
+    opacity: 0.5;
+    background: #fef2f2 !important;
+}
+
+.deleted-row:hover {
+    background: #fee2e2 !important;
+}
+
+.deleted-icon {
+    font-size: 16px;
+    color: #dc2626;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
 /* 페이지네이션 */
 .pagination {
     display: flex;
