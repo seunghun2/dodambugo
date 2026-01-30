@@ -183,6 +183,13 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 'virtual': 'VBANK'
             };
 
+            // 가상계좌 입금 기한 계산 (7일 후)
+            const getVBankExpDate = () => {
+                const date = new Date();
+                date.setDate(date.getDate() + 7);
+                return date.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD 형식
+            };
+
             // INNOPAY 결제창 호출
             window.innopay.goPay({
                 payMethod: payMethodMap[paymentMethod] || 'CARD',
@@ -194,10 +201,11 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 taxFreeAmt: '0',
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
-                buyerEmail: 'order@maeumbugo.co.kr', // 필수 필드이므로 기본값 설정
+                buyerEmail: 'order@maeumbugo.co.kr',
                 returnUrl: `${window.location.origin}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
                 mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id }),
+                vBankExpDate: paymentMethod === 'virtual' ? getVBankExpDate() : '', // 가상계좌 입금기한
             });
 
         } catch (err: any) {
