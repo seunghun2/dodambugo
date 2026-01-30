@@ -1,0 +1,183 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+export default function PaymentCallbackPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+    const [message, setMessage] = useState('결제를 처리하고 있습니다...');
+
+    useEffect(() => {
+        async function processPayment() {
+            // URL 파라미터에서 결제 정보 추출
+            const paymentToken = searchParams.get('paymentToken');
+            const tid = searchParams.get('tid');
+            const mid = searchParams.get('mid');
+            const amt = searchParams.get('amt');
+            const moid = searchParams.get('moid');
+            const resultCode = searchParams.get('resultCode');
+            const resultMsg = searchParams.get('resultMsg');
+            const mallReserved = searchParams.get('mallReserved');
+
+            console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg });
+
+            // 결제 실패 체크
+            if (resultCode !== '0000' && resultCode !== '00') {
+                setStatus('error');
+                setMessage(resultMsg || '결제가 취소되었거나 실패했습니다.');
+                return;
+            }
+
+            // mallReserved에서 bugoId 추출
+            let bugoId = '';
+            let orderId = '';
+            try {
+                if (mallReserved) {
+                    const reserved = JSON.parse(mallReserved);
+                    bugoId = reserved.bugoId;
+                    orderId = reserved.orderId;
+                }
+            } catch (e) {
+                console.error('mallReserved 파싱 오류:', e);
+            }
+
+            if (!paymentToken || !tid) {
+                setStatus('error');
+                setMessage('결제 정보가 올바르지 않습니다.');
+                return;
+            }
+
+            try {
+                // 서버에서 결제 승인 처리
+                const approveResponse = await fetch('/api/payment/innopay/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        paymentToken,
+                        tid,
+                        mid,
+                        amt,
+                        moid,
+                        orderId,
+                    }),
+                });
+
+                const approveResult = await approveResponse.json();
+
+                if (!approveResponse.ok || !approveResult.success) {
+                    throw new Error(approveResult.error || approveResult.message || '결제 승인 실패');
+                }
+
+                // 성공
+                setStatus('success');
+                setMessage('결제가 완료되었습니다!');
+
+                // 완료 페이지로 이동
+                setTimeout(() => {
+                    if (bugoId) {
+                        router.push(`/view/${bugoId}/order/complete`);
+                    } else {
+                        router.push('/');
+                    }
+                }, 1500);
+
+            } catch (err: any) {
+                console.error('결제 승인 오류:', err);
+                setStatus('error');
+                setMessage(err.message || '결제 승인 중 오류가 발생했습니다.');
+            }
+        }
+
+        processPayment();
+    }, [searchParams, router]);
+
+    return (
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            padding: '20px',
+            textAlign: 'center',
+            backgroundColor: '#f5f5f5',
+        }}>
+            {status === 'processing' && (
+                <>
+                    <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '4px solid #e0e0e0',
+                        borderTopColor: '#4A7C59',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                    }} />
+                    <style jsx>{`
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </>
+            )}
+
+            {status === 'success' && (
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4A7C59',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px',
+                }}>
+                    <span style={{ color: 'white', fontSize: '32px' }}>✓</span>
+                </div>
+            )}
+
+            {status === 'error' && (
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e74c3c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px',
+                }}>
+                    <span style={{ color: 'white', fontSize: '32px' }}>✕</span>
+                </div>
+            )}
+
+            <h2 style={{
+                marginTop: '24px',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: status === 'error' ? '#e74c3c' : '#333',
+            }}>
+                {message}
+            </h2>
+
+            {status === 'error' && (
+                <button
+                    onClick={() => router.back()}
+                    style={{
+                        marginTop: '24px',
+                        padding: '12px 24px',
+                        backgroundColor: '#4A7C59',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    다시 시도
+                </button>
+            )}
+        </div>
+    );
+}

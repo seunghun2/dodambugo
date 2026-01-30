@@ -2,7 +2,39 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Script from 'next/script';
 import '@/app/view/[id]/order/[productId]/order.css';
+
+// INNOPAY 타입 선언
+declare global {
+    interface Window {
+        innopay: {
+            goPay: (params: {
+                payMethod: string;
+                mid: string;
+                moid: string;
+                goodsName: string;
+                goodsCnt: string;
+                amt: string;
+                taxFreeAmt?: string;
+                buyerName: string;
+                buyerTel: string;
+                buyerEmail: string;
+                returnUrl: string;
+                currency?: string;
+                mallReserved?: string;
+                offeringPeriod?: string;
+                mallIp?: string;
+                mallUserId?: string;
+                userIp?: string;
+                userId?: string;
+                vBankExpDate?: string;
+                appScheme?: string;
+                logoUrl?: string;
+            }) => void;
+        };
+    }
+}
 
 interface FlowerProduct {
     id: string;
@@ -86,6 +118,12 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
             return;
         }
 
+        // INNOPAY SDK 로드 확인
+        if (typeof window === 'undefined' || !window.innopay) {
+            alert('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+
         // 주문 데이터 가져오기
         const storedOrder = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (!storedOrder) {
@@ -94,8 +132,11 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         }
         const orderData = JSON.parse(storedOrder);
 
+        // 고유 주문번호 생성
+        const moid = `MAEUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
         try {
-            // DB에 주문 저장
+            // DB에 주문 저장 (결제 대기 상태)
             const response = await fetch('/api/flower-orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -114,6 +155,8 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     ribbon_text1: orderData.ribbonText1,
                     ribbon_text2: orderData.ribbonText2,
                     payment_method: paymentMethod,
+                    payment_status: 'pending', // 결제 대기 상태
+                    moid: moid, // 주문번호 저장
                 }),
             });
 
@@ -122,18 +165,41 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 throw new Error(result.error || '주문 저장 실패');
             }
 
-            // 결제 정보 저장 (완료 페이지용)
+            // 결제 정보 저장 (콜백 페이지에서 사용)
             sessionStorage.setItem(`payment_${bugoId}`, JSON.stringify({
                 senderName: paymentForm.senderName,
                 senderPhone: paymentForm.senderPhone,
                 paymentMethod: paymentMethod,
                 marketingAgreed: termsAgreed.marketing,
                 orderNumber: result.order_number,
+                moid: moid,
+                orderId: result.id,
             }));
 
-            // TODO: 실제 PG 연동 시 여기서 결제 처리
-            // 지금은 바로 완료 페이지로 이동
-            router.push(`/view/${bugoId}/order/complete`);
+            // payMethod 매핑
+            const payMethodMap: { [key: string]: string } = {
+                'card': 'CARD',
+                'easy': 'EPAY',
+                'virtual': 'VBANK'
+            };
+
+            // INNOPAY 결제창 호출
+            window.innopay.goPay({
+                payMethod: payMethodMap[paymentMethod] || 'CARD',
+                mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
+                moid: moid,
+                goodsName: product.name,
+                goodsCnt: '1',
+                amt: String(product.price),
+                taxFreeAmt: '0',
+                buyerName: paymentForm.senderName,
+                buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
+                buyerEmail: '',
+                returnUrl: `${window.location.origin}/view/${bugoId}/payment/callback`,
+                currency: 'KRW',
+                mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id }),
+            });
+
         } catch (err: any) {
             alert(err.message || '주문 처리 중 오류가 발생했습니다.');
         }
@@ -142,152 +208,159 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     // 로딩/에러 처리는 서버 컴포넌트에서 담당
 
     return (
-        <div className="order-page">
-            {/* 헤더 */}
-            <header className="order-header">
-                <button className="back-btn" onClick={() => router.back()}>
-                    <span className="material-symbols-outlined">arrow_back</span>
-                </button>
-                <h1>보내시는 분</h1>
-                <div style={{ width: 40 }} />
-            </header>
+        <>
+            {/* INNOPAY SDK */}
+            <Script
+                src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js"
+                strategy="beforeInteractive"
+            />
+            <div className="order-page">
+                {/* 헤더 */}
+                <header className="order-header">
+                    <button className="back-btn" onClick={() => router.back()}>
+                        <span className="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <h1>보내시는 분</h1>
+                    <div style={{ width: 40 }} />
+                </header>
 
-            <div className="order-content">
-                {/* 보내시는 분 */}
-                <section className="order-section">
-                    <h2 className="section-title">이름 및 연락처</h2>
-                    <div className="form-group">
-                        <input
-                            type="text"
-                            placeholder="이름을 입력해주세요"
-                            value={paymentForm.senderName}
-                            onChange={(e) => setPaymentForm({ ...paymentForm, senderName: e.target.value })}
-                            autoFocus
-                        />
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="tel"
-                            placeholder="연락처를 입력해주세요"
-                            value={paymentForm.senderPhone}
-                            onChange={handlePhoneChange}
-                            maxLength={13}
-                        />
-                    </div>
-                </section>
+                <div className="order-content">
+                    {/* 보내시는 분 */}
+                    <section className="order-section">
+                        <h2 className="section-title">이름 및 연락처</h2>
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                placeholder="이름을 입력해주세요"
+                                value={paymentForm.senderName}
+                                onChange={(e) => setPaymentForm({ ...paymentForm, senderName: e.target.value })}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="tel"
+                                placeholder="연락처를 입력해주세요"
+                                value={paymentForm.senderPhone}
+                                onChange={handlePhoneChange}
+                                maxLength={13}
+                            />
+                        </div>
+                    </section>
 
-                {/* 결제방식 */}
-                <section className="order-section">
-                    <h2 className="section-title">결제방식</h2>
-                    <div className="payment-methods">
-                        <button
-                            type="button"
-                            className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('card')}
-                        >
-                            카드
-                        </button>
-                        <button
-                            type="button"
-                            className={`payment-method-btn ${paymentMethod === 'easy' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('easy')}
-                        >
-                            간편결제
-                        </button>
-                        <button
-                            type="button"
-                            className={`payment-method-btn ${paymentMethod === 'virtual' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('virtual')}
-                        >
-                            가상계좌
-                        </button>
-                    </div>
-                </section>
-
-                {/* 배송가능시간 안내 */}
-                <section className="order-section delivery-notice">
-                    <h2 className="section-title">
-                        <span className="material-symbols-outlined">info</span>
-                        배송 안내
-                    </h2>
-                    <p>평일/주말 오전 9시부터 오후 6시 사이 결제 완료 시, 약 4시간 내 배송해드립니다.</p>
-                    <p>오후 6시 이후 주문은 다음날 정오까지 도착합니다.</p>
-
-                    <p className="notice-warning">※ 기상 및 도로 상황에 따라 배송 시간이 변동될 수 있습니다.</p>
-
-                    <p className="notice-warning">※ 주말·공휴일 배송</p>
-                    <p>당일 배송은 오후 4시까지 주문 가능하며, 이후 주문은 다음날 정오까지 배송됩니다.</p>
-
-                    <p className="notice-warning">※ 상품 안내</p>
-                    <p>화환은 전국 제휴 화원에서 정성껏 제작됩니다. 지역 및 수급 상황에 따라 이미지와 구성이 일부 다를 수 있으나, 품질에는 차이가 없도록 최선을 다하겠습니다.</p>
-                </section>
-
-            </div>
-
-            {/* 개인정보 동의 모달 (바텀시트) */}
-            {privacyModalOpen && (
-                <div className="modal-overlay" onClick={() => setPrivacyModalOpen(false)}>
-                    <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>개인정보 수집/제공 동의</h3>
-                            <button className="modal-close" onClick={() => setPrivacyModalOpen(false)}>
-                                <span className="material-symbols-outlined">close</span>
+                    {/* 결제방식 */}
+                    <section className="order-section">
+                        <h2 className="section-title">결제방식</h2>
+                        <div className="payment-methods">
+                            <button
+                                type="button"
+                                className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod('card')}
+                            >
+                                카드
+                            </button>
+                            <button
+                                type="button"
+                                className={`payment-method-btn ${paymentMethod === 'easy' ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod('easy')}
+                            >
+                                간편결제
+                            </button>
+                            <button
+                                type="button"
+                                className={`payment-method-btn ${paymentMethod === 'virtual' ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod('virtual')}
+                            >
+                                가상계좌
                             </button>
                         </div>
-                        <div className="modal-content">
-                            <ul className="terms-list">
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
-                                    <a href="/privacy" target="_blank" className="terms-link">
-                                        <span className="material-symbols-outlined">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">전자금융거래 이용약관(필수)</span>
-                                    <a href="/terms" target="_blank" className="terms-link">
-                                        <span className="material-symbols-outlined">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
-                                    <a href="/privacy-third-party" target="_blank" className="terms-link">
-                                        <span className="material-symbols-outlined">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <label className="terms-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={termsAgreed.marketing}
-                                            onChange={(e) => setTermsAgreed({ ...termsAgreed, marketing: e.target.checked })}
-                                        />
-                                        <span className="checkmark"></span>
-                                        마케팅 수신 동의 약관(선택)
-                                    </label>
-                                    <a href="/marketing" target="_blank" className="terms-link">
-                                        <span className="material-symbols-outlined">chevron_right</span>
-                                    </a>
-                                </li>
-                            </ul>
+                    </section>
+
+                    {/* 배송가능시간 안내 */}
+                    <section className="order-section delivery-notice">
+                        <h2 className="section-title">
+                            <span className="material-symbols-outlined">info</span>
+                            배송 안내
+                        </h2>
+                        <p>평일/주말 오전 9시부터 오후 6시 사이 결제 완료 시, 약 4시간 내 배송해드립니다.</p>
+                        <p>오후 6시 이후 주문은 다음날 정오까지 도착합니다.</p>
+
+                        <p className="notice-warning">※ 기상 및 도로 상황에 따라 배송 시간이 변동될 수 있습니다.</p>
+
+                        <p className="notice-warning">※ 주말·공휴일 배송</p>
+                        <p>당일 배송은 오후 4시까지 주문 가능하며, 이후 주문은 다음날 정오까지 배송됩니다.</p>
+
+                        <p className="notice-warning">※ 상품 안내</p>
+                        <p>화환은 전국 제휴 화원에서 정성껏 제작됩니다. 지역 및 수급 상황에 따라 이미지와 구성이 일부 다를 수 있으나, 품질에는 차이가 없도록 최선을 다하겠습니다.</p>
+                    </section>
+
+                </div>
+
+                {/* 개인정보 동의 모달 (바텀시트) */}
+                {privacyModalOpen && (
+                    <div className="modal-overlay" onClick={() => setPrivacyModalOpen(false)}>
+                        <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h3>개인정보 수집/제공 동의</h3>
+                                <button className="modal-close" onClick={() => setPrivacyModalOpen(false)}>
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <div className="modal-content">
+                                <ul className="terms-list">
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
+                                        <a href="/privacy" target="_blank" className="terms-link">
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </a>
+                                    </li>
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">전자금융거래 이용약관(필수)</span>
+                                        <a href="/terms" target="_blank" className="terms-link">
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </a>
+                                    </li>
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
+                                        <a href="/privacy-third-party" target="_blank" className="terms-link">
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <label className="terms-checkbox">
+                                            <input
+                                                type="checkbox"
+                                                checked={termsAgreed.marketing}
+                                                onChange={(e) => setTermsAgreed({ ...termsAgreed, marketing: e.target.checked })}
+                                            />
+                                            <span className="checkmark"></span>
+                                            마케팅 수신 동의 약관(선택)
+                                        </label>
+                                        <a href="/marketing" target="_blank" className="terms-link">
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* 하단 결제 버튼 - 항상 최상단에 고정 */}
-            <div className="order-footer">
-                {!privacyModalOpen && (
-                    <div className="privacy-notice-link" onClick={() => setPrivacyModalOpen(true)}>
-                        약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
-                    </div>
                 )}
-                <button className="btn-payment" onClick={handleSubmit}>
-                    {product.price.toLocaleString()}원 결제하기
-                </button>
+
+                {/* 하단 결제 버튼 - 항상 최상단에 고정 */}
+                <div className="order-footer">
+                    {!privacyModalOpen && (
+                        <div className="privacy-notice-link" onClick={() => setPrivacyModalOpen(true)}>
+                            약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
+                        </div>
+                    )}
+                    <button className="btn-payment" onClick={handleSubmit}>
+                        {product.price.toLocaleString()}원 결제하기
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
