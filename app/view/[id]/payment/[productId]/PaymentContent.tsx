@@ -205,6 +205,9 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         }
     };
 
+    // SDK 로드 상태
+    const [sdkLoaded, setSdkLoaded] = useState(false);
+
     // 로딩/에러 처리는 서버 컴포넌트에서 담당
 
     return (
@@ -212,7 +215,11 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
             {/* INNOPAY SDK */}
             <Script
                 src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js"
-                strategy="beforeInteractive"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    console.log('INNOPAY SDK loaded');
+                    setSdkLoaded(true);
+                }}
             />
             <div className="order-page">
                 {/* 헤더 */}
@@ -356,8 +363,16 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                             약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다. <span className="material-symbols-outlined">chevron_right</span>
                         </div>
                     )}
-                    <button className="btn-payment" onClick={handleSubmit}>
-                        {product.price.toLocaleString()}원 결제하기
+                    <button
+                        className="btn-payment"
+                        onClick={handleSubmit}
+                        disabled={!sdkLoaded}
+                        style={{ opacity: sdkLoaded ? 1 : 0.6 }}
+                    >
+                        {sdkLoaded
+                            ? `${product.price.toLocaleString()}원 결제하기`
+                            : '결제 모듈 로딩중...'
+                        }
                     </button>
                 </div>
             </div>
