@@ -24,10 +24,10 @@ const getCachedBugo = unstable_cache(
         const isUUID = id.includes('-') && id.length > 10;
 
         if (isUUID) {
-            const result = await supabase.from('bugo').select('*').eq('id', id).limit(1);
+            const result = await supabase.from('bugo').select('*').eq('id', id).is('deleted_at', null).limit(1);
             return result.data?.[0] || null;
         } else {
-            const result = await supabase.from('bugo').select('*').eq('bugo_number', id).order('created_at', { ascending: false }).limit(1);
+            const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
             return result.data?.[0] || null;
         }
     },

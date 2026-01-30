@@ -15,11 +15,12 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'ID is required' }, { status: 400 });
         }
 
-        console.log('🗑️ 서버에서 부고 삭제 시도:', id);
+        console.log('🗑️ 서버에서 부고 소프트 삭제 시도:', id);
 
+        // 소프트 삭제: deleted_at 필드에 현재 시간 설정
         const { error } = await supabaseAdmin
             .from('bugo')
-            .delete()
+            .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
 
         if (error) {
@@ -27,7 +28,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        console.log('✅ 삭제 완료:', id);
+        console.log('✅ 소프트 삭제 완료:', id);
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('❌ 서버 에러:', error);
