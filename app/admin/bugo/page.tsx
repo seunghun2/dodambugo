@@ -114,34 +114,46 @@ export default function AdminBugoPage() {
     const deleteBugo = async (id: string) => {
         if (!confirm('정말 삭제하시겠습니까?')) return;
 
-        const { error } = await supabase
-            .from('bugo')
-            .update({ deleted_at: new Date().toISOString() })
-            .eq('id', id);
+        try {
+            const response = await fetch('/api/admin/delete-bugo', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
 
-        if (error) {
-            alert('삭제 중 오류가 발생했습니다.');
+            if (!response.ok) {
+                const result = await response.json();
+                alert('삭제 중 오류가 발생했습니다: ' + result.error);
+            } else {
+                alert('삭제되었습니다.');
+                fetchBugos();
+            }
+        } catch (error) {
             console.error(error);
-        } else {
-            alert('삭제되었습니다.');
-            fetchBugos();
+            alert('삭제 중 네트워크 오류가 발생했습니다.');
         }
     };
 
     const restoreBugo = async (id: string) => {
         if (!confirm('복구하시겠습니까?')) return;
 
-        const { error } = await supabase
-            .from('bugo')
-            .update({ deleted_at: null })
-            .eq('id', id);
+        try {
+            const response = await fetch('/api/admin/restore-bugo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
 
-        if (error) {
-            alert('복구 중 오류가 발생했습니다.');
+            if (!response.ok) {
+                const result = await response.json();
+                alert('복구 중 오류가 발생했습니다: ' + result.error);
+            } else {
+                alert('복구되었습니다.');
+                fetchBugos();
+            }
+        } catch (error) {
             console.error(error);
-        } else {
-            alert('복구되었습니다.');
-            fetchBugos();
+            alert('복구 중 네트워크 오류가 발생했습니다.');
         }
     };
 
