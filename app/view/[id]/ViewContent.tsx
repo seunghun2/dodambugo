@@ -806,7 +806,7 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            <section className="section flower-section">
+            <section className="section flower-section" style={{ display: isOwner ? 'none' : 'block' }} suppressHydrationWarning>
                 <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
                 <div className="flower-list">
@@ -967,6 +967,8 @@ ${url}
                 !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
+                        style={{ display: isOwner ? 'none' : undefined }}
+                        suppressHydrationWarning
                     >
                         <button
                             className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
