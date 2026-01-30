@@ -29,6 +29,7 @@ export default function SearchPage() {
                 const { data, error } = await supabase
                     .from('bugo')
                     .select('*')
+                    .is('deleted_at', null)
                     .gte('funeral_date', getOneMonthAgo())
                     .order('created_at', { ascending: false })
                     .limit(100);
@@ -55,6 +56,7 @@ export default function SearchPage() {
             const { data, error } = await supabase
                 .from('bugo')
                 .select('*')
+                .is('deleted_at', null)
                 .or(`bugo_number.eq.${query},deceased_name.ilike.%${query}%,mourner_name.ilike.%${query}%`)
                 .gte('funeral_date', getOneMonthAgo())
                 .order('created_at', { ascending: false })
