@@ -124,4 +124,33 @@ dodam-next/
 
 ---
 
-*마지막 업데이트: 2026-01-28*
+## 🚧 임시 비활성화 기능 (TODO)
+
+### 화환 보내기 기능 (2026-01-30 비활성화)
+
+**ViewContent.tsx** 파일에서 다음 섹션들이 주석 처리됨:
+
+| 기능 | 위치 | 검색어 |
+|------|------|--------|
+| 꽃으로 마음을 보내신 분 | 812-834줄 | `[임시 주석] 화환 연동` |
+| 플로팅 화환 보내기 버튼 | 973-1013줄 | `[임시 주석] 화환 연동` |
+| 화환 주문 바텀시트 모달 | 1015-1058줄 | `[임시 주석] 화환 연동` |
+
+**활성화 방법**: `[임시 주석] 화환 연동` 검색 → 주석 해제
+
+---
+
+### INNOPAY 결제 연동 (2026-01-30 구현 완료)
+
+- MID: `pgmaeum01m`
+- SDK URL: `https://pg.innopay.co.kr/tpay/js/v1/innopay.js`
+- 환경변수: `INNOPAY_MID`, `INNOPAY_LICENSE_KEY`
+
+**관련 파일**:
+- `app/view/[id]/payment/[productId]/PaymentContent.tsx` - 결제창 호출
+- `app/view/[id]/payment/callback/page.tsx` - 콜백 처리
+- `app/api/payment/innopay/approve/route.ts` - 승인 API
+
+---
+
+*마지막 업데이트: 2026-01-30*
