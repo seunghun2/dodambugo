@@ -112,20 +112,35 @@ export default function AdminBugoPage() {
     };
 
     const deleteBugo = async (id: string) => {
-        if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+        console.log('🗑️ 삭제 시도:', id);
+        if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            console.log('❌ 사용자가 취소함');
+            return;
+        }
 
-        const { error } = await supabase
-            .from('bugo')
-            .delete()
-            .eq('id', id);
+        try {
+            console.log('📡 API 삭제 요청 중...');
+            const response = await fetch('/api/admin/delete-bugo', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
 
-        if (error) {
-            alert('삭제 중 오류가 발생했습니다.');
-            console.error(error);
-        } else {
-            alert('삭제되었습니다.');
-            setSelectedBugo(null);
-            fetchBugos();
+            const result = await response.json();
+            console.log('📡 응답:', result);
+
+            if (!response.ok) {
+                alert('삭제 중 오류가 발생했습니다: ' + result.error);
+                console.error('❌ 삭제 에러:', result.error);
+            } else {
+                alert('삭제되었습니다.');
+                console.log('✅ 삭제 완료');
+                setSelectedBugo(null);
+                fetchBugos();
+            }
+        } catch (error) {
+            console.error('❌ 네트워크 에러:', error);
+            alert('삭제 중 네트워크 오류가 발생했습니다.');
         }
     };
 
