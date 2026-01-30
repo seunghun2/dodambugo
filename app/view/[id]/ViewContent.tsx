@@ -806,26 +806,24 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
             ======================================== */}
-            {!isOwner && (
-                <section className="section flower-section">
-                    <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
+            <section className="section flower-section" style={{ display: isOwner ? 'none' : 'block' }}>
+                <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
-                    <div className="flower-list">
-                        {flowerOrders.length > 0 ? (
-                            flowerOrders.map((order, idx) => (
-                                <div key={idx} className="flower-sender-item">
-                                    <div className="flower-sender-name">{order.ribbon_text2 || order.sender_name}</div>
-                                    <div className="flower-sender-message">{order.ribbon_text1}</div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="flower-empty">
-                                <p>아직 보내신 분이 없습니다.</p>
+                <div className="flower-list">
+                    {flowerOrders.length > 0 ? (
+                        flowerOrders.map((order, idx) => (
+                            <div key={idx} className="flower-sender-item">
+                                <div className="flower-sender-name">{order.ribbon_text2 || order.sender_name}</div>
+                                <div className="flower-sender-message">{order.ribbon_text1}</div>
                             </div>
-                        )}
-                    </div>
-                </section>
-            )}
+                        ))
+                    ) : (
+                        <div className="flower-empty">
+                            <p>아직 보내신 분이 없습니다.</p>
+                        </div>
+                    )}
+                </div>
+            </section>
 
 
             {/* ========================================
@@ -966,8 +964,11 @@ ${url}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
-                    <div className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}>
+                !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                    <div
+                        className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
+                        style={{ display: isOwner ? 'none' : undefined }}
+                    >
                         <button
                             className={`btn-flower-search-floating ${flowerModalOpen ? 'show' : ''}`}
                             onClick={() => {
