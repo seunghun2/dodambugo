@@ -362,7 +362,7 @@ ${bugoUrl}
                         </p>
                         {applicantPhone && (
                             <p className="alimtalk-modal-phone">
-                                📱 {applicantPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')}
+                                {applicantPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')}
                             </p>
                         )}
                         <p className="alimtalk-modal-hint">잠시 후 알림톡이 도착합니다</p>
