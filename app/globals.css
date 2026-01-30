@@ -6288,9 +6288,11 @@ mark {
     justify-content: center;
 }
 
-.xd-action-icon-circle .material-symbols-outlined {
+.xd-action-icon-circle .material-symbols-outlined,
+.xd-action-icon-circle svg {
     font-size: 32px;
     color: #364F6B;
+    fill: #364F6B;
 }
 
 /* 액션 타이틀 - XD: Bold 16px */
