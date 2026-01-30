@@ -194,7 +194,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 taxFreeAmt: '0',
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
-                buyerEmail: '',
+                buyerEmail: 'order@maeumbugo.co.kr', // 필수 필드이므로 기본값 설정
                 returnUrl: `${window.location.origin}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
                 mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id }),
