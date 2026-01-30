@@ -1,0 +1,402 @@
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INNOPAY 전자결제</title>
+
+    <script src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("moid").value = generateRandomString()
+        })
+
+        function onClick() {
+            innopay.goPay({
+                payMethod: document.getElementById("PayMethod").value,
+                mid: document.getElementById("mid").value,
+                moid: document.getElementById("moid").value,
+                goodsName: document.getElementById("goodsName").value,
+                goodsCnt: document.getElementById("goodsCnt").value,
+                amt: document.getElementById("amt").value,
+                taxFreeAmt: document.getElementById("taxFreeAmt").value,
+                buyerName: document.getElementById("buyerName").value,
+                buyerTel: document.getElementById("buyerTel").value,
+                buyerEmail: document.getElementById("buyerEmail").value,
+                returnUrl: document.getElementById("returnUrl").value,
+                currency: document.getElementById("currency").value,
+                mallReserved: document.getElementById("mallReserved").value,
+                offeringPeriod: document.getElementById("offeringPeriod").value,
+                mallIp: document.getElementById("mallIp").value,
+                mallUserId: document.getElementById("mallUserId").value,
+                userIp: document.getElementById("userIp").value,
+                userId: document.getElementById("userId").value,
+                vBankExpDate: document.getElementById("vBankExpDate").value,
+                appScheme: document.getElementById("appScheme").value,
+                logoUrl: document.getElementById("logoUrl").value
+            });
+        }
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        article h2 {
+            display: block;
+            width: 100%;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form {
+            width: 100%;
+        }
+
+        .form table {
+            padding: 20px 0 0 0;
+            width: 100%;
+        }
+
+        .form td {
+            padding: 0 0 5px 0;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .form td.title {
+            width: 180px;
+            font-size: 12px;
+        }
+
+        .form input {
+            border: 1px solid #aaa;
+            border-radius: 0;
+            padding-left: 10px;
+            width: 100%;
+        }
+
+        .form .btn_submit {
+            width: 150px;
+            border-radius: 4px;
+            padding: 0;
+            margin: 20px 0;
+            height: 30px;
+            background-color: #1e5dd2;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        @media screen and (max-device-width: 736px) {
+            form {
+                width: 100%;
+            }
+
+            form input {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div style="padding:20px;display:inline-block;max-width:600px;">
+    <header>
+        <h1 class="logo">
+            <a href="http://web.innopay.co.kr/" target="_blank"><img
+                    src="https://pg.innopay.co.kr/ipay/images/innopay_logo.png" alt="INNOPAY 전자결제서비스 logo" height="26px"
+                    width="auto" border="0"></a>
+        </h1>
+    </header>
+
+    <article>
+        <h2>쇼핑몰 결제요청 샘플 페이지</h2>
+        <div class="form">
+            <table>
+                <caption>쇼핑몰 결제요청 폼</caption>
+                <tbody>
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>결제수단</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="pay_method">
+                            <select style="width: 100%;" name="PayMethod" id="PayMethod">
+                                <option value="EPAY">간편결제</option>
+                                <option value="EBANK">계좌간편</option>
+                                <option value="VBANK">가상계좌</option>
+                                <option value="BANK">계좌이체</option>
+                                <option value="NONE">NONE</option>
+                                <option value="CARD">신용카드(일반)</option>
+                                <option value="OPCARD">해외카드결제</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>상점 MID</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input id="mid" type="text" name="MID" value="testpay01m" style="width:40%;"> (발급받은 상점MID를
+                            입력)
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>상품 개수</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input id="goodsCnt" type="text" name="goodsCnt" value="1" style="width:40%;">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>앱스킴</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input id="appScheme" type="text" name="appScheme" value="googlechrome://">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>주문번호</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input id="moid" type="text" name="moid" value="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>결제 통화(해외카드)</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="test-currency">
+                            <select style="width: 100%;" name="currency" id="currency">
+                                <option value="KRW">KRW</option>
+                                <option value="USD">USD</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>상품명</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="goodsName" id="goodsName" value="테스트" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>상품가격</b>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" name="amt" id="amt" value="1000">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>면세 금액</b>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" name="taxFreeAmt" id="taxFreeAmt" value="">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>
+                            <b>구매자명</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="buyerName" id="buyerName" value="구매자" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>구매자 이메일 주소</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="buyerEmail" id="buyerEmail" value="buyer@buyer.com" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>구매자 연락처</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="buyerTel" id="buyerTel" value="01012341234" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>mall reserved</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="mallReserved" id="mallReserved" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>offering period</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="offeringPeriod" id="offeringPeriod" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>mall ip</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="mallIp" id="mallIp" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>mall user id</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="mallUserId" id="mallUserId" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>user ip</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="userIp" id="userIp" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>user id</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="userId" id="userId" value="" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>가상계좌 입금기한</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="vBankExpDate" id="vBankExpDate" placeholder="20250101">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div><b>로고 URL</b></div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="logoUrl" id="logoUrl" placeholder="">
+                        </div>
+                    </td>
+                </tr>
+
+                <tr height="10">
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td class="title">
+                        <div>결제결과전송 URL</div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" name="returnUrl" id="returnUrl"
+                                   value="https://web.innopay.co.kr/test.html"
+                                   placeholder="">
+                            <br> (ReturnURL 이 없는 경우 현재페이지로 결제결과가 전송됩니다)
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div align="center" style="height:50px;">
+                <input type="button" onclick="onClick()" class="btn_submit" name="btn_pay" value="결제요청">
+            </div>
+            <div style="height:10px;"></div>
+        </div>
+
+    </article>
+</div>
+</body>
+</html>

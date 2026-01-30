@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상점 승인요청</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="common/css/innopay_shop.css" />
+    <link rel="stylesheet" href="https://cdn.metroui.org.ua/current/metro.css">
+    <script src="https://cdn.metroui.org.ua/current/metro.js"></script>
+
+    <style>
+        .input{margin-bottom: 10px;border-radius: 5px;overflow: hidden;}
+        .input .prepend{min-width: 130px;justify-content: flex-start;}
+    </style>
+
+    <script type="text/javascript">
+        const url = new URL(window.location.href)
+        const paymentToken = url.searchParams.get("paymentToken")
+        const tid = url.searchParams.get("tid")
+        const mid = url.searchParams.get("mid")
+        const amt = url.searchParams.get("amt")
+        const taxFreeAmt = url.searchParams.get("taxFreeAmt")
+        const moid = url.searchParams.get("moid")
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("sum").innerText = `${Number(amt) + Number(taxFreeAmt)}`
+        })
+
+        function addCard(result) {
+            const section = document.getElementById("innopay-wrap")
+            const card = document.createElement("div")
+            card.className = "card"
+
+            section.appendChild(card)
+
+            const header = document.createElement("div")
+            header.className = "card-header"
+            header.innerText = result.success ? "결제 성공" : "결제 실패"
+
+            card.appendChild(header)
+
+            const content = document.createElement("div")
+            content.className = "card-content"
+
+            card.appendChild(content)
+
+            const json = document.createElement("pre")
+            content.appendChild(json)
+            json.innerText = JSON.stringify(result, null, 4)
+        }
+
+        async function onClick() {
+            const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/pay`, {
+                method: "POST",
+                headers: {
+                    "Payment-Token": paymentToken,
+                    "Merchant-Key": document.getElementById("merchantKey").value,
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify({tid, mid, amt, taxFreeAmt, moid})
+            })
+
+            const result = await resp.json()
+            console.log(result)
+            addCard(result)
+        }
+    </script>
+</head>
+<body>
+<div class="innopay">
+    <section class="innopay_wrap" id="innopay-wrap">
+        <section class="success_notice">
+            <img src="https://pg.innopay.co.kr/tpay/images/loading.gif" class="loading">
+            <section class="confirm_notice">
+                <p>
+                    결제요청 금액을 확인하시고<br><b>결제하기</b> 버튼을 클릭하면<br>결제가 완료 됩니다.
+                </p>
+            </section>
+        </section>
+
+        <ul class="payment_info top_info">
+            <li class="price_li">
+                <div class="info_title">결제금액</div>
+                <div class="price" id="sum"><span>원</span></div>
+            </li>
+        </ul>
+
+        <input type="text" data-role="input" data-prepend="Merchant Key " name="merchantKey" id="merchantKey" value="Ma29gyAFhvv/+e4/AHpV6pISQIvSKziLIbrNoXPbRS5nfTx2DOs8OJve+NzwyoaQ8p9Uy1AN4S1I0Um5v7oNUg==">
+
+        <section class="btn_wrap">
+            <a class="btn_blue btn" href="#" onclick="onClick()">결제하기</a>
+        </section>
+
+    </section>
+</div>
+</body>
+</html>

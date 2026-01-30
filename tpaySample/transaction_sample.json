@@ -1,0 +1,41 @@
+{
+  "success": true,
+  "data": {
+    "mid": "testpay01m",
+    "tid": "testpay01m01082502061700416194",
+    "moid": "ZOEfKJh75yv5aB8Sv2AGJ94rn-QaoY0JoIRmllPY",
+    "aid": "testpay01a",
+    "gid": "GID000001g",
+    "payMethod": "CARD",
+    "amt": 1000,
+    "taxFreeAmt": 10,
+    "status": 0,
+    "authNum": "65709935",
+    "approvedAt": "2025-02-06 17:01:23",
+    "receiptUrl": "https://pg.innopay.co.kr/pay/issue/CardIssue.jsp?TID=testpay01m01082502061700416194",
+    "card": {
+      "acquCardCode": "01",
+      "acquCardName": "비씨",
+      "cardQuota": "00",
+      "cardNum": "12345678****1234",
+      "fnCd": "01",
+      "fnName": "비씨",
+      "currency": "KRW"
+    },
+    "etc": {
+      "mallUserId": "mallUserId",
+      "userId": "userId",
+      "userIp": "127.0.0.1",
+      "mallReserved": "mallReserved"
+    },
+    "buyer": {
+      "name": "투페이",
+      "tel": "01012341234",
+      "email": "test@test.com"
+    },
+    "goods": {
+      "name": "테스트상품",
+      "cnt": 1
+    }
+  }
+}

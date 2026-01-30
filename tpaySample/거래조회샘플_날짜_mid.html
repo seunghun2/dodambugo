@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>날짜, MID 기반 거래조회 샘플</title>
+    <style type="text/css">
+        h1{font-size: 20px!important;font-weight: bold!important;margin-bottom: 20px!important;}
+        .wrap{padding: 50px;max-width: 1000px;margin: 0 auto;}
+        .wrap .input{margin-bottom: 10px;border-radius: 5px;overflow: hidden;}
+        .wrap .input .prepend{min-width: 130px;justify-content: flex-start;}
+        .button.primary{width: 100%;margin-top: 20px;}
+        .card{max-width: 900px;margin-bottom: 50px!important;border-radius: 10px!important;}
+        .card-content{padding: 1rem;background: #f4f4f4;}
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.metroui.org.ua/current/metro.css">
+    <script src="https://cdn.metroui.org.ua/current/metro.js"></script>
+
+    <script type="text/javascript">
+
+        function addCard(result) {
+            if (document.getElementById("transaction-card") !== null) {
+                document.getElementById("transaction-card").remove()
+            }
+
+            const card = document.createElement("div")
+            card.id = "transaction-card"
+            card.className = "card"
+
+            document.body.appendChild(card)
+
+            const header = document.createElement("div")
+            header.className = "card-header"
+            header.innerText = result.success ? "조회 성공" : "조회 실패"
+
+            card.appendChild(header)
+
+            const content = document.createElement("div")
+            content.className = "card-content"
+
+            card.appendChild(content)
+
+            const json = document.createElement("pre")
+            json.innerText = JSON.stringify(result, null, 4)
+
+            content.appendChild(json)
+        }
+
+        async function onClick() {
+            const mid = document.getElementById("mid").value
+            const merchantKey = document.getElementById("merchantKey").value
+            const startDate = document.getElementById("startDate").value
+
+            const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/merchants/${mid}?startDate=${startDate}`, {
+                method: "GET",
+                headers: {
+                    MID: mid,
+                    "Merchant-Key": merchantKey
+                }
+            })
+
+            const result = await resp.json()
+            addCard(result)
+        }
+    </script>
+</head>
+<body>
+    <div class="wrap">
+        <h1>날짜, MID 기반 거래조회 샘플</h1>
+        <input type="text" id="mid" data-role="input" data-prepend="MID" value="testpay01m" placeholder="MID를 입력하세요.">
+        <input type="text" id="merchantKey" data-role="input" data-prepend="Merchant-Key"
+               value="Ma29gyAFhvv/+e4/AHpV6pISQIvSKziLIbrNoXPbRS5nfTx2DOs8OJve+NzwyoaQ8p9Uy1AN4S1I0Um5v7oNUg==" placeholder="Merchant-Key를 입력하세요.">
+        <input type="text" id="startDate" data-role="input" data-prepend="날짜" placeholder="날짜를 입력하세요. YYYYMMDD" value="20250101">
+        <button class="button primary rounded" onclick="onClick()">검색</button>
+    </div>
+</body>
+</html>
