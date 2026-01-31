@@ -9,11 +9,16 @@ const supabase = createClient(
 
 // INNOPAY 승인 API
 export async function POST(request: NextRequest) {
+    console.log('🔵 INNOPAY 승인 API 호출됨');
+
     try {
         const body = await request.json();
         const { paymentToken, tid, mid, amt, moid, orderId } = body;
 
+        console.log('📥 승인 요청 데이터:', { paymentToken: paymentToken?.substring(0, 20) + '...', tid, mid, amt, moid, orderId });
+
         if (!paymentToken || !tid) {
+            console.log('❌ 필수 파라미터 누락');
             return NextResponse.json(
                 { success: false, error: '필수 결제 정보가 누락되었습니다.' },
                 { status: 400 }
@@ -21,6 +26,7 @@ export async function POST(request: NextRequest) {
         }
 
         // INNOPAY 승인 API 호출
+        console.log('📤 INNOPAY API 호출 시작...');
         const approveResponse = await fetch('https://api.innopay.co.kr/v1/transactions/pay', {
             method: 'POST',
             headers: {
@@ -38,7 +44,7 @@ export async function POST(request: NextRequest) {
         });
 
         const approveResult = await approveResponse.json();
-        console.log('INNOPAY 승인 결과:', approveResult);
+        console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
 
         // 승인 성공 체크 (INNOPAY 응답 형식에 따라 조정 필요)
         if (approveResult.resultCode !== '0000' && approveResult.resultCode !== '00') {
