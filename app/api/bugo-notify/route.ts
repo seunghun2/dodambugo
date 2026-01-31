@@ -72,6 +72,35 @@ export async function POST(request: NextRequest) {
                     }
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
+
+                // 📅 감사장 알림톡 예약 발송 (발인 다음날 10시)
+                if (funeral_date) {
+                    try {
+                        // 발인일 다음날 10시 (한국시간) 계산
+                        const funeralDateObj = new Date(funeral_date);
+                        funeralDateObj.setDate(funeralDateObj.getDate() + 1);
+                        funeralDateObj.setHours(10, 0, 0, 0);
+                        // 한국시간 → UTC 변환 (9시간 빼기)
+                        const scheduledUtc = new Date(funeralDateObj.getTime() - (9 * 60 * 60 * 1000));
+
+                        // 예약 시간이 현재보다 미래인 경우에만 발송
+                        if (scheduledUtc > new Date()) {
+                            await sendAlimtalk(
+                                phoneNumber,
+                                'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿
+                                {
+                                    '상주명': mourner_name || '',
+                                    '고인명': deceased_name || '',
+                                    '부고ID': bugo_number,
+                                },
+                                scheduledUtc  // 예약 발송!
+                            );
+                            console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', funeralDateObj.toISOString().split('T')[0], '10:00 KST');
+                        }
+                    } catch (thanksErr) {
+                        console.error('감사장 예약 발송 실패:', thanksErr);
+                    }
+                }
             }
         } catch (alimtalkErr) {
             console.error('알림톡 발송 실패:', alimtalkErr);
