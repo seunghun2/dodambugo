@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
-                    payment_status: 'completed',
+                    status: 'completed',
                     tid: tid,
                     receipt_url: receiptUrl,
                 })
