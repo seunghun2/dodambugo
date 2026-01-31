@@ -100,16 +100,25 @@ export async function POST(request: NextRequest) {
             console.error('mallReserved 파싱 오류:', e);
         }
 
-        // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장 + 주문 정보 조회
+        // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장
         let orderData: any = null;
         if (actualOrderId) {
-            const { data: updatedOrder, error: updateError } = await supabase
+            // 1. 먼저 업데이트
+            const { error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
                     status: 'completed',
-                    tid: tid,  // 취소 시 필요
+                    tid: tid,
                 })
-                .eq('id', actualOrderId)
+                .eq('id', actualOrderId);
+
+            if (updateError) {
+                console.error('주문 상태 업데이트 오류:', updateError);
+            }
+
+            // 2. 업데이트 후 조인해서 조회
+            const { data: fetchedOrder, error: fetchError } = await supabase
+                .from('flower_orders')
                 .select(`
                     *,
                     bugo:bugo_id (
@@ -117,12 +126,18 @@ export async function POST(request: NextRequest) {
                         deceased_name
                     )
                 `)
+                .eq('id', actualOrderId)
                 .single();
 
-            if (updateError) {
-                console.error('주문 상태 업데이트 오류:', updateError);
+            if (fetchError) {
+                console.error('주문 조회 오류:', fetchError);
             } else {
-                orderData = updatedOrder;
+                orderData = fetchedOrder;
+                console.log('📦 조회된 주문 데이터:', {
+                    order_number: orderData.order_number,
+                    bugo: orderData.bugo,
+                    bugo_number: orderData.bugo?.bugo_number,
+                });
             }
         }
 
