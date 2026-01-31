@@ -73,7 +73,14 @@ export default function PaymentCallbackPage() {
                 console.log('📥 승인 결과:', approveResult);
 
                 if (!approveResponse.ok || !approveResult.success) {
-                    throw new Error(approveResult.error || approveResult.message || '결제 승인 실패');
+                    const errorCode = approveResult.code || approveResult.innopayResponse?.resultCode || 'Unknown';
+                    const errorMsg = approveResult.error || approveResult.message || '결제 승인 실패';
+
+                    // 상세 에러 메시지 생성
+                    const detailedMsg = `[${errorCode}] ${errorMsg}`;
+                    console.error('결제 승인 실패 상세:', approveResult);
+
+                    throw new Error(detailedMsg);
                 }
 
                 // 성공
