@@ -198,9 +198,9 @@ export default function OrderCompletePage() {
                         <span className="value">
                             신용/체크카드
                             {orderData.receiptUrl ? (
-                                <a href={orderData.receiptUrl} target="_blank" rel="noopener noreferrer" className="receipt-btn">영수증 보기</a>
+                                <a href={orderData.receiptUrl} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A' }}>영수증 보기</a>
                             ) : (
-                                <button className="receipt-btn" disabled style={{ opacity: 0.5 }}>영수증 보기</button>
+                                <button className="receipt-btn" disabled style={{ opacity: 0.5, color: '#AAAAAA' }}>영수증 보기</button>
                             )}
                         </span>
                     </div>

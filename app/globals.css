@@ -3549,6 +3549,11 @@ section {
     text-decoration: none;
 }
 
+/* 영수증 버튼은 검은색 */
+.detail-row a.receipt-btn {
+    color: #1A1A1A;
+}
+
 .detail-row a:hover {
     text-decoration: underline;
 }
