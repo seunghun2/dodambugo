@@ -115,12 +115,14 @@ export async function POST(request: NextRequest) {
 
         // 4. 부고 정보 조회 (부고번호 필요)
         let bugoNumber = '';
+        console.log('🔍 부고 조회:', { bugo_id: order.bugo_id });
         if (order.bugo_id) {
-            const { data: bugoData } = await supabase
+            const { data: bugoData, error: bugoError } = await supabase
                 .from('bugos')
                 .select('bugo_number')
                 .eq('id', order.bugo_id)
                 .single();
+            console.log('🔍 부고 조회 결과:', { bugoData, bugoError });
             bugoNumber = bugoData?.bugo_number || '';
         }
 
