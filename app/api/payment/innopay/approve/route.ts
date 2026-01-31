@@ -116,6 +116,19 @@ export async function POST(request: NextRequest) {
                 console.error('주문 상태 업데이트 오류:', updateError);
             } else {
                 orderData = updatedOrder;
+
+                // bugo_number 별도 조회
+                if (orderData.bugo_id) {
+                    const { data: bugoData } = await supabase
+                        .from('bugos')
+                        .select('bugo_number, deceased_name')
+                        .eq('id', orderData.bugo_id)
+                        .single();
+
+                    if (bugoData) {
+                        orderData.bugo = bugoData;
+                    }
+                }
             }
         }
 
