@@ -102,17 +102,15 @@ export async function POST(request: NextRequest) {
             console.error('mallReserved 파싱 오류:', e);
         }
 
-        // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장
+        // DB 업데이트 - 결제 완료 상태로 변경
         let orderData: any = null;
         const transactionId = approveResult.data?.tid || '';
 
         if (actualOrderId) {
+            // 1단계: status 먼저 업데이트 (확실히 작동)
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
-                .update({
-                    status: 'completed',
-                    tid: transactionId,  // 취소 시 필요!
-                })
+                .update({ status: 'completed' })
                 .eq('id', actualOrderId)
                 .select('*')
                 .single();
@@ -121,6 +119,17 @@ export async function POST(request: NextRequest) {
                 console.error('주문 상태 업데이트 오류:', updateError);
             } else {
                 orderData = updatedOrder;
+
+                // 2단계: tid 별도 업데이트 (실패해도 OK)
+                try {
+                    await supabase
+                        .from('flower_orders')
+                        .update({ tid: transactionId })
+                        .eq('id', actualOrderId);
+                    console.log('✅ TID 저장 성공:', transactionId);
+                } catch (tidError) {
+                    console.error('TID 저장 실패 (무시):', tidError);
+                }
 
                 // bugo_number 별도 조회
                 if (orderData.bugo_id) {
