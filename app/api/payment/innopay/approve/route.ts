@@ -87,14 +87,16 @@ export async function POST(request: NextRequest) {
         // INNOPAY 응답에서 영수증 URL 추출
         const receiptUrl = approveResult.data?.receiptUrl || '';
 
-        // mallReserved에서 orderId 추출 (INNOPAY 응답에서 가져옴)
+        // mallReserved에서 orderId, bugoId 추출 (INNOPAY 응답에서 가져옴)
         let actualOrderId = '';
+        let bugoNumber = '';
         try {
             const mallReserved = approveResult.data?.etc?.mallReserved;
             if (mallReserved) {
                 const parsed = JSON.parse(mallReserved);
                 actualOrderId = parsed.orderId || '';
-                console.log('📦 mallReserved에서 orderId 추출:', actualOrderId);
+                bugoNumber = parsed.bugoId || '';
+                console.log('📦 mallReserved 추출:', { orderId: actualOrderId, bugoNumber });
             }
         } catch (e) {
             console.error('mallReserved 파싱 오류:', e);
@@ -165,7 +167,7 @@ export async function POST(request: NextRequest) {
             try {
                 await sendFlowerOrderNotification({
                     id: orderData.order_number || moid,
-                    bugo_number: orderData.bugo?.bugo_number || '',
+                    bugo_number: bugoNumber || orderData.bugo?.bugo_number || '',
                     deceased_name: orderData.bugo?.deceased_name || orderData.recipient_name || '',
                     sender_name: orderData.sender_name,
                     sender_phone: orderData.sender_phone,
