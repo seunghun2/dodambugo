@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
                     '주문번호': orderData.order_number || moid,
                     '받는분': orderData.recipient_name || '',
                     '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
+                    '부고번호': orderData.bugo_id || '',  // 버튼 URL용
                 }
             ).then(() => {
                 console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
