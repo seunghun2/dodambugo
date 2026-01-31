@@ -104,6 +104,13 @@ export async function POST(request: NextRequest) {
         }).catch(err => console.error('Slack 알림 실패:', err));
 
         // 📱 화환 결제완료 알림톡 발송 (주문자에게)
+        console.log('📱 flower-orders 알림톡 발송 시도:', {
+            senderPhone: body.sender_phone,
+            paymentMethod: body.payment_method,
+            productName: body.product_name,
+            orderNumber,
+        });
+
         if (body.sender_phone) {
             const phoneNumber = body.sender_phone.replace(/-/g, '');
             sendAlimtalk(
@@ -117,8 +124,10 @@ export async function POST(request: NextRequest) {
                     '장례식장': `${body.funeral_home || ''} ${body.room || ''}`.trim(),
                 }
             ).then(() => {
-                console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
-            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err));
+                console.log('✅ 화환 결제완료 알림톡 발송 성공:', phoneNumber, body.payment_method);
+            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err, body.payment_method));
+        } else {
+            console.log('⚠️ 알림톡 미발송 - sender_phone 없음');
         }
 
         return NextResponse.json({ order: data, order_number: orderNumber, id: data.id });
