@@ -73,17 +73,15 @@ export async function POST(request: NextRequest) {
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
 
-                // 📅 감사장 알림톡 예약 발송 (테스트: 1분 후 / 실제: 발인 다음날 10시)
+                // 📅 감사장 알림톡 예약 발송 (발인 다음날 10시)
                 if (funeral_date) {
                     try {
-                        // 🧪 테스트용: 1분 후 발송
-                        const scheduledUtc = new Date(Date.now() + 1 * 60 * 1000);
-
-                        // 🚀 실제 운영용 (나중에 주석 해제)
-                        // const funeralDateObj = new Date(funeral_date);
-                        // funeralDateObj.setDate(funeralDateObj.getDate() + 1);
-                        // funeralDateObj.setHours(10, 0, 0, 0);
-                        // const scheduledUtc = new Date(funeralDateObj.getTime() - (9 * 60 * 60 * 1000));
+                        // 발인일 다음날 10시 (한국시간) 계산
+                        const funeralDateObj = new Date(funeral_date);
+                        funeralDateObj.setDate(funeralDateObj.getDate() + 1);
+                        funeralDateObj.setHours(10, 0, 0, 0);
+                        // 한국시간 → UTC 변환 (9시간 빼기)
+                        const scheduledUtc = new Date(funeralDateObj.getTime() - (9 * 60 * 60 * 1000));
 
                         // 예약 시간이 현재보다 미래인 경우에만 발송
                         if (scheduledUtc > new Date()) {
@@ -97,7 +95,7 @@ export async function POST(request: NextRequest) {
                                 },
                                 scheduledUtc  // 예약 발송!
                             );
-                            console.log('📅 감사장 알림톡 예약 완료 (테스트 1분 후):', phoneNumber, '→', scheduledUtc.toISOString());
+                            console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', funeralDateObj.toISOString().split('T')[0], '10:00 KST');
                         }
                     } catch (thanksErr) {
                         console.error('감사장 예약 발송 실패:', thanksErr);
