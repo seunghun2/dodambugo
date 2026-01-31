@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
             }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err));
         }
 
-        return NextResponse.json({ order: data, order_number: orderNumber });
+        return NextResponse.json({ order: data, order_number: orderNumber, id: data.id });
     } catch (err) {
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
