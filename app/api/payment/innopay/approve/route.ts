@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { paymentToken, tid, mid, amt, taxFreeAmt, moid, orderId } = body;
+        const { paymentToken, tid, mid, amt, taxFreeAmt, moid, orderId, payMethod } = body;
 
-        console.log('📥 승인 요청 데이터:', { paymentToken: paymentToken?.substring(0, 20) + '...', tid, mid, amt, taxFreeAmt, moid, orderId });
+        console.log('📥 승인 요청 데이터:', { paymentToken: paymentToken?.substring(0, 20) + '...', tid, mid, amt, taxFreeAmt, moid, orderId, payMethod });
 
         if (!paymentToken || !tid) {
             console.log('❌ 필수 파라미터 누락');
@@ -129,6 +129,28 @@ export async function POST(request: NextRequest) {
                     console.log('✅ TID 저장 성공:', transactionId);
                 } catch (tidError) {
                     console.error('TID 저장 실패 (무시):', tidError);
+                }
+
+                // 3단계: payment_method 저장 (INNOPAY에서 온 실제 결제수단)
+                if (payMethod) {
+                    try {
+                        // INNOPAY payMethod를 DB 형식으로 변환
+                        const paymentMethodMap: Record<string, string> = {
+                            'CARD': 'card',
+                            'EPAY': 'easy',
+                            'VBANK': 'virtual',
+                            'BANK': 'bank',
+                        };
+                        const dbPaymentMethod = paymentMethodMap[payMethod] || payMethod.toLowerCase();
+
+                        await supabase
+                            .from('flower_orders')
+                            .update({ payment_method: dbPaymentMethod })
+                            .eq('id', actualOrderId);
+                        console.log('✅ 결제수단 저장 성공:', dbPaymentMethod);
+                    } catch (pmError) {
+                        console.error('결제수단 저장 실패 (무시):', pmError);
+                    }
                 }
 
                 // bugo_number 별도 조회

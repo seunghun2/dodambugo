@@ -104,6 +104,7 @@ export default function PaymentCallbackPage() {
                         taxFreeAmt,
                         moid,
                         orderId,
+                        payMethod,  // CARD, EPAY, VBANK 등 실제 결제수단
                     }),
                 });
 

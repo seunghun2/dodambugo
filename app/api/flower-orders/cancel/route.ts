@@ -15,7 +15,7 @@ const getSvcCd = (paymentMethod: string) => {
         case 'card': return '01';  // 신용카드
         case 'bank': return '02';  // 계좌이체
         case 'virtual': return '04';  // 가상계좌
-        case 'easy': return '01';  // 간편결제도 카드로 처리 (INNOPAY 취소는 01 사용)
+        case 'easy': return '07';  // 간편결제
         default: return '01';  // 기본값 카드
     }
 };
