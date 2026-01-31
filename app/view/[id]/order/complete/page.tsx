@@ -65,7 +65,7 @@ export default function OrderCompletePage() {
                             ribbonText: latestOrder.ribbon_text,
                             ribbonText1: latestOrder.ribbon_text,
                             ribbonText2: latestOrder.ribbon_from,
-                            orderNumber: `MG${latestOrder.id}`,
+                            orderNumber: latestOrder.order_number || `MG${latestOrder.id}`,
                             orderDate: formatDateTime(latestOrder.approved_at || latestOrder.created_at),
                             receiptUrl: latestOrder.receipt_url,
                         });
