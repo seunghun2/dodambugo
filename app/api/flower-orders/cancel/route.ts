@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
         // 6. 슬랙 알림
         try {
-            const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+            const slackWebhookUrl = process.env.SLACK_WEBHOOK_FLOWER;
             if (slackWebhookUrl) {
                 await fetch(slackWebhookUrl, {
                     method: 'POST',
