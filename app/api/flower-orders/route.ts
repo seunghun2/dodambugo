@@ -103,32 +103,7 @@ export async function POST(request: NextRequest) {
             payment_method: body.payment_method || 'card',
         }).catch(err => console.error('Slack 알림 실패:', err));
 
-        // 📱 화환 결제완료 알림톡 발송 (주문자에게)
-        console.log('📱 flower-orders 알림톡 발송 시도:', {
-            senderPhone: body.sender_phone,
-            paymentMethod: body.payment_method,
-            productName: body.product_name,
-            orderNumber,
-        });
-
-        if (body.sender_phone) {
-            const phoneNumber = body.sender_phone.replace(/-/g, '');
-            sendAlimtalk(
-                phoneNumber,
-                ALIMTALK_TEMPLATES.FLOWER_PAYMENT_COMPLETE,
-                {
-                    '상품명': body.product_name || '',
-                    '금액': body.product_price?.toLocaleString() || '0',
-                    '주문번호': orderNumber,
-                    '받는분': body.recipient_name || '',
-                    '장례식장': `${body.funeral_home || ''} ${body.room || ''}`.trim(),
-                }
-            ).then(() => {
-                console.log('✅ 화환 결제완료 알림톡 발송 성공:', phoneNumber, body.payment_method);
-            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err, body.payment_method));
-        } else {
-            console.log('⚠️ 알림톡 미발송 - sender_phone 없음');
-        }
+        // 📱 알림톡은 결제 완료 후 approve API에서 발송
 
         return NextResponse.json({ order: data, order_number: orderNumber, id: data.id });
     } catch (err) {
