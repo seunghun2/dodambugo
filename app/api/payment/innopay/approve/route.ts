@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { paymentToken, tid, mid, amt, moid, orderId } = body;
+        const { paymentToken, tid, mid, amt, taxFreeAmt, moid, orderId } = body;
 
-        console.log('📥 승인 요청 데이터:', { paymentToken: paymentToken?.substring(0, 20) + '...', tid, mid, amt, moid, orderId });
+        console.log('📥 승인 요청 데이터:', { paymentToken: paymentToken?.substring(0, 20) + '...', tid, mid, amt, taxFreeAmt, moid, orderId });
 
         if (!paymentToken || !tid) {
             console.log('❌ 필수 파라미터 누락');
@@ -38,13 +38,27 @@ export async function POST(request: NextRequest) {
                 tid,
                 mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
                 amt,
-                taxFreeAmt: '0',
+                taxFreeAmt: taxFreeAmt || '0',
                 moid,
             }),
         });
 
         const approveResult = await approveResponse.json();
         console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
+
+        // INNOPAY HTTP 에러 체크
+        if (!approveResponse.ok) {
+            console.log('❌ INNOPAY HTTP 에러:', approveResponse.status);
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: approveResult.message || approveResult.resultMsg || '결제 승인 실패',
+                    code: approveResult.code || approveResult.resultCode,
+                    innopayResponse: approveResult,  // 전체 응답 포함
+                },
+                { status: 400 }
+            );
+        }
 
         // 승인 성공 체크 (INNOPAY 응답 형식에 따라 조정 필요)
         if (approveResult.resultCode !== '0000' && approveResult.resultCode !== '00') {
@@ -53,6 +67,7 @@ export async function POST(request: NextRequest) {
                     success: false,
                     error: approveResult.resultMsg || '결제 승인 실패',
                     code: approveResult.resultCode,
+                    innopayResponse: approveResult,  // 전체 응답 포함
                 },
                 { status: 400 }
             );

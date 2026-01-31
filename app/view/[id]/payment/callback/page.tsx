@@ -16,6 +16,7 @@ export default function PaymentCallbackPage() {
             const tid = searchParams.get('tid');
             const mid = searchParams.get('mid');
             const amt = searchParams.get('amt');
+            const taxFreeAmt = searchParams.get('taxFreeAmt') || '0';
             const moid = searchParams.get('moid');
             const resultCode = searchParams.get('resultCode');
             const resultMsg = searchParams.get('resultMsg');
@@ -51,7 +52,7 @@ export default function PaymentCallbackPage() {
 
             try {
                 // 서버에서 결제 승인 처리
-                console.log('📤 승인 API 호출 시작...', { paymentToken, tid, mid, amt, moid, orderId });
+                console.log('📤 승인 API 호출 시작...', { paymentToken, tid, mid, amt, taxFreeAmt, moid, orderId });
 
                 const approveResponse = await fetch('/api/payment/innopay/approve', {
                     method: 'POST',
@@ -61,6 +62,7 @@ export default function PaymentCallbackPage() {
                         tid,
                         mid,
                         amt,
+                        taxFreeAmt,
                         moid,
                         orderId,
                     }),
