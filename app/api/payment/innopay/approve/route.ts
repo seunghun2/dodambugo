@@ -206,6 +206,7 @@ export async function POST(request: NextRequest) {
                 moid,
                 amt,
                 receiptUrl,
+                orderNumber: orderData?.order_number || moid,
                 approvedAt: new Date().toISOString(),
             },
         });

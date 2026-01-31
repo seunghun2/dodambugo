@@ -86,7 +86,7 @@ export default function OrderCompletePage() {
                     senderName: payment.senderName,
                     senderPhone: payment.senderPhone,
                     receiptUrl: payment.receiptUrl,
-                    orderNumber: `MG${Date.now()}`,
+                    orderNumber: payment.orderNumber || `MG${Date.now()}`,
                     orderDate: formatDateTime(),
                 });
             } else {
