@@ -102,14 +102,16 @@ export async function POST(request: NextRequest) {
             console.error('mallReserved 파싱 오류:', e);
         }
 
-        // DB 업데이트 - 결제 완료 상태로 변경
+        // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장
         let orderData: any = null;
+        const transactionId = approveResult.data?.tid || '';
 
         if (actualOrderId) {
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
                     status: 'completed',
+                    tid: transactionId,  // 취소 시 필요!
                 })
                 .eq('id', actualOrderId)
                 .select('*')
