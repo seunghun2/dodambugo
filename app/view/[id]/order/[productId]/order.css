@@ -816,11 +816,17 @@
     margin-left: 8px;
     padding: 4px 8px;
     font-size: 12px;
-    color: #888888;
+    color: #1A1A1A;
     background: #F5F5F5;
     border: 1px solid #E0E0E0;
     border-radius: 4px;
     cursor: pointer;
+    text-decoration: none;
+}
+
+.receipt-btn:disabled {
+    color: #AAAAAA;
+    cursor: not-allowed;
 }
 
 /* 아코디언 */
