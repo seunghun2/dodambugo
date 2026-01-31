@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
                 ribbon_text2: orderData.ribbon_text2,
                 funeral_hall: orderData.funeral_home,
                 room: orderData.room,
-                payment_method: 'card',
+                payment_method: orderData.payment_method || 'card',
             }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
