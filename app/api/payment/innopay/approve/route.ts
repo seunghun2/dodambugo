@@ -60,18 +60,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 승인 성공 체크 (INNOPAY 응답 형식에 따라 조정 필요)
-        if (approveResult.resultCode !== '0000' && approveResult.resultCode !== '00') {
+        // 승인 성공 체크 - INNOPAY는 success 필드 사용
+        // 성공: {success: true, data: {...}}
+        // 실패: {success: false, error: {...}} 또는 {resultCode: 'XXXX', resultMsg: '...'}
+        const isSuccess = approveResult.success === true ||
+            approveResult.resultCode === '0000' ||
+            approveResult.resultCode === '00';
+
+        if (!isSuccess) {
+            const errorInfo = approveResult.error || {};
             return NextResponse.json(
                 {
                     success: false,
-                    error: approveResult.resultMsg || '결제 승인 실패',
-                    code: approveResult.resultCode,
-                    innopayResponse: approveResult,  // 전체 응답 포함
+                    error: errorInfo.message || approveResult.resultMsg || '결제 승인 실패',
+                    code: errorInfo.code || approveResult.resultCode,
+                    innopayResponse: approveResult,
                 },
                 { status: 400 }
             );
         }
+
+        console.log('✅ INNOPAY 승인 성공!');
 
         // DB 업데이트 - 결제 완료 상태로 변경
         if (orderId) {
