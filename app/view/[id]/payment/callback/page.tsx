@@ -23,8 +23,16 @@ export default function PaymentCallbackPage() {
             const resultCode = searchParams.get('resultCode');
             const resultMsg = searchParams.get('resultMsg');
             const mallReserved = searchParams.get('mallReserved');
+            const payMethod = searchParams.get('payMethod'); // 결제 수단 (CARD, EPAY, VBANK)
 
-            console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg });
+            // 가상계좌 관련 파라미터
+            const bankCode = searchParams.get('bankCode');
+            const bankName = searchParams.get('bankName');
+            const accountNo = searchParams.get('accountNo');
+            const depositName = searchParams.get('depositName');
+            const expDate = searchParams.get('expDate');
+
+            console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg, payMethod });
 
             // 결제 실패 체크 (resultCode가 있고 실패인 경우에만)
             if (resultCode && resultCode !== '0000' && resultCode !== '00') {
@@ -45,6 +53,35 @@ export default function PaymentCallbackPage() {
             } catch (e) {
                 console.error('mallReserved 파싱 오류:', e);
             }
+
+            // 🏦 가상계좌인 경우 - 입금 대기 페이지로 이동
+            if (payMethod === 'VBANK') {
+                console.log('📦 가상계좌 결제 - 입금 대기:', { bankName, accountNo, expDate });
+
+                // 가상계좌 정보를 sessionStorage에 저장
+                const finalBugoId = bugoId || routeBugoId;
+                sessionStorage.setItem(`vbank_${finalBugoId}`, JSON.stringify({
+                    bankCode,
+                    bankName,
+                    accountNo,
+                    depositName,
+                    expDate,
+                    amt,
+                    orderId,
+                    moid,
+                }));
+
+                setStatus('success');
+                setMessage('가상계좌가 발급되었습니다.');
+
+                // 입금 대기 페이지로 이동
+                setTimeout(() => {
+                    router.push(`/view/${finalBugoId}/order/vbank-pending`);
+                }, 1000);
+                return;
+            }
+
+
 
             if (!paymentToken || !tid) {
                 setStatus('error');
