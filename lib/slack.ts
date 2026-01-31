@@ -82,7 +82,7 @@ export async function sendFlowerOrderNotification(order: {
     room?: string;
     payment_method?: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER;
+    const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL;
     const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
 
     const text = `[마음부고] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
