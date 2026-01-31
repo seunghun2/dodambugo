@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendAlimtalk } from '@/lib/solapi';
+import { sendFlowerOrderNotification } from '@/lib/slack';
 
 // Supabase 클라이언트
 const supabase = createClient(
@@ -85,9 +87,10 @@ export async function POST(request: NextRequest) {
         // INNOPAY 응답에서 영수증 URL 추출
         const receiptUrl = approveResult.data?.receiptUrl || '';
 
-        // DB 업데이트 - 결제 완료 상태로 변경
+        // DB 업데이트 - 결제 완료 상태로 변경 + 주문 정보 조회
+        let orderData: any = null;
         if (orderId) {
-            const { error: updateError } = await supabase
+            const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
                     payment_status: 'completed',
@@ -95,27 +98,52 @@ export async function POST(request: NextRequest) {
                     receipt_url: receiptUrl,
                     approved_at: new Date().toISOString(),
                 })
-                .eq('id', orderId);
+                .eq('id', orderId)
+                .select('*, bugo:bugo_id(bugo_number, deceased_name)')
+                .single();
 
             if (updateError) {
                 console.error('주문 상태 업데이트 오류:', updateError);
+            } else {
+                orderData = updatedOrder;
             }
         }
 
-        // Slack 알림 발송 (옵션)
-        try {
-            const slackWebhook = process.env.SLACK_WEBHOOK_URL;
-            if (slackWebhook) {
-                await fetch(slackWebhook, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: `💐 화환 결제 완료!\n주문번호: ${moid}\n금액: ${Number(amt).toLocaleString()}원`,
-                    }),
-                });
-            }
-        } catch (slackError) {
-            console.error('Slack 알림 오류:', slackError);
+        // 📱 알림톡 발송 (결제 완료)
+        if (orderData?.sender_phone) {
+            const phoneNumber = orderData.sender_phone.replace(/-/g, '');
+            sendAlimtalk(
+                phoneNumber,
+                'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료 템플릿
+                {
+                    '상품명': orderData.product_name || '',
+                    '금액': Number(amt).toLocaleString(),
+                    '주문번호': orderData.order_number || moid,
+                    '받는분': orderData.recipient_name || '',
+                    '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
+                }
+            ).then(() => {
+                console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
+            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err));
+        }
+
+        // 🔔 슬랙 알림 발송
+        if (orderData) {
+            sendFlowerOrderNotification({
+                id: orderData.order_number || moid,
+                bugo_number: orderData.bugo?.bugo_number || '',
+                deceased_name: orderData.bugo?.deceased_name || orderData.recipient_name || '',
+                sender_name: orderData.sender_name,
+                sender_phone: orderData.sender_phone,
+                recipient_name: orderData.recipient_name,
+                product_name: orderData.product_name,
+                price: Number(amt),
+                ribbon_text1: orderData.ribbon_text1,
+                ribbon_text2: orderData.ribbon_text2,
+                funeral_hall: orderData.funeral_home,
+                room: orderData.room,
+                payment_method: 'card',
+            }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
         return NextResponse.json({
