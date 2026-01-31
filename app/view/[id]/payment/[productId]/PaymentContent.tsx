@@ -295,6 +295,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                             >
                                 간편결제
                             </button>
+                            {/* 가상계좌 - INNOPAY 설정 완료 후 활성화
                             <button
                                 type="button"
                                 className={`payment-method-btn ${paymentMethod === 'virtual' ? 'active' : ''}`}
@@ -302,6 +303,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                             >
                                 가상계좌
                             </button>
+                            */}
                         </div>
                     </section>
 
