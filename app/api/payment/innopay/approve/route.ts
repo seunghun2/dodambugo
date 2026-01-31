@@ -87,9 +87,22 @@ export async function POST(request: NextRequest) {
         // INNOPAY 응답에서 영수증 URL 추출
         const receiptUrl = approveResult.data?.receiptUrl || '';
 
+        // mallReserved에서 orderId 추출 (INNOPAY 응답에서 가져옴)
+        let actualOrderId = '';
+        try {
+            const mallReserved = approveResult.data?.etc?.mallReserved;
+            if (mallReserved) {
+                const parsed = JSON.parse(mallReserved);
+                actualOrderId = parsed.orderId || '';
+                console.log('📦 mallReserved에서 orderId 추출:', actualOrderId);
+            }
+        } catch (e) {
+            console.error('mallReserved 파싱 오류:', e);
+        }
+
         // DB 업데이트 - 결제 완료 상태로 변경 + 주문 정보 조회
         let orderData: any = null;
-        if (orderId) {
+        if (actualOrderId) {
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
@@ -98,7 +111,7 @@ export async function POST(request: NextRequest) {
                     receipt_url: receiptUrl,
                     approved_at: new Date().toISOString(),
                 })
-                .eq('id', orderId)
+                .eq('id', actualOrderId)
                 .select('*, bugo:bugo_id(bugo_number, deceased_name)')
                 .single();
 
@@ -113,7 +126,7 @@ export async function POST(request: NextRequest) {
         console.log('📱 알림톡 발송 체크:', {
             hasOrderData: !!orderData,
             senderPhone: orderData?.sender_phone,
-            orderId
+            actualOrderId
         });
 
         if (orderData?.sender_phone) {
