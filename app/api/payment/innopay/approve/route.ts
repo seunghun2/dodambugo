@@ -107,8 +107,6 @@ export async function POST(request: NextRequest) {
                 .from('flower_orders')
                 .update({
                     status: 'completed',
-                    tid: tid,
-                    receipt_url: receiptUrl,
                 })
                 .eq('id', actualOrderId)
                 .select('*')
