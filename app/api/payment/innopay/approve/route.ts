@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
                     status: 'completed',
                 })
                 .eq('id', actualOrderId)
-                .select('*, bugo:bugo_id(bugo_number, deceased_name)')
+                .select('*')
                 .single();
 
             if (updateError) {
