@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
                     approved_at: new Date().toISOString(),
                 })
                 .eq('id', actualOrderId)
-                .select('*, bugo:bugo_id(bugo_number, deceased_name)')
+                .select('*')
                 .single();
 
             if (updateError) {
