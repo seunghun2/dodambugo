@@ -11,6 +11,7 @@ export default function OrderCompletePage() {
     const bugoId = params.id as string;
 
     const [orderData, setOrderData] = useState<any>(null);
+    const [mounted, setMounted] = useState(false);
     const [isExpanded, setIsExpanded] = useState({
         productInfo: false,
         refund: false,
@@ -52,6 +53,7 @@ export default function OrderCompletePage() {
                 ...order,
                 senderName: payment.senderName,
                 senderPhone: payment.senderPhone,
+                receiptUrl: payment.receiptUrl,
                 orderNumber: `MG${Date.now()}`,
                 orderDate: formatDateTime(),
             });
@@ -73,6 +75,10 @@ export default function OrderCompletePage() {
         }
     }, [bugoId]);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     if (!orderData) {
         return (
             <div className="order-page">
@@ -90,7 +96,9 @@ export default function OrderCompletePage() {
             <div className="order-body complete-body">
                 {/* 완료 메시지 */}
                 <div className="complete-banner">
-                    <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#FFD43B', marginBottom: '20px' }}>check_circle</span>
+                    {mounted && (
+                        <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#FFD43B', marginBottom: '20px' }}>check_circle</span>
+                    )}
                     <h2>주문이 정상적으로 완료<br />되었습니다.</h2>
                 </div>
 
@@ -154,7 +162,11 @@ export default function OrderCompletePage() {
                         <span className="label">결제 정보</span>
                         <span className="value">
                             신용/체크카드
-                            <button className="receipt-btn">영수증 보기</button>
+                            {orderData.receiptUrl ? (
+                                <a href={orderData.receiptUrl} target="_blank" rel="noopener noreferrer" className="receipt-btn">영수증 보기</a>
+                            ) : (
+                                <button className="receipt-btn" disabled style={{ opacity: 0.5 }}>영수증 보기</button>
+                            )}
                         </span>
                     </div>
                 </section>

@@ -82,6 +82,9 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ INNOPAY 승인 성공!');
 
+        // INNOPAY 응답에서 영수증 URL 추출
+        const receiptUrl = approveResult.data?.receiptUrl || '';
+
         // DB 업데이트 - 결제 완료 상태로 변경
         if (orderId) {
             const { error: updateError } = await supabase
@@ -89,6 +92,7 @@ export async function POST(request: NextRequest) {
                 .update({
                     payment_status: 'completed',
                     tid: tid,
+                    receipt_url: receiptUrl,
                     approved_at: new Date().toISOString(),
                 })
                 .eq('id', orderId);
@@ -121,6 +125,7 @@ export async function POST(request: NextRequest) {
                 tid,
                 moid,
                 amt,
+                receiptUrl,
                 approvedAt: new Date().toISOString(),
             },
         });

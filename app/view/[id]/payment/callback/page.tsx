@@ -85,7 +85,19 @@ export default function PaymentCallbackPage() {
                     throw new Error(detailedMsg);
                 }
 
-                // 성공
+                // 성공 - receiptUrl 저장
+                const receiptUrl = approveResult.data?.receiptUrl;
+                if (receiptUrl) {
+                    const finalBugoId = bugoId || routeBugoId;
+                    // 기존 payment 데이터에 receiptUrl 추가
+                    const existingPayment = sessionStorage.getItem(`payment_${finalBugoId}`);
+                    if (existingPayment) {
+                        const paymentData = JSON.parse(existingPayment);
+                        paymentData.receiptUrl = receiptUrl;
+                        sessionStorage.setItem(`payment_${finalBugoId}`, JSON.stringify(paymentData));
+                    }
+                }
+
                 setStatus('success');
                 setMessage('결제가 완료되었습니다!');
 
