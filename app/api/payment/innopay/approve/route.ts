@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
                 // bugo_number 별도 조회
                 if (orderData.bugo_id) {
                     const { data: bugoData } = await supabase
-                        .from('bugos')
+                        .from('bugo')
                         .select('bugo_number, deceased_name')
                         .eq('id', orderData.bugo_id)
                         .single();

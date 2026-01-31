@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         console.log('🔍 부고 조회:', { bugo_id: order.bugo_id });
         if (order.bugo_id) {
             const { data: bugoData, error: bugoError } = await supabase
-                .from('bugos')
+                .from('bugo')
                 .select('bugo_number')
                 .eq('id', order.bugo_id)
                 .single();
