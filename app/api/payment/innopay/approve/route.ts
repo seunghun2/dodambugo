@@ -100,52 +100,22 @@ export async function POST(request: NextRequest) {
             console.error('mallReserved 파싱 오류:', e);
         }
 
-        // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장
+        // DB 업데이트 - 결제 완료 상태로 변경 + 주문 정보 조회
         let orderData: any = null;
         if (actualOrderId) {
-            // 1. 먼저 업데이트
-            const { error: updateError } = await supabase
+            const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({
                     status: 'completed',
-                    tid: tid,
                 })
-                .eq('id', actualOrderId);
+                .eq('id', actualOrderId)
+                .select('*')
+                .single();
 
             if (updateError) {
                 console.error('주문 상태 업데이트 오류:', updateError);
-            }
-
-            // 2. 업데이트 후 조인해서 조회
-            const { data: fetchedOrder, error: fetchError } = await supabase
-                .from('flower_orders')
-                .select(`
-                    *,
-                    bugo:bugo_id (
-                        bugo_number,
-                        deceased_name
-                    )
-                `)
-                .eq('id', actualOrderId)
-                .single();
-
-            if (fetchError) {
-                console.error('주문 조회 오류 (조인):', fetchError);
-                // 조인 실패 시 기본 조회
-                const { data: basicOrder } = await supabase
-                    .from('flower_orders')
-                    .select('*')
-                    .eq('id', actualOrderId)
-                    .single();
-                orderData = basicOrder;
-                console.log('📦 기본 조회 결과:', orderData);
             } else {
-                orderData = fetchedOrder;
-                console.log('📦 조인 조회 결과:', {
-                    order_number: orderData.order_number,
-                    bugo: orderData.bugo,
-                    bugo_number: orderData.bugo?.bugo_number,
-                });
+                orderData = updatedOrder;
             }
         }
 
@@ -167,7 +137,6 @@ export async function POST(request: NextRequest) {
                     '주문번호': orderData.order_number || moid,
                     '받는분': orderData.recipient_name || '',
                     '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
-                    '부고번호': orderData.bugo_id || '',  // 버튼 URL용
                 }
             ).then(() => {
                 console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
@@ -189,7 +158,7 @@ export async function POST(request: NextRequest) {
                 ribbon_text2: orderData.ribbon_text2,
                 funeral_hall: orderData.funeral_home,
                 room: orderData.room,
-                payment_method: orderData.payment_method || 'card',
+                payment_method: 'card',
             }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
