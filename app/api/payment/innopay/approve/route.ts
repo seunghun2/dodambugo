@@ -109,7 +109,6 @@ export async function POST(request: NextRequest) {
                     payment_status: 'completed',
                     tid: tid,
                     receipt_url: receiptUrl,
-                    approved_at: new Date().toISOString(),
                 })
                 .eq('id', actualOrderId)
                 .select('*')
