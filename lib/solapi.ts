@@ -59,28 +59,52 @@ export async function sendAlimtalk(
             wrappedVariables[wrappedKey] = value;
         }
 
-        const messageBody: Record<string, unknown> = {
-            message: {
-                to,
-                from: '01048375076', // 마음부고 발신번호
-                kakaoOptions: {
-                    pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
-                    templateId,
-                    variables: wrappedVariables,
-                },
+        const message = {
+            to,
+            from: '01048375076', // 마음부고 발신번호
+            kakaoOptions: {
+                pfId: 'KA01PF260116055354175OcsXglgUTBt', // 마음부고 카카오채널
+                templateId,
+                variables: wrappedVariables,
             },
         };
 
-        // 예약 발송 시간 설정 (message 바깥에!)
+        // 예약 발송일 경우 그룹 방식 사용
         if (scheduledDate) {
-            messageBody.scheduledDate = scheduledDate.toISOString();
-            console.log('📅 예약 발송 설정:', scheduledDate.toISOString());
+            // 1. 그룹 생성
+            const groupRes = await fetch(`${SOLAPI_URL}/messages/v4/groups`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({}),
+            });
+            const groupData = await groupRes.json();
+            const groupId = groupData.groupId;
+            console.log('📦 그룹 생성:', groupId);
+
+            // 2. 메시지 추가
+            await fetch(`${SOLAPI_URL}/messages/v4/groups/${groupId}/messages`, {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ messages: [message] }),
+            });
+            console.log('📝 메시지 추가 완료');
+
+            // 3. 예약 발송 설정
+            const scheduleRes = await fetch(`${SOLAPI_URL}/messages/v4/groups/${groupId}/schedule`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ scheduledDate: scheduledDate.toISOString() }),
+            });
+            const scheduleData = await scheduleRes.json();
+            console.log('📅 예약 발송 설정:', scheduledDate.toISOString(), scheduleData);
+            return scheduleData;
         }
 
+        // 즉시 발송
         const response = await fetch(`${SOLAPI_URL}/messages/v4/send`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify(messageBody),
+            body: JSON.stringify({ message }),
         });
 
         const data = await response.json();
