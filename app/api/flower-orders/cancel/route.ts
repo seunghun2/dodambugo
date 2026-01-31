@@ -136,20 +136,12 @@ export async function POST(request: NextRequest) {
                     'virtual': '가상계좌',
                 };
 
-                // 배송지 조합
-                const deliveryAddress = order.funeral_home
-                    ? `${order.funeral_home}${order.room ? ' ' + order.room : ''}`
-                    : order.address || '';
-
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP260128002330965AMneEQhHRIM',  // 화환 구매 취소 템플릿
                     {
-                        '부고장번호': bugoNumber,
-                        '주문번호': order.order_number || '',
-                        '상품명': order.product_name || '',
-                        '배송지': deliveryAddress,
-                        '주문자': `${order.sender_name || ''}(${order.sender_phone || ''})`,
+                        '주문자명': order.sender_name || '',
+                        '환불금액': order.product_price?.toLocaleString() || '',
                         '결제수단': paymentMethodText[order.payment_method] || order.payment_method || '',
                     }
                 );
@@ -167,7 +159,7 @@ export async function POST(request: NextRequest) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text: `🚫 *화환 주문 취소*\n• 주문번호: ${order.order_number}\n• 상품: ${order.product_name}\n• 금액: ${order.product_price?.toLocaleString()}원\n• 보낸분: ${order.sender_name}\n• 사유: ${cancelReason || '미입력'}`,
+                        text: `[마음부고] 화환 주문이 취소되었습니다. (부고장번호: ${bugoNumber || '-'} / 주문번호: ${order.order_number || '-'})\n- 상품명: ${order.product_name || '-'}\n- 배송지: ${order.funeral_home || ''}${order.room ? ' ' + order.room : ''}${order.address ? ' ' + order.address : ''}\n- 주문자: ${order.sender_name || ''}(${order.sender_phone || ''})\n- 결제수단: ${order.payment_method === 'card' ? '신용카드' : order.payment_method || '-'}`,
                     }),
                 });
                 console.log('📢 취소 슬랙 알림 발송 완료');
