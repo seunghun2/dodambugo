@@ -994,7 +994,7 @@ ${url}
                         <button
                             className="btn-floating-flower"
                             onClick={() => {
-                                if (flowerModalOpen && selectedFlower) {
+                                if (flowerModalOpen && selectedFlower !== null) {
                                     const product = flowerProducts.find(p => p.sort_order === selectedFlower);
                                     if (product) {
                                         sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));

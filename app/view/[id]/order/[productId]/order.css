@@ -13,6 +13,20 @@
 
 .order-page .material-symbols-outlined {
     font-family: 'Material Symbols Outlined' !important;
+    /* FOUC 방지: 폰트 로드 전까지 투명 처리 */
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.order-page .material-symbols-outlined:not(:empty) {
+    opacity: 1;
+}
+
+/* 폰트 로드 후 표시 */
+@supports (font: 24px/1 'Material Symbols Outlined') {
+    .order-page .material-symbols-outlined {
+        opacity: 1;
+    }
 }
 
 /* PC 중앙 정렬 */

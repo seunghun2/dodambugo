@@ -23,8 +23,8 @@ export default function PaymentCallbackPage() {
 
             console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg });
 
-            // 결제 실패 체크
-            if (resultCode !== '0000' && resultCode !== '00') {
+            // 결제 실패 체크 (resultCode가 있고 실패인 경우에만)
+            if (resultCode && resultCode !== '0000' && resultCode !== '00') {
                 setStatus('error');
                 setMessage(resultMsg || '결제가 취소되었거나 실패했습니다.');
                 return;
