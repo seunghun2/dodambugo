@@ -110,7 +110,13 @@ export async function POST(request: NextRequest) {
                     tid: tid,  // 취소 시 필요
                 })
                 .eq('id', actualOrderId)
-                .select('*')
+                .select(`
+                    *,
+                    bugo:bugo_id (
+                        bugo_number,
+                        deceased_name
+                    )
+                `)
                 .single();
 
             if (updateError) {
