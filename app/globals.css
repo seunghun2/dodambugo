@@ -99,7 +99,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Material Symbols 폰트 로딩 전 숨김 처리 */
+/* Material Symbols 폰트 로딩 전 완전 숨김 처리 */
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
     font-weight: normal;
@@ -114,14 +114,14 @@ body {
     direction: ltr;
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
-    /* 폰트 로딩 전 완전 숨김 */
-    opacity: 0;
-    transition: opacity 0.1s ease;
+    /* 폰트 로딩 전 완전 숨김 - visibility 사용 (레이아웃 유지) */
+    visibility: hidden;
 }
 
 /* 폰트 로딩 완료 후 표시 */
-.fonts-loaded .material-symbols-outlined {
-    opacity: 1;
+.fonts-loaded .material-symbols-outlined,
+html.fonts-loaded .material-symbols-outlined {
+    visibility: visible;
 }
 
 .container {
