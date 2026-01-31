@@ -99,16 +99,24 @@ export async function POST(request: NextRequest) {
         if (order.sender_phone) {
             try {
                 const phoneNumber = order.sender_phone.replace(/-/g, '');
-                // TODO: 취소 알림톡 템플릿 승인 후 사용
-                // await sendAlimtalk(
-                //     phoneNumber,
-                //     'CANCEL_TEMPLATE_ID',  // 취소 템플릿 ID
-                //     {
-                //         '상품명': order.product_name || '',
-                //         '환불금액': order.product_price?.toLocaleString() || '',
-                //     }
-                // );
-                console.log('📱 취소 알림톡 발송 예정:', phoneNumber);
+                // 결제수단 한글 변환
+                const paymentMethodText: Record<string, string> = {
+                    'card': '신용카드',
+                    'easy': '간편결제',
+                    'bank': '계좌이체',
+                    'virtual': '가상계좌',
+                };
+
+                await sendAlimtalk(
+                    phoneNumber,
+                    'KA01TP260128002330965AMneEQhHRIM',  // 화환 구매 취소 템플릿
+                    {
+                        '주문자명': order.sender_name || '',
+                        '환불금액': order.product_price?.toLocaleString() || '',
+                        '결제수단': paymentMethodText[order.payment_method] || order.payment_method || '',
+                    }
+                );
+                console.log('📱 취소 알림톡 발송 완료:', phoneNumber);
             } catch (err) {
                 console.error('취소 알림톡 실패:', err);
             }
