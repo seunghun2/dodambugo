@@ -130,10 +130,18 @@ export async function POST(request: NextRequest) {
                 .single();
 
             if (fetchError) {
-                console.error('주문 조회 오류:', fetchError);
+                console.error('주문 조회 오류 (조인):', fetchError);
+                // 조인 실패 시 기본 조회
+                const { data: basicOrder } = await supabase
+                    .from('flower_orders')
+                    .select('*')
+                    .eq('id', actualOrderId)
+                    .single();
+                orderData = basicOrder;
+                console.log('📦 기본 조회 결과:', orderData);
             } else {
                 orderData = fetchedOrder;
-                console.log('📦 조회된 주문 데이터:', {
+                console.log('📦 조인 조회 결과:', {
                     order_number: orderData.order_number,
                     bugo: orderData.bugo,
                     bugo_number: orderData.bugo?.bugo_number,
