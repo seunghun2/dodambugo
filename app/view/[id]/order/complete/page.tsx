@@ -19,60 +19,95 @@ export default function OrderCompletePage() {
     });
 
     useEffect(() => {
-        // sessionStorage에서 주문 정보 가져오기 (order_bugoId_productId 형식)
-        const storedPayment = sessionStorage.getItem(`payment_${bugoId}`);
+        async function fetchOrderData() {
+            // sessionStorage에서 주문 정보 가져오기 (order_bugoId_productId 형식)
+            const storedPayment = sessionStorage.getItem(`payment_${bugoId}`);
 
-        // order 키 찾기
-        let orderKey = '';
-        for (let i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i);
-            if (key && key.startsWith(`order_${bugoId}_`)) {
-                orderKey = key;
-                break;
+            // order 키 찾기
+            let orderKey = '';
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith(`order_${bugoId}_`)) {
+                    orderKey = key;
+                    break;
+                }
+            }
+
+            const storedOrder = orderKey ? sessionStorage.getItem(orderKey) : null;
+
+            // 날짜 포맷 함수
+            const formatDateTime = (date?: string) => {
+                const d = date ? new Date(date) : new Date();
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const hour = String(d.getHours()).padStart(2, '0');
+                const minute = String(d.getMinutes()).padStart(2, '0');
+                return `${year}.${month}.${day} ${hour}:${minute}`;
+            };
+
+            // DB에서 최신 주문 정보 가져오기
+            try {
+                const response = await fetch(`/api/flower-orders?bugo_id=${bugoId}&limit=1`);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.orders && result.orders.length > 0) {
+                        const latestOrder = result.orders[0];
+                        setOrderData({
+                            senderName: latestOrder.sender_name,
+                            senderPhone: latestOrder.sender_phone,
+                            productName: latestOrder.product_name,
+                            productPrice: latestOrder.amount,
+                            recipientName: latestOrder.recipient_name,
+                            funeralHome: latestOrder.funeral_home,
+                            room: latestOrder.room || '',
+                            address: latestOrder.address || '',
+                            ribbonText: latestOrder.ribbon_text,
+                            ribbonText1: latestOrder.ribbon_text,
+                            ribbonText2: latestOrder.ribbon_from,
+                            orderNumber: `MG${latestOrder.id}`,
+                            orderDate: formatDateTime(latestOrder.approved_at || latestOrder.created_at),
+                            receiptUrl: latestOrder.receipt_url,
+                        });
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('주문 정보 조회 실패:', error);
+            }
+
+            // sessionStorage 데이터 사용 (폴백)
+            if (storedOrder && storedPayment) {
+                const order = JSON.parse(storedOrder);
+                const payment = JSON.parse(storedPayment);
+
+                setOrderData({
+                    ...order,
+                    senderName: payment.senderName,
+                    senderPhone: payment.senderPhone,
+                    receiptUrl: payment.receiptUrl,
+                    orderNumber: `MG${Date.now()}`,
+                    orderDate: formatDateTime(),
+                });
+            } else {
+                // 데모용 기본 데이터
+                setOrderData({
+                    senderName: '테스트',
+                    senderPhone: '010-1234-5678',
+                    productName: '근조 3단 화환',
+                    productPrice: 150000,
+                    recipientName: '홍길동',
+                    funeralHome: '서울대학교병원장례식장',
+                    room: '1호실',
+                    address: '서울시 강남구 테헤란로',
+                    ribbonText: '삼가 고인의 명복을 빕니다',
+                    orderNumber: `MG${Date.now()}`,
+                    orderDate: formatDateTime(),
+                });
             }
         }
 
-        const storedOrder = orderKey ? sessionStorage.getItem(orderKey) : null;
-
-        // 날짜 포맷 함수
-        const formatDateTime = () => {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-            return `${year}.${month}.${day} ${hour}:${minute}`;
-        };
-
-        if (storedOrder && storedPayment) {
-            const order = JSON.parse(storedOrder);
-            const payment = JSON.parse(storedPayment);
-
-            setOrderData({
-                ...order,
-                senderName: payment.senderName,
-                senderPhone: payment.senderPhone,
-                receiptUrl: payment.receiptUrl,
-                orderNumber: `MG${Date.now()}`,
-                orderDate: formatDateTime(),
-            });
-        } else {
-            // 데모용 기본 데이터
-            setOrderData({
-                senderName: '테스트',
-                senderPhone: '010-1234-5678',
-                productName: '근조 3단 화환',
-                productPrice: 150000,
-                recipientName: '홍길동',
-                funeralHome: '서울대학교병원장례식장',
-                room: '1호실',
-                address: '서울시 강남구 테헤란로',
-                ribbonText: '삼가 고인의 명복을 빕니다',
-                orderNumber: `MG${Date.now()}`,
-                orderDate: formatDateTime(),
-            });
-        }
+        fetchOrderData();
     }, [bugoId]);
 
     useEffect(() => {
