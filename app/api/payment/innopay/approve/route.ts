@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
         // DB 업데이트 - 결제 완료 상태로 변경 + TID 저장
         let orderData: any = null;
-        const tid = approveResult.data?.tid || '';
+        const transactionId = approveResult.data?.tid || '';
         const payMethod = approveResult.data?.payMethod || 'CARD';
 
         if (actualOrderId) {
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
                 .from('flower_orders')
                 .update({
                     status: 'completed',
-                    tid: tid,  // 취소 시 필요!
+                    tid: transactionId,  // 취소 시 필요!
                     payment_method: payMethod === 'EPAY' ? 'easy' : 'card',
                 })
                 .eq('id', actualOrderId)
