@@ -51,8 +51,12 @@ export async function GET(request: NextRequest) {
             .or('thanks_sent.is.null,thanks_sent.eq.false');
 
         if (error) {
-            console.error('DB 조회 에러:', error);
-            return NextResponse.json({ error: 'DB error' }, { status: 500 });
+            console.error('DB 조회 에러:', JSON.stringify(error, null, 2));
+            return NextResponse.json({
+                error: 'DB error',
+                detail: error.message,
+                code: error.code
+            }, { status: 500 });
         }
 
         if (!bugos || bugos.length === 0) {
