@@ -51,6 +51,8 @@ export default function PaymentCallbackPage() {
 
             try {
                 // 서버에서 결제 승인 처리
+                console.log('📤 승인 API 호출 시작...', { paymentToken, tid, mid, amt, moid, orderId });
+
                 const approveResponse = await fetch('/api/payment/innopay/approve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -64,7 +66,9 @@ export default function PaymentCallbackPage() {
                     }),
                 });
 
+                console.log('📥 승인 API 응답:', approveResponse.status);
                 const approveResult = await approveResponse.json();
+                console.log('📥 승인 결과:', approveResult);
 
                 if (!approveResponse.ok || !approveResult.success) {
                     throw new Error(approveResult.error || approveResult.message || '결제 승인 실패');

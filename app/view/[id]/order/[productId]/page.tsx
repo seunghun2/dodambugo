@@ -38,20 +38,23 @@ const getCachedBugo = unstable_cache(
     { revalidate: 300 } // 5분 캐시
 );
 
-// 캐시된 상품 조회 (1시간)
-const getCachedProduct = unstable_cache(
-    async (productNumber: string) => {
-        const supabase = getSupabase();
-        const { data } = await supabase
-            .from('flower_products')
-            .select('*')
-            .eq('sort_order', parseInt(productNumber))
-            .single();
-        return data;
-    },
-    ['flower-product-order'],
-    { revalidate: 3600 } // 1시간 캐시
-);
+// 캐시된 상품 조회 (1시간) - 캐시 키 동적 생성
+async function getCachedProduct(productNumber: string) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            const { data } = await supabase
+                .from('flower_products')
+                .select('*')
+                .eq('sort_order', parseInt(productNumber))
+                .single();
+            return data;
+        },
+        [`flower-product-${productNumber}`],  // ✅ 상품별 고유 캐시 키
+        { revalidate: 3600 } // 1시간 캐시
+    );
+    return getCached();
+}
 
 // 서버 컴포넌트 - 캐시된 데이터 사용
 export default async function OrderPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
