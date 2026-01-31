@@ -98,6 +98,28 @@
 
 ## ✅ 완료
 
+### 2026-01-31 ⚠️ 결제/알림 통합 대수술
+- [x] **INNOPAY 결제 취소 API 구현** (`/api/flower-orders/cancel`)
+  - INNOPAY cancelApi 연동 (svcCd, cancelPwd 포함)
+  - 결제수단별 서비스코드 매핑 (card→CARD, easy→EPAY 등)
+  - 성공 코드 2001 처리
+  - DB 상태 업데이트 (cancelled, cancelled_at, cancel_reason)
+- [x] **어드민 주문 취소 버튼** (`/admin/flower-orders`)
+  - 취소 사유 입력 → API 호출 → 상태 반영
+- [x] **취소 알림톡 연동** (템플릿: KA01TP260128002330965AMneEQhHRIM)
+  - 주문자명, 환불금액, 결제수단 변수 전달
+- [x] **TID 저장 로직 추가** (approve에서 flower_orders.tid 저장)
+- [x] **주문 상세 페이지 추가** (`/order/[orderId]`)
+  - 알림톡 버튼 URL용 (개인화된 주문 확인)
+- [x] **슬랙 웹훅 폴백 추가** (SLACK_WEBHOOK_FLOWER 없으면 SLACK_WEBHOOK_URL 사용)
+- [x] **알림톡/슬랙 발송 await 처리** ⚠️ 중요!
+  - 서버리스 환경에서 async 완료 보장
+  - `.then().catch()` → `await + try/catch`로 변경
+- [x] **mallReserved에서 bugoNumber 직접 추출**
+  - DB 조인 없이 INNOPAY 응답에서 바로 부고번호 가져오기
+- [x] **핵심 기능 수정 체크리스트 워크플로우** (`.agent/workflows/critical-check.md`)
+  - 결제/알림 수정 전 필수 확인사항
+
 ### 2026-01-28
 - [x] **제주 '일포' 기능 완성**
   - View 페이지 일포일시 표시 (발인보다 먼저, 강조)
@@ -172,4 +194,19 @@
 
 ---
 
-*마지막 업데이트: 2026-01-23 15:55*
+## 📋 내일 할 일 (2026-02-01)
+
+### 필수
+- [ ] **주문 취소 실제 테스트** (INNOPAY 환경변수 확인 후)
+- [ ] **취소 슬랙 알림 확인** (웹훅 URL 설정)
+- [ ] **알림톡 버튼 URL 통일** (`/order/[orderId]` → `/view/[bugoNumber]/order/complete`로 변경 검토)
+- [ ] **Vercel 환경변수 정리** (INNOPAY_CANCEL_PWD 등)
+
+### 권장
+- [ ] 결제 완료 페이지 URL 통일 검토
+- [ ] 슬랙 알림 부고번호 최종 확인
+- [ ] 주문 취소 알림톡 발송 테스트
+
+---
+
+*마지막 업데이트: 2026-01-31 23:36*
