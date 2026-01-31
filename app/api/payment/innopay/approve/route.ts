@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
 
         // DB 업데이트 - 결제 완료 상태로 변경
         let orderData: any = null;
-        const transactionId = approveResult.data?.tid || '';
+        // TID: INNOPAY 응답에서 가져오거나, 없으면 콜백에서 받은 원래 tid 사용
+        const transactionId = approveResult.data?.tid || tid || '';
 
         if (actualOrderId) {
             // 1단계: status 먼저 업데이트 (확실히 작동)
