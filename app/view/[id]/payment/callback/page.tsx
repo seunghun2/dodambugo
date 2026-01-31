@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 
 export default function PaymentCallbackPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
+    const routeBugoId = params.id as string;  // URL 경로에서 id 추출 (폴백용)
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [message, setMessage] = useState('결제를 처리하고 있습니다...');
 
@@ -89,8 +91,9 @@ export default function PaymentCallbackPage() {
 
                 // 완료 페이지로 이동
                 setTimeout(() => {
-                    if (bugoId) {
-                        router.push(`/view/${bugoId}/order/complete`);
+                    const finalBugoId = bugoId || routeBugoId;
+                    if (finalBugoId) {
+                        router.push(`/view/${finalBugoId}/order/complete`);
                     } else {
                         router.push('/');
                     }
