@@ -31,6 +31,7 @@ export default function AdminFlowerOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<FlowerOrder | null>(null);
     const [statusFilter, setStatusFilter] = useState('');
+    const [cancelling, setCancelling] = useState(false);
 
     useEffect(() => {
         fetchOrders();
@@ -64,6 +65,38 @@ export default function AdminFlowerOrdersPage() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    // 주문 취소 (INNOPAY + DB + 알림)
+    const cancelOrder = async (order: FlowerOrder) => {
+        const reason = prompt('취소 사유를 입력해주세요:');
+        if (reason === null) return; // 취소 버튼
+
+        if (!confirm(`정말 "${order.product_name}" 주문을 취소하시겠습니까?\n\n취소 시 결제금액이 환불됩니다.`)) {
+            return;
+        }
+
+        setCancelling(true);
+        try {
+            const response = await fetch('/api/flower-orders/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: order.id, cancelReason: reason }),
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('주문이 취소되었습니다.');
+                fetchOrders();
+                setSelectedOrder(null);
+            } else {
+                alert(`취소 실패: ${result.error}`);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('취소 처리 중 오류가 발생했습니다.');
+        }
+        setCancelling(false);
     };
 
     const formatDate = (dateString: string) => {
@@ -310,8 +343,8 @@ export default function AdminFlowerOrdersPage() {
                                         </div>
                                     </div>
 
-                                    {selectedOrder.bugo && (
-                                        <div className="detail-actions">
+                                    <div className="detail-actions">
+                                        {selectedOrder.bugo && (
                                             <Link
                                                 href={`/view/${selectedOrder.bugo.bugo_number}`}
                                                 target="_blank"
@@ -320,8 +353,31 @@ export default function AdminFlowerOrdersPage() {
                                                 <span className="material-symbols-outlined">visibility</span>
                                                 부고장 보기
                                             </Link>
-                                        </div>
-                                    )}
+                                        )}
+                                        {selectedOrder.status !== 'cancelled' && (
+                                            <button
+                                                onClick={() => cancelOrder(selectedOrder)}
+                                                className="btn-action danger"
+                                                disabled={cancelling}
+                                                style={{
+                                                    background: '#fee2e2',
+                                                    color: '#dc2626',
+                                                    border: 'none',
+                                                    padding: '10px 16px',
+                                                    borderRadius: '8px',
+                                                    cursor: cancelling ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontWeight: 600,
+                                                    marginTop: '8px',
+                                                }}
+                                            >
+                                                <span className="material-symbols-outlined">cancel</span>
+                                                {cancelling ? '취소 중...' : '주문 취소'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </>
                         ) : (

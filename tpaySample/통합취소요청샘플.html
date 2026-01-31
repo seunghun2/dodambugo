@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Insert title here</title>
+</head>
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<style>
+	div.wrap {
+		padding : 30px;
+		width : 1400px;
+		float : left;
+		width: 100%;
+		text-align: center;
+	}
+	div.first {
+		padding : 30px;
+		width : 350px;
+		display: inline-block;
+	}
+	div.second {
+		padding : 60px 30px 30px 30px;
+		width : 615.922px;
+		display: inline-block;
+	}	
+	h2 {
+		width : 100%;
+		font-size : 16px;
+		margin-top : 0px;
+		padding-bottom : 6px;
+		float : left;
+		color : #444;
+		line-height : 26px;
+		display : block;
+	}
+	
+	td {
+		padding : 0 0px 5px 0;
+		text-align : left;
+		font-weight : bold;
+		width : 167px;
+	}
+	
+	div.first input {
+		border : 1px solid #aaa;
+		border-radius : 0;
+		padding-left : 10px;
+		width : 100%;
+		font-size : 13px;
+		vertical-align : baseline;
+		height : 30px;
+	}
+	
+	div.second input {
+		border : 1px solid #aaa;
+		border-radius : 0;
+		padding-left : 10px;
+		width : 250%;
+		font-size : 13px;
+		vertical-align : baseline;
+		height : 30px;
+	}
+	
+	button {
+		width : 350px;
+		border-radius : 4px;
+		padding : 0;
+		margin : 20px 0;
+		height : 40px;
+		background-color : #1e5dd2;
+		border : none;
+		color : #fff;
+		font-weight : bold;
+	}
+</style>
+<script type="text/javascript">
+
+function tableToJSON(table) {
+	var obj = {};
+	var row, rows = table.rows;
+	for (var i=0, iLen=rows.length; i<iLen; i++) {
+	  row = rows[i];
+	  obj[document.getElementsByTagName("input")[i].getAttribute('name')] = document.getElementsByTagName("input")[i].value;
+	}
+	console.log(obj);
+	return JSON.stringify(obj);
+}
+
+function send(){
+	
+    var resultcode = null;
+    $.ajax({
+        type : "POST",
+        url : "https://api.innopay.co.kr/api/cancelApi",
+        async : true,
+        data : tableToJSON(document.getElementById('payTable')),
+        contentType: "application/json; charset=utf-8",
+        dataType : "json",
+        success : function(data){
+			$("#first").hide();
+			$("#second").show();
+
+            console.log(data);
+            $('[name="pgTid_result"]').val(data.pgTid);
+            $('[name="resultCode_result"]').val(data.resultCode);
+            $('[name="resultMsg_result"]').val(data.resultMsg);
+            $('[name="pgApprovalAmt_result"]').val(data.pgApprovalAmt);
+            $('[name="pgAppDate_result"]').val(data.pgAppDate);
+            $('[name="pgAppTime_result"]').val(data.pgAppTime);
+			$('[name="stateCd_result"]').val(data.stateCd);
+        },
+        error : function(data){
+        	console.log(data);   
+        	alert("통신에러");
+        }
+    });
+}
+function back(){
+	$("#first").show();
+	$("#second").hide();
+}
+</script>
+<body>
+<div class="wrap">
+	<h2>카드 수기 결제 취소 샘플 페이지</h2>
+	<div class="first" id="first">
+		<h2>카드 수기 결제 취소 요청</h2>
+		<form id="frm" name="frm">
+			<table id="payTable">
+				<tr>
+					<td>상점 아이디</td>
+					<td>
+						<input name="mid" value=""> <!-- 필수: 인피니소프트에서 발급한 상점아이디 -->
+					</td>
+				</tr>
+				<tr>
+					<td>거래고유번호</td>
+					<td>
+						<input name="tid" value=""> <!-- 필수: 거래고유번호 -->
+					</td>
+				</tr>
+				<tr>
+					<td>서비스구분</td>
+					<td>
+						<input name="svcCd" value="01"> <!-- 필수: 01:신용카드, 02:계좌이체, 04:현금영수증, 07:휴대폰 -->
+					</td>
+				</tr>
+				<tr>
+					<td>부분취소여부</td>
+					<td>
+						<input name="partialCancelCode" value="0"> <!-- 선택: 0:default, 0:전체취소, 1:부분취소 (부분취소 사용 가능 가맹점만 사용 가능) -->
+					</td>
+				</tr>
+				<tr>
+					<td>취소금액</td>
+					<td>
+						<input name="cancelAmt" value="0"> <!-- 필수: 취소금액 (숫자) -->
+					</td>
+				</tr>
+				<tr>
+					<td>취소사유</td>
+					<td>
+						<input name="cancelMsg" value=""> <!-- 필수: 취소사유 -->
+					</td>
+				</tr>
+
+				<tr>
+					<td>은행</td>
+					<td>
+						<input name="refundBankCd" value="004"> <!-- 환불시필수: 은행 -->
+					</td>
+				</tr>
+
+				<tr>
+					<td>계좌번호</td>
+					<td>
+						<input name="refundAcctNo" value=""> <!-- 환불시필수: 계좌번호 -->
+					</td>
+				</tr>
+
+				<tr>
+					<td>계좌주</td>
+					<td>
+						<input name="refundAcctNm" value=""> <!-- 환불시필수: 계좌주 -->
+					</td>
+				</tr>
+
+				<tr>
+					<td>취소비밀번호</td>
+					<td>
+						<input name="cancelPwd" value=""> <!-- 필수: 취소비밀번호 -->
+					</td>
+				</tr>
+			</table>
+		</form>
+		<button onclick="javascript:send();" style="cursor:pointer">취소요청</button>
+	</div>
+
+	<div class="second" id="second">
+		<h2>카드 수기 결제 취소 결과</h2>
+		<table id="">
+			<tr>
+				<td>거래고유번호</td>
+				<td>
+					<input name="pgTid_result" value="" disabled> <!-- pgTid -->
+				</td>
+			</tr>
+			<tr>
+				<td>결과코드 (2001:성공, 이외 실패)</td>
+				<td>
+					<input name="resultCode_result" value="" disabled> <!-- resultCode -->
+				</td>
+			</tr>
+			<tr>
+				<td>결과메시지</td>
+				<td>
+					<input name="resultMsg_result" value="" disabled> <!-- resultMsg -->
+				</td>
+			</tr>
+			<tr>
+				<td>취소금액</td>
+				<td>
+					<input name="pgApprovalAmt_result" value="" disabled> <!-- pgApprovalAmt -->
+				</td>
+			</tr>
+			<tr>
+				<td>취소일</td>
+				<td>
+					<input name="pgAppDate_result" value="" disabled> <!-- pgAppDate -->
+				</td>
+			</tr>
+			<tr>
+				<td>취소시간</td>
+				<td>
+					<input name="pgAppTime_result" value="" disabled> <!-- pgAppTime -->
+				</td>
+			</tr>
+			<tr>
+				<td>취소상태</td>
+				<td>
+					<input name="stateCd_result" value="" disabled> <!-- stateCd -->
+				</td>
+			</tr>
+		</table>
+		<button onclick="javascript:back();" style="cursor:pointer">뒤로가기</button>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function () {
+	$("#second").hide();
+});	
+</script>
+</body>
+</html>
