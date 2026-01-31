@@ -110,6 +110,12 @@ export async function POST(request: NextRequest) {
         }
 
         // 📱 알림톡 발송 (결제 완료)
+        console.log('📱 알림톡 발송 체크:', {
+            hasOrderData: !!orderData,
+            senderPhone: orderData?.sender_phone,
+            orderId
+        });
+
         if (orderData?.sender_phone) {
             const phoneNumber = orderData.sender_phone.replace(/-/g, '');
             sendAlimtalk(
