@@ -141,39 +141,47 @@ export async function POST(request: NextRequest) {
 
         if (orderData?.sender_phone) {
             const phoneNumber = orderData.sender_phone.replace(/-/g, '');
-            sendAlimtalk(
-                phoneNumber,
-                'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료 템플릿
-                {
-                    '상품명': orderData.product_name || '',
-                    '금액': Number(amt).toLocaleString(),
-                    '주문번호': orderData.order_number || moid,
-                    '받는분': orderData.recipient_name || '',
-                    '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
-                    '부고번호': orderData.bugo?.bugo_number || orderData.bugo_id || '',
-                }
-            ).then(() => {
+            try {
+                await sendAlimtalk(
+                    phoneNumber,
+                    'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료 템플릿
+                    {
+                        '상품명': orderData.product_name || '',
+                        '금액': Number(amt).toLocaleString(),
+                        '주문번호': orderData.order_number || moid,
+                        '받는분': orderData.recipient_name || '',
+                        '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
+                        '부고번호': orderData.bugo?.bugo_number || orderData.bugo_id || '',
+                    }
+                );
                 console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
-            }).catch(err => console.error('❌ 화환 결제완료 알림톡 실패:', err));
+            } catch (err) {
+                console.error('❌ 화환 결제완료 알림톡 실패:', err);
+            }
         }
 
         // 🔔 슬랙 알림 발송
         if (orderData) {
-            sendFlowerOrderNotification({
-                id: orderData.order_number || moid,
-                bugo_number: orderData.bugo?.bugo_number || '',
-                deceased_name: orderData.bugo?.deceased_name || orderData.recipient_name || '',
-                sender_name: orderData.sender_name,
-                sender_phone: orderData.sender_phone,
-                recipient_name: orderData.recipient_name,
-                product_name: orderData.product_name,
-                price: Number(amt),
-                ribbon_text1: orderData.ribbon_text1,
-                ribbon_text2: orderData.ribbon_text2,
-                funeral_hall: orderData.funeral_home,
-                room: orderData.room,
-                payment_method: 'card',
-            }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
+            try {
+                await sendFlowerOrderNotification({
+                    id: orderData.order_number || moid,
+                    bugo_number: orderData.bugo?.bugo_number || '',
+                    deceased_name: orderData.bugo?.deceased_name || orderData.recipient_name || '',
+                    sender_name: orderData.sender_name,
+                    sender_phone: orderData.sender_phone,
+                    recipient_name: orderData.recipient_name,
+                    product_name: orderData.product_name,
+                    price: Number(amt),
+                    ribbon_text1: orderData.ribbon_text1,
+                    ribbon_text2: orderData.ribbon_text2,
+                    funeral_hall: orderData.funeral_home,
+                    room: orderData.room,
+                    payment_method: 'card',
+                });
+                console.log('✅ 슬랙 알림 발송 완료');
+            } catch (err) {
+                console.error('❌ 슬랙 알림 실패:', err);
+            }
         }
 
         return NextResponse.json({
