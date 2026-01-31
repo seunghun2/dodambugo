@@ -81,18 +81,29 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 3. DB 상태 업데이트
+        // 3. DB 상태 업데이트 (분리해서 스키마 캐시 문제 방지)
+        // 3-1. 필수: status와 cancelled_at
         const { error: updateError } = await supabase
             .from('flower_orders')
             .update({
                 status: 'cancelled',
                 cancelled_at: new Date().toISOString(),
-                cancel_reason: cancelReason || null,
             })
             .eq('id', orderId);
 
         if (updateError) {
             console.error('DB 업데이트 실패:', updateError);
+        }
+
+        // 3-2. 선택: cancel_reason (실패해도 OK)
+        try {
+            await supabase
+                .from('flower_orders')
+                .update({ cancel_reason: cancelReason || null })
+                .eq('id', orderId);
+            console.log('✅ 취소 사유 저장 완료');
+        } catch (e) {
+            console.error('취소 사유 저장 실패 (무시):', e);
         }
 
         // 4. 알림톡 발송 (고객에게)
