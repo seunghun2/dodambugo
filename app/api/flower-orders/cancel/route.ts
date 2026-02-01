@@ -9,15 +9,10 @@ const supabase = createClient(
 
 const INNOPAY_CANCEL_API_URL = 'https://api.innopay.co.kr/api/cancelApi';
 
-// 결제방법에 따른 서비스코드
+// 결제방법에 따른 서비스코드 - 취소는 모두 01로
 const getSvcCd = (paymentMethod: string) => {
-    switch (paymentMethod) {
-        case 'card': return '01';  // 신용카드
-        case 'bank': return '02';  // 계좌이체
-        case 'virtual': return '04';  // 가상계좌
-        case 'easy': return '07';  // 간편결제
-        default: return '01';  // 기본값 카드
-    }
+    // 카카오페이 등 간편결제도 INNOPAY 내부적으로 카드로 처리됨
+    return '01';  // 모든 취소는 01(카드)로
 };
 
 // 주문 취소 API
