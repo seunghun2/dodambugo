@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8',
+                    'Merchant-Key': process.env.INNOPAY_LICENSE_KEY || '',
                 },
                 body: JSON.stringify(cancelData),
             });
