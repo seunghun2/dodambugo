@@ -23,7 +23,7 @@ interface OrderData {
     created_at: string;
     approved_at: string;
     bugo_id: string;
-    receipt_url: string;
+    tid: string;
 }
 
 export default function OrderDetailPage() {
@@ -176,8 +176,8 @@ export default function OrderDetailPage() {
                         <span className="label">결제 정보</span>
                         <span className="value">
                             {paymentText[order.payment_method] || order.payment_method}
-                            {order.receipt_url ? (
-                                <a href={order.receipt_url} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A', marginLeft: '10px' }}>영수증 보기</a>
+                            {order.tid ? (
+                                <a href={`https://pg.innopay.co.kr/pay/issue/CardIssue.jsp?TID=${order.tid}`} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A', marginLeft: '10px' }}>영수증 보기</a>
                             ) : null}
                         </span>
                     </div>
