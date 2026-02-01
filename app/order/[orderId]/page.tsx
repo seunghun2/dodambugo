@@ -177,7 +177,7 @@ export default function OrderDetailPage() {
                         <span className="value">
                             {paymentText[order.payment_method] || order.payment_method}
                             {order.tid ? (
-                                <a href={`https://pg.innopay.co.kr/pay/issue/CardIssue.jsp?TID=${order.tid}`} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A', marginLeft: '10px' }}>영수증 보기</a>
+                                <a href={`https://pg.innopay.co.kr/TransIssue.jsp?TID=${order.tid}`} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A', marginLeft: '10px' }}>영수증 보기</a>
                             ) : null}
                         </span>
                     </div>
