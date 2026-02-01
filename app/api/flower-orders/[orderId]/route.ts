@@ -18,12 +18,16 @@ export async function GET(
     }
 
     try {
-        // 주문번호(order_number) 또는 ID로 검색
-        const { data, error } = await supabase
-            .from('flower_orders')
-            .select('*')
-            .or(`order_number.eq.${orderId},id.eq.${orderId}`)
-            .single();
+        // MG로 시작하면 order_number로 검색, 아니면 id로 검색
+        let query = supabase.from('flower_orders').select('*');
+
+        if (orderId.startsWith('MG')) {
+            query = query.eq('order_number', orderId);
+        } else {
+            query = query.eq('id', orderId);
+        }
+
+        const { data, error } = await query.single();
 
         if (error || !data) {
             console.error('주문 조회 실패:', error);
