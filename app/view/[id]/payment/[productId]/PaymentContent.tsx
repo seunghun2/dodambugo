@@ -199,7 +199,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 goodsName: product.name,
                 goodsCnt: '1',
                 amt: String(product.price),
-                taxFreeAmt: '0',
+                taxFreeAmt: String(product.price),  // 화환은 비과세 상품
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
