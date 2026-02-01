@@ -145,13 +145,17 @@ export default function PaymentCallbackPage() {
                 setStatus('success');
                 setMessage('결제가 완료되었습니다!');
 
-                // 완료 페이지로 이동
+                // 완료 페이지로 이동 - 주문번호 페이지로 리다이렉트
                 setTimeout(() => {
-                    const finalBugoId = bugoId || routeBugoId;
-                    if (finalBugoId) {
-                        router.push(`/view/${finalBugoId}/order/complete`);
+                    if (orderNumber) {
+                        router.push(`/order/${orderNumber}`);
                     } else {
-                        router.push('/');
+                        const finalBugoId = bugoId || routeBugoId;
+                        if (finalBugoId) {
+                            router.push(`/view/${finalBugoId}/order/complete`);
+                        } else {
+                            router.push('/');
+                        }
                     }
                 }, 1500);
 
