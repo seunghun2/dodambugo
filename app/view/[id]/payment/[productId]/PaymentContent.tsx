@@ -199,7 +199,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 goodsName: product.name,
                 goodsCnt: '1',
                 amt: String(product.price),
-                taxFreeAmt: String(product.price),  // 화환은 비과세 상품
+                taxFreeAmt: '0',  // TODO: INNOPAY 복합과세 가맹점 변경 후 비과세 적용
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
