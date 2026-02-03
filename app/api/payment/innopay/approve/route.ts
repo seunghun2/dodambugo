@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
             try {
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료 템플릿
+                    'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
                     {
                         '상품명': orderData.product_name || '',
                         '금액': Number(amt).toLocaleString(),

@@ -5,7 +5,7 @@ import { sendAlimtalk } from '@/lib/solapi';
 
 // 알림톡 템플릿 ID
 const ALIMTALK_TEMPLATES = {
-    FLOWER_PAYMENT_COMPLETE: 'KA01TP26012700534231305PoQ81TX6h',  // 화환 결제완료
+    FLOWER_PAYMENT_COMPLETE: 'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료
     FLOWER_DELIVERY_COMPLETE: 'KA01TP260127010157157MBMxvZX3qUI', // 화환 배송완료
 };
 
