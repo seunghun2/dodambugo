@@ -35,7 +35,7 @@ const getCachedBugo = unstable_cache(
     { revalidate: 60 }
 );
 
-// 캐시된 상품 조회 (5분)
+// 캐시된 상품 조회 (30초)
 const getCachedProducts = unstable_cache(
     async () => {
         const supabase = getSupabase();
@@ -43,7 +43,7 @@ const getCachedProducts = unstable_cache(
         return result.data || [];
     },
     ['flower-products'],
-    { revalidate: 300 }
+    { revalidate: 30 }
 );
 
 // ISR: 60초마다 재생성 (CDN 캐싱)

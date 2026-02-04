@@ -919,6 +919,34 @@ export default function AdminProductsPage() {
                     gap: 8px;
                     cursor: pointer;
                 }
+                .toggle-label input[type="checkbox"] {
+                    width: 44px;
+                    height: 24px;
+                    appearance: none;
+                    background: #cbd5e1;
+                    border-radius: 12px;
+                    position: relative;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .toggle-label input[type="checkbox"]:checked {
+                    background: #22c55e;
+                }
+                .toggle-label input[type="checkbox"]::before {
+                    content: '';
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    background: white;
+                    border-radius: 50%;
+                    top: 2px;
+                    left: 2px;
+                    transition: transform 0.2s;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                }
+                .toggle-label input[type="checkbox"]:checked::before {
+                    transform: translateX(20px);
+                }
                 .image-upload-area {
                     display: flex;
                     flex-wrap: wrap;
