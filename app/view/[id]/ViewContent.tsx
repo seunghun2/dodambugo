@@ -810,9 +810,9 @@ ${url}
 
 
             {/* ========================================
-                꽃으로 마음을 보내신 분 - 상주가 볼 때는 숨김
+                꽃으로 마음을 보내신 분 - 상주도 볼 수 있음
             ======================================== */}
-            {mounted && !isOwner && (
+            {mounted && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
