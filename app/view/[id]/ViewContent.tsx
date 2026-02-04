@@ -826,7 +826,8 @@ ${url}
                             ))
                         ) : (
                             <div className="flower-empty">
-                                <p>아직 보내신 분이 없습니다.</p>
+                                <p>고인을 향한 따뜻한 마음</p>
+                                <p style={{ fontSize: '13px', color: '#888', marginTop: '4px' }}>화환으로 조의를 전하세요.</p>
                             </div>
                         )}
                     </div>
