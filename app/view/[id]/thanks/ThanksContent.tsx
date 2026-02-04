@@ -265,38 +265,41 @@ ${mournerName} 배상`;
                 ))}
             </div>
 
-            {/* 배경 이미지 (탭 아래 전체) */}
-            <div className="thanks-bg">
-                <Image
-                    src={symbolImages[activeTab]}
-                    alt=""
-                    fill
-                    style={{ objectFit: 'cover', objectPosition: 'top' }}
-                    priority
-                />
-            </div>
+            {/* 카드 래퍼 - 배경 + 콘텐츠 함께 스크롤 */}
+            <div className="thanks-card-wrapper">
+                {/* 배경 이미지 */}
+                <div className="thanks-bg">
+                    <Image
+                        src={symbolImages[activeTab]}
+                        alt=""
+                        fill
+                        style={{ objectFit: 'cover', objectPosition: 'top' }}
+                        priority
+                    />
+                </div>
 
-            {/* 컨텐츠 */}
-            <div className="thanks-content">
-                {/* 메시지 카드 */}
-                <div className="thanks-card">
-                    <h1 className="thanks-title">{currentMessage.title}</h1>
+                {/* 컨텐츠 */}
+                <div className="thanks-content">
+                    {/* 메시지 카드 */}
+                    <div className="thanks-card">
+                        <h1 className="thanks-title">{currentMessage.title}</h1>
 
-                    <div className="thanks-body">
-                        {currentCustomMessage ? (
-                            currentCustomMessage.split('\n\n').map((paragraph, i) => (
-                                <p key={i} dangerouslySetInnerHTML={{ __html: paragraph.replace(/\n/g, '<br/>') || '&nbsp;' }} />
-                            ))
-                        ) : (
-                            currentMessage.body.map((text, i) => (
-                                <p key={i} dangerouslySetInnerHTML={{ __html: replaceDeceased(text) }} />
-                            ))
-                        )}
-                    </div>
+                        <div className="thanks-body">
+                            {currentCustomMessage ? (
+                                currentCustomMessage.split('\n\n').map((paragraph, i) => (
+                                    <p key={i} dangerouslySetInnerHTML={{ __html: paragraph.replace(/\n/g, '<br/>') || '&nbsp;' }} />
+                                ))
+                            ) : (
+                                currentMessage.body.map((text, i) => (
+                                    <p key={i} dangerouslySetInnerHTML={{ __html: replaceDeceased(text) }} />
+                                ))
+                            )}
+                        </div>
 
-                    <div className="thanks-footer">
-                        <p className="thanks-date">{formatDate()}</p>
-                        <p className="thanks-mourner">{bugo.mourner_name || '상주'} 배상</p>
+                        <div className="thanks-footer">
+                            <p className="thanks-date">{formatDate()}</p>
+                            <p className="thanks-mourner">{bugo.mourner_name || '상주'} 배상</p>
+                        </div>
                     </div>
                 </div>
             </div>

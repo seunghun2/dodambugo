@@ -20,17 +20,25 @@
     color: #666;
 }
 
-/* 배경 이미지 - 탭 아래 전체 */
+/* 배경 이미지 - 콘텐츠와 함께 스크롤되는 카드 내부 */
 .thanks-bg {
-    position: fixed;
-    top: 52px;
-    /* 탭 높이 */
-    left: 50%;
-    transform: translateX(-50%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
     width: 100%;
-    max-width: 430px;
+    height: 100%;
     z-index: 0;
+}
+
+/* 카드 컨테이너 - 배경 + 글씨 함께 */
+.thanks-card-wrapper {
+    position: relative;
+    min-height: calc(100vh - 52px - 80px);
+    margin: 52px 20px 0;
+    /* 탭 높이만큼 위 여백 */
+    overflow: hidden;
 }
 
 /* 탭 네비게이션 */
@@ -66,14 +74,14 @@
     border-bottom: 2px solid #333333;
 }
 
-/* 컨텐츠 영역 */
+/* 컨텐츠 영역 - 배경 위에 오버레이 */
 .thanks-content {
     position: relative;
     z-index: 1;
-    padding: 260px 20px 120px;
+    padding: 200px 20px 80px;
+    /* 상단 패딩 늘림 */
     max-width: 430px;
     margin: 0 auto;
-    min-height: calc(100vh - 52px - 80px);
 }
 
 /* 심볼 이미지 */
