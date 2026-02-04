@@ -12,7 +12,7 @@ interface Facility {
 interface FacilitySearchModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (facility: { name: string; address: string }, source: 'facility' | 'address') => void;
+    onSelect: (facility: { name: string; address: string; phone?: string }, source: 'facility' | 'address') => void;
 }
 
 export default function FacilitySearchModal({ isOpen, onClose, onSelect }: FacilitySearchModalProps) {
@@ -114,7 +114,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
     }, [isOpen, activeTab, onSelect, onClose]);
 
     const handleFacilitySelect = (facility: Facility) => {
-        onSelect({ name: facility.name, address: facility.address }, 'facility');
+        onSelect({ name: facility.name, address: facility.address, phone: facility.phone }, 'facility');
         onClose();
     };
 
