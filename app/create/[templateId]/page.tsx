@@ -1669,7 +1669,8 @@ export default function WriteFormPage() {
                         setFormData(prev => ({
                             ...prev,
                             funeral_home: facility.name,
-                            address: facility.address
+                            address: facility.address,
+                            funeral_home_tel: facility.phone || ''
                         }));
                         // 에러 클리어
                         setErrors(prev => {
