@@ -14,8 +14,43 @@ export function middleware(request: NextRequest) {
 
     // 차단 IP 체크
     if (BLOCKED_IPS.includes(ip)) {
-        // 차단 페이지로 리다이렉트 또는 403 반환
-        return new NextResponse('접근이 제한되었습니다.', { status: 403 });
+        // 무한 로딩 페이지 😈
+        const infiniteLoadingHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>마음부고</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #fff;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+</body>
+</html>`;
+        return new NextResponse(infiniteLoadingHtml, {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' }
+        });
     }
 
     return NextResponse.next();
