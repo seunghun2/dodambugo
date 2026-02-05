@@ -82,6 +82,8 @@ export const gaEvents = {
     viewFlowerDetail: (productId: string) => trackEvent('화환상세_조회', '화환', productId),
     startFlowerOrder: (productId: string) => trackEvent('화환주문_시작', '화환', productId),
     submitFlowerOrder: (productId: string, price: number) => trackEvent('화환주문_제출', '화환', `${productId}_${price}원`),
+    viewPaymentPage: (productId: string) => trackEvent('화환결제페이지_조회', '화환', productId),
+    startFlowerPayment: (productId: string, price: number) => trackEvent('화환결제_시작', '화환', `${productId}_${price}원`),
     completeFlowerOrder: (orderId: string, price: number) => trackEvent('화환결제_완료', '화환', `${orderId}_${price}원`),
     failFlowerPayment: (reason: string) => trackEvent('화환결제_실패', '화환', reason),
 

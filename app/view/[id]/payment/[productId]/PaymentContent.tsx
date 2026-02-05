@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import '@/app/view/[id]/order/[productId]/order.css';
 
 // INNOPAY 타입 선언
@@ -97,6 +98,8 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     };
 
     useEffect(() => {
+        // GA: 결제 페이지 조회 이벤트
+        gaEvents.viewPaymentPage(productId);
         // sessionStorage에서 주문 데이터 가져오기
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (storedData) {
@@ -135,6 +138,9 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
 
         // 고유 주문번호 생성
         const moid = `MAEUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // GA: 화환 결제 시작 이벤트
+        gaEvents.startFlowerPayment(productId, product.price);
 
         try {
             // DB에 주문 저장 (결제 대기 상태)

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import './order.css';
 
 interface FlowerProduct {
@@ -68,6 +69,9 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
 
     // sessionStorage에서 이전 입력값 복원
     useEffect(() => {
+        // GA: 주문 페이지 조회 이벤트
+        gaEvents.viewFlowerDetail(productId);
+
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (storedData) {
             try {
@@ -112,6 +116,8 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
             room: bugo.room_number || '',
             address: bugo.address || '',
         }));
+        // GA: 화환 주문 제출 이벤트
+        gaEvents.submitFlowerOrder(productId, product.discount_price || product.price);
         // payment 페이지로 이동
         router.push(`/view/${bugoId}/payment/${productId}`);
     };
