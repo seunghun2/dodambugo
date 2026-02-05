@@ -32,6 +32,71 @@ export default function AdminFlowerOrdersPage() {
     const [selectedOrder, setSelectedOrder] = useState<FlowerOrder | null>(null);
     const [statusFilter, setStatusFilter] = useState('');
     const [cancelling, setCancelling] = useState(false);
+    const [sendingDelivery, setSendingDelivery] = useState(false);
+
+    // 배송중 알림톡 발송
+    const sendDeliveringNotify = async (order: FlowerOrder) => {
+        if (!confirm(`"${order.sender_name}"님께 배송중 알림톡을 발송하시겠습니까?`)) {
+            return;
+        }
+
+        setSendingDelivery(true);
+        try {
+            const response = await fetch('/api/flower-orders/delivery-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    type: 'delivering'
+                }),
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('배송중 알림톡이 발송되었습니다.');
+                // 상태도 업데이트
+                await updateStatus(order.id, 'delivering');
+            } else {
+                alert(`발송 실패: ${result.error}`);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('알림톡 발송 중 오류가 발생했습니다.');
+        }
+        setSendingDelivery(false);
+    };
+
+    // 배송완료 알림톡 발송
+    const sendDeliveredNotify = async (order: FlowerOrder) => {
+        if (!confirm(`"${order.sender_name}"님께 배송완료 알림톡을 발송하시겠습니까?`)) {
+            return;
+        }
+
+        setSendingDelivery(true);
+        try {
+            const response = await fetch('/api/flower-orders/delivery-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    type: 'delivered'
+                }),
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('배송완료 알림톡이 발송되었습니다.');
+                // 상태도 업데이트
+                await updateStatus(order.id, 'delivered');
+            } else {
+                alert(`발송 실패: ${result.error}`);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('알림톡 발송 중 오류가 발생했습니다.');
+        }
+        setSendingDelivery(false);
+    };
 
     useEffect(() => {
         fetchOrders();
@@ -354,7 +419,56 @@ export default function AdminFlowerOrdersPage() {
                                                 부고장 보기
                                             </Link>
                                         )}
-                                        {selectedOrder.status !== 'cancelled' && (
+
+                                        {/* 배송중 버튼 - pending/confirmed/preparing 상태일 때만 */}
+                                        {['pending', 'confirmed', 'preparing'].includes(selectedOrder.status) && (
+                                            <button
+                                                onClick={() => sendDeliveringNotify(selectedOrder)}
+                                                disabled={sendingDelivery}
+                                                style={{
+                                                    background: '#dbeafe',
+                                                    color: '#2563eb',
+                                                    border: 'none',
+                                                    padding: '10px 16px',
+                                                    borderRadius: '8px',
+                                                    cursor: sendingDelivery ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontWeight: 600,
+                                                    marginTop: '8px',
+                                                }}
+                                            >
+                                                <span className="material-symbols-outlined">local_shipping</span>
+                                                {sendingDelivery ? '발송 중...' : '배송중 알림'}
+                                            </button>
+                                        )}
+
+                                        {/* 배송완료 버튼 - delivering 상태일 때만 */}
+                                        {selectedOrder.status === 'delivering' && (
+                                            <button
+                                                onClick={() => sendDeliveredNotify(selectedOrder)}
+                                                disabled={sendingDelivery}
+                                                style={{
+                                                    background: '#dcfce7',
+                                                    color: '#16a34a',
+                                                    border: 'none',
+                                                    padding: '10px 16px',
+                                                    borderRadius: '8px',
+                                                    cursor: sendingDelivery ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontWeight: 600,
+                                                    marginTop: '8px',
+                                                }}
+                                            >
+                                                <span className="material-symbols-outlined">check_circle</span>
+                                                {sendingDelivery ? '발송 중...' : '배송완료 알림'}
+                                            </button>
+                                        )}
+
+                                        {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
                                             <button
                                                 onClick={() => cancelOrder(selectedOrder)}
                                                 className="btn-action danger"
