@@ -69,8 +69,7 @@ export default function CompletePage() {
 
         if (params.bugoNumber) {
             fetchBugo();
-            // 상주임을 localStorage에 저장 (view 페이지에서 확인용)
-            localStorage.setItem(`bugo_owner_${params.bugoNumber}`, 'true');
+            // 상주 인증은 토큰 방식으로만 처리 (view 페이지에서 token 파라미터로 접속 시)
 
             // QR 코드 생성 (클라이언트에서 즉시)
             const url = `${getOrigin()}/view/${params.bugoNumber}`;
