@@ -26,6 +26,7 @@ interface Bugo {
     account_info: any[];
     message: string;
     address: string;
+    ip_address?: string;
 }
 
 export default function AdminBugoPage() {
@@ -378,6 +379,17 @@ export default function AdminBugoPage() {
                                         <div className="detail-section">
                                             <label>안내사항</label>
                                             <div className="message-box">{selectedBugo.message}</div>
+                                        </div>
+                                    )}
+
+                                    {selectedBugo.ip_address && (
+                                        <div className="detail-section">
+                                            <div className="detail-row">
+                                                <label>IP 주소</label>
+                                                <span style={{ fontFamily: 'monospace', color: '#0066cc' }}>
+                                                    {selectedBugo.ip_address}
+                                                </span>
+                                            </div>
                                         </div>
                                     )}
 
