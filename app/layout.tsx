@@ -12,6 +12,7 @@ import { dodamTheme } from '@/lib/theme';
 import MainLayout from '@/components/MainLayout';
 import KakaoInit from '@/components/KakaoInit';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import MicrosoftClarity from '@/components/MicrosoftClarity';
 
 export const metadata = {
   title: '마음부고 - 무료 모바일 부고장, 모바일부고, 부고문자, 부고, 부고장, 카카오톡 공유',
@@ -124,6 +125,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <GoogleAnalytics />
+        <MicrosoftClarity />
         <KakaoInit />
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
