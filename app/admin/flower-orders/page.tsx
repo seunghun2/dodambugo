@@ -33,6 +33,14 @@ export default function AdminFlowerOrdersPage() {
     const [statusFilter, setStatusFilter] = useState('');
     const [cancelling, setCancelling] = useState(false);
     const [sendingDelivery, setSendingDelivery] = useState(false);
+    const [notifyLogs, setNotifyLogs] = useState<{ time: string; message: string; type: 'success' | 'error' }[]>([]);
+
+    // 로그 추가 함수
+    const addNotifyLog = (message: string, type: 'success' | 'error' = 'success') => {
+        const now = new Date();
+        const time = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setNotifyLogs(prev => [{ time, message, type }, ...prev.slice(0, 9)]); // 최근 10개만 유지
+    };
 
     // 배송중 알림톡 발송
     const sendDeliveringNotify = async (order: FlowerOrder) => {
@@ -53,15 +61,16 @@ export default function AdminFlowerOrdersPage() {
             const result = await response.json();
 
             if (response.ok) {
-                alert('배송중 알림톡이 발송되었습니다.');
+                addNotifyLog(`[배송중] ${order.sender_name}님께 알림톡 발송 완료`, 'success');
                 // 상태도 업데이트
                 await updateStatus(order.id, 'delivering');
+                fetchOrders();
             } else {
-                alert(`발송 실패: ${result.error}`);
+                addNotifyLog(`[배송중] 발송 실패: ${result.error}`, 'error');
             }
         } catch (err) {
             console.error(err);
-            alert('알림톡 발송 중 오류가 발생했습니다.');
+            addNotifyLog(`[배송중] 발송 오류`, 'error');
         }
         setSendingDelivery(false);
     };
@@ -85,15 +94,16 @@ export default function AdminFlowerOrdersPage() {
             const result = await response.json();
 
             if (response.ok) {
-                alert('배송완료 알림톡이 발송되었습니다.');
+                addNotifyLog(`[배송완료] ${order.sender_name}님께 알림톡 발송 완료`, 'success');
                 // 상태도 업데이트
                 await updateStatus(order.id, 'delivered');
+                fetchOrders();
             } else {
-                alert(`발송 실패: ${result.error}`);
+                addNotifyLog(`[배송완료] 발송 실패: ${result.error}`, 'error');
             }
         } catch (err) {
             console.error(err);
-            alert('알림톡 발송 중 오류가 발생했습니다.');
+            addNotifyLog(`[배송완료] 발송 오류`, 'error');
         }
         setSendingDelivery(false);
     };
@@ -419,77 +429,109 @@ export default function AdminFlowerOrdersPage() {
                                                 부고장 보기
                                             </Link>
                                         )}
+                                        {/* 알림톡 버튼 섹션 */}
+                                        <div style={{ marginTop: '16px', borderTop: '1px solid #333', paddingTop: '16px' }}>
+                                            <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>알림톡 발송</div>
 
-                                        {/* 배송중 버튼 - pending/confirmed/preparing 상태일 때만 */}
-                                        {['pending', 'confirmed', 'preparing'].includes(selectedOrder.status) && (
-                                            <button
-                                                onClick={() => sendDeliveringNotify(selectedOrder)}
-                                                disabled={sendingDelivery}
-                                                style={{
-                                                    background: '#dbeafe',
-                                                    color: '#2563eb',
-                                                    border: 'none',
-                                                    padding: '10px 16px',
-                                                    borderRadius: '8px',
-                                                    cursor: sendingDelivery ? 'not-allowed' : 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    fontWeight: 600,
-                                                    marginTop: '8px',
-                                                }}
-                                            >
-                                                <span className="material-symbols-outlined">local_shipping</span>
-                                                {sendingDelivery ? '발송 중...' : '배송중 알림'}
-                                            </button>
-                                        )}
+                                            {/* 첫번째 줄: 배송중 / 배송완료 */}
+                                            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                                <button
+                                                    onClick={() => sendDeliveringNotify(selectedOrder)}
+                                                    disabled={sendingDelivery}
+                                                    style={{
+                                                        flex: 1,
+                                                        background: '#dbeafe',
+                                                        color: '#2563eb',
+                                                        border: 'none',
+                                                        padding: '10px 12px',
+                                                        borderRadius: '8px',
+                                                        cursor: sendingDelivery ? 'not-allowed' : 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '6px',
+                                                        fontWeight: 600,
+                                                        fontSize: '13px',
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>local_shipping</span>
+                                                    배송중 알림
+                                                </button>
+                                                <button
+                                                    onClick={() => sendDeliveredNotify(selectedOrder)}
+                                                    disabled={sendingDelivery}
+                                                    style={{
+                                                        flex: 1,
+                                                        background: '#dcfce7',
+                                                        color: '#16a34a',
+                                                        border: 'none',
+                                                        padding: '10px 12px',
+                                                        borderRadius: '8px',
+                                                        cursor: sendingDelivery ? 'not-allowed' : 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '6px',
+                                                        fontWeight: 600,
+                                                        fontSize: '13px',
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check_circle</span>
+                                                    배송완료
+                                                </button>
+                                            </div>
 
-                                        {/* 배송완료 버튼 - delivering 상태일 때만 */}
-                                        {selectedOrder.status === 'delivering' && (
-                                            <button
-                                                onClick={() => sendDeliveredNotify(selectedOrder)}
-                                                disabled={sendingDelivery}
-                                                style={{
-                                                    background: '#dcfce7',
-                                                    color: '#16a34a',
-                                                    border: 'none',
-                                                    padding: '10px 16px',
-                                                    borderRadius: '8px',
-                                                    cursor: sendingDelivery ? 'not-allowed' : 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    fontWeight: 600,
-                                                    marginTop: '8px',
-                                                }}
-                                            >
-                                                <span className="material-symbols-outlined">check_circle</span>
-                                                {sendingDelivery ? '발송 중...' : '배송완료 알림'}
-                                            </button>
-                                        )}
-
-                                        {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
+                                            {/* 두번째 줄: 주문취소 */}
                                             <button
                                                 onClick={() => cancelOrder(selectedOrder)}
-                                                className="btn-action danger"
-                                                disabled={cancelling}
+                                                disabled={cancelling || selectedOrder.status === 'cancelled'}
                                                 style={{
-                                                    background: '#fee2e2',
-                                                    color: '#dc2626',
+                                                    width: '100%',
+                                                    background: selectedOrder.status === 'cancelled' ? '#555' : '#fee2e2',
+                                                    color: selectedOrder.status === 'cancelled' ? '#888' : '#dc2626',
                                                     border: 'none',
-                                                    padding: '10px 16px',
+                                                    padding: '10px 12px',
                                                     borderRadius: '8px',
-                                                    cursor: cancelling ? 'not-allowed' : 'pointer',
+                                                    cursor: (cancelling || selectedOrder.status === 'cancelled') ? 'not-allowed' : 'pointer',
                                                     display: 'flex',
                                                     alignItems: 'center',
+                                                    justifyContent: 'center',
                                                     gap: '6px',
                                                     fontWeight: 600,
-                                                    marginTop: '8px',
+                                                    fontSize: '13px',
                                                 }}
                                             >
-                                                <span className="material-symbols-outlined">cancel</span>
-                                                {cancelling ? '취소 중...' : '주문 취소'}
+                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cancel</span>
+                                                {cancelling ? '취소 중...' : selectedOrder.status === 'cancelled' ? '취소됨' : '주문 취소'}
                                             </button>
+                                        </div>
+
+                                        {/* 알림톡 발송 로그 */}
+                                        {notifyLogs.length > 0 && (
+                                            <div style={{ marginTop: '16px', borderTop: '1px solid #333', paddingTop: '16px' }}>
+                                                <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>발송 로그</div>
+                                                <div style={{
+                                                    background: '#1a1a1a',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    maxHeight: '150px',
+                                                    overflowY: 'auto',
+                                                    fontSize: '12px',
+                                                    fontFamily: 'monospace'
+                                                }}>
+                                                    {notifyLogs.map((log, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            style={{
+                                                                color: log.type === 'success' ? '#22c55e' : '#ef4444',
+                                                                marginBottom: idx < notifyLogs.length - 1 ? '6px' : 0
+                                                            }}
+                                                        >
+                                                            <span style={{ color: '#888' }}>{log.time}</span> {log.message}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
