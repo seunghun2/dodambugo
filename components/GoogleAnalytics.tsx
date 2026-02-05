@@ -92,5 +92,7 @@ export const gaEvents = {
     // ========== 기타 ==========
     clickFAQ: () => trackEvent('FAQ_클릭', '기타'),
     clickGuide: () => trackEvent('장례가이드_클릭', '기타'),
+    clickMainCTA: () => trackEvent('메인_CTA클릭', 'CTA', '부고장 만들기'),
+    clickHeaderCTA: () => trackEvent('헤더_CTA클릭', 'CTA', '부고장 만들기'),
 };
 

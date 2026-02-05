@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import SideMenu from '@/components/SideMenu';
 import NavMenu from '@/components/NavMenu';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import KBEscrow from '@/components/KBEscrow';
 // supabase는 검색 시에만 동적 로드 (초기 번들 크기 감소)
 import {
@@ -194,6 +195,7 @@ export default function HomePage() {
   }, []);
 
   const checkDraftBeforeCreate = () => {
+    gaEvents.clickMainCTA(); // GA 이벤트 추적
     if (hasDraft && draftTemplateId) {
       setDraftModalOpen(true);
     } else {
