@@ -114,38 +114,17 @@ export async function PATCH(request: NextRequest) {
             .from('flower_orders')
             .update(updateData)
             .eq('id', id)
-            .select(`
-                *,
-                bugo:bugo_id (
-                    deceased_name,
-                    bugo_number
-                )
-            `)
+            .select('*')
             .single();
 
         if (error) {
+            console.error('주문 상태 업데이트 에러:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // 📱 배송완료 알림톡 발송 (주문자에게)
-        if (status === 'delivered' && data?.sender_phone) {
-            const phoneNumber = data.sender_phone.replace(/-/g, '');
-            const deceasedName = data.bugo?.deceased_name || '';
+        // 📱 배송완료 알림톡 발송 (주문자에게) - 별도 API로 이동됨
+        // delivery-notify API에서 처리
 
-            sendAlimtalk(
-                phoneNumber,
-                ALIMTALK_TEMPLATES.FLOWER_DELIVERY_COMPLETE,
-                {
-                    '상품명': data.product_name || '',
-                    '받는분': data.recipient_name || '',
-                    '장례식장': `${data.funeral_home || ''} ${data.room || ''}`.trim(),
-                    '주문번호': data.order_number || '',
-                    '고인명': deceasedName,
-                }
-            ).then(() => {
-                console.log('✅ 화환 배송완료 알림톡 발송:', phoneNumber);
-            }).catch(err => console.error('❌ 화환 배송완료 알림톡 실패:', err));
-        }
 
         return NextResponse.json({ order: data });
     } catch (err) {
