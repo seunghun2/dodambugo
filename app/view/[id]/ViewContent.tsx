@@ -1025,8 +1025,10 @@ ${url}
                                         sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
                                         sessionStorage.setItem(`bugo_cache_${params.id}`, JSON.stringify(bugo));
                                     }
+                                    gaEvents.startFlowerOrder(String(selectedFlower));
                                     router.push(`/view/${params.id}/order/${selectedFlower}`);
                                 } else {
+                                    gaEvents.clickFlowerButton();
                                     setFlowerModalOpen(true);
                                 }
                             }}
