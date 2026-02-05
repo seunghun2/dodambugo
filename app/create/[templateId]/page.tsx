@@ -144,6 +144,16 @@ export default function WriteFormPage() {
     // 원래 연락처 (수정 모드에서 변경 감지용)
     const [originalPhone, setOriginalPhone] = useState('');
 
+    // 클라이언트 IP 주소 (부고 생성 추적용)
+    const [clientIp, setClientIp] = useState('');
+    useEffect(() => {
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => setClientIp(data.ip))
+            .catch(() => setClientIp(''));
+    }, []);
+
+
     // 제출 상태
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createdBugo, setCreatedBugo] = useState<any>(null);
@@ -793,6 +803,7 @@ export default function WriteFormPage() {
                     : null,
                 photo_url: showPhoto ? photoUrl : null,
                 status: 'active',
+                ip_address: clientIp || null,
             };
 
             // 디버깅: 계좌 정보 확인
