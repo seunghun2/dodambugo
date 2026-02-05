@@ -66,9 +66,12 @@ export async function POST(request: Request) {
             variables
         );
 
-        if (!result.success) {
-            console.error('알림톡 발송 실패:', result.error);
-            return NextResponse.json({ error: '알림톡 발송 실패: ' + result.error }, { status: 500 });
+        console.log('알림톡 발송 API 결과:', JSON.stringify(result, null, 2));
+
+        // Solapi 응답에서 에러 확인 (groupId가 있으면 성공, errorCode가 있으면 실패)
+        if (result.errorCode || result.errorMessage) {
+            console.error('알림톡 발송 실패:', result.errorCode, result.errorMessage);
+            return NextResponse.json({ error: '알림톡 발송 실패: ' + (result.errorMessage || result.errorCode) }, { status: 500 });
         }
 
         // 상태 업데이트
