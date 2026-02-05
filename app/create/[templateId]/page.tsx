@@ -169,12 +169,37 @@ export default function WriteFormPage() {
 
     // 임시저장 모달
     const [draftModalOpen, setDraftModalOpen] = useState(false);
+    const [draftId, setDraftId] = useState<string | null>(null);
 
     const handleDraftClick = () => {
         setDraftModalOpen(true);
     };
 
-    const saveDraftAndGoHome = () => {
+    // DB에 임시저장 (API 호출)
+    const saveDraftToDb = async () => {
+        try {
+            const response = await fetch('/api/drafts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    draftId,
+                    formData,
+                    templateId,
+                    ipAddress: clientIp,
+                }),
+            });
+            const result = await response.json();
+            if (result.draftId) {
+                setDraftId(result.draftId);
+                localStorage.setItem(`bugo_draft_id_${templateId}`, result.draftId);
+            }
+        } catch (error) {
+            console.error('Draft save to DB failed:', error);
+        }
+    };
+
+    const saveDraftAndGoHome = async () => {
+        // localStorage에 저장 (기존)
         const draftData = {
             formData,
             mourners,
@@ -187,6 +212,10 @@ export default function WriteFormPage() {
             savedAt: new Date().toISOString()
         };
         localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+
+        // DB에도 저장 (새로 추가)
+        await saveDraftToDb();
+
         setDraftModalOpen(false);
         router.push('/');
     };
@@ -322,9 +351,10 @@ export default function WriteFormPage() {
         // 수정 모드에서는 자동저장 안 함
         if (editBugoNumber) return;
 
-        const autoSave = () => {
+        const autoSave = async () => {
             // 최소 하나 이상 입력된 경우에만 저장
-            if (formData.deceased_name || formData.funeral_home || mourners[0]?.name) {
+            if (formData.deceased_name || formData.funeral_home || formData.primary_mourner) {
+                // localStorage에 저장 (기존)
                 const draftData = {
                     formData,
                     mourners,
@@ -337,6 +367,28 @@ export default function WriteFormPage() {
                     savedAt: new Date().toISOString()
                 };
                 localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+
+                // DB에도 저장 (IP 추적용)
+                try {
+                    const savedDraftId = localStorage.getItem(`bugo_draft_id_${templateId}`);
+                    const response = await fetch('/api/drafts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            draftId: savedDraftId,
+                            formData,
+                            templateId,
+                            ipAddress: clientIp,
+                        }),
+                    });
+                    const result = await response.json();
+                    if (result.draftId && !savedDraftId) {
+                        localStorage.setItem(`bugo_draft_id_${templateId}`, result.draftId);
+                    }
+                } catch (error) {
+                    console.error('Auto-save to DB failed:', error);
+                }
+
                 console.log('자동 저장 완료:', new Date().toLocaleTimeString());
             }
         };
@@ -344,7 +396,7 @@ export default function WriteFormPage() {
         const timer = setInterval(autoSave, 30000); // 30초
 
         return () => clearInterval(timer);
-    }, [formData, mourners, accounts, showAccount, showBurial, showPhoto, photoUrl, templateId, editBugoNumber]);
+    }, [formData, mourners, accounts, showAccount, showBurial, showPhoto, photoUrl, templateId, editBugoNumber, clientIp]);
 
     // 수정 모드: 기존 부고장 데이터 불러오기
     useEffect(() => {
