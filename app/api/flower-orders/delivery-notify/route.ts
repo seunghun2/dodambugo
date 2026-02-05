@@ -18,11 +18,16 @@ export async function POST(request: Request) {
         // 주문 정보 조회
         const { data: order, error: orderError } = await supabase
             .from('flower_orders')
-            .select('*, bugo:bugo_id(funeral_home, address, room)')
+            .select('*')
             .eq('id', orderId)
             .single();
 
-        if (orderError || !order) {
+        if (orderError) {
+            console.error('주문 조회 에러:', orderError);
+            return NextResponse.json({ error: '주문 조회 실패: ' + orderError.message }, { status: 404 });
+        }
+
+        if (!order) {
             return NextResponse.json({ error: '주문을 찾을 수 없습니다' }, { status: 404 });
         }
 
@@ -40,8 +45,8 @@ export async function POST(request: Request) {
             variables = {
                 '#{상품명}': order.product_name,
                 '#{주문자명}': order.sender_name,
-                '#{주소}': order.bugo?.funeral_home
-                    ? `${order.bugo.funeral_home}${order.bugo.room ? ' ' + order.bugo.room : ''}`
+                '#{주소}': order.funeral_home
+                    ? `${order.funeral_home}${order.room ? ' ' + order.room : ''}`
                     : order.address || '장례식장'
             };
         } else if (type === 'delivered') {
