@@ -13,6 +13,11 @@ import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
 import 'dayjs/locale/ko';
 
+// 상주 토큰 생성 (UUID-like)
+function generateOwnerToken(): string {
+    return 'xxxxxxxxxxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
+}
+
 // 관계 옵션
 const relationOptions = [
     '배우자', '아들', '딸', '며느리', '사위', '손', '손자', '손녀',
@@ -804,6 +809,8 @@ export default function WriteFormPage() {
                 photo_url: showPhoto ? photoUrl : null,
                 status: 'active',
                 ip_address: clientIp || null,
+                // 상주 인증 토큰 (신규 생성 시에만)
+                owner_token: editBugoNumber ? undefined : generateOwnerToken(),
             };
 
             // 디버깅: 계좌 정보 확인

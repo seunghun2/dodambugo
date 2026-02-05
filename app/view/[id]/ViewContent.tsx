@@ -207,18 +207,40 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const bugoRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
     const bugoAddress = funeralAddress;
 
-    // owner=true 파라미터 처리 (URL 정리)
+    // owner=true 또는 token 파라미터 처리 (URL 정리)
     useEffect(() => {
         const ownerParam = searchParams.get('owner');
+        const tokenParam = searchParams.get('token');
         const flowerParam = searchParams.get('flower');
         const bugoId = params.id as string;
         const storageKey = `bugo_owner_${bugoId}`;
 
-        if (ownerParam === 'true') {
-            // localStorage에 저장
+        // 토큰 기반 인증 (우선 처리)
+        if (tokenParam) {
+            // API로 토큰 검증 & 무효화
+            fetch(`/api/bugo/verify-token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bugoId, token: tokenParam })
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.valid) {
+                        // 유효한 토큰 → localStorage에 저장
+                        localStorage.setItem(storageKey, 'true');
+                        setIsOwner(true);
+                    }
+                    // 토큰 유효 여부 상관없이 URL 정리
+                    window.history.replaceState({}, '', window.location.pathname);
+                })
+                .catch(() => {
+                    // 에러 시에도 URL 정리
+                    window.history.replaceState({}, '', window.location.pathname);
+                });
+        } else if (ownerParam === 'true') {
+            // 기존 owner=true 방식 (하위 호환)
             localStorage.setItem(storageKey, 'true');
             setIsOwner(true);
-            // URL에서 owner 파라미터 제거 (history.replaceState로 새로고침 없이)
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, '', cleanUrl);
         } else {
