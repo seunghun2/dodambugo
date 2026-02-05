@@ -15,10 +15,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'orderId와 type이 필요합니다' }, { status: 400 });
         }
 
-        // 주문 정보 조회
+        // 주문 정보 조회 (bugo에서 고인명 가져오기)
         const { data: order, error: orderError } = await supabase
             .from('flower_orders')
-            .select('*')
+            .select('*, bugo:bugo_id(deceased_name)')
             .eq('id', orderId)
             .single();
 
@@ -50,10 +50,16 @@ export async function POST(request: Request) {
                     : order.address || '장례식장'
             };
         } else if (type === 'delivered') {
-            // 06-화환 배송 완료 (화환 도착 안내)
+            // 06-화환 배송 완료
             templateId = 'KA01TP260127010157157MBMxvZX3qUI';
             variables = {
-                '#{상품명}': order.product_name
+                '#{상품명}': order.product_name || '',
+                '#{받는분}': order.recipient_name || '',
+                '#{장례식장}': order.funeral_home
+                    ? `${order.funeral_home}${order.room ? ' ' + order.room : ''}`
+                    : '',
+                '#{주문번호}': order.order_number || '',
+                '#{고인명}': order.bugo?.deceased_name || ''
             };
         } else {
             return NextResponse.json({ error: '잘못된 type입니다' }, { status: 400 });
