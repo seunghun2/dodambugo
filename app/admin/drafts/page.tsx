@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import './drafts.css';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface Draft {
     id: string;
@@ -22,12 +21,14 @@ export default function AdminDraftsPage() {
     const [drafts, setDrafts] = useState<Draft[]>([]);
     const [loading, setLoading] = useState(true);
     const [groupByIp, setGroupByIp] = useState(false);
+    const [selectedIp, setSelectedIp] = useState<string | null>(null);
 
     useEffect(() => {
         fetchDrafts();
     }, []);
 
     const fetchDrafts = async () => {
+        setLoading(true);
         try {
             const response = await fetch('/api/drafts');
             const result = await response.json();
@@ -42,16 +43,24 @@ export default function AdminDraftsPage() {
     };
 
     // IP별 그룹핑
-    const groupedDrafts = groupByIp
-        ? drafts.reduce((acc, draft) => {
-            const ip = draft.ip_address || '알 수 없음';
-            if (!acc[ip]) acc[ip] = [];
-            acc[ip].push(draft);
-            return acc;
-        }, {} as Record<string, Draft[]>)
-        : null;
+    const groupedDrafts = drafts.reduce((acc, draft) => {
+        const ip = draft.ip_address || '알 수 없음';
+        if (!acc[ip]) acc[ip] = [];
+        acc[ip].push(draft);
+        return acc;
+    }, {} as Record<string, Draft[]>);
+
+    // IP별 통계
+    const ipStats = Object.entries(groupedDrafts)
+        .map(([ip, items]) => ({
+            ip,
+            count: items.length,
+            lastUpdate: items[0]?.updated_at,
+        }))
+        .sort((a, b) => b.count - a.count);
 
     const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-';
         const date = new Date(dateStr);
         return date.toLocaleString('ko-KR', {
             year: 'numeric',
@@ -69,112 +78,181 @@ export default function AdminDraftsPage() {
             border: '안내형',
             flower: '국화',
         };
-        return labels[template] || template;
+        return labels[template] || template || '-';
     };
 
-    if (loading) {
-        return (
-            <div className="admin-drafts">
-                <div className="loading">로딩 중...</div>
-            </div>
-        );
-    }
+    // 선택된 IP의 상세 목록
+    const selectedDrafts = selectedIp ? groupedDrafts[selectedIp] || [] : drafts;
 
     return (
-        <div className="admin-drafts">
-            <header className="admin-header">
-                <h1>임시저장 관리</h1>
-                <p className="subtitle">부고장 작성 중 임시저장된 데이터 목록</p>
-            </header>
+        <div className="admin-pc">
+            <AdminSidebar />
 
-            <div className="controls">
-                <label className="toggle-label">
-                    <input
-                        type="checkbox"
-                        checked={groupByIp}
-                        onChange={(e) => setGroupByIp(e.target.checked)}
-                    />
-                    IP별 그룹핑
-                </label>
-                <button className="refresh-btn" onClick={fetchDrafts}>
-                    새로고침
-                </button>
-            </div>
+            <main className="admin-main">
+                <header className="admin-top-header">
+                    <h1>임시저장 관리</h1>
+                    <div className="header-actions">
+                        <span className="total-count">총 {drafts.length}건 / IP {ipStats.length}개</span>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={groupByIp}
+                                onChange={(e) => {
+                                    setGroupByIp(e.target.checked);
+                                    setSelectedIp(null);
+                                }}
+                                style={{ width: '16px', height: '16px' }}
+                            />
+                            IP별 보기
+                        </label>
+                        <button onClick={fetchDrafts} className="btn-refresh">
+                            <span className="material-symbols-outlined">refresh</span>
+                            새로고침
+                        </button>
+                    </div>
+                </header>
 
-            {drafts.length === 0 ? (
-                <div className="empty-state">
-                    <p>임시저장된 데이터가 없습니다.</p>
-                </div>
-            ) : groupByIp && groupedDrafts ? (
-                // IP별 그룹핑 뷰
-                <div className="grouped-view">
-                    {Object.entries(groupedDrafts).map(([ip, ipDrafts]) => (
-                        <div key={ip} className="ip-group">
-                            <h2 className="ip-header">
-                                <span className="ip-address">{ip}</span>
-                                <span className="draft-count">{ipDrafts.length}건</span>
-                            </h2>
-                            <table className="drafts-table">
-                                <thead>
-                                    <tr>
-                                        <th>템플릿</th>
-                                        <th>고인명</th>
-                                        <th>장례식장</th>
-                                        <th>신청자</th>
-                                        <th>마지막 수정</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ipDrafts.map((draft) => (
-                                        <tr key={draft.id}>
-                                            <td>{getTemplateLabel(draft.template)}</td>
-                                            <td>{draft.deceased_name || '-'}</td>
-                                            <td>{draft.funeral_home || '-'}</td>
-                                            <td>{draft.applicant_name || '-'}</td>
-                                            <td>{formatDate(draft.updated_at)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                <div className="admin-content-area">
+                    {groupByIp ? (
+                        <>
+                            {/* IP 그룹 패널 */}
+                            <div className="inquiry-panel" style={{ flex: 1, maxWidth: '360px' }}>
+                                <div className="panel-header">
+                                    <span>IP 주소 ({ipStats.length})</span>
+                                </div>
+
+                                {loading ? (
+                                    <div className="panel-loading">
+                                        <span className="material-symbols-outlined spinning">progress_activity</span>
+                                        불러오는 중...
+                                    </div>
+                                ) : (
+                                    <div className="inquiry-table">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>IP 주소</th>
+                                                    <th>저장 수</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {ipStats.map(({ ip, count }) => (
+                                                    <tr
+                                                        key={ip}
+                                                        className={selectedIp === ip ? 'selected' : ''}
+                                                        onClick={() => setSelectedIp(ip)}
+                                                    >
+                                                        <td style={{ fontFamily: 'monospace', color: '#0066cc' }}>{ip}</td>
+                                                        <td className="number-cell">{count}건</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 선택된 IP의 상세 리스트 */}
+                            <div className="inquiry-panel wide">
+                                <div className="panel-header">
+                                    <span>
+                                        {selectedIp ? `${selectedIp} (${selectedDrafts.length}건)` : '전체 목록'}
+                                    </span>
+                                    {selectedIp && (
+                                        <button className="btn-close" onClick={() => setSelectedIp(null)}>
+                                            <span className="material-symbols-outlined">close</span>
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="inquiry-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>템플릿</th>
+                                                <th>고인명</th>
+                                                <th>장례식장</th>
+                                                <th>신청자</th>
+                                                <th>마지막 수정</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedDrafts.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={5} className="empty-cell">
+                                                        {selectedIp ? 'IP를 선택하세요' : '임시저장 데이터가 없습니다'}
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                selectedDrafts.map((draft) => (
+                                                    <tr key={draft.id}>
+                                                        <td>{getTemplateLabel(draft.template)}</td>
+                                                        <td className="name-cell">{draft.deceased_name || '-'}</td>
+                                                        <td>{draft.funeral_home || '-'}</td>
+                                                        <td>{draft.applicant_name || '-'}</td>
+                                                        <td className="date-cell">{formatDate(draft.updated_at)}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        /* 일반 리스트 뷰 */
+                        <div className="inquiry-panel wide">
+                            <div className="panel-header">
+                                <span>전체 임시저장 ({drafts.length})</span>
+                            </div>
+
+                            {loading ? (
+                                <div className="panel-loading">
+                                    <span className="material-symbols-outlined spinning">progress_activity</span>
+                                    불러오는 중...
+                                </div>
+                            ) : (
+                                <div className="inquiry-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>IP 주소</th>
+                                                <th>템플릿</th>
+                                                <th>고인명</th>
+                                                <th>장례식장</th>
+                                                <th>신청자</th>
+                                                <th>마지막 수정</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {drafts.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="empty-cell">
+                                                        임시저장 데이터가 없습니다
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                drafts.map((draft) => (
+                                                    <tr key={draft.id}>
+                                                        <td style={{ fontFamily: 'monospace', color: '#0066cc' }}>
+                                                            {draft.ip_address || '-'}
+                                                        </td>
+                                                        <td>{getTemplateLabel(draft.template)}</td>
+                                                        <td className="name-cell">{draft.deceased_name || '-'}</td>
+                                                        <td>{draft.funeral_home || '-'}</td>
+                                                        <td>{draft.applicant_name || '-'}</td>
+                                                        <td className="date-cell">{formatDate(draft.updated_at)}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
-                    ))}
+                    )}
                 </div>
-            ) : (
-                // 일반 리스트 뷰
-                <table className="drafts-table">
-                    <thead>
-                        <tr>
-                            <th>IP 주소</th>
-                            <th>템플릿</th>
-                            <th>고인명</th>
-                            <th>장례식장</th>
-                            <th>신청자</th>
-                            <th>마지막 수정</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {drafts.map((draft) => (
-                            <tr key={draft.id}>
-                                <td className="ip-cell">{draft.ip_address || '-'}</td>
-                                <td>{getTemplateLabel(draft.template)}</td>
-                                <td>{draft.deceased_name || '-'}</td>
-                                <td>{draft.funeral_home || '-'}</td>
-                                <td>{draft.applicant_name || '-'}</td>
-                                <td>{formatDate(draft.updated_at)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-
-            <div className="stats">
-                <p>총 {drafts.length}건의 임시저장</p>
-                <p>고유 IP: {new Set(drafts.map(d => d.ip_address)).size}개</p>
-            </div>
-
-            <Link href="/admin" className="back-link">
-                ← 어드민 홈으로
-            </Link>
+            </main>
         </div>
     );
 }

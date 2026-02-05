@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const navItems = [
     { href: '/admin/bugo', icon: 'description', label: '부고장 관리' },
+    { href: '/admin/drafts', icon: 'edit_note', label: '임시저장' },
     { href: '/admin/condolence-orders', icon: 'payments', label: '부의금 판매' },
     { href: '/admin/flower-orders', icon: 'local_florist', label: '화환 주문' },
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
