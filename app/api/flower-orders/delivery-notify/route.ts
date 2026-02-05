@@ -45,11 +45,10 @@ export async function POST(request: Request) {
                     : order.address || '장례식장'
             };
         } else if (type === 'delivered') {
-            // 06-화환 배송 완료
+            // 06-화환 배송 완료 (화환 도착 안내)
             templateId = 'KA01TP260127010157157MBMxvZX3qUI';
             variables = {
-                '#{상품명}': order.product_name,
-                '#{장례식장}': order.bugo?.funeral_home || order.funeral_home || '장례식장'
+                '#{상품명}': order.product_name
             };
         } else {
             return NextResponse.json({ error: '잘못된 type입니다' }, { status: 400 });
