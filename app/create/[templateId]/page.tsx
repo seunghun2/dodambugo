@@ -1468,6 +1468,15 @@ export default function WriteFormPage() {
                                                                 setFormData(prev => ({ ...prev, funeral_time: val }));
                                                                 if (errors.funeral_time) setErrors(prev => ({ ...prev, funeral_time: '' }));
                                                             }}
+                                                            onBlur={(e) => {
+                                                                let val = e.target.value.replace(/[^0-9:]/g, '');
+                                                                // 숫자만 있으면 (예: "9", "09", "14") → ":00" 추가
+                                                                if (val && !val.includes(':')) {
+                                                                    const hour = val.padStart(2, '0');
+                                                                    val = hour + ':00';
+                                                                    setFormData(prev => ({ ...prev, funeral_time: val }));
+                                                                }
+                                                            }}
                                                             style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                         />
                                                     </div>
@@ -1515,6 +1524,15 @@ export default function WriteFormPage() {
                                                             }
                                                             setFormData(prev => ({ ...prev, death_time: val }));
                                                             if (errors.death_time) setErrors(prev => ({ ...prev, death_time: '' }));
+                                                        }}
+                                                        onBlur={(e) => {
+                                                            let val = e.target.value.replace(/[^0-9:]/g, '');
+                                                            // 숫자만 있으면 (예: "9", "09", "14") → ":00" 추가
+                                                            if (val && !val.includes(':')) {
+                                                                const hour = val.padStart(2, '0');
+                                                                val = hour + ':00';
+                                                                setFormData(prev => ({ ...prev, death_time: val }));
+                                                            }
                                                         }}
                                                         style={{ width: '100%', height: '48px', textAlign: 'center', fontSize: '16px' }}
                                                     />
