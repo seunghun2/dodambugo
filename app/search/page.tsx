@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Bugo } from '@/lib/supabase';
 // supabase는 동적 로드
 
 export default function SearchPage() {
+    const router = useRouter();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<Bugo[]>([]);
     const [recentBugo, setRecentBugo] = useState<Bugo[]>([]);
@@ -13,6 +14,12 @@ export default function SearchPage() {
     const [searched, setSearched] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
+    // 비밀번호 모달
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [selectedBugo, setSelectedBugo] = useState<Bugo | null>(null);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     // 1달 전 날짜 계산
     const getOneMonthAgo = () => {
@@ -75,6 +82,31 @@ export default function SearchPage() {
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleSearch();
+        }
+    };
+
+    // 부고 카드 클릭 → 비밀번호 모달
+    const handleBugoClick = (bugo: Bugo) => {
+        setSelectedBugo(bugo);
+        setPasswordInput('');
+        setPasswordError('');
+        setShowPasswordModal(true);
+    };
+
+    // 비밀번호 확인
+    const handlePasswordSubmit = () => {
+        if (!selectedBugo) return;
+
+        // phone_password 또는 applicant_phone 뒤 4자리와 비교
+        const phonePassword = (selectedBugo as any).phone_password || (selectedBugo as any).applicant_phone || '';
+        const cleanPhone = phonePassword.replace(/-/g, '');
+        const last4 = cleanPhone.slice(-4);
+
+        if (passwordInput === last4) {
+            setShowPasswordModal(false);
+            router.push(`/create/complete/${selectedBugo.bugo_number}`);
+        } else {
+            setPasswordError('비밀번호가 일치하지 않습니다');
         }
     };
 
@@ -155,9 +187,9 @@ export default function SearchPage() {
                         {displayList.length > 0 ? (
                             <>
                                 {displayList.map((bugo) => (
-                                    <Link
+                                    <div
                                         key={bugo.id}
-                                        href={`/create/complete/${bugo.bugo_number}`}
+                                        onClick={() => handleBugoClick(bugo)}
                                         style={{
                                             display: 'block',
                                             padding: '16px',
@@ -166,7 +198,8 @@ export default function SearchPage() {
                                             border: '1px solid #e5e7eb',
                                             textDecoration: 'none',
                                             color: 'inherit',
-                                            transition: 'box-shadow 0.15s'
+                                            transition: 'box-shadow 0.15s',
+                                            cursor: 'pointer'
                                         }}
                                         onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'}
                                         onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
@@ -190,7 +223,7 @@ export default function SearchPage() {
                                             {(bugo as any).funeral_type || '일반 장례'}
                                             {((bugo as any).funeral_type === '일반 장례' || !(bugo as any).funeral_type) && bugo.funeral_home && ` | ${bugo.funeral_home}${bugo.room_number ? ` ${bugo.room_number}` : ''}`}
                                         </div>
-                                    </Link>
+                                    </div>
                                 ))}
 
                                 {/* 페이지네이션 */}
@@ -277,6 +310,105 @@ export default function SearchPage() {
                     </div>
                 </div>
             </section>
+
+            {/* 비밀번호 모달 */}
+            {showPasswordModal && (
+                <div
+                    onClick={() => setShowPasswordModal(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999,
+                        padding: '20px'
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'white',
+                            borderRadius: '16px',
+                            padding: '32px 24px',
+                            width: '100%',
+                            maxWidth: '340px',
+                            textAlign: 'center'
+                        }}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '28px', color: '#9ca3af', marginBottom: '12px' }}>lock</span>
+                        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1f2937', marginBottom: '8px' }}>비밀번호 입력</h3>
+                        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '20px' }}>
+                            신청 시 입력한 휴대전화번호<br />뒷자리 4자리를 입력해주세요
+                        </p>
+                        <input
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={4}
+                            placeholder="●●●●"
+                            value={passwordInput}
+                            onChange={(e) => {
+                                setPasswordInput(e.target.value.replace(/[^0-9]/g, ''));
+                                setPasswordError('');
+                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handlePasswordSubmit(); }}
+                            autoFocus
+                            style={{
+                                width: '100%',
+                                height: '52px',
+                                border: passwordError ? '2px solid #ef4444' : '2px solid #e5e7eb',
+                                borderRadius: '10px',
+                                fontSize: '24px',
+                                textAlign: 'center',
+                                letterSpacing: '8px',
+                                outline: 'none',
+                                marginBottom: '8px',
+                                boxSizing: 'border-box'
+                            }}
+                        />
+                        {passwordError && (
+                            <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px' }}>{passwordError}</p>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                            <button
+                                onClick={() => setShowPasswordModal(false)}
+                                style={{
+                                    flex: 1,
+                                    height: '48px',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '10px',
+                                    background: 'white',
+                                    color: '#6b7280',
+                                    fontSize: '15px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handlePasswordSubmit}
+                                style={{
+                                    flex: 1,
+                                    height: '48px',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    background: '#FFCC45',
+                                    color: '#191919',
+                                    fontSize: '15px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
