@@ -745,9 +745,12 @@ export default function WriteFormPage() {
                 newErrors[`mourner_${index}_contact`] = '연락처를 잘못 입력했습니다';
             }
         });
-        if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
-        if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
-        if (!formData.address) newErrors.address = '주소를 입력해주세요';
+        // 일반 장례일 때만 장례식장 정보 필수
+        if (formData.funeral_type === '일반 장례' || formData.funeral_type === '') {
+            if (!formData.funeral_home) newErrors.funeral_home = '장례식장명을 입력해주세요';
+            if (!formData.room_number) newErrors.room_number = '호실을 입력해주세요';
+            if (!formData.address) newErrors.address = '주소를 입력해주세요';
+        }
 
         // 일포 OFF일 때만 발인일시 필수
         if (!showIlpo) {
@@ -777,12 +780,18 @@ export default function WriteFormPage() {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length > 0) {
+            // 에러 메시지 알림 (모바일에서 에러 필드 못 볼 수 있음)
+            const firstErrorMessage = Object.values(newErrors)[0];
+            alert(firstErrorMessage);
+
             // 첫 번째 에러 필드로 스크롤
-            const firstErrorKey = Object.keys(newErrors)[0];
-            const errorElement = document.querySelector(`[data-field="${firstErrorKey}"]`);
-            if (errorElement) {
-                errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            setTimeout(() => {
+                const firstErrorKey = Object.keys(newErrors)[0];
+                const errorElement = document.querySelector(`[data-field="${firstErrorKey}"]`);
+                if (errorElement) {
+                    errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             return;
         }
 
@@ -1053,7 +1062,7 @@ export default function WriteFormPage() {
                                         {(formData.funeral_type === '일반 장례' || formData.funeral_type === '') && (
                                             <>
                                                 {/* 장례식장 검색 */}
-                                                <div className="form-group">
+                                                <div className="form-group" data-field="address">
                                                     <div
                                                         className="input-with-button"
                                                         style={{ position: 'relative', cursor: 'pointer' }}
@@ -1485,7 +1494,7 @@ export default function WriteFormPage() {
                                             {errors.funeral_time && !hideFuneral && <p className="field-error" style={{ marginTop: '4px' }}>{errors.funeral_time}</p>}
                                         </div>
 
-                                        <div className="form-group">
+                                        <div className="form-group" data-field="death_date">
                                             <label className="form-label required">임종(별세)일시</label>
                                             <div className="datetime-row" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                                                 <div style={{ flex: 6 }}>
