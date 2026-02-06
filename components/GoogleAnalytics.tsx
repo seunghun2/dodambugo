@@ -6,6 +6,11 @@ const GA_MEASUREMENT_ID = 'G-41LNKTBH4W';
 const GOOGLE_ADS_ID = 'AW-17911391889';
 
 export default function GoogleAnalytics() {
+    // 프로덕션에서만 GA 활성화 (로컬 개발 환경 제외)
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        return null;
+    }
+
     return (
         <>
             {/* Google Analytics */}
