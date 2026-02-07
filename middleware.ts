@@ -1,26 +1,62 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// 차단할 IP 목록
-const BLOCKED_IPS = [
+// 하드코딩 차단 IP (항상 적용)
+const HARDCODED_BLOCKED_IPS = [
   '183.98.166.235', // 아이리스코퍼레이션
   '112.184.95.41',  // 홍길동/신사임당 테스트
 ];
 
-export function middleware(request: NextRequest) {
+// DB 차단 IP 캐시 (5분마다 갱신)
+let cachedBlockedIPs: string[] = [];
+let lastFetchTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5분
+
+async function getBlockedIPs(request: NextRequest): Promise<string[]> {
+  const now = Date.now();
+
+  // 캐시 유효하면 바로 반환
+  if (now - lastFetchTime < CACHE_TTL && cachedBlockedIPs.length > 0) {
+    return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
+  }
+
+  // DB에서 차단 IP 가져오기
+  try {
+    const origin = request.nextUrl.origin;
+    const res = await fetch(`${origin}/api/blocked-ips`, {
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      cachedBlockedIPs = data
+        .filter((item: { is_active: boolean }) => item.is_active)
+        .map((item: { ip_address: string }) => item.ip_address);
+      lastFetchTime = now;
+    }
+  } catch {
+    // API 실패 시 캐시 유지
+  }
+
+  return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
+}
+
+export async function middleware(request: NextRequest) {
   // 클라이언트 IP 가져오기
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
     || '';
 
   // 차단 IP 체크
-  if (BLOCKED_IPS.includes(ip)) {
+  const blockedIPs = await getBlockedIPs(request);
+
+  if (blockedIPs.includes(ip)) {
     // 무한 로딩 페이지 😈
     const infiniteLoadingHtml = `
 <!DOCTYPE html>
 <html>
 <head>
   <title>마음부고</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       display: flex;

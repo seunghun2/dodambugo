@@ -7,6 +7,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 // supabase는 필요할 때만 동적 로드
 import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { detectScreenshot, detectDevTools, trackPageView } from '@/lib/antiScrape';
 import './view.css';
 
 // 은행명 → 로고 파일 매핑
@@ -196,10 +197,20 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const [flowerOrders] = useState(initialFlowerOrders);
     const [flowerProducts] = useState(initialFlowerProducts);
 
-    // Hydration 완료 후 mounted 상태 true
+    // Hydration 완료 후 mounted 상태 true + 의심 행동 감지
     useEffect(() => {
         setMounted(true);
-    }, []);
+
+        // 경쟁사 감지
+        const cleanupScreenshot = detectScreenshot();
+        const cleanupDevTools = detectDevTools();
+        trackPageView(bugo.bugo_number);
+
+        return () => {
+            cleanupScreenshot();
+            cleanupDevTools();
+        };
+    }, [bugo.bugo_number]);
 
     // 지역 정보 계산
     const funeralAddress = bugo.address || bugo.funeral_home || '';
