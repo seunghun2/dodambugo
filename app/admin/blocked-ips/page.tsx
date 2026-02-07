@@ -210,6 +210,11 @@ export default function BlockedIPsPage() {
                                         <td>즉시</td>
                                         <td style={{ fontSize: '12px', color: '#888' }}>python, scrapy, curl, selenium 등 자동화 도구로 부고 접근 시 즉시 차단</td>
                                     </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>페이지 과다 탐색</td>
+                                        <td>10개 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>고유 페이지 10개 이상 방문 시 자동 차단 + 슬랙 알림 (서비스 분석 의심)</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

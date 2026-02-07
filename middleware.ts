@@ -17,9 +17,12 @@ const CACHE_TTL = 5 * 60 * 1000; // 5분
 
 // 부고 대량 열람 감지 (IP → 고유 부고번호 Set)
 const viewTracker: Map<string, Set<string>> = new Map();
+// 페이지 과다 탐색 감지 (IP → 고유 페이지 Set)
+const pageTracker: Map<string, Set<string>> = new Map();
 let trackerResetTime = Date.now();
 const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
 const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
+const PAGE_THRESHOLD = 10; // 10개 이상 고유 페이지 방문 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -83,6 +86,7 @@ function trackBugoView(ip: string, bugoNumber: string) {
   const now = Date.now();
   if (now - trackerResetTime > TRACKER_TTL) {
     viewTracker.clear();
+    pageTracker.clear();
     trackerResetTime = now;
   }
 
@@ -102,6 +106,25 @@ function trackBugoView(ip: string, bugoNumber: string) {
       cachedBlockedIPs.push(ip);
     }
     viewTracker.delete(ip); // 트래커에서 제거
+  }
+}
+
+// 페이지 과다 탐색 감지 + 자동 차단
+function trackPageBrowsing(ip: string, pagePath: string) {
+  if (!pageTracker.has(ip)) {
+    pageTracker.set(ip, new Set());
+  }
+  const pages = pageTracker.get(ip)!;
+  pages.add(pagePath);
+
+  if (pages.size >= PAGE_THRESHOLD) {
+    const reason = `[자동] 페이지 과다 탐색 (${pages.size}개: ${[...pages].slice(0, 5).join(', ')}...)`;
+    autoBlockIP(ip, reason);
+    notifySlack(ip, reason);
+    if (!cachedBlockedIPs.includes(ip)) {
+      cachedBlockedIPs.push(ip);
+    }
+    pageTracker.delete(ip);
   }
 }
 
@@ -172,6 +195,9 @@ export async function middleware(request: NextRequest) {
   if (bugoMatch) {
     trackBugoView(ip, bugoMatch[1]);
   }
+
+  // 페이지 과다 탐색 감지
+  trackPageBrowsing(ip, path);
 
   // 차단 IP 체크
   const blockedIPs = await getBlockedIPs();
