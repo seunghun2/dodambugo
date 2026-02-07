@@ -13,6 +13,8 @@ import MainLayout from '@/components/MainLayout';
 import KakaoInit from '@/components/KakaoInit';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import MicrosoftClarity from '@/components/MicrosoftClarity';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: '마음부고 - 무료 모바일 부고장, 모바일부고, 부고문자, 부고, 부고장, 카카오톡 공유',
@@ -135,6 +137,8 @@ export default function RootLayout({
             </MainLayout>
           </ModalsProvider>
         </MantineProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
