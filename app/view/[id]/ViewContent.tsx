@@ -279,18 +279,36 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     }, [searchParams, params.id]);
 
 
-    // GA 조회 이벤트 & 조회수 증가 (한 번만)
+    // GA 조회 이벤트 & 조회수 증가 (한 번만, 관리자 제외)
     useEffect(() => {
         gaEvents.viewBugo(bugo.bugo_number || bugo.id);
 
-        // 조회수 증가 (백그라운드, 동적 로드)
-        import('@/lib/supabase').then(({ supabase }) => {
-            supabase
-                .from('bugo')
-                .update({ view_count: ((bugo as any).view_count || 0) + 1 })
-                .eq('id', bugo.id)
-                .then(); // 실행 트리거
-        });
+        // 관리자 IP 체크 후 조회수 증가
+        const ADMIN_IPS = ['14.38.63.241'];
+
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => {
+                if (ADMIN_IPS.includes(data.ip)) return; // 관리자는 카운트 안 함
+
+                import('@/lib/supabase').then(({ supabase }) => {
+                    supabase
+                        .from('bugo')
+                        .update({ view_count: ((bugo as any).view_count || 0) + 1 })
+                        .eq('id', bugo.id)
+                        .then();
+                });
+            })
+            .catch(() => {
+                // IP 확인 실패 시 그냥 카운트
+                import('@/lib/supabase').then(({ supabase }) => {
+                    supabase
+                        .from('bugo')
+                        .update({ view_count: ((bugo as any).view_count || 0) + 1 })
+                        .eq('id', bugo.id)
+                        .then();
+                });
+            });
     }, [bugo.id]);
 
     // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)

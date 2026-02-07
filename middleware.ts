@@ -51,11 +51,14 @@ async function getBlockedIPs(): Promise<string[]> {
   return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
 }
 
+// 관리자 IP (로그 제외)
+const ADMIN_IPS = ['14.38.63.241'];
+
 // 접속 로그 기록 (비동기, 논블로킹)
 function logAccess(ip: string, path: string, userAgent: string, referer: string) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
-  // /admin 페이지는 로그 제외
   if (path.startsWith('/admin')) return;
+  if (ADMIN_IPS.includes(ip)) return;
 
   fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
     method: 'POST',
