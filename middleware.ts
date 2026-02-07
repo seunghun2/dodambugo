@@ -19,7 +19,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5분
 const viewTracker: Map<string, Set<string>> = new Map();
 let trackerResetTime = Date.now();
 const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
-const VIEW_THRESHOLD = 3; // 3개 이상 다른 부고 열람 → 자동 차단
+const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -92,9 +92,11 @@ function trackBugoView(ip: string, bugoNumber: string) {
   const viewed = viewTracker.get(ip)!;
   viewed.add(bugoNumber);
 
-  // 임계값 초과 → 자동 차단
+  // 임계값 초과 → 자동 차단 + 슬랙 알림
   if (viewed.size >= VIEW_THRESHOLD) {
-    autoBlockIP(ip, `[자동] 부고 대량 열람 (${viewed.size}건: ${[...viewed].join(', ')})`);
+    const reason = `[자동] 부고 대량 열람 (${viewed.size}건: ${[...viewed].join(', ')})`;
+    autoBlockIP(ip, reason);
+    notifySlack(ip, reason);
     // 차단 후 캐시에 즉시 추가 (DB 갱신 전에도 적용)
     if (!cachedBlockedIPs.includes(ip)) {
       cachedBlockedIPs.push(ip);
@@ -116,6 +118,20 @@ function autoBlockIP(ip: string, reason: string) {
       'Prefer': 'resolution=ignore-duplicates',
     },
     body: JSON.stringify({ ip_address: ip, reason, is_active: true }),
+  }).catch(() => { });
+}
+
+// 슬랙 알림 (경쟁사 의심)
+function notifySlack(ip: string, reason: string) {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: `🚨 *경쟁사 의심 IP 자동 차단*\nIP: \`${ip}\`\n사유: ${reason}\n\n👉 /admin/blocked-ips 에서 확인`,
+    }),
   }).catch(() => { });
 }
 
