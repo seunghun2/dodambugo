@@ -112,13 +112,13 @@ export async function GET(request: NextRequest) {
         const oneDayAgo = new Date();
         oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-        // 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송
+        // 1~24시간 전 생성 + 조회수 5회 이하 + 리마인더 미발송
         const { data: bugos } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent')
+            .select('bugo_number, deceased_name, phone_password, owner_token, view_count, share_reminder_sent')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
-            .or('share_count.is.null,share_count.eq.0')
+            .or('view_count.is.null,view_count.lte.5')
             .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
             .not('phone_password', 'is', null);
 
