@@ -3824,6 +3824,11 @@ section {
         min-width: 600px;
     }
 
+    .inquiry-table th,
+    .inquiry-table td {
+        white-space: nowrap;
+    }
+
     /* 상세 패널: 전체 너비 */
     .detail-panel {
         min-width: 0 !important;
