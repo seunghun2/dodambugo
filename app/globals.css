@@ -3760,6 +3760,7 @@ section {
     /* 메인 영역: 사이드바 마진 제거 */
     .admin-main {
         margin-left: 0 !important;
+        padding-bottom: 72px !important;
     }
 
     /* 상단 헤더 모바일 */
@@ -3821,7 +3822,7 @@ section {
     }
 
     .inquiry-table table {
-        min-width: 600px;
+        min-width: 800px;
     }
 
     .inquiry-table th,
@@ -3889,7 +3890,7 @@ section {
     /* admin-full-table 모바일 */
     .admin-full-table {
         font-size: 12px;
-        min-width: 700px;
+        min-width: 900px;
     }
 
     .admin-full-table th,

@@ -8,7 +8,7 @@ const HARDCODED_BLOCKED_IPS = [
 ];
 
 // 관리자 IP (화이트리스트 — 차단/로그 제외)
-const ADMIN_IPS = ['14.38.63.241'];
+const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1'];
 
 // DB 차단 IP 캐시 (5분마다 갱신)
 let cachedBlockedIPs: string[] = [];
