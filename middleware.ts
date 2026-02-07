@@ -1,6 +1,41 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// 무한 로딩 페이지 (차단된 IP/국가에 표시) 😈
+const infiniteLoadingHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>마음부고</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #fff;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+</body>
+</html>`;
+
 // 하드코딩 차단 IP (항상 적용)
 const HARDCODED_BLOCKED_IPS = [
   '183.98.166.235', // 아이리스코퍼레이션
@@ -188,6 +223,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 🇨🇳 중국 IP 차단 (Vercel geo 감지 + IP 대역 fallback)
+  const country = (request as any).geo?.country || request.headers.get('x-vercel-ip-country') || '';
+  if (country === 'CN') {
+    return new NextResponse(infiniteLoadingHtml, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
+  }
+
   // 봇/크롤러 User-Agent 감지
   const ua = request.headers.get('user-agent') || '';
 
@@ -220,43 +264,9 @@ export async function middleware(request: NextRequest) {
   const blockedIPs = await getBlockedIPs();
 
   if (blockedIPs.includes(ip)) {
-    // 무한 로딩 페이지 😈
-    const infiniteLoadingHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>마음부고</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #fff;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #333;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-  <div class="spinner"></div>
-</body>
-</html>`;
     return new NextResponse(infiniteLoadingHtml, {
       status: 200,
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     });
   }
 
