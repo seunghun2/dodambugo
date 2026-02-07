@@ -16,7 +16,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5분
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-async function getBlockedIPs(request: NextRequest): Promise<string[]> {
+async function getBlockedIPs(): Promise<string[]> {
   const now = Date.now();
 
   // 캐시 유효하면 바로 반환
@@ -24,21 +24,28 @@ async function getBlockedIPs(request: NextRequest): Promise<string[]> {
     return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
   }
 
-  // DB에서 차단 IP 가져오기
+  // Supabase REST API 직접 호출 (자기 API 호출 방지)
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return [...HARDCODED_BLOCKED_IPS];
+  }
+
   try {
-    const origin = request.nextUrl.origin;
-    const res = await fetch(`${origin}/api/blocked-ips`, {
-      headers: { 'Cache-Control': 'no-cache' }
-    });
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/blocked_ips?is_active=eq.true&select=ip_address`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
     if (res.ok) {
       const data = await res.json();
-      cachedBlockedIPs = data
-        .filter((item: { is_active: boolean }) => item.is_active)
-        .map((item: { ip_address: string }) => item.ip_address);
+      cachedBlockedIPs = data.map((item: { ip_address: string }) => item.ip_address);
       lastFetchTime = now;
     }
   } catch {
-    // API 실패 시 캐시 유지
+    // 실패 시 캐시 유지
   }
 
   return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
@@ -78,7 +85,7 @@ export async function middleware(request: NextRequest) {
   );
 
   // 차단 IP 체크
-  const blockedIPs = await getBlockedIPs(request);
+  const blockedIPs = await getBlockedIPs();
 
   if (blockedIPs.includes(ip)) {
     // 무한 로딩 페이지 😈
