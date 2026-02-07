@@ -48,14 +48,15 @@ export function trackEvent(
 }
 
 // 부고 관련 이벤트들 (한글 라벨로 GA에서 쉽게 확인)
+// 네이밍 규칙: '카테고리_동작' 형태, 카테고리는 gaEvents 섹션별 통일
 export const gaEvents = {
-    // ========== 부고 생성 플로우 ==========
+    // ========== 부고 생성 ==========
     startCreateBugo: () => trackEvent('부고_생성시작', '부고생성'),
-    selectTemplate: (templateId: string) => trackEvent('템플릿_선택', '부고생성', templateId),
+    selectTemplate: (templateId: string) => trackEvent('부고_템플릿선택', '부고생성', templateId),
     completeBugo: (bugoNumber: string) => trackEvent('부고_생성완료', '부고생성', bugoNumber),
 
     // ========== 부고 조회 ==========
-    viewBugo: (bugoNumber: string) => trackEvent('부고_조회', '부고뷰', bugoNumber),
+    viewBugo: (bugoNumber: string) => trackEvent('부고_조회', '부고조회', bugoNumber),
 
     // ========== 공유 ==========
     shareBugo: (method: 'kakao' | 'link' | 'sms' | 'band') => {
@@ -65,41 +66,41 @@ export const gaEvents = {
             link: '링크복사',
             band: '밴드'
         };
-        trackEvent('부고_공유', '공유', labels[method] || method);
+        trackEvent('공유_부고', '공유', labels[method] || method);
     },
 
-    // ========== 지도/연락 ==========
-    clickMap: () => trackEvent('지도_클릭', '상호작용'),
-    clickCall: () => trackEvent('장례식장_전화', '상호작용'),
-    copyAddress: () => trackEvent('주소_복사', '상호작용'),
+    // ========== 상호작용 ==========
+    clickMap: () => trackEvent('상호작용_지도클릭', '상호작용'),
+    clickCall: () => trackEvent('상호작용_전화클릭', '상호작용'),
+    copyAddress: () => trackEvent('상호작용_주소복사', '상호작용'),
 
-    // ========== 부의금 플로우 ==========
-    openAccountModal: () => trackEvent('부의금모달_열기', '부의금'),
-    copyAccount: () => trackEvent('계좌번호_복사', '부의금'),
-    clickCardPayment: () => trackEvent('카드결제_클릭', '부의금'),
+    // ========== 부의금 ==========
+    openAccountModal: () => trackEvent('부의금_모달열기', '부의금'),
+    copyAccount: () => trackEvent('부의금_계좌복사', '부의금'),
+    clickCardPayment: () => trackEvent('부의금_카드결제클릭', '부의금'),
     startCondolence: (amount: number) => trackEvent('부의금_결제시작', '부의금', `${amount}원`),
     completeCondolence: (amount: number) => trackEvent('부의금_결제완료', '부의금', `${amount}원`),
 
-    // ========== 화환 플로우 ==========
-    clickFlowerButton: () => trackEvent('화환버튼_클릭', '화환'),
-    openFlowerModal: () => trackEvent('화환모달_열기', '화환'),
-    selectFlower: (productId: string) => trackEvent('화환상품_선택', '화환', productId),
-    viewFlowerDetail: (productId: string) => trackEvent('화환상세_조회', '화환', productId),
-    startFlowerOrder: (productId: string) => trackEvent('화환주문_시작', '화환', productId),
-    submitFlowerOrder: (productId: string, price: number) => trackEvent('화환주문_제출', '화환', `${productId}_${price}원`),
-    viewPaymentPage: (productId: string) => trackEvent('화환결제페이지_조회', '화환', productId),
-    startFlowerPayment: (productId: string, price: number) => trackEvent('화환결제_시작', '화환', `${productId}_${price}원`),
-    completeFlowerOrder: (orderId: string, price: number) => trackEvent('화환결제_완료', '화환', `${orderId}_${price}원`),
-    failFlowerPayment: (reason: string) => trackEvent('화환결제_실패', '화환', reason),
+    // ========== 화환 ==========
+    clickFlowerButton: () => trackEvent('화환_버튼클릭', '화환'),
+    openFlowerModal: () => trackEvent('화환_모달열기', '화환'),
+    selectFlower: (productId: string) => trackEvent('화환_상품선택', '화환', productId),
+    viewFlowerDetail: (productId: string) => trackEvent('화환_상세조회', '화환', productId),
+    startFlowerOrder: (productId: string) => trackEvent('화환_주문시작', '화환', productId),
+    submitFlowerOrder: (productId: string, price: number) => trackEvent('화환_주문제출', '화환', `${productId}_${price}원`),
+    viewPaymentPage: (productId: string) => trackEvent('화환_결제페이지', '화환', productId),
+    startFlowerPayment: (productId: string, price: number) => trackEvent('화환_결제시작', '화환', `${productId}_${price}원`),
+    completeFlowerOrder: (orderId: string, price: number) => trackEvent('화환_결제완료', '화환', `${orderId}_${price}원`),
+    failFlowerPayment: (reason: string) => trackEvent('화환_결제실패', '화환', reason),
 
     // ========== 감사장 ==========
     viewThanks: (bugoNumber: string) => trackEvent('감사장_조회', '감사장', bugoNumber),
     shareThanks: (method: string) => trackEvent('감사장_공유', '감사장', method),
 
-    // ========== 기타 ==========
-    clickFAQ: () => trackEvent('FAQ_클릭', '기타'),
-    clickGuide: () => trackEvent('장례가이드_클릭', '기타'),
-    clickMainCTA: () => trackEvent('메인_CTA클릭', 'CTA', '부고장 만들기'),
-    clickHeaderCTA: () => trackEvent('헤더_CTA클릭', 'CTA', '부고장 만들기'),
+    // ========== 페이지 ==========
+    clickFAQ: () => trackEvent('페이지_자주묻는질문', '페이지'),
+    clickGuide: () => trackEvent('페이지_장례가이드', '페이지'),
+    clickMainCTA: () => trackEvent('페이지_메인CTA', '전환', '부고장 만들기'),
+    clickHeaderCTA: () => trackEvent('페이지_헤더CTA', '전환', '부고장 만들기'),
 };
 
