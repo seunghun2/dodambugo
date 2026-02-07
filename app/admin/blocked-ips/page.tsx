@@ -203,7 +203,7 @@ export default function BlockedIPsPage() {
                                     <tr>
                                         <td style={{ fontWeight: 600 }}>부고 대량 열람</td>
                                         <td>5건 이상</td>
-                                        <td style={{ fontSize: '12px', color: '#888' }}>다수 부고 페이지 열람 (스크래핑 의심)</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>다른 부고 5개 이상 열람 시 자동 차단 + 슬랙 알림 (관리자 IP 제외)</td>
                                     </tr>
                                 </tbody>
                             </table>
