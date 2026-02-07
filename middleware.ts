@@ -111,11 +111,20 @@ function trackBugoView(ip: string, bugoNumber: string) {
 
 // 페이지 과다 탐색 감지 + 자동 차단
 function trackPageBrowsing(ip: string, pagePath: string) {
+  // 정적 파일 제외
+  if (/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(pagePath)) return;
+
+  // 경로 정규화: /view/XXX/flower/N, /view/XXX/order/N → /view/XXX
+  // /create/complete/XXX, /create/edit/XXX → /create
+  let normalized = pagePath;
+  normalized = normalized.replace(/^\/view\/(\d+)\/(flower|order)\/\d+$/, '/view/$1');
+  normalized = normalized.replace(/^\/create\/(complete|edit|preview)\/.*$/, '/create');
+
   if (!pageTracker.has(ip)) {
     pageTracker.set(ip, new Set());
   }
   const pages = pageTracker.get(ip)!;
-  pages.add(pagePath);
+  pages.add(normalized);
 
   if (pages.size >= PAGE_THRESHOLD) {
     const reason = `[자동] 페이지 과다 탐색 (${pages.size}개: ${[...pages].slice(0, 5).join(', ')}...)`;
