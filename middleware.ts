@@ -12,6 +12,10 @@ let cachedBlockedIPs: string[] = [];
 let lastFetchTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5분
 
+// Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 async function getBlockedIPs(request: NextRequest): Promise<string[]> {
   const now = Date.now();
 
@@ -40,11 +44,38 @@ async function getBlockedIPs(request: NextRequest): Promise<string[]> {
   return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
 }
 
+// 접속 로그 기록 (비동기, 논블로킹)
+function logAccess(ip: string, path: string, userAgent: string, referer: string) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+  // /admin 페이지는 로그 제외
+  if (path.startsWith('/admin')) return;
+
+  fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ip_address: ip, path, user_agent: userAgent, referer }),
+  }).catch(() => { });
+}
+
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
   // 클라이언트 IP 가져오기
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
     || '';
+
+  // 접속 로그 기록 (논블로킹)
+  logAccess(
+    ip,
+    path,
+    request.headers.get('user-agent') || '',
+    request.headers.get('referer') || ''
+  );
 
   // 차단 IP 체크
   const blockedIPs = await getBlockedIPs(request);
