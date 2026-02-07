@@ -156,6 +156,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 봇/크롤러 User-Agent 감지 → 자동 차단
+  const ua = request.headers.get('user-agent') || '';
+  const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium|headless/i;
+  if (botPatterns.test(ua) && path.startsWith('/view/')) {
+    autoBlockIP(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
+    notifySlack(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
+    if (!cachedBlockedIPs.includes(ip)) {
+      cachedBlockedIPs.push(ip);
+    }
+  }
+
   // 부고 열람 감지 (/view/숫자 패턴만)
   const bugoMatch = path.match(/^\/view\/(\d+)$/);
   if (bugoMatch) {

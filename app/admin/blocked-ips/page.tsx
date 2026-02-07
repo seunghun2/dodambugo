@@ -205,6 +205,11 @@ export default function BlockedIPsPage() {
                                         <td>5건 이상</td>
                                         <td style={{ fontSize: '12px', color: '#888' }}>다른 부고 5개 이상 열람 시 자동 차단 + 슬랙 알림 (관리자 IP 제외)</td>
                                     </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>봇/크롤러 감지</td>
+                                        <td>즉시</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>python, scrapy, curl, selenium 등 자동화 도구로 부고 접근 시 즉시 차단</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
