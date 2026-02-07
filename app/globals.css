@@ -3742,6 +3742,170 @@ section {
 }
 
 /* ========================================
+   어드민 모바일 반응형
+   ======================================== */
+
+/* 모바일 하단 네비 (PC에서 숨김) */
+.admin-mobile-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    /* 사이드바 숨기기 */
+    .admin-sidebar {
+        display: none !important;
+    }
+
+    /* 메인 영역: 사이드바 마진 제거 */
+    .admin-main {
+        margin-left: 0 !important;
+    }
+
+    /* 상단 헤더 모바일 */
+    .admin-top-header {
+        padding: 14px 16px !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+    }
+
+    .admin-top-header h1 {
+        font-size: 18px !important;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px !important;
+    }
+
+    .header-actions select,
+    .header-actions .btn-refresh {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .search-input input {
+        width: 100% !important;
+    }
+
+    /* 콘텐츠 영역: 세로 배치 */
+    .admin-content-area {
+        flex-direction: column !important;
+        padding: 12px !important;
+        gap: 12px !important;
+    }
+
+    /* 테이블 래퍼: 가로 스크롤 */
+    .admin-table-wrapper {
+        margin: 12px !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 문의/주문 테이블 패널 */
+    .inquiry-panel,
+    .inquiry-panel.wide {
+        flex: none !important;
+        width: 100%;
+    }
+
+    .inquiry-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .inquiry-table table {
+        min-width: 600px;
+    }
+
+    /* 상세 패널: 전체 너비 */
+    .detail-panel {
+        min-width: 0 !important;
+        max-width: none !important;
+        width: 100%;
+    }
+
+    /* 상세 액션 버튼 */
+    .detail-actions {
+        flex-direction: column;
+    }
+
+    /* 페이지네이션 */
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    /* 모바일 하단 네비 표시 */
+    .admin-mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1e293b;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        justify-content: space-around;
+        padding: 6px 0;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+        z-index: 1000;
+    }
+
+    .admin-mobile-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 4px;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        font-size: 10px;
+        transition: color 0.2s;
+    }
+
+    .admin-mobile-nav a .material-symbols-outlined {
+        font-size: 22px;
+    }
+
+    .admin-mobile-nav a.active {
+        color: var(--primary);
+    }
+
+    /* 메인 하단 패딩 (네비 높이만큼) */
+    .admin-main {
+        padding-bottom: 72px;
+    }
+
+    /* admin-full-table 모바일 */
+    .admin-full-table {
+        font-size: 12px;
+        min-width: 700px;
+    }
+
+    .admin-full-table th,
+    .admin-full-table td {
+        padding: 10px 12px !important;
+        white-space: nowrap;
+    }
+
+    /* 필터 입력 */
+    .admin-full-table .filter-row input {
+        font-size: 11px;
+    }
+
+    /* 메모 섹션 */
+    .memo-section {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+}
+
+/* ========================================
    부고장 작성 페이지 스타일
    ======================================== */
 
