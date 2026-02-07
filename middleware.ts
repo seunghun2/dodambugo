@@ -7,10 +7,19 @@ const HARDCODED_BLOCKED_IPS = [
   '112.184.95.41',  // 홍길동/신사임당 테스트
 ];
 
+// 관리자 IP (화이트리스트 — 차단/로그 제외)
+const ADMIN_IPS = ['14.38.63.241'];
+
 // DB 차단 IP 캐시 (5분마다 갱신)
 let cachedBlockedIPs: string[] = [];
 let lastFetchTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5분
+
+// 부고 대량 열람 감지 (IP → 고유 부고번호 Set)
+const viewTracker: Map<string, Set<string>> = new Map();
+let trackerResetTime = Date.now();
+const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
+const VIEW_THRESHOLD = 3; // 3개 이상 다른 부고 열람 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -51,9 +60,6 @@ async function getBlockedIPs(): Promise<string[]> {
   return [...HARDCODED_BLOCKED_IPS, ...cachedBlockedIPs];
 }
 
-// 관리자 IP (로그 제외)
-const ADMIN_IPS = ['14.38.63.241'];
-
 // 접속 로그 기록 (비동기, 논블로킹)
 function logAccess(ip: string, path: string, userAgent: string, referer: string) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
@@ -68,6 +74,48 @@ function logAccess(ip: string, path: string, userAgent: string, referer: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ ip_address: ip, path, user_agent: userAgent, referer }),
+  }).catch(() => { });
+}
+
+// 부고 대량 열람 감지 + 자동 차단
+function trackBugoView(ip: string, bugoNumber: string) {
+  // 24시간마다 트래커 리셋 (메모리 관리)
+  const now = Date.now();
+  if (now - trackerResetTime > TRACKER_TTL) {
+    viewTracker.clear();
+    trackerResetTime = now;
+  }
+
+  if (!viewTracker.has(ip)) {
+    viewTracker.set(ip, new Set());
+  }
+  const viewed = viewTracker.get(ip)!;
+  viewed.add(bugoNumber);
+
+  // 임계값 초과 → 자동 차단
+  if (viewed.size >= VIEW_THRESHOLD) {
+    autoBlockIP(ip, `[자동] 부고 대량 열람 (${viewed.size}건: ${[...viewed].join(', ')})`);
+    // 차단 후 캐시에 즉시 추가 (DB 갱신 전에도 적용)
+    if (!cachedBlockedIPs.includes(ip)) {
+      cachedBlockedIPs.push(ip);
+    }
+    viewTracker.delete(ip); // 트래커에서 제거
+  }
+}
+
+// IP 자동 차단 (DB 저장)
+function autoBlockIP(ip: string, reason: string) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+
+  fetch(`${SUPABASE_URL}/rest/v1/blocked_ips`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=ignore-duplicates',
+    },
+    body: JSON.stringify({ ip_address: ip, reason, is_active: true }),
   }).catch(() => { });
 }
 
@@ -86,6 +134,17 @@ export async function middleware(request: NextRequest) {
     request.headers.get('user-agent') || '',
     request.headers.get('referer') || ''
   );
+
+  // 관리자는 모든 차단/감지 스킵
+  if (ADMIN_IPS.includes(ip)) {
+    return NextResponse.next();
+  }
+
+  // 부고 열람 감지 (/view/숫자 패턴만)
+  const bugoMatch = path.match(/^\/view\/(\d+)$/);
+  if (bugoMatch) {
+    trackBugoView(ip, bugoMatch[1]);
+  }
 
   // 차단 IP 체크
   const blockedIPs = await getBlockedIPs();
@@ -140,3 +199,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
+
