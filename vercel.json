@@ -9,11 +9,7 @@
             "schedule": "0 1 * * *"
         },
         {
-            "path": "/api/cron/draft-reminder",
-            "schedule": "0 * * * *"
-        },
-        {
-            "path": "/api/cron/share-reminder",
+            "path": "/api/cron/reminders",
             "schedule": "0 * * * *"
         }
     ],
