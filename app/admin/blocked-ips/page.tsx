@@ -64,6 +64,8 @@ export default function BlockedIPsPage() {
         });
     };
 
+    const isAutoBlocked = (r: string) => r?.startsWith('[자동]');
+
     return (
         <div className="admin-pc">
             <AdminSidebar />
@@ -81,8 +83,44 @@ export default function BlockedIPsPage() {
                 </header>
 
                 <div className="admin-content-area">
+
+                    {/* 자동 차단 규칙 */}
+                    <div className="inquiry-panel wide" style={{ marginBottom: '16px' }}>
+                        <div className="panel-header">
+                            <span>자동 차단 규칙</span>
+                        </div>
+                        <div className="inquiry-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '160px' }}>감지 유형</th>
+                                        <th style={{ width: '100px' }}>임계값</th>
+                                        <th>설명</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>스크린샷 감지</td>
+                                        <td>3회 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>PrintScreen, Cmd+Shift+3/4/5 등 캡처 키 입력 감지</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>개발자 도구</td>
+                                        <td>2회 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>DevTools 반복 열기 감지 (소스코드 탈취 의심)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>부고 대량 열람</td>
+                                        <td>5건 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>다수 부고 페이지 열람 (스크래핑 의심)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* 차단 IP 목록 */}
                     <div className="inquiry-panel wide">
-                        {/* IP 등록 폼 */}
                         <div className="panel-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
                             <span>차단 IP 목록</span>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -105,13 +143,13 @@ export default function BlockedIPsPage() {
                                     type="text"
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
-                                    placeholder="사유 (선택)"
+                                    placeholder="차단 사유"
                                     style={{
                                         padding: '6px 12px',
                                         border: '1px solid #ddd',
                                         borderRadius: '6px',
                                         fontSize: '13px',
-                                        width: '140px',
+                                        width: '160px',
                                     }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleBlock()}
                                 />
@@ -144,27 +182,51 @@ export default function BlockedIPsPage() {
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>IP 주소</th>
-                                            <th>사유</th>
-                                            <th>차단 시간</th>
+                                            <th style={{ width: '140px' }}>IP 주소</th>
+                                            <th>차단 사유</th>
+                                            <th style={{ width: '60px' }}>유형</th>
+                                            <th style={{ width: '140px' }}>차단 시간</th>
                                             <th style={{ width: '80px' }}>관리</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {blockedIPs.length === 0 ? (
                                             <tr>
-                                                <td colSpan={4} className="empty-cell">
+                                                <td colSpan={5} className="empty-cell">
                                                     차단된 IP가 없습니다
                                                 </td>
                                             </tr>
                                         ) : (
                                             blockedIPs.map((item) => (
                                                 <tr key={item.id}>
-                                                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0066cc' }}>
+                                                    <td style={{
+                                                        fontFamily: 'monospace',
+                                                        fontWeight: 600,
+                                                        color: '#0066cc',
+                                                        fontSize: '13px',
+                                                    }}>
                                                         {item.ip_address}
                                                     </td>
-                                                    <td>{item.reason || '-'}</td>
-                                                    <td className="date-cell">{formatDate(item.blocked_at)}</td>
+                                                    <td style={{ fontSize: '13px', color: '#444' }}>
+                                                        {item.reason || '-'}
+                                                    </td>
+                                                    <td>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '10px',
+                                                            fontSize: '11px',
+                                                            fontWeight: 600,
+                                                            background: isAutoBlocked(item.reason) ? '#fef2f2' : '#f0fdf4',
+                                                            color: isAutoBlocked(item.reason) ? '#dc2626' : '#16a34a',
+                                                            border: `1px solid ${isAutoBlocked(item.reason) ? '#fecaca' : '#bbf7d0'}`,
+                                                        }}>
+                                                            {isAutoBlocked(item.reason) ? '자동' : '수동'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="date-cell" style={{ fontSize: '12px' }}>
+                                                        {formatDate(item.blocked_at)}
+                                                    </td>
                                                     <td>
                                                         <button
                                                             onClick={() => handleUnblock(item.ip_address)}
@@ -190,11 +252,11 @@ export default function BlockedIPsPage() {
                             </div>
                         )}
                     </div>
-                </div>
 
-                <p style={{ padding: '0 24px', fontSize: '13px', color: '#999' }}>
-                    ※ 차단된 IP로 접속 시 무한 로딩 페이지가 표시됩니다. 등록 후 최대 5분 내 적용됩니다.
-                </p>
+                    <p style={{ padding: '0', fontSize: '12px', color: '#999', marginTop: '12px' }}>
+                        ※ 차단된 IP로 접속 시 무한 로딩 페이지가 표시됩니다. 등록 후 최대 5분 내 적용됩니다.
+                    </p>
+                </div>
             </main>
         </div>
     );
