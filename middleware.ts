@@ -198,7 +198,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 악성 봇/크롤러 감지 → 자동 차단 (모든 페이지)
-  const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium|headless/i;
+  const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium/i;
   if (botPatterns.test(ua)) {
     autoBlockIP(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
     notifySlack(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
