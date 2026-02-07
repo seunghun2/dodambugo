@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('phone_password, applicant_name, ilpo_date, ilpo_time')
+                .select('phone_password, applicant_name, ilpo_date, ilpo_time, owner_token')
                 .eq('bugo_number', bugo_number)
                 .single();
 
@@ -59,16 +59,17 @@ export async function POST(request: NextRequest) {
                     dateTimeInfo = `${funeral_date || ''} ${funeral_time || ''}`.trim();
                 }
 
-                // 알림톡 발송
+                // 알림톡 발송 (토큰 포함 새 템플릿)
                 const { sendAlimtalk } = await import('@/lib/solapi');
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP260122110120730mPhOlSAUi3r',  // 부고장 생성 완료 템플릿
+                    'KA01TP260205140421178W9wkTdR8WCz',  // 부고장 생성 완료 템플릿 (토큰 포함, 검수완료)
                     {
                         '고인명': deceased_name ? `故 ${deceased_name}` : '',
                         '장례식장': funeralLocation,
                         '발인일시': dateTimeInfo,
                         '부고번호': bugo_number,
+                        'owner_token': bugo.owner_token || '',
                     }
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
@@ -101,6 +102,9 @@ export async function POST(request: NextRequest) {
                         console.error('감사장 예약 발송 실패:', thanksErr);
                     }
                 }
+
+                // 📢 공유 리마인더는 cron(/api/cron/share-reminder)에서 처리
+                // share_count = 0인 사람에게만 발송하기 위해
             }
         } catch (alimtalkErr) {
             console.error('알림톡 발송 실패:', alimtalkErr);

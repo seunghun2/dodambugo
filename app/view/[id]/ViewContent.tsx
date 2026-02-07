@@ -256,6 +256,15 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, '', cleanUrl);
         }
+
+        // share=true 파라미터 처리 (공유 모달 바로 열기)
+        const shareParam = searchParams.get('share');
+        if (shareParam === 'true') {
+            setShareModalOpen(true);
+            // URL에서 share 파라미터 제거
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+        }
     }, [searchParams, params.id]);
 
 
@@ -348,6 +357,14 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
         return `${window.location.origin}${pathname}`;
     };
+    // 공유 횟수 서버 추적
+    const trackShare = (method: string) => {
+        fetch('/api/bugo/track-share', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bugoNumber: bugo.bugo_number, method })
+        }).catch(() => { }); // 실패해도 무시
+    };
 
     const copyToClipboard = async (text: string, message?: string, isAccount?: boolean) => {
         await navigator.clipboard.writeText(text);
@@ -406,6 +423,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
             console.log('[카카오 공유] shareUrl:', shareUrl);
 
             gaEvents.shareBugo('kakao');
+            trackShare('kakao');
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
@@ -461,6 +479,7 @@ ${url}
 너그러이 헤아려 주시기 바랍니다.`;
 
         gaEvents.shareBugo('sms');
+        trackShare('sms');
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     };
 
@@ -470,6 +489,7 @@ ${url}
         const content = `故 ${bugo?.deceased_name || ''} 님의 부고장입니다.`;
 
         gaEvents.shareBugo('band');
+        trackShare('band');
         // 밴드 공유 URL 형식
         const bandUrl = `https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + content)}&route=${encodeURIComponent(shareUrl)}`;
         window.open(bandUrl, '_blank', 'width=500,height=700');
@@ -880,7 +900,7 @@ ${url}
                             <Image src="/images/icon-band.png" alt="밴드" width={32} height={32} />
                             <span>밴드로 보내기</span>
                         </button>
-                        <button className="share-option" onClick={() => copyToClipboard(getCleanShareUrl(), '모바일부고장이 복사되었습니다')}>
+                        <button className="share-option" onClick={() => { copyToClipboard(getCleanShareUrl(), '모바일부고장이 복사되었습니다'); trackShare('link'); }}>
                             <Image src="/images/icon-link.png" alt="링크" width={32} height={32} />
                             <span>링크 복사하기</span>
                         </button>

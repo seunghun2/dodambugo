@@ -66,6 +66,7 @@ export default function WriteFormPage() {
     const searchParams = useSearchParams();
     const templateId = params.templateId as string;
     const editBugoNumber = searchParams.get('edit');
+    const draftIdParam = searchParams.get('draft');
 
     // 유효한 템플릿인지 확인
     useEffect(() => {
@@ -516,6 +517,59 @@ export default function WriteFormPage() {
 
         loadBugoData();
     }, [editBugoNumber]);
+
+    // 알림톡 리마인더: ?draft= 파라미터로 DB 임시저장 불러오기
+    useEffect(() => {
+        if (!draftIdParam || editBugoNumber) return;
+
+        const loadDraftData = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('drafts')
+                    .select('*')
+                    .eq('id', draftIdParam)
+                    .single();
+
+                if (error || !data) {
+                    console.log('임시저장 데이터 없음:', draftIdParam);
+                    return;
+                }
+
+                console.log('📋 DB 임시저장 불러옴:', data.id);
+
+                // formData에 채우기
+                setFormData(prev => ({
+                    ...prev,
+                    applicant_name: data.applicant_name || prev.applicant_name,
+                    applicant_phone: data.applicant_phone || prev.applicant_phone,
+                    deceased_name: data.deceased_name || prev.deceased_name,
+                    gender: data.gender || prev.gender,
+                    age: data.age?.toString() || prev.age,
+                    religion: data.religion || prev.religion,
+                    funeral_home: data.funeral_home || prev.funeral_home,
+                    room_number: data.room_number || prev.room_number,
+                    funeral_home_tel: data.funeral_home_tel || prev.funeral_home_tel,
+                    address: data.address || prev.address,
+                    funeral_date: data.funeral_date || prev.funeral_date,
+                    funeral_time: data.funeral_time || prev.funeral_time,
+                    funeral_hour: data.funeral_time?.split(':')[0] || prev.funeral_hour,
+                    funeral_minute: data.funeral_time?.split(':')[1] || prev.funeral_minute,
+                    death_date: data.death_date || prev.death_date,
+                    death_time: data.death_time || prev.death_time,
+                    death_hour: data.death_time?.split(':')[0] || prev.death_hour,
+                    death_minute: data.death_time?.split(':')[1] || prev.death_minute,
+                    message: data.message || prev.message,
+                }));
+
+                // URL 정리 (draft 파라미터 제거)
+                window.history.replaceState({}, '', window.location.pathname);
+            } catch (err) {
+                console.error('Draft 로드 에러:', err);
+            }
+        };
+
+        loadDraftData();
+    }, [draftIdParam, editBugoNumber]);
 
     // 장례식장 검색 모달
     const [facilityModalOpen, setFacilityModalOpen] = useState(false);
