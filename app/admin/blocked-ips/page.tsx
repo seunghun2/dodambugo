@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface BlockedIP {
@@ -20,6 +20,8 @@ interface AccessLog {
     created_at: string;
 }
 
+const PAGE_SIZE = 50;
+
 export default function BlockedIPsPage() {
     const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
     const [newIP, setNewIP] = useState('');
@@ -27,6 +29,9 @@ export default function BlockedIPsPage() {
     const [loading, setLoading] = useState(true);
     const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
     const [logsLoading, setLogsLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const logScrollRef = useRef<HTMLDivElement>(null);
 
     const fetchBlockedIPs = async () => {
         const res = await fetch('/api/blocked-ips');
@@ -37,11 +42,37 @@ export default function BlockedIPsPage() {
 
     const fetchAccessLogs = async () => {
         setLogsLoading(true);
-        const res = await fetch('/api/access-logs?limit=50');
+        setHasMore(true);
+        const res = await fetch(`/api/access-logs?limit=${PAGE_SIZE}&offset=0`);
         const data = await res.json();
         setAccessLogs(Array.isArray(data) ? data : []);
         setLogsLoading(false);
+        if (!Array.isArray(data) || data.length < PAGE_SIZE) setHasMore(false);
     };
+
+    const loadMoreLogs = useCallback(async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+        const offset = accessLogs.length;
+        const res = await fetch(`/api/access-logs?limit=${PAGE_SIZE}&offset=${offset}`);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            setAccessLogs(prev => [...prev, ...data]);
+            if (data.length < PAGE_SIZE) setHasMore(false);
+        } else {
+            setHasMore(false);
+        }
+        setLoadingMore(false);
+    }, [loadingMore, hasMore, accessLogs.length]);
+
+    // 무한 스크롤 핸들러
+    const handleLogScroll = useCallback(() => {
+        const el = logScrollRef.current;
+        if (!el) return;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+            loadMoreLogs();
+        }
+    }, [loadMoreLogs]);
 
     useEffect(() => {
         fetchBlockedIPs();
@@ -142,10 +173,10 @@ export default function BlockedIPsPage() {
                     </div>
                 </header>
 
-                <div className="admin-content-area">
+                <div className="admin-content-area" style={{ flexDirection: 'column', overflow: 'auto' }}>
 
                     {/* 자동 차단 규칙 */}
-                    <div className="inquiry-panel wide" style={{ marginBottom: '16px' }}>
+                    <div className="inquiry-panel wide" style={{ marginBottom: '16px', flex: 'none' }}>
                         <div className="panel-header">
                             <span>자동 차단 규칙</span>
                         </div>
@@ -180,7 +211,7 @@ export default function BlockedIPsPage() {
                     </div>
 
                     {/* 차단 IP 목록 */}
-                    <div className="inquiry-panel wide" style={{ marginBottom: '16px' }}>
+                    <div className="inquiry-panel wide" style={{ marginBottom: '16px', flex: 'none' }}>
                         <div className="panel-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
                             <span>차단 IP 목록</span>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -314,93 +345,83 @@ export default function BlockedIPsPage() {
                     </div>
 
                     {/* 최근 접속 로그 */}
-                    <div className="inquiry-panel wide">
-                        <div className="panel-header">
-                            <span>최근 접속 로그 (최대 50건)</span>
+                    <div className="inquiry-panel wide" style={{ flex: 'none' }}>
+                        <div className="panel-header" style={{ padding: '8px 16px' }}>
+                            <span style={{ fontSize: '13px' }}>접속 로그 ({accessLogs.length}건{hasMore ? '+' : ''})</span>
                             <button
                                 onClick={fetchAccessLogs}
                                 style={{
-                                    padding: '4px 12px',
+                                    padding: '2px 8px',
                                     background: '#f5f5f5',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
-                                    fontSize: '12px',
+                                    fontSize: '11px',
                                     cursor: 'pointer',
                                 }}
                             >
-                                새로고침
+                                초기화
                             </button>
                         </div>
 
                         {logsLoading ? (
-                            <div className="panel-loading">
-                                <span className="material-symbols-outlined spinning">progress_activity</span>
+                            <div style={{ padding: '20px', textAlign: 'center', fontSize: '12px', color: '#999' }}>
                                 불러오는 중...
                             </div>
                         ) : (
-                            <div className="inquiry-table">
-                                <table>
-                                    <thead>
+                            <div
+                                ref={logScrollRef}
+                                onScroll={handleLogScroll}
+                                style={{ maxHeight: '400px', overflow: 'auto' }}
+                            >
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                                    <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 1 }}>
                                         <tr>
-                                            <th style={{ width: '130px' }}>IP 주소</th>
-                                            <th style={{ width: '200px' }}>경로</th>
-                                            <th style={{ width: '70px' }}>디바이스</th>
-                                            <th>유입 경로</th>
-                                            <th style={{ width: '90px' }}>시간</th>
-                                            <th style={{ width: '70px' }}>관리</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>IP</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>경로</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0', width: '50px' }}>기기</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>출처</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0', width: '70px' }}>시간</th>
+                                            <th style={{ padding: '4px 8px', textAlign: 'center', fontSize: '10px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid #e2e8f0', width: '40px' }}></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {accessLogs.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="empty-cell">
-                                                    접속 로그가 없습니다 (배포 후 수집 시작)
+                                                <td colSpan={6} style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '11px' }}>
+                                                    접속 로그 없음
                                                 </td>
                                             </tr>
                                         ) : (
                                             accessLogs.map((log) => (
                                                 <tr key={log.id} style={{
                                                     background: isBlocked(log.ip_address) ? '#fef2f2' : undefined,
+                                                    borderBottom: '1px solid #f1f5f9',
                                                 }}>
-                                                    <td style={{
-                                                        fontFamily: 'monospace',
-                                                        fontSize: '12px',
-                                                        fontWeight: 600,
-                                                        color: isBlocked(log.ip_address) ? '#dc2626' : '#0066cc',
-                                                    }}>
+                                                    <td style={{ padding: '3px 8px', fontFamily: 'monospace', fontSize: '11px', fontWeight: 600, color: isBlocked(log.ip_address) ? '#dc2626' : '#0066cc' }}>
                                                         {log.ip_address || '-'}
                                                     </td>
-                                                    <td style={{ fontSize: '12px', color: '#444' }}>
+                                                    <td style={{ padding: '3px 8px', fontSize: '11px', color: '#333', fontWeight: 500, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                         {log.path}
                                                     </td>
-                                                    <td style={{ fontSize: '11px', color: '#888' }}>
+                                                    <td style={{ padding: '3px 8px', fontSize: '10px', color: '#555', fontWeight: 500 }}>
                                                         {getDevice(log.user_agent)}
                                                     </td>
-                                                    <td style={{ fontSize: '11px', color: '#888', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {log.referer || '직접 접속'}
+                                                    <td style={{ padding: '3px 8px', fontSize: '10px', color: '#555', fontWeight: 500, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {log.referer || '-'}
                                                     </td>
-                                                    <td style={{ fontSize: '11px', color: '#888' }}>
+                                                    <td style={{ padding: '3px 8px', fontSize: '10px', color: '#999' }}>
                                                         {formatTime(log.created_at)}
                                                     </td>
-                                                    <td>
+                                                    <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                                                         {!isBlocked(log.ip_address) && log.ip_address ? (
                                                             <button
                                                                 onClick={() => handleQuickBlock(log.ip_address)}
-                                                                style={{
-                                                                    padding: '2px 8px',
-                                                                    background: '#dc3545',
-                                                                    color: 'white',
-                                                                    border: 'none',
-                                                                    borderRadius: '4px',
-                                                                    fontSize: '11px',
-                                                                    cursor: 'pointer',
-                                                                    fontWeight: 600,
-                                                                }}
+                                                                style={{ padding: '1px 6px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', fontSize: '10px', cursor: 'pointer', fontWeight: 600 }}
                                                             >
                                                                 차단
                                                             </button>
                                                         ) : (
-                                                            <span style={{ fontSize: '11px', color: '#dc2626', fontWeight: 600 }}>차단됨</span>
+                                                            <span style={{ fontSize: '10px', color: '#dc2626', fontWeight: 600 }}>X</span>
                                                         )}
                                                     </td>
                                                 </tr>
@@ -408,12 +429,22 @@ export default function BlockedIPsPage() {
                                         )}
                                     </tbody>
                                 </table>
+                                {loadingMore && (
+                                    <div style={{ padding: '8px', textAlign: 'center', fontSize: '11px', color: '#999' }}>
+                                        로딩 중...
+                                    </div>
+                                )}
+                                {!hasMore && accessLogs.length > 0 && (
+                                    <div style={{ padding: '6px', textAlign: 'center', fontSize: '10px', color: '#ccc' }}>
+                                        끝
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
 
-                    <p style={{ padding: '0', fontSize: '12px', color: '#999', marginTop: '12px' }}>
-                        ※ 차단된 IP로 접속 시 무한 로딩 페이지가 표시됩니다. 등록 후 최대 5분 내 적용됩니다.
+                    <p style={{ padding: '0', fontSize: '11px', color: '#bbb', marginTop: '8px', flex: 'none' }}>
+                        ※ 차단 IP → 무한 로딩 표시. 등록 후 최대 5분 내 적용.
                     </p>
                 </div>
             </main>
