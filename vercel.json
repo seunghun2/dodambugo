@@ -1,5 +1,6 @@
 {
     "framework": "nextjs",
+    "ignoreCommand": "git log -1 --pretty=%B | grep -qi '\\[skip ci\\]' && exit 0 || exit 1",
     "buildCommand": "npm run build",
     "outputDirectory": ".next",
     "installCommand": "npm install",
