@@ -173,13 +173,14 @@ export default function AdminDraftsPage() {
                                                 <th>고인명</th>
                                                 <th>장례식장</th>
                                                 <th>신청자</th>
+                                                <th>연락처</th>
                                                 <th>마지막 수정</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {selectedDrafts.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={5} className="empty-cell">
+                                                    <td colSpan={6} className="empty-cell">
                                                         {selectedIp ? 'IP를 선택하세요' : '임시저장 데이터가 없습니다'}
                                                     </td>
                                                 </tr>
@@ -190,6 +191,7 @@ export default function AdminDraftsPage() {
                                                         <td className="name-cell">{draft.deceased_name || '-'}</td>
                                                         <td>{draft.funeral_home || '-'}</td>
                                                         <td>{draft.applicant_name || '-'}</td>
+                                                        <td>{draft.applicant_phone || '-'}</td>
                                                         <td className="date-cell">{formatDate(draft.updated_at)}</td>
                                                     </tr>
                                                 ))
@@ -221,13 +223,14 @@ export default function AdminDraftsPage() {
                                                 <th>고인명</th>
                                                 <th>장례식장</th>
                                                 <th>신청자</th>
+                                                <th>연락처</th>
                                                 <th>마지막 수정</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {drafts.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={6} className="empty-cell">
+                                                    <td colSpan={7} className="empty-cell">
                                                         임시저장 데이터가 없습니다
                                                     </td>
                                                 </tr>
@@ -241,6 +244,7 @@ export default function AdminDraftsPage() {
                                                         <td className="name-cell">{draft.deceased_name || '-'}</td>
                                                         <td>{draft.funeral_home || '-'}</td>
                                                         <td>{draft.applicant_name || '-'}</td>
+                                                        <td>{draft.applicant_phone || '-'}</td>
                                                         <td className="date-cell">{formatDate(draft.updated_at)}</td>
                                                     </tr>
                                                 ))
