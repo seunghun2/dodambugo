@@ -1097,34 +1097,36 @@ export default function WriteFormPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* 장례식장명 + 호실 */}
-                                                <div className="form-row">
-                                                    <div className="form-group" data-field="funeral_home">
-                                                        <input
-                                                            ref={funeralHomeRef}
-                                                            type="text"
-                                                            name="funeral_home"
-                                                            className={`form-input ${errors.funeral_home ? 'error' : ''}`}
-                                                            placeholder="장례식장명"
-                                                            value={formData.funeral_home}
-                                                            onChange={handleChange}
-                                                        />
-                                                        {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
-                                                    </div>
+                                                {/* 장례식장명 + 호실: 검색 후에만 표시 */}
+                                                {formData.address && (
+                                                    <div className="form-row">
+                                                        <div className="form-group" data-field="funeral_home">
+                                                            <input
+                                                                ref={funeralHomeRef}
+                                                                type="text"
+                                                                name="funeral_home"
+                                                                className={`form-input ${errors.funeral_home ? 'error' : ''}`}
+                                                                placeholder="장례식장명"
+                                                                value={formData.funeral_home}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {errors.funeral_home && <p className="field-error">{errors.funeral_home}</p>}
+                                                        </div>
 
-                                                    <div className="form-group" data-field="room_number">
-                                                        <input
-                                                            ref={roomNumberRef}
-                                                            type="text"
-                                                            name="room_number"
-                                                            className={`form-input ${errors.room_number ? 'error' : ''}`}
-                                                            placeholder="호실(예시:102호)"
-                                                            value={formData.room_number}
-                                                            onChange={handleChange}
-                                                        />
-                                                        {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                        <div className="form-group" data-field="room_number">
+                                                            <input
+                                                                ref={roomNumberRef}
+                                                                type="text"
+                                                                name="room_number"
+                                                                className={`form-input ${errors.room_number ? 'error' : ''}`}
+                                                                placeholder="호실(예시:102호)"
+                                                                value={formData.room_number}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {errors.room_number && <p className="field-error">{errors.room_number}</p>}
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </>
                                         )}
                                     </div>
