@@ -11,7 +11,7 @@ const navItems = [
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
     { href: '/admin/products', icon: 'inventory_2', label: '상품 등록' },
     { href: '/admin/inquiries', icon: 'mail', label: '문의 관리' },
-    { href: '/admin/blocked-ips', icon: 'block', label: 'IP 차단' },
+    { href: '/admin/blocked-ips', icon: 'block', label: 'IP 제한' },
 ];
 
 export default function AdminSidebar() {
