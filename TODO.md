@@ -115,7 +115,24 @@
   - 알림톡 [부고 공유하기] 버튼에서 바로 공유 모달 열림
 - [x] **알림톡 새 템플릿 적용** (토큰 포함)
   - bugo-notify API: owner_token DB 조회 + 새 템플릿 ID 반영
-- [ ] **알림톡 공유 버튼 템플릿** 솔라피 검수 대기 중 ⏳
+- [x] **공유 추적 (share_count)** 📤
+  - `/api/bugo/track-share` API 생성
+  - ViewContent에서 카카오/문자/밴드/링크 공유 시 DB 추적
+  - bugo 테이블에 share_count, share_reminder_sent 컬럼 추가
+- [x] **임시저장 리마인더 cron** 📝
+  - 미완성 draft 1시간 경과 시 알림톡 발송
+  - `?draft={id}` 파라미터로 DB 임시저장 불러오기 구현
+  - drafts 테이블에 reminder_sent 컬럼 추가
+- [x] **공유 리마인더 cron** 📢
+  - share_count=0인 상주에게만 공유 유도 알림톡
+  - 부고 생성 1~24시간 후 발송
+- [x] **cron 통합** (`/api/cron/reminders`)
+  - draft-reminder + share-reminder 합쳐서 Hobby 2개 제한 대응
+- [ ] **솔라피 템플릿 검수 대기** ⏳
+  - 임시저장 리마인더 (07-임시저장 대상 부고장 발송)
+  - 공유 리마인더 (08-공유 안내)
+  - 검수 완료 후 `/api/cron/reminders/route.ts`의 PENDING_REVIEW, PENDING_SHARE_REVIEW 교체 필요
+- [ ] **알림톡 [부고 공유하기] 버튼 템플릿** 솔라피 검수 대기 중 ⏳
 
 ### 2026-02-06
 - [x] **임시저장 DB 저장 + IP 추적** 📍
