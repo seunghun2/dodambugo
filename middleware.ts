@@ -188,8 +188,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 봇/크롤러 User-Agent 감지 → 자동 차단 (모든 페이지)
+  // 봇/크롤러 User-Agent 감지
   const ua = request.headers.get('user-agent') || '';
+
+  // Vercel + 검색엔진 봇은 화이트리스트 (감지/차단 스킵)
+  const friendlyBots = /vercel|googlebot|bingbot|yandex|naverbot|daumoa|kakaotalk/i;
+  if (friendlyBots.test(ua)) {
+    return NextResponse.next();
+  }
+
+  // 악성 봇/크롤러 감지 → 자동 차단 (모든 페이지)
   const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium|headless/i;
   if (botPatterns.test(ua)) {
     autoBlockIP(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
