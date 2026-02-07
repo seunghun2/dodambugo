@@ -16,6 +16,7 @@ interface Bugo {
     room_number: string;
     funeral_date: string;
     funeral_time: string;
+    funeral_type?: string;
     status: string;
     created_at: string;
     deleted_at: string | null;
@@ -34,6 +35,7 @@ export default function AdminBugoPage() {
     const [loading, setLoading] = useState(true);
     const [selectedBugo, setSelectedBugo] = useState<Bugo | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [typeFilter, setTypeFilter] = useState<string>('전체');
     const itemsPerPage = 50;
 
     // 필터 상태
@@ -67,6 +69,12 @@ export default function AdminBugoPage() {
         if (filters.funeral_home && !bugo.funeral_home?.includes(filters.funeral_home)) return false;
         if (filters.deceased_name && !bugo.deceased_name?.includes(filters.deceased_name)) return false;
         if (filters.applicant_name && !bugo.applicant_name?.includes(filters.applicant_name)) return false;
+        if (typeFilter !== '전체') {
+            const bugoType = bugo.funeral_type || '일반 장례';
+            if (typeFilter === '일반장례' && bugoType !== '일반 장례') return false;
+            if (typeFilter === '가족장' && bugoType !== '가족장') return false;
+            if (typeFilter === '무빈소' && bugoType !== '무빈소장례') return false;
+        }
         return true;
     });
 
@@ -80,7 +88,7 @@ export default function AdminBugoPage() {
     // 필터 변경 시 첫 페이지로
     useEffect(() => {
         setCurrentPage(1);
-    }, [filters]);
+    }, [filters, typeFilter]);
 
 
     const formatDate = (dateString: string) => {
@@ -178,7 +186,7 @@ export default function AdminBugoPage() {
                 <div className="admin-content-area">
                     {/* 부고장 목록 테이블 */}
                     <div className="inquiry-panel wide">
-                        <div className="panel-header">
+                        <div className="panel-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
                             <span>전체 부고장 ({filteredBugos.length})</span>
                         </div>
 
@@ -195,6 +203,7 @@ export default function AdminBugoPage() {
                                             <th>장례식장</th>
                                             <th>고인명</th>
                                             <th>작성자</th>
+                                            <th>장례형식</th>
                                             <th>화환</th>
                                             <th>방문</th>
                                             <th>판매율</th>
@@ -226,6 +235,18 @@ export default function AdminBugoPage() {
                                                     onChange={(e) => setFilters({ ...filters, applicant_name: e.target.value })}
                                                 />
                                             </th>
+                                            <th>
+                                                <select
+                                                    value={typeFilter}
+                                                    onChange={(e) => setTypeFilter(e.target.value)}
+                                                    style={{ width: '100%', padding: '4px', fontSize: '12px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                                >
+                                                    <option value="전체">전체</option>
+                                                    <option value="일반장례">일반장례</option>
+                                                    <option value="가족장">가족장</option>
+                                                    <option value="무빈소">무빈소</option>
+                                                </select>
+                                            </th>
                                             <th></th>
                                             <th></th>
                                             <th></th>
@@ -236,7 +257,7 @@ export default function AdminBugoPage() {
                                     <tbody>
                                         {paginatedBugos.length === 0 ? (
                                             <tr>
-                                                <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                                <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                                                     부고장이 없습니다
                                                 </td>
                                             </tr>
@@ -253,6 +274,9 @@ export default function AdminBugoPage() {
                                                     </td>
                                                     <td>{bugo.deceased_name}</td>
                                                     <td className="company-cell">{bugo.applicant_name}</td>
+                                                    <td style={{ fontSize: '12px', color: bugo.funeral_type === '가족장' ? '#dc2626' : bugo.funeral_type === '무빈소장례' ? '#2563eb' : '#666' }}>
+                                                        {bugo.funeral_type === '일반 장례' || !bugo.funeral_type ? '일반' : bugo.funeral_type === '무빈소장례' ? '무빈소' : bugo.funeral_type}
+                                                    </td>
                                                     <td className="number-cell">{bugo.flower_count || 0}</td>
                                                     <td className="number-cell">{bugo.view_count || 0}</td>
                                                     <td className="number-cell">{getSalesRate(bugo.view_count || 0, bugo.flower_count || 0)}</td>
