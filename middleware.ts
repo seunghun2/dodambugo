@@ -43,7 +43,7 @@ const HARDCODED_BLOCKED_IPS = [
 ];
 
 // 관리자 IP (화이트리스트 — 차단/로그 제외)
-const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1'];
+const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1', '117.111.6.111'];
 
 // DB 차단 IP 캐시 (5분마다 갱신)
 let cachedBlockedIPs: string[] = [];
@@ -57,7 +57,7 @@ const pageTracker: Map<string, Set<string>> = new Map();
 let trackerResetTime = Date.now();
 const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
 const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
-const PAGE_THRESHOLD = 10; // 10개 이상 고유 페이지 방문 → 자동 차단
+const PAGE_THRESHOLD = 15; // 15개 이상 고유 페이지 방문 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
