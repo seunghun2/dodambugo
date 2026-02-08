@@ -46,6 +46,7 @@ export async function sendBugoNotification(bugo: {
     bugo_number: string;
     deceased_name: string;
     mourner_name?: string;
+    funeral_type?: string;
     funeral_home?: string;
     room_number?: string;
     funeral_date?: string;
@@ -53,10 +54,15 @@ export async function sendBugoNotification(bugo: {
 }): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_BUGO;
 
+    const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
+        ? bugo.funeral_type
+        : `${bugo.funeral_home || '미입력'} ${bugo.room_number || ''}`;
+
     const text = `[마음부고] 부고장이 등록되었습니다. (부고번호: ${bugo.bugo_number})
+- 장례 종류: ${bugo.funeral_type || '일반 장례'}
 - 고인: ${bugo.deceased_name || '미입력'}
 - 상주: ${bugo.mourner_name || '미입력'}
-- 장례식장: ${bugo.funeral_home || '미입력'} ${bugo.room_number || ''}
+- 장례식장: ${funeralLocation}
 - 발인일시: ${bugo.funeral_date || '미정'} ${bugo.funeral_time || ''}
 - 부고장: https://maeumbugo.co.kr/view/${bugo.bugo_number}`;
 

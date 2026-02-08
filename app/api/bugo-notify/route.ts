@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
                 bugo_number,
                 deceased_name,
                 mourner_name,
+                funeral_type,
                 funeral_home,
                 room_number,
                 funeral_date,
