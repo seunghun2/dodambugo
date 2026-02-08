@@ -133,7 +133,7 @@ async function BugoContentLoader({ id }: { id: string }) {
     // 화환 주문 & 상품 병렬 조회 (상품은 캐시 사용)
     const supabase = getSupabase();
     const [ordersResult, productsData] = await Promise.all([
-        supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).order('created_at', { ascending: false }),
+        supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).eq('status', 'paid').order('created_at', { ascending: false }),
         getCachedProducts()
     ]);
 
