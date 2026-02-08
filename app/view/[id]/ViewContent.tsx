@@ -754,9 +754,8 @@ ${url}
                         ));
                     })()}
                 </div>
-                {/* 부고 공유하기 / 부의금 보내기 버튼 - 새 디자인 */}
-                {/* 가족장/무빈소장례는 주소가 없으므로 숨김 */}
-                {bugo.funeral_type !== '가족장' && bugo.funeral_type !== '무빈소장례' && (() => {
+                {/* 부고 공유하기 / 부의금 보내기 버튼 - 모든 장례형식에서 표시 */}
+                {(() => {
                     const hasAccount = (bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
                         (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber));
 
@@ -863,9 +862,9 @@ ${url}
 
 
             {/* ========================================
-                꽃으로 마음을 보내신 분 - 상주도 볼 수 있음
+                꽃으로 마음을 보내신 분 - 일반 장례일 때만 표시
             ======================================== */}
-            {mounted && (
+            {mounted && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
@@ -1026,9 +1025,9 @@ ${url}
                 </div>
             )}
 
-            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 스크롤 시 표시 (상주/발인완료/모달오픈 시 숨김) */}
+            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 일반 장례일 때만 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                mounted && !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                mounted && !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
                     >
