@@ -13,7 +13,7 @@ function getSupabase() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { bugo_number, deceased_name, funeral_home, room_number, funeral_date, funeral_time, mourner_name, created_new, phone_changed } = body;
+        const { bugo_number, deceased_name, funeral_home, room_number, funeral_date, funeral_time, mourner_name, funeral_type, created_new, phone_changed } = body;
 
         // 신규 생성일 때만 슬랙 알림
         if (created_new) {
@@ -46,8 +46,10 @@ export async function POST(request: NextRequest) {
             if (bugo?.phone_password) {
                 const phoneNumber = bugo.phone_password.replace(/-/g, '');
 
-                // 장례식장 정보 조합
-                const funeralLocation = `${funeral_home || ''} ${room_number || ''}`.trim();
+                // 장례식장 정보 조합 (가족장/무빈소는 장례형식 표시)
+                const funeralLocation = (funeral_type === '가족장' || funeral_type === '무빈소장례')
+                    ? funeral_type
+                    : `${funeral_home || ''} ${room_number || ''}`.trim();
 
                 // 일포가 있으면 줄바꿈 포맷, 없으면 기존 포맷
                 let dateTimeInfo = '';

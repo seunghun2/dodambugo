@@ -974,6 +974,7 @@ export default function WriteFormPage() {
                         funeral_date: formData.funeral_date,
                         funeral_time: formData.funeral_time,
                         mourner_name: formData.primary_mourner,
+                        funeral_type: formData.funeral_type,
                         created_new: true,
                     }),
                 }).catch(err => console.error('부고 알림 실패:', err));
@@ -997,6 +998,7 @@ export default function WriteFormPage() {
                             funeral_date: formData.funeral_date,
                             funeral_time: formData.funeral_time,
                             mourner_name: formData.primary_mourner,
+                            funeral_type: formData.funeral_type,
                             created_new: false,
                             phone_changed: true,
                         }),
