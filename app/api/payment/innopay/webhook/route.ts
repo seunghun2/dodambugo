@@ -87,20 +87,44 @@ export async function POST(request: NextRequest) {
 
         // 🔔 슬랙 알림 발송
         if (orderData) {
+            // 부고 데이터 조회 (대표상주, 주소 포함)
+            let bugoData: any = null;
+            if (orderData.bugo_id) {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address')
+                    .eq('id', orderData.bugo_id)
+                    .single();
+                bugoData = data;
+            }
+
+            // mourners에서 수신자 연락처 매칭
+            let recipientPhone = '';
+            if (bugoData?.mourners && Array.isArray(bugoData.mourners)) {
+                const matched = bugoData.mourners.find(
+                    (m: any) => m.name === orderData.recipient_name && m.contact
+                );
+                if (matched) recipientPhone = matched.contact;
+            }
+
             sendFlowerOrderNotification({
                 id: orderData.order_number || moid,
-                bugo_number: '',
-                deceased_name: orderData.recipient_name || '',
+                bugo_number: bugoData?.bugo_number || '',
+                deceased_name: bugoData?.deceased_name || orderData.recipient_name || '',
                 sender_name: orderData.sender_name,
                 sender_phone: orderData.sender_phone,
                 recipient_name: orderData.recipient_name,
+                recipient_phone: recipientPhone,
                 product_name: orderData.product_name,
                 price: Number(amt),
                 ribbon_text1: orderData.ribbon_text1,
                 ribbon_text2: orderData.ribbon_text2,
                 funeral_hall: orderData.funeral_home,
                 room: orderData.room,
+                address: orderData.address || bugoData?.address || '',
                 payment_method: 'vbank',
+                chief_mourner_name: bugoData?.mourner_name || '',
+                chief_mourner_phone: bugoData?.phone_password || '',
             }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 

@@ -74,25 +74,45 @@ export async function sendFlowerOrderNotification(order: {
     sender_name: string;
     sender_phone: string;
     recipient_name?: string;
+    recipient_phone?: string;
     product_name: string;
     price: number;
     ribbon_text1?: string;
     ribbon_text2?: string;
     funeral_hall?: string;
     room?: string;
+    address?: string;
     payment_method?: string;
+    chief_mourner_name?: string;
+    chief_mourner_phone?: string;
 }): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL;
     const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
+
+    // 수신자 표시: 연락처 있으면 포함
+    const recipientDisplay = order.recipient_name
+        ? order.recipient_phone
+            ? `${order.recipient_name}(${order.recipient_phone})`
+            : order.recipient_name
+        : order.deceased_name;
+
+    // 대표상주 표시: 연락처 있으면 포함
+    const chiefMournerDisplay = order.chief_mourner_name
+        ? order.chief_mourner_phone
+            ? `${order.chief_mourner_name}(${order.chief_mourner_phone})`
+            : order.chief_mourner_name
+        : '-';
 
     const text = `[마음부고] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
 - 상품명: ${order.product_name}
 - 금액: ${priceFormatted}원
 - 빈소: ${order.funeral_hall || '미입력'} ${order.room || ''}
+- 주소: ${order.address || '-'}
 - 리본문구1: ${order.ribbon_text1 || '-'}
 - 리본문구2: ${order.ribbon_text2 || '-'}
-- 수신자: ${order.recipient_name || order.deceased_name}
+- 수신자: ${recipientDisplay}
 - 주문자: ${order.sender_name}(${order.sender_phone})
+- 대표상주: ${chiefMournerDisplay}
 - 결제수단: ${order.payment_method || '미정'}`;
 
     return sendToWebhook(webhookUrl!, { text });

@@ -158,12 +158,22 @@ export async function POST(request: NextRequest) {
                 if (orderData.bugo_id) {
                     const { data: bugoData } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name')
+                        .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address')
                         .eq('id', orderData.bugo_id)
                         .single();
 
                     if (bugoData) {
                         orderData.bugo = bugoData;
+
+                        // mourners 배열에서 수신자 연락처 매칭
+                        if (bugoData.mourners && Array.isArray(bugoData.mourners)) {
+                            const matched = bugoData.mourners.find(
+                                (m: any) => m.name === orderData.recipient_name && m.contact
+                            );
+                            if (matched) {
+                                orderData.recipient_phone = matched.contact;
+                            }
+                        }
                     }
                 }
             }
@@ -207,13 +217,17 @@ export async function POST(request: NextRequest) {
                     sender_name: orderData.sender_name,
                     sender_phone: orderData.sender_phone,
                     recipient_name: orderData.recipient_name,
+                    recipient_phone: orderData.recipient_phone || '',
                     product_name: orderData.product_name,
                     price: Number(amt),
                     ribbon_text1: orderData.ribbon_text1,
                     ribbon_text2: orderData.ribbon_text2,
                     funeral_hall: orderData.funeral_home,
                     room: orderData.room,
+                    address: orderData.address || orderData.bugo?.address || '',
                     payment_method: 'card',
+                    chief_mourner_name: orderData.bugo?.mourner_name || '',
+                    chief_mourner_phone: orderData.bugo?.phone_password || '',
                 });
                 console.log('✅ 슬랙 알림 발송 완료');
             } catch (err) {
