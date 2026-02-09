@@ -25,6 +25,14 @@ declare global {
                 returnUrl: string;
                 currency?: string;
                 mallReserved?: string;
+                offeringPeriod?: string;
+                mallIp?: string;
+                mallUserId?: string;
+                userIp?: string;
+                userId?: string;
+                vBankExpDate?: string;
+                appScheme?: string;
+                logoUrl?: string;
             }) => void;
         };
     }

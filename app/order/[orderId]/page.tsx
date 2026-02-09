@@ -245,6 +245,8 @@ export default function OrderDetailPage() {
         'virtual': '가상계좌',
     };
 
+    if (!order) return null;
+
     return (
         <div className="order-page">
             <header className="order-header" style={{ justifyContent: 'center' }}>
