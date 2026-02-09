@@ -655,8 +655,12 @@ export default function HomePage() {
 
       {/* 모바일 플로팅 버튼 - 부고장 만들기 */}
       <div className="mobile-floating-cta">
-        <div className="floating-tooltip">
-          링크형 <strong>부고장 무료</strong> 제작하기
+        <div className={`floating-tooltip${hasDraft ? ' draft-tooltip' : ''}`}>
+          {hasDraft ? (
+            <>임시저장된 <strong>모바일 부고장</strong>이 있습니다</>
+          ) : (
+            <>링크형 <strong>부고장 무료</strong> 제작하기</>
+          )}
         </div>
         <button className="btn-floating-create" onClick={checkDraftBeforeCreate}>
           부고장 만들기

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface Draft {
@@ -10,8 +11,14 @@ interface Draft {
     gender: string | null;
     age: number | null;
     funeral_home: string | null;
+    funeral_date: string | null;
+    funeral_time: string | null;
+    funeral_type: string | null;
+    mourner_name: string | null;
+    relationship: string | null;
     applicant_name: string | null;
     applicant_phone: string | null;
+    message: string | null;
     ip_address: string | null;
     created_at: string;
     updated_at: string;
@@ -20,6 +27,7 @@ interface Draft {
 export default function AdminDraftsPage() {
     const [drafts, setDrafts] = useState<Draft[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedDraft, setSelectedDraft] = useState<Draft | null>(null);
     const [groupByIp, setGroupByIp] = useState(false);
     const [selectedIp, setSelectedIp] = useState<string | null>(null);
 
@@ -39,6 +47,28 @@ export default function AdminDraftsPage() {
             console.error('Failed to fetch drafts:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const deleteDraft = async (id: string) => {
+        if (!confirm('이 임시저장을 삭제하시겠습니까?')) return;
+
+        try {
+            const response = await fetch(`/api/drafts/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('삭제되었습니다.');
+                setSelectedDraft(null);
+                fetchDrafts();
+            } else {
+                const result = await response.json();
+                alert('삭제 실패: ' + (result.error || '알 수 없는 오류'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('삭제 중 네트워크 오류가 발생했습니다.');
         }
     };
 
@@ -175,24 +205,32 @@ export default function AdminDraftsPage() {
                                                 <th>신청자</th>
                                                 <th>연락처</th>
                                                 <th>마지막 수정</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {selectedDrafts.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={6} className="empty-cell">
+                                                    <td colSpan={7} className="empty-cell">
                                                         {selectedIp ? 'IP를 선택하세요' : '임시저장 데이터가 없습니다'}
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 selectedDrafts.map((draft) => (
-                                                    <tr key={draft.id}>
+                                                    <tr
+                                                        key={draft.id}
+                                                        className={selectedDraft?.id === draft.id ? 'selected' : ''}
+                                                        onClick={() => setSelectedDraft(draft)}
+                                                    >
                                                         <td>{getTemplateLabel(draft.template)}</td>
                                                         <td className="name-cell">{draft.deceased_name || '-'}</td>
                                                         <td>{draft.funeral_home || '-'}</td>
                                                         <td>{draft.applicant_name || '-'}</td>
                                                         <td>{draft.applicant_phone || '-'}</td>
                                                         <td className="date-cell">{formatDate(draft.updated_at)}</td>
+                                                        <td className="arrow-cell">
+                                                            <span className="material-symbols-outlined">chevron_right</span>
+                                                        </td>
                                                     </tr>
                                                 ))
                                             )}
@@ -225,18 +263,23 @@ export default function AdminDraftsPage() {
                                                 <th>신청자</th>
                                                 <th>연락처</th>
                                                 <th>마지막 수정</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {drafts.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={7} className="empty-cell">
+                                                    <td colSpan={8} className="empty-cell">
                                                         임시저장 데이터가 없습니다
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 drafts.map((draft) => (
-                                                    <tr key={draft.id}>
+                                                    <tr
+                                                        key={draft.id}
+                                                        className={selectedDraft?.id === draft.id ? 'selected' : ''}
+                                                        onClick={() => setSelectedDraft(draft)}
+                                                    >
                                                         <td style={{ fontFamily: 'monospace', color: '#0066cc' }}>
                                                             {draft.ip_address || '-'}
                                                         </td>
@@ -246,6 +289,9 @@ export default function AdminDraftsPage() {
                                                         <td>{draft.applicant_name || '-'}</td>
                                                         <td>{draft.applicant_phone || '-'}</td>
                                                         <td className="date-cell">{formatDate(draft.updated_at)}</td>
+                                                        <td className="arrow-cell">
+                                                            <span className="material-symbols-outlined">chevron_right</span>
+                                                        </td>
                                                     </tr>
                                                 ))
                                             )}
@@ -255,6 +301,110 @@ export default function AdminDraftsPage() {
                             )}
                         </div>
                     )}
+
+                    {/* 상세 패널 */}
+                    <div className="detail-panel">
+                        {selectedDraft ? (
+                            <>
+                                <div className="panel-header">
+                                    <span>임시저장 상세</span>
+                                    <button onClick={() => setSelectedDraft(null)} className="btn-close">
+                                        <span className="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                                <div className="detail-content">
+                                    <div className="detail-section">
+                                        <div className="detail-row">
+                                            <label>템플릿</label>
+                                            <span>{getTemplateLabel(selectedDraft.template)}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>고인명</label>
+                                            <span>{selectedDraft.deceased_name || '-'}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>성별 / 연세</label>
+                                            <span>{selectedDraft.gender || '-'} / {selectedDraft.age || '-'}세</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>장례형식</label>
+                                            <span>{selectedDraft.funeral_type || '-'}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>장례식장</label>
+                                            <span>{selectedDraft.funeral_home || '-'}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>발인일시</label>
+                                            <span>{selectedDraft.funeral_date || '-'} {selectedDraft.funeral_time || ''}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <div className="detail-row">
+                                            <label>상주</label>
+                                            <span>{selectedDraft.relationship || '-'} {selectedDraft.mourner_name || ''}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>신청자</label>
+                                            <span>{selectedDraft.applicant_name || '-'} ({selectedDraft.applicant_phone || '-'})</span>
+                                        </div>
+                                    </div>
+
+                                    {selectedDraft.message && (
+                                        <div className="detail-section">
+                                            <label>안내사항</label>
+                                            <div className="message-box">{selectedDraft.message}</div>
+                                        </div>
+                                    )}
+
+                                    {selectedDraft.ip_address && (
+                                        <div className="detail-section">
+                                            <div className="detail-row">
+                                                <label>IP 주소</label>
+                                                <span style={{ fontFamily: 'monospace', color: '#0066cc' }}>
+                                                    {selectedDraft.ip_address}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="detail-section">
+                                        <div className="detail-row">
+                                            <label>최초 저장</label>
+                                            <span>{formatDate(selectedDraft.created_at)}</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>마지막 수정</label>
+                                            <span>{formatDate(selectedDraft.updated_at)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-actions">
+                                        <Link
+                                            href={`/create/${selectedDraft.template}?draft=${selectedDraft.id}`}
+                                            className="btn-action primary"
+                                        >
+                                            <span className="material-symbols-outlined">edit</span>
+                                            수정하기
+                                        </Link>
+                                        <button
+                                            onClick={() => deleteDraft(selectedDraft.id)}
+                                            className="btn-action danger"
+                                        >
+                                            <span className="material-symbols-outlined">delete</span>
+                                            삭제하기
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="panel-empty">
+                                <span className="material-symbols-outlined">touch_app</span>
+                                <p>임시저장을 선택하세요</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </main>
         </div>
