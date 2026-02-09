@@ -603,7 +603,17 @@ export default function WriteFormPage() {
             return;
         }
 
-        setFormData(prev => ({ ...prev, [name]: value }));
+        // 장례형식 변경 시 조문객 안내사항도 자동 변경
+        if (name === 'funeral_type') {
+            const messageMap: Record<string, string> = {
+                '일반 장례': '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                '가족장': '가족의 뜻을 담아 조용히 가족장으로 모십니다.',
+                '무빈소장례': '조용한 배웅으로 빈소를 마련하지 않고 무빈소로 고인을 모십니다.',
+            };
+            setFormData(prev => ({ ...prev, [name]: value, message: messageMap[value] || '' }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
 
         // 입력 시 해당 필드 에러 클리어
         if (errors[name]) {

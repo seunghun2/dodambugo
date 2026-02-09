@@ -668,7 +668,7 @@ ${url}
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
                                 <span className="funeral-info-label">빈소</span>
-                                <span className="funeral-info-value">가족의 뜻을 담아 조용히 가족장으로 모십니다.</span>
+                                <span className="funeral-info-value">가족장</span>
                             </div>
                         </>
                     )}
@@ -678,7 +678,7 @@ ${url}
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
                                 <span className="funeral-info-label">빈소</span>
-                                <span className="funeral-info-value">조용한 배웅으로 빈소를 마련하지 않고 무빈소로 고인을 모십니다.</span>
+                                <span className="funeral-info-value">무빈소</span>
                             </div>
                         </>
                     )}
