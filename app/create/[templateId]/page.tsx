@@ -2000,7 +2000,12 @@ export default function WriteFormPage() {
                                     disabled={!tempAccount.bank || !tempAccount.number || !tempAccount.holder || accountVerifying}
                                     onClick={async () => {
                                         const holderName = tempAccount.holder || formData.primary_mourner || '';
-                                        const success = await verifyAccount(tempAccount.bank, tempAccount.number, holderName);
+                                        // 이미 인증된 값과 동일하면 API 스킵
+                                        const alreadyVerified = accountVerified
+                                            && tempAccount.bank === accounts[0]?.bank
+                                            && tempAccount.number === accounts[0]?.number
+                                            && (tempAccount.holder || holderName) === accounts[0]?.holder;
+                                        const success = alreadyVerified || await verifyAccount(tempAccount.bank, tempAccount.number, holderName);
                                         if (success) {
                                             const updated = [...accounts];
                                             updated[0] = { ...tempAccount, holder: holderName };
@@ -2104,7 +2109,13 @@ export default function WriteFormPage() {
                                     className="account-modal-submit"
                                     disabled={!tempMournerAccount.bank || !tempMournerAccount.number || !tempMournerAccount.holder || mournerAccountVerifying}
                                     onClick={async () => {
-                                        const success = await verifyAccount(tempMournerAccount.bank, tempMournerAccount.number, tempMournerAccount.holder || '', true);
+                                        const mourner = mourners[editingMournerIndex];
+                                        // 이미 인증된 값과 동일하면 API 스킵
+                                        const alreadyVerified = mournerAccountVerified
+                                            && tempMournerAccount.bank === mourner?.bank
+                                            && tempMournerAccount.number === mourner?.accountNumber
+                                            && tempMournerAccount.holder === mourner?.accountHolder;
+                                        const success = alreadyVerified || await verifyAccount(tempMournerAccount.bank, tempMournerAccount.number, tempMournerAccount.holder || '', true);
                                         if (success) {
                                             const updated = [...mourners];
                                             updated[editingMournerIndex] = {
