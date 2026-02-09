@@ -328,50 +328,50 @@ export async function POST(request: NextRequest) {
                 }
 
                 // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리)
-                if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
-                    try {
-                        console.log('📤 부의금 송금 시작 (서버):', {
-                            bankName: condolenceInfo.bankName,
-                            accountNo: condolenceInfo.accountNo,
-                            accountHolder: condolenceInfo.accountHolder,
-                            amount: selectedAmount,
-                        });
-
-                        const transferUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://maeumbugo.co.kr'}/api/condolence/transfer`;
-                        const transferRes = await fetch(transferUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                bankName: condolenceInfo.bankName,
-                                accountNo: condolenceInfo.accountNo,
-                                accountHolder: condolenceInfo.accountHolder,
-                                amount: selectedAmount,
-                                buyerName: buyerInfo.name || '',
-                                bugoId: condBugoId || '',
-                            }),
-                        });
-
-                        const transferResult = await transferRes.json();
-                        console.log('📥 송금 결과:', transferResult);
-
-                        if (transferResult.success) {
-                            console.log('✅ 부의금 송금 성공! TID:', transferResult.data?.tid);
-                            // DB에 송금 상태 업데이트
-                            if (condolenceOrderNumber) {
-                                await supabase
-                                    .from('condolence_orders')
-                                    .update({ status: 'transferred', settled_at: new Date().toISOString() })
-                                    .eq('order_number', condolenceOrderNumber);
-                            }
-                        } else {
-                            console.error('❌ 부의금 송금 실패:', transferResult.error);
-                        }
-                    } catch (transferErr) {
-                        console.error('❌ 부의금 송금 API 오류:', transferErr);
-                    }
-                } else {
-                    console.warn('⚠️ 송금 정보 부족 - bankName:', condolenceInfo.bankName, 'accountNo:', condolenceInfo.accountNo, 'amount:', selectedAmount);
-                }
+                // TODO: 이노페이 송금 서비스 설정 완료 후 주석 해제
+                // if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
+                //     try {
+                //         console.log('📤 부의금 송금 시작 (서버):', {
+                //             bankName: condolenceInfo.bankName,
+                //             accountNo: condolenceInfo.accountNo,
+                //             accountHolder: condolenceInfo.accountHolder,
+                //             amount: selectedAmount,
+                //         });
+                //
+                //         const transferUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://maeumbugo.co.kr'}/api/condolence/transfer`;
+                //         const transferRes = await fetch(transferUrl, {
+                //             method: 'POST',
+                //             headers: { 'Content-Type': 'application/json' },
+                //             body: JSON.stringify({
+                //                 bankName: condolenceInfo.bankName,
+                //                 accountNo: condolenceInfo.accountNo,
+                //                 accountHolder: condolenceInfo.accountHolder,
+                //                 amount: selectedAmount,
+                //                 buyerName: buyerInfo.name || '',
+                //                 bugoId: condBugoId || '',
+                //             }),
+                //         });
+                //
+                //         const transferResult = await transferRes.json();
+                //         console.log('📥 송금 결과:', transferResult);
+                //
+                //         if (transferResult.success) {
+                //             console.log('✅ 부의금 송금 성공! TID:', transferResult.data?.tid);
+                //             if (condolenceOrderNumber) {
+                //                 await supabase
+                //                     .from('condolence_orders')
+                //                     .update({ status: 'transferred', settled_at: new Date().toISOString() })
+                //                     .eq('order_number', condolenceOrderNumber);
+                //             }
+                //         } else {
+                //             console.error('❌ 부의금 송금 실패:', transferResult.error);
+                //         }
+                //     } catch (transferErr) {
+                //         console.error('❌ 부의금 송금 API 오류:', transferErr);
+                //     }
+                // } else {
+                //     console.warn('⚠️ 송금 정보 부족 - bankName:', condolenceInfo.bankName, 'accountNo:', condolenceInfo.accountNo, 'amount:', selectedAmount);
+                // }
             } catch (condolenceErr) {
                 console.error('❌ 부의금 처리 오류:', condolenceErr);
             }
