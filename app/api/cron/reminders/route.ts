@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendSMS } from '@/lib/solapi';
+import { sendSMS, sendAlimtalk } from '@/lib/solapi';
 
 // Cron Job: 매시간 실행
-// 1. 임시저장 리마인더: 미완성 draft에 SMS 발송 (알림톡 검수 전까지)
-// 2. 공유 리마인더: 부고 생성 후 조회수 5회 이하 상주에게 SMS 발송
+// 1. 임시저장 리마인더: 미완성 draft에 SMS 발송
+// 2. 공유 리마인더: 부고 생성 후 공유 0회 상주에게 알림톡 발송
 
 function getSupabase() {
     return createClient(
@@ -20,7 +20,8 @@ function verifyCronRequest(request: NextRequest): boolean {
     return false;
 }
 
-// TODO: 알림톡 검수 완료 후 sendSMS → sendAlimtalk 로 교체
+// 공유 리마인더 알림톡 템플릿 ID (2/9 검수완료)
+const SHARE_REMINDER_TEMPLATE_ID = 'KA01TP260207020322069HCW4FIURXNp';
 
 export async function GET(request: NextRequest) {
     if (process.env.CRON_SECRET && !verifyCronRequest(request)) {
@@ -115,13 +116,13 @@ ${continueUrl}
         const oneDayAgo = new Date();
         oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-        // 1~24시간 전 생성 + 조회수 5회 이하 + 리마인더 미발송
+        // 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송
         const { data: bugos } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, applicant_name, funeral_home, room_number, funeral_date, funeral_time, death_date, death_time, mourners, view_count, share_reminder_sent')
+            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
-            .or('view_count.is.null,view_count.lte.5')
+            .or('share_count.is.null,share_count.eq.0')
             .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
             .not('phone_password', 'is', null);
 
@@ -132,54 +133,15 @@ ${continueUrl}
             for (const bugo of bugos) {
                 const phone = bugo.phone_password.replace(/-/g, '');
                 try {
-                    const viewUrl = `https://maeumbugo.co.kr/view/${bugo.bugo_number}`;
-
-                    // 날짜/시간 포맷 (완성 페이지와 동일)
-                    const formatDateTime = (dateStr?: string, timeStr?: string) => {
-                        if (!dateStr) return '';
-                        const date = new Date(dateStr);
-                        const year = date.getFullYear();
-                        const month = date.getMonth() + 1;
-                        const day = date.getDate();
-                        if (timeStr) {
-                            const [h, m] = timeStr.split(':');
-                            const ampm = parseInt(h) < 12 ? '오전' : '오후';
-                            const hour = parseInt(h) % 12 || 12;
-                            return `${year}년 ${month}월 ${day}일 ${ampm} ${hour}시 ${m}분`;
+                    await sendAlimtalk(
+                        phone,
+                        SHARE_REMINDER_TEMPLATE_ID,
+                        {
+                            '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                            '부고번호': bugo.bugo_number,
+                            'owner_token': bugo.owner_token || '',
                         }
-                        return `${year}년 ${month}월 ${day}일`;
-                    };
-
-                    // 상주 이름 추출
-                    let mournerName = '';
-                    try {
-                        const mourners = typeof bugo.mourners === 'string' ? JSON.parse(bugo.mourners) : bugo.mourners;
-                        if (Array.isArray(mourners) && mourners.length > 0) {
-                            mournerName = mourners[0].name || '';
-                        }
-                    } catch { }
-                    if (!mournerName) mournerName = bugo.applicant_name || '';
-
-                    const deathDateTime = formatDateTime(bugo.death_date, bugo.death_time);
-                    const funeralDateTime = formatDateTime(bugo.funeral_date, bugo.funeral_time);
-                    const venue = [bugo.funeral_home, bugo.room_number].filter(Boolean).join(' ');
-
-                    await sendSMS(phone, `(마음부고) 부고장을 가족·지인에게 공유해 보세요.
-
-[訃告]
-故 ${bugo.deceased_name || ''} 님께서${mournerName ? ` (상주 ${mournerName})` : ''}
-${deathDateTime}에
-별세하셨기에 아래와 같이 부고를 전해드립니다.
-
-[부고장 확인하기]
-${viewUrl}
-
-발인일: ${funeralDateTime || '추후 공지'}
-빈소: ${venue || '-'}
-
-갑작스러운 비보에 직접 연락드리지 못하고
-모바일 부고장으로 알려드리는 점
-너그러이 헤아려 주시기 바랍니다.`);
+                    );
                     await supabase
                         .from('bugo')
                         .update({ share_reminder_sent: true })

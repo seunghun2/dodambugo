@@ -24,7 +24,7 @@ function verifyCronRequest(request: NextRequest): boolean {
 }
 
 // 알림톡 템플릿 ID (솔라피 검수 완료 후 교체)
-const SHARE_REMINDER_TEMPLATE_ID = 'PENDING_SHARE_REVIEW'; // TODO: 검수 완료 후 교체
+const SHARE_REMINDER_TEMPLATE_ID = 'KA01TP260207020322069HCW4FIURXNp'; // 공유 리마인더 (2/9 검수완료)
 
 export async function GET(request: NextRequest) {
     if (process.env.CRON_SECRET && !verifyCronRequest(request)) {

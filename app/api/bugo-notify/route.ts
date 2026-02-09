@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
                 const { sendAlimtalk } = await import('@/lib/solapi');
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP260205140421178W9wkTdR8WCz',  // 부고장 생성 완료 템플릿 (토큰 포함, 검수완료)
+                    'KA01TP2602070138097871zexjvolnSU',  // 부고장 생성 완료 템플릿 (2/9 검수완료)
                     {
                         '고인명': deceased_name ? `故 ${deceased_name}` : '',
                         '장례식장': funeralLocation,
