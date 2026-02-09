@@ -43,6 +43,7 @@ export default function AdminBugoPage() {
         funeral_home: '',
         deceased_name: '',
         applicant_name: '',
+        ip_address: '',
         created_at: '',
     });
 
@@ -69,6 +70,7 @@ export default function AdminBugoPage() {
         if (filters.funeral_home && !bugo.funeral_home?.includes(filters.funeral_home)) return false;
         if (filters.deceased_name && !bugo.deceased_name?.includes(filters.deceased_name)) return false;
         if (filters.applicant_name && !bugo.applicant_name?.includes(filters.applicant_name)) return false;
+        if (filters.ip_address && !bugo.ip_address?.includes(filters.ip_address)) return false;
         if (typeFilter !== '전체') {
             const bugoType = bugo.funeral_type || '일반 장례';
             if (typeFilter === '일반장례' && bugoType !== '일반 장례') return false;
@@ -207,6 +209,7 @@ export default function AdminBugoPage() {
                                             <th>화환</th>
                                             <th>방문</th>
                                             <th>판매율</th>
+                                            <th>IP</th>
                                             <th>제작일시</th>
                                             <th></th>
                                         </tr>
@@ -250,6 +253,14 @@ export default function AdminBugoPage() {
                                             <th></th>
                                             <th></th>
                                             <th></th>
+                                            <th>
+                                                <input
+                                                    type="text"
+                                                    placeholder="IP 검색"
+                                                    value={filters.ip_address}
+                                                    onChange={(e) => setFilters({ ...filters, ip_address: e.target.value })}
+                                                />
+                                            </th>
                                             <th></th>
                                             <th></th>
                                         </tr>
@@ -257,7 +268,7 @@ export default function AdminBugoPage() {
                                     <tbody>
                                         {paginatedBugos.length === 0 ? (
                                             <tr>
-                                                <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                                <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                                                     부고장이 없습니다
                                                 </td>
                                             </tr>
@@ -280,6 +291,7 @@ export default function AdminBugoPage() {
                                                     <td className="number-cell">{bugo.flower_count || 0}</td>
                                                     <td className="number-cell">{bugo.view_count || 0}</td>
                                                     <td className="number-cell">{getSalesRate(bugo.view_count || 0, bugo.flower_count || 0)}</td>
+                                                    <td style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>{bugo.ip_address || '-'}</td>
                                                     <td className="date-cell">{formatDate(bugo.created_at)}</td>
                                                     <td className="arrow-cell">
                                                         <span className="material-symbols-outlined">chevron_right</span>
