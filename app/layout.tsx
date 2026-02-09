@@ -131,7 +131,7 @@ export default function RootLayout({
         <KakaoInit />
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
-            <Notifications position="top-right" />
+            <Notifications position="top-center" zIndex={10000} />
             <MainLayout>
               {children}
             </MainLayout>

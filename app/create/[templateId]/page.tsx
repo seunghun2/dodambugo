@@ -12,6 +12,7 @@ import { gaEvents } from '@/components/GoogleAnalytics';
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
 import 'dayjs/locale/ko';
+import { notifications } from '@mantine/notifications';
 
 // 상주 토큰 생성 (UUID-like)
 function generateOwnerToken(): string {
@@ -36,6 +37,16 @@ const bankOptions = [
     '경남은행', '부산은행', '대구은행', '제주은행', '씨티은행',
     'KDB산업은행', '저축은행', '산림조합'
 ];
+
+// 은행명 → 이노페이 은행코드 매핑
+const bankCodeMap: Record<string, string> = {
+    'KB국민은행': '004', '신한은행': '088', '우리은행': '020', '하나은행': '081',
+    'NH농협은행': '011', 'IBK기업은행': '003', 'SC제일은행': '023', '카카오뱅크': '090',
+    '케이뱅크': '089', '토스뱅크': '092', '새마을금고': '045', '신협': '048',
+    '우체국': '071', '수협': '007', '광주은행': '034', '전북은행': '037',
+    '경남은행': '039', '부산은행': '032', '대구은행': '031', '제주은행': '035',
+    '씨티은행': '027', 'KDB산업은행': '002', '저축은행': '050', '산림조합': '064',
+};
 
 // 템플릿 정보
 const templateInfo: Record<string, { name: string; image: string }> = {
@@ -128,6 +139,55 @@ export default function WriteFormPage() {
     const [showAccount, setShowAccount] = useState(false);
     const [isAccountSaved, setIsAccountSaved] = useState(false);
     const [tempAccount, setTempAccount] = useState<Account>({ holder: '', bank: '', number: '' });
+    const [accountVerified, setAccountVerified] = useState(false);
+    const [accountVerifying, setAccountVerifying] = useState(false);
+    const [accountVerifyFailed, setAccountVerifyFailed] = useState(false);
+    const [mournerAccountVerified, setMournerAccountVerified] = useState(false);
+    const [mournerAccountVerifying, setMournerAccountVerifying] = useState(false);
+    const [mournerAccountVerifyFailed, setMournerAccountVerifyFailed] = useState(false);
+
+    // 계좌 확인하기 (이노페이 예금주 성명 조회) — returns success boolean
+    const verifyAccount = async (bank: string, accountNo: string, holderName: string, isForMourner = false): Promise<boolean> => {
+        const bankCd = bankCodeMap[bank];
+        if (!bankCd) { notifications.show({ message: '은행을 선택해주세요.', color: 'red' }); return false; }
+        if (!accountNo) { notifications.show({ message: '계좌번호를 입력해주세요.', color: 'red' }); return false; }
+        if (!holderName) { notifications.show({ message: '예금주명을 입력해주세요.', color: 'red' }); return false; }
+
+        if (isForMourner) { setMournerAccountVerifying(true); setMournerAccountVerifyFailed(false); }
+        else { setAccountVerifying(true); setAccountVerifyFailed(false); }
+
+        try {
+            const res = await fetch('/api/verify-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bankCd, accountNo: accountNo.replace(/[^0-9]/g, ''), holderName }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (isForMourner) {
+                    setTempMournerAccount(prev => ({ ...prev, holder: data.holderName || holderName }));
+                    setMournerAccountVerified(true);
+                    setMournerAccountVerifyFailed(false);
+                } else {
+                    setTempAccount(prev => ({ ...prev, holder: data.holderName || holderName }));
+                    setAccountVerified(true);
+                    setAccountVerifyFailed(false);
+                }
+                return true;
+            } else {
+                if (isForMourner) { setMournerAccountVerified(false); setMournerAccountVerifyFailed(true); }
+                else { setAccountVerified(false); setAccountVerifyFailed(true); }
+                return false;
+            }
+        } catch {
+            if (isForMourner) setMournerAccountVerifyFailed(true);
+            else setAccountVerifyFailed(true);
+            return false;
+        } finally {
+            if (isForMourner) setMournerAccountVerifying(false);
+            else setAccountVerifying(false);
+        }
+    };
     const [accounts, setAccounts] = useState<Account[]>([
         { holder: '', bank: '', number: '' }
     ]);
@@ -1907,40 +1967,51 @@ export default function WriteFormPage() {
                                 />
                             </div>
 
-                            <input
-                                id="account-number-input"
-                                type="text"
-                                className="account-modal-input-full"
-                                placeholder="계좌번호를 입력해주세요"
-                                inputMode="numeric"
-                                value={tempAccount.number}
-                                onChange={(e) => {
-                                    const formatted = formatAccountNumber(tempAccount.bank, e.target.value);
-                                    setTempAccount({ ...tempAccount, number: formatted });
-                                }}
-                            />
+                            <div style={{ marginBottom: accountVerified ? '8px' : '20px' }}>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        id="account-number-input"
+                                        type="text"
+                                        className="account-modal-input-full"
+                                        placeholder="계좌번호를 입력해주세요"
+                                        inputMode="numeric"
+                                        value={tempAccount.number}
+                                        onChange={(e) => {
+                                            const formatted = formatAccountNumber(tempAccount.bank, e.target.value);
+                                            setTempAccount({ ...tempAccount, number: formatted });
+                                            setAccountVerified(false);
+                                            setAccountVerifyFailed(false);
+                                        }}
+                                        style={{ marginBottom: 0 }}
+                                    />
+                                </div>
+                                {accountVerifyFailed && (
+                                    <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#e03131', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>error</span>
+                                        계좌정보를 정확히 입력해주세요
+                                    </p>
+                                )}
+                            </div>
 
                             <div className="account-modal-buttons">
                                 <button
                                     type="button"
                                     className="account-modal-submit"
-                                    onClick={() => {
-                                        if (!tempAccount.bank) {
-                                            alert('은행명을 선택해주세요.');
-                                            return;
+                                    disabled={!tempAccount.bank || !tempAccount.number || !tempAccount.holder || accountVerifying}
+                                    onClick={async () => {
+                                        const holderName = tempAccount.holder || formData.primary_mourner || '';
+                                        const success = await verifyAccount(tempAccount.bank, tempAccount.number, holderName);
+                                        if (success) {
+                                            const updated = [...accounts];
+                                            updated[0] = { ...tempAccount, holder: holderName };
+                                            setAccounts(updated);
+                                            setIsAccountSaved(true);
+                                            setShowAccount(false);
                                         }
-                                        if (!tempAccount.number) {
-                                            alert('계좌번호를 입력해주세요.');
-                                            return;
-                                        }
-                                        const updated = [...accounts];
-                                        updated[0] = { ...tempAccount, holder: tempAccount.holder || formData.primary_mourner || '' };
-                                        setAccounts(updated);
-                                        setIsAccountSaved(true);
-                                        setShowAccount(false);
                                     }}
+                                    style={{ opacity: (!tempAccount.bank || !tempAccount.number || !tempAccount.holder || accountVerifying) ? 0.5 : 1, cursor: (!tempAccount.bank || !tempAccount.number || !tempAccount.holder || accountVerifying) ? 'not-allowed' : 'pointer' }}
                                 >
-                                    {isAccountSaved ? '변경하기' : '등록하기'}
+                                    {accountVerifying ? '확인중...' : (isAccountSaved ? '변경하기' : '등록하기')}
                                 </button>
                                 {isAccountSaved && (
                                     <button
@@ -1996,30 +2067,45 @@ export default function WriteFormPage() {
                                     type="text"
                                     className="account-modal-input"
                                     placeholder="예금주"
-                                    value={tempMournerAccount.holder}
+                                    value={tempMournerAccount.holder || ''}
                                     onChange={(e) => setTempMournerAccount({ ...tempMournerAccount, holder: e.target.value })}
                                 />
                             </div>
 
-                            <input
-                                id="mourner-account-number-input"
-                                type="text"
-                                className="account-modal-input-full"
-                                placeholder="계좌번호를 입력해주세요"
-                                inputMode="numeric"
-                                value={tempMournerAccount.number}
-                                onChange={(e) => {
-                                    const formatted = formatAccountNumber(tempMournerAccount.bank, e.target.value);
-                                    setTempMournerAccount({ ...tempMournerAccount, number: formatted });
-                                }}
-                            />
+                            <div style={{ marginBottom: mournerAccountVerified ? '8px' : '20px' }}>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        id="mourner-account-number-input"
+                                        type="text"
+                                        className="account-modal-input-full"
+                                        placeholder="계좌번호를 입력해주세요"
+                                        inputMode="numeric"
+                                        value={tempMournerAccount.number}
+                                        onChange={(e) => {
+                                            const formatted = formatAccountNumber(tempMournerAccount.bank, e.target.value);
+                                            setTempMournerAccount({ ...tempMournerAccount, number: formatted });
+                                            setMournerAccountVerified(false);
+                                            setMournerAccountVerifyFailed(false);
+                                        }}
+                                        style={{ marginBottom: 0 }}
+                                    />
+                                </div>
+                                {mournerAccountVerifyFailed && (
+                                    <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#e03131', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>error</span>
+                                        계좌정보를 정확히 입력해주세요
+                                    </p>
+                                )}
+                            </div>
 
                             <div className="account-modal-buttons">
                                 <button
                                     type="button"
                                     className="account-modal-submit"
-                                    onClick={() => {
-                                        if (tempMournerAccount.bank && tempMournerAccount.number) {
+                                    disabled={!tempMournerAccount.bank || !tempMournerAccount.number || !tempMournerAccount.holder || mournerAccountVerifying}
+                                    onClick={async () => {
+                                        const success = await verifyAccount(tempMournerAccount.bank, tempMournerAccount.number, tempMournerAccount.holder || '', true);
+                                        if (success) {
                                             const updated = [...mourners];
                                             updated[editingMournerIndex] = {
                                                 ...updated[editingMournerIndex],
@@ -2028,11 +2114,12 @@ export default function WriteFormPage() {
                                                 accountNumber: tempMournerAccount.number
                                             };
                                             setMourners(updated);
+                                            setShowMournerAccountModal(false);
                                         }
-                                        setShowMournerAccountModal(false);
                                     }}
+                                    style={{ opacity: (!tempMournerAccount.bank || !tempMournerAccount.number || !tempMournerAccount.holder || mournerAccountVerifying) ? 0.5 : 1, cursor: (!tempMournerAccount.bank || !tempMournerAccount.number || !tempMournerAccount.holder || mournerAccountVerifying) ? 'not-allowed' : 'pointer' }}
                                 >
-                                    {mourners[editingMournerIndex]?.bank ? '변경하기' : '등록하기'}
+                                    {mournerAccountVerifying ? '확인중...' : (mourners[editingMournerIndex]?.bank ? '변경하기' : '등록하기')}
                                 </button>
                                 {mourners[editingMournerIndex]?.bank && mourners[editingMournerIndex]?.accountNumber && (
                                     <button
