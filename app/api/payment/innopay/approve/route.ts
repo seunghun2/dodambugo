@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendAlimtalk } from '@/lib/solapi';
-import { sendFlowerOrderNotification } from '@/lib/slack';
+import { sendFlowerOrderNotification, sendCondolenceNotification } from '@/lib/slack';
 
 // Supabase 클라이언트
 const supabase = createClient(
@@ -235,15 +235,159 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // 💰 부의금 결제인 경우 - condolence_orders 테이블에 저장 + 슬랙 알림
+        let condolenceOrderNumber = '';
+        if (moid && moid.startsWith('COND_')) {
+            try {
+                // mallReserved에서 부의금 정보 추출
+                const mallReservedData = approveResult.data?.etc?.mallReserved;
+                let condolenceInfo: any = {};
+                if (mallReservedData) {
+                    try {
+                        const decoded = decodeURIComponent(mallReservedData);
+                        condolenceInfo = JSON.parse(decoded);
+                        console.log('✅ condolenceInfo 파싱 성공:', condolenceInfo);
+                    } catch (e) {
+                        // decodeURIComponent 없이 직접 파싱 시도
+                        try {
+                            condolenceInfo = JSON.parse(mallReservedData);
+                            console.log('✅ condolenceInfo 직접 파싱 성공:', condolenceInfo);
+                        } catch (e2) {
+                            console.error('❌ condolence mallReserved 파싱 오류:', e2);
+                        }
+                    }
+                }
+
+                const buyerInfo = approveResult.data?.buyer || {};
+                const selectedAmount = condolenceInfo.selectedAmount || 0;
+                const totalAmount = Number(amt) || condolenceInfo.totalAmount || 0;
+                const fee = totalAmount - selectedAmount;
+
+                // 부고 정보 조회
+                let bugoData: any = null;
+                const condBugoId = condolenceInfo.bugoId || bugoNumber;
+                if (condBugoId) {
+                    const { data } = await supabase
+                        .from('bugo')
+                        .select('bugo_number, deceased_name, mourner_name, funeral_home_name')
+                        .eq('id', condBugoId)
+                        .single();
+                    bugoData = data;
+                }
+
+                // condolence_orders 테이블에 저장
+                const { data: insertedOrder, error: insertError } = await supabase
+                    .from('condolence_orders')
+                    .insert({
+                        bugo_number: condBugoId || '',
+                        buyer_name: buyerInfo.name || '',
+                        buyer_phone: buyerInfo.tel || '',
+                        recipient_name: condolenceInfo.accountHolder || '',
+                        amount: selectedAmount,
+                        fee: fee,
+                        total_amount: totalAmount,
+                        payment_method: approveResult.data?.payMethod || 'CARD',
+                        payment_type: 'card',
+                        status: 'completed',
+                        tid: transactionId,
+                        moid: moid,
+                        bank_name: condolenceInfo.bankName || '',
+                        account_no: condolenceInfo.accountNo || '',
+                        receipt_url: receiptUrl,
+                    })
+                    .select('id, order_number')
+                    .single();
+
+                if (insertError) {
+                    console.error('❌ 부의금 주문 DB 저장 오류:', insertError);
+                } else {
+                    condolenceOrderNumber = insertedOrder?.order_number || String(insertedOrder?.id);
+                    console.log('✅ 부의금 주문 DB 저장 성공:', condolenceOrderNumber);
+                }
+
+                // 🔔 부의금 슬랙 알림
+                try {
+                    await sendCondolenceNotification({
+                        order_number: condolenceOrderNumber || moid,
+                        bugo_number: condBugoId || '',
+                        deceased_name: bugoData?.deceased_name || '',
+                        buyer_name: buyerInfo.name || '',
+                        buyer_phone: buyerInfo.tel || '',
+                        recipient_name: condolenceInfo.accountHolder || buyerInfo.name || '',
+                        amount: selectedAmount,
+                        fee: fee,
+                        total_amount: totalAmount,
+                        payment_method: approveResult.data?.payMethod === 'EPAY' ? '간편결제' : '신용카드(개인)',
+                        funeral_home: bugoData?.funeral_home_name || '',
+                        bank_name: condolenceInfo.bankName || '',
+                        account_no: condolenceInfo.accountNo || '',
+                    });
+                    console.log('✅ 부의금 슬랙 알림 발송 완료');
+                } catch (slackErr) {
+                    console.error('❌ 부의금 슬랙 알림 실패:', slackErr);
+                }
+
+                // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리)
+                if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
+                    try {
+                        console.log('📤 부의금 송금 시작 (서버):', {
+                            bankName: condolenceInfo.bankName,
+                            accountNo: condolenceInfo.accountNo,
+                            accountHolder: condolenceInfo.accountHolder,
+                            amount: selectedAmount,
+                        });
+
+                        const transferUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://maeumbugo.co.kr'}/api/condolence/transfer`;
+                        const transferRes = await fetch(transferUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                bankName: condolenceInfo.bankName,
+                                accountNo: condolenceInfo.accountNo,
+                                accountHolder: condolenceInfo.accountHolder,
+                                amount: selectedAmount,
+                                buyerName: buyerInfo.name || '',
+                                bugoId: condBugoId || '',
+                            }),
+                        });
+
+                        const transferResult = await transferRes.json();
+                        console.log('📥 송금 결과:', transferResult);
+
+                        if (transferResult.success) {
+                            console.log('✅ 부의금 송금 성공! TID:', transferResult.data?.tid);
+                            // DB에 송금 상태 업데이트
+                            if (condolenceOrderNumber) {
+                                await supabase
+                                    .from('condolence_orders')
+                                    .update({ status: 'transferred', settled_at: new Date().toISOString() })
+                                    .eq('order_number', condolenceOrderNumber);
+                            }
+                        } else {
+                            console.error('❌ 부의금 송금 실패:', transferResult.error);
+                        }
+                    } catch (transferErr) {
+                        console.error('❌ 부의금 송금 API 오류:', transferErr);
+                    }
+                } else {
+                    console.warn('⚠️ 송금 정보 부족 - bankName:', condolenceInfo.bankName, 'accountNo:', condolenceInfo.accountNo, 'amount:', selectedAmount);
+                }
+            } catch (condolenceErr) {
+                console.error('❌ 부의금 처리 오류:', condolenceErr);
+            }
+        }
+
         return NextResponse.json({
             success: true,
             message: '결제 승인 완료',
             data: {
+                ...approveResult.data,  // INNOPAY 원본 데이터 (먼저 spread)
                 tid,
                 moid,
                 amt,
                 receiptUrl,
-                orderNumber: orderData?.order_number || moid,
+                orderNumber: condolenceOrderNumber || orderData?.order_number || moid,
+                paymentType: moid?.startsWith('COND_') ? 'condolence' : 'flower',
                 approvedAt: new Date().toISOString(),
             },
         });

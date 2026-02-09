@@ -14,23 +14,27 @@ export default function PaymentCallbackPage() {
     useEffect(() => {
         async function processPayment() {
             // URL 파라미터에서 결제 정보 추출
-            const paymentToken = searchParams.get('paymentToken');
-            const tid = searchParams.get('tid');
-            const mid = searchParams.get('mid');
-            const amt = searchParams.get('amt');
-            const taxFreeAmt = searchParams.get('taxFreeAmt') || '0';
-            const moid = searchParams.get('moid');
-            const resultCode = searchParams.get('resultCode');
-            const resultMsg = searchParams.get('resultMsg');
-            const mallReserved = searchParams.get('mallReserved');
-            const payMethod = searchParams.get('payMethod'); // 결제 수단 (CARD, EPAY, VBANK)
+            // useSearchParams가 비어있을 수 있으므로 window.location.search 폴백 사용
+            const urlParams = new URLSearchParams(window.location.search);
+            const getParam = (key: string) => searchParams.get(key) || urlParams.get(key) || '';
+
+            const paymentToken = getParam('paymentToken');
+            const tid = getParam('tid');
+            const mid = getParam('mid');
+            const amt = getParam('amt');
+            const taxFreeAmt = getParam('taxFreeAmt') || '0';
+            const moid = getParam('moid');
+            const resultCode = getParam('resultCode');
+            const resultMsg = getParam('resultMsg');
+            const mallReserved = getParam('mallReserved');
+            const payMethod = getParam('payMethod');
 
             // 가상계좌 관련 파라미터
-            const bankCode = searchParams.get('bankCode');
-            const bankName = searchParams.get('bankName');
-            const accountNo = searchParams.get('accountNo');
-            const depositName = searchParams.get('depositName');
-            const expDate = searchParams.get('expDate');
+            const bankCode = getParam('bankCode');
+            const bankName = getParam('bankName');
+            const accountNo = getParam('accountNo');
+            const depositName = getParam('depositName');
+            const expDate = getParam('expDate');
 
             console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg, payMethod });
 
@@ -41,18 +45,29 @@ export default function PaymentCallbackPage() {
                 return;
             }
 
-            // mallReserved에서 bugoId 추출
+            // mallReserved에서 bugoId, type 추출
             let bugoId = '';
             let orderId = '';
+            let paymentType = getParam('type'); // condolence 여부
             try {
                 if (mallReserved) {
-                    const reserved = JSON.parse(mallReserved);
-                    bugoId = reserved.bugoId;
-                    orderId = reserved.orderId;
+                    // URL 인코딩된 경우 디코딩
+                    const decodedReserved = decodeURIComponent(mallReserved);
+                    const reserved = JSON.parse(decodedReserved);
+                    bugoId = reserved.bugoId || '';
+                    orderId = reserved.orderId || '';
+                    if (reserved.type) paymentType = reserved.type;
                 }
             } catch (e) {
-                console.error('mallReserved 파싱 오류:', e);
+                console.error('mallReserved 파싱 오류:', e, mallReserved);
             }
+
+            // moid가 COND_로 시작하면 부의금 결제
+            if (!paymentType && moid && moid.startsWith('COND_')) {
+                paymentType = 'condolence';
+            }
+
+            console.log('📋 결제 타입 판별:', { paymentType, moid, bugoId });
 
             // 🏦 가상계좌인 경우 - 입금 대기 페이지로 이동
             if (payMethod === 'VBANK') {
@@ -127,6 +142,32 @@ export default function PaymentCallbackPage() {
                 const receiptUrl = approveResult.data?.receiptUrl;
                 const orderNumber = approveResult.data?.orderNumber;
 
+                // approve 응답에서 paymentType 직접 추출 (가장 확실한 방법)
+                if (!paymentType && approveResult.data?.paymentType) {
+                    paymentType = approveResult.data.paymentType;
+                }
+
+                // approve 응답의 mallReserved에서도 type 추출 (추가 폴백)
+                if (!paymentType) {
+                    try {
+                        const respMallReserved = approveResult.data?.etc?.mallReserved;
+                        if (respMallReserved) {
+                            const decoded = JSON.parse(decodeURIComponent(respMallReserved));
+                            if (decoded.type) paymentType = decoded.type;
+                            if (decoded.bugoId && !bugoId) bugoId = decoded.bugoId;
+                        }
+                    } catch (e) {
+                        console.error('approve mallReserved 파싱 오류:', e);
+                    }
+                }
+
+                // orderNumber가 COND_로 시작하면 부의금 (최종 폴백)
+                if (!paymentType && orderNumber && orderNumber.startsWith('COND_')) {
+                    paymentType = 'condolence';
+                }
+
+                console.log('🔍 최종 paymentType:', paymentType, 'orderNumber:', orderNumber, 'moid:', moid);
+
                 const finalBugoId = bugoId || routeBugoId;
                 const existingPayment = sessionStorage.getItem(`payment_${finalBugoId}`);
                 if (existingPayment) {
@@ -145,14 +186,76 @@ export default function PaymentCallbackPage() {
                 setStatus('success');
                 setMessage('결제가 완료되었습니다!');
 
-                // 완료 페이지로 이동 - 주문번호 페이지로 리다이렉트
+                const finalBugoId2 = bugoId || routeBugoId;
+
+                // 부의금 결제인 경우 - 카드결제 승인 후 상주 계좌로 즉시 송금
+                if (paymentType === 'condolence') {
+                    const condolenceData = sessionStorage.getItem(`condolence_payment_${finalBugoId2}`);
+                    let parsedData: any = null;
+
+                    if (condolenceData) {
+                        parsedData = JSON.parse(condolenceData);
+                        parsedData.tid = tid;
+                        parsedData.receiptUrl = receiptUrl;
+                        parsedData.paymentCompleted = true;
+                    }
+
+                    // 상주 계좌로 송금 (수수료 제외 원금)
+                    if (parsedData?.account && parsedData?.selectedAmount) {
+                        try {
+                            setMessage('상주님 계좌로 송금 중...');
+                            console.log('📤 부의금 송금 시작:', parsedData.account);
+
+                            const transferRes = await fetch('/api/condolence/transfer', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    bankName: parsedData.account.bank,
+                                    accountNo: parsedData.account.number,
+                                    accountHolder: parsedData.account.holder,
+                                    amount: parsedData.selectedAmount,
+                                    buyerName: parsedData.buyerName,
+                                    bugoId: finalBugoId2,
+                                }),
+                            });
+
+                            const transferResult = await transferRes.json();
+                            console.log('📥 송금 결과:', transferResult);
+
+                            if (transferResult.success) {
+                                parsedData.transferCompleted = true;
+                                parsedData.transferTid = transferResult.data?.tid;
+                                console.log('✅ 부의금 송금 성공!');
+                            } else {
+                                parsedData.transferCompleted = false;
+                                parsedData.transferError = transferResult.error;
+                                console.error('❌ 송금 실패:', transferResult.error);
+                            }
+                        } catch (transferErr: any) {
+                            console.error('❌ 송금 API 오류:', transferErr);
+                            parsedData.transferCompleted = false;
+                            parsedData.transferError = transferErr.message;
+                        }
+                    }
+
+                    if (parsedData) {
+                        sessionStorage.setItem(`condolence_payment_${finalBugoId2}`, JSON.stringify(parsedData));
+                    }
+
+                    setTimeout(() => {
+                        const completeUrl = `/view/${finalBugoId2}/condolence/complete${orderNumber ? `?orderNumber=${orderNumber}` : ''}`;
+                        router.push(completeUrl);
+                    }, 1000);
+                    return;
+                }
+
+                // 화환 결제인 경우 (기존 로직)
                 setTimeout(() => {
                     if (orderNumber) {
                         router.push(`/order/${orderNumber}`);
                     } else {
-                        const finalBugoId = bugoId || routeBugoId;
-                        if (finalBugoId) {
-                            router.push(`/view/${finalBugoId}/order/complete`);
+                        if (finalBugoId2) {
+                            router.push(`/view/${finalBugoId2}/order/complete`);
                         } else {
                             router.push('/');
                         }
@@ -167,7 +270,7 @@ export default function PaymentCallbackPage() {
         }
 
         processPayment();
-    }, [searchParams, router]);
+    }, []);
 
     return (
         <div style={{

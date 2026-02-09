@@ -3,8 +3,32 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Script from 'next/script';
 import '@/app/view/[id]/order/[productId]/order.css';
 import './condolence.css';
+
+// INNOPAY 타입 선언
+declare global {
+    interface Window {
+        innopay: {
+            goPay: (params: {
+                payMethod: string;
+                mid: string;
+                moid: string;
+                goodsName: string;
+                goodsCnt: string;
+                amt: string;
+                taxFreeAmt?: string;
+                buyerName: string;
+                buyerTel: string;
+                buyerEmail: string;
+                returnUrl: string;
+                currency?: string;
+                mallReserved?: string;
+            }) => void;
+        };
+    }
+}
 
 // 은행명 → 로고 파일 매핑
 function getBankLogo(bankName: string): string | null {
@@ -71,6 +95,7 @@ const AMOUNT_OPTIONS = [
     { value: 300000, label: '30만원' },
     { value: 500000, label: '50만원' },
     { value: 1000000, label: '100만원' },
+    { value: 1000, label: '1,000원(테스트)' },
 ];
 
 export default function CondolenceContent() {
@@ -87,6 +112,7 @@ export default function CondolenceContent() {
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agreed, setAgreed] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [sdkLoaded, setSdkLoaded] = useState(false);
 
     const formatPhone = (value: string) => {
         const numbers = value.replace(/[^\d]/g, '');
@@ -105,7 +131,64 @@ export default function CondolenceContent() {
 
     const handleConfirmPayment = () => {
         setConfirmModalOpen(false);
-        alert('카드결제 서비스 준비 중입니다.\n이노페이 PG 연동 완료 후 사용 가능합니다.');
+
+        if (!selectedAmount) return;
+
+        // INNOPAY SDK 로드 확인
+        if (typeof window === 'undefined' || !window.innopay) {
+            alert('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+
+        // 수수료 포함 총 결제금액
+        const totalAmount = Math.round(selectedAmount * 1.086);
+
+        // 고유 주문번호 생성
+        const moid = `COND_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // 결제 정보 sessionStorage에 저장 (콜백에서 사용)
+        sessionStorage.setItem(`condolence_payment_${params.id}`, JSON.stringify({
+            buyerName,
+            buyerPhone,
+            selectedAmount,
+            totalAmount,
+            paymentMethod,
+            moid,
+            account,
+        }));
+
+        // payMethod 매핑
+        const payMethodMap: { [key: string]: string } = {
+            'card': 'CARD',
+            'simple': 'EPAY',
+        };
+
+        // INNOPAY 결제창 호출
+        window.innopay.goPay({
+            payMethod: payMethodMap[paymentMethod] || 'CARD',
+            mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
+            moid: moid,
+            goodsName: `부의금 (${account?.name || '상주'})`,
+            goodsCnt: '1',
+            amt: String(totalAmount),
+            taxFreeAmt: '0',  // 과세
+            buyerName: buyerName,
+            buyerTel: buyerPhone.replace(/-/g, ''),
+            buyerEmail: 'condolence@maeumbugo.co.kr',
+            returnUrl: `${window.location.origin}/view/${params.id}/payment/callback?type=condolence`,
+            currency: 'KRW',
+            mallReserved: JSON.stringify({
+                bugoId: params.id,
+                type: 'condolence',
+                selectedAmount,
+                totalAmount,
+                buyerName,
+                buyerPhone,
+                accountHolder: account?.name || '',
+                bankName: account?.bank || '',
+                accountNo: account?.number || '',
+            }),
+        });
     };
 
     const canSubmit = buyerName && buyerPhone && selectedAmount && paymentMethod;
@@ -136,243 +219,264 @@ export default function CondolenceContent() {
     }
 
     return (
-        <main className="condolence-page">
-            <header className="condolence-header">
-                <button className="back-button" onClick={() => router.back()}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-                <h1>부의금 카드결제</h1>
-                <div style={{ width: 40 }} />
-            </header>
+        <>
+            {/* INNOPAY SDK */}
+            <Script
+                src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    console.log('INNOPAY SDK loaded (condolence)');
+                    if (typeof (window as any).innopay === 'undefined') {
+                        try {
+                            const script = document.createElement('script');
+                            script.textContent = 'window.innopay = innopay;';
+                            document.body.appendChild(script);
+                            document.body.removeChild(script);
+                            console.log('INNOPAY attached to window');
+                        } catch (e) {
+                            console.error('Failed to attach innopay to window:', e);
+                        }
+                    }
+                    setSdkLoaded(true);
+                }}
+            />
+            <main className="condolence-page">
+                <header className="condolence-header">
+                    <button className="back-button" onClick={() => router.back()}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <h1>부의금 카드결제</h1>
+                    <div style={{ width: 40 }} />
+                </header>
 
-            <div className="condolence-content">
-                <section className="account-info-card">
-                    <div className="account-header">
-                        <span className="account-rel">{account.relationship}</span>
-                        <span className="account-name">{account.name}</span>
-                    </div>
-                    <div className="account-body">
-                        {getBankLogo(account.bank) && (
-                            <Image
-                                src={getBankLogo(account.bank)!}
-                                alt={account.bank}
-                                width={32}
-                                height={32}
-                                className="bank-logo"
-                            />
-                        )}
-                        <div className="account-text">
-                            <span className="bank-name">{account.bank}({account.holder})</span>
-                            <span className="account-number-display">{account.number}</span>
+                <div className="condolence-content">
+                    <section className="account-info-card">
+                        <div className="account-header">
+                            <span className="account-rel">{account.relationship}</span>
+                            <span className="account-name">{account.name}</span>
                         </div>
-                    </div>
-                </section>
-
-                <section className="form-section">
-                    <h2 className="section-title">이름 및 연락처</h2>
-                    <div className="form-group">
-                        <input
-                            type="text"
-                            className="form-input"
-                            placeholder="보내시는 분 성함"
-                            value={buyerName}
-                            onChange={(e) => setBuyerName(e.target.value)}
-                            autoFocus
-                        />
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="tel"
-                            className="form-input"
-                            placeholder="010-0000-0000"
-                            value={buyerPhone}
-                            onChange={(e) => setBuyerPhone(formatPhone(e.target.value))}
-                            maxLength={13}
-                        />
-                    </div>
-                </section>
-
-                <section className="form-section">
-                    <label className="form-label">마음을 전하실 금액을 선택해주세요</label>
-                    <div className="amount-grid">
-                        {AMOUNT_OPTIONS.map((option) => (
-                            <button
-                                key={option.value}
-                                type="button"
-                                className={`amount-button ${selectedAmount === option.value ? 'selected' : ''}`}
-                                onClick={() => setSelectedAmount(option.value)}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {selectedAmount && (
-                    <section className="payment-summary">
-                        <div className="summary-row">
-                            <span className="summary-label">결제금액</span>
-                            <span className="summary-value">{selectedAmount.toLocaleString()}원</span>
-                        </div>
-                        <div className="summary-row">
-                            <span className="summary-label">이용수수료(8.6%)</span>
-                            <span className="summary-value">{Math.round(selectedAmount * 0.086).toLocaleString()}원</span>
-                        </div>
-                        <div className="summary-row total">
-                            <span className="summary-label">총 결제금액</span>
-                            <span className="summary-value">{Math.round(selectedAmount * 1.086).toLocaleString()}원</span>
+                        <div className="account-body">
+                            {getBankLogo(account.bank) && (
+                                <Image
+                                    src={getBankLogo(account.bank)!}
+                                    alt={account.bank}
+                                    width={32}
+                                    height={32}
+                                    className="bank-logo"
+                                />
+                            )}
+                            <div className="account-text">
+                                <span className="bank-name">{account.bank}({account.holder})</span>
+                                <span className="account-number-display">{account.number}</span>
+                            </div>
                         </div>
                     </section>
+
+                    <section className="form-section">
+                        <h2 className="section-title">이름 및 연락처</h2>
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="보내시는 분 성함"
+                                value={buyerName}
+                                onChange={(e) => setBuyerName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="tel"
+                                className="form-input"
+                                placeholder="010-0000-0000"
+                                value={buyerPhone}
+                                onChange={(e) => setBuyerPhone(formatPhone(e.target.value))}
+                                maxLength={13}
+                            />
+                        </div>
+                    </section>
+
+                    <section className="form-section">
+                        <label className="form-label">마음을 전하실 금액을 선택해주세요</label>
+                        <div className="amount-grid">
+                            {AMOUNT_OPTIONS.map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    className={`amount-button ${selectedAmount === option.value ? 'selected' : ''}`}
+                                    onClick={() => setSelectedAmount(option.value)}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {selectedAmount && (
+                        <section className="payment-summary">
+                            <div className="summary-row">
+                                <span className="summary-label">결제금액</span>
+                                <span className="summary-value">{selectedAmount.toLocaleString()}원</span>
+                            </div>
+                            <div className="summary-row">
+                                <span className="summary-label">이용수수료(8.6%)</span>
+                                <span className="summary-value">{Math.round(selectedAmount * 0.086).toLocaleString()}원</span>
+                            </div>
+                            <div className="summary-row total">
+                                <span className="summary-label">총 결제금액</span>
+                                <span className="summary-value">{Math.round(selectedAmount * 1.086).toLocaleString()}원</span>
+                            </div>
+                        </section>
+                    )}
+
+                    <section className="form-section">
+                        <h2 className="section-title">결제 방식</h2>
+                        <div className="payment-methods">
+                            <button
+                                type="button"
+                                className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod('card')}
+                            >
+                                카드
+                            </button>
+                            <button
+                                type="button"
+                                className={`payment-method-btn ${paymentMethod === 'simple' ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod('simple')}
+                            >
+                                간편결제
+                            </button>
+                        </div>
+                        <div className="payment-notices">
+                            <p>* 법인카드로 결제하시면 접대비 증빙이 가능합니다.</p>
+                            <p>* 본 서비스는 장례식장과 별개로 운영됩니다.</p>
+                        </div>
+                    </section>
+                </div>
+
+                {/* 개인정보 동의 모달 */}
+                {agreed && (
+                    <div className="modal-overlay" onClick={() => setAgreed(false)}>
+                        <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h3>개인정보 수집/제공 동의</h3>
+                                <button className="modal-close" onClick={() => setAgreed(false)}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="modal-content">
+                                <ul className="terms-list">
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
+                                        <a href="/privacy" target="_blank" className="terms-link">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M9 18l6-6-6-6" />
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">전자금융거래 이용약관(필수)</span>
+                                        <a href="/terms" target="_blank" className="terms-link">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M9 18l6-6-6-6" />
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
+                                        <a href="/privacy-third-party" target="_blank" className="terms-link">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M9 18l6-6-6-6" />
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li className="required-term">
+                                        <span className="term-bullet">•</span>
+                                        <span className="term-text">[부의금]환불 불가 약관(필수)</span>
+                                        <a href="/condolence-refund" target="_blank" className="terms-link">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M9 18l6-6-6-6" />
+                                            </svg>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
-                <section className="form-section">
-                    <h2 className="section-title">결제 방식</h2>
-                    <div className="payment-methods">
-                        <button
-                            type="button"
-                            className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('card')}
-                        >
-                            카드
-                        </button>
-                        <button
-                            type="button"
-                            className={`payment-method-btn ${paymentMethod === 'simple' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('simple')}
-                        >
-                            간편결제
-                        </button>
-                    </div>
-                    <div className="payment-notices">
-                        <p>* 법인카드로 결제하시면 접대비 증빙이 가능합니다.</p>
-                        <p>* 본 서비스는 장례식장과 별개로 운영됩니다.</p>
-                    </div>
-                </section>
-            </div>
+                <div className="condolence-footer">
+                    {!agreed && (
+                        <div className="privacy-notice-link" onClick={() => setAgreed(true)}>
+                            약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </div>
+                    )}
+                    <button
+                        type="button"
+                        className={`submit-button ${canSubmit && sdkLoaded ? 'active' : ''}`}
+                        onClick={handlePaymentClick}
+                        disabled={!canSubmit || !sdkLoaded}
+                    >
+                        {!sdkLoaded
+                            ? '결제 모듈 로딩중...'
+                            : selectedAmount
+                                ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원 결제하기`
+                                : '결제하기'
+                        }
+                    </button>
+                </div>
 
-            {/* 개인정보 동의 모달 */}
-            {agreed && (
-                <div className="modal-overlay" onClick={() => setAgreed(false)}>
-                    <div className="privacy-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>개인정보 수집/제공 동의</h3>
-                            <button className="modal-close" onClick={() => setAgreed(false)}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {/* 결제 확인 모달 */}
+                {confirmModalOpen && (
+                    <div className="confirm-modal-overlay" onClick={() => setConfirmModalOpen(false)}>
+                        <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+                            <button className="confirm-modal-x" onClick={() => setConfirmModalOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M18 6L6 18M6 6l12 12" />
                                 </svg>
                             </button>
-                        </div>
-                        <div className="modal-content">
-                            <ul className="terms-list">
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
-                                    <a href="/privacy" target="_blank" className="terms-link">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">전자금융거래 이용약관(필수)</span>
-                                    <a href="/terms" target="_blank" className="terms-link">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
-                                    <a href="/privacy-third-party" target="_blank" className="terms-link">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li className="required-term">
-                                    <span className="term-bullet">•</span>
-                                    <span className="term-text">[부의금]환불 불가 약관(필수)</span>
-                                    <a href="/condolence-refund" target="_blank" className="terms-link">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            <h3 className="confirm-modal-title">주의사항</h3>
+                            <p className="confirm-modal-desc">
+                                부의금 결제는 상주님의 계좌로<br />
+                                <strong>즉시 입금되어 환불이 불가능합니다.</strong>
+                            </p>
+                            <p className="confirm-modal-sub">결제금액이 맞는지 한 번 더 확인해주세요.</p>
 
-            <div className="condolence-footer">
-                {!agreed && (
-                    <div className="privacy-notice-link" onClick={() => setAgreed(true)}>
-                        약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 18l6-6-6-6" />
-                        </svg>
+                            <div className="confirm-modal-info">
+                                <div className="confirm-info-row">
+                                    <span className="confirm-info-label">받는 분에게 표시</span>
+                                    <span className="confirm-info-value">{buyerName}</span>
+                                </div>
+                                <div className="confirm-info-row">
+                                    <span className="confirm-info-label">결제금액</span>
+                                    <span className="confirm-info-value">{selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원` : ''}</span>
+                                </div>
+                                <div className="confirm-info-row">
+                                    <span className="confirm-info-label">결제수단</span>
+                                    <span className="confirm-info-value">{paymentMethod === 'card' ? '카드결제' : '간편결제'}</span>
+                                </div>
+                            </div>
+
+                            <button className="confirm-modal-btn" onClick={handleConfirmPayment}>
+                                동의하고 결제하기
+                            </button>
+                        </div>
                     </div>
                 )}
-                <button
-                    type="button"
-                    className={`submit-button ${canSubmit ? 'active' : ''}`}
-                    onClick={handlePaymentClick}
-                    disabled={!canSubmit}
-                >
-                    {selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원 결제하기` : '결제하기'}
-                </button>
-            </div>
 
-            {/* 결제 확인 모달 */}
-            {confirmModalOpen && (
-                <div className="confirm-modal-overlay" onClick={() => setConfirmModalOpen(false)}>
-                    <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
-                        <button className="confirm-modal-x" onClick={() => setConfirmModalOpen(false)}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M18 6L6 18M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <h3 className="confirm-modal-title">주의사항</h3>
-                        <p className="confirm-modal-desc">
-                            부의금 결제는 상주님의 계좌로<br />
-                            <strong>즉시 입금되어 환불이 불가능합니다.</strong>
-                        </p>
-                        <p className="confirm-modal-sub">결제금액이 맞는지 한 번 더 확인해주세요.</p>
 
-                        <div className="confirm-modal-info">
-                            <div className="confirm-info-row">
-                                <span className="confirm-info-label">받는 분에게 표시</span>
-                                <span className="confirm-info-value">{buyerName}</span>
-                            </div>
-                            <div className="confirm-info-row">
-                                <span className="confirm-info-label">결제금액</span>
-                                <span className="confirm-info-value">{selectedAmount ? `${Math.round(selectedAmount * 1.086).toLocaleString()}원` : ''}</span>
-                            </div>
-                            <div className="confirm-info-row">
-                                <span className="confirm-info-label">결제수단</span>
-                                <span className="confirm-info-value">{paymentMethod === 'card' ? '카드결제' : '간편결제'}</span>
-                            </div>
-                        </div>
-
-                        <button className="confirm-modal-btn" onClick={handleConfirmPayment}>
-                            동의하고 결제하기
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Footer - PG 승인용 사업자 정보 */}
-            <footer className="view-footer">
-                <p className="view-footer-company">마음부고</p>
-                <p>서울특별시 강남구 압구정로 306, 지하 1층 4-S36호</p>
-                <p>대표: 김미연 | 대표번호: 010-4837-5076</p>
-                <p>사업자등록번호: 408-22-68851 | 통신판매업신고: 2026-서울강남-00502</p>
-                <p className="view-footer-copyright">© 2026 maeumbugo. All rights reserved.</p>
-            </footer>
-        </main>
+            </main>
+        </>
     );
 }
+

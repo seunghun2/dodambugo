@@ -26,10 +26,30 @@ interface OrderData {
     tid: string;
 }
 
+interface CondolenceOrderData {
+    id: number;
+    order_number: string;
+    bugo_number: string;
+    buyer_name: string;
+    buyer_phone: string;
+    recipient_name: string;
+    amount: number;
+    fee: number;
+    total_amount: number;
+    payment_method: string;
+    status: string;
+    tid: string;
+    bank_name: string;
+    account_no: string;
+    receipt_url: string;
+    created_at: string;
+}
+
 export default function OrderDetailPage() {
     const params = useParams();
     const orderId = params.orderId as string;
     const [order, setOrder] = useState<OrderData | null>(null);
+    const [condolenceOrder, setCondolenceOrder] = useState<CondolenceOrderData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isExpanded, setIsExpanded] = useState({
@@ -38,15 +58,37 @@ export default function OrderDetailPage() {
         withdrawal: false,
     });
 
+    const isCondolence = orderId?.startsWith('CO');
+
     useEffect(() => {
         async function fetchOrder() {
             try {
-                const res = await fetch(`/api/flower-orders/${orderId}`);
-                if (!res.ok) {
+                if (isCondolence) {
+                    // 부의금 주문 조회 (DB 커밋 타이밍 이슈 대비 재시도)
+                    let retries = 3;
+                    let lastError = '';
+                    while (retries > 0) {
+                        const res = await fetch(`/api/condolence/orders/${orderId}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.success && data.order) {
+                                setCondolenceOrder(data.order);
+                                return;
+                            }
+                        }
+                        retries--;
+                        if (retries > 0) {
+                            await new Promise(r => setTimeout(r, 1500));
+                        }
+                    }
                     throw new Error('주문을 찾을 수 없습니다.');
+                } else {
+                    // 화환 주문 조회
+                    const res = await fetch(`/api/flower-orders/${orderId}`);
+                    if (!res.ok) throw new Error('주문을 찾을 수 없습니다.');
+                    const data = await res.json();
+                    setOrder(data);
                 }
-                const data = await res.json();
-                setOrder(data);
             } catch (err: any) {
                 setError(err.message || '주문 정보를 불러올 수 없습니다.');
             } finally {
@@ -57,7 +99,7 @@ export default function OrderDetailPage() {
         if (orderId) {
             fetchOrder();
         }
-    }, [orderId]);
+    }, [orderId, isCondolence]);
 
     // 날짜 포맷 함수
     const formatDateTime = (date?: string) => {
@@ -79,7 +121,7 @@ export default function OrderDetailPage() {
         );
     }
 
-    if (error || !order) {
+    if (error || (!order && !condolenceOrder)) {
         return (
             <div className="order-page">
                 <div className="order-body" style={{ textAlign: 'center', paddingTop: '100px' }}>
@@ -89,6 +131,108 @@ export default function OrderDetailPage() {
                     <Link href="/" className="btn-payment" style={{ marginTop: '30px', display: 'inline-block', textDecoration: 'none' }}>
                         홈으로
                     </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // ===== 부의금 완료 화면 =====
+    if (isCondolence && condolenceOrder) {
+        return (
+            <div className="order-page">
+                <header className="order-header" style={{ justifyContent: 'center' }}>
+                    <h1>결제 완료</h1>
+                </header>
+
+                <div className="order-body complete-body">
+                    <div className="complete-banner">
+                        <div style={{
+                            width: 80, height: 80, borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #4A7C59, #5a9a6a)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 20px',
+                            boxShadow: '0 4px 16px rgba(74, 124, 89, 0.3)',
+                        }}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                        </div>
+                        <h2>부의금이 전달되었습니다</h2>
+                        <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>따뜻한 마음이 상주님께 전달되었습니다.</p>
+                    </div>
+
+                    <section className="order-section">
+                        <div className="detail-row">
+                            <span className="label">주문번호</span>
+                            <span className="value">{condolenceOrder.order_number}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="label">보내신 분</span>
+                            <span className="value">{condolenceOrder.buyer_name}</span>
+                        </div>
+                        {condolenceOrder.recipient_name && (
+                            <div className="detail-row">
+                                <span className="label">받으시는 분</span>
+                                <span className="value">{condolenceOrder.recipient_name}</span>
+                            </div>
+                        )}
+                        {condolenceOrder.bank_name && (
+                            <div className="detail-row">
+                                <span className="label">입금계좌</span>
+                                <span className="value">{condolenceOrder.bank_name} {condolenceOrder.account_no}</span>
+                            </div>
+                        )}
+                        <div className="detail-row">
+                            <span className="label">부의금</span>
+                            <span className="value">{condolenceOrder.amount?.toLocaleString()}원</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="label">수수료</span>
+                            <span className="value" style={{ color: '#888' }}>{condolenceOrder.fee?.toLocaleString()}원</span>
+                        </div>
+                        <div className="detail-row total">
+                            <span className="label">결제금액</span>
+                            <span className="value highlight">{condolenceOrder.total_amount?.toLocaleString()}원</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="label">결제일시</span>
+                            <span className="value">{formatDateTime(condolenceOrder.created_at)}</span>
+                        </div>
+                        <div className="detail-row">
+                            <span className="label">결제수단</span>
+                            <span className="value">
+                                {condolenceOrder.payment_method === 'CARD' ? '신용카드' : condolenceOrder.payment_method === 'EPAY' ? '간편결제' : condolenceOrder.payment_method}
+                                {condolenceOrder.tid && (
+                                    <a href={`https://pg.innopay.co.kr/pay/issue/TransIssue.jsp?TID=${condolenceOrder.tid}`} target="_blank" rel="noopener noreferrer" className="receipt-btn" style={{ color: '#1A1A1A', marginLeft: '10px' }}>영수증 보기</a>
+                                )}
+                            </span>
+                        </div>
+                    </section>
+
+                    <div style={{
+                        margin: '20px 16px 0', padding: '16px',
+                        background: '#F5F5F5', borderRadius: 8,
+                        fontSize: 13, color: '#888', lineHeight: 1.8,
+                    }}>
+                        <p style={{ fontWeight: 600, color: '#666', marginBottom: 8 }}>안내사항</p>
+                        <p>• 부의금은 상주님 계좌로 입금 처리됩니다.</p>
+                        <p>• 부의금은 상주님 계좌로 즉시 송금되므로 결제 후 환불이 불가합니다.</p>
+                        <p>• 결제 내역은 이 페이지에서 확인하실 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <div className="order-footer">
+                    {condolenceOrder.bugo_number ? (
+                        <Link href={`/view/${condolenceOrder.bugo_number}`} className="btn-payment"
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            부고 페이지로 돌아가기
+                        </Link>
+                    ) : (
+                        <Link href="/" className="btn-payment"
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            홈으로 돌아가기
+                        </Link>
+                    )}
                 </div>
             </div>
         );
