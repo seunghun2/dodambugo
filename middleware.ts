@@ -54,10 +54,13 @@ const CACHE_TTL = 5 * 60 * 1000; // 5분
 const viewTracker: Map<string, Set<string>> = new Map();
 // 페이지 과다 탐색 감지 (IP → 고유 페이지 Set)
 const pageTracker: Map<string, Set<string>> = new Map();
+// 총 방문 횟수 감지 (IP → 카운트) - 같은 페이지 반복 방문 감지
+const visitCounter: Map<string, number> = new Map();
 let trackerResetTime = Date.now();
 const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
 const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
 const PAGE_THRESHOLD = 15; // 15개 이상 고유 페이지 방문 → 자동 차단
+const VISIT_THRESHOLD = 50; // 24시간 내 50회 이상 총 방문 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -122,6 +125,7 @@ function trackBugoView(ip: string, bugoNumber: string) {
   if (now - trackerResetTime > TRACKER_TTL) {
     viewTracker.clear();
     pageTracker.clear();
+    visitCounter.clear();
     trackerResetTime = now;
   }
 
@@ -259,6 +263,41 @@ export async function middleware(request: NextRequest) {
 
   // 페이지 과다 탐색 감지
   trackPageBrowsing(ip, path);
+
+  // 총 방문 횟수 감지 (같은 페이지 반복 방문 포함, /view 제외 - 조문객 정상 이용)
+  if (!/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(path) && !path.startsWith('/view')) {
+    const count = (visitCounter.get(ip) || 0) + 1;
+    visitCounter.set(ip, count);
+    if (count >= VISIT_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+      const reason = `[자동] 과다 방문 (${count}회/24시간)`;
+      autoBlockIP(ip, reason);
+      notifySlack(ip, reason);
+      cachedBlockedIPs.push(ip);
+      visitCounter.delete(ip);
+    }
+  }
+
+  // 부고 생성 완료 → 자동 차단 해제 (실제 고객이므로)
+  if (path.startsWith('/create/complete')) {
+    if (cachedBlockedIPs.includes(ip)) {
+      cachedBlockedIPs = cachedBlockedIPs.filter(blocked => blocked !== ip);
+    }
+    // DB에서도 해제
+    if (SUPABASE_URL && SUPABASE_KEY) {
+      fetch(`${SUPABASE_URL}/rest/v1/blocked_ips?ip_address=eq.${ip}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_active: false, reason: '[자동 해제] 부고 생성 완료 - 실제 고객' }),
+      }).catch(() => { });
+    }
+    visitCounter.delete(ip);
+    viewTracker.delete(ip);
+    pageTracker.delete(ip);
+  }
 
   // 차단 IP 체크
   const blockedIPs = await getBlockedIPs();
