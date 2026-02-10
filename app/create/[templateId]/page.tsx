@@ -1365,12 +1365,12 @@ export default function WriteFormPage() {
                                                 value={accounts[0]?.bank && accounts[0]?.number ? `${accounts[0].bank} : ${accounts[0].number}` : ''}
                                                 readOnly
                                                 onClick={() => {
-                                                    setTempAccount({ ...accounts[0] });
+                                                    setTempAccount({ ...accounts[0], holder: accounts[0]?.holder || formData.primary_mourner || '' });
                                                     setShowAccount(true);
                                                 }}
                                             />
                                             <button type="button" className="btn-account-edit" onClick={() => {
-                                                setTempAccount({ ...accounts[0] });
+                                                setTempAccount({ ...accounts[0], holder: accounts[0]?.holder || formData.primary_mourner || '' });
                                                 setShowAccount(true);
                                             }}>
                                                 {isAccountSaved ? '변경하기' : '추가하기'}
@@ -1963,7 +1963,8 @@ export default function WriteFormPage() {
                                     className="account-modal-input"
                                     placeholder="예금주"
                                     value={tempAccount.holder || formData.primary_mourner || ''}
-                                    onChange={(e) => setTempAccount({ ...tempAccount, holder: e.target.value })}
+                                    readOnly
+                                    style={{ backgroundColor: '#f5f5f5', color: '#666' }}
                                 />
                             </div>
 
@@ -2073,7 +2074,8 @@ export default function WriteFormPage() {
                                     className="account-modal-input"
                                     placeholder="예금주"
                                     value={tempMournerAccount.holder || ''}
-                                    onChange={(e) => setTempMournerAccount({ ...tempMournerAccount, holder: e.target.value })}
+                                    readOnly
+                                    style={{ backgroundColor: '#f5f5f5', color: '#666' }}
                                 />
                             </div>
 
