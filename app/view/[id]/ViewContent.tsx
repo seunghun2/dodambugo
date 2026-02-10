@@ -986,6 +986,7 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
+                                            {/* TODO: 이노페이 송금 IP 등록 완료 후 주석 해제
                                             <button
                                                 style={{
                                                     width: 'calc(100% - 40px)',
@@ -1014,6 +1015,7 @@ ${url}
                                             >
                                                 카드결제
                                             </button>
+                                            */}
                                         </div>
                                     )
                                 });
