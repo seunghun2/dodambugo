@@ -39,6 +39,10 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                         <span className="material-symbols-outlined">menu_book</span>
                         <span>장례가이드</span>
                     </Link>
+                    <Link href="/guide/funeral-home" className="side-menu-item" onClick={onClose}>
+                        <span className="material-symbols-outlined">location_on</span>
+                        <span>장례식장 찾기</span>
+                    </Link>
                 </nav>
             </div>
         </div>

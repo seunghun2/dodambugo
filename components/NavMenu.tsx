@@ -7,6 +7,7 @@ export const NAV_ITEMS = [
     { href: '/search', label: '부고검색' },
     { href: '/faq', label: '자주묻는 질문' },
     { href: '/guide', label: '장례가이드' },
+    { href: '/guide/funeral-home', label: '장례식장 찾기' },
 ];
 
 export default function NavMenu() {

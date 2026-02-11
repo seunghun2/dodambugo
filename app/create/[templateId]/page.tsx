@@ -79,6 +79,11 @@ export default function WriteFormPage() {
     const editBugoNumber = searchParams.get('edit');
     const draftIdParam = searchParams.get('draft');
 
+    // 장례식장 찾기에서 넘어온 경우
+    const facilityName = searchParams.get('funeral_home');
+    const facilityAddress = searchParams.get('address');
+    const facilityPhone = searchParams.get('funeral_home_tel');
+
     // 유효한 템플릿인지 확인
     useEffect(() => {
         if (!['basic', 'ribbon', 'border', 'flower'].includes(templateId)) {
@@ -88,6 +93,18 @@ export default function WriteFormPage() {
             gaEvents.selectTemplate(templateId);
         }
     }, [templateId, router]);
+
+    // 장례식장 정보 자동 세팅 (장례식장 찾기 → 부고장 만들기)
+    useEffect(() => {
+        if (facilityName || facilityAddress || facilityPhone) {
+            setFormData(prev => ({
+                ...prev,
+                ...(facilityName && { funeral_home: facilityName }),
+                ...(facilityAddress && { address: facilityAddress }),
+                ...(facilityPhone && { funeral_home_tel: facilityPhone }),
+            }));
+        }
+    }, [facilityName, facilityAddress, facilityPhone]);
 
     // Side menu
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
