@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // 이노페이 송금(입금이체) API
 // bumaeum02m 가맹점의 예치금 계좌에서 상주 계좌로 입금이체
 
-const INNOPAY_DEPOSIT_URL = 'https://acct.innopay.co.kr/AcctOutTransReq.acct';
+// 프록시 서버를 통해 이노페이 API 호출 (고정 IP: 49.50.139.204)
+const INNOPAY_DEPOSIT_URL = 'http://49.50.139.204/proxy/transfer';
 const INNOPAY_MID = 'bumaeum02m';
 const INNOPAY_LICENSE_KEY = '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==';
 
