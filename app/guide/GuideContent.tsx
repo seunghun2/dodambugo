@@ -100,18 +100,22 @@ export default function GuideContent() {
                         ))}
                     </div>
 
-                    {/* 안내 문구 */}
                     <div style={{
                         marginTop: '60px',
                         padding: '24px',
-                        background: '#fff',
+                        background: '#f8f6f0',
                         borderRadius: '12px',
                         textAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        borderLeft: '4px solid #c9a96e',
                     }}>
-                        <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>
-                            상세 가이드 페이지는 준비 중입니다.<br />
-                            빠른 시일 내에 더 자세한 정보로 찾아뵙겠습니다.
+                        <p style={{ margin: 0, color: '#555', fontSize: '14px', lineHeight: 1.8 }}>
+                            장례 소식을 전해야 하시나요?<br />
+                            <span
+                                onClick={() => router.push('/mobile-bugo')}
+                                style={{ color: '#c9a96e', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                무료 모바일 부고장
+                            </span>을 3분 만에 만들고 카카오톡으로 공유하세요.
                         </p>
                     </div>
                 </div>
