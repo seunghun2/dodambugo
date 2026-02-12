@@ -145,22 +145,22 @@ export default function MobileBugoContent() {
                 <section className="mobile-bugo-section" id="features">
                     <h2>마음부고 모바일 부고장 특징</h2>
 
-                    <h3>🎨 4가지 세련된 템플릿</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>palette</span> 4가지 세련된 템플릿</h3>
                     <p>고인의 품격을 지키는 정중한 디자인 템플릿을 제공합니다.</p>
 
-                    <h3>💰 완전 무료</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>savings</span> 완전 무료</h3>
                     <p>모바일 부고장 제작부터 공유까지 모든 기능이 무료입니다. 숨겨진 비용도 없습니다.</p>
 
-                    <h3>🚫 광고 없음</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>block</span> 광고 없음</h3>
                     <p>부고장에 광고가 노출되지 않습니다. 장례라는 상황에 맞는 격식을 지킵니다.</p>
 
-                    <h3>📱 회원가입 불필요</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>smartphone</span> 회원가입 불필요</h3>
                     <p>별도의 회원가입이나 앱 설치 없이 바로 모바일 부고장을 만들 수 있습니다.</p>
 
-                    <h3>✏️ 언제든 수정 가능</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>edit</span> 언제든 수정 가능</h3>
                     <p>장례 일정이 변경되더라도 언제든 수정할 수 있습니다.</p>
 
-                    <h3>🗺️ 장례식장 지도 포함</h3>
+                    <h3><span className="material-symbols-outlined" style={{ fontSize: '20px', verticalAlign: 'middle', marginRight: '6px', color: '#4A90A4' }}>map</span> 장례식장 지도 포함</h3>
                     <p>장례식장 위치와 길찾기 기능이 부고장에 자동으로 포함됩니다.</p>
                 </section>
 
@@ -209,19 +209,19 @@ export default function MobileBugoContent() {
                     <p>처음 장례를 준비하시는 분들을 위한 안내입니다.</p>
                     <div className="mobile-bugo-links">
                         <Link href="/guide/procedure" className="mobile-bugo-link">
-                            <span className="mobile-bugo-link-icon">📋</span>
+                            <span className="material-symbols-outlined mobile-bugo-link-icon">church</span>
                             장례 절차 안내
                         </Link>
                         <Link href="/guide/cost" className="mobile-bugo-link">
-                            <span className="mobile-bugo-link-icon">💰</span>
+                            <span className="material-symbols-outlined mobile-bugo-link-icon">payments</span>
                             장례 비용 안내
                         </Link>
                         <Link href="/guide/etiquette" className="mobile-bugo-link">
-                            <span className="mobile-bugo-link-icon">🙏</span>
+                            <span className="material-symbols-outlined mobile-bugo-link-icon">checkroom</span>
                             장례 예절 가이드
                         </Link>
                         <Link href="/guide/funeral-home" className="mobile-bugo-link">
-                            <span className="mobile-bugo-link-icon">🏥</span>
+                            <span className="material-symbols-outlined mobile-bugo-link-icon">location_on</span>
                             장례식장 찾기
                         </Link>
                     </div>

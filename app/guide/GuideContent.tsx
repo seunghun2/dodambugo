@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation';
 
 const guides = [
     {
+        title: '모바일 부고장',
+        description: '3분 만에 무료로 모바일 부고장을 만들고 카카오톡으로 공유하세요.',
+        icon: 'smartphone',
+        color: '#6366F1',
+        href: '/guide/mobile-bugo',
+    },
+    {
         title: '장례 절차',
         description: '임종부터 발인까지, 3일간의 장례 절차를 상세히 안내해 드립니다.',
         icon: 'church',

@@ -491,53 +491,8 @@ export default function HomeContent() {
       {/* Side Menu */}
       <SideMenu isOpen={sideMenuOpen} onClose={closeSideMenu} />
 
-      {/* 장례 가이드 섹션 - 내부 링크 SEO */}
-      <section className="features" id="guide-links" style={{ paddingBottom: 0 }}>
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">장례 가이드</h2>
-            <p className="section-subtitle">처음 장례를 준비하시는 분들을 위한 안내</p>
-          </div>
-          <div className="features-grid">
-            <Link href="/guide/procedure" className="feature-card" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-              <div className="feature-icon">
-                <ScheduleIcon size={24} />
-              </div>
-              <div className="feature-text">
-                <h3 className="feature-title">장례 절차 안내</h3>
-                <p className="feature-description">임종부터 발인까지 3일장 절차를 단계별로 안내합니다.</p>
-              </div>
-            </Link>
-            <Link href="/guide/cost" className="feature-card" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-              <div className="feature-icon">
-                <CheckCircleIcon size={24} />
-              </div>
-              <div className="feature-text">
-                <h3 className="feature-title">장례 비용 안내</h3>
-                <p className="feature-description">장례식장, 장례용품, 화장 등 항목별 예상 비용을 확인하세요.</p>
-              </div>
-            </Link>
-            <Link href="/guide/etiquette" className="feature-card" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-              <div className="feature-icon">
-                <PaletteIcon size={24} />
-              </div>
-              <div className="feature-text">
-                <h3 className="feature-title">장례 예절 가이드</h3>
-                <p className="feature-description">조문 복장, 절하는 법, 부의금 작성법을 알려드립니다.</p>
-              </div>
-            </Link>
-            <Link href="/guide/funeral-home" className="feature-card" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-              <div className="feature-icon">
-                <SearchIcon size={24} />
-              </div>
-              <div className="feature-text">
-                <h3 className="feature-title">전국 장례식장 찾기</h3>
-                <p className="feature-description">전국 1,100여 개 장례식장 정보를 검색하세요.</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
+
+
 
       {/* Features Section */}
       <section className="features" id="features">

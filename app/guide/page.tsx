@@ -27,24 +27,30 @@ const itemListJsonLd = {
         {
             '@type': 'ListItem',
             position: 1,
+            name: '모바일 부고장',
+            url: 'https://maeumbugo.co.kr/guide/mobile-bugo',
+        },
+        {
+            '@type': 'ListItem',
+            position: 2,
             name: '장례 절차 가이드',
             url: 'https://maeumbugo.co.kr/guide/procedure',
         },
         {
             '@type': 'ListItem',
-            position: 2,
+            position: 3,
             name: '장례 비용 가이드',
             url: 'https://maeumbugo.co.kr/guide/cost',
         },
         {
             '@type': 'ListItem',
-            position: 3,
+            position: 4,
             name: '장례 예절 가이드',
             url: 'https://maeumbugo.co.kr/guide/etiquette',
         },
         {
             '@type': 'ListItem',
-            position: 4,
+            position: 5,
             name: '장례식장 찾기',
             url: 'https://maeumbugo.co.kr/guide/funeral-home',
         },
