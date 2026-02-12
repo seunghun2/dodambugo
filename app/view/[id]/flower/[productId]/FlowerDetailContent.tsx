@@ -101,7 +101,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
                                                 if (offset === -1 && swiperRef) swiperRef.slidePrev();
                                             }}
                                         >
-                                            <img src={product.images[idx]} alt="" />
+                                            <img src={product.images[idx]} alt={`${product.name} 상세 이미지 ${idx + 1}`} />
                                         </button>
                                     );
                                 })}

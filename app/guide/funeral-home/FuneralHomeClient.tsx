@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import './funeral-home.css';
 
 interface Facility {
@@ -284,6 +285,22 @@ export default function FuneralHomeClient({ initialData }: FuneralHomeClientProp
                     )}
                 </div>
             )}
+
+            {/* 관련 가이드 링크 */}
+            <div className="funeral-home-related-guides" style={{ maxWidth: 600, margin: '32px auto', padding: '0 16px' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 16, color: '#333' }}>관련 장례 가이드</h2>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <li><Link href="/guide/procedure" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 절차 가이드 - 임종부터 발인까지 3일장 안내</Link></li>
+                    <li><Link href="/guide/cost" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 비용 가이드 - 항목별 예상 비용 총정리</Link></li>
+                    <li><Link href="/guide/etiquette" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 예절 가이드 - 조문 복장, 절하는 법, 부의금</Link></li>
+                    <li><Link href="/mobile-bugo" style={{ color: '#555', textDecoration: 'none', display: 'block' }}>모바일 부고장 만들기 - 무료, 3분 완성</Link></li>
+                </ul>
+                <div style={{ background: '#f8f6f0', borderLeft: '4px solid #c9a96e', padding: '16px 20px', marginTop: 20, borderRadius: 8, fontSize: '0.95rem', color: '#555' }}>
+                    <p style={{ margin: 0 }}>
+                        장례 소식을 전해야 하시나요? <Link href="/mobile-bugo" style={{ color: '#c9a96e', fontWeight: 700 }}>무료 모바일 부고장</Link>을 3분 만에 만들고 카카오톡으로 공유하세요.
+                    </p>
+                </div>
+            </div>
 
             {/* 맨 위로 가기 버튼 */}
             <button

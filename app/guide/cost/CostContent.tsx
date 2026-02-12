@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import './cost.css';
 
 export default function CostContent() {
@@ -375,6 +376,22 @@ export default function CostContent() {
                         <p>
                             장례 후 국민건강보험공단에 장제비를 신청하면
                             80만원을 지급받을 수 있습니다. 잊지 말고 꼭 신청하세요.
+                        </p>
+                    </div>
+                </section>
+
+                {/* 관련 가이드 링크 */}
+                <section className="cost-section">
+                    <h2>관련 장례 가이드</h2>
+                    <ul>
+                        <li><Link href="/guide/procedure">장례 절차 가이드 - 임종부터 발인까지 3일장 안내</Link></li>
+                        <li><Link href="/guide/etiquette">장례 예절 가이드 - 조문 복장, 절하는 법, 부의금</Link></li>
+                        <li><Link href="/guide/funeral-home">전국 장례식장 찾기 - 1,100여 개 장례식장 검색</Link></li>
+                        <li><Link href="/mobile-bugo">모바일 부고장 만들기 - 무료, 3분 완성</Link></li>
+                    </ul>
+                    <div className="cost-highlight">
+                        <p>
+                            장례 소식을 전해야 하시나요? <Link href="/mobile-bugo"><strong>무료 모바일 부고장</strong></Link>을 3분 만에 만들고 카카오톡으로 공유하세요.
                         </p>
                     </div>
                 </section>

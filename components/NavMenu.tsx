@@ -5,7 +5,7 @@ import Link from 'next/link';
 // 네비게이션 메뉴 아이템 - 전체 사이트 공통
 export const NAV_ITEMS = [
     { href: '/search', label: '부고검색' },
-    { href: '/faq', label: '자주묻는 질문' },
+    { href: '/mobile-bugo', label: '모바일 부고장' },
     { href: '/guide', label: '장례가이드' },
     { href: '/guide/funeral-home', label: '장례식장 찾기' },
 ];

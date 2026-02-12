@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import './procedure.css';
 
 export default function ProcedureContent() {
@@ -339,6 +340,22 @@ export default function ProcedureContent() {
                             장례식장에서 대부분의 물품을 준비해주므로,
                             영정사진과 사망진단서만 챙기시면 됩니다.
                             나머지는 장례지도사와 상의하며 진행하시면 돼요.
+                        </p>
+                    </div>
+                </section>
+
+                {/* 관련 가이드 링크 */}
+                <section className="procedure-section">
+                    <h2>관련 장례 가이드</h2>
+                    <ul>
+                        <li><Link href="/guide/cost">장례 비용 가이드 - 항목별 예상 비용 총정리</Link></li>
+                        <li><Link href="/guide/etiquette">장례 예절 가이드 - 조문 복장, 절하는 법, 부의금</Link></li>
+                        <li><Link href="/guide/funeral-home">전국 장례식장 찾기 - 1,100여 개 장례식장 검색</Link></li>
+                        <li><Link href="/mobile-bugo">모바일 부고장 만들기 - 무료, 3분 완성</Link></li>
+                    </ul>
+                    <div className="procedure-highlight">
+                        <p>
+                            장례 소식을 전해야 하시나요? <Link href="/mobile-bugo"><strong>무료 모바일 부고장</strong></Link>을 3분 만에 만들고 카카오톡으로 공유하세요.
                         </p>
                     </div>
                 </section>
