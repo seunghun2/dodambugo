@@ -353,7 +353,7 @@ ${bugoUrl}
 
             {/* 알림톡 발송 완료 모달 */}
             {showAlimtalkModal && (
-                <div className="alimtalk-modal-overlay" onClick={() => setShowAlimtalkModal(false)}>
+                <div className="alimtalk-modal-overlay">
                     <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="alimtalk-modal-icon">
                             <Image src="/images/icon-kakao.png" alt="카카오톡" width={40} height={40} />
@@ -390,7 +390,7 @@ ${bugoUrl}
                     (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
                 ) || [];
                 return (
-                    <div className="alimtalk-modal-overlay" onClick={() => setShowAdditionalMournerModal(false)}>
+                    <div className="alimtalk-modal-overlay">
                         <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
                             <button
                                 onClick={() => setShowAdditionalMournerModal(false)}
@@ -482,8 +482,9 @@ ${bugoUrl}
                                                 })
                                             });
                                             if (res.ok) {
+                                                const data = await res.json();
                                                 setShowAdditionalMournerModal(false);
-                                                setToast('알림을 발송했습니다');
+                                                setToast(data.scheduled ? '오전 8시에 발송 예정입니다' : '알림을 발송했습니다');
                                                 setTimeout(() => setToast(null), 2500);
                                             }
                                         } catch (err) {
