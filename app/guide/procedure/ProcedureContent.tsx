@@ -40,7 +40,7 @@ export default function ProcedureContent() {
                     </p>
 
                     <div className="procedure-image">
-                        <img src="/images/procedure-overview.png" alt="장례 절차 전체 흐름 - 1일차 임종, 2일차 조문, 3일차 발인" />
+                        <img src="/images/procedure-overview.png" alt="장례 절차 전체 흐름 - 1일차 임종, 2일차 조문, 3일차 발인" width={640} height={640} loading="lazy" />
                     </div>
 
                     <table className="procedure-table">
@@ -84,7 +84,7 @@ export default function ProcedureContent() {
                     </p>
 
                     <div className="procedure-image">
-                        <img src="/images/procedure-day1.png" alt="1일차 절차 - 사망진단서, 장례식장 준비, 친지 연락, 제단 설치" />
+                        <img src="/images/procedure-day1.png" alt="1일차 절차 - 사망진단서, 장례식장 준비, 친지 연락, 제단 설치" width={640} height={640} loading="lazy" />
                     </div>
 
                     <div className="procedure-step-item">
@@ -153,7 +153,7 @@ export default function ProcedureContent() {
                     </p>
 
                     <div className="procedure-image">
-                        <img src="/images/procedure-day2.png" alt="2일차 절차 - 염습, 방명록 접수, 조문객 맞이" />
+                        <img src="/images/procedure-day2.png" alt="2일차 절차 - 염습, 방명록 접수, 조문객 맞이" width={640} height={640} loading="lazy" />
                     </div>
 
                     <div className="procedure-step-item">
@@ -197,7 +197,7 @@ export default function ProcedureContent() {
                     </p>
 
                     <div className="procedure-image">
-                        <img src="/images/procedure-day3.png" alt="3일차 절차 - 발인제, 영구차, 화장장 및 봉안당" />
+                        <img src="/images/procedure-day3.png" alt="3일차 절차 - 발인제, 영구차, 화장장 및 봉안당" width={640} height={640} loading="lazy" />
                     </div>
 
                     <div className="procedure-step-item">

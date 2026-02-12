@@ -39,7 +39,7 @@ export default function EtiquetteContent() {
                     </p>
 
                     <div className="etiquette-image">
-                        <img src="/images/etiquette-visitor-dress.png" alt="조문객 복장 안내 - 남성, 여성 복장 예시" />
+                        <img src="/images/etiquette-visitor-dress.png" alt="조문객 복장 안내 - 남성, 여성 복장 예시" width={1024} height={651} loading="lazy" />
                     </div>
 
                     <h3>남성</h3>
@@ -74,7 +74,7 @@ export default function EtiquetteContent() {
                     </p>
 
                     <div className="etiquette-image">
-                        <img src="/images/etiquette-mourner-dress.png" alt="상주 복장 안내 - 한복, 정장 착용 예시" />
+                        <img src="/images/etiquette-mourner-dress.png" alt="상주 복장 안내 - 한복, 정장 착용 예시" width={1024} height={559} loading="lazy" />
                     </div>
 
                     <h3>상주 복장 옵션</h3>
@@ -115,7 +115,7 @@ export default function EtiquetteContent() {
                     </p>
 
                     <div className="etiquette-image">
-                        <img src="/images/etiquette-visit-process.png" alt="조문 예절 순서 - 방명록, 분향, 위로인사" />
+                        <img src="/images/etiquette-visit-process.png" alt="조문 예절 순서 - 방명록, 분향, 위로인사" width={1024} height={553} loading="lazy" />
                     </div>
 
                     <h3>간단한 조문 순서</h3>
@@ -172,7 +172,7 @@ export default function EtiquetteContent() {
                     </p>
 
                     <div className="etiquette-image">
-                        <img src="/images/etiquette-envelope.png" alt="부의금 봉투 뒷면 작성 예시" />
+                        <img src="/images/etiquette-envelope.png" alt="부의금 봉투 뒷면 작성 예시" width={1024} height={1024} loading="lazy" />
                     </div>
 
                     <h3>봉투 앞면</h3>

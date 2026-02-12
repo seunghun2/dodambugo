@@ -39,7 +39,7 @@ export default function CostContent() {
                     </p>
 
                     <div className="cost-image">
-                        <img src="/images/cost-overview.png" alt="장례 비용 구성 - 장례식장, 장례용품, 화장/매장, 음식/접대, 기타" />
+                        <img src="/images/cost-overview.png" alt="장례 비용 구성 - 장례식장, 장례용품, 화장/매장, 음식/접대, 기타" width={640} height={640} loading="lazy" />
                     </div>
 
                     <div className="cost-summary">
@@ -100,7 +100,7 @@ export default function CostContent() {
                     </p>
 
                     <div className="cost-image">
-                        <img src="/images/cost-funeral-hall.png" alt="장례식장 비용 - 빈소 공간, 제단 장식, 식사, 주차장" />
+                        <img src="/images/cost-funeral-hall.png" alt="장례식장 비용 - 빈소 공간, 제단 장식, 식사, 주차장" width={640} height={640} loading="lazy" />
                     </div>
 
                     <h3>빈소 사용료 (3일 기준)</h3>
@@ -221,7 +221,7 @@ export default function CostContent() {
                     </p>
 
                     <div className="cost-image">
-                        <img src="/images/cost-cremation.png" alt="장지 선택 - 봉안당, 자연장, 매장" />
+                        <img src="/images/cost-cremation.png" alt="장지 선택 - 봉안당, 자연장, 매장" width={640} height={640} loading="lazy" />
                     </div>
 
                     <h3>화장 비용</h3>
