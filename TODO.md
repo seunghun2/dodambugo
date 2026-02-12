@@ -68,10 +68,16 @@
 - [ ] 마음으로 화환 보낸 분 로그 남기기
 
 ### SEO / 마케팅
+- [x] 전 페이지 메타데이터 + canonical URL + OG 태그 ✅
+- [x] JSON-LD 구조화 데이터 7개 페이지 ✅
+- [x] 사이트맵 보강 (정적 13개 + 동적 부고) ✅
+- [x] Core Web Vitals 최적화 (preload, lazy loading, 이미지 dimensions) ✅
 - [ ] 블로그 기능 (`/blog`) — SEO 콘텐츠
   - "모바일 부고장 만드는 법", "장례식장 조문 예절", "조의금 봉투 쓰는 법"
 - [ ] 네이버 광고 세팅
-- [ ] 키워드 최적화
+- [ ] **2~3일 후**: Google Search Console 색인 상태 확인
+- [ ] **1~2주 후**: "모바일부고장", "부고장 만들기" 검색 순위 모니터링
+- [ ] OG 이미지 1200x630 사이즈 전용 제작 (카카오톡 공유 이미지는 별도 유지)
 
 ---
 
@@ -104,6 +110,31 @@
 ---
 
 ## ✅ 완료
+
+### 2026-02-12
+- [x] **SEO 전면 최적화** 🔍
+  - 전 페이지 메타데이터 (title/description/keywords/canonical/OG)
+  - JSON-LD: Organization, WebSite, WebApplication, FAQPage, HowTo, BreadcrumbList, ItemList
+  - 메타 없던 5개 페이지 추가 (/create, /search, /contact, /privacy, /terms)
+  - 사이트맵에 /faq, /guide 누락분 추가
+- [x] **Core Web Vitals 최적화** ⚡
+  - Pretendard/Material Symbols 폰트 preload
+  - cdn.jsdelivr.net preconnect
+  - 가이드 이미지 11개에 width/height + lazy loading
+
+### 2026-02-10
+- [x] **프록시 서버 구축** (Naver Cloud Platform) 🖥️
+  - dodam-proxy 서버 생성 (Ubuntu 24.04, 고정IP: 49.50.139.204)
+  - Nginx 설치 및 리버스 프록시 설정 (/proxy/transfer → innopay)
+  - ACG 포트 오픈 (22, 80, 443)
+  - 송금 API URL 프록시 경유로 변경 완료
+  - ⏳ **이노페이 IP 등록 메일 답변 대기 중** → 답변 후 배포+테스트
+- [x] **창업사관학교 사업계획서 제출** 📋
+  - 본문 13페이지로 압축
+  - 스캔본 A4 사이즈 통일 + 신청서 PDF 합본
+  - 온라인 신청서 폼 작성 완료
+- [x] **알림톡 템플릿 수정** (07-임시저장 리마인더)
+  - 카카오 반려 → "작성 진행 중 임시저장하신" 문구로 수정 후 재검수
 
 ### 2026-02-07
 - [x] **공유 행동 분석** 📊
@@ -286,4 +317,4 @@
 
 ---
 
-*마지막 업데이트: 2026-02-07 14:11*
+*마지막 업데이트: 2026-02-12 11:46*
