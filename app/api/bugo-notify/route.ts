@@ -77,32 +77,27 @@ export async function POST(request: NextRequest) {
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
 
-                // 📅 감사장 알림톡 예약 발송 (발인 다음날 10시)
+                // 📅 감사장 알림톡 예약 발송 (발인 다음날 10시 KST)
                 if (funeral_date) {
                     try {
-                        // 발인일 다음날 10시 (한국시간) 계산
-                        const funeralDateObj = new Date(funeral_date);
-                        funeralDateObj.setDate(funeralDateObj.getDate() + 1);
-                        // Solapi는 KST 기준이므로 UTC 변환 없이 KST 10시를 직접 지정
-                        const year = funeralDateObj.getFullYear();
-                        const month = String(funeralDateObj.getMonth() + 1).padStart(2, '0');
-                        const day = String(funeralDateObj.getDate()).padStart(2, '0');
-                        const scheduledKST = new Date(`${year}-${month}-${day}T10:00:00+09:00`);
+                        const [fy, fm, fd] = funeral_date.split('-').map(Number);
+                        const nextDay = new Date(fy, fm - 1, fd + 1);
+                        const ny = nextDay.getFullYear();
+                        const nm = String(nextDay.getMonth() + 1).padStart(2, '0');
+                        const nd = String(nextDay.getDate()).padStart(2, '0');
+                        const scheduledKST = `${ny}-${nm}-${nd} 10:00:00`;
 
-                        // 예약 시간이 현재보다 미래인 경우에만 발송
-                        if (scheduledKST > new Date()) {
-                            await sendAlimtalk(
-                                phoneNumber,
-                                'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿
-                                {
-                                    '상주명': mourner_name || '',
-                                    '고인명': deceased_name || '',
-                                    '부고ID': bugo_number,
-                                },
-                                scheduledKST  // 예약 발송!
-                            );
-                            console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', `${year}-${month}-${day} 10:00 KST`);
-                        }
+                        await sendAlimtalk(
+                            phoneNumber,
+                            'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿
+                            {
+                                '상주명': mourner_name || '',
+                                '고인명': deceased_name || '',
+                                '부고ID': bugo_number,
+                            },
+                            scheduledKST  // 예약 발송!
+                        );
+                        console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', scheduledKST);
                     } catch (thanksErr) {
                         console.error('감사장 예약 발송 실패:', thanksErr);
                     }

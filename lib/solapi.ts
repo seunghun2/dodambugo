@@ -48,7 +48,7 @@ export async function sendAlimtalk(
     to: string,
     templateId: string,
     variables: Record<string, string>,
-    scheduledDate?: Date  // 예약 발송 시간 (선택)
+    scheduledDate?: string  // 예약 발송 시간 (KST, "YYYY-MM-DD HH:mm:ss" 형식)
 ) {
     try {
         // SOLAPI는 변수 키에 #{} 래퍼가 필요함
@@ -89,17 +89,14 @@ export async function sendAlimtalk(
             });
             console.log('📝 메시지 추가 완료');
 
-            // 3. 예약 발송 설정 (Solapi는 KST 기준으로 해석)
-            // toISOString()은 UTC로 변환하므로, KST 시간을 직접 포맷
-            const kstDate = new Date(scheduledDate.getTime() + (9 * 60 * 60 * 1000));
-            const kstString = kstDate.toISOString().replace('Z', '');  // "2026-02-10T10:00:00.000"
+            // 3. 예약 발송 설정 (Solapi는 KST 기준)
             const scheduleRes = await fetch(`${SOLAPI_URL}/messages/v4/groups/${groupId}/schedule`, {
                 method: 'POST',
                 headers: getAuthHeader(),
-                body: JSON.stringify({ scheduledDate: kstString }),
+                body: JSON.stringify({ scheduledDate }),
             });
             const scheduleData = await scheduleRes.json();
-            console.log('📅 예약 발송 설정 (KST):', kstString, scheduleData);
+            console.log('📅 예약 발송 설정:', scheduledDate, scheduleData);
             return scheduleData;
         }
 
