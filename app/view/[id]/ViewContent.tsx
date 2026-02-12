@@ -1118,7 +1118,7 @@ ${url}
             {/* Footer 숨김 처리 - 2026-02-04
             <footer className="view-footer">
                 <p className="view-footer-company">마음부고</p>
-                <p>서울특별시 강남구 압구정로 306, 지하 1층 4-S36호</p>
+                <p>서울특별시 강남구 압구정로 306</p>
                 <p>대표: 김미연 | 대표번호: 010-4837-5076</p>
                 <p>사업자등록번호: 408-22-68851 | 통신판매업신고: 2026-서울강남-00502</p>
                 <p className="view-footer-copyright">© 2026 maeumbugo. All rights reserved.</p>
