@@ -51,12 +51,26 @@ const howToJsonLd = {
     ],
 };
 
+const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '마음부고', item: 'https://maeumbugo.co.kr' },
+        { '@type': 'ListItem', position: 2, name: '장례가이드', item: 'https://maeumbugo.co.kr/guide' },
+        { '@type': 'ListItem', position: 3, name: '장례 절차', item: 'https://maeumbugo.co.kr/guide/procedure' },
+    ],
+};
+
 export default function ProcedurePage() {
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
             <ProcedureContent />
         </>

@@ -12,7 +12,46 @@ export const metadata: Metadata = {
         url: 'https://maeumbugo.co.kr/guide/funeral-home',
         siteName: '마음부고',
         type: 'website',
+        locale: 'ko_KR',
     },
+    alternates: {
+        canonical: 'https://maeumbugo.co.kr/guide/funeral-home',
+    },
+};
+
+const funeralHomeJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: '전국 장례식장 목록',
+    description: '전국 1,100여개 장례식장의 주소, 전화번호, 위치 정보를 제공합니다.',
+    url: 'https://maeumbugo.co.kr/guide/funeral-home',
+    numberOfItems: 1100,
+    itemListOrder: 'https://schema.org/ItemListUnordered',
+};
+
+const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        {
+            '@type': 'ListItem',
+            position: 1,
+            name: '마음부고',
+            item: 'https://maeumbugo.co.kr',
+        },
+        {
+            '@type': 'ListItem',
+            position: 2,
+            name: '장례가이드',
+            item: 'https://maeumbugo.co.kr/guide',
+        },
+        {
+            '@type': 'ListItem',
+            position: 3,
+            name: '장례식장 찾기',
+            item: 'https://maeumbugo.co.kr/guide/funeral-home',
+        },
+    ],
 };
 
 // 서버에서 초기 데이터 가져오기 (SEO용)
@@ -38,5 +77,17 @@ async function getInitialFacilities() {
 export default async function FuneralHomePage() {
     const initialData = await getInitialFacilities();
 
-    return <FuneralHomeClient initialData={initialData} />;
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(funeralHomeJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+            />
+            <FuneralHomeClient initialData={initialData} />
+        </>
+    );
 }
