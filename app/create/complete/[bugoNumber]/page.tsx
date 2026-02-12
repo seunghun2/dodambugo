@@ -37,6 +37,9 @@ export default function CompletePage() {
     const [qrDataUrl, setQrDataUrl] = useState<string>('');
     const [showAlimtalkModal, setShowAlimtalkModal] = useState(false);
     const [applicantPhone, setApplicantPhone] = useState<string>('');
+    const [showAdditionalMournerModal, setShowAdditionalMournerModal] = useState(false);
+    const [additionalMournerConsent, setAdditionalMournerConsent] = useState(false);
+    const [sendingAdditionalNotify, setSendingAdditionalNotify] = useState(false);
 
     // 프로덕션 환경에서는 도메인 강제 고정 (www 제거, https 강제)
     const getOrigin = () => {
@@ -365,12 +368,138 @@ ${bugoUrl}
                             </p>
                         )}
                         <p className="alimtalk-modal-hint">잠시 후 알림톡이 도착합니다</p>
-                        <button className="alimtalk-modal-btn" onClick={() => setShowAlimtalkModal(false)}>
+                        <button className="alimtalk-modal-btn" onClick={() => {
+                            setShowAlimtalkModal(false);
+                            // 추가 상주 중 전화번호 있는 사람이 있으면 두 번째 모달
+                            const additionalWithPhone = bugo?.mourners?.filter(
+                                (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
+                            ) || [];
+                            if (additionalWithPhone.length > 0) {
+                                setTimeout(() => setShowAdditionalMournerModal(true), 300);
+                            }
+                        }}>
                             확인
                         </button>
                     </div>
                 </div>
             )}
+
+            {/* 추가 상주 알림 발송 모달 */}
+            {showAdditionalMournerModal && (() => {
+                const additionalMourners = bugo?.mourners?.filter(
+                    (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
+                ) || [];
+                return (
+                    <div className="alimtalk-modal-overlay" onClick={() => setShowAdditionalMournerModal(false)}>
+                        <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
+                            <button
+                                onClick={() => setShowAdditionalMournerModal(false)}
+                                style={{
+                                    position: 'absolute', top: '12px', right: '12px',
+                                    background: 'none', border: 'none', cursor: 'pointer',
+                                    fontSize: '20px', color: '#aaa', padding: '4px', lineHeight: 1
+                                }}
+                            >✕</button>
+                            <div className="alimtalk-modal-icon">
+                                <Image src="/images/icon-kakao.png" alt="카카오톡" width={40} height={40} />
+                            </div>
+                            <h2 className="alimtalk-modal-title" style={{ marginTop: '8px' }}>
+                                추가 상주에게도<br />부고장을 보내시겠습니까?
+                            </h2>
+                            <div style={{ margin: '16px 0', textAlign: 'left', width: '100%' }}>
+                                {additionalMourners.map((m, i) => (
+                                    <div key={i} style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        padding: '10px 16px', background: '#f8f9fa', borderRadius: '8px',
+                                        marginBottom: '8px'
+                                    }}>
+                                        <span style={{ flex: 1 }}>
+                                            <strong>{m.name}</strong>
+                                            <span style={{ color: '#888', marginLeft: '4px' }}>({m.relationship})</span>
+                                        </span>
+                                        <span style={{ color: '#666', fontSize: '14px' }}>
+                                            {m.contact.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div
+                                onClick={() => setAdditionalMournerConsent(!additionalMournerConsent)}
+                                style={{
+                                    background: 'transparent', borderRadius: '8px',
+                                    border: '1px solid #ddd',
+                                    padding: '12px 12px', margin: '38px 0 16px', width: '100%',
+                                    cursor: 'pointer'
+                                }}>
+                                <div
+                                    onClick={() => setAdditionalMournerConsent(!additionalMournerConsent)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '10px',
+                                        cursor: 'pointer', fontSize: '13px', color: '#333'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '20px', height: '20px', borderRadius: '50%',
+                                        border: additionalMournerConsent ? 'none' : '1.5px solid #ddd',
+                                        background: additionalMournerConsent ? '#f5c519' : '#fff',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        flexShrink: 0, transition: 'all 0.2s'
+                                    }}>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={additionalMournerConsent ? '#fff' : '#333'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                    수신 동의를 받았습니다.
+                                </div>
+                                <p style={{
+                                    fontSize: '11px', color: '#aaa', textAlign: 'left',
+                                    margin: '2px 0 0 30px'
+                                }}>
+                                    수신 동의가 없는 번호에는 발송하실 수 없습니다.
+                                </p>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                <button
+                                    className="alimtalk-modal-btn"
+                                    style={{
+                                        width: '100%',
+                                        opacity: additionalMournerConsent ? 1 : 0.4
+                                    }}
+                                    disabled={!additionalMournerConsent || sendingAdditionalNotify}
+                                    onClick={async () => {
+                                        setSendingAdditionalNotify(true);
+                                        try {
+                                            const res = await fetch('/api/bugo-notify-additional', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    parent_bugo_number: bugo?.bugo_number,
+                                                    additional_mourners: additionalMourners.map(m => ({
+                                                        name: m.name,
+                                                        relationship: m.relationship,
+                                                        contact: m.contact
+                                                    }))
+                                                })
+                                            });
+                                            if (res.ok) {
+                                                setShowAdditionalMournerModal(false);
+                                                setToast('알림을 발송했습니다');
+                                                setTimeout(() => setToast(null), 2500);
+                                            }
+                                        } catch (err) {
+                                            console.error('추가 상주 알림 발송 실패:', err);
+                                        } finally {
+                                            setSendingAdditionalNotify(false);
+                                        }
+                                    }}
+                                >
+                                    {sendingAdditionalNotify ? '발송 중...' : '보내기'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }

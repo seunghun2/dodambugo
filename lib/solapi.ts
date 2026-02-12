@@ -43,6 +43,32 @@ export async function sendSMS(to: string, text: string) {
     }
 }
 
+// LMS 발송 (긴 문자 - 제목+본문 지원)
+export async function sendLMS(to: string, subject: string, text: string) {
+    try {
+        const response = await fetch(`${SOLAPI_URL}/messages/v4/send`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+                message: {
+                    to,
+                    from: '01048375076',
+                    subject,
+                    text,
+                    type: 'LMS',
+                },
+            }),
+        });
+
+        const data = await response.json();
+        console.log('LMS 발송 결과:', JSON.stringify(data, null, 2));
+        return data;
+    } catch (error) {
+        console.error('LMS 발송 실패:', error);
+        throw error;
+    }
+}
+
 // 알림톡 발송 (예약 발송 지원)
 export async function sendAlimtalk(
     to: string,

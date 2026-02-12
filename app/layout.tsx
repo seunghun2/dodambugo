@@ -17,7 +17,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
-  title: '마음부고 - 무료 모바일 부고장, 모바일부고, 부고문자, 부고, 부고장, 카카오톡 공유',
+  title: '마음부고 - 무료 모바일 부고장 만들기 | 3분 완성, 카카오톡 공유',
   description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료, 광고 없음, 카카오톡 공유',
   keywords: '마음부고, 부고장, 모바일 부고장, 모바일부고, 부고문자, 부고, 무료 부고장, 온라인 부고, 카카오톡 공유, 장례식장, 조문, 화환, 근조화환',
   authors: [{ name: '마음부고' }],
