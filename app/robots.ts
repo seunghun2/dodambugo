@@ -5,6 +5,25 @@ export default function robots(): MetadataRoute.Robots {
         rules: [
             {
                 userAgent: '*',
+                allow: [
+                    '/',
+                    '/mobile-bugo',
+                    '/guide/',
+                    '/view/',
+                    '/create',
+                    '/faq',
+                    '/search',
+                ],
+                disallow: [
+                    '/admin/',
+                    '/api/',
+                    '/_next/',
+                    '/static/',
+                ],
+            },
+            // 네이버 크롤러 명시적 허용
+            {
+                userAgent: 'Yeti',
                 allow: '/',
                 disallow: ['/admin/', '/api/'],
             },
