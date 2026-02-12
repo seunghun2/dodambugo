@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
                         const ny = nextDay.getFullYear();
                         const nm = String(nextDay.getMonth() + 1).padStart(2, '0');
                         const nd = String(nextDay.getDate()).padStart(2, '0');
-                        const scheduledKST = `${ny}-${nm}-${nd} 10:00:00`;
+                        const scheduledKST = `${ny}-${nm}-${nd}T10:00:00+09:00`;
 
                         await sendAlimtalk(
                             phoneNumber,
