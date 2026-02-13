@@ -5915,6 +5915,7 @@ section {
     padding: 16px 20px;
     padding-bottom: max(16px, env(safe-area-inset-bottom));
     border-top: 1px solid var(--gray-100);
+    background: #fff;
     flex-shrink: 0;
 }
 
