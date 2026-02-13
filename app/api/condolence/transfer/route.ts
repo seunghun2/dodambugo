@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sendDepositBalanceNotification } from '@/lib/slack';
 
 // 이노페이 송금(입금이체) API
 // bumaeum02m 가맹점의 예치금 계좌에서 상주 계좌로 입금이체
@@ -140,6 +141,41 @@ export async function POST(request: NextRequest) {
                 to: `${bankName} ${accountHolder}`,
                 from: buyerName,
             });
+
+            // 슬랙 예치금 출금 알림
+            try {
+                // 잔액 조회
+                let remainAmt: number | undefined;
+                try {
+                    const balRes = await fetch('http://49.50.139.204/proxy/balance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mid: INNOPAY_MID,
+                            merkey: INNOPAY_LICENSE_KEY,
+                            depAcntNo: '66400001397152',
+                        }),
+                    });
+                    const balData = await balRes.json();
+                    if (balData.resultCode === '0000') {
+                        remainAmt = Number(balData.remainAmt);
+                    }
+                } catch (e) { /* 잔액 조회 실패해도 송금 결과는 정상 */ }
+
+                await sendDepositBalanceNotification({
+                    type: '출금',
+                    amount: Number(amount),
+                    remainAmt,
+                    buyerName,
+                    recipientName: accountHolder,
+                    bankName,
+                    accountNo: cleanAccountNo,
+                    bugoNumber: bugoId,
+                    description: `${buyerName}→${accountHolder}님에게 송금`,
+                });
+            } catch (slackErr) {
+                console.error('❌ 예치금 출금 슬랙 알림 실패:', slackErr);
+            }
 
             return NextResponse.json({
                 success: true,

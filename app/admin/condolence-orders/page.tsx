@@ -29,6 +29,14 @@ export default function AdminCondolenceOrdersPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 50;
 
+    // 예치금 잔액
+    const [depositBalance, setDepositBalance] = useState<{
+        remainAmt: string;
+        totDptAmt: string;
+        totWdrAmt: string;
+        loading: boolean;
+    }>({ remainAmt: '-', totDptAmt: '-', totWdrAmt: '-', loading: true });
+
     // 필터 상태
     const [filters, setFilters] = useState({
         buyer_name: '',
@@ -46,7 +54,28 @@ export default function AdminCondolenceOrdersPage() {
 
     useEffect(() => {
         fetchOrders();
+        fetchDepositBalance();
     }, []);
+
+    const fetchDepositBalance = async () => {
+        setDepositBalance(prev => ({ ...prev, loading: true }));
+        try {
+            const res = await fetch('/api/condolence/transfer/balance');
+            const data = await res.json();
+            if (data.success) {
+                setDepositBalance({
+                    remainAmt: Number(data.data.remainAmt).toLocaleString(),
+                    totDptAmt: Number(data.data.totDptAmt).toLocaleString(),
+                    totWdrAmt: Number(data.data.totWdrAmt).toLocaleString(),
+                    loading: false,
+                });
+            } else {
+                setDepositBalance(prev => ({ ...prev, loading: false }));
+            }
+        } catch (e) {
+            setDepositBalance(prev => ({ ...prev, loading: false }));
+        }
+    };
 
     const fetchOrders = async () => {
         setLoading(true);
@@ -239,6 +268,22 @@ export default function AdminCondolenceOrdersPage() {
                     <div className="stat-card highlight">
                         <div className="stat-label">총 수익</div>
                         <div className="stat-value">{formatMoney(stats.totalProfit)}원</div>
+                    </div>
+                    <div className="stat-card deposit">
+                        <div className="stat-label">
+                            예치금 잔액
+                            <button onClick={fetchDepositBalance} className="btn-deposit-refresh" title="새로고침">
+                                <span className={`material-symbols-outlined ${depositBalance.loading ? 'spinning' : ''}`} style={{ fontSize: '16px' }}>refresh</span>
+                            </button>
+                        </div>
+                        <div className="stat-value">
+                            {depositBalance.loading ? '...' : `${depositBalance.remainAmt}원`}
+                        </div>
+                        {!depositBalance.loading && (
+                            <div className="deposit-detail">
+                                입금 {depositBalance.totDptAmt}원 / 출금 {depositBalance.totWdrAmt}원
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -471,7 +516,7 @@ export default function AdminCondolenceOrdersPage() {
             <style jsx>{`
                 .stats-row {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    grid-template-columns: repeat(5, 1fr);
                     gap: 16px;
                     margin-bottom: 24px;
                     padding: 0 24px;
@@ -554,6 +599,36 @@ export default function AdminCondolenceOrdersPage() {
                 .highlight {
                     font-weight: 600;
                     color: #1e293b;
+                }
+                .stat-card.deposit {
+                    background: linear-gradient(135deg, #059669, #047857);
+                    color: white;
+                }
+                .stat-card.deposit .stat-label {
+                    color: rgba(255,255,255,0.8);
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .stat-card.deposit .stat-value {
+                    color: white;
+                }
+                .deposit-detail {
+                    font-size: 11px;
+                    color: rgba(255,255,255,0.7);
+                    margin-top: 4px;
+                }
+                .btn-deposit-refresh {
+                    background: none;
+                    border: none;
+                    color: rgba(255,255,255,0.8);
+                    cursor: pointer;
+                    padding: 2px;
+                    display: flex;
+                    align-items: center;
+                }
+                .btn-deposit-refresh:hover {
+                    color: white;
                 }
             `}</style>
         </div>

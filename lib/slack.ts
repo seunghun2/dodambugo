@@ -178,3 +178,39 @@ export async function sendCondolenceNotification(payment: {
 
     return sendToWebhook(webhookUrl!, { text });
 }
+
+/**
+ * 예치금 잔액 변동 알림 전송
+ */
+export async function sendDepositBalanceNotification(info: {
+    type: '입금' | '출금';
+    amount: number;
+    remainAmt?: number;
+    buyerName?: string;
+    recipientName?: string;
+    bugoNumber?: string;
+    bankName?: string;
+    accountNo?: string;
+    description?: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_BUGO;
+
+    const amountFormatted = new Intl.NumberFormat('ko-KR').format(info.amount);
+    const remainFormatted = info.remainAmt != null
+        ? new Intl.NumberFormat('ko-KR').format(info.remainAmt)
+        : '조회 필요';
+
+    const emoji = info.type === '입금' ? '💰' : '💸';
+    const sign = info.type === '입금' ? '+' : '-';
+
+    let text = `${emoji} [마음부고] 예치금 ${info.type} (${sign}${amountFormatted}원)\n`;
+    text += `  - 잔액: ${remainFormatted}원\n`;
+
+    if (info.buyerName) text += `  - 구매자: ${info.buyerName}\n`;
+    if (info.recipientName) text += `  - 받는분: ${info.recipientName}\n`;
+    if (info.bankName && info.accountNo) text += `  - 송금계좌: ${info.bankName} ${info.accountNo}\n`;
+    if (info.bugoNumber) text += `  - 부고번호: ${info.bugoNumber}\n`;
+    if (info.description) text += `  - 비고: ${info.description}\n`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
