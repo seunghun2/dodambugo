@@ -178,8 +178,8 @@ export default function CondolenceContent() {
             moid: moid,
             goodsName: `부의금 (${account?.name || '상주'})`,
             goodsCnt: '1',
-            amt: String(totalAmount),
-            taxFreeAmt: String(selectedAmount),  // 부의금 원금 비과세, 수수료만 과세
+            amt: String(totalAmount - selectedAmount),  // 수수료만 (과세)
+            taxFreeAmt: String(selectedAmount),  // 부의금 원금 (비과세) → 총 결제액 = amt + taxFreeAmt
             buyerName: buyerName,
             buyerTel: buyerPhone.replace(/-/g, ''),
             buyerEmail: 'condolence@maeumbugo.co.kr',

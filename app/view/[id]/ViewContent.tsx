@@ -986,35 +986,37 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 카드결제 버튼 - 추후 활성화 예정
-                                            <button
-                                                style={{
-                                                    width: 'calc(100% - 40px)',
-                                                    margin: '6px 20px 20px',
-                                                    padding: '10px',
-                                                    background: '#FFFFFF',
-                                                    border: '1px solid #333333',
-                                                    borderRadius: '8px',
-                                                    textAlign: 'center',
-                                                    cursor: 'pointer',
-                                                    fontSize: '14px',
-                                                    fontFamily: "'Pretendard', -apple-system, sans-serif",
-                                                    color: '#333',
-                                                    fontWeight: 500
-                                                }}
-                                                onClick={() => {
-                                                    sessionStorage.setItem('condolence_account', JSON.stringify({
-                                                        relationship: acc.relationship || '',
-                                                        name: acc.name || acc.holder || '',
-                                                        bank: acc.bank || '',
-                                                        holder: acc.holder || '',
-                                                        number: acc.number || ''
-                                                    }));
-                                                    router.push(`/view/${params.id}/condolence`);
-                                                }}
-                                            >
-                                                카드결제
-                                            </button>
+                                            {/* 부의금 카드결제 버튼 - 복합과세 테스트 완료, 정식 오픈 전까지 비활성화
+                                            {typeof window !== 'undefined' && window.location.hostname === 'localhost' && (
+                                                <button
+                                                    style={{
+                                                        width: 'calc(100% - 40px)',
+                                                        margin: '6px 20px 20px',
+                                                        padding: '10px',
+                                                        background: '#FFFFFF',
+                                                        border: '1px solid #333333',
+                                                        borderRadius: '8px',
+                                                        textAlign: 'center',
+                                                        cursor: 'pointer',
+                                                        fontSize: '14px',
+                                                        fontFamily: "'Pretendard', -apple-system, sans-serif",
+                                                        color: '#333',
+                                                        fontWeight: 500
+                                                    }}
+                                                    onClick={() => {
+                                                        sessionStorage.setItem('condolence_account', JSON.stringify({
+                                                            relationship: acc.relationship || '',
+                                                            name: acc.name || acc.holder || '',
+                                                            bank: acc.bank || '',
+                                                            holder: acc.holder || '',
+                                                            number: acc.number || ''
+                                                        }));
+                                                        router.push(`/view/${params.id}/condolence`);
+                                                    }}
+                                                >
+                                                    카드결제
+                                                </button>
+                                            )}
                                             */}
                                         </div>
                                     )

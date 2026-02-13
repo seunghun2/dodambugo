@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
                     'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
                     {
                         '상품명': orderData.product_name || '',
-                        '금액': Number(amt).toLocaleString(),
+                        '금액': ((Number(amt) || 0) + (Number(taxFreeAmt) || 0)).toLocaleString(),
                         '주문번호': orderData.order_number || moid,
                         '받는분': orderData.recipient_name || '',
                         '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
                     recipient_name: orderData.recipient_name,
                     recipient_phone: orderData.recipient_phone || '',
                     product_name: orderData.product_name,
-                    price: Number(amt),
+                    price: (Number(amt) || 0) + (Number(taxFreeAmt) || 0),
                     ribbon_text1: orderData.ribbon_text1,
                     ribbon_text2: orderData.ribbon_text2,
                     funeral_hall: orderData.funeral_home,
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
 
                 const buyerInfo = approveResult.data?.buyer || {};
                 const selectedAmount = condolenceInfo.selectedAmount || 0;
-                const totalAmount = Number(amt) || condolenceInfo.totalAmount || 0;
+                const totalAmount = (Number(amt) || 0) + (Number(taxFreeAmt) || 0) || condolenceInfo.totalAmount || 0;  // 복합과세: 실제 결제액 = amt(과세) + taxFreeAmt(비과세)
                 const fee = totalAmount - selectedAmount;
 
                 // 부고 정보 조회

@@ -45,9 +45,10 @@ export default function PaymentCallbackPage() {
                 return;
             }
 
-            // mallReserved에서 bugoId, type 추출
+            // mallReserved에서 bugoId, type, originalTaxFreeAmt 추출
             let bugoId = '';
             let orderId = '';
+            let originalTaxFreeAmt = '';
             let paymentType = getParam('type'); // condolence 여부
             try {
                 if (mallReserved) {
@@ -56,6 +57,7 @@ export default function PaymentCallbackPage() {
                     const reserved = JSON.parse(decodedReserved);
                     bugoId = reserved.bugoId || '';
                     orderId = reserved.orderId || '';
+                    originalTaxFreeAmt = reserved.originalTaxFreeAmt || '';
                     if (reserved.type) paymentType = reserved.type;
                 }
             } catch (e) {
@@ -106,7 +108,9 @@ export default function PaymentCallbackPage() {
 
             try {
                 // 서버에서 결제 승인 처리
-                console.log('📤 승인 API 호출 시작...', { paymentToken, tid, mid, amt, taxFreeAmt, moid, orderId });
+                // originalTaxFreeAmt가 있으면 콜백의 taxFreeAmt 대신 사용 (INNOPAY 콜백이 면세금액을 누락할 수 있음)
+                const finalTaxFreeAmt = originalTaxFreeAmt || taxFreeAmt;
+                console.log('📤 승인 API 호출 시작...', { paymentToken, tid, mid, amt, taxFreeAmt, originalTaxFreeAmt, finalTaxFreeAmt, moid, orderId });
 
                 const approveResponse = await fetch('/api/payment/innopay/approve', {
                     method: 'POST',
@@ -116,7 +120,7 @@ export default function PaymentCallbackPage() {
                         tid,
                         mid,
                         amt,
-                        taxFreeAmt,
+                        taxFreeAmt: finalTaxFreeAmt,
                         moid,
                         orderId,
                         payMethod,  // CARD, EPAY, VBANK 등 실제 결제수단

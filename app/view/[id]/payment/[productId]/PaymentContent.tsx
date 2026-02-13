@@ -204,14 +204,14 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 moid: moid,
                 goodsName: product.name,
                 goodsCnt: '1',
-                amt: String(product.price),
-                taxFreeAmt: '0',  // TODO: INNOPAY 복합과세 가맹점 변경 후 비과세 적용
+                amt: '0',  // 과세금액 없음 (화환 = 전액 면세)
+                taxFreeAmt: String(product.price),  // 면세금액 = 상품가격 (총 결제금액 = amt + taxFreeAmt)
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
                 returnUrl: `${window.location.origin}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
-                mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id }),
+                mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id, originalTaxFreeAmt: String(product.price) }),
                 vBankExpDate: paymentMethod === 'virtual' ? getVBankExpDate() : '', // 가상계좌 입금기한
             });
 
