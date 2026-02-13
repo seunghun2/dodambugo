@@ -162,6 +162,7 @@ export default function WriteFormPage() {
     const [mournerAccountVerified, setMournerAccountVerified] = useState(false);
     const [mournerAccountVerifying, setMournerAccountVerifying] = useState(false);
     const [mournerAccountVerifyFailed, setMournerAccountVerifyFailed] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
 
     // 계좌 확인하기 (이노페이 예금주 성명 조회) — returns success boolean
     const verifyAccount = async (bank: string, accountNo: string, holderName: string, isForMourner = false): Promise<boolean> => {
@@ -936,6 +937,18 @@ export default function WriteFormPage() {
             return;
         }
 
+        // 수정 모드일 때는 바로 제출
+        if (editBugoNumber) {
+            handleConfirmSubmit();
+            return;
+        }
+
+        // 신규 생성: 미리보기 모달 표시
+        setShowPreview(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        setShowPreview(false);
         setIsSubmitting(true);
 
         try {
@@ -1890,6 +1903,154 @@ export default function WriteFormPage() {
                         )}
                     </div >
                 </main >
+
+                {/* 미리보기 모달 */}
+                {showPreview && (
+                    <div className="preview-overlay" onClick={() => setShowPreview(false)}>
+                        <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="preview-body">
+                                {/* 타이틀 */}
+                                <div className="preview-title-section">
+                                    <h2 className="preview-confirm-title">모바일 부고장 내용을 확인해주세요</h2>
+                                    <p className="preview-confirm-subtitle">발인 3일 후 답례메세지를 자동으로 전달드려요</p>
+                                </div>
+
+                                {/* 정보 테이블 */}
+                                <div className="preview-info-table">
+                                    {/* 부고장 테마 */}
+                                    <div className="preview-info-row">
+                                        <span className="preview-label">부고장테마</span>
+                                        <span className="preview-value">{templateInfo[templateId]?.name || templateId} 부고장 테마</span>
+                                    </div>
+
+                                    {/* 장례식장 정보 */}
+                                    {formData.funeral_home && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">장례식장정보</span>
+                                            <span className="preview-value">
+                                                {formData.address && <>{formData.address}<br /></>}
+                                                {formData.funeral_home} {formData.room_number}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 고인 정보 - 한 줄 */}
+                                    <div className="preview-info-row">
+                                        <span className="preview-label">고인정보</span>
+                                        <span className="preview-value">
+                                            {formData.deceased_name}
+                                            {formData.religion && formData.religion !== '없음' && formData.religion !== '무교' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}` : ''}
+                                            {formData.age ? ` / ${formData.age}세` : ''}
+                                            {formData.gender ? ` / ${formData.gender === '남' ? '남성' : '여성'}` : ''}
+                                        </span>
+                                    </div>
+
+                                    {/* 별세일 */}
+                                    {formData.death_date && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">별세일</span>
+                                            <span className="preview-value">
+                                                {formData.death_date}{formData.death_time ? ` / ${formData.death_time}` : ''}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 입관일 */}
+                                    {formData.encoffin_date && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">입관일</span>
+                                            <span className="preview-value">
+                                                {formData.encoffin_date}
+                                                {formData.encoffin_hour ? ` / ${formData.encoffin_hour}:${formData.encoffin_minute || '00'}` : ''}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 발인일 */}
+                                    {formData.funeral_date && !hideFuneral && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">발인일</span>
+                                            <span className="preview-value">
+                                                {formData.funeral_date}{formData.funeral_time ? ` / ${formData.funeral_time}` : ''}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 일포일시 (제주) */}
+                                    {showIlpo && formData.ilpo_date && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">일포일시</span>
+                                            <span className="preview-value">
+                                                {formData.ilpo_date}{formData.ilpo_time ? ` / ${formData.ilpo_time}` : ''}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 장례형태 */}
+                                    {(formData.funeral_type === '가족장' || formData.funeral_type === '무빈소장례') && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">장례형태</span>
+                                            <span className="preview-value">{formData.funeral_type}</span>
+                                        </div>
+                                    )}
+
+                                    {/* 장지 */}
+                                    {showBurial && (formData.burial_place || formData.burial_place2) && (
+                                        <div className="preview-info-row">
+                                            <span className="preview-label">
+                                                {formData.burial_place && formData.burial_place2?.trim() ? '1차/2차 장지' : '장지'}
+                                            </span>
+                                            <span className="preview-value">
+                                                {formData.burial_place}
+                                                {formData.burial_place2?.trim() ? ` / ${formData.burial_place2.trim()}` : ''}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 대표상주 (계좌 포함) */}
+                                    <div className="preview-info-row">
+                                        <span className="preview-label">대표상주</span>
+                                        <span className="preview-value">
+                                            {formData.primary_mourner} / {formData.relationship} / {mourners[0]?.contact || ''}
+                                            {accounts[0]?.bank && accounts[0]?.number && (
+                                                <><br />{accounts[0].bank} / {accounts[0].number}</>
+                                            )}
+                                        </span>
+                                    </div>
+
+                                    {/* 추가 상주 */}
+                                    {mourners.filter(m => m.name).map((m, i) => (
+                                        <div key={i} className="preview-info-row">
+                                            <span className="preview-label">상주</span>
+                                            <span className="preview-value">
+                                                {m.name} / {m.relationship} / {m.contact}
+                                                {m.bank && m.accountNumber && (
+                                                    <><br />{m.bank} / {m.accountNumber}</>
+                                                )}
+                                            </span>
+                                        </div>
+                                    ))}
+
+                                    {/* 안내사항 */}
+                                    <div className="preview-info-row">
+                                        <span className="preview-label">안내사항</span>
+                                        <span className="preview-value">
+                                            {formData.message || '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="preview-footer">
+                                <button type="button" className="preview-btn-back" onClick={() => setShowPreview(false)}>
+                                    수정하기
+                                </button>
+                                <button type="button" className="preview-btn-confirm" onClick={handleConfirmSubmit}>
+                                    부고장 만들기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* 로딩 오버레이 */}
                 {

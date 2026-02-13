@@ -179,7 +179,7 @@ export default function CondolenceContent() {
             goodsName: `부의금 (${account?.name || '상주'})`,
             goodsCnt: '1',
             amt: String(totalAmount),
-            taxFreeAmt: '0',  // 과세
+            taxFreeAmt: String(selectedAmount),  // 부의금 원금 비과세, 수수료만 과세
             buyerName: buyerName,
             buyerTel: buyerPhone.replace(/-/g, ''),
             buyerEmail: 'condolence@maeumbugo.co.kr',
