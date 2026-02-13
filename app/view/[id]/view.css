@@ -1340,7 +1340,6 @@
     border-radius: 12px;
     margin-bottom: 16px;
     border: 1px solid #EEEEEE;
-    overflow: hidden;
 }
 
 .account-bottom-sheet .account-card:last-child {
