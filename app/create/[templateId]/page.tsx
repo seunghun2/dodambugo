@@ -876,8 +876,11 @@ export default function WriteFormPage() {
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
         if (!formData.relationship || !formData.primary_mourner) newErrors.primary_mourner = '상주를 입력해주세요';
 
-        // 추가상주: 관계 선택 시 이름 필수, 연락처는 선택이지만 형식 검증
+        // 추가상주: 이름 입력 시 관계 필수, 관계 선택 시 이름 필수
         mourners.forEach((mourner, index) => {
+            if (mourner.name && !mourner.relationship) {
+                newErrors[`mourner_${index}_relationship`] = '관계를 선택해주세요';
+            }
             if (mourner.relationship && !mourner.name) {
                 newErrors[`mourner_${index}_name`] = '상주 성함을 입력해주세요';
             }
@@ -1414,11 +1417,11 @@ export default function WriteFormPage() {
                                         <p className="section-desc">함께 상을 치르는 유가족을 추가해주세요</p>
 
                                         {mourners.map((mourner, index) => (
-                                            <div key={index} className="mourner-block">
-                                                <div key={index} className="mourner-card" data-field={`mourner_${index}_contact`}>
+                                            <div key={index} className="mourner-block" data-field={`mourner_${index}_relationship`}>
+                                                <div className="mourner-card" data-field={`mourner_${index}_contact`}>
                                                     <div className="mourner-row">
                                                         <select
-                                                            className="form-select mourner-relation"
+                                                            className={`form-select mourner-relation ${errors[`mourner_${index}_relationship`] ? 'error' : ''}`}
                                                             value={mourner.relationship}
                                                             onChange={(e) => updateMourner(index, 'relationship', e.target.value)}
                                                         >
@@ -1447,6 +1450,7 @@ export default function WriteFormPage() {
                                                             </button>
                                                         )}
                                                     </div>
+                                                    {errors[`mourner_${index}_relationship`] && <p className="field-error">{errors[`mourner_${index}_relationship`]}</p>}
                                                     {errors[`mourner_${index}_name`] && <p className="field-error">{errors[`mourner_${index}_name`]}</p>}
                                                     {errors[`mourner_${index}_contact`] && <p className="field-error">{errors[`mourner_${index}_contact`]}</p>}
                                                     {/* 상주별 계좌 입력 (선택) */}
