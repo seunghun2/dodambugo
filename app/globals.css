@@ -5784,6 +5784,7 @@ section {
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    overflow: hidden;
 }
 
 .preview-modal {
@@ -5791,10 +5792,10 @@ section {
     max-width: 500px;
     background: #fff;
     border-radius: 20px 20px 0 0;
-    height: 85vh;
+    min-height: 70vh;
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     position: relative;
     animation: slideUp 0.3s ease forwards;
 }
@@ -5830,11 +5831,23 @@ section {
 }
 
 .preview-body {
-    overflow-y: auto;
-    padding: 0 24px 80px;
-    flex: 1;
-    min-height: 0;
+    overflow-y: scroll;
+    padding: 0 24px 70px;
+    flex: 1 1 0;
+    height: 0;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+
+@media (max-width: 768px) {
+    .preview-modal {
+        min-height: 75vh;
+    }
+
+    .preview-body {
+        padding-bottom: 120px;
+    }
 }
 
 /* 타이틀 섹션 */
