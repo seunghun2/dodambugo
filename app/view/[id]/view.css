@@ -1338,7 +1338,7 @@
 .account-bottom-sheet .account-card {
     background: #FFFFFF;
     border-radius: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     border: 1px solid #EEEEEE;
 }
 
@@ -1371,7 +1371,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px 16px;
+    padding: 0 20px 8px;
 }
 
 .account-bottom-sheet .account-detail {
