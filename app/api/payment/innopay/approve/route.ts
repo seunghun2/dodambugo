@@ -97,6 +97,23 @@ export async function POST(request: NextRequest) {
                 actualOrderId = parsed.orderId || '';
                 bugoNumber = parsed.bugoId || '';
                 console.log('📦 mallReserved 추출:', { orderId: actualOrderId, bugoNumber });
+
+                // bugoId가 UUID 형태면 실제 bugo_number 조회
+                if (bugoNumber && bugoNumber.includes('-') && bugoNumber.length > 10) {
+                    try {
+                        const { data: bugoData } = await supabase
+                            .from('bugo')
+                            .select('bugo_number')
+                            .eq('id', bugoNumber)
+                            .single();
+                        if (bugoData?.bugo_number) {
+                            console.log(`🔄 UUID → bugo_number 변환: ${bugoNumber} → ${bugoData.bugo_number}`);
+                            bugoNumber = String(bugoData.bugo_number);
+                        }
+                    } catch (e) {
+                        console.error('bugo_number 조회 실패:', e);
+                    }
+                }
             }
         } catch (e) {
             console.error('mallReserved 파싱 오류:', e);
