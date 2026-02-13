@@ -5772,6 +5772,186 @@ section {
     justify-content: center;
 }
 
+/* ========================================
+   미리보기 모달 (바텀시트)
+   ======================================== */
+.preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.preview-modal {
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease forwards;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    flex-shrink: 0;
+}
+
+.preview-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.preview-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.preview-close .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--gray-400);
+}
+
+.preview-body {
+    overflow-y: auto;
+    padding: 20px;
+    padding-bottom: 24px;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.preview-section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.preview-section:first-child {
+    padding-top: 0;
+}
+
+.preview-section:last-child {
+    border-bottom: none;
+}
+
+.preview-deceased-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.preview-religion {
+    font-size: 13px;
+    color: var(--gray-500);
+    text-align: center;
+    margin-top: 6px;
+}
+
+.preview-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.preview-label {
+    flex-shrink: 0;
+    width: 64px;
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 500;
+    padding-top: 1px;
+}
+
+.preview-value {
+    font-size: 14px;
+    color: var(--gray-800);
+    font-weight: 500;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+.preview-message {
+    background: var(--gray-50);
+    border-radius: 10px;
+    padding: 14px 16px !important;
+}
+
+.preview-message p {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.7;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.preview-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--gray-100);
+    flex-shrink: 0;
+}
+
+.preview-btn-back {
+    flex: 1;
+    padding: 14px;
+    background: white;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preview-btn-back:hover {
+    background: var(--gray-50);
+}
+
+.preview-btn-confirm {
+    flex: 2;
+    padding: 14px;
+    background: var(--primary);
+    color: var(--primary-text);
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preview-btn-confirm:hover {
+    filter: brightness(0.95);
+}
+
 /* Loading Overlay */
 .loading-overlay {
     position: fixed;
@@ -5938,24 +6118,25 @@ section {
 .account-modal {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     width: 100%;
     max-width: 500px;
     background: white;
     border-radius: 20px 20px 0 0;
-    padding: 24px 20px 32px;
-    z-index: 10001;
-    animation: slideUp 0.3s ease forwards;
+    padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
+    z-index: 100000;
+    animation: accountSlideUp 0.3s ease forwards;
 }
 
-@keyframes slideUp {
+@keyframes accountSlideUp {
     from {
-        transform: translateX(-50%) translateY(100%);
+        transform: translateY(100%);
     }
 
     to {
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 }
 
