@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase();
         const { data: bugo } = await supabase
             .from('bugo')
-            .select('deceased_name, funeral_home, room_number, funeral_date, funeral_time, funeral_type, owner_token, ilpo_date, ilpo_time')
+            .select('deceased_name, funeral_home, room_number, funeral_date, funeral_time, funeral_type, owner_token, ilpo_date, ilpo_time, mourner_name')
             .eq('bugo_number', parent_bugo_number)
             .single();
 
@@ -86,9 +86,10 @@ export async function POST(request: NextRequest) {
             try {
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP2602070138097871zexjvolnSU',  // 부고장 생성 완료 템플릿
+                    'KA01TP2602121532276099rVDeNpBxvE',  // 부고장 생성 완료 템플릿 (카카오내링크+공유하기)
                     {
-                        '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                        '대표상주명': bugo.mourner_name || '',
+                        '고인명': bugo.deceased_name || '',
                         '장례식장': funeralLocation,
                         '발인일시': dateTimeInfo,
                         '부고번호': parent_bugo_number,
