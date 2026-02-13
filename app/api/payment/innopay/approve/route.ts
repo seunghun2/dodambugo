@@ -9,6 +9,115 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// INNOPAY 카드사 코드 → 카드사명 매핑 (공식 문서 기준)
+const CARD_ISSUER_MAP: Record<string, string> = {
+    '01': '비씨카드', '02': '국민카드', '03': '하나카드', '04': '삼성카드',
+    '06': '신한카드', '07': '현대카드', '08': '롯데카드', '11': '씨티카드',
+    '12': '농협카드', '13': '수협카드', '14': '협동조합카드', '15': '우리카드',
+    '16': '하나카드', '20': '농협카드', '21': '광주카드', '22': '전북카드',
+    '23': '제주카드', '24': '산은카드', '25': 'VISA', '26': 'Master',
+    '27': 'Diners', '28': 'AMX', '29': 'JCB', '30': '유니온페이',
+};
+
+// INNOPAY epayCl 코드 → 간편결제 서비스명 매핑
+const EPAY_CL_MAP: Record<string, string> = {
+    '01': '카카오페이',
+    '02': '네이버페이',
+    '03': 'SSG페이',
+    '04': '엘페이',
+    '05': '페이코',
+    '06': '삼성페이',
+    '07': '애플페이',
+    '08': '토스페이',
+    '09': 'KB페이',
+};
+
+// 간편결제 코드/키워드 → 서비스명 매핑 (fallback)
+const EASY_PAY_MAP: Record<string, string> = {
+    'KAKAO': '카카오페이', 'KAKAOPAY': '카카오페이',
+    'NAVER': '네이버페이', 'NAVERPAY': '네이버페이',
+    'SSG': 'SSG페이', 'SSGPAY': 'SSG페이',
+    'LPAY': '엘페이', 'L.PAY': '엘페이',
+    'PAYCO': '페이코',
+    'SAMSUNG': '삼성페이', 'SAMSUNGPAY': '삼성페이',
+    'APPLE': '애플페이', 'APPLEPAY': '애플페이',
+    'TOSS': '토스페이', 'TOSSPAY': '토스페이',
+    'CHAI': '차이',
+    'KB': 'KB페이', 'KBPAY': 'KB페이',
+};
+
+/**
+ * 카드사 코드를 이름으로 변환 (코드/이름 모두 대응)
+ */
+function resolveCardIssuer(value: string): string {
+    if (!value) return '';
+    // 코드값이면 매핑에서 찾기
+    if (CARD_ISSUER_MAP[value]) return CARD_ISSUER_MAP[value];
+    // 해외카드 브랜드는 그대로
+    const foreignBrands = ['VISA', 'Master', 'JCB', 'AMX', 'Diners', '유니온페이'];
+    if (foreignBrands.some(b => value.includes(b))) return value;
+    // 이름에 '카드'가 없으면 추가 (예: "국민" → "국민카드")
+    if (!value.includes('카드') && !value.includes('Card')) return value + '카드';
+    return value;
+}
+
+/**
+ * 간편결제 코드/키워드를 서비스명으로 변환
+ */
+function resolveEasyPayName(value: string): string {
+    if (!value) return '';
+    const upper = value.toUpperCase().replace(/\s/g, '');
+    if (EASY_PAY_MAP[upper]) return EASY_PAY_MAP[upper];
+    // 부분 매칭
+    for (const [key, name] of Object.entries(EASY_PAY_MAP)) {
+        if (upper.includes(key)) return name;
+    }
+    return value;
+}
+
+/**
+ * INNOPAY 응답에서 상세 결제수단 문자열 추출
+ * 예: "신용카드(국민카드)", "간편결제(카카오페이)", "가상계좌"
+ */
+function getDetailedPaymentMethod(payMethod: string, responseData: any): string {
+    // 카드사 이름/코드 추출 (INNOPAY 실제 필드: card.fnName, card.fnCd, card.acquCardName)
+    const rawCardIssuer = responseData?.card?.fnName
+        || responseData?.card?.acquCardName
+        || responseData?.card?.fnCd
+        || responseData?.fnName
+        || responseData?.fnNm
+        || responseData?.fnCd
+        || '';
+    const cardIssuer = resolveCardIssuer(String(rawCardIssuer));
+
+    // 간편결제 서비스명 추출 (INNOPAY 실제 필드: epay.epayCl)
+    const epayCl = responseData?.epay?.epayCl || '';
+    let easyPayName = EPAY_CL_MAP[epayCl] || '';
+    // epayCl로 못찾으면 다른 필드 fallback
+    if (!easyPayName) {
+        const rawEasyPay = responseData?.epay?.name
+            || responseData?.easyPayMethod
+            || responseData?.easyPayName
+            || '';
+        easyPayName = resolveEasyPayName(String(rawEasyPay));
+    }
+
+    switch (payMethod) {
+        case 'CARD':
+            return cardIssuer ? `신용카드(${cardIssuer})` : '신용카드';
+        case 'EPAY':
+            if (easyPayName) return `간편결제(${easyPayName})`;
+            if (cardIssuer) return `간편결제(${cardIssuer})`;
+            return '간편결제';
+        case 'VBANK':
+            return '가상계좌';
+        case 'BANK':
+            return '계좌이체';
+        default:
+            return payMethod || '카드결제';
+    }
+}
+
 // INNOPAY 승인 API
 export async function POST(request: NextRequest) {
     console.log('🔵 INNOPAY 승인 API 호출됨');
@@ -47,6 +156,15 @@ export async function POST(request: NextRequest) {
 
         const approveResult = await approveResponse.json();
         console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
+        // 상세 결제정보 필드 로깅 (카드사/간편결제 종류 확인용)
+        if (approveResult.data) {
+            console.log('🔍 INNOPAY data 키:', Object.keys(approveResult.data));
+            console.log('🔍 결제상세:', JSON.stringify({
+                payMethod: approveResult.data.payMethod,
+                card: approveResult.data.card,
+                epay: approveResult.data.epay,
+            }));
+        }
 
         // INNOPAY HTTP 에러 체크
         if (!approveResponse.ok) {
@@ -149,23 +267,17 @@ export async function POST(request: NextRequest) {
                     console.error('TID 저장 실패 (무시):', tidError);
                 }
 
-                // 3단계: payment_method 저장 (INNOPAY에서 온 실제 결제수단)
-                if (payMethod) {
+                // 3단계: payment_method 저장 (상세 결제수단 포함)
+                const actualPayMethod = approveResult.data?.payMethod || payMethod;
+                if (actualPayMethod) {
                     try {
-                        // INNOPAY payMethod를 DB 형식으로 변환
-                        const paymentMethodMap: Record<string, string> = {
-                            'CARD': 'card',
-                            'EPAY': 'easy',
-                            'VBANK': 'virtual',
-                            'BANK': 'bank',
-                        };
-                        const dbPaymentMethod = paymentMethodMap[payMethod] || payMethod.toLowerCase();
+                        const detailedMethod = getDetailedPaymentMethod(actualPayMethod, approveResult.data);
 
                         await supabase
                             .from('flower_orders')
-                            .update({ payment_method: dbPaymentMethod })
+                            .update({ payment_method: detailedMethod })
                             .eq('id', actualOrderId);
-                        console.log('✅ 결제수단 저장 성공:', dbPaymentMethod);
+                        console.log('✅ 결제수단 저장 성공:', detailedMethod);
                     } catch (pmError) {
                         console.error('결제수단 저장 실패 (무시):', pmError);
                     }
@@ -242,7 +354,7 @@ export async function POST(request: NextRequest) {
                     funeral_hall: orderData.funeral_home,
                     room: orderData.room,
                     address: orderData.address || orderData.bugo?.address || '',
-                    payment_method: 'card',
+                    payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
                     chief_mourner_name: orderData.bugo?.mourner_name || '',
                     chief_mourner_phone: orderData.bugo?.phone_password || '',
                 });
@@ -303,7 +415,7 @@ export async function POST(request: NextRequest) {
                         amount: selectedAmount,
                         fee: fee,
                         total_amount: totalAmount,
-                        payment_method: approveResult.data?.payMethod || 'CARD',
+                        payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
                         payment_type: 'card',
                         status: 'completed',
                         tid: transactionId,
@@ -334,7 +446,7 @@ export async function POST(request: NextRequest) {
                         amount: selectedAmount,
                         fee: fee,
                         total_amount: totalAmount,
-                        payment_method: approveResult.data?.payMethod === 'EPAY' ? '간편결제' : '신용카드(개인)',
+                        payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
                         funeral_home: bugoData?.funeral_home_name || '',
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',

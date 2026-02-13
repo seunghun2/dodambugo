@@ -373,7 +373,13 @@ export default function AdminFlowerOrdersPage() {
                                         </div>
                                         <div className="detail-row">
                                             <label>결제방식</label>
-                                            <span>{selectedOrder.payment_method === 'card' ? '신용카드' : selectedOrder.payment_method}</span>
+                                            <span>{
+                                                selectedOrder.payment_method === 'card' ? '신용카드' :
+                                                    selectedOrder.payment_method === 'easy' ? '간편결제' :
+                                                        selectedOrder.payment_method === 'virtual' ? '가상계좌' :
+                                                            selectedOrder.payment_method === 'bank' ? '계좌이체' :
+                                                                selectedOrder.payment_method || '미정'
+                                            }</span>
                                         </div>
                                     </div>
 
