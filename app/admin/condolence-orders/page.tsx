@@ -80,98 +80,20 @@ export default function AdminCondolenceOrdersPage() {
     const fetchOrders = async () => {
         setLoading(true);
 
-        // 부의금 주문 테이블이 없으면 샘플 데이터 사용 (나중에 실제 테이블로 교체)
-        // const { data, error } = await supabase
-        //     .from('condolence_orders')
-        //     .select('*')
-        //     .order('created_at', { ascending: false });
+        const { data, error } = await supabase
+            .from('condolence_orders')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        // 샘플 데이터 (PG 연동 후 실제 데이터로 교체)
-        const sampleData: CondolenceOrder[] = [
-            {
-                id: 1,
-                order_number: '18605',
-                bugo_number: 'B240122001',
-                buyer_name: '김현근',
-                buyer_phone: '010-7294-7777',
-                recipient_name: '주성기업',
-                amount: 500000,
-                fee: 43000,
-                total_amount: 543000,
-                payment_method: '신용카드',
-                payment_type: '법인',
-                status: 'completed',
-                created_at: '2026-01-22T14:32:00',
-                settled_at: null,
-            },
-            {
-                id: 2,
-                order_number: '18601',
-                bugo_number: 'B240122002',
-                buyer_name: '이남지',
-                buyer_phone: '010-6555-4578',
-                recipient_name: '이남지',
-                amount: 100000,
-                fee: 8600,
-                total_amount: 108600,
-                payment_method: '신용카드',
-                payment_type: '개인',
-                status: 'completed',
-                created_at: '2026-01-22T13:15:00',
-                settled_at: null,
-            },
-            {
-                id: 3,
-                order_number: '18598',
-                bugo_number: 'B240121015',
-                buyer_name: '박서연',
-                buyer_phone: '010-2345-6789',
-                recipient_name: '박서연',
-                amount: 300000,
-                fee: 25800,
-                total_amount: 325800,
-                payment_method: '간편결제',
-                payment_type: '개인',
-                status: 'settled',
-                created_at: '2026-01-21T18:45:00',
-                settled_at: '2026-01-22T09:00:00',
-            },
-            {
-                id: 4,
-                order_number: '18590',
-                bugo_number: 'B240121012',
-                buyer_name: '최민수',
-                buyer_phone: '010-8765-4321',
-                recipient_name: '최민수',
-                amount: 50000,
-                fee: 4300,
-                total_amount: 54300,
-                payment_method: '신용카드',
-                payment_type: '개인',
-                status: 'completed',
-                created_at: '2026-01-21T10:22:00',
-                settled_at: null,
-            },
-            {
-                id: 5,
-                order_number: '18585',
-                bugo_number: 'B240120008',
-                buyer_name: '정유진',
-                buyer_phone: '010-1111-2222',
-                recipient_name: '(주)테크솔루션',
-                amount: 1000000,
-                fee: 86000,
-                total_amount: 1086000,
-                payment_method: '신용카드',
-                payment_type: '법인',
-                status: 'settled',
-                created_at: '2026-01-20T15:30:00',
-                settled_at: '2026-01-21T09:00:00',
-            },
-        ];
+        if (error) {
+            console.error('❌ 부의금 주문 조회 오류:', error);
+            setOrders([]);
+            calculateStats([]);
+        } else {
+            setOrders(data || []);
+            calculateStats(data || []);
+        }
 
-        setOrders(sampleData);
-        calculateStats(sampleData);
         setLoading(false);
     };
 
