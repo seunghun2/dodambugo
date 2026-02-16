@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import './funeral-home.css';
 
 interface Facility {
@@ -36,6 +36,27 @@ const REGIONS = [
     '경남',
     '제주',
 ];
+
+// 약칭 → 정식 명칭 매핑 (주소에는 정식 명칭이 저장되어 있음)
+const REGION_MAP: Record<string, string[]> = {
+    '서울': ['서울', '서울특별시'],
+    '경기': ['경기', '경기도'],
+    '인천': ['인천', '인천광역시'],
+    '부산': ['부산', '부산광역시'],
+    '대구': ['대구', '대구광역시'],
+    '대전': ['대전', '대전광역시'],
+    '광주': ['광주', '광주광역시'],
+    '울산': ['울산', '울산광역시'],
+    '세종': ['세종', '세종특별자치시'],
+    '강원': ['강원', '강원도', '강원특별자치도'],
+    '충북': ['충북', '충청북도'],
+    '충남': ['충남', '충청남도'],
+    '전북': ['전북', '전라북도', '전북특별자치도'],
+    '전남': ['전남', '전라남도'],
+    '경북': ['경북', '경상북도'],
+    '경남': ['경남', '경상남도'],
+    '제주': ['제주', '제주특별자치도'],
+};
 
 const ITEMS_PER_PAGE = 5;
 
@@ -82,7 +103,8 @@ export default function FuneralHomeClient({ initialData }: FuneralHomeClientProp
 
         // 지역 필터
         if (selectedRegion !== '전체') {
-            result = result.filter(f => f.address?.includes(selectedRegion));
+            const keywords = REGION_MAP[selectedRegion] || [selectedRegion];
+            result = result.filter(f => keywords.some(kw => f.address?.includes(kw)));
         }
 
         // 검색 필터
@@ -286,21 +308,7 @@ export default function FuneralHomeClient({ initialData }: FuneralHomeClientProp
                 </div>
             )}
 
-            {/* 관련 가이드 링크 */}
-            <div className="funeral-home-related-guides" style={{ maxWidth: 600, margin: '32px auto', padding: '0 16px' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 16, color: '#333' }}>관련 장례 가이드</h2>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <li><Link href="/guide/procedure" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 절차 가이드 - 임종부터 발인까지 3일장 안내</Link></li>
-                    <li><Link href="/guide/cost" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 비용 가이드 - 항목별 예상 비용 총정리</Link></li>
-                    <li><Link href="/guide/etiquette" style={{ color: '#555', textDecoration: 'none', borderBottom: '1px solid #eee', paddingBottom: 8, display: 'block' }}>장례 예절 가이드 - 조문 복장, 절하는 법, 부의금</Link></li>
-                    <li><Link href="/mobile-bugo" style={{ color: '#555', textDecoration: 'none', display: 'block' }}>모바일 부고장 만들기 - 무료, 3분 완성</Link></li>
-                </ul>
-                <div style={{ background: '#f8f6f0', borderLeft: '4px solid #c9a96e', padding: '16px 20px', marginTop: 20, borderRadius: 8, fontSize: '0.95rem', color: '#555' }}>
-                    <p style={{ margin: 0 }}>
-                        장례 소식을 전해야 하시나요? <Link href="/mobile-bugo" style={{ color: '#c9a96e', fontWeight: 700 }}>무료 모바일 부고장</Link>을 3분 만에 만들고 카카오톡으로 공유하세요.
-                    </p>
-                </div>
-            </div>
+
 
             {/* 맨 위로 가기 버튼 */}
             <button
