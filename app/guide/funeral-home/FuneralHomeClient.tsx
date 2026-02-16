@@ -104,7 +104,7 @@ export default function FuneralHomeClient({ initialData }: FuneralHomeClientProp
         // 지역 필터
         if (selectedRegion !== '전체') {
             const keywords = REGION_MAP[selectedRegion] || [selectedRegion];
-            result = result.filter(f => keywords.some(kw => f.address?.includes(kw)));
+            result = result.filter(f => keywords.some(kw => f.address?.startsWith(kw)));
         }
 
         // 검색 필터
