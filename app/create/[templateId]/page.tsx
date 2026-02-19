@@ -689,6 +689,17 @@ export default function WriteFormPage() {
                 '무빈소장례': '조용한 배웅으로 빈소를 마련하지 않고 무빈소로 고인을 모십니다.',
             };
             setFormData(prev => ({ ...prev, [name]: value, message: messageMap[value] || '' }));
+        } else if (name === 'applicant_name') {
+            // 신청자 성함 → 대표상주 자동 동기화
+            // 대표상주가 비어있거나, 이전 신청자명과 동일하면 함께 업데이트
+            setFormData(prev => {
+                const shouldSync = !prev.primary_mourner || prev.primary_mourner === prev.applicant_name;
+                return {
+                    ...prev,
+                    applicant_name: value,
+                    ...(shouldSync ? { primary_mourner: value } : {}),
+                };
+            });
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
