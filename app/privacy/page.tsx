@@ -143,7 +143,7 @@ export default function PrivacyPage() {
                         <ul>
                             <li><strong>성명:</strong> 김미연</li>
                             <li><strong>직책:</strong> 대표</li>
-                            <li><strong>이메일:</strong> wsh9991@gmail.com</li>
+                            <li><strong>이메일:</strong> miyoun1990@gmail.com</li>
                         </ul>
                     </div>
                 </section>
