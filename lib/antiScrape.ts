@@ -59,8 +59,11 @@ export function detectScreenshot() {
     return () => document.removeEventListener('keydown', handler);
 }
 
-// 2. 개발자도구 감지
+// 2. 개발자도구 감지 (모바일 제외 - 주소창/하단바로 인한 오탐 방지)
 export function detectDevTools() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) return () => { };
+
     const activity = getActivity();
     let isOpen = false;
 

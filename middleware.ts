@@ -61,6 +61,15 @@ const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
 
 const VISIT_THRESHOLD = 50; // 24시간 내 50회 이상 총 방문 → 자동 차단
 
+// 의심 페이지 과다 열람 감지 (IP → 카운트)
+const policyCounter: Map<string, number> = new Map();
+const SUSPICIOUS_PAGES = ['/terms', '/privacy', '/contact'];
+const SUSPICIOUS_PAGE_THRESHOLD = 8; // 8회 이상 → 자동 차단
+
+// 검색 페이지 과다 방문 감지 (IP → 카운트)
+const searchCounter: Map<string, number> = new Map();
+const SEARCH_THRESHOLD = 4; // 4회 이상 → 자동 차단
+
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -124,6 +133,8 @@ function trackBugoView(ip: string, bugoNumber: string) {
   if (now - trackerResetTime > TRACKER_TTL) {
     viewTracker.clear();
     visitCounter.clear();
+    policyCounter.clear();
+    searchCounter.clear();
     trackerResetTime = now;
   }
 
@@ -246,6 +257,32 @@ export async function middleware(request: NextRequest) {
       notifySlack(ip, reason);
       cachedBlockedIPs.push(ip);
       visitCounter.delete(ip);
+    }
+  }
+
+  // 의심 페이지 과다 열람 감지 (약관/개인정보/연락처)
+  if (SUSPICIOUS_PAGES.includes(path)) {
+    const count = (policyCounter.get(ip) || 0) + 1;
+    policyCounter.set(ip, count);
+    if (count >= SUSPICIOUS_PAGE_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+      const reason = `[자동] 의심 페이지 과다 열람 (${count}회)`;
+      autoBlockIP(ip, reason);
+      notifySlack(ip, reason);
+      cachedBlockedIPs.push(ip);
+      policyCounter.delete(ip);
+    }
+  }
+
+  // 검색 페이지 과다 방문 감지
+  if (path === '/search') {
+    const count = (searchCounter.get(ip) || 0) + 1;
+    searchCounter.set(ip, count);
+    if (count >= SEARCH_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+      const reason = `[자동] 검색 페이지 과다 방문 (${count}회)`;
+      autoBlockIP(ip, reason);
+      notifySlack(ip, reason);
+      cachedBlockedIPs.push(ip);
+      searchCounter.delete(ip);
     }
   }
 
