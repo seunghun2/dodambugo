@@ -43,6 +43,7 @@ export default function AdminBugoPage() {
         funeral_home: '',
         deceased_name: '',
         applicant_name: '',
+        phone: '',
         ip_address: '',
         created_at: '',
     });
@@ -70,6 +71,17 @@ export default function AdminBugoPage() {
         if (filters.funeral_home && !bugo.funeral_home?.includes(filters.funeral_home)) return false;
         if (filters.deceased_name && !bugo.deceased_name?.includes(filters.deceased_name)) return false;
         if (filters.applicant_name && !bugo.applicant_name?.includes(filters.applicant_name)) return false;
+        if (filters.phone) {
+            const phoneQuery = filters.phone.replace(/-/g, '');
+            const bugoPhone = (bugo.applicant_phone || bugo.phone_password || '').replace(/-/g, '');
+            let mournerMatch = false;
+            if (Array.isArray(bugo.mourners)) {
+                mournerMatch = bugo.mourners.some((m: any) =>
+                    m.contact && m.contact.replace(/-/g, '').includes(phoneQuery)
+                );
+            }
+            if (!bugoPhone.includes(phoneQuery) && !mournerMatch) return false;
+        }
         if (filters.ip_address && !bugo.ip_address?.includes(filters.ip_address)) return false;
         if (typeFilter !== '전체') {
             const bugoType = bugo.funeral_type || '일반 장례';
@@ -205,6 +217,7 @@ export default function AdminBugoPage() {
                                             <th>장례식장</th>
                                             <th>고인명</th>
                                             <th>작성자</th>
+                                            <th>연락처</th>
                                             <th>장례형식</th>
                                             <th>화환</th>
                                             <th>방문</th>
@@ -236,6 +249,14 @@ export default function AdminBugoPage() {
                                                     placeholder="검색"
                                                     value={filters.applicant_name}
                                                     onChange={(e) => setFilters({ ...filters, applicant_name: e.target.value })}
+                                                />
+                                            </th>
+                                            <th>
+                                                <input
+                                                    type="text"
+                                                    placeholder="번호 검색"
+                                                    value={filters.phone}
+                                                    onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
                                                 />
                                             </th>
                                             <th>
@@ -285,6 +306,7 @@ export default function AdminBugoPage() {
                                                     </td>
                                                     <td>{bugo.deceased_name}</td>
                                                     <td className="company-cell">{bugo.applicant_name}</td>
+                                                    <td style={{ fontSize: '12px', color: '#475569', fontFamily: 'monospace' }}>{bugo.applicant_phone || bugo.phone_password || '-'}</td>
                                                     <td style={{ fontSize: '12px', color: bugo.funeral_type === '가족장' ? '#dc2626' : bugo.funeral_type === '무빈소장례' ? '#2563eb' : '#666' }}>
                                                         {bugo.funeral_type === '일반 장례' || !bugo.funeral_type ? '일반' : bugo.funeral_type === '무빈소장례' ? '무빈소' : bugo.funeral_type}
                                                     </td>
