@@ -52,14 +52,13 @@ const CACHE_TTL = 5 * 60 * 1000; // 5분
 
 // 부고 대량 열람 감지 (IP → 고유 부고번호 Set)
 const viewTracker: Map<string, Set<string>> = new Map();
-// 페이지 과다 탐색 감지 (IP → 고유 페이지 Set)
-const pageTracker: Map<string, Set<string>> = new Map();
+
 // 총 방문 횟수 감지 (IP → 카운트) - 같은 페이지 반복 방문 감지
 const visitCounter: Map<string, number> = new Map();
 let trackerResetTime = Date.now();
 const TRACKER_TTL = 24 * 60 * 60 * 1000; // 24시간마다 리셋
 const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
-const PAGE_THRESHOLD = 15; // 15개 이상 고유 페이지 방문 → 자동 차단
+
 const VISIT_THRESHOLD = 50; // 24시간 내 50회 이상 총 방문 → 자동 차단
 
 // Supabase 직접 접근 (미들웨어에서 자기 API 호출 방지)
@@ -124,7 +123,6 @@ function trackBugoView(ip: string, bugoNumber: string) {
   const now = Date.now();
   if (now - trackerResetTime > TRACKER_TTL) {
     viewTracker.clear();
-    pageTracker.clear();
     visitCounter.clear();
     trackerResetTime = now;
   }
@@ -148,33 +146,7 @@ function trackBugoView(ip: string, bugoNumber: string) {
   }
 }
 
-// 페이지 과다 탐색 감지 + 자동 차단
-function trackPageBrowsing(ip: string, pagePath: string) {
-  // 정적 파일 제외
-  if (/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(pagePath)) return;
 
-  // 경로 정규화: /view/XXX/flower/N, /view/XXX/order/N → /view/XXX
-  // /create/complete/XXX, /create/edit/XXX → /create
-  let normalized = pagePath;
-  normalized = normalized.replace(/^\/view\/(\d+)\/(flower|order)\/\d+$/, '/view/$1');
-  normalized = normalized.replace(/^\/create\/(complete|edit|preview)\/.*$/, '/create');
-
-  if (!pageTracker.has(ip)) {
-    pageTracker.set(ip, new Set());
-  }
-  const pages = pageTracker.get(ip)!;
-  pages.add(normalized);
-
-  if (pages.size >= PAGE_THRESHOLD) {
-    const reason = `[자동] 페이지 과다 탐색 (${pages.size}개: ${[...pages].slice(0, 5).join(', ')}...)`;
-    autoBlockIP(ip, reason);
-    notifySlack(ip, reason);
-    if (!cachedBlockedIPs.includes(ip)) {
-      cachedBlockedIPs.push(ip);
-    }
-    pageTracker.delete(ip);
-  }
-}
 
 // IP 자동 차단 (DB 저장)
 function autoBlockIP(ip: string, reason: string) {
@@ -261,11 +233,10 @@ export async function middleware(request: NextRequest) {
     trackBugoView(ip, bugoMatch[1]);
   }
 
-  // 페이지 과다 탐색 감지
-  trackPageBrowsing(ip, path);
 
-  // 총 방문 횟수 감지 (같은 페이지 반복 방문 포함, /view 제외 - 조문객 정상 이용)
-  if (!/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(path) && !path.startsWith('/view')) {
+
+  // 총 방문 횟수 감지 (같은 페이지 반복 방문 포함, /view·/create·/guide·/admin 제외 - 고객/관리자 정상 이용)
+  if (!/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(path) && !path.startsWith('/view') && !path.startsWith('/create') && !path.startsWith('/guide') && !path.startsWith('/admin')) {
     const count = (visitCounter.get(ip) || 0) + 1;
     visitCounter.set(ip, count);
     if (count >= VISIT_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
@@ -296,7 +267,6 @@ export async function middleware(request: NextRequest) {
     }
     visitCounter.delete(ip);
     viewTracker.delete(ip);
-    pageTracker.delete(ip);
   }
 
   // 차단 IP 체크
