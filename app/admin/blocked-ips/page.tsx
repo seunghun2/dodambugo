@@ -24,6 +24,7 @@ const PAGE_SIZE = 50;
 
 export default function BlockedIPsPage() {
     const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
+    const [ipDevices, setIpDevices] = useState<Record<string, string>>({});
     const [newIP, setNewIP] = useState('');
     const [reason, setReason] = useState('');
     const [loading, setLoading] = useState(true);
@@ -38,6 +39,21 @@ export default function BlockedIPsPage() {
         const data = await res.json();
         setBlockedIPs(data);
         setLoading(false);
+
+        // 각 차단 IP의 기기 정보 가져오기
+        if (Array.isArray(data) && data.length > 0) {
+            const ips = data.map((d: BlockedIP) => d.ip_address);
+            const logsRes = await fetch(`/api/access-logs?limit=500&offset=0`);
+            const logsData = await logsRes.json();
+            if (Array.isArray(logsData)) {
+                const deviceMap: Record<string, string> = {};
+                for (const ip of ips) {
+                    const log = logsData.find((l: AccessLog) => l.ip_address === ip);
+                    if (log) deviceMap[ip] = getDevice(log.user_agent);
+                }
+                setIpDevices(deviceMap);
+            }
+        }
     };
 
     const fetchAccessLogs = async () => {
@@ -198,7 +214,7 @@ export default function BlockedIPsPage() {
                                     <tr>
                                         <td style={{ fontWeight: 600 }}>개발자 도구</td>
                                         <td>2회 이상</td>
-                                        <td style={{ fontSize: '12px', color: '#888' }}>DevTools 반복 열기 감지 (소스코드 탈취 의심)</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>DevTools 반복 열기 감지 (모바일 제외)</td>
                                     </tr>
                                     <tr>
                                         <td style={{ fontWeight: 600 }}>부고 대량 열람</td>
@@ -214,6 +230,16 @@ export default function BlockedIPsPage() {
                                         <td style={{ fontWeight: 600 }}>과다 방문</td>
                                         <td>50회/24시간</td>
                                         <td style={{ fontSize: '12px', color: '#888' }}>24시간 내 총 50회 이상 방문 시 자동 차단 (/view, /create, /guide, /admin 경로는 제외)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>의심 페이지</td>
+                                        <td>8회 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>약관·개인정보·연락처 페이지 합계 8회 이상 방문 시 자동 차단</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 600 }}>검색 과다</td>
+                                        <td>4회 이상</td>
+                                        <td style={{ fontSize: '12px', color: '#888' }}>/search 페이지 4회 이상 방문 시 자동 차단</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -286,6 +312,7 @@ export default function BlockedIPsPage() {
                                             <th style={{ width: '140px' }}>IP 주소</th>
                                             <th>차단 사유</th>
                                             <th style={{ width: '60px' }}>유형</th>
+                                            <th style={{ width: '70px' }}>기기</th>
                                             <th style={{ width: '140px' }}>차단 시간</th>
                                             <th style={{ width: '80px' }}>관리</th>
                                         </tr>
@@ -293,7 +320,7 @@ export default function BlockedIPsPage() {
                                     <tbody>
                                         {blockedIPs.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="empty-cell">
+                                                <td colSpan={6} className="empty-cell">
                                                     차단된 IP가 없습니다
                                                 </td>
                                             </tr>
@@ -324,6 +351,9 @@ export default function BlockedIPsPage() {
                                                         }}>
                                                             {isAutoBlocked(item.reason) ? '자동' : '수동'}
                                                         </span>
+                                                    </td>
+                                                    <td style={{ fontSize: '12px', color: '#475569' }}>
+                                                        {ipDevices[item.ip_address] || '-'}
                                                     </td>
                                                     <td className="date-cell" style={{ fontSize: '12px' }}>
                                                         {formatDate(item.blocked_at)}
