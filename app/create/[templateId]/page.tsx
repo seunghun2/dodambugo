@@ -991,7 +991,7 @@ export default function WriteFormPage() {
                 gender: formData.gender,
                 relationship: formData.relationship || '',
                 mourner_name: formData.primary_mourner || '',
-                contact: mourners[0]?.contact || '',
+                contact: formData.applicant_phone || '',
                 age: formData.age ? parseInt(formData.age) : null,
                 religion: formData.religion === '기타' ? formData.religion_custom : (formData.religion || null),
                 funeral_type: formData.funeral_type || '일반 장례',
@@ -2026,7 +2026,7 @@ export default function WriteFormPage() {
                                     <div className="preview-info-row">
                                         <span className="preview-label">대표상주</span>
                                         <span className="preview-value">
-                                            {formData.primary_mourner} / {formData.relationship} / {mourners[0]?.contact || ''}
+                                            {formData.primary_mourner} / {formData.relationship} / {formData.applicant_phone || ''}
                                             {accounts[0]?.bank && accounts[0]?.number && (
                                                 <><br />{accounts[0].bank} / {accounts[0].number}</>
                                             )}
