@@ -186,18 +186,19 @@ export async function middleware(request: NextRequest) {
     || request.headers.get('x-real-ip')
     || '';
 
-  // 접속 로그 기록 (논블로킹)
+  // 관리자는 모든 차단/감지 스킵 (하드코딩 IP + 어드민 로그인 쿠키)
+  const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
+  if (ADMIN_IPS.includes(ip) || isAdminCookie) {
+    return NextResponse.next();
+  }
+
+  // 접속 로그 기록 (논블로킹, 어드민 제외 후)
   logAccess(
     ip,
     path,
     request.headers.get('user-agent') || '',
     request.headers.get('referer') || ''
   );
-
-  // 관리자는 모든 차단/감지 스킵
-  if (ADMIN_IPS.includes(ip)) {
-    return NextResponse.next();
-  }
 
   // 🇨🇳 중국 IP 차단 (Vercel geo 감지 + IP 대역 fallback)
   const country = (request as any).geo?.country || request.headers.get('x-vercel-ip-country') || '';
