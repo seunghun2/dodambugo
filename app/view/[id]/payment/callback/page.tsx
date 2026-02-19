@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { gaEvents } from '@/components/GoogleAnalytics';
 
 export default function PaymentCallbackPage() {
     const router = useRouter();
@@ -42,6 +43,7 @@ export default function PaymentCallbackPage() {
             if (resultCode && resultCode !== '0000' && resultCode !== '00') {
                 setStatus('error');
                 setMessage(resultMsg || '결제가 취소되었거나 실패했습니다.');
+                gaEvents.failFlowerPayment(resultMsg || `결제실패_${resultCode}`);
                 return;
             }
 
@@ -270,6 +272,7 @@ export default function PaymentCallbackPage() {
                 console.error('결제 승인 오류:', err);
                 setStatus('error');
                 setMessage(err.message || '결제 승인 중 오류가 발생했습니다.');
+                gaEvents.failFlowerPayment(err.message || '결제승인오류');
             }
         }
 

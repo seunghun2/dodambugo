@@ -1061,6 +1061,7 @@ ${url}
                                     router.push(`/view/${params.id}/order/${selectedFlower}`);
                                 } else {
                                     gaEvents.clickFlowerButton();
+                                    gaEvents.openFlowerModal();
                                     setFlowerModalOpen(true);
                                 }
                             }}
@@ -1092,7 +1093,11 @@ ${url}
                                     <div
                                         key={product.id}
                                         className="flower-product-item"
-                                        onClick={() => setSelectedFlower(selectedFlower === product.sort_order ? null : product.sort_order)}
+                                        onClick={() => {
+                                            const newVal = selectedFlower === product.sort_order ? null : product.sort_order;
+                                            setSelectedFlower(newVal);
+                                            if (newVal !== null) gaEvents.selectFlower(String(product.sort_order));
+                                        }}
                                     >
                                         <div className={`flower-radio ${selectedFlower === product.sort_order ? 'checked' : ''}`} />
                                         <div className="flower-product-image">

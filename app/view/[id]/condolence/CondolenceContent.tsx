@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import '@/app/view/[id]/order/[productId]/order.css';
 import './condolence.css';
 
@@ -141,6 +142,9 @@ export default function CondolenceContent() {
         setConfirmModalOpen(false);
 
         if (!selectedAmount) return;
+
+        // GA: 부의금 결제 시작
+        gaEvents.startCondolence(selectedAmount);
 
         // INNOPAY SDK 로드 확인
         if (typeof window === 'undefined' || !window.innopay) {
@@ -345,7 +349,7 @@ export default function CondolenceContent() {
                             <button
                                 type="button"
                                 className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
-                                onClick={() => setPaymentMethod('card')}
+                                onClick={() => { gaEvents.clickCardPayment(); setPaymentMethod('card'); }}
                             >
                                 카드
                             </button>

@@ -350,7 +350,7 @@ export default function HomeContent() {
           <Link href="/" className="nav-logo"><Image src="/images/logo.png" alt="마음부고" className="nav-logo-img" width={120} height={32} /></Link>
           <NavMenu />
           <div className="nav-actions">
-            <button className="nav-cta" onClick={checkDraftBeforeCreate}>부고장 만들기</button>
+            <button className="nav-cta" onClick={() => { gaEvents.clickHeaderCTA(); checkDraftBeforeCreate(); }}>부고장 만들기</button>
             <button className="nav-toggle" onClick={openSideMenu}>
               <span></span>
               <span></span>
@@ -468,7 +468,7 @@ export default function HomeContent() {
             </div>
             <span className="xd-action-title">부고 검색</span>
           </button>
-          <button className="xd-action-card xd-action-faq" onClick={() => router.push('/faq')}>
+          <button className="xd-action-card xd-action-faq" onClick={() => { gaEvents.clickFAQ(); router.push('/faq'); }}>
             <div className="xd-action-icon-circle">
               <HelpIcon size={24} />
             </div>

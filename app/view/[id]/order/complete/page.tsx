@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import '../[productId]/order.css';
 
 export default function OrderCompletePage() {
@@ -69,6 +70,7 @@ export default function OrderCompletePage() {
                             orderDate: formatDateTime(latestOrder.approved_at || latestOrder.created_at),
                             receiptUrl: latestOrder.receipt_url,
                         });
+                        gaEvents.completeFlowerOrder(latestOrder.order_number || `MG${latestOrder.id}`, latestOrder.amount || 0);
                         return;
                     }
                 }

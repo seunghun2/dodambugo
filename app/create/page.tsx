@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { gaEvents } from '@/components/GoogleAnalytics';
 
 // 관계 옵션
 const relationOptions = [
@@ -114,6 +115,11 @@ function CreatePageContent() {
             encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
         }));
+    }, []);
+
+    // GA: 부고 생성 시작 이벤트
+    useEffect(() => {
+        gaEvents.startCreateBugo();
     }, []);
 
     // URL 템플릿 파라미터 확인

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import '@/app/view/[id]/condolence/condolence.css';
 
 interface CondolencePaymentData {
@@ -40,6 +41,9 @@ export default function CondolenceCompletePage() {
             try {
                 const parsed = JSON.parse(stored);
                 setPaymentData(parsed);
+                if (parsed.totalAmount) {
+                    gaEvents.completeCondolence(parsed.totalAmount);
+                }
             } catch (e) {
                 console.error('결제 데이터 파싱 오류:', e);
             }

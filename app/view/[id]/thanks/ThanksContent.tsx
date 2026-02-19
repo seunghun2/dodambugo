@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { gaEvents } from '@/components/GoogleAnalytics';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -114,6 +115,11 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const [editingMessage, setEditingMessage] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
+    // GA 이벤트: 감사장 조회
+    useEffect(() => {
+        gaEvents.viewThanks(bugoId);
+    }, [bugoId]);
+
     // 탭 변경 시 DB에 저장
     const handleTabChange = async (tab: ReligionType) => {
         setActiveTab(tab);
@@ -140,6 +146,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
 
     // 카카오 공유
     const shareKakao = () => {
+        gaEvents.shareThanks('카카오톡');
         const shareUrl = getShareUrl();
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
@@ -162,6 +169,7 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
 
     // SMS 공유
     const shareSMS = () => {
+        gaEvents.shareThanks('문자메시지');
         const shareUrl = getShareUrl();
         const mournerName = bugo.mourner_name || '상주';
         const text = `[감사 인사]
@@ -181,6 +189,7 @@ ${mournerName} 배상`;
 
     // 밴드 공유
     const shareBand = () => {
+        gaEvents.shareThanks('밴드');
         const shareUrl = getShareUrl();
         const title = `[감사장] 故 ${bugo.deceased_name || ''} 감사장`;
         const content = `故 ${bugo.deceased_name || ''} 님의 감사장입니다.`;
@@ -191,6 +200,7 @@ ${mournerName} 배상`;
 
     // 링크 복사
     const copyLink = () => {
+        gaEvents.shareThanks('링크복사');
         navigator.clipboard.writeText(getShareUrl()).then(() => {
             alert('링크가 복사되었습니다.');
         });
