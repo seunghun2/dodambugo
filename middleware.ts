@@ -273,20 +273,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 검색 페이지 과다 방문 감지 (모바일 제외 - PC에서만 감지)
-  const userAgent = request.headers.get('user-agent') || '';
-  const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
-  if (path === '/search' && !isMobileUA) {
-    const count = (searchCounter.get(ip) || 0) + 1;
-    searchCounter.set(ip, count);
-    if (count >= SEARCH_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
-      const reason = `[자동] 검색 페이지 과다 방문 (${count}회)`;
-      autoBlockIP(ip, reason);
-      notifySlack(ip, reason);
-      cachedBlockedIPs.push(ip);
-      searchCounter.delete(ip);
-    }
-  }
+  // 검색 페이지 과다 방문 감지 — 비활성화 (실제 고객도 차단됨)
+  // if (path === '/search') {
+  //   const count = (searchCounter.get(ip) || 0) + 1;
+  //   searchCounter.set(ip, count);
+  //   if (count >= SEARCH_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+  //     const reason = `[자동] 검색 페이지 과다 방문 (${count}회)`;
+  //     autoBlockIP(ip, reason);
+  //     notifySlack(ip, reason);
+  //     cachedBlockedIPs.push(ip);
+  //     searchCounter.delete(ip);
+  //   }
+  // }
 
   // 부고 생성 완료 → 자동 차단 해제 (실제 고객이므로)
   if (path.startsWith('/create/complete')) {
