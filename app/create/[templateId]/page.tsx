@@ -171,6 +171,7 @@ export default function WriteFormPage() {
     const [codeSent, setCodeSent] = useState(false);
     const [codeTimer, setCodeTimer] = useState(0);
     const codeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const isClonedRef = useRef(false);
 
     // 인증번호 발송
     const sendVerifyCode = async () => {
@@ -227,6 +228,8 @@ export default function WriteFormPage() {
                 setCodeSent(false);
                 if (codeTimerRef.current) clearInterval(codeTimerRef.current);
                 setErrors(prev => ({ ...prev, applicant_phone: '' }));
+                // 인증된 번호 저장 (임시저장 복원 시 확인용)
+                try { localStorage.setItem('mb_verified_phone', formData.applicant_phone.replace(/-/g, '')); } catch { }
             } else {
                 setErrors(prev => ({ ...prev, applicant_phone: data.error || '인증 실패' }));
             }
@@ -372,6 +375,20 @@ export default function WriteFormPage() {
 
 
 
+    // 휴대폰 인증 상태 자동 복원 (드래프트/임시저장 로드 후)
+    useEffect(() => {
+        if (phoneVerified || isClonedRef.current) return; // 이미 인증됨 or 복제 모드
+        const phone = formData.applicant_phone;
+        if (!phone || phone.replace(/-/g, '').length !== 11) return;
+        try {
+            const verifiedPhone = localStorage.getItem('mb_verified_phone');
+            if (verifiedPhone && verifiedPhone === phone.replace(/-/g, '')) {
+                setPhoneVerified(true);
+            }
+        } catch { }
+    }, [formData.applicant_phone]);
+
+
     // 초기 데이터 로드 (복제 > draft 순서)
     useEffect(() => {
         // 수정 모드에서는 draft/복제 데이터 로드하지 않음
@@ -429,6 +446,9 @@ export default function WriteFormPage() {
                     applicant_name: parsed.applicant_name || '',
                     applicant_phone: parsed.applicant_phone || '',
                 }));
+
+                // 복제 시에는 인증 상태 복원하지 않음 (새로 인증 필요)
+                isClonedRef.current = true;
 
                 // 추가 상주 복사
                 if (mournersData && Array.isArray(mournersData) && mournersData.length > 1) {
@@ -710,6 +730,17 @@ export default function WriteFormPage() {
                     message: data.message || prev.message,
                 }));
 
+                // 인증 상태 복원
+                const phone = data.applicant_phone;
+                if (phone) {
+                    try {
+                        const verifiedPhone = localStorage.getItem('mb_verified_phone');
+                        if (verifiedPhone === phone.replace(/-/g, '')) {
+                            setPhoneVerified(true);
+                        }
+                    } catch { }
+                }
+
                 // URL 정리 (draft 파라미터 제거)
                 window.history.replaceState({}, '', window.location.pathname);
             } catch (err) {
@@ -953,6 +984,7 @@ export default function WriteFormPage() {
         if (!formData.applicant_name) newErrors.applicant_name = '신청자 성함을 입력해주세요';
         if (!formData.applicant_phone || formData.applicant_phone.replace(/-/g, '').length !== 11) newErrors.applicant_phone = '휴대번호를 정확히 입력해주세요';
         else if (!phoneVerified && !editBugoNumber) newErrors.applicant_phone = '휴대폰 인증을 완료해주세요';
+        else if (editBugoNumber && originalPhone && formData.applicant_phone !== originalPhone && !phoneVerified) newErrors.applicant_phone = '변경된 번호는 인증이 필요합니다';
         if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
         if (!formData.age) newErrors.age = '연세를 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
@@ -1282,7 +1314,7 @@ export default function WriteFormPage() {
                                                     }}
                                                     style={phoneVerified ? { paddingRight: '80px', background: '#f0fdf4', borderColor: '#86efac' } : { paddingRight: '80px' }}
                                                 />
-                                                {!phoneVerified && !editBugoNumber && (
+                                                {!phoneVerified && (!editBugoNumber || (editBugoNumber && originalPhone && formData.applicant_phone !== originalPhone)) && (
                                                     <button
                                                         type="button"
                                                         onClick={sendVerifyCode}
@@ -1367,7 +1399,7 @@ export default function WriteFormPage() {
                                                 </div>
                                             )}
                                             {errors.applicant_phone && <p className="field-error">{errors.applicant_phone}</p>}
-                                            {!errors.applicant_phone && !codeSent && !phoneVerified && <p className="form-hint">부고장 수정 시 비밀번호로 사용됩니다</p>}
+                                            {!errors.applicant_phone && !codeSent && <p className="form-hint">부고장 수정 시 비밀번호로 사용됩니다</p>}
                                         </div>
                                     </div>
 
