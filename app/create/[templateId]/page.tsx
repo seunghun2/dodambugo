@@ -164,6 +164,77 @@ export default function WriteFormPage() {
     const [mournerAccountVerifyFailed, setMournerAccountVerifyFailed] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
 
+    // 휴대폰 인증
+    const [phoneVerified, setPhoneVerified] = useState(false);
+    const [phoneVerifying, setPhoneVerifying] = useState(false);
+    const [verifyCode, setVerifyCode] = useState('');
+    const [codeSent, setCodeSent] = useState(false);
+    const [codeTimer, setCodeTimer] = useState(0);
+    const codeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // 인증번호 발송
+    const sendVerifyCode = async () => {
+        const phone = formData.applicant_phone;
+        if (!phone || phone.replace(/-/g, '').length !== 11) {
+            setErrors(prev => ({ ...prev, applicant_phone: '휴대번호를 정확히 입력해주세요' }));
+            return;
+        }
+        setPhoneVerifying(true);
+        try {
+            const res = await fetch('/api/phone-verify/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setCodeSent(true);
+                setCodeTimer(180); // 3분
+                if (codeTimerRef.current) clearInterval(codeTimerRef.current);
+                codeTimerRef.current = setInterval(() => {
+                    setCodeTimer(prev => {
+                        if (prev <= 1) {
+                            if (codeTimerRef.current) clearInterval(codeTimerRef.current);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            } else {
+                setErrors(prev => ({ ...prev, applicant_phone: data.error || '발송 실패' }));
+            }
+        } catch {
+            setErrors(prev => ({ ...prev, applicant_phone: '인증번호 발송에 실패했습니다' }));
+        }
+        setPhoneVerifying(false);
+    };
+
+    // 인증번호 확인
+    const confirmVerifyCode = async () => {
+        if (!verifyCode || verifyCode.length !== 6) {
+            setErrors(prev => ({ ...prev, applicant_phone: '6자리 인증번호를 입력해주세요' }));
+            return;
+        }
+        try {
+            const res = await fetch('/api/phone-verify/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: formData.applicant_phone, code: verifyCode }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setPhoneVerified(true);
+                setCodeSent(false);
+                if (codeTimerRef.current) clearInterval(codeTimerRef.current);
+                setErrors(prev => ({ ...prev, applicant_phone: '' }));
+            } else {
+                setErrors(prev => ({ ...prev, applicant_phone: data.error || '인증 실패' }));
+            }
+        } catch {
+            setErrors(prev => ({ ...prev, applicant_phone: '인증 확인에 실패했습니다' }));
+        }
+    };
+
     // 계좌 확인하기 (이노페이 예금주 성명 조회) — returns success boolean
     const verifyAccount = async (bank: string, accountNo: string, holderName: string, isForMourner = false): Promise<boolean> => {
         const bankCd = bankCodeMap[bank];
@@ -881,6 +952,7 @@ export default function WriteFormPage() {
 
         if (!formData.applicant_name) newErrors.applicant_name = '신청자 성함을 입력해주세요';
         if (!formData.applicant_phone || formData.applicant_phone.replace(/-/g, '').length !== 11) newErrors.applicant_phone = '휴대번호를 정확히 입력해주세요';
+        else if (!phoneVerified && !editBugoNumber) newErrors.applicant_phone = '휴대폰 인증을 완료해주세요';
         if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
         if (!formData.age) newErrors.age = '연세를 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
@@ -1187,24 +1259,115 @@ export default function WriteFormPage() {
                                         </div>
                                         <div className="form-group" data-field="applicant_phone">
                                             <label className="form-label required">휴대번호</label>
-                                            <input
-                                                type="tel"
-                                                name="applicant_phone"
-                                                className={`form-input ${errors.applicant_phone ? 'error' : ''}`}
-                                                placeholder="010-1234-5678"
-                                                maxLength={13}
-                                                inputMode="numeric"
-                                                value={formData.applicant_phone}
-                                                onChange={(e) => {
-                                                    const formatted = formatPhone(e.target.value);
-                                                    setFormData(prev => ({ ...prev, applicant_phone: formatted }));
-                                                    if (errors.applicant_phone) {
-                                                        setErrors(prev => ({ ...prev, applicant_phone: '' }));
-                                                    }
-                                                }}
-                                            />
+                                            <div style={{ position: 'relative' }}>
+                                                <input
+                                                    type="tel"
+                                                    name="applicant_phone"
+                                                    className={`form-input ${errors.applicant_phone ? 'error' : ''}`}
+                                                    placeholder="010-1234-5678"
+                                                    maxLength={13}
+                                                    inputMode="numeric"
+                                                    value={formData.applicant_phone}
+                                                    disabled={phoneVerified}
+                                                    onChange={(e) => {
+                                                        const formatted = formatPhone(e.target.value);
+                                                        setFormData(prev => ({ ...prev, applicant_phone: formatted }));
+                                                        if (errors.applicant_phone) {
+                                                            setErrors(prev => ({ ...prev, applicant_phone: '' }));
+                                                        }
+                                                        // 번호 변경 시 인증 초기화
+                                                        setPhoneVerified(false);
+                                                        setCodeSent(false);
+                                                        setVerifyCode('');
+                                                    }}
+                                                    style={phoneVerified ? { paddingRight: '80px', background: '#f0fdf4', borderColor: '#86efac' } : { paddingRight: '80px' }}
+                                                />
+                                                {!phoneVerified && !editBugoNumber && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={sendVerifyCode}
+                                                        disabled={phoneVerifying || (codeSent && codeTimer > 0)}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            right: '10px',
+                                                            top: '50%',
+                                                            transform: 'translateY(-50%)',
+                                                            padding: '6px 12px',
+                                                            background: codeSent ? '#94a3b8' : '#FFD43B',
+                                                            color: codeSent ? 'white' : '#1a1a1a',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            fontSize: '13px',
+                                                            fontWeight: 600,
+                                                            cursor: phoneVerifying ? 'wait' : 'pointer',
+                                                            whiteSpace: 'nowrap',
+                                                        }}
+                                                    >
+                                                        {phoneVerifying ? '발송중...' : codeSent ? '재발송' : '확인하기'}
+                                                    </button>
+                                                )}
+                                                {phoneVerified && (
+                                                    <span style={{
+                                                        position: 'absolute',
+                                                        right: '12px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        color: '#16a34a',
+                                                        fontSize: '13px',
+                                                        fontWeight: 600,
+                                                    }}>
+                                                        ✓ 인증완료
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {codeSent && !phoneVerified && (
+                                                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                                    <div style={{ position: 'relative', flex: 1 }}>
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            placeholder="인증번호 6자리"
+                                                            maxLength={6}
+                                                            inputMode="numeric"
+                                                            value={verifyCode}
+                                                            onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
+                                                            style={{ paddingRight: '55px' }}
+                                                        />
+                                                        {codeTimer > 0 && (
+                                                            <span style={{
+                                                                position: 'absolute',
+                                                                right: '12px',
+                                                                top: '50%',
+                                                                transform: 'translateY(-50%)',
+                                                                color: '#dc2626',
+                                                                fontSize: '13px',
+                                                                fontWeight: 600,
+                                                            }}>
+                                                                {Math.floor(codeTimer / 60)}:{String(codeTimer % 60).padStart(2, '0')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={confirmVerifyCode}
+                                                        style={{
+                                                            padding: '0 16px',
+                                                            background: '#FFD43B',
+                                                            color: '#1a1a1a',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            fontSize: '14px',
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            whiteSpace: 'nowrap',
+                                                        }}
+                                                    >
+                                                        확인
+                                                    </button>
+                                                </div>
+                                            )}
                                             {errors.applicant_phone && <p className="field-error">{errors.applicant_phone}</p>}
-                                            {!errors.applicant_phone && <p className="form-hint">부고장 수정 시 비밀번호로 사용됩니다</p>}
+                                            {!errors.applicant_phone && !codeSent && !phoneVerified && <p className="form-hint">부고장 수정 시 비밀번호로 사용됩니다</p>}
                                         </div>
                                     </div>
 

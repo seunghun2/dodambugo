@@ -273,8 +273,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 검색 페이지 과다 방문 감지
-  if (path === '/search') {
+  // 검색 페이지 과다 방문 감지 (모바일 제외 - PC에서만 감지)
+  const userAgent = request.headers.get('user-agent') || '';
+  const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
+  if (path === '/search' && !isMobileUA) {
     const count = (searchCounter.get(ip) || 0) + 1;
     searchCounter.set(ip, count);
     if (count >= SEARCH_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
