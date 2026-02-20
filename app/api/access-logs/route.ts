@@ -15,6 +15,25 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const supabase = getSupabase();
+
+    // IP 필터링 (차단 IP 목록의 기기 정보 조회용)
+    const ips = searchParams.get('ips');
+    if (ips) {
+        const ipList = ips.split(',');
+        // 각 IP의 최근 접속 로그 1건씩 가져오기
+        const results = [];
+        for (const ip of ipList) {
+            const { data } = await supabase
+                .from('access_logs')
+                .select('ip_address, user_agent')
+                .eq('ip_address', ip.trim())
+                .order('created_at', { ascending: false })
+                .limit(1);
+            if (data && data.length > 0) results.push(data[0]);
+        }
+        return NextResponse.json(results);
+    }
+
     const { data, error } = await supabase
         .from('access_logs')
         .select('*')

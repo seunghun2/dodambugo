@@ -42,14 +42,13 @@ export default function BlockedIPsPage() {
 
         // 각 차단 IP의 기기 정보 가져오기
         if (Array.isArray(data) && data.length > 0) {
-            const ips = data.map((d: BlockedIP) => d.ip_address);
-            const logsRes = await fetch(`/api/access-logs?limit=500&offset=0`);
+            const ips = data.map((d: BlockedIP) => d.ip_address).join(',');
+            const logsRes = await fetch(`/api/access-logs?ips=${encodeURIComponent(ips)}`);
             const logsData = await logsRes.json();
             if (Array.isArray(logsData)) {
                 const deviceMap: Record<string, string> = {};
-                for (const ip of ips) {
-                    const log = logsData.find((l: AccessLog) => l.ip_address === ip);
-                    if (log) deviceMap[ip] = getDevice(log.user_agent);
+                for (const log of logsData) {
+                    deviceMap[log.ip_address] = getDevice(log.user_agent);
                 }
                 setIpDevices(deviceMap);
             }
@@ -164,11 +163,13 @@ export default function BlockedIPsPage() {
     // User-Agent에서 디바이스 간단 표시
     const getDevice = (ua: string) => {
         if (!ua) return '-';
+        if (ua.includes('HeadlessChrome')) return 'Vercel Bot';
         if (ua.includes('iPhone')) return 'iPhone';
         if (ua.includes('Android')) return 'Android';
         if (ua.includes('iPad')) return 'iPad';
         if (ua.includes('Macintosh')) return 'Mac';
         if (ua.includes('Windows')) return 'Windows';
+        if (ua.includes('Linux')) return 'Linux';
         if (ua.includes('bot') || ua.includes('Bot') || ua.includes('crawl')) return 'Bot';
         return 'Other';
     };
