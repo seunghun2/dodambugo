@@ -456,6 +456,26 @@ export async function POST(request: NextRequest) {
                     console.error('❌ 부의금 슬랙 알림 실패:', slackErr);
                 }
 
+                // 📱 부의금 결제완료 알림톡 (조문객에게 발송)
+                if (buyerInfo.tel) {
+                    try {
+                        const buyerPhone = (buyerInfo.tel || '').replace(/-/g, '');
+                        await sendAlimtalk(
+                            buyerPhone,
+                            'KA01TP260213055510356BnS8IHlKvWB',  // 부의금 결제완료 템플릿
+                            {
+                                '부의금액': (selectedAmount || 0).toLocaleString(),
+                                '결제금액': (totalAmount || 0).toLocaleString(),
+                                '상주명': condolenceInfo.accountHolder || bugoData?.mourner_name || '',
+                                '주문번호': condolenceOrderNumber || moid,
+                            }
+                        );
+                        console.log('✅ 부의금 결제완료 알림톡 발송:', buyerPhone);
+                    } catch (alimErr) {
+                        console.error('❌ 부의금 결제완료 알림톡 실패:', alimErr);
+                    }
+                }
+
                 // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리)
                 // ✅ 이노페이 IP 등록 완료 (2026-02-13) - 프록시 서버 49.50.139.204 경유
                 if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
