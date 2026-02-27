@@ -40,6 +40,10 @@ export default function CompletePage() {
     const [showAdditionalMournerModal, setShowAdditionalMournerModal] = useState(false);
     const [additionalMournerConsent, setAdditionalMournerConsent] = useState(false);
     const [sendingAdditionalNotify, setSendingAdditionalNotify] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteError, setDeleteError] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
     // 프로덕션 환경에서는 도메인 강제 고정 (www 제거, https 강제)
     const getOrigin = () => {
@@ -233,6 +237,56 @@ ${bugoUrl}
         router.push(`/create/${templateId}`);
     };
 
+    const handleDelete = async () => {
+        if (deletePassword.length !== 4 || deleting) return;
+        setDeleting(true);
+        setDeleteError('');
+
+        try {
+            // 신청자 전화번호 조회
+            const { data: bugoCheck } = await supabase
+                .from('bugo')
+                .select('applicant_phone, phone_password')
+                .eq('bugo_number', params.bugoNumber)
+                .single();
+
+            if (!bugoCheck) {
+                setDeleteError('부고장을 찾을 수 없습니다.');
+                setDeleting(false);
+                return;
+            }
+
+            // 전화번호 뒷4자리 검증
+            const phone = (bugoCheck.applicant_phone || bugoCheck.phone_password || '').replace(/-/g, '');
+            const last4 = phone.slice(-4);
+
+            if (deletePassword !== last4) {
+                setDeleteError('번호가 일치하지 않습니다.');
+                setDeleting(false);
+                return;
+            }
+
+            // 부고장 소프트 삭제 (어드민에서 확인/복구 가능)
+            const { error } = await supabase
+                .from('bugo')
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('bugo_number', params.bugoNumber);
+
+            if (error) throw error;
+
+            setShowDeleteModal(false);
+            setToast('부고장이 삭제되었습니다');
+            setTimeout(() => {
+                router.push('/');
+            }, 1500);
+        } catch (err) {
+            console.error('삭제 오류:', err);
+            setDeleteError('삭제 중 오류가 발생했습니다.');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="complete-loading">
@@ -276,7 +330,7 @@ ${bugoUrl}
                 <div className="title-section">
                     <h1 className="page-title">상주 {mournerName} 님의 부고장</h1>
                     <Link href={`/create/edit/${params.bugoNumber}`} className="btn-edit-light">
-                        <span className="material-symbols-outlined">edit</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                         수정하기
                     </Link>
                 </div>
@@ -348,6 +402,11 @@ ${bugoUrl}
                 <div className="copy-banner">
                     <p>부고장을 복제하여 다른 이름으로<br />변경하여 사용하실 수 있습니다</p>
                     <button className="btn-copy-bugo" onClick={duplicateBugo}>복제하기</button>
+                </div>
+
+                {/* 삭제하기 */}
+                <div className="delete-section">
+                    <button className="btn-delete-text" onClick={() => { setShowDeleteModal(true); setDeletePassword(''); setDeleteError(''); }}>부고장 삭제하기</button>
                 </div>
             </main>
 
@@ -501,6 +560,77 @@ ${bugoUrl}
                     </div>
                 );
             })()}
+
+            {/* 부고장 삭제 확인 모달 */}
+            {showDeleteModal && (
+                <div className="alimtalk-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+                    <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                <circle cx="12" cy="16" r="1" fill="#888" />
+                            </svg>
+                        </div>
+                        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#191919', margin: '0 0 8px', textAlign: 'center' }}>비밀번호 입력</h2>
+                        <p style={{ fontSize: '13px', color: '#888', margin: '0 0 20px', textAlign: 'center', lineHeight: 1.6 }}>
+                            신청 시 입력한 휴대전화번호<br />뒷자리 4자리를 입력해주세요
+                        </p>
+                        <div
+                            onClick={() => document.getElementById('delete-pin')?.focus()}
+                            style={{
+                                width: '100%', padding: '16px', border: `1px solid ${deleteError ? '#ef4444' : '#ddd'}`,
+                                borderRadius: '10px', boxSizing: 'border-box', cursor: 'text',
+                                display: 'flex', justifyContent: 'center', gap: '16px',
+                                marginBottom: deleteError ? '6px' : '16px',
+                            }}
+                        >
+                            {[0, 1, 2, 3].map((i) => (
+                                <div key={i} style={{
+                                    width: '14px', height: '14px', borderRadius: '50%',
+                                    background: deletePassword.length > i ? '#555' : '#ddd',
+                                    transition: 'background 0.15s',
+                                }} />
+                            ))}
+                        </div>
+                        <input
+                            id="delete-pin"
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={4}
+                            value={deletePassword}
+                            onChange={(e) => { setDeletePassword(e.target.value.replace(/\D/g, '')); setDeleteError(''); }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && deletePassword.length === 4 && !deleting) {
+                                    handleDelete();
+                                }
+                            }}
+                            autoFocus
+                            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+                        />
+                        {deleteError && <p style={{ fontSize: '12px', color: '#ef4444', margin: '0 0 12px', textAlign: 'center' }}>{deleteError}</p>}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                style={{
+                                    flex: 1, padding: '13px', border: '1px solid #ddd', borderRadius: '10px',
+                                    background: '#fff', fontSize: '15px', fontWeight: 600, color: '#666', cursor: 'pointer',
+                                }}
+                            >취소</button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deletePassword.length !== 4 || deleting}
+                                style={{
+                                    flex: 1, padding: '13px', border: 'none', borderRadius: '10px',
+                                    background: '#FFCC45', fontSize: '15px', fontWeight: 600, color: '#191919',
+                                    cursor: deletePassword.length === 4 && !deleting ? 'pointer' : 'default',
+                                    opacity: deletePassword.length === 4 && !deleting ? 1 : 0.5,
+                                }}
+                            >{deleting ? '삭제 중...' : '확인'}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

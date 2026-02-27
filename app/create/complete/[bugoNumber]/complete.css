@@ -366,6 +366,26 @@
     }
 }
 
+/* 삭제하기 */
+.delete-section {
+    text-align: left;
+    margin-top: 24px;
+    padding-bottom: 20px;
+}
+
+.btn-delete-text {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.btn-delete-text:hover {
+    color: #888;
+}
+
 /* 수정하기 버튼 */
 .btn-edit-light {
     display: inline-flex;
@@ -373,10 +393,11 @@
     gap: 4px;
     padding: 6px 12px;
     background: transparent;
-    color: #888;
-    border: 1px solid #ddd;
+    color: #333;
+    border: 1px solid #999;
     border-radius: 20px;
     font-size: 13px;
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
@@ -384,12 +405,13 @@
 }
 
 .btn-edit-light:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
+    background: #f0f0f0;
+    border-color: #666;
 }
 
 .btn-edit-light .material-symbols-outlined {
     font-size: 16px;
+    color: #333;
 }
 
 /* 알림톡 발송 완료 모달 */
