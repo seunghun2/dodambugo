@@ -221,7 +221,22 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     };
 
     // SDK 로드 상태
-    const [sdkLoaded, setSdkLoaded] = useState(false);
+    const [sdkLoaded, setSdkLoaded] = useState(typeof window !== 'undefined' && !!window.innopay);
+
+    // 뒤로가기 후 재진입 시 이미 로드된 SDK 감지
+    useEffect(() => {
+        if (window.innopay) {
+            setSdkLoaded(true);
+            return;
+        }
+        const interval = setInterval(() => {
+            if (window.innopay) {
+                setSdkLoaded(true);
+                clearInterval(interval);
+            }
+        }, 200);
+        return () => clearInterval(interval);
+    }, []);
 
     // 로딩/에러 처리는 서버 컴포넌트에서 담당
 

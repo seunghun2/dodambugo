@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -107,13 +107,9 @@ const AMOUNT_OPTIONS = [
     { value: 1000, label: '1,000원(테스트)' },
 ];
 
-export default function CondolenceContent() {
+export default function CondolenceContent({ account }: { account: AccountInfo | null }) {
     const params = useParams();
     const router = useRouter();
-
-    // sessionStorage에서 바로 읽기
-    const stored = sessionStorage.getItem('condolence_account');
-    const account: AccountInfo | null = stored ? JSON.parse(stored) : null;
 
     const [buyerName, setBuyerName] = useState('');
     const [buyerPhone, setBuyerPhone] = useState('');
@@ -121,7 +117,23 @@ export default function CondolenceContent() {
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agreed, setAgreed] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-    const [sdkLoaded, setSdkLoaded] = useState(false);
+    const [sdkLoaded, setSdkLoaded] = useState(typeof window !== 'undefined' && !!window.innopay);
+
+    // 뒤로가기 후 재진입 시 이미 로드된 SDK 감지
+    useEffect(() => {
+        if (window.innopay) {
+            setSdkLoaded(true);
+            return;
+        }
+        // SDK 로딩 대기 (최대 5초)
+        const interval = setInterval(() => {
+            if (window.innopay) {
+                setSdkLoaded(true);
+                clearInterval(interval);
+            }
+        }, 200);
+        return () => clearInterval(interval);
+    }, []);
 
     const formatPhone = (value: string) => {
         const numbers = value.replace(/[^\d]/g, '');

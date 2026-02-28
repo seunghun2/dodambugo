@@ -1004,14 +1004,7 @@ ${url}
                                                         fontWeight: 500
                                                     }}
                                                     onClick={() => {
-                                                        sessionStorage.setItem('condolence_account', JSON.stringify({
-                                                            relationship: acc.relationship || '',
-                                                            name: acc.name || acc.holder || '',
-                                                            bank: acc.bank || '',
-                                                            holder: acc.holder || '',
-                                                            number: acc.number || ''
-                                                        }));
-                                                        router.push(`/view/${params.id}/condolence`);
+                                                        window.location.href = `/view/${params.id}/condolence?m=${i}`;
                                                     }}
                                                 >
                                                     카드결제
