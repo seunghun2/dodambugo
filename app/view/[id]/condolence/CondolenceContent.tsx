@@ -276,11 +276,8 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                 </header>
 
                 <div className="condolence-content">
-                    <section className="account-info-card">
-                        <div className="account-header">
-                            <span className="account-rel">{account.relationship}</span>
-                            <span className="account-name">{account.name}</span>
-                        </div>
+                    <section className="form-section">
+                        <label className="form-label">{account.name}</label>
                         <div className="account-body">
                             {getBankLogo(account.bank) && (
                                 <Image
@@ -299,7 +296,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                     </section>
 
                     <section className="form-section">
-                        <h2 className="section-title">이름 및 연락처</h2>
+                        <label className="form-label">보내시는 분(성함 및 연락처)</label>
                         <div className="form-group">
                             <input
                                 type="text"
@@ -356,7 +353,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                     )}
 
                     <section className="form-section">
-                        <h2 className="section-title">결제 방식</h2>
+                        <label className="form-label">결제 방식</label>
                         <div className="payment-methods">
                             <button
                                 type="button"
