@@ -986,8 +986,8 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 부의금 카드결제 버튼 - 복합과세 테스트 완료, 정식 오픈 전까지 비활성화
-                                            {typeof window !== 'undefined' && window.location.hostname === 'localhost' && (
+                                            {/* 부의금 카드결제 버튼 - localhost에서만 표시 */}
+                                            {mounted && window.location.hostname === 'localhost' && (
                                                 <button
                                                     style={{
                                                         width: 'calc(100% - 40px)',
@@ -1017,7 +1017,6 @@ ${url}
                                                     카드결제
                                                 </button>
                                             )}
-                                            */}
                                         </div>
                                     )
                                 });

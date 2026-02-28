@@ -194,63 +194,25 @@ export default function PaymentCallbackPage() {
 
                 const finalBugoId2 = bugoId || routeBugoId;
 
-                // 부의금 결제인 경우 - 카드결제 승인 후 상주 계좌로 즉시 송금
+                // 부의금 결제인 경우 - 서버 approve에서 송금 처리 완료됨, 완료 페이지로 이동
                 if (paymentType === 'condolence') {
                     const condolenceData = sessionStorage.getItem(`condolence_payment_${finalBugoId2}`);
-                    let parsedData: any = null;
 
                     if (condolenceData) {
-                        parsedData = JSON.parse(condolenceData);
+                        const parsedData = JSON.parse(condolenceData);
                         parsedData.tid = tid;
                         parsedData.receiptUrl = receiptUrl;
                         parsedData.paymentCompleted = true;
-                    }
-
-                    // 상주 계좌로 송금 (수수료 제외 원금)
-                    if (parsedData?.account && parsedData?.selectedAmount) {
-                        try {
-                            setMessage('상주님 계좌로 송금 중...');
-                            console.log('📤 부의금 송금 시작:', parsedData.account);
-
-                            const transferRes = await fetch('/api/condolence/transfer', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    bankName: parsedData.account.bank,
-                                    accountNo: parsedData.account.number,
-                                    accountHolder: parsedData.account.holder,
-                                    amount: parsedData.selectedAmount,
-                                    buyerName: parsedData.buyerName,
-                                    bugoId: finalBugoId2,
-                                }),
-                            });
-
-                            const transferResult = await transferRes.json();
-                            console.log('📥 송금 결과:', transferResult);
-
-                            if (transferResult.success) {
-                                parsedData.transferCompleted = true;
-                                parsedData.transferTid = transferResult.data?.tid;
-                                console.log('✅ 부의금 송금 성공!');
-                            } else {
-                                parsedData.transferCompleted = false;
-                                parsedData.transferError = transferResult.error;
-                                console.error('❌ 송금 실패:', transferResult.error);
-                            }
-                        } catch (transferErr: any) {
-                            console.error('❌ 송금 API 오류:', transferErr);
-                            parsedData.transferCompleted = false;
-                            parsedData.transferError = transferErr.message;
-                        }
-                    }
-
-                    if (parsedData) {
+                        parsedData.transferCompleted = true; // 서버에서 이미 송금 완료
                         sessionStorage.setItem(`condolence_payment_${finalBugoId2}`, JSON.stringify(parsedData));
                     }
 
                     setTimeout(() => {
-                        const completeUrl = `/view/${finalBugoId2}/condolence/complete${orderNumber ? `?orderNumber=${orderNumber}` : ''}`;
-                        router.push(completeUrl);
+                        if (orderNumber) {
+                            router.push(`/order/${orderNumber}`);
+                        } else {
+                            router.push(`/view/${finalBugoId2}/condolence/complete`);
+                        }
                     }, 1000);
                     return;
                 }

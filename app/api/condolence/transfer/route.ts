@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
                 acntNm: accountHolder,
                 amt: String(amount),
                 depAcntNo: '66400001397152',           // 예치금 계좌 (기업은행)
-                depAcntNm: '마음부고',                   // 예치금 계좌 예금주
+                depAcntNm: buyerName || '마음부고',       // 입금자명 (조문객 이름 → 상주 통장에 표시)
             }),
         });
 

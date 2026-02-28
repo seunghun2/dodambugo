@@ -396,10 +396,12 @@ export async function POST(request: NextRequest) {
                 let bugoData: any = null;
                 const condBugoId = condolenceInfo.bugoId || bugoNumber;
                 if (condBugoId) {
+                    // bugo_number(숫자) 또는 id(UUID) 둘 다 시도
+                    const isNumeric = /^\d+$/.test(condBugoId);
                     const { data } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, funeral_home_name')
-                        .eq('id', condBugoId)
+                        .select('bugo_number, deceased_name, mourner_name, funeral_home_name, phone_password, applicant_phone, mourners')
+                        .eq(isNumeric ? 'bugo_number' : 'id', condBugoId)
                         .single();
                     bugoData = data;
                 }
@@ -476,44 +478,126 @@ export async function POST(request: NextRequest) {
                     }
                 }
 
-                // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리)
+                // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리 - 외부 API 호출 없이 이노페이 프록시로 직접)
                 // ✅ 이노페이 IP 등록 완료 (2026-02-13) - 프록시 서버 49.50.139.204 경유
                 if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
                     try {
-                        console.log('📤 부의금 송금 시작 (서버):', {
+                        console.log('📤 부의금 송금 시작 (서버 직접):', {
                             bankName: condolenceInfo.bankName,
                             accountNo: condolenceInfo.accountNo,
                             accountHolder: condolenceInfo.accountHolder,
                             amount: selectedAmount,
                         });
 
-                        const transferUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://maeumbugo.co.kr'}/api/condolence/transfer`;
-                        const transferRes = await fetch(transferUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                bankName: condolenceInfo.bankName,
-                                accountNo: condolenceInfo.accountNo,
-                                accountHolder: condolenceInfo.accountHolder,
-                                amount: selectedAmount,
-                                buyerName: buyerInfo.name || '',
-                                bugoId: condBugoId || '',
-                            }),
-                        });
+                        // 은행코드 매핑
+                        const BANK_CODE_MAP: Record<string, string> = {
+                            'KB국민': '004', '국민': '004', '국민은행': '004',
+                            '신한': '088', '신한은행': '088', '우리': '020', '우리은행': '020',
+                            '하나': '081', '하나은행': '081', 'NH농협': '011', '농협': '011', '농협은행': '011',
+                            'IBK기업': '003', '기업': '003', '기업은행': '003',
+                            'SC제일': '023', '제일은행': '023',
+                            '케이뱅크': '089', '카카오뱅크': '090', '카카오': '090',
+                            '토스뱅크': '092', '토스': '092',
+                            '새마을금고': '045', '새마을': '045', '우체국': '071',
+                            '부산': '032', '부산은행': '032', '대구': '031', '대구은행': '031',
+                            '경남': '039', '경남은행': '039', '수협': '007', '수협은행': '007',
+                            '신협': '048', '신협은행': '048',
+                        };
+                        const getBankCode = (name: string) => {
+                            if (BANK_CODE_MAP[name]) return BANK_CODE_MAP[name];
+                            for (const key in BANK_CODE_MAP) { if (name.includes(key) || key.includes(name)) return BANK_CODE_MAP[key]; }
+                            return null;
+                        };
 
-                        const transferResult = await transferRes.json();
-                        console.log('📥 송금 결과:', transferResult);
-
-                        if (transferResult.success) {
-                            console.log('✅ 부의금 송금 성공! TID:', transferResult.data?.tid);
-                            if (condolenceOrderNumber) {
-                                await supabase
-                                    .from('condolence_orders')
-                                    .update({ status: 'transferred', settled_at: new Date().toISOString() })
-                                    .eq('order_number', condolenceOrderNumber);
-                            }
+                        const bankCode = getBankCode(condolenceInfo.bankName);
+                        if (!bankCode) {
+                            console.error('❌ 지원하지 않는 은행:', condolenceInfo.bankName);
                         } else {
-                            console.error('❌ 부의금 송금 실패:', transferResult.error);
+                            const cleanAccNo = (condolenceInfo.accountNo || '').replace(/-/g, '');
+                            const txMoid = `CONDTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                            const now2 = new Date();
+                            const reqDt = now2.getFullYear().toString() +
+                                String(now2.getMonth() + 1).padStart(2, '0') +
+                                String(now2.getDate()).padStart(2, '0') +
+                                String(now2.getHours()).padStart(2, '0') +
+                                String(now2.getMinutes()).padStart(2, '0') +
+                                String(now2.getSeconds()).padStart(2, '0');
+
+                            const transferRes = await fetch('http://49.50.139.204/proxy/transfer', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    mid: 'bumaeum02m',
+                                    merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
+                                    moid: txMoid,
+                                    req_dt: reqDt,
+                                    bankCode: bankCode,
+                                    acntNo: cleanAccNo,
+                                    acntNm: condolenceInfo.accountHolder,
+                                    amt: String(selectedAmount),
+                                    depAcntNo: '66400001397152',
+                                    depAcntNm: buyerInfo.name || '마음부고',
+                                }),
+                            });
+
+                            const transferResult = await transferRes.json();
+                            console.log('📥 송금 결과:', transferResult);
+
+                            if (transferResult.resultCode === '0000') {
+                                console.log('✅ 부의금 송금 성공! TID:', transferResult.tid);
+                                if (condolenceOrderNumber) {
+                                    await supabase
+                                        .from('condolence_orders')
+                                        .update({ status: 'transferred', settled_at: new Date().toISOString() })
+                                        .eq('order_number', condolenceOrderNumber);
+                                }
+
+                                // 📱 상주에게 "부의금 전달 완료" 알림톡 발송
+                                try {
+                                    // 상주 연락처 찾기: mourners 배열에서 계좌 수신자명 매칭 → 대표상주 번호 fallback
+                                    let mournerPhone = '';
+                                    const recipientName = condolenceInfo.accountHolder || '';
+
+                                    if (bugoData?.mourners && Array.isArray(bugoData.mourners)) {
+                                        const matched = bugoData.mourners.find(
+                                            (m: any) => m.name === recipientName && m.contact
+                                        );
+                                        if (matched) {
+                                            mournerPhone = matched.contact;
+                                        }
+                                    }
+                                    // 대표상주와 이름이 같으면 대표상주 번호 사용
+                                    if (!mournerPhone && recipientName === bugoData?.mourner_name) {
+                                        mournerPhone = bugoData?.applicant_phone || bugoData?.phone_password || '';
+                                    }
+                                    // 그래도 없으면 대표상주 번호 fallback
+                                    if (!mournerPhone) {
+                                        mournerPhone = bugoData?.applicant_phone || bugoData?.phone_password || '';
+                                    }
+
+                                    if (mournerPhone) {
+                                        const cleanPhone = mournerPhone.replace(/-/g, '');
+                                        await sendAlimtalk(
+                                            cleanPhone,
+                                            'KA01TP260213060236557haj4AEvPgIn',  // 부의금 전달 완료 (상주용)
+                                            {
+                                                '수신자명': recipientName,
+                                                '보내는분': buyerInfo.name || '',
+                                                '부의금액': (selectedAmount || 0).toLocaleString(),
+                                                '은행명': condolenceInfo.bankName || '',
+                                                '계좌번호': condolenceInfo.accountNo || '',
+                                            }
+                                        );
+                                        console.log('✅ 상주 부의금 입금 알림톡 발송:', cleanPhone);
+                                    } else {
+                                        console.warn('⚠️ 상주 연락처를 찾을 수 없어 알림톡 미발송');
+                                    }
+                                } catch (mournerAlimErr) {
+                                    console.error('❌ 상주 부의금 입금 알림톡 실패:', mournerAlimErr);
+                                }
+                            } else {
+                                console.error('❌ 부의금 송금 실패:', transferResult);
+                            }
                         }
                     } catch (transferErr) {
                         console.error('❌ 부의금 송금 API 오류:', transferErr);
