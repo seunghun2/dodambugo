@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { gaEvents } from '@/components/GoogleAnalytics';
 
+// 모듈 레벨: React StrictMode에서도 중복 실행 완전 차단
+let paymentProcessed = false;
+
 export default function PaymentCallbackPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -14,6 +17,12 @@ export default function PaymentCallbackPage() {
 
     useEffect(() => {
         async function processPayment() {
+            // 중복 실행 방지 (모듈 레벨)
+            if (paymentProcessed) {
+                console.log('⚠️ processPayment 중복 실행 차단');
+                return;
+            }
+            paymentProcessed = true;
             // URL 파라미터에서 결제 정보 추출
             // useSearchParams가 비어있을 수 있으므로 window.location.search 폴백 사용
             const urlParams = new URLSearchParams(window.location.search);

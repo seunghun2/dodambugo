@@ -398,12 +398,24 @@ export async function POST(request: NextRequest) {
                 if (condBugoId) {
                     // bugo_number(숫자) 또는 id(UUID) 둘 다 시도
                     const isNumeric = /^\d+$/.test(condBugoId);
-                    const { data } = await supabase
+                    const { data, error: bugoError } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, funeral_home_name, phone_password, applicant_phone, mourners')
+                        .select('bugo_number, deceased_name, mourner_name, funeral_home, phone_password, applicant_phone, mourners')
                         .eq(isNumeric ? 'bugo_number' : 'id', condBugoId)
+                        .is('deleted_at', null)
                         .single();
                     bugoData = data;
+                    console.log('📋 bugoData 조회 결과:', {
+                        condBugoId,
+                        isNumeric,
+                        queryValue: isNumeric ? Number(condBugoId) : condBugoId,
+                        found: !!data,
+                        error: bugoError?.message,
+                        mourner_name: data?.mourner_name,
+                        applicant_phone: data?.applicant_phone,
+                        phone_password: data?.phone_password,
+                        mourners: data?.mourners,
+                    });
                 }
 
                 // condolence_orders 테이블에 저장
@@ -449,7 +461,7 @@ export async function POST(request: NextRequest) {
                         fee: fee,
                         total_amount: totalAmount,
                         payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
-                        funeral_home: bugoData?.funeral_home_name || '',
+                        funeral_home: bugoData?.funeral_home || '',
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',
                     });
@@ -554,10 +566,11 @@ export async function POST(request: NextRequest) {
 
                                 // 📱 상주에게 "부의금 전달 완료" 알림톡 발송
                                 try {
-                                    // 상주 연락처 찾기: mourners 배열에서 계좌 수신자명 매칭 → 대표상주 번호 fallback
+                                    // 계좌 수신 상주에게만 알림 (전화번호 없으면 미발송)
                                     let mournerPhone = '';
                                     const recipientName = condolenceInfo.accountHolder || '';
 
+                                    // 1. mourners 배열에서 계좌 수신자명 매칭
                                     if (bugoData?.mourners && Array.isArray(bugoData.mourners)) {
                                         const matched = bugoData.mourners.find(
                                             (m: any) => m.name === recipientName && m.contact
@@ -566,12 +579,8 @@ export async function POST(request: NextRequest) {
                                             mournerPhone = matched.contact;
                                         }
                                     }
-                                    // 대표상주와 이름이 같으면 대표상주 번호 사용
+                                    // 2. 대표상주 본인 계좌면 대표상주 번호 사용
                                     if (!mournerPhone && recipientName === bugoData?.mourner_name) {
-                                        mournerPhone = bugoData?.applicant_phone || bugoData?.phone_password || '';
-                                    }
-                                    // 그래도 없으면 대표상주 번호 fallback
-                                    if (!mournerPhone) {
                                         mournerPhone = bugoData?.applicant_phone || bugoData?.phone_password || '';
                                     }
 
