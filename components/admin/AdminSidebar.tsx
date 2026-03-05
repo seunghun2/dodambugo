@@ -10,6 +10,7 @@ const navItems = [
     { href: '/admin/flower-orders', icon: 'local_florist', label: '화환 주문' },
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
     { href: '/admin/products', icon: 'inventory_2', label: '상품 등록' },
+    { href: '/admin/condolence-settings', icon: 'credit_card', label: '조의금 설정' },
     { href: '/admin/inquiries', icon: 'mail', label: '문의 관리' },
     { href: '/admin/blocked-ips', icon: 'block', label: 'IP 제한' },
 ];

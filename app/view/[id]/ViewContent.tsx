@@ -196,6 +196,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const [selectedFlower, setSelectedFlower] = useState<number | null>(initialFlowerProducts[0]?.sort_order || null); // 선택된 상품 순번
     const [flowerOrders] = useState(initialFlowerOrders);
     const [flowerProducts] = useState(initialFlowerProducts);
+    const [condolenceActive, setCondolenceActive] = useState(true);
 
     // Hydration 완료 후 mounted 상태 true + 의심 행동 감지
     useEffect(() => {
@@ -205,6 +206,14 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         const cleanupScreenshot = detectScreenshot();
         const cleanupDevTools = detectDevTools();
         trackPageView(bugo.bugo_number);
+
+        // 조의금 서비스 활성화 여부 확인
+        import('@/lib/supabase').then(({ supabase }) => {
+            supabase.from('condolence_config').select('is_active').limit(1).single()
+                .then(({ data }) => {
+                    if (data) setCondolenceActive(data.is_active);
+                });
+        });
 
         return () => {
             cleanupScreenshot();
@@ -987,7 +996,7 @@ ${url}
                                                 </button>
                                             </div>
                                             {/* 부의금 카드결제 버튼 */}
-                                            {mounted && (
+                                            {mounted && condolenceActive && (
                                                 <button
                                                     style={{
                                                         width: 'calc(100% - 40px)',

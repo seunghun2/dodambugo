@@ -217,7 +217,11 @@ export default function PaymentCallbackPage() {
                     }
 
                     setTimeout(() => {
-                        router.push(`/view/${finalBugoId2}/condolence/complete`);
+                        if (orderNumber && orderNumber.startsWith('CO')) {
+                            router.push(`/order/${orderNumber}`);
+                        } else {
+                            router.push(`/view/${finalBugoId2}/condolence/complete`);
+                        }
                     }, 1000);
                     return;
                 }
