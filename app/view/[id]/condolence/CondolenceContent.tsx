@@ -97,7 +97,7 @@ interface AccountInfo {
     number: string;
 }
 
-const AMOUNT_OPTIONS = [
+const AMOUNT_OPTIONS_FALLBACK = [
     { value: 50000, label: '5만원' },
     { value: 100000, label: '10만원' },
     { value: 200000, label: '20만원' },
@@ -118,6 +118,23 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
     const [agreed, setAgreed] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [sdkLoaded, setSdkLoaded] = useState(typeof window !== 'undefined' && !!window.innopay);
+    const [amountOptions, setAmountOptions] = useState(AMOUNT_OPTIONS_FALLBACK);
+
+    // DB에서 활성화된 금액 옵션 가져오기
+    useEffect(() => {
+        import('@/lib/supabase').then(({ supabase }) => {
+            supabase
+                .from('condolence_amounts')
+                .select('value, label')
+                .eq('is_active', true)
+                .order('sort_order', { ascending: true })
+                .then(({ data }) => {
+                    if (data && data.length > 0) {
+                        setAmountOptions(data);
+                    }
+                });
+        });
+    }, []);
 
     // 뒤로가기 후 재진입 시 이미 로드된 SDK 감지
     useEffect(() => {
@@ -322,7 +339,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                     <section className="form-section">
                         <label className="form-label">마음을 전하실 금액을 선택해주세요</label>
                         <div className="amount-grid">
-                            {AMOUNT_OPTIONS.map((option) => (
+                            {amountOptions.map((option) => (
                                 <button
                                     key={option.value}
                                     type="button"

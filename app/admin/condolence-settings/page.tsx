@@ -14,8 +14,17 @@ interface CondolenceConfig {
     updated_at: string;
 }
 
+interface AmountOption {
+    id: number;
+    value: number;
+    label: string;
+    is_active: boolean;
+    sort_order: number;
+}
+
 export default function AdminCondolenceSettingsPage() {
     const [config, setConfig] = useState<CondolenceConfig | null>(null);
+    const [amounts, setAmounts] = useState<AmountOption[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
@@ -30,6 +39,7 @@ export default function AdminCondolenceSettingsPage() {
 
     useEffect(() => {
         fetchConfig();
+        fetchAmounts();
         fetchDepositBalance();
     }, []);
 
@@ -47,6 +57,19 @@ export default function AdminCondolenceSettingsPage() {
             setConfig(data);
         }
         setLoading(false);
+    };
+
+    const fetchAmounts = async () => {
+        const { data, error } = await supabase
+            .from('condolence_amounts')
+            .select('*')
+            .order('sort_order', { ascending: true });
+
+        if (error) {
+            console.error('금액 조회 오류:', error);
+        } else {
+            setAmounts(data || []);
+        }
     };
 
     const fetchDepositBalance = async () => {
@@ -109,6 +132,21 @@ export default function AdminCondolenceSettingsPage() {
         setSaving(false);
     };
 
+    const handleAmountToggle = async (amt: AmountOption) => {
+        const newActive = !amt.is_active;
+        const { error } = await supabase
+            .from('condolence_amounts')
+            .update({ is_active: newActive })
+            .eq('id', amt.id);
+
+        if (error) {
+            showToast('변경 실패');
+        } else {
+            setAmounts(prev => prev.map(a => a.id === amt.id ? { ...a, is_active: newActive } : a));
+            showToast(`${amt.label} ${newActive ? '활성화' : '비활성화'}됨`);
+        }
+    };
+
     const showToast = (msg: string) => {
         setToast(msg);
         setTimeout(() => setToast(null), 2500);
@@ -131,7 +169,7 @@ export default function AdminCondolenceSettingsPage() {
                 <header className="admin-top-header">
                     <h1>조의금 서비스 설정</h1>
                     <div className="header-actions">
-                        <button onClick={fetchConfig} className="btn-refresh">
+                        <button onClick={() => { fetchConfig(); fetchAmounts(); }} className="btn-refresh">
                             <span className="material-symbols-outlined">refresh</span>
                             새로고침
                         </button>
@@ -194,6 +232,32 @@ export default function AdminCondolenceSettingsPage() {
                                     총 입금 {depositBalance.totDptAmt}원 · 총 출금 {depositBalance.totWdrAmt}원
                                 </div>
                             )}
+                        </div>
+
+                        {/* 금액 옵션 관리 */}
+                        <div className="cs-settings-card">
+                            <h3 className="cs-card-title">
+                                <span className="material-symbols-outlined">payments</span>
+                                결제 금액 옵션
+                            </h3>
+                            <p className="cs-card-desc">부고장에서 표시되는 금액 버튼을 ON/OFF 할 수 있습니다.</p>
+
+                            <div className="cs-amount-list">
+                                {amounts.map((amt) => (
+                                    <div key={amt.id} className={`cs-amount-item ${amt.is_active ? '' : 'inactive'}`}>
+                                        <div className="cs-amount-info">
+                                            <span className="cs-amount-label">{amt.label}</span>
+                                            <span className="cs-amount-value">{amt.value.toLocaleString()}원</span>
+                                        </div>
+                                        <button
+                                            className={`cs-toggle-sm ${amt.is_active ? 'active' : ''}`}
+                                            onClick={() => handleAmountToggle(amt)}
+                                        >
+                                            <div className="cs-toggle-knob-sm" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* 설정 폼 */}
@@ -404,8 +468,78 @@ export default function AdminCondolenceSettingsPage() {
                     font-size: 16px;
                     font-weight: 700;
                     color: #1e293b;
-                    margin: 0 0 24px;
+                    margin: 0 0 8px;
                 }
+                .cs-card-desc {
+                    font-size: 13px;
+                    color: #94a3b8;
+                    margin: 0 0 20px;
+                }
+
+                .cs-amount-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .cs-amount-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 16px 20px;
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+                    transition: all 0.2s;
+                }
+                .cs-amount-item.inactive {
+                    opacity: 0.5;
+                    background: #f1f5f9;
+                }
+                .cs-amount-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+                .cs-amount-label {
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: #1e293b;
+                    min-width: 120px;
+                }
+                .cs-amount-value {
+                    font-size: 13px;
+                    color: #64748b;
+                    font-family: monospace;
+                }
+                .cs-toggle-sm {
+                    width: 44px;
+                    height: 24px;
+                    border-radius: 12px;
+                    border: none;
+                    background: #e2e8f0;
+                    cursor: pointer;
+                    position: relative;
+                    transition: background 0.3s;
+                    flex-shrink: 0;
+                }
+                .cs-toggle-sm.active {
+                    background: #22c55e;
+                }
+                .cs-toggle-knob-sm {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: white;
+                    position: absolute;
+                    top: 3px;
+                    left: 3px;
+                    transition: transform 0.3s;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                }
+                .cs-toggle-sm.active .cs-toggle-knob-sm {
+                    transform: translateX(20px);
+                }
+
                 .cs-form-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
