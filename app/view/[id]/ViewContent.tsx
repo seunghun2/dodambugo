@@ -986,8 +986,8 @@ ${url}
                                                     계좌복사
                                                 </button>
                                             </div>
-                                            {/* 부의금 카드결제 버튼 - localhost에서만 표시 */}
-                                            {mounted && window.location.hostname === 'localhost' && (
+                                            {/* 부의금 카드결제 버튼 */}
+                                            {mounted && (
                                                 <button
                                                     style={{
                                                         width: 'calc(100% - 40px)',
