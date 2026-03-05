@@ -217,11 +217,7 @@ export default function PaymentCallbackPage() {
                     }
 
                     setTimeout(() => {
-                        if (orderNumber) {
-                            router.push(`/order/${orderNumber}`);
-                        } else {
-                            router.push(`/view/${finalBugoId2}/condolence/complete`);
-                        }
+                        router.push(`/view/${finalBugoId2}/condolence/complete`);
                     }, 1000);
                     return;
                 }
