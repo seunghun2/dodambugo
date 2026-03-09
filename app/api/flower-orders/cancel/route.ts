@@ -11,13 +11,11 @@ const INNOPAY_CANCEL_API_URL = 'https://api.innopay.co.kr/api/cancelApi';
 
 // 결제방법에 따른 서비스코드 (INNOPAY 문서 기준)
 const getSvcCd = (paymentMethod: string) => {
-    switch (paymentMethod) {
-        case 'card': return '01';  // 신용카드
-        case 'bank': return '02';  // 계좌이체
-        case 'virtual': return '03';  // 가상계좌
-        case 'easy': return '16';  // 간편결제 (카카오페이 등)
-        default: return '01';  // 기본값 카드
-    }
+    if (paymentMethod.includes('간편결제') || paymentMethod === 'easy') return '16';
+    if (paymentMethod.includes('신용카드') || paymentMethod === 'card') return '01';
+    if (paymentMethod.includes('계좌이체') || paymentMethod === 'bank') return '02';
+    if (paymentMethod.includes('가상계좌') || paymentMethod === 'virtual') return '03';
+    return '01';  // 기본값 카드
 };
 
 // 주문 취소 API
