@@ -1938,8 +1938,8 @@ export default function WriteFormPage() {
                                     </div>
 
 
-                                    {/* 장지 정보 - 가족장 제외 (일반장례, 무빈소장례) */}
-                                    {formData.funeral_type !== '가족장' && (
+                                    {/* 장지 정보 (일반장례, 무빈소장례, 가족장 모두) */}
+                                    {(
                                         <div className="form-section">
                                             <div className="toggle-row">
                                                 <div className="toggle-row-label">

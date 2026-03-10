@@ -127,11 +127,31 @@ ${continueUrl}
             .not('phone_password', 'is', null);
 
         if (bugos && bugos.length > 0) {
-            results.share.total = bugos.length;
-            console.log(`📬 공유 리마인더 대상: ${bugos.length}건`);
-
+            // 같은 전화번호로 여러 부고 → 마지막(최신 bugo_number) 하나만 발송
+            const phoneMap: Record<string, typeof bugos[0]> = {};
             for (const bugo of bugos) {
                 const phone = bugo.phone_password.replace(/-/g, '');
+                if (!phoneMap[phone] || Number(bugo.bugo_number) > Number(phoneMap[phone].bugo_number)) {
+                    phoneMap[phone] = bugo;
+                }
+            }
+
+            const targets = Object.entries(phoneMap);
+            results.share.total = targets.length;
+            console.log(`📬 공유 리마인더 대상: ${targets.length}건 (전체 ${bugos.length}건 중 중복번호 제거)`);
+
+            // 중복 번호의 나머지 부고는 리마인더 발송 완료 처리
+            for (const bugo of bugos) {
+                const phone = bugo.phone_password.replace(/-/g, '');
+                if (phoneMap[phone] && phoneMap[phone].bugo_number !== bugo.bugo_number) {
+                    await supabase
+                        .from('bugo')
+                        .update({ share_reminder_sent: true })
+                        .eq('bugo_number', bugo.bugo_number);
+                }
+            }
+
+            for (const [phone, bugo] of targets) {
                 try {
                     await sendAlimtalk(
                         phone,

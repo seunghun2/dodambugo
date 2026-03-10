@@ -8,6 +8,7 @@ const navItems = [
     { href: '/admin/drafts', icon: 'edit_note', label: '임시저장' },
     { href: '/admin/condolence-orders', icon: 'payments', label: '부의금 판매' },
     { href: '/admin/flower-orders', icon: 'local_florist', label: '화환 주문' },
+    { href: '/admin/burial-reviews', icon: 'rate_review', label: '장지 후기' },
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
     { href: '/admin/products', icon: 'inventory_2', label: '상품 등록' },
     { href: '/admin/condolence-settings', icon: 'credit_card', label: '조의금 설정' },
