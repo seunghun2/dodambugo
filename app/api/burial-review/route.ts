@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         // 리뷰코드로 부고번호 역추적
         const { data: bugo } = await supabase
             .from('bugo')
-            .select('bugo_number, burial_place, mourner_name')
+            .select('bugo_number, burial_place, mourner_name, phone_password, applicant_phone')
             .is('deleted_at', null);
 
         const matched = bugo?.find(b => generateReviewCode(String(b.bugo_number)) === reviewCode);
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
                 bugo_number: bugoNumber,
                 burial_place: burialPlace || matched.burial_place,
                 mourner_name: mournerName || matched.mourner_name,
+                mourner_phone: matched.applicant_phone || matched.phone_password || undefined,
                 rating,
                 review_text: reviewText,
                 photo_count: photos?.length || 0,

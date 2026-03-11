@@ -222,6 +222,7 @@ export async function sendBurialReviewNotification(review: {
     bugo_number: string;
     burial_place: string;
     mourner_name?: string;
+    mourner_phone?: string;
     rating: number;
     review_text?: string;
     photo_count?: number;
@@ -240,6 +241,7 @@ export async function sendBurialReviewNotification(review: {
 - 장지: ${review.burial_place}
 - 별점: ${stars} (${review.rating}점)
 - 상주: ${review.mourner_name || '-'}
+- 연락처: ${review.mourner_phone || '-'}
 - 소감: ${reviewPreview}
 - 사진: ${review.photo_count || 0}장
 - 활용 동의: ${review.consent_agreed ? '✅' : '❌'}
