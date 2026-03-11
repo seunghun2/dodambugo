@@ -214,3 +214,36 @@ export async function sendDepositBalanceNotification(info: {
 
     return sendToWebhook(webhookUrl!, { text });
 }
+
+/**
+ * 장지 후기 알림 전송 (#99_99_장지이용후기)
+ */
+export async function sendBurialReviewNotification(review: {
+    bugo_number: string;
+    burial_place: string;
+    mourner_name?: string;
+    rating: number;
+    review_text?: string;
+    photo_count?: number;
+    consent_agreed?: boolean;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_REVIEW || process.env.SLACK_WEBHOOK_BUGO;
+
+    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+    const reviewPreview = review.review_text
+        ? review.review_text.length > 100
+            ? review.review_text.substring(0, 100) + '...'
+            : review.review_text
+        : '(소감 없음)';
+
+    const text = `[마음부고] 장지 후기가 등록되었습니다.
+- 장지: ${review.burial_place}
+- 별점: ${stars} (${review.rating}점)
+- 상주: ${review.mourner_name || '-'}
+- 소감: ${reviewPreview}
+- 사진: ${review.photo_count || 0}장
+- 활용 동의: ${review.consent_agreed ? '✅' : '❌'}
+- 부고번호: ${review.bugo_number}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}

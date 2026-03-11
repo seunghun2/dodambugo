@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { sendBurialReviewNotification } from '@/lib/slack';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -73,6 +74,21 @@ export async function POST(request: NextRequest) {
         if (error) {
             console.error('리뷰 저장 오류:', error);
             return NextResponse.json({ error: '저장 중 오류가 발생했습니다.' }, { status: 500 });
+        }
+
+        // 슬랙 알림 (#99_99_장지이용후기)
+        try {
+            await sendBurialReviewNotification({
+                bugo_number: bugoNumber,
+                burial_place: burialPlace || matched.burial_place,
+                mourner_name: mournerName || matched.mourner_name,
+                rating,
+                review_text: reviewText,
+                photo_count: photos?.length || 0,
+                consent_agreed: consentAgreed,
+            });
+        } catch (slackErr) {
+            console.error('슬랙 알림 실패 (무시):', slackErr);
         }
 
         return NextResponse.json({ success: true, id: data.id });
