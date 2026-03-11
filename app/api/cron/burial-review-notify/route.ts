@@ -77,7 +77,6 @@ export async function GET(request: NextRequest) {
         for (const [phone, bugo] of targets) {
             try {
                 const reviewCode = generateReviewCode(String(bugo.bugo_number));
-                const reviewUrl = `https://maeumbugo.co.kr/review/${reviewCode}`;
 
                 await sendAlimtalk(
                     phone,
@@ -86,7 +85,7 @@ export async function GET(request: NextRequest) {
                         '상주명': bugo.mourner_name || '',
                         '고인명': bugo.deceased_name || '',
                         '장지명': bugo.burial_place || '',
-                        '후기URL': reviewUrl,
+                        '리뷰링크': reviewCode,
                     }
                 );
 
@@ -101,7 +100,7 @@ export async function GET(request: NextRequest) {
                         .eq('bugo_number', sb.bugo_number);
                 }
 
-                console.log(`✅ 장지 후기 알림 발송: ${bugo.bugo_number} → ${phone} (${reviewUrl})`);
+                console.log(`✅ 장지 후기 알림 발송: ${bugo.bugo_number} → ${phone} (${reviewCode})`);
                 sentCount++;
 
             } catch (err) {
