@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
                 await sendAlimtalk(
                     phone,
-                    'BURIAL_REVIEW_TEMPLATE_ID',  // TODO: 솔라피에서 승인받은 템플릿 ID로 교체
+                    'KA01TP260310031832180MIhfBqgYYoB',
                     {
                         '상주명': bugo.mourner_name || '',
                         '고인명': bugo.deceased_name || '',
