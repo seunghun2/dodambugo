@@ -120,19 +120,23 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: '잘못된 접근입니다.' }, { status: 403 });
         }
 
-        // 이미 리뷰 작성했는지 체크
-        const { data: existing } = await supabase
+        // 이미 리뷰 작성했는지 장지별 체크
+        const { data: existingReviews } = await supabase
             .from('burial_reviews')
-            .select('id')
-            .eq('bugo_number', String(matched.bugo_number))
-            .maybeSingle();
+            .select('id, burial_place')
+            .eq('bugo_number', String(matched.bugo_number));
+
+        const reviewedPlaces = (existingReviews || []).map(r => r.burial_place);
+        const allPlaces = [matched.burial_place, matched.burial_place2].filter(Boolean);
+        const allReviewed = allPlaces.every(p => reviewedPlaces.includes(p));
 
         return NextResponse.json({
             burialPlace: matched.burial_place,
             burialPlace2: matched.burial_place2 || null,
             mournerName: matched.mourner_name,
             funeralHome: matched.funeral_home,
-            alreadyReviewed: !!existing,
+            alreadyReviewed: allReviewed,
+            reviewedPlaces,
         });
     } catch (err) {
         console.error('부고 조회 오류:', err);

@@ -33,6 +33,7 @@ export default function BurialReviewPage() {
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [showConsentModal, setShowConsentModal] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         async function fetchBugo() {
@@ -58,17 +59,40 @@ export default function BurialReviewPage() {
         fetchBugo();
     }, [reviewCode]);
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
         const setPhotos = step === 1 ? setPhotos1 : setPhotos2;
         const currentPhotos = step === 1 ? photos1 : photos2;
-        Array.from(files).forEach(file => {
-            if (currentPhotos.length >= 10) return;
-            const reader = new FileReader();
-            reader.onload = () => setPhotos(prev => [...prev, reader.result as string]);
-            reader.readAsDataURL(file);
-        });
+
+        const filesToUpload = Array.from(files).slice(0, 10 - currentPhotos.length);
+        if (filesToUpload.length === 0) return;
+
+        setUploading(true);
+        for (const file of filesToUpload) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('reviewCode', reviewCode);
+
+                const res = await fetch('/api/burial-review/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    setPhotos(prev => [...prev, data.url]);
+                } else {
+                    alert(data.error || '사진 업로드에 실패했습니다.');
+                }
+            } catch (err) {
+                console.error('사진 업로드 오류:', err);
+                alert('사진 업로드 중 오류가 발생했습니다.');
+            }
+        }
+        setUploading(false);
+        // input 초기화
+        e.target.value = '';
     };
 
     const removePhoto = (index: number) => {
@@ -142,6 +166,9 @@ export default function BurialReviewPage() {
                 if (!res2.ok) {
                     const err = await res2.json();
                     console.error('2차 장지 리뷰 오류:', err);
+                    alert('2차 장지 후기 등록에 실패했습니다. 다시 시도해주세요.');
+                    setSubmitting(false);
+                    return;
                 }
             }
 
@@ -283,7 +310,7 @@ export default function BurialReviewPage() {
                                 <button className="photo-remove" onClick={() => removePhoto(idx)} type="button">✕</button>
                             </div>
                         ))}
-                        {currentPhotos.length < 10 && (
+                        {currentPhotos.length < 10 && !uploading && (
                             <label className="photo-add">
                                 <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} hidden />
                                 <svg className="photo-add-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -291,6 +318,11 @@ export default function BurialReviewPage() {
                                 </svg>
                                 <span className="photo-add-text">사진 추가</span>
                             </label>
+                        )}
+                        {uploading && (
+                            <div className="photo-add" style={{ cursor: 'default', opacity: 0.6 }}>
+                                <span className="photo-add-text">업로드 중...</span>
+                            </div>
                         )}
                     </div>
                 </div>

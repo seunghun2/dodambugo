@@ -27,7 +27,7 @@ export async function GET() {
         const bugoNumbers = [...new Set(reviews.map(r => r.bugo_number))];
         const { data: bugos } = await supabase
             .from('bugo')
-            .select('bugo_number, mourner_name, mourner_phone, funeral_home, deceased_name')
+            .select('bugo_number, mourner_name, phone_password, applicant_phone, funeral_home, deceased_name')
             .in('bugo_number', bugoNumbers.map(Number));
 
         const bugoMap: Record<string, any> = {};
@@ -38,7 +38,7 @@ export async function GET() {
         // 3. 병합
         const merged = reviews.map(r => ({
             ...r,
-            mourner_phone: bugoMap[r.bugo_number]?.mourner_phone || null,
+            mourner_phone: bugoMap[r.bugo_number]?.applicant_phone || bugoMap[r.bugo_number]?.phone_password || null,
             funeral_home: bugoMap[r.bugo_number]?.funeral_home || null,
             deceased_name: bugoMap[r.bugo_number]?.deceased_name || null,
         }));
