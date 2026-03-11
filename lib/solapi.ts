@@ -74,7 +74,7 @@ export async function sendAlimtalk(
     to: string,
     templateId: string,
     variables: Record<string, string>,
-    scheduledDate?: string  // 예약 발송 시간 (KST, "YYYY-MM-DD HH:mm:ss" 형식)
+    scheduledDate?: string  // 예약 발송 시간 (UTC, "YYYY-MM-DD HH:mm:ss" 형식. KST 13시 = UTC 04시)
 ) {
     try {
         // SOLAPI는 변수 키에 #{} 래퍼가 필요함
@@ -115,7 +115,7 @@ export async function sendAlimtalk(
             });
             console.log('📝 메시지 추가 완료');
 
-            // 3. 예약 발송 설정 (Solapi는 KST 기준)
+            // 3. 예약 발송 설정 (Solapi는 UTC 기준)
             const scheduleRes = await fetch(`${SOLAPI_URL}/messages/v4/groups/${groupId}/schedule`, {
                 method: 'POST',
                 headers: getAuthHeader(),
