@@ -87,7 +87,7 @@ export default function CompletePage() {
             // Google Ads 전환 추적
             if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'conversion', {
-                    'send_to': 'AW-17911391889/UwRrCNfliO4bEJHN6NxC',
+                    'send_to': 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
                     'value': 1.0,
                     'currency': 'KRW'
                 });
