@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
                 // 감사장 알림톡 발송
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿
+                    'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2 - 께서 제거)
                     {
                         '상주명': bugo.mourner_name || '',
                         '고인명': bugo.deceased_name || '',
