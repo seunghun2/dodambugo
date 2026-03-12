@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
                         await sendAlimtalk(
                             phoneNumber,
-                            'KA01TP260122105940293Z83PibzRM5z',  // 감사장 알림톡 템플릿
+                            'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2)
                             {
                                 '상주명': mourner_name || '',
                                 '고인명': deceased_name || '',
