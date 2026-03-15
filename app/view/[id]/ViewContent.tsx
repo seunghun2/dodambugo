@@ -876,7 +876,7 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 일반 장례일 때만 표시
             ======================================== */}
-            {mounted && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+            {mounted && !bugo.hide_flower_order && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
@@ -1033,7 +1033,7 @@ ${url}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 일반 장례일 때만 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                mounted && !isOwner && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                mounted && !isOwner && !bugo.hide_flower_order && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
                     >
