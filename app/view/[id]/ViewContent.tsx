@@ -117,6 +117,7 @@ interface BugoData {
     ilpo_date?: string;
     ilpo_time?: string;
     hide_funeral?: boolean;
+    hide_flower_order?: boolean;
 }
 
 // 상주 관계 + 고인 성별 → 고인-상주 관계 자동 매핑
