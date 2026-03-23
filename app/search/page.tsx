@@ -37,6 +37,7 @@ export default function SearchPage() {
                     .from('bugo')
                     .select('*')
                     .is('deleted_at', null)
+                    .neq('bugo_number', '5169')
                     .gte('funeral_date', getOneMonthAgo())
                     .order('created_at', { ascending: false })
                     .limit(100);
@@ -64,6 +65,7 @@ export default function SearchPage() {
                 .from('bugo')
                 .select('*')
                 .is('deleted_at', null)
+                .neq('bugo_number', '5169')
                 .or(`bugo_number.eq.${query},deceased_name.ilike.%${query}%,mourner_name.ilike.%${query}%`)
                 .gte('funeral_date', getOneMonthAgo())
                 .order('created_at', { ascending: false })

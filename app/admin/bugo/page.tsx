@@ -414,29 +414,6 @@ export default function AdminBugoPage() {
                                             <label>판매율</label>
                                             <span>{getSalesRate(selectedBugo.view_count || 0, selectedBugo.flower_count || 0)}</span>
                                         </div>
-                                        <div className="detail-row">
-                                            <label>화환 주문</label>
-                                            <button
-                                                onClick={async () => {
-                                                    const newVal = !selectedBugo.hide_flower_order;
-                                                    await supabase.from('bugo').update({ hide_flower_order: newVal }).eq('id', selectedBugo.id);
-                                                    setSelectedBugo({ ...selectedBugo, hide_flower_order: newVal });
-                                                    setBugos(bugos.map(b => b.id === selectedBugo.id ? { ...b, hide_flower_order: newVal } : b));
-                                                }}
-                                                style={{
-                                                    padding: '4px 12px',
-                                                    borderRadius: '12px',
-                                                    border: 'none',
-                                                    fontSize: '12px',
-                                                    fontWeight: 600,
-                                                    cursor: 'pointer',
-                                                    background: selectedBugo.hide_flower_order ? '#fee2e2' : '#dcfce7',
-                                                    color: selectedBugo.hide_flower_order ? '#dc2626' : '#16a34a',
-                                                }}
-                                            >
-                                                {selectedBugo.hide_flower_order ? '🚫 비활성' : '✅ 활성'}
-                                            </button>
-                                        </div>
                                     </div>
 
                                     {selectedBugo.mourners && (
@@ -474,6 +451,32 @@ export default function AdminBugoPage() {
                                             </div>
                                         </div>
                                     )}
+
+                                    <div className="detail-section">
+                                        <div className="detail-row">
+                                            <label>화환 주문</label>
+                                            <button
+                                                onClick={async () => {
+                                                    const newVal = !selectedBugo.hide_flower_order;
+                                                    await supabase.from('bugo').update({ hide_flower_order: newVal }).eq('id', selectedBugo.id);
+                                                    setSelectedBugo({ ...selectedBugo, hide_flower_order: newVal });
+                                                    setBugos(bugos.map(b => b.id === selectedBugo.id ? { ...b, hide_flower_order: newVal } : b));
+                                                }}
+                                                style={{
+                                                    padding: '4px 12px',
+                                                    borderRadius: '12px',
+                                                    border: 'none',
+                                                    fontSize: '12px',
+                                                    fontWeight: 600,
+                                                    cursor: 'pointer',
+                                                    background: selectedBugo.hide_flower_order ? '#fee2e2' : '#dcfce7',
+                                                    color: selectedBugo.hide_flower_order ? '#dc2626' : '#16a34a',
+                                                }}
+                                            >
+                                                {selectedBugo.hide_flower_order ? '🚫 비활성' : '✅ 활성'}
+                                            </button>
+                                        </div>
+                                    </div>
 
                                     <div className="detail-actions">
                                         <Link
