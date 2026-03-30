@@ -564,7 +564,9 @@ ${url}
         );
     }
 
-    const showMemorialOverlay = isFuneralEnded();
+    // 특정 부고는 오버레이 예외 처리 (고객 요청)
+    const overlayExceptions = [1818];
+    const showMemorialOverlay = isFuneralEnded() && !overlayExceptions.includes(Number(bugo.id));
 
     // 상주 목록 (대표상주 + 추가 상주들, 중복 방지)
     const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
