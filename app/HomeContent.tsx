@@ -373,17 +373,17 @@ export default function HomeContent() {
         <div className="xd-stats">
           <div className="xd-stat-item">
             <span className="xd-stat-label">누적부고장</span>
-            <span className="xd-stat-value" data-count={bugoCount} data-suffix="건">0</span>
+            <span className="xd-stat-value" data-count={bugoCount} data-suffix="건" suppressHydrationWarning>0</span>
           </div>
           <div className="xd-stat-divider"></div>
           <div className="xd-stat-item">
             <span className="xd-stat-label">누적답례글</span>
-            <span className="xd-stat-value" data-count={thanksCount} data-suffix="건">0</span>
+            <span className="xd-stat-value" data-count={thanksCount} data-suffix="건" suppressHydrationWarning>0</span>
           </div>
           <div className="xd-stat-divider"></div>
           <div className="xd-stat-item">
             <span className="xd-stat-label">상주만족도</span>
-            <span className="xd-stat-value" data-count={99} data-suffix="%">0</span>
+            <span className="xd-stat-value" data-count={99} data-suffix="%" suppressHydrationWarning>0</span>
           </div>
         </div>
 

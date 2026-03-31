@@ -1600,7 +1600,14 @@ export default function WriteFormPage() {
                                         {errors.primary_mourner && <p className="field-error">{errors.primary_mourner}</p>}
 
                                         {/* 계좌 입력 */}
-                                        <div className="account-input-row">
+                                        <div 
+                                            className="account-input-row"
+                                            onClick={() => {
+                                                setTempAccount({ ...accounts[0], holder: accounts[0]?.holder || formData.primary_mourner || '' });
+                                                setShowAccount(true);
+                                            }}
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             <span className="material-symbols-outlined">account_balance</span>
                                             <input
                                                 type="text"
@@ -1608,15 +1615,9 @@ export default function WriteFormPage() {
                                                 placeholder="계좌를 입력해주세요."
                                                 value={accounts[0]?.bank && accounts[0]?.number ? `${accounts[0].bank} : ${accounts[0].number}` : ''}
                                                 readOnly
-                                                onClick={() => {
-                                                    setTempAccount({ ...accounts[0], holder: accounts[0]?.holder || formData.primary_mourner || '' });
-                                                    setShowAccount(true);
-                                                }}
+                                                style={{ pointerEvents: 'none' }}
                                             />
-                                            <button type="button" className="btn-account-edit" onClick={() => {
-                                                setTempAccount({ ...accounts[0], holder: accounts[0]?.holder || formData.primary_mourner || '' });
-                                                setShowAccount(true);
-                                            }}>
+                                            <button type="button" className="btn-account-edit" style={{ pointerEvents: 'none' }}>
                                                 {isAccountSaved ? '변경하기' : '추가하기'}
                                             </button>
                                         </div>
@@ -1665,25 +1666,9 @@ export default function WriteFormPage() {
                                                     {errors[`mourner_${index}_name`] && <p className="field-error">{errors[`mourner_${index}_name`]}</p>}
                                                     {errors[`mourner_${index}_contact`] && <p className="field-error">{errors[`mourner_${index}_contact`]}</p>}
                                                     {/* 상주별 계좌 입력 (선택) */}
-                                                    <div className="account-input-row mourner-account">
-                                                        <span className="material-symbols-outlined">account_balance</span>
-                                                        <input
-                                                            type="text"
-                                                            className={`account-input-field ${mourner.bank && mourner.accountNumber ? 'filled' : ''}`}
-                                                            placeholder="계좌를 입력해주세요."
-                                                            value={mourner.bank && mourner.accountNumber ? `${mourner.bank} : ${mourner.accountNumber}` : ''}
-                                                            readOnly
-                                                            onClick={() => {
-                                                                setTempMournerAccount({
-                                                                    bank: mourner.bank || '',
-                                                                    holder: mourner.accountHolder || mourner.name || '',
-                                                                    number: mourner.accountNumber || ''
-                                                                });
-                                                                setEditingMournerIndex(index);
-                                                                setShowMournerAccountModal(true);
-                                                            }}
-                                                        />
-                                                        <button type="button" className="btn-account-edit" onClick={() => {
+                                                    <div 
+                                                        className="account-input-row mourner-account"
+                                                        onClick={() => {
                                                             setTempMournerAccount({
                                                                 bank: mourner.bank || '',
                                                                 holder: mourner.accountHolder || mourner.name || '',
@@ -1691,7 +1676,19 @@ export default function WriteFormPage() {
                                                             });
                                                             setEditingMournerIndex(index);
                                                             setShowMournerAccountModal(true);
-                                                        }}>
+                                                        }}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        <span className="material-symbols-outlined">account_balance</span>
+                                                        <input
+                                                            type="text"
+                                                            className={`account-input-field ${mourner.bank && mourner.accountNumber ? 'filled' : ''}`}
+                                                            placeholder="계좌를 입력해주세요."
+                                                            value={mourner.bank && mourner.accountNumber ? `${mourner.bank} : ${mourner.accountNumber}` : ''}
+                                                            readOnly
+                                                            style={{ pointerEvents: 'none' }}
+                                                        />
+                                                        <button type="button" className="btn-account-edit">
                                                             {mourner.bank && mourner.accountNumber ? '변경하기' : '추가하기'}
                                                         </button>
                                                     </div>
@@ -2359,9 +2356,12 @@ export default function WriteFormPage() {
                                     type="text"
                                     className="account-modal-input"
                                     placeholder="예금주"
-                                    value={tempAccount.holder || formData.primary_mourner || ''}
-                                    readOnly
-                                    style={{ backgroundColor: '#f5f5f5', color: '#666' }}
+                                    value={tempAccount.holder || ''}
+                                    onChange={(e) => {
+                                        setTempAccount((prev) => ({ ...prev, holder: e.target.value }));
+                                        setAccountVerified(false);
+                                        setAccountVerifyFailed(false);
+                                    }}
                                 />
                             </div>
 
@@ -2471,8 +2471,11 @@ export default function WriteFormPage() {
                                     className="account-modal-input"
                                     placeholder="예금주"
                                     value={tempMournerAccount.holder || ''}
-                                    readOnly
-                                    style={{ backgroundColor: '#f5f5f5', color: '#666' }}
+                                    onChange={(e) => {
+                                        setTempMournerAccount((prev) => ({ ...prev, holder: e.target.value }));
+                                        setMournerAccountVerified(false);
+                                        setMournerAccountVerifyFailed(false);
+                                    }}
                                 />
                             </div>
 

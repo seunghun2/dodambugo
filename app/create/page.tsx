@@ -337,12 +337,28 @@ function CreatePageContent() {
                                     { id: 'flower', name: '부고장 국화', image: '/images/flower-detail.png', preview: '/templates/flower.html' },
                                 ].map(template => (
                                     <div key={template.id} className={`template-slide ${changeFrom === template.id ? 'current' : ''}`}>
-                                        <div className="template-phone" onClick={() => router.push(`/create/${template.id}`)} style={{ cursor: 'pointer' }}>
+                                        <div 
+                                            className="template-phone" 
+                                            onClick={() => {
+                                                if (changeFrom === template.id) return;
+                                                router.push(`/create/${template.id}`);
+                                            }} 
+                                            style={{ cursor: changeFrom === template.id ? 'default' : 'pointer' }}
+                                        >
                                             <img src={template.image} alt={template.name} />
                                         </div>
                                         <div className="template-bottom">
                                             <div className="template-meta">
-                                                <span className="template-name" onClick={() => router.push(`/create/${template.id}`)} style={{ cursor: 'pointer' }}>{template.name}</span>
+                                                <span 
+                                                    className="template-name" 
+                                                    onClick={() => {
+                                                        if (changeFrom === template.id) return;
+                                                        router.push(`/create/${template.id}`);
+                                                    }} 
+                                                    style={{ cursor: changeFrom === template.id ? 'default' : 'pointer' }}
+                                                >
+                                                    {template.name}
+                                                </span>
                                                 <button
                                                     type="button"
                                                     className="btn-preview-outline"
