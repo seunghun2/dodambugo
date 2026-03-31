@@ -133,11 +133,23 @@ async function BugoContentLoader({ id }: { id: string }) {
     // 화환 주문 & 상품 병렬 조회 (상품은 캐시 사용)
     const supabase = getSupabase();
     const [ordersResult, productsData] = await Promise.all([
-        supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).eq('status', 'completed').order('created_at', { ascending: false }),
+        supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).in('status', ['completed', 'delivered']).order('created_at', { ascending: false }),
         getCachedProducts()
     ]);
 
-    const flowerOrders = ordersResult.data || [];
+    const rawFlowerOrders = ordersResult.data || [];
+    
+    // 중복 이름 제거 (동일한 표시 이름이 여러 개일 경우 가장 최근 1건만 노출)
+    const flowerOrders: typeof rawFlowerOrders = [];
+    const seenNames = new Set<string>();
+    
+    for (const order of rawFlowerOrders) {
+        const displayName = (order.ribbon_text2 || order.sender_name || '').trim();
+        if (displayName && !seenNames.has(displayName)) {
+            seenNames.add(displayName);
+            flowerOrders.push(order);
+        }
+    }
 
     // 화환 상품 필터링
     const funeralAddress = bugoData.address || bugoData.funeral_home || '';

@@ -137,7 +137,7 @@ export default function CondolenceHistoryPage() {
             .from('condolence_orders')
             .select('*')
             .eq('bugo_number', bugoData?.bugo_number)
-            .eq('status', 'completed')
+            .in('status', ['completed', 'transferred'])
             .order('created_at', { ascending: false });
 
         if (data) {
