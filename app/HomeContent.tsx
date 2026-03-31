@@ -53,7 +53,7 @@ export default function HomeContent() {
     const daysPassed = Math.floor((today.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
     return baseCount + Math.max(0, daysPassed) * dailyIncrease;
   };
-  const [bugoCount] = useState(calculateBugoCount());
+  const [bugoCount, setBugoCount] = useState(15149);
 
   // 누적 답례글 수 계산 (기준일: 2026-01-27, 기준값: 10204, 하루 +3건)
   const calculateThanksCount = () => {
@@ -64,7 +64,13 @@ export default function HomeContent() {
     const daysPassed = Math.floor((today.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
     return baseCount + Math.max(0, daysPassed) * dailyIncrease;
   };
-  const [thanksCount] = useState(calculateThanksCount());
+  const [thanksCount, setThanksCount] = useState(10204);
+
+  // Hydration-safe: 클라이언트에서만 날짜 기반 계산 실행
+  useEffect(() => {
+    setBugoCount(calculateBugoCount());
+    setThanksCount(calculateThanksCount());
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenFaqs(prev => {

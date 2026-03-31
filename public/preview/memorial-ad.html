@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발인 후 추모 + 대대손손 CTA 프리뷰 v4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .phone-frame {
+            width: 375px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .preview-label {
+            background: #fff;
+            color: #111;
+            text-align: center;
+            padding: 12px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* ========================================
+           추모 오버레이 (실제 view.css 기반)
+        ======================================== */
+        .memorial-overlay {
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+
+        .memorial-ribbon {
+            width: 80px;
+            margin-bottom: 32px;
+            opacity: 0.85;
+        }
+
+        .memorial-message {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            line-height: 1.5;
+        }
+
+        .memorial-sub {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* ========================================
+           옵션 A: 오버레이 내부 통합형
+        ======================================== */
+        .cta-integrated {
+            padding: 0 24px 52px;
+            background: rgba(0, 0, 0, 0.95);
+            text-align: center;
+        }
+
+        .cta-divider-line {
+            width: 32px;
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+            margin: 0 auto 32px;
+        }
+
+        .cta-integrated-label {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .cta-integrated-title {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.55;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-integrated-desc {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .cta-integrated-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.85);
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .cta-integrated-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        .cta-integrated-powered {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            margin-top: 16px;
+        }
+
+        /* ========================================
+           옵션 B: 라이트 전환형
+        ======================================== */
+        .cta-light-section {
+            background: #fff;
+            padding: 36px 20px 44px;
+        }
+
+        .cta-light-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cta-light-header-title {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .cta-light-card {
+            background: #FAFAFA;
+            border-radius: 12px;
+            padding: 24px 20px;
+        }
+
+        .cta-light-title {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .cta-light-desc {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px;
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .cta-light-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .cta-light-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            padding: 6px 12px;
+            border-radius: 100px;
+        }
+
+        .cta-light-tag svg {
+            width: 13px;
+            height: 13px;
+            stroke: #888;
+            fill: none;
+            stroke-width: 1.8;
+        }
+
+        .cta-light-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background: #111;
+            color: #fff;
+            padding: 15px 24px;
+            border-radius: 8px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .cta-light-btn:hover { background: #333; }
+
+        .cta-light-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding-top: 16px;
+        }
+
+        .cta-light-logo {
+            width: 6px;
+            height: 6px;
+            background: #111;
+            border-radius: 1px;
+        }
+
+        .cta-light-brand {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            color: #bbb;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           옵션 C: 오버레이 내부 리스트형
+        ======================================== */
+        .cta-list-section {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 0 20px 48px;
+        }
+
+        .cta-list-divider {
+            width: 40px;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+            margin: 0 auto 28px;
+        }
+
+        .cta-list-title {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cta-list-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cta-list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .cta-list-item:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+        .cta-list-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cta-list-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: rgba(255,255,255,0.55);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cta-list-text { flex: 1; }
+
+        .cta-list-item-title {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 3px;
+        }
+
+        .cta-list-item-desc {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 12px;
+            color: rgba(255,255,255,0.35);
+        }
+
+        .cta-list-arrow {
+            flex-shrink: 0;
+            color: rgba(255,255,255,0.2);
+        }
+
+        .cta-list-powered {
+            text-align: center;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 옵션 A ========== -->
+    <div class="phone-frame">
+        <div class="preview-label">A — 오버레이 내부 통합</div>
+        <div class="memorial-overlay">
+            <div class="memorial-ribbon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
+                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
+                </svg>
+            </div>
+            <p class="memorial-message">발인이 끝난 고인입니다.</p>
+            <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+        </div>
+        <div class="cta-integrated">
+            <div class="cta-divider-line"></div>
+            <p class="cta-integrated-label">장례 이후 안내</p>
+            <h3 class="cta-integrated-title">장지를 아직<br>정하지 못하셨나요?</h3>
+            <p class="cta-integrated-desc">전국 수목장·납골당·봉안당 시설을<br>가격과 위치로 비교해 보세요</p>
+            <a href="https://daedaesonson.com" class="cta-integrated-btn" target="_blank">
+                내 주변 장묘시설 비교
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+            <p class="cta-integrated-powered">대대손손 · 전국 장지 비교 플랫폼</p>
+        </div>
+    </div>
+
+    <!-- ========== 옵션 B ========== -->
+    <div class="phone-frame">
+        <div class="preview-label">B — 라이트 전환형</div>
+        <div class="memorial-overlay">
+            <div class="memorial-ribbon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
+                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
+                </svg>
+            </div>
+            <p class="memorial-message">발인이 끝난 고인입니다.</p>
+            <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+        </div>
+        <div class="cta-light-section">
+            <div class="cta-light-header">
+                <h3 class="cta-light-header-title">장례 이후 절차</h3>
+            </div>
+            <div class="cta-light-card">
+                <h4 class="cta-light-title">가족에게 맞는<br>장지를 비교해보세요</h4>
+                <p class="cta-light-desc">전국 장묘시설의 위치, 가격, 시설 정보를 한눈에 확인할 수 있습니다.</p>
+                <div class="cta-light-tags">
+                    <span class="cta-light-tag">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 6 5 10c0 6 7 12 7 12s7-6 7-12c0-4-3-8-7-8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        수목장
+                    </span>
+                    <span class="cta-light-tag">
+                        <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        봉안당
+                    </span>
+                    <span class="cta-light-tag">
+                        <svg viewBox="0 0 24 24"><path d="M3 21h18M9 21V8l3-5 3 5v13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        납골당
+                    </span>
+                    <span class="cta-light-tag">
+                        <svg viewBox="0 0 24 24"><path d="M17 8C17 8 13 2 12 2S7 8 7 8c-3 0-5 2-5 5s2 5 5 5h10c3 0 5-2 5-5s-2-5-5-5z" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+                        자연장
+                    </span>
+                </div>
+                <a href="https://daedaesonson.com" class="cta-light-btn" target="_blank">
+                    내 주변 장묘시설 찾기
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+            <div class="cta-light-footer">
+                <div class="cta-light-logo"></div>
+                <span class="cta-light-brand">대대손손 · 전국 장지 비교 플랫폼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 옵션 C ========== -->
+    <div class="phone-frame">
+        <div class="preview-label">C — 오버레이 내부 리스트</div>
+        <div class="memorial-overlay">
+            <div class="memorial-ribbon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
+                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
+                </svg>
+            </div>
+            <p class="memorial-message">발인이 끝난 고인입니다.</p>
+            <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+        </div>
+        <div class="cta-list-section">
+            <div class="cta-list-divider"></div>
+            <h3 class="cta-list-title">장례 이후 절차 안내</h3>
+            <div class="cta-list-items">
+                <a href="https://daedaesonson.com" class="cta-list-item" target="_blank">
+                    <div class="cta-list-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </div>
+                    <div class="cta-list-text">
+                        <div class="cta-list-item-title">내 주변 장묘시설 비교</div>
+                        <div class="cta-list-item-desc">수목장·납골당·봉안당 가격 비교</div>
+                    </div>
+                    <div class="cta-list-arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </a>
+                <a href="https://daedaesonson.com/blog" class="cta-list-item" target="_blank">
+                    <div class="cta-list-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="cta-list-text">
+                        <div class="cta-list-item-title">49재·탈상 절차 알아보기</div>
+                        <div class="cta-list-item-desc">장례 이후 필요한 절차 안내</div>
+                    </div>
+                    <div class="cta-list-arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </a>
+            </div>
+            <p class="cta-list-powered">대대손손 · 전국 장지 비교 플랫폼</p>
+        </div>
+    </div>
+
+</body>
+</html>

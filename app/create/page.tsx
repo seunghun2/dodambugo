@@ -337,18 +337,19 @@ function CreatePageContent() {
                                     { id: 'flower', name: '부고장 국화', image: '/images/flower-detail.png', preview: '/templates/flower.html' },
                                 ].map(template => (
                                     <div key={template.id} className={`template-slide ${changeFrom === template.id ? 'current' : ''}`}>
-                                        <div className="template-phone">
+                                        <div className="template-phone" onClick={() => router.push(`/create/${template.id}`)} style={{ cursor: 'pointer' }}>
                                             <img src={template.image} alt={template.name} />
                                         </div>
                                         <div className="template-bottom">
                                             <div className="template-meta">
-                                                <span className="template-name">{template.name}</span>
-                                                <Link
-                                                    href={`/create/preview/${template.id}`}
+                                                <span className="template-name" onClick={() => router.push(`/create/${template.id}`)} style={{ cursor: 'pointer' }}>{template.name}</span>
+                                                <button
+                                                    type="button"
                                                     className="btn-preview-outline"
+                                                    onClick={() => setPreviewTemplate(template)}
                                                 >
                                                     미리보기
-                                                </Link>
+                                                </button>
                                             </div>
                                             {changeFrom === template.id ? (
                                                 <Link
@@ -859,6 +860,32 @@ function CreatePageContent() {
                     )}
                 </div>
             </main>
+
+            {/* 미리보기 모달 (인라인) */}
+            {previewTemplate && (
+                <div className="loading-overlay" onClick={() => setPreviewTemplate(null)} style={{ zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', maxWidth: '420px', height: '85vh', display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: '16px 16px 0 0', animation: 'slideUpModal 0.3s ease-out' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #eee' }}>
+                            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 600 }}>{previewTemplate.name} 미리보기</h3>
+                            <button type="button" onClick={() => setPreviewTemplate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#666' }}>close</span>
+                            </button>
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                            <iframe src={previewTemplate.preview} title={previewTemplate.name} style={{ width: '100%', height: '100%', border: 'none' }} />
+                        </div>
+                        <div style={{ padding: '12px 20px 20px', borderTop: '1px solid #eee', opacity: 0, animation: 'fadeInUp 0.3s ease-out 0.15s forwards' }}>
+                            <Link
+                                href={`/create/${previewTemplate.id}`}
+                                className="btn-use-template"
+                                style={{ display: 'block', textAlign: 'center', width: '100%', padding: '14px', fontSize: '16px', borderRadius: '10px', background: '#FFD43B', color: '#000', fontWeight: 600 }}
+                            >
+                                이 템플릿으로 제작하기
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 로딩 오버레이 */}
             {isSubmitting && (

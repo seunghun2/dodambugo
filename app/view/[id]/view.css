@@ -1672,6 +1672,29 @@ body:has(.memorial-overlay) {
     font-size: 18px;
 }
 
+/* 부의금 플로팅 버튼 */
+.btn-floating-condolence {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    background: #FFFFFF;
+    color: #333333;
+    border: 1px solid #E0E0E0;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-out;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.btn-floating-condolence:active {
+    background: #F5F5F5;
+}
+
 /* ========================================
    화환 주문 바텀시트 모달
 ======================================== */

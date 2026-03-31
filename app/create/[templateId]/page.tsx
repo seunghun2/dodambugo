@@ -1410,8 +1410,13 @@ export default function WriteFormPage() {
 
                                         {/* 장례 형식 */}
                                         <div className="form-group">
-                                            <label className="form-label required">장례 형식</label>
+                                            <label className="form-label required" htmlFor="funeral_type" onClick={(e) => {
+                                                e.preventDefault();
+                                                const el = document.getElementById('funeral_type') as HTMLSelectElement;
+                                                if (el) { try { el.showPicker(); } catch { el.focus(); } }
+                                            }}>장례 형식</label>
                                             <select
+                                                id="funeral_type"
                                                 name="funeral_type"
                                                 className="form-select"
                                                 value={formData.funeral_type}
@@ -1745,6 +1750,7 @@ export default function WriteFormPage() {
                                                                 }))}
                                                                 valueFormat="YYYY년 MM월 DD일"
                                                                 rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                                rightSectionPointerEvents="none"
                                                                 styles={{
                                                                     input: {
                                                                         height: '48px',
@@ -1819,6 +1825,7 @@ export default function WriteFormPage() {
                                                             }))}
                                                             valueFormat="YYYY년 MM월 DD일"
                                                             rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                            rightSectionPointerEvents="none"
                                                             styles={{
                                                                 input: {
                                                                     height: '48px',
@@ -1875,7 +1882,8 @@ export default function WriteFormPage() {
                                                             death_date: value || ''
                                                         }))}
                                                         valueFormat="YYYY년 MM월 DD일"
-                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
+                                                        rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af', pointerEvents: 'none' }}>calendar_today</span>}
+                                                        rightSectionPointerEvents="none"
                                                         styles={{
                                                             input: {
                                                                 height: '48px',
@@ -1925,8 +1933,9 @@ export default function WriteFormPage() {
                                         <p className="section-desc">조문객에게 전달할 메시지를 작성해주세요</p>
 
                                         <div className="form-group">
-                                            <label className="form-label">안내사항</label>
+                                            <label className="form-label" htmlFor="message" onClick={() => document.getElementById('message')?.focus()}>안내사항</label>
                                             <textarea
+                                                id="message"
                                                 name="message"
                                                 className="form-textarea"
                                                 placeholder="뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다."

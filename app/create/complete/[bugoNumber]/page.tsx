@@ -414,31 +414,61 @@ ${bugoUrl}
             {showAlimtalkModal && (
                 <div className="alimtalk-modal-overlay">
                     <div className="alimtalk-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="alimtalk-modal-icon">
+                        <div 
+                            className="alimtalk-modal-icon"
+                            onClick={() => {
+                                setShowAlimtalkModal(false);
+                                window.location.href = 'kakaotalk://';
+                            }}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Image src="/images/icon-kakao.png" alt="카카오톡" width={40} height={40} />
                         </div>
                         <h2 className="alimtalk-modal-title">알림톡 발송 완료</h2>
-                        <p className="alimtalk-modal-desc">
+                        <p 
+                            className="alimtalk-modal-desc"
+                            onClick={() => {
+                                setShowAlimtalkModal(false);
+                                window.location.href = 'kakaotalk://';
+                            }}
+                            style={{ cursor: 'pointer' }}
+                        >
                             카카오톡으로 모바일부고장을<br />보내드렸습니다
                         </p>
                         {applicantPhone && (
                             <p className="alimtalk-modal-phone">
-                                {applicantPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')}
+                                {applicantPhone}
                             </p>
                         )}
-                        <p className="alimtalk-modal-hint">잠시 후 알림톡이 도착합니다</p>
-                        <button className="alimtalk-modal-btn" onClick={() => {
-                            setShowAlimtalkModal(false);
-                            // 추가 상주 중 전화번호 있는 사람이 있으면 두 번째 모달
-                            const additionalWithPhone = bugo?.mourners?.filter(
-                                (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
-                            ) || [];
-                            if (additionalWithPhone.length > 0) {
-                                setTimeout(() => setShowAdditionalMournerModal(true), 300);
-                            }
-                        }}>
-                            확인
-                        </button>
+                        <p className="alimtalk-modal-hint" style={{ marginBottom: '24px' }}>잠시 후 알림톡이 도착합니다</p>
+                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                            <button className="alimtalk-modal-btn" style={{ flex: 1, background: '#f1f3f5', color: '#495057' }} onClick={() => {
+                                setShowAlimtalkModal(false);
+                                // 추가 상주 중 전화번호 있는 사람이 있으면 두 번째 모달
+                                const additionalWithPhone = bugo?.mourners?.filter(
+                                    (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
+                                ) || [];
+                                if (additionalWithPhone.length > 0) {
+                                    setTimeout(() => setShowAdditionalMournerModal(true), 300);
+                                }
+                            }}>
+                                닫기
+                            </button>
+                            <button className="alimtalk-modal-btn" style={{ flex: 2, background: '#FEE500', color: '#191919', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={() => {
+                                setShowAlimtalkModal(false);
+                                window.location.href = 'kakaotalk://';
+                                // 공유 후 돌아왔을 때 추가 상주 모달 처리
+                                const additionalWithPhone = bugo?.mourners?.filter(
+                                    (m, i) => i > 0 && m.contact && m.contact.trim() !== ''
+                                ) || [];
+                                if (additionalWithPhone.length > 0) {
+                                    setTimeout(() => setShowAdditionalMournerModal(true), 1000);
+                                }
+                            }}>
+                                <Image src="/images/icon-kakao.png" alt="카카오톡" width={20} height={20} />
+                                내 카카오톡 확인
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
