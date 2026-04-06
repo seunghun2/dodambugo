@@ -24,14 +24,13 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
         const bugoId = searchParams.get('bugo_id');
-        const limit = parseInt(searchParams.get('limit') || '50');
+        const limit = parseInt(searchParams.get('limit') || '500');
         const offset = parseInt(searchParams.get('offset') || '0');
 
         let query = supabase
             .from('flower_orders')
             .select('*')
-            .order('created_at', { ascending: false })
-            .range(offset, offset + limit - 1);
+            .order('created_at', { ascending: false });
 
         if (status) {
             query = query.eq('status', status);

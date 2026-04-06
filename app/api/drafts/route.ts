@@ -12,8 +12,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await supabase
             .from('drafts')
             .select('*')
-            .order('updated_at', { ascending: false })
-            .limit(100);
+            .order('updated_at', { ascending: false });
 
         if (error) throw error;
 
