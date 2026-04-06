@@ -56,6 +56,7 @@
             width: 80px;
             margin-bottom: 32px;
             opacity: 0.85;
+            filter: invert(1);
         }
 
         .memorial-message {
@@ -362,6 +363,27 @@
             color: rgba(255,255,255,0.15);
             margin-top: 20px;
         }
+
+        /* 옵션 D: 부의금/답례품 아이콘 색상 */
+        .cta-icon-condolence {
+            background: rgba(180, 160, 130, 0.12) !important;
+        }
+        .cta-icon-condolence svg {
+            stroke: rgba(210, 190, 160, 0.7) !important;
+        }
+        .cta-list-item-condolence:hover .cta-icon-condolence {
+            background: rgba(180, 160, 130, 0.2) !important;
+        }
+
+        .cta-icon-gift {
+            background: rgba(200, 150, 150, 0.12) !important;
+        }
+        .cta-icon-gift svg {
+            stroke: rgba(220, 170, 170, 0.7) !important;
+        }
+        .cta-list-item-gift:hover .cta-icon-gift {
+            background: rgba(200, 150, 150, 0.2) !important;
+        }
     </style>
 </head>
 <body>
@@ -370,11 +392,7 @@
     <div class="phone-frame">
         <div class="preview-label">A — 오버레이 내부 통합</div>
         <div class="memorial-overlay">
-            <div class="memorial-ribbon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
-                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
-                </svg>
-            </div>
+            <img src="/images/mourning-ribbon.png" alt="추모" class="memorial-ribbon" />
             <p class="memorial-message">발인이 끝난 고인입니다.</p>
             <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
         </div>
@@ -395,11 +413,7 @@
     <div class="phone-frame">
         <div class="preview-label">B — 라이트 전환형</div>
         <div class="memorial-overlay">
-            <div class="memorial-ribbon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
-                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
-                </svg>
-            </div>
+            <img src="/images/mourning-ribbon.png" alt="추모" class="memorial-ribbon" />
             <p class="memorial-message">발인이 끝난 고인입니다.</p>
             <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
         </div>
@@ -444,11 +458,7 @@
     <div class="phone-frame">
         <div class="preview-label">C — 오버레이 내부 리스트</div>
         <div class="memorial-overlay">
-            <div class="memorial-ribbon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" fill="#fff">
-                    <path d="M50 10 C35 10 25 25 25 40 C25 55 35 65 45 75 L30 130 L50 110 L70 130 L55 75 C65 65 75 55 75 40 C75 25 65 10 50 10 Z M50 25 C58 25 65 32 65 40 C65 48 58 55 50 55 C42 55 35 48 35 40 C35 32 42 25 50 25 Z"/>
-                </svg>
-            </div>
+            <img src="/images/mourning-ribbon.png" alt="추모" class="memorial-ribbon" />
             <p class="memorial-message">발인이 끝난 고인입니다.</p>
             <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
         </div>
@@ -490,6 +500,74 @@
                 </a>
             </div>
             <p class="cta-list-powered">대대손손 · 전국 장지 비교 플랫폼</p>
+        </div>
+    </div>
+
+    <!-- ========== 옵션 D ========== -->
+    <div class="phone-frame">
+        <div class="preview-label">D — 부의금 + 답례품 CTA</div>
+        <div class="memorial-overlay">
+            <img src="/images/mourning-ribbon.png" alt="추모" class="memorial-ribbon" />
+            <p class="memorial-message">발인이 끝난 고인입니다.</p>
+            <p class="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+        </div>
+        <div class="cta-list-section">
+            <div class="cta-list-divider"></div>
+            <h3 class="cta-list-title">아직 전하지 못한 마음이 있으신가요?</h3>
+            <div class="cta-list-items">
+                <!-- 부의금 보내기 (조문객용) -->
+                <a href="#" class="cta-list-item cta-list-item-condolence">
+                    <div class="cta-list-icon cta-icon-condolence">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="2" y1="10" x2="22" y2="10"/>
+                        </svg>
+                    </div>
+                    <div class="cta-list-text">
+                        <div class="cta-list-item-title">뒤늦은 위로의 마음 전하기</div>
+                        <div class="cta-list-item-desc">부의금을 카드로 간편하게 보낼 수 있어요</div>
+                    </div>
+                    <div class="cta-list-arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </a>
+                <!-- 답례품 보내기 (상주용) -->
+                <a href="#" class="cta-list-item cta-list-item-gift">
+                    <div class="cta-list-icon cta-icon-gift">
+                        <svg viewBox="0 0 24 24">
+                            <polyline points="20 12 20 22 4 22 4 12"/>
+                            <rect x="2" y="7" width="20" height="5"/>
+                            <line x1="12" y1="22" x2="12" y2="7"/>
+                            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                        </svg>
+                    </div>
+                    <div class="cta-list-text">
+                        <div class="cta-list-item-title">감사의 마음을 답례품으로</div>
+                        <div class="cta-list-item-desc">조문해주신 분들께 답례품을 보내보세요</div>
+                    </div>
+                    <div class="cta-list-arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </a>
+                <!-- 장묘시설 찾기 (대대손손) -->
+                <a href="https://daedaesonson.com" class="cta-list-item" target="_blank">
+                    <div class="cta-list-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </div>
+                    <div class="cta-list-text">
+                        <div class="cta-list-item-title">장지 비교하기</div>
+                        <div class="cta-list-item-desc">전국 수목장·봉안당 가격 비교</div>
+                    </div>
+                    <div class="cta-list-arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </a>
+            </div>
+            <p class="cta-list-powered">마음부고</p>
         </div>
     </div>
 

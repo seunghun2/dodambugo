@@ -1267,7 +1267,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    z-index: 1000;
+    z-index: 10001;
 }
 
 .account-bottom-sheet {
@@ -1523,7 +1523,7 @@
 }
 
 /* ========================================
-   발인 완료 추모 오버레이
+   발인 완료 추모 오버레이 (Option D)
 ======================================== */
 .memorial-overlay {
     position: fixed;
@@ -1534,9 +1534,11 @@
     background: rgba(0, 0, 0, 0.95);
     z-index: 9999;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* 오버레이 표시 시 body 스크롤 방지 */
@@ -1547,7 +1549,8 @@ body:has(.memorial-overlay) {
 .memorial-content {
     text-align: center;
     color: white;
-    padding: 40px 20px;
+    padding: 60px 20px 40px;
+    flex-shrink: 0;
 }
 
 .memorial-ribbon {
@@ -1569,6 +1572,133 @@ body:has(.memorial-overlay) {
     font-family: 'Nanum Myeongjo', serif;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
+}
+
+/* CTA 섹션 */
+.memorial-cta-section {
+    padding: 0 20px 48px;
+    width: 100%;
+    max-width: 400px;
+    flex-shrink: 0;
+}
+
+.memorial-cta-divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 auto 28px;
+}
+
+.memorial-cta-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.memorial-cta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.memorial-cta-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+}
+
+button.memorial-cta-item {
+    width: 100%;
+    text-align: left;
+}
+
+.memorial-cta-item:hover,
+.memorial-cta-item:active {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.memorial-cta-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.memorial-cta-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: rgba(255, 255, 255, 0.55);
+}
+
+/* 부의금 아이콘 색상 */
+.memorial-cta-icon-condolence {
+    background: rgba(180, 160, 130, 0.12);
+}
+
+.memorial-cta-icon-condolence svg {
+    stroke: rgba(210, 190, 160, 0.7);
+}
+
+.memorial-cta-condolence:hover .memorial-cta-icon-condolence {
+    background: rgba(180, 160, 130, 0.2);
+}
+
+/* 답례품 아이콘 색상 */
+.memorial-cta-icon-gift {
+    background: rgba(200, 150, 150, 0.12);
+}
+
+.memorial-cta-icon-gift svg {
+    stroke: rgba(220, 170, 170, 0.7);
+}
+
+.memorial-cta-gift:hover .memorial-cta-icon-gift {
+    background: rgba(200, 150, 150, 0.2);
+}
+
+.memorial-cta-text {
+    flex: 1;
+}
+
+.memorial-cta-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 3px;
+}
+
+.memorial-cta-item-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.memorial-cta-arrow {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.memorial-cta-powered {
+    text-align: center;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.15);
+    margin-top: 20px;
 }
 
 /* ========================================

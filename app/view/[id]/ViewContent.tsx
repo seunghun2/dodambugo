@@ -306,6 +306,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         });
     }, [bugo.id]);
 
+
     // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)
     useEffect(() => {
         if (isOwner) return; // 상주는 표시 안 함
@@ -539,6 +540,16 @@ ${url}
         return new Date() > threeDaysAfter;
     };
 
+    // 발인 후 경과 일수 (부의금 CTA 노출 기간 제어용)
+    const getDaysSinceFuneral = () => {
+        if (!bugo.funeral_date) return 0;
+        const funeralDate = new Date(bugo.funeral_date);
+        const now = new Date();
+        return Math.floor((now.getTime() - funeralDate.getTime()) / (1000 * 60 * 60 * 24));
+    };
+    // 부의금 CTA: 발인 후 3~7일만 노출 (8일부터 숨김)
+    const showCondolenceCTA = getDaysSinceFuneral() <= 7;
+
     // 발인 일시 경과 여부 (화환 버튼 숨김용 - 발인 시간 지나면 바로)
     const isFuneralPassed = () => {
         if (!bugo.funeral_date) return false;
@@ -566,7 +577,14 @@ ${url}
 
     // 특정 부고는 오버레이 예외 처리 (고객 요청)
     const overlayExceptions = ['1818'];
-    const showMemorialOverlay = isFuneralEnded() && !overlayExceptions.includes(String(bugo.bugo_number));
+    const showMemorialOverlay = mounted && isFuneralEnded() && !overlayExceptions.includes(String(bugo.bugo_number));
+
+    // 오버레이 노출 이벤트 추적
+    useEffect(() => {
+        if (showMemorialOverlay) {
+            gaEvents.viewMemorialOverlay(String(bugo.bugo_number), getDaysSinceFuneral());
+        }
+    }, [showMemorialOverlay]);
 
     // 상주 목록 (대표상주 + 추가 상주들, 중복 방지)
     const mournersList: Array<{ relationship: string; name: string; contact: string }> = [];
@@ -597,6 +615,67 @@ ${url}
                         <Image src="/images/mourning-ribbon.png" alt="추모" className="memorial-ribbon" width={80} height={100} />
                         <p className="memorial-message">발인이 끝난 고인입니다.</p>
                         <p className="memorial-sub">삼가 고인의 명복을 빕니다.</p>
+                    </div>
+                    <div className="memorial-cta-section">
+                        <div className="memorial-cta-divider"></div>
+                        <h3 className="memorial-cta-title">아직 전하지 못한 마음이 있으신가요?</h3>
+                        <div className="memorial-cta-list">
+                            {/* 부의금 보내기 - 발인 후 3~7일만 노출 */}
+                            {showCondolenceCTA && (
+                            <button className="memorial-cta-item memorial-cta-condolence" onClick={() => { gaEvents.clickOverlayCondolence(String(bugo.bugo_number)); setAccountModalOpen(true); }}>
+                                <div className="memorial-cta-icon memorial-cta-icon-condolence">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                    </svg>
+                                </div>
+                                <div className="memorial-cta-text">
+                                    <div className="memorial-cta-item-title">뒤늦은 위로의 마음 전하기</div>
+                                    <div className="memorial-cta-item-desc">부의금을 카드로 간편하게 보낼 수 있어요</div>
+                                </div>
+                                <div className="memorial-cta-arrow">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                                </div>
+                            </button>
+                            )}
+                            {/* 답례품 보내기 - DB 연동 후 활성화 예정
+                            <a href="/gift" className="memorial-cta-item memorial-cta-gift">
+                                <div className="memorial-cta-icon memorial-cta-icon-gift">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 12 20 22 4 22 4 12"/>
+                                        <rect x="2" y="7" width="20" height="5"/>
+                                        <line x1="12" y1="22" x2="12" y2="7"/>
+                                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                                    </svg>
+                                </div>
+                                <div className="memorial-cta-text">
+                                    <div className="memorial-cta-item-title">감사의 마음을 답례품으로</div>
+                                    <div className="memorial-cta-item-desc">조문해주신 분들께 답례품을 보내보세요</div>
+                                </div>
+                                <div className="memorial-cta-arrow">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                                </div>
+                            </a>
+                            */}
+                            {/* 장묘시설 찾기 */}
+                            <a href="https://daedaesonson.com" target="_blank" rel="noopener noreferrer" className="memorial-cta-item" onClick={() => gaEvents.clickOverlayFacility(String(bugo.bugo_number))}>
+                                <div className="memorial-cta-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                </div>
+                                <div className="memorial-cta-text">
+                                    <div className="memorial-cta-item-title">장지 비교하기</div>
+                                    <div className="memorial-cta-item-desc">전국 수목장·봉안당 가격 비교</div>
+                                </div>
+                                <div className="memorial-cta-arrow">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                                </div>
+                            </a>
+                        </div>
+                        <p className="memorial-cta-powered">마음부고</p>
                     </div>
                 </div>
             )}
@@ -754,13 +833,15 @@ ${url}
                                     {names.map((n, j) => (
                                         <span key={j}>
                                             {j > 0 && ', '}
-                                            {n.name}
-                                            {n.contact && (
-                                                <a href={`tel:${n.contact}`} className="mourner-tel-inline">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#999999" stroke="none">
+                                            {n.contact ? (
+                                                <a href={`tel:${n.contact}`} className="mourner-tel-inline" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center' }}>
+                                                    {n.name}
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#999999" stroke="none" style={{ marginLeft: '2px' }}>
                                                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                                                     </svg>
                                                 </a>
+                                            ) : (
+                                                n.name
                                             )}
                                         </span>
                                     ))}

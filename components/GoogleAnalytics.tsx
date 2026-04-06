@@ -102,5 +102,11 @@ export const gaEvents = {
     clickGuide: () => trackEvent('페이지_장례가이드', '페이지'),
     clickMainCTA: () => trackEvent('페이지_메인CTA', '전환', '부고장 만들기'),
     clickHeaderCTA: () => trackEvent('페이지_헤더CTA', '전환', '부고장 만들기'),
+
+    // ========== 발인후 오버레이 CTA ==========
+    viewMemorialOverlay: (bugoNumber: string, daysSince: number) => trackEvent('오버레이_노출', '발인후CTA', `${bugoNumber}_${daysSince}일차`),
+    clickOverlayCondolence: (bugoNumber: string) => trackEvent('오버레이_부의금클릭', '발인후CTA', bugoNumber),
+    clickOverlayGift: (bugoNumber: string) => trackEvent('오버레이_답례품클릭', '발인후CTA', bugoNumber),
+    clickOverlayFacility: (bugoNumber: string) => trackEvent('오버레이_장지비교클릭', '발인후CTA', bugoNumber),
 };
 

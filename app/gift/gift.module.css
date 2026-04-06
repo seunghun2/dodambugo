@@ -4,6 +4,14 @@
     min-height: 100vh;
     background: #fff;
     padding-bottom: 40px;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+@media (min-width: 431px) {
+    .giftPage {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
 }
 
 /* 상단 배너 */

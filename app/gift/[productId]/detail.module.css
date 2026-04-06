@@ -4,6 +4,14 @@
     min-height: 100vh;
     background: #f8fafc;
     padding-bottom: 100px;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+@media (min-width: 431px) {
+    .detailPage {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
 }
 
 /* 헤더 */
@@ -172,8 +180,10 @@
 .submitSection {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
     background: white;
     padding: 16px 20px;
     border-top: 1px solid #e5e7eb;
