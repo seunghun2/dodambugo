@@ -30,6 +30,12 @@ export default function AdminDraftsPage() {
     const [selectedDraft, setSelectedDraft] = useState<Draft | null>(null);
     const [groupByIp, setGroupByIp] = useState(false);
     const [selectedIp, setSelectedIp] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 50;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedIp, groupByIp]);
 
     useEffect(() => {
         fetchDrafts();
@@ -112,7 +118,12 @@ export default function AdminDraftsPage() {
     };
 
     // 선택된 IP의 상세 목록
-    const selectedDrafts = selectedIp ? groupedDrafts[selectedIp] || [] : drafts;
+    const currentList = groupByIp && selectedIp ? (groupedDrafts[selectedIp] || []) : drafts;
+    const totalPages = Math.ceil(currentList.length / itemsPerPage);
+    const paginatedDrafts = currentList.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
         <div className="admin-pc">
@@ -186,7 +197,7 @@ export default function AdminDraftsPage() {
                             <div className="inquiry-panel wide">
                                 <div className="panel-header">
                                     <span>
-                                        {selectedIp ? `${selectedIp} (${selectedDrafts.length}건)` : '전체 목록'}
+                                        {selectedIp ? `${selectedIp} (${currentList.length}건)` : '전체 목록'}
                                     </span>
                                     {selectedIp && (
                                         <button className="btn-close" onClick={() => setSelectedIp(null)}>
@@ -209,14 +220,14 @@ export default function AdminDraftsPage() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {selectedDrafts.length === 0 ? (
+                                            {paginatedDrafts.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={7} className="empty-cell">
                                                         {selectedIp ? 'IP를 선택하세요' : '임시저장 데이터가 없습니다'}
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                selectedDrafts.map((draft) => (
+                                                paginatedDrafts.map((draft) => (
                                                     <tr
                                                         key={draft.id}
                                                         className={selectedDraft?.id === draft.id ? 'selected' : ''}
@@ -237,6 +248,16 @@ export default function AdminDraftsPage() {
                                         </tbody>
                                     </table>
                                 </div>
+                                {/* 페이지네이션 (IP 선택 시) */}
+                                {selectedIp && totalPages > 1 && (
+                                    <div className="pagination">
+                                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="page-btn">←</button>
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button key={page} onClick={() => setCurrentPage(page)} className={`page-btn ${currentPage === page ? 'active' : ''}`}>{page}</button>
+                                        ))}
+                                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="page-btn">→</button>
+                                    </div>
+                                )}
                             </div>
                         </>
                     ) : (
@@ -252,52 +273,65 @@ export default function AdminDraftsPage() {
                                     불러오는 중...
                                 </div>
                             ) : (
-                                <div className="inquiry-table">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>IP 주소</th>
-                                                <th>템플릿</th>
-                                                <th>고인명</th>
-                                                <th>장례식장</th>
-                                                <th>신청자</th>
-                                                <th>연락처</th>
-                                                <th>마지막 수정</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {drafts.length === 0 ? (
+                                <>
+                                    <div className="inquiry-table">
+                                        <table>
+                                            <thead>
                                                 <tr>
-                                                    <td colSpan={8} className="empty-cell">
-                                                        임시저장 데이터가 없습니다
-                                                    </td>
+                                                    <th>IP 주소</th>
+                                                    <th>템플릿</th>
+                                                    <th>고인명</th>
+                                                    <th>장례식장</th>
+                                                    <th>신청자</th>
+                                                    <th>연락처</th>
+                                                    <th>마지막 수정</th>
+                                                    <th></th>
                                                 </tr>
-                                            ) : (
-                                                drafts.map((draft) => (
-                                                    <tr
-                                                        key={draft.id}
-                                                        className={selectedDraft?.id === draft.id ? 'selected' : ''}
-                                                        onClick={() => setSelectedDraft(draft)}
-                                                    >
-                                                        <td style={{ fontFamily: 'monospace', color: '#0066cc' }}>
-                                                            {draft.ip_address || '-'}
-                                                        </td>
-                                                        <td>{getTemplateLabel(draft.template)}</td>
-                                                        <td className="name-cell">{draft.deceased_name || '-'}</td>
-                                                        <td>{draft.funeral_home || '-'}</td>
-                                                        <td>{draft.applicant_name || '-'}</td>
-                                                        <td>{draft.applicant_phone || '-'}</td>
-                                                        <td className="date-cell">{formatDate(draft.updated_at)}</td>
-                                                        <td className="arrow-cell">
-                                                            <span className="material-symbols-outlined">chevron_right</span>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedDrafts.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={8} className="empty-cell">
+                                                            임시저장 데이터가 없습니다
                                                         </td>
                                                     </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                ) : (
+                                                    paginatedDrafts.map((draft) => (
+                                                        <tr
+                                                            key={draft.id}
+                                                            className={selectedDraft?.id === draft.id ? 'selected' : ''}
+                                                            onClick={() => setSelectedDraft(draft)}
+                                                        >
+                                                            <td style={{ fontFamily: 'monospace', color: '#0066cc' }}>
+                                                                {draft.ip_address || '-'}
+                                                            </td>
+                                                            <td>{getTemplateLabel(draft.template)}</td>
+                                                            <td className="name-cell">{draft.deceased_name || '-'}</td>
+                                                            <td>{draft.funeral_home || '-'}</td>
+                                                            <td>{draft.applicant_name || '-'}</td>
+                                                            <td>{draft.applicant_phone || '-'}</td>
+                                                            <td className="date-cell">{formatDate(draft.updated_at)}</td>
+                                                            <td className="arrow-cell">
+                                                                <span className="material-symbols-outlined">chevron_right</span>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {/* 페이지네이션 (일반 검색) */}
+                                    {totalPages > 1 && (
+                                        <div className="pagination" style={{ borderTop: '1px solid #e2e8f0', padding: '16px', display: 'flex', justifyContent: 'center', gap: '4px' }}>
+                                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="page-btn">←</button>
+                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                                <button key={page} onClick={() => setCurrentPage(page)} className={`page-btn ${currentPage === page ? 'active' : ''}`}>{page}</button>
+                                            ))}
+                                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="page-btn">→</button>
+                                            <span className="page-info" style={{ marginLeft: '12px', fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center' }}>총 {currentList.length}개</span>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}

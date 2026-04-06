@@ -26,6 +26,8 @@ export default function BlockedIPsPage() {
     const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
     const [ipDevices, setIpDevices] = useState<Record<string, string>>({});
     const [newIP, setNewIP] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
     const [reason, setReason] = useState('');
     const [loading, setLoading] = useState(true);
     const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
@@ -174,6 +176,12 @@ export default function BlockedIPsPage() {
         return 'Other';
     };
 
+    const totalPages = Math.ceil(blockedIPs.length / itemsPerPage);
+    const paginatedBlockedIPs = blockedIPs.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     return (
         <div className="admin-pc">
             <AdminSidebar />
@@ -319,14 +327,14 @@ export default function BlockedIPsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {blockedIPs.length === 0 ? (
+                                        {paginatedBlockedIPs.length === 0 ? (
                                             <tr>
                                                 <td colSpan={6} className="empty-cell">
                                                     차단된 IP가 없습니다
                                                 </td>
                                             </tr>
                                         ) : (
-                                            blockedIPs.map((item) => (
+                                            paginatedBlockedIPs.map((item) => (
                                                 <tr key={item.id}>
                                                     <td style={{
                                                         fontFamily: 'monospace',
@@ -381,6 +389,17 @@ export default function BlockedIPsPage() {
                                         )}
                                     </tbody>
                                 </table>
+                            </div>
+                        )}
+                        {/* 페이지네이션 */}
+                        {totalPages > 1 && (
+                            <div className="pagination" style={{ borderTop: '1px solid #e2e8f0', padding: '16px', display: 'flex', justifyContent: 'center', gap: '4px' }}>
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="page-btn">←</button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button key={page} onClick={() => setCurrentPage(page)} className={`page-btn ${currentPage === page ? 'active' : ''}`}>{page}</button>
+                                ))}
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="page-btn">→</button>
+                                <span className="page-info" style={{ marginLeft: '12px', fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center' }}>총 {blockedIPs.length}개</span>
                             </div>
                         )}
                     </div>

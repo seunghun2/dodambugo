@@ -34,6 +34,8 @@ export default function AdminFlowerOrdersPage() {
     const [cancelling, setCancelling] = useState(false);
     const [sendingDelivery, setSendingDelivery] = useState(false);
     const [notifyLogs, setNotifyLogs] = useState<{ time: string; message: string; type: 'success' | 'error' }[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 50;
 
     // 로그 추가 함수
     const addNotifyLog = (message: string, type: 'success' | 'error' = 'success') => {
@@ -111,6 +113,10 @@ export default function AdminFlowerOrdersPage() {
     useEffect(() => {
         fetchOrders();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [statusFilter]);
 
     const fetchOrders = async () => {
         setLoading(true);
@@ -218,6 +224,12 @@ export default function AdminFlowerOrdersPage() {
         ? orders.filter(o => o.status === statusFilter)
         : orders;
 
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const paginatedOrders = filteredOrders.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     return (
         <div className="admin-pc">
             <AdminSidebar />
@@ -276,14 +288,14 @@ export default function AdminFlowerOrdersPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredOrders.length === 0 ? (
+                                        {paginatedOrders.length === 0 ? (
                                             <tr>
                                                 <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                                                     주문이 없습니다
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredOrders.map((order) => (
+                                            paginatedOrders.map((order) => (
                                                 <tr
                                                     key={order.id}
                                                     className={selectedOrder?.id === order.id ? 'selected' : ''}
@@ -318,6 +330,37 @@ export default function AdminFlowerOrdersPage() {
                                         )}
                                     </tbody>
                                 </table>
+                                {/* 페이지네이션 */}
+                                {totalPages > 1 && (
+                                    <div className="pagination">
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="page-btn"
+                                        >
+                                            ←
+                                        </button>
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="page-btn"
+                                        >
+                                            →
+                                        </button>
+                                        <span className="page-info">
+                                            총 {filteredOrders.length}개
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
