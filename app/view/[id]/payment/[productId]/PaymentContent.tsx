@@ -121,6 +121,11 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
             alert('연락처를 입력해주세요.');
             return;
         }
+        const phoneDigits = paymentForm.senderPhone.replace(/[^\d]/g, '');
+        if (!phoneDigits.startsWith('010') || (phoneDigits.length !== 10 && phoneDigits.length !== 11)) {
+            alert('연락처를 올바르게 입력해주세요. (010-0000-0000)');
+            return;
+        }
 
         // INNOPAY SDK 로드 확인
         if (typeof window === 'undefined' || !window.innopay) {

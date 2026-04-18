@@ -162,9 +162,18 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
         return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
     };
 
+    const isValidPhone = (phone: string) => {
+        const digits = phone.replace(/[^\d]/g, '');
+        return digits.startsWith('010') && (digits.length === 10 || digits.length === 11);
+    };
+
     const handlePaymentClick = () => {
         if (!buyerName || !buyerPhone || !selectedAmount) {
             alert('모든 정보를 입력해주세요.');
+            return;
+        }
+        if (!isValidPhone(buyerPhone)) {
+            alert('연락처를 올바르게 입력해주세요. (010-0000-0000)');
             return;
         }
         setConfirmModalOpen(true);
