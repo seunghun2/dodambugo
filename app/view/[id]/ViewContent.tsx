@@ -374,13 +374,16 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
     };
 
-    // 공유용 URL: owner 파라미터 제거 + 프로덕션 도메인 강제
-    const getCleanShareUrl = () => {
+    // 공유용 URL: owner 파라미터 제거 + 프로덕션 도메인 강제 + UTM 파라미터
+    const getCleanShareUrl = (utmMedium?: string) => {
         const pathname = window.location.pathname;
-        if (window.location.hostname.includes('maeumbugo.co.kr')) {
-            return `https://maeumbugo.co.kr${pathname}`;
+        const baseUrl = window.location.hostname.includes('maeumbugo.co.kr')
+            ? `https://maeumbugo.co.kr${pathname}`
+            : `${window.location.origin}${pathname}`;
+        if (utmMedium) {
+            return `${baseUrl}?utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
         }
-        return `${window.location.origin}${pathname}`;
+        return baseUrl;
     };
     // 공유 횟수 서버 추적
     const trackShare = (method: string) => {
@@ -418,7 +421,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     };
 
     const shareViaKakao = () => {
-        const shareUrl = getCleanShareUrl();
+        const shareUrl = getCleanShareUrl('kakao');
 
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
@@ -509,7 +512,7 @@ ${url}
     };
 
     const shareViaBand = () => {
-        const shareUrl = getCleanShareUrl();
+        const shareUrl = getCleanShareUrl('band');
         const title = `[訃告] 故 ${bugo?.deceased_name || ''} 부고장`;
         const content = `故 ${bugo?.deceased_name || ''} 님의 부고장입니다.`;
 
