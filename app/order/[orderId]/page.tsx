@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import '@/app/view/[id]/order/[productId]/order.css';
 
 interface OrderData {
@@ -99,7 +100,40 @@ export default function OrderDetailPage() {
         if (orderId) {
             fetchOrder();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [orderId, isCondolence]);
+
+    // GA 이벤트 & Google Ads 전환 추적 (한 번만 실행)
+    const trackedRef = useRef(false);
+    useEffect(() => {
+        if (trackedRef.current) return;
+
+        if (isCondolence && condolenceOrder) {
+            trackedRef.current = true;
+            // 부의금 결제 완료 GA 이벤트
+            gaEvents.completeCondolence(condolenceOrder.amount || 0);
+            // Google Ads 전환 추적
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
+                    'value': condolenceOrder.total_amount || 0,
+                    'currency': 'KRW'
+                });
+            }
+        } else if (!isCondolence && order) {
+            trackedRef.current = true;
+            // 화환 결제 완료 GA 이벤트
+            gaEvents.completeFlowerOrder(order.order_number, order.product_price || 0);
+            // Google Ads 전환 추적
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
+                    'value': order.product_price || 0,
+                    'currency': 'KRW'
+                });
+            }
+        }
+    }, [isCondolence, condolenceOrder, order]);
 
     // 날짜 포맷 함수
     const formatDateTime = (date?: string) => {
