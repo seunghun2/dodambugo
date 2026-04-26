@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import './history.css';
@@ -43,11 +43,28 @@ export default function CondolenceHistoryPage() {
     const [selectedMourner, setSelectedMourner] = useState('전체');
     const [bugoData, setBugoData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [ordersLoading, setOrdersLoading] = useState(false);
 
     // 부고 데이터 로드
     useEffect(() => {
         loadBugoData();
     }, [bugoId]);
+
+    // 세션 복원 - bugoData 로드 후 실행
+    useEffect(() => {
+        if (!bugoData) return;
+        const saved = sessionStorage.getItem(`condolence_auth_${bugoId}`);
+        if (saved) {
+            try {
+                const { name, isOwner: savedIsOwner, mourner } = JSON.parse(saved);
+                setAuthName(name);
+                setIsAuthenticated(true);
+                setIsOwner(savedIsOwner);
+                setSelectedMourner(savedIsOwner ? '전체' : mourner);
+                loadOrders();
+            } catch { /* 세션 데이터 손상 시 무시 */ }
+        }
+    }, [bugoData]);
 
     async function loadBugoData() {
 
@@ -104,6 +121,10 @@ export default function CondolenceHistoryPage() {
             setIsAuthenticated(true);
             setIsOwner(true);
             setSelectedMourner('전체');
+            // 세션 저장
+            sessionStorage.setItem(`condolence_auth_${bugoId}`, JSON.stringify({
+                name: authName, isOwner: true, mourner: '전체'
+            }));
             loadOrders();
             return;
         }
@@ -123,6 +144,10 @@ export default function CondolenceHistoryPage() {
             setIsAuthenticated(true);
             setIsOwner(false);
             setSelectedMourner(matchedMourner.name);
+            // 세션 저장
+            sessionStorage.setItem(`condolence_auth_${bugoId}`, JSON.stringify({
+                name: authName, isOwner: false, mourner: matchedMourner.name
+            }));
             loadOrders();
             return;
         }
@@ -132,6 +157,7 @@ export default function CondolenceHistoryPage() {
 
     // 부의금 내역 로드
     async function loadOrders() {
+        setOrdersLoading(true);
 
         const { data } = await supabase
             .from('condolence_orders')
@@ -143,6 +169,7 @@ export default function CondolenceHistoryPage() {
         if (data) {
             setOrders(data);
         }
+        setOrdersLoading(false);
     }
 
     // 필터된 주문 목록
@@ -172,10 +199,40 @@ export default function CondolenceHistoryPage() {
         return `${y}.${m}.${day} ${h}:${min}`;
     }
 
+    // CSV 다운로드
+    function downloadCSV() {
+        if (filteredOrders.length === 0) return;
+
+        const BOM = '\uFEFF';
+        const header = '보낸 분,금액,결제방법,일시' + (isOwner ? ',받는 상주' : '') + '\n';
+        const rows = filteredOrders.map(o => {
+            const base = `${o.buyer_name},${o.amount},${getPaymentLabel(o.payment_method, o.payment_type)},${formatDate(o.created_at)}`;
+            return isOwner ? `${base},${o.recipient_name || ''}` : base;
+        }).join('\n');
+
+        const blob = new Blob([BOM + header + rows], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `부의금현황_${bugoId}_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Enter 키 인증
+    function handleKeyDown(e: React.KeyboardEvent) {
+        if (e.key === 'Enter' && authName && authPhoneLast4.length === 4) {
+            handleAuth();
+        }
+    }
+
     if (loading) {
         return (
             <div className="history-page">
-                <div className="loading-container">로딩 중...</div>
+                <div className="loading-container">
+                    <div className="loading-spinner" />
+                    <p>로딩 중...</p>
+                </div>
             </div>
         );
     }
@@ -185,7 +242,13 @@ export default function CondolenceHistoryPage() {
         return (
             <div className="history-page">
                 <header className="history-header">
+                    <button className="header-back" onClick={() => router.back()}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12H5M5 12L12 19M5 12L12 5" />
+                        </svg>
+                    </button>
                     <h1>부의금 현황</h1>
+                    <div style={{ width: 40 }} />
                 </header>
 
                 <div className="auth-container">
@@ -203,13 +266,14 @@ export default function CondolenceHistoryPage() {
                             이름과 휴대폰번호 뒷 4자리를 입력해주세요.
                         </p>
 
-                        <div className="auth-form">
+                        <div className="auth-form" onKeyDown={handleKeyDown}>
                             <input
                                 type="text"
                                 className="form-input"
                                 placeholder="이름"
                                 value={authName}
                                 onChange={(e) => { setAuthName(e.target.value); setAuthError(''); }}
+                                autoFocus
                             />
                             <input
                                 type="text"
@@ -241,65 +305,94 @@ export default function CondolenceHistoryPage() {
     return (
         <div className="history-page">
             <header className="history-header">
+                <button className="header-back" onClick={() => router.back()}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" />
+                    </svg>
+                </button>
                 <h1>부의금 현황</h1>
+                {/* CSV 다운로드 버튼 */}
+                <button
+                    className="header-download"
+                    onClick={downloadCSV}
+                    disabled={filteredOrders.length === 0}
+                    title="CSV 다운로드"
+                >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                </button>
             </header>
 
-            <div className="history-content">
-                {/* 총액 카드 */}
-                <div className="summary-card">
-                    <p className="summary-label-text">총 부의금</p>
-                    <p className="summary-amount">{totalAmount.toLocaleString()}원</p>
-                    <p className="summary-count">총 {filteredOrders.length}건</p>
+            {ordersLoading ? (
+                <div className="loading-container">
+                    <div className="loading-spinner" />
+                    <p>부의금 내역을 불러오는 중...</p>
                 </div>
+            ) : (
+                <div className="history-content">
+                    {/* 총액 카드 */}
+                    <div className="summary-card">
+                        <p className="summary-label-text">총 부의금</p>
+                        <p className="summary-amount">{totalAmount.toLocaleString()}원</p>
+                        <p className="summary-count">총 {filteredOrders.length}건</p>
+                    </div>
 
-                {/* 상주 탭 (대표상주만 전체 보기 가능) */}
-                {isOwner && mournerAccounts.length > 0 && (
-                    <div className="mourner-tabs">
-                        <button
-                            className={`mourner-tab ${selectedMourner === '전체' ? 'active' : ''}`}
-                            onClick={() => setSelectedMourner('전체')}
-                        >
-                            전체
-                        </button>
-                        {mournerAccounts.map((a, i) => (
+                    {/* 상주 탭 (대표상주만 전체 보기 가능) */}
+                    {isOwner && mournerAccounts.length > 0 && (
+                        <div className="mourner-tabs">
                             <button
-                                key={i}
-                                className={`mourner-tab ${selectedMourner === a.name ? 'active' : ''}`}
-                                onClick={() => setSelectedMourner(a.name)}
+                                className={`mourner-tab ${selectedMourner === '전체' ? 'active' : ''}`}
+                                onClick={() => setSelectedMourner('전체')}
                             >
-                                {a.name}{a.relationship ? `(${a.relationship})` : ''}
+                                전체
                             </button>
-                        ))}
-                    </div>
-                )}
+                            {mournerAccounts.map((a, i) => (
+                                <button
+                                    key={i}
+                                    className={`mourner-tab ${selectedMourner === a.name ? 'active' : ''}`}
+                                    onClick={() => setSelectedMourner(a.name)}
+                                >
+                                    {a.name}{a.relationship ? `(${a.relationship})` : ''}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-                {/* 부의금 리스트 */}
-                {filteredOrders.length === 0 ? (
-                    <div className="empty-state">
-                        <p>아직 접수된 부의금이 없습니다.</p>
-                    </div>
-                ) : (
-                    <div className="order-list">
-                        {filteredOrders.map((order) => (
-                            <div key={order.id} className="order-card">
-                                <div className="order-main">
-                                    <div className="order-left">
-                                        <p className="order-sender">{order.buyer_name}</p>
-                                        <p className="order-date">{formatDate(order.created_at)}</p>
+                    {/* 부의금 리스트 */}
+                    {filteredOrders.length === 0 ? (
+                        <div className="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="1.5">
+                                <rect x="2" y="6" width="20" height="12" rx="2" />
+                                <path d="M2 10h20" />
+                            </svg>
+                            <p>아직 접수된 부의금이 없습니다.</p>
+                        </div>
+                    ) : (
+                        <div className="order-list">
+                            {filteredOrders.map((order) => (
+                                <div key={order.id} className="order-card">
+                                    <div className="order-main">
+                                        <div className="order-left">
+                                            <p className="order-sender">{order.buyer_name}</p>
+                                            <p className="order-date">{formatDate(order.created_at)}</p>
+                                        </div>
+                                        <div className="order-right">
+                                            <p className="order-amount">{order.amount.toLocaleString()}원</p>
+                                            <p className="order-method">{getPaymentLabel(order.payment_method, order.payment_type)}</p>
+                                        </div>
                                     </div>
-                                    <div className="order-right">
-                                        <p className="order-amount">{order.amount.toLocaleString()}원</p>
-                                        <p className="order-method">{getPaymentLabel(order.payment_method, order.payment_type)}</p>
-                                    </div>
+                                    {isOwner && order.recipient_name && (
+                                        <p className="order-recipient">→ {order.recipient_name}</p>
+                                    )}
                                 </div>
-                                {isOwner && order.recipient_name && (
-                                    <p className="order-recipient">→ {order.recipient_name}</p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

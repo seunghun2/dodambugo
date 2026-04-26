@@ -525,9 +525,17 @@ ${url}
 
     // 로딩/에러 처리는 서버 컴포넌트에서 담당 (여기선 항상 bugo가 존재함)
 
+    // 열람 기한 연장 예외 (고객 요청: 부고번호 → 만료일)
+    const expiryExceptions: Record<string, string> = {
+        '4286': '2026-07-05',  // 금동회/금무수 - 고객 요청으로 7/5까지 연장
+    };
+
     // 1달 이상 지난 부고는 비공개 처리
     const isExpired = () => {
         if (!bugo.funeral_date) return false;
+        // 연장 예외 체크
+        const extendedUntil = expiryExceptions[String(bugo.bugo_number)];
+        if (extendedUntil && new Date() <= new Date(extendedUntil)) return false;
         const funeralDate = new Date(bugo.funeral_date);
         const oneMonthAgo = new Date();
         oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
@@ -579,7 +587,7 @@ ${url}
     }
 
     // 특정 부고는 오버레이 예외 처리 (고객 요청)
-    const overlayExceptions = ['1818'];
+    const overlayExceptions = ['1818', '4286'];
     const showMemorialOverlay = mounted && isFuneralEnded() && !overlayExceptions.includes(String(bugo.bugo_number));
 
     // 오버레이 노출 이벤트 추적
