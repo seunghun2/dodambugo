@@ -98,7 +98,7 @@ export async function PATCH(request: NextRequest) {
     try {
         const supabase = getSupabase();
         const body = await request.json();
-        const { id, status, partner_order_id, partner_data } = body;
+        const { id, status, partner_order_id, partner_data, product_name, product_price } = body;
 
         if (!id) {
             return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
@@ -108,6 +108,8 @@ export async function PATCH(request: NextRequest) {
         if (status) updateData.status = status;
         if (partner_order_id) updateData.partner_order_id = partner_order_id;
         if (partner_data) updateData.partner_data = partner_data;
+        if (product_name) updateData.product_name = product_name;
+        if (product_price !== undefined && product_price !== null) updateData.product_price = product_price;
 
         const { data, error } = await supabase
             .from('flower_orders')
