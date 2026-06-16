@@ -55,6 +55,12 @@ export const gaEvents = {
     selectTemplate: (templateId: string) => trackEvent('부고_템플릿선택', '부고생성', templateId),
     completeBugo: (bugoNumber: string) => trackEvent('부고_생성완료', '부고생성', bugoNumber),
 
+    // ========== 부고 생성 폼 단계별 ==========
+    formStep: (step: string) => trackEvent(`폼_${step}`, '부고생성_퍼널', step),
+    formSubmitAttempt: () => trackEvent('폼_제출시도', '부고생성_퍼널'),
+    formValidationFail: (fields: string) => trackEvent('폼_유효성실패', '부고생성_퍼널', fields),
+    formSaveDraft: () => trackEvent('폼_임시저장', '부고생성_퍼널'),
+
     // ========== 부고 조회 ==========
     viewBugo: (bugoNumber: string) => trackEvent('부고_조회', '부고조회', bugoNumber),
 

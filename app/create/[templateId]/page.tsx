@@ -299,6 +299,29 @@ export default function WriteFormPage() {
     const [mounted, setMounted] = useState(false);
     useEffect(() => { setMounted(true); }, []);
 
+    // 폼 섹션별 GA 트래킹 (IntersectionObserver)
+    const trackedSteps = useRef<Set<string>>(new Set());
+    useEffect(() => {
+        if (!mounted) return;
+        const sections = document.querySelectorAll('.form-section[data-step]');
+        if (sections.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const step = (entry.target as HTMLElement).dataset.step;
+                    if (step && !trackedSteps.current.has(step)) {
+                        trackedSteps.current.add(step);
+                        gaEvents.formStep(step);
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sections.forEach((section) => observer.observe(section));
+        return () => observer.disconnect();
+    }, [mounted]);
+
     // 원래 연락처 (수정 모드에서 변경 감지용)
     const [originalPhone, setOriginalPhone] = useState('');
 
@@ -352,6 +375,8 @@ export default function WriteFormPage() {
     };
 
     const saveDraftAndGoHome = async () => {
+        // GA: 임시저장 트래킹
+        gaEvents.formSaveDraft();
         // localStorage에 저장 (기존)
         const draftData = {
             formData,
@@ -978,6 +1003,9 @@ export default function WriteFormPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // GA: 제출 시도 트래킹
+        gaEvents.formSubmitAttempt();
+
         // 유효성 검사
         const newErrors: Record<string, string> = {};
 
@@ -1040,6 +1068,9 @@ export default function WriteFormPage() {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length > 0) {
+            // GA: 유효성 실패 트래킹 (어떤 필드에서 막히는지)
+            gaEvents.formValidationFail(Object.keys(newErrors).join(','));
+
             // 에러 메시지 알림 (모바일에서 에러 필드 못 볼 수 있음)
             const firstErrorMessage = Object.values(newErrors)[0];
             alert(firstErrorMessage);
@@ -1272,7 +1303,7 @@ export default function WriteFormPage() {
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>
                                     {/* 신청자 정보 */}
-                                    <div className="form-section applicant-section">
+                                    <div className="form-section applicant-section" data-step="신청자정보">
                                         <h2 className="section-title">신청자 정보</h2>
                                         <p className="section-description">부고장 수정 시 필요한 정보입니다</p>
 
@@ -1404,7 +1435,7 @@ export default function WriteFormPage() {
                                     </div>
 
                                     {/* 장례식장 정보 */}
-                                    <div className="form-section">
+                                    <div className="form-section" data-step="장례식장정보">
                                         <h2 className="section-title">장례식장 정보</h2>
                                         <p className="section-desc">조문객이 방문할 장례식장 정보입니다</p>
 
@@ -1502,7 +1533,7 @@ export default function WriteFormPage() {
                                     </div>
 
                                     {/* 부고 정보 */}
-                                    <div className="form-section">
+                                    <div className="form-section" data-step="부고정보">
                                         <h2 className="section-title">부고 정보</h2>
                                         <p className="section-desc">고인 및 유가족 정보를 입력해주세요</p>
 
@@ -1624,7 +1655,7 @@ export default function WriteFormPage() {
                                     </div>
 
                                     {/* 추가 상주 */}
-                                    <div className="form-section">
+                                    <div className="form-section" data-step="추가상주">
                                         <h2 className="section-title">추가 상주</h2>
                                         <p className="section-desc">함께 상을 치르는 유가족을 추가해주세요</p>
 
@@ -1790,7 +1821,7 @@ export default function WriteFormPage() {
                                     )}
 
                                     {/* 일정 정보 */}
-                                    <div className="form-section">
+                                    <div className="form-section" data-step="발인일시">
                                         <h2 className="section-title">발인/임종 일시</h2>
                                         <p className="section-desc">장례 일정을 입력해주세요</p>
 
@@ -1925,7 +1956,7 @@ export default function WriteFormPage() {
                                     </div>
 
                                     {/* 조문객에게 안내사항 */}
-                                    <div className="form-section">
+                                    <div className="form-section" data-step="안내사항">
                                         <h2 className="section-title">조문객에게 안내사항</h2>
                                         <p className="section-desc">조문객에게 전달할 메시지를 작성해주세요</p>
 
