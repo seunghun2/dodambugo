@@ -1,0 +1,280 @@
+/* 정산 (지갑) */
+
+.container {
+    min-height: 100dvh;
+    background: #fff;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 72px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    padding: 0 16px;
+    border-bottom: 1px solid #F2F4F6;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+}
+
+.backBtn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #191F28;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.backBtn:active { background: #F2F4F6; }
+
+.headerTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #191F28;
+}
+
+.headerRight { width: 36px; }
+
+/* 잔액 카드 */
+.balanceCard {
+    margin: 16px 20px;
+    padding: 28px 24px;
+    background: #333D4B;
+    border-radius: 16px;
+    color: #fff;
+    text-align: center;
+}
+
+.balanceLabel {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+}
+
+.balanceAmount {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.won {
+    font-size: 15px;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+.withdrawBtn {
+    height: 38px;
+    padding: 0 24px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.withdrawBtn:active { background: rgba(255,255,255,0.25); }
+
+/* 알림 */
+.error {
+    margin: 0 20px 12px;
+    padding: 12px 16px;
+    background: #FFF5F5;
+    border-radius: 10px;
+    color: #F04452;
+    font-size: 13px;
+    text-align: center;
+}
+
+.success {
+    margin: 0 20px 12px;
+    padding: 12px 16px;
+    background: #F0FFF4;
+    border-radius: 10px;
+    color: #12B886;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* 모달 (바텀시트) */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+}
+
+.modalContent {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px 32px;
+}
+
+.modalTitle {
+    font-size: 17px;
+    font-weight: 700;
+    color: #191F28;
+    margin-bottom: 4px;
+}
+
+.modalDesc {
+    font-size: 13px;
+    color: #8B95A1;
+    margin-bottom: 20px;
+}
+
+.input {
+    width: 100%;
+    height: 52px;
+    padding: 0 16px;
+    border: 1px solid #E5E8EB;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    box-sizing: border-box;
+    color: #191F28;
+    -webkit-appearance: none;
+}
+
+.input:focus {
+    border-color: #333D4B;
+}
+
+.modalHint {
+    font-size: 12px;
+    color: #8B95A1;
+    text-align: center;
+    margin: 8px 0 20px;
+}
+
+.modalBtns {
+    display: flex;
+    gap: 10px;
+}
+
+.cancelBtn {
+    flex: 1;
+    height: 48px;
+    background: #F2F4F6;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4E5968;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.cancelBtn:active { background: #E5E8EB; }
+
+.confirmBtn {
+    flex: 1;
+    height: 48px;
+    background: #333D4B;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.confirmBtn:active { opacity: 0.85; }
+
+.confirmBtn:disabled {
+    background: #E5E8EB;
+    color: #ADB5BD;
+    cursor: default;
+}
+
+/* 거래내역 */
+.section { padding: 0 20px; }
+
+.sectionTitle {
+    font-size: 17px;
+    font-weight: 700;
+    color: #191F28;
+    margin-bottom: 12px;
+}
+
+.emptyState {
+    padding: 40px 20px;
+    background: #F9FAFB;
+    border-radius: 14px;
+    text-align: center;
+    color: #8B95A1;
+    font-size: 13px;
+}
+
+.emptyHint {
+    font-size: 11px;
+    color: #ADB5BD;
+    margin-top: 4px;
+}
+
+.txList {
+    background: #F9FAFB;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.txItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #F2F4F6;
+}
+
+.txItem:last-child { border-bottom: none; }
+
+.txType {
+    font-size: 14px;
+    font-weight: 600;
+    color: #191F28;
+}
+
+.txDesc {
+    font-size: 11px;
+    color: #8B95A1;
+    margin-top: 2px;
+}
+
+.txDate {
+    font-size: 11px;
+    color: #ADB5BD;
+    margin-top: 4px;
+}
+
+.txPlus {
+    font-size: 14px;
+    font-weight: 700;
+    color: #12B886;
+}
+
+.txMinus {
+    font-size: 14px;
+    font-weight: 700;
+    color: #F04452;
+}

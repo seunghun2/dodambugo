@@ -1,0 +1,253 @@
+/* 회원가입 */
+
+.container {
+    min-height: 100dvh;
+    background: #fff;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* 헤더 */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    padding: 0 16px;
+    border-bottom: 1px solid #F2F4F6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+}
+
+.backBtn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #191F28;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.backBtn:active { background: #F2F4F6; }
+
+.headerTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #191F28;
+}
+
+.headerRight { width: 36px; }
+
+/* 프로그레스 */
+.progress {
+    height: 2px;
+    background: #F2F4F6;
+}
+
+.progressBar {
+    height: 100%;
+    background: #333D4B;
+    transition: width 0.3s ease;
+}
+
+.stepLabel {
+    text-align: center;
+    font-size: 12px;
+    color: #8B95A1;
+    padding: 10px 0 0;
+}
+
+/* 에러 */
+.error {
+    margin: 12px 20px 0;
+    padding: 10px 14px;
+    background: #FFF5F5;
+    border-radius: 10px;
+    color: #F04452;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* 스텝 컨텐츠 */
+.stepContent {
+    padding: 28px 20px 40px;
+}
+
+.stepTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #191F28;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+}
+
+.stepDesc {
+    font-size: 14px;
+    color: #8B95A1;
+    margin-bottom: 28px;
+    line-height: 1.5;
+}
+
+/* 인풋 */
+.input {
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    border: 1px solid #E5E8EB;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #191F28;
+    background: #F9FAFB;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+}
+
+.input:focus {
+    border-color: #333D4B;
+    background: #fff;
+}
+
+.input:disabled {
+    color: #ADB5BD;
+    background: #F2F4F6;
+}
+
+.input::placeholder { color: #ADB5BD; }
+
+select.input {
+    color: #191F28;
+    cursor: pointer;
+}
+
+/* 인증코드 행 */
+.verifyRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.verifyRow .input { flex: 1; }
+
+.timer {
+    font-size: 14px;
+    color: #F04452;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* 보조 버튼 */
+.subBtn {
+    display: inline-block;
+    height: 44px;
+    padding: 0 20px;
+    background: #fff;
+    border: 1px solid #333D4B;
+    color: #333D4B;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.subBtn:active { background: #F9FAFB; }
+
+.subBtn:disabled {
+    border-color: #E5E8EB;
+    color: #ADB5BD;
+    cursor: default;
+}
+
+/* 인증 완료 */
+.verified {
+    padding: 12px 16px;
+    background: #F0FFF4;
+    border-radius: 10px;
+    color: #12B886;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+/* 비밀번호 체크 */
+.checkList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+}
+
+.checkOk { font-size: 13px; color: #12B886; }
+.checkNo { font-size: 13px; color: #CED4DA; }
+
+/* 다음 버튼 */
+.nextBtn {
+    width: 100%;
+    height: 52px;
+    background: #333D4B;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.15s;
+    font-family: inherit;
+}
+
+.nextBtn:active { opacity: 0.8; }
+
+.nextBtn:disabled {
+    background: #E5E8EB;
+    color: #ADB5BD;
+    cursor: default;
+}
+
+/* 가입 완료 버튼 */
+.submitBtn {
+    composes: nextBtn;
+    background: #FFD43B;
+    color: #191F28;
+}
+
+.submitBtn:disabled {
+    background: #E5E8EB;
+    color: #ADB5BD;
+}
+
+/* 건너뛰기 */
+.skipBtn {
+    width: 100%;
+    height: 44px;
+    background: none;
+    border: none;
+    color: #8B95A1;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 6px;
+    font-family: inherit;
+}
+
+.skipBtn:active { color: #4E5968; }
+
+.skipText {
+    font-size: 12px;
+    color: #8B95A1;
+    text-align: center;
+    margin: 8px 0 14px;
+}

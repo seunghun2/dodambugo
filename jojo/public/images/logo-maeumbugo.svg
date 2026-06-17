@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">
+  <!-- 마음부고 텍스트 -->
+  <text x="100" y="32" 
+        font-family="Pretendard, -apple-system, sans-serif" 
+        font-size="28" 
+        font-weight="700" 
+        fill="#1A1A1A" 
+        text-anchor="middle">마음부고</text>
+  
+  <!-- 밑줄 (노란색 브랜드 컬러) -->
+  <line x1="40" y1="45" x2="160" y2="45" 
+        stroke="#FFCC45" 
+        stroke-width="3" 
+        stroke-linecap="round"/>
+</svg>

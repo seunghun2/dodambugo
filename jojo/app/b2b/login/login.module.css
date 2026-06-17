@@ -1,0 +1,131 @@
+/* 로그인 */
+
+.page {
+    min-height: 100dvh;
+    background: #fff;
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inner {
+    width: 100%;
+    padding: 0 28px;
+}
+
+/* 로고 */
+.logoSection {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.logoMark {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 14px;
+    background: #333D4B;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFD43B;
+}
+
+.logoText {
+    font-size: 18px;
+    font-weight: 700;
+    color: #191F28;
+    letter-spacing: -0.02em;
+}
+
+/* 에러 */
+.error {
+    font-size: 13px;
+    color: #F04452;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+/* 폼 */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input {
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    border: 1px solid #E5E8EB;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #191F28;
+    background: #F9FAFB;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+}
+
+.input:focus {
+    border-color: #333D4B;
+    background: #fff;
+}
+
+.input::placeholder {
+    color: #ADB5BD;
+}
+
+.loginBtn {
+    width: 100%;
+    height: 52px;
+    margin-top: 6px;
+    background: #333D4B;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: inherit;
+}
+
+.loginBtn:active {
+    opacity: 0.8;
+}
+
+.loginBtn:disabled {
+    background: #E5E8EB;
+    color: #ADB5BD;
+    cursor: default;
+}
+
+/* 하단 */
+.bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 28px;
+}
+
+.bottomText {
+    font-size: 13px;
+    color: #8B95A1;
+}
+
+.signupLink {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333D4B;
+    text-decoration: none;
+}
+
+.signupLink:active {
+    opacity: 0.6;
+}

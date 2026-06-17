@@ -1,0 +1,288 @@
+/* 대시보드 — 부고온 스타일 */
+
+.page {
+  min-height: 100dvh;
+  background: #fff;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 72px;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 20px;
+  border-bottom: 1px solid #F2F4F6;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.headerTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191F28;
+  letter-spacing: -0.02em;
+}
+
+.headerBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #4E5968;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.headerBtn:active { background: #F2F4F6; }
+
+/* CTA 배너 */
+.ctaBanner {
+  margin: 16px 20px 0;
+  padding: 20px;
+  background: #333D4B;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  min-height: 100px;
+}
+
+.ctaBanner:active { opacity: 0.95; }
+
+.ctaText { flex: 1; }
+
+.ctaTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.ctaDesc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.ctaImg {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  margin-left: 12px;
+  flex-shrink: 0;
+  filter: brightness(1.2);
+}
+
+/* 섹션 */
+.section {
+  padding: 16px 20px 0;
+}
+
+/* 일반 카드 */
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background: #F9FAFB;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.card:active { background: #F2F4F6; }
+
+.cardLeft { flex: 1; }
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191F28;
+  margin-bottom: 6px;
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: #8B95A1;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.cardImg {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* 3열 기능 카드 */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 14px 12px;
+  background: #F9FAFB;
+  border-radius: 14px;
+  cursor: pointer;
+  min-height: 120px;
+}
+
+.featureCard:active { background: #F2F4F6; }
+
+.featureLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333D4B;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.featureImg {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  align-self: flex-end;
+}
+
+/* 잔액 */
+.balanceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: #F9FAFB;
+  border-radius: 14px;
+}
+
+.balanceLabel {
+  font-size: 14px;
+  color: #8B95A1;
+  font-weight: 500;
+}
+
+.balanceAmount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #191F28;
+}
+
+/* 추천 코드 */
+.referralRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #F9FAFB;
+  border-radius: 14px;
+}
+
+.referralLabel {
+  font-size: 12px;
+  color: #8B95A1;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.referralCode {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191F28;
+  letter-spacing: 1px;
+}
+
+.copyBtn {
+  height: 32px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid #E5E8EB;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4E5968;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.copyBtn:active { background: #F2F4F6; }
+
+/* 공지사항 */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191F28;
+}
+
+.moreBtn {
+  background: none;
+  border: none;
+  color: #8B95A1;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.noticeCard {
+  background: #F9FAFB;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.noticeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #F2F4F6;
+}
+
+.noticeItem:last-child { border-bottom: none; }
+
+.noticeBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333D4B;
+  background: #E5E8EB;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.noticeText {
+  flex: 1;
+  font-size: 13px;
+  color: #333D4B;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noticeDate {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #ADB5BD;
+  font-variant-numeric: tabular-nums;
+}

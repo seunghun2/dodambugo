@@ -1,0 +1,643 @@
+/* 부의금 카드결제 페이지 - 주문하기 UI 스타일 */
+
+.condolence-page {
+    min-height: 100vh;
+    background: #F5F5F5;
+    padding-bottom: 100px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.condolence-page * {
+    font-family: inherit !important;
+}
+
+/* PC 중앙 정렬 */
+@media (min-width: 481px) {
+    .condolence-page {
+        max-width: 360px;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 헤더 */
+.condolence-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.back-button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1A1A1A;
+    margin-right: 8px;
+}
+
+.condolence-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin: 0;
+}
+
+/* Content */
+.condolence-content {
+    padding: 16px;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* 상주 정보 카드 */
+.account-info-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.account-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.account-rel {
+    font-size: 14px;
+    color: #888888;
+}
+
+.account-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+.account-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bank-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+}
+
+.account-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bank-name {
+    font-size: 13px;
+    color: #888888;
+}
+
+.account-number-display {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+/* Form Section */
+.form-section {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin: 0 0 16px 0;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 12px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #1A1A1A;
+    background: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #FFD43B;
+}
+
+.form-input::placeholder {
+    color: #AAAAAA;
+}
+
+/* 금액 선택 */
+.amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.amount-button {
+    padding: 14px 8px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    background: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.amount-button:hover {
+    border-color: #FFD43B;
+}
+
+.amount-button.selected {
+    background: #FFF9E6;
+    border-color: #FFD43B;
+    font-weight: 600;
+}
+
+/* 결제 금액 요약 */
+.payment-summary {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.summary-row:nth-last-child(2) {
+    border-bottom: none;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #666666;
+}
+
+.summary-value {
+    font-size: 13px;
+    color: #888888;
+}
+
+.summary-row.total {
+    padding-top: 10px;
+    margin-top: 2px;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: none;
+}
+
+.summary-row.total .summary-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+.summary-row.total .summary-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+}
+
+/* 결제 방식 */
+.payment-methods {
+    display: flex;
+    gap: 10px;
+}
+
+.payment-method-btn {
+    flex: 1;
+    padding: 16px 8px;
+    background: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.payment-method-btn svg {
+    color: #888888;
+}
+
+.payment-method-btn:hover {
+    border-color: #FFD43B;
+}
+
+.payment-method-btn.active {
+    border-color: #FFD43B;
+    background: #FFF9E6;
+    color: #1A1A1A;
+}
+
+.payment-method-btn.active svg {
+    color: #F59F00;
+}
+
+.payment-notices {
+    margin-top: 12px;
+}
+
+.payment-notices p {
+    font-size: 11px;
+    color: #888888;
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
+/* 동의 */
+.agreement-section {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.agreement-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1A1A1A;
+}
+
+.agreement-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #FFD43B;
+}
+
+.agreement-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888888;
+}
+
+/* 하단 결제 버튼 - 고정 */
+.condolence-footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 360px;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: #FFFFFF;
+    border-top: 1px solid #F0F0F0;
+    box-sizing: border-box;
+    z-index: 2001;
+}
+
+@media (max-width: 480px) {
+    .condolence-footer {
+        left: 0;
+        transform: none;
+        max-width: 100%;
+    }
+}
+
+.submit-button {
+    width: 100%;
+    height: 56px;
+    background: #E0E0E0;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #999999;
+    cursor: not-allowed;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.submit-button.active {
+    background: #FFD43B;
+    color: #1A1A1A;
+    cursor: pointer;
+}
+
+.submit-button.active:hover {
+    background: #FCC419;
+}
+
+/* 약관 링크 */
+.privacy-notice-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #888888;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.privacy-notice-link:hover {
+    color: #666666;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.privacy-modal {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    max-width: 360px;
+    width: 100%;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+    max-height: 60vh;
+    margin-bottom: 80px;
+}
+
+@media (max-width: 480px) {
+    .privacy-modal {
+        max-width: 100%;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #888888;
+}
+
+.modal-content {
+    padding: 16px 20px 24px;
+}
+
+/* 약관 리스트 */
+.terms-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+}
+
+.terms-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.terms-list li:last-child {
+    border-bottom: none;
+}
+
+.term-bullet {
+    font-size: 14px;
+    color: #1A1A1A;
+    margin-right: 8px;
+}
+
+.term-text {
+    font-size: 14px;
+    color: #1A1A1A;
+    flex: 1;
+}
+
+.terms-link {
+    color: #888888;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* 사업자 정보 푸터 - 컴팩트 */
+.condolence-page .view-footer {
+    margin-top: 10px;
+    padding: 16px 20px;
+    padding-bottom: 10px;
+}
+
+.condolence-page .view-footer p {
+    font-size: 11px;
+}
+
+/* 결제 확인 모달 */
+.confirm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+}
+
+.confirm-modal {
+    position: relative;
+    background: #FFFFFF;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 320px;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.confirm-modal-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999999;
+}
+
+.confirm-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 16px;
+}
+
+.confirm-modal-desc {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.confirm-modal-desc strong {
+    color: #1A1A1A;
+}
+
+.confirm-modal-sub {
+    font-size: 13px;
+    color: #888888;
+    margin-bottom: 20px;
+}
+
+.confirm-modal-info {
+    background: #F8F8F8;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.confirm-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.confirm-info-row:first-child {
+    padding-top: 0;
+}
+
+.confirm-info-row:last-child {
+    padding-bottom: 0;
+}
+
+.confirm-info-label {
+    font-size: 13px;
+    color: #666666;
+}
+
+.confirm-info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.confirm-modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.confirm-modal-close {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #888888;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
