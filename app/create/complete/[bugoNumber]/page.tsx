@@ -329,10 +329,10 @@ ${bugoUrl}
                 {/* 제목 섹션 */}
                 <div className="title-section">
                     <h1 className="page-title">상주 {mournerName} 님의 부고장</h1>
-                    <Link href={`/create/edit/${params.bugoNumber}`} className="btn-edit-light">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                        수정하기
-                    </Link>
+                    <button className="btn-edit-light" onClick={duplicateBugo}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        복제하기
+                    </button>
                 </div>
 
                 {/* 정보 카드 */}
@@ -398,11 +398,11 @@ ${bugoUrl}
                     </div>
                 </div>
 
-                {/* 복제 배너 */}
-                <div className="copy-banner">
-                    <p>부고장을 복제하여 다른 이름으로<br />변경하여 사용하실 수 있습니다</p>
-                    <button className="btn-copy-bugo" onClick={duplicateBugo}>복제하기</button>
-                </div>
+                {/* 수정 배너 */}
+                <Link href={`/create/edit/${params.bugoNumber}`} className="copy-banner" style={{ textDecoration: 'none' }}>
+                    <p>부고장 내용을 수정하실 수 있습니다</p>
+                    <span className="btn-copy-bugo">수정하기</span>
+                </Link>
 
                 {/* 삭제하기 */}
                 <div className="delete-section">

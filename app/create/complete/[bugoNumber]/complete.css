@@ -244,37 +244,45 @@
     line-height: 1.3;
 }
 
-/* 복제 배너 */
+/* 수정 배너 */
 .copy-banner {
     background: var(--gray-700);
     border-radius: var(--radius-md);
-    padding: 14px 20px;
+    padding: 18px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.copy-banner:hover {
+    background: var(--gray-600);
 }
 
 .copy-banner p {
-    font-size: 12px;
-    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
     flex: 1;
 }
 
 .btn-copy-bugo {
-    padding: 8px 16px;
-    background: transparent;
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.9);
     border: none;
-    color: var(--gray-300);
-    font-size: 12px;
+    color: var(--gray-700);
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    border-radius: 6px;
 }
 
 .btn-copy-bugo:hover {
-    color: white;
+    background: var(--gray-100);
 }
 
 /* 로딩 */
