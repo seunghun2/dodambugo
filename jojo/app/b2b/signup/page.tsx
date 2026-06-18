@@ -495,34 +495,21 @@ export default function SignupPage() {
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>은행 선택</label>
-                        {/* 자동추천 하이라이트 */}
-                        {suggestedBanks.length > 0 && !form.bankName && (
-                            <p className={styles.hint} style={{ marginBottom: 8 }}>이 은행이 맞으신가요?</p>
-                        )}
-                        <div className={styles.bankGrid}>
-                            {BANKS.map((b) => {
-                                const isSuggested = suggestedBanks.some((s) => s.code === b.code);
-                                const isSelected = form.bankName === b.name;
-                                const iconName = b.name === 'IBK기업은행' ? '기업은행' : b.name === 'SC제일은행' ? '제일은행' : b.name;
-                                return (
-                                    <button
-                                        key={b.code}
-                                        className={isSelected ? styles.bankItemActive : styles.bankItem}
-                                        onClick={() => setForm({ ...form, bankName: b.name, accountVerified: false })}
-                                        style={isSuggested && !form.bankName ? { borderColor: '#3A8F47', background: '#F0FDF4' } : {}}
-                                    >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={`/images/bankicon/${iconName}.svg`}
-                                            alt={b.name}
-                                            className={styles.bankIcon}
-                                        />
-                                        <span className={styles.bankName}>{b.name.replace('은행', '').replace('NH농협', '농협').replace('IBK기업', '기업').replace('SC제일', 'SC')}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        <label className={styles.inputLabel}>은행</label>
+                        <select
+                            className={styles.input}
+                            value={form.bankName}
+                            onChange={(e) =>
+                                setForm({ ...form, bankName: e.target.value, accountVerified: false })
+                            }
+                        >
+                            <option value="">은행을 선택해 주세요</option>
+                            {BANKS.map((b) => (
+                                <option key={b.code} value={b.name}>
+                                    {b.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className={styles.inputGroup}>
