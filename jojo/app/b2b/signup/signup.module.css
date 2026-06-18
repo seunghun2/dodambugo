@@ -51,7 +51,7 @@
 
 .progressBar {
     height: 100%;
-    background: #8B6C4C;
+    background: #333D4B;
     border-radius: 2px;
     transition: width 0.3s;
 }
@@ -84,7 +84,7 @@
 .stepTitle {
     font-size: 22px;
     font-weight: 700;
-    color: #8B6C4C;
+    color: #333D4B;
     margin-bottom: 6px;
     line-height: 1.3;
 }
@@ -119,7 +119,7 @@
 }
 
 .input:focus {
-    border-color: #8B6C4C;
+    border-color: #333D4B;
 }
 
 .input::placeholder {
@@ -220,7 +220,7 @@
 .nextBtn {
     flex: 1.5;
     height: 52px;
-    background: #8B6C4C;
+    background: #333D4B;
     border: none;
     border-radius: 10px;
     font-size: 15px;
@@ -233,7 +233,7 @@
 .nextBtn:active { opacity: 0.85; }
 
 .nextBtn:disabled {
-    background: #D5C4B0;
+    background: #ADB5BD;
     cursor: default;
 }
 
@@ -280,7 +280,7 @@
 .submitBtn {
     width: 100%;
     height: 52px;
-    background: #8B6C4C;
+    background: #333D4B;
     border: none;
     border-radius: 10px;
     font-size: 16px;
@@ -291,4 +291,4 @@
 }
 
 .submitBtn:active { opacity: 0.85; }
-.submitBtn:disabled { background: #D5C4B0; cursor: default; }
+.submitBtn:disabled { background: #ADB5BD; cursor: default; }
