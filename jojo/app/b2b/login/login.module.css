@@ -41,7 +41,7 @@
     width: 44px;
     height: 44px;
     margin: 0 auto 10px;
-    background: #333D4B;
+    background: #3A8F47;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -84,7 +84,7 @@
 }
 
 .inputWrap:focus-within {
-    border-color: #333D4B;
+    border-color: #3A8F47;
 }
 
 .inputIcon {
@@ -121,6 +121,8 @@
     border: none;
     color: #8B95A1;
     cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* 자동로그인 */
@@ -146,8 +148,8 @@
 }
 
 .checkboxActive {
-    background: #333D4B;
-    border-color: #333D4B;
+    background: #3A8F47;
+    border-color: #3A8F47;
 }
 
 .autoLoginText {
@@ -160,7 +162,7 @@
     width: 100%;
     height: 52px;
     margin-top: 8px;
-    background: #333D4B;
+    background: #3A8F47;
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -168,6 +170,9 @@
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
 }
 
 .loginBtn:active {

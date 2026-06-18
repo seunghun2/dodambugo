@@ -49,7 +49,7 @@
 .balanceCard {
     margin: 16px 20px;
     padding: 28px 24px;
-    background: #333D4B;
+    background: #3A8F47;
     border-radius: 16px;
     color: #fff;
     text-align: center;
@@ -165,7 +165,7 @@
 }
 
 .input:focus {
-    border-color: #333D4B;
+    border-color: #3A8F47;
 }
 
 .modalHint {
@@ -198,7 +198,7 @@
 .confirmBtn {
     flex: 1;
     height: 48px;
-    background: #333D4B;
+    background: #3A8F47;
     border: none;
     border-radius: 12px;
     font-size: 14px;

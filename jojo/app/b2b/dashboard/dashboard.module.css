@@ -48,7 +48,7 @@
 .ctaBanner {
   margin: 16px 20px 0;
   padding: 20px;
-  background: #333D4B;
+  background: #3A8F47;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -149,7 +149,7 @@
 .featureLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #333D4B;
+  color: #3A8F47;
   line-height: 1.4;
   white-space: pre-line;
 }
@@ -264,7 +264,7 @@
   flex-shrink: 0;
   font-size: 11px;
   font-weight: 600;
-  color: #333D4B;
+  color: #3A8F47;
   background: #E5E8EB;
   padding: 2px 8px;
   border-radius: 4px;
@@ -273,7 +273,7 @@
 .noticeText {
   flex: 1;
   font-size: 13px;
-  color: #333D4B;
+  color: #3A8F47;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;

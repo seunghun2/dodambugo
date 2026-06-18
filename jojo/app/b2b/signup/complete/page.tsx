@@ -26,7 +26,7 @@ function CompleteContent() {
             <div style={{ padding: '80px 28px 40px', textAlign: 'center' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#191F28', lineHeight: '1.4', marginBottom: '16px' }}>
                     {name ? `${name} 님,` : ''}<br />
-                    <span style={{ color: '#333D4B' }}>마음부고 파트너</span> 환영합니다!
+                    <span style={{ color: '#3A8F47' }}>마음부고 파트너</span> 환영합니다!
                 </h2>
                 <p style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '36px', lineHeight: '1.5' }}>
                     마음부고 파트너의 다양한 서비스를<br />이용하실 수 있습니다.
@@ -40,7 +40,7 @@ function CompleteContent() {
                     marginBottom: '40px',
                     textAlign: 'center',
                 }}>
-                    <p style={{ fontSize: '13px', fontWeight: '600', color: '#333D4B', marginBottom: '10px' }}>
+                    <p style={{ fontSize: '13px', fontWeight: '600', color: '#3A8F47', marginBottom: '10px' }}>
                         [가입정보]
                     </p>
                     {code && (
@@ -62,7 +62,7 @@ function CompleteContent() {
                         justifyContent: 'center',
                         width: '100%',
                         height: '52px',
-                        background: '#333D4B',
+                        background: '#3A8F47',
                         color: '#fff',
                         borderRadius: '10px',
                         fontSize: '16px',

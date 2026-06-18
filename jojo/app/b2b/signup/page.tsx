@@ -371,19 +371,22 @@ export default function SignupPage() {
                                 {showPw ? <IconEye size={18} stroke={1.5} /> : <IconEyeOff size={18} stroke={1.5} />}
                             </button>
                         </div>
-                        {form.password && (
-                            <div className={styles.pwRules}>
-                                {PW_RULES.map((rule) => (
-                                    <span
-                                        key={rule.key}
-                                        className={rule.test(form.password) ? styles.ruleOk : styles.ruleItem}
-                                    >
-                                        {rule.test(form.password) ? <IconCheck size={12} stroke={2.5} /> : '○'}{' '}
-                                        {rule.label}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
+                        {form.password && (() => {
+                            const passCount = PW_RULES.filter(r => r.test(form.password)).length;
+                            const level = passCount <= 1 ? 'weak' : passCount <= 2 ? 'fair' : passCount <= 3 ? 'good' : 'strong';
+                            const labelMap = { weak: '위험', fair: '보통', good: '안전', strong: '매우 안전' };
+                            return (
+                                <>
+                                    <div className={styles.strengthBar}>
+                                        <div className={`${styles.strengthFill} ${styles[`strength_${level}`]}`} />
+                                    </div>
+                                    <p className={`${styles.strengthText} ${styles[`strengthText_${level}`]}`}>
+                                        {labelMap[level]}
+                                    </p>
+                                </>
+                            );
+                        })()}
+                        <p className={styles.hint}>영문, 숫자, 특수문자 포함 8자 이상</p>
                     </div>
 
                     <div className={styles.inputGroup}>
@@ -479,7 +482,7 @@ export default function SignupPage() {
                         <input
                             type="text"
                             className={styles.input}
-                            placeholder="계좌번호 입력 (숫자만)"
+                            placeholder="- 없이 계좌번호 입력"
                             value={form.accountNo}
                             onChange={(e) =>
                                 setForm({
@@ -489,42 +492,37 @@ export default function SignupPage() {
                                 })
                             }
                         />
-                        {/* 은행 자동추천 */}
-                        {suggestedBanks.length > 0 && !form.bankName && (
-                            <>
-                                <p className={styles.hint}>이 은행이 맞으신가요?</p>
-                                <div className={styles.bankSuggestion}>
-                                    {suggestedBanks.map((b) => (
-                                        <button
-                                            key={b.code}
-                                            className={styles.bankChip}
-                                            onClick={() => setForm({ ...form, bankName: b.name, accountVerified: false })}
-                                        >
-                                            {b.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>은행</label>
-                        <select
-                            className={styles.input}
-                            value={form.bankName}
-                            onChange={(e) =>
-                                setForm({ ...form, bankName: e.target.value, accountVerified: false })
-                            }
-                        >
-                            <option value="">은행 선택</option>
-                            {BANKS.map((b) => (
-                                <option key={b.code} value={b.name}>
-                                    {b.name}
-                                </option>
-                            ))}
-                        </select>
-                        {form.bankName && <p className={styles.hintOk}>{form.bankName} 선택됨</p>}
+                        <label className={styles.inputLabel}>은행 선택</label>
+                        {/* 자동추천 하이라이트 */}
+                        {suggestedBanks.length > 0 && !form.bankName && (
+                            <p className={styles.hint} style={{ marginBottom: 8 }}>이 은행이 맞으신가요?</p>
+                        )}
+                        <div className={styles.bankGrid}>
+                            {BANKS.map((b) => {
+                                const isSuggested = suggestedBanks.some((s) => s.code === b.code);
+                                const isSelected = form.bankName === b.name;
+                                const iconName = b.name === 'IBK기업은행' ? '기업은행' : b.name === 'SC제일은행' ? '제일은행' : b.name;
+                                return (
+                                    <button
+                                        key={b.code}
+                                        className={isSelected ? styles.bankItemActive : styles.bankItem}
+                                        onClick={() => setForm({ ...form, bankName: b.name, accountVerified: false })}
+                                        style={isSuggested && !form.bankName ? { borderColor: '#3A8F47', background: '#F0FDF4' } : {}}
+                                    >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={`/images/bankicon/${iconName}.svg`}
+                                            alt={b.name}
+                                            className={styles.bankIcon}
+                                        />
+                                        <span className={styles.bankName}>{b.name.replace('은행', '').replace('NH농협', '농협').replace('IBK기업', '기업').replace('SC제일', 'SC')}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className={styles.inputGroup}>
