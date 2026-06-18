@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { IconUser, IconLock, IconEyeOff, IconEye } from '@tabler/icons-react';
 import styles from './login.module.css';
 
 function LoginContent() {
@@ -10,6 +11,7 @@ function LoginContent() {
     const searchParams = useSearchParams();
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPw, setShowPw] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -53,40 +55,60 @@ function LoginContent() {
 
     return (
         <div className={styles.page}>
+            {/* 헤더 */}
+            <header className={styles.header}>
+                <span className={styles.headerTitle}>로그인</span>
+            </header>
+            <div className={styles.divider} />
+
             <div className={styles.inner}>
                 {/* 로고 */}
-                <header className={styles.logoSection}>
+                <div className={styles.logoSection}>
                     <div className={styles.logoMark}>
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                             <path d="M14 3C14 3 7 7 7 14C7 18 9 22 14 26C19 22 21 18 21 14C21 7 14 3 14 3Z" fill="currentColor"/>
                         </svg>
                     </div>
                     <h1 className={styles.logoText}>마음부고 파트너</h1>
-                </header>
+                </div>
 
                 {/* 에러 */}
                 {error && <p className={styles.error}>{error}</p>}
 
                 {/* 폼 */}
                 <div className={styles.form}>
-                    <input
-                        type="tel"
-                        className={styles.input}
-                        placeholder="휴대폰 번호"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        autoComplete="tel"
-                    />
-                    <input
-                        type="password"
-                        className={styles.input}
-                        placeholder="비밀번호"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        autoComplete="current-password"
-                    />
+                    <div className={styles.inputWrap}>
+                        <IconUser size={18} stroke={1.5} className={styles.inputIcon} />
+                        <input
+                            type="tel"
+                            className={styles.input}
+                            placeholder="휴대폰 번호 입력"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            autoComplete="tel"
+                        />
+                    </div>
+                    <div className={styles.inputWrap}>
+                        <IconLock size={18} stroke={1.5} className={styles.inputIcon} />
+                        <input
+                            type={showPw ? 'text' : 'password'}
+                            className={styles.input}
+                            placeholder="비밀번호 입력"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            autoComplete="current-password"
+                        />
+                        <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() => setShowPw(!showPw)}
+                        >
+                            {showPw ? <IconEye size={18} stroke={1.5} /> : <IconEyeOff size={18} stroke={1.5} />}
+                        </button>
+                    </div>
+
                     <button
                         className={styles.loginBtn}
                         onClick={handleLogin}
@@ -96,11 +118,10 @@ function LoginContent() {
                     </button>
                 </div>
 
-                {/* 하단 */}
+                {/* 하단 링크 */}
                 <div className={styles.bottom}>
-                    <span className={styles.bottomText}>아직 파트너가 아니신가요?</span>
-                    <a href={`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`} className={styles.signupLink}>
-                        가입하기
+                    <a href={`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`} className={styles.bottomLink}>
+                        회원가입
                     </a>
                 </div>
             </div>
@@ -110,7 +131,7 @@ function LoginContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="loading-fallback" />}>
+        <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#fff' }} />}>
             <LoginContent />
         </Suspense>
     );

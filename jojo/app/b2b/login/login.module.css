@@ -1,32 +1,48 @@
-/* 로그인 */
+/* 로그인 — 바로부고 스타일 */
 
 .page {
     min-height: 100dvh;
     background: #fff;
     max-width: 480px;
     margin: 0 auto;
+}
+
+/* 헤더 */
+.header {
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.headerTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #191F28;
+}
+
+.divider {
+    height: 1px;
+    background: #E5E8EB;
+}
+
+/* 내부 */
 .inner {
-    width: 100%;
     padding: 0 28px;
 }
 
 /* 로고 */
 .logoSection {
     text-align: center;
-    margin-bottom: 48px;
+    padding: 40px 0 36px;
 }
 
 .logoMark {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 14px;
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 10px;
     background: #333D4B;
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,7 +50,7 @@
 }
 
 .logoText {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #191F28;
     letter-spacing: -0.02em;
@@ -56,52 +72,78 @@
     gap: 10px;
 }
 
-.input {
-    width: 100%;
-    height: 50px;
-    padding: 0 16px;
+.inputWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
     border: 1px solid #E5E8EB;
-    border-radius: 12px;
-    font-size: 15px;
-    color: #191F28;
-    background: #F9FAFB;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.15s, background 0.15s;
-    -webkit-appearance: none;
+    border-radius: 10px;
+    height: 52px;
+    background: #fff;
+    transition: border-color 0.15s;
 }
 
-.input:focus {
+.inputWrap:focus-within {
     border-color: #333D4B;
-    background: #fff;
+}
+
+.inputIcon {
+    flex-shrink: 0;
+    margin-left: 16px;
+    color: #8B95A1;
+}
+
+.input {
+    flex: 1;
+    height: 100%;
+    padding: 0 14px;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    color: #191F28;
+    outline: none;
+    -webkit-appearance: none;
+    font-family: inherit;
 }
 
 .input::placeholder {
     color: #ADB5BD;
 }
 
+.eyeBtn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #8B95A1;
+    cursor: pointer;
+}
+
+/* 로그인 버튼 */
 .loginBtn {
     width: 100%;
     height: 52px;
-    margin-top: 6px;
-    background: #333D4B;
+    margin-top: 12px;
+    background: #8B6C4C;
     color: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.15s;
     font-family: inherit;
 }
 
 .loginBtn:active {
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 .loginBtn:disabled {
-    background: #E5E8EB;
-    color: #ADB5BD;
+    background: #D5C4B0;
     cursor: default;
 }
 
@@ -110,22 +152,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-top: 28px;
+    gap: 16px;
+    margin-top: 24px;
+    padding-bottom: 40px;
 }
 
-.bottomText {
-    font-size: 13px;
-    color: #8B95A1;
-}
-
-.signupLink {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333D4B;
+.bottomLink {
+    font-size: 14px;
+    color: #4E5968;
     text-decoration: none;
+    font-weight: 500;
 }
 
-.signupLink:active {
+.bottomLink:active {
     opacity: 0.6;
 }

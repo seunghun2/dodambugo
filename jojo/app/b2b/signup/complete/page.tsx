@@ -1,103 +1,59 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import styles from '../signup.module.css';
 
 function CompleteContent() {
     const searchParams = useSearchParams();
     const code = searchParams.get('code') || '';
-    const [copied, setCopied] = useState(false);
-
-    const copyCode = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    const shareKakao = () => {
-        if (typeof window !== 'undefined' && (window as any).Kakao) {
-            const kakao = (window as any).Kakao;
-            if (!kakao.isInitialized()) return;
-            kakao.Share.sendDefault({
-                objectType: 'text',
-                text: `마음부고 파트너에 가입하시고 화환 판매 수익을 받아 보세요.\n\n추천 코드: ${code}`,
-                link: {
-                    mobileWebUrl: `${window.location.origin}/b2b/signup?ref=${code}`,
-                    webUrl: `${window.location.origin}/b2b/signup?ref=${code}`,
-                },
-            });
-        }
-    };
+    const name = (() => {
+        try {
+            const u = localStorage.getItem('b2b_user');
+            return u ? JSON.parse(u).owner_name : '';
+        } catch { return ''; }
+    })();
 
     return (
         <div className={styles.container}>
-            <div style={{ padding: '60px 20px 40px', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#191F28', marginBottom: '8px' }}>
-                    가입이 완료되었습니다.
+            {/* 헤더 */}
+            <div className={styles.header}>
+                <span style={{ width: 36 }} />
+                <span className={styles.headerTitle}>회원가입완료</span>
+                <span style={{ width: 36 }} />
+            </div>
+
+            <div style={{ padding: '80px 28px 40px', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#191F28', lineHeight: '1.4', marginBottom: '16px' }}>
+                    {name ? `${name} 님,` : ''}<br />
+                    <span style={{ color: '#8B6C4C' }}>마음부고 파트너</span> 환영합니다!
                 </h2>
                 <p style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '36px', lineHeight: '1.5' }}>
-                    부고장을 작성하시고 화환 판매 수익을<br />확인하실 수 있습니다.
+                    마음부고 파트너의 다양한 서비스를<br />이용하실 수 있습니다.
                 </p>
 
-                {/* 추천 코드 */}
+                {/* 가입 정보 카드 */}
                 <div style={{
-                    background: '#F9FAFB',
-                    borderRadius: '14px',
+                    border: '1px solid #E5E8EB',
+                    borderRadius: '12px',
                     padding: '20px',
-                    marginBottom: '12px',
+                    marginBottom: '40px',
+                    textAlign: 'center',
                 }}>
-                    <p style={{ fontSize: '12px', color: '#8B95A1', marginBottom: '6px' }}>
-                        나의 추천 코드
+                    <p style={{ fontSize: '13px', fontWeight: '600', color: '#333D4B', marginBottom: '10px' }}>
+                        [가입정보]
                     </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '24px', fontWeight: '700', color: '#191F28', letterSpacing: '2px' }}>
-                            {code}
-                        </span>
-                        <button
-                            onClick={copyCode}
-                            style={{
-                                height: '30px',
-                                padding: '0 12px',
-                                background: '#fff',
-                                border: '1px solid #E5E8EB',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                color: '#4E5968',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            {copied ? '복사 완료' : '복사'}
-                        </button>
-                    </div>
+                    {code && (
+                        <p style={{ fontSize: '14px', color: '#4E5968', marginBottom: '4px' }}>
+                            추천 코드: <strong>{code}</strong>
+                        </p>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#8B95A1' }}>
+                        가입일: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                    </p>
                 </div>
 
-                <p style={{ fontSize: '12px', color: '#8B95A1', marginBottom: '28px', lineHeight: '1.5' }}>
-                    다른 파트너에게 이 코드를 공유하시면<br />추천 수당을 받으실 수 있습니다.
-                </p>
-
-                {/* 카카오 공유 */}
-                <button
-                    onClick={shareKakao}
-                    style={{
-                        width: '100%',
-                        height: '48px',
-                        background: '#FEE500',
-                        color: '#191919',
-                        border: 'none',
-                        borderRadius: '12px',
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        marginBottom: '10px',
-                        fontFamily: 'inherit',
-                    }}
-                >
-                    카카오톡으로 공유하기
-                </button>
-
-                {/* 시작 */}
+                {/* 로그인하기 */}
                 <a
                     href="/b2b/dashboard"
                     style={{
@@ -105,17 +61,18 @@ function CompleteContent() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '100%',
-                        height: '48px',
-                        background: '#333D4B',
+                        height: '52px',
+                        background: '#8B6C4C',
                         color: '#fff',
-                        borderRadius: '12px',
-                        fontSize: '15px',
+                        borderRadius: '10px',
+                        fontSize: '16px',
                         fontWeight: '600',
                         textDecoration: 'none',
                         boxSizing: 'border-box',
+                        fontFamily: 'inherit',
                     }}
                 >
-                    시작하기
+                    로그인하기
                 </a>
             </div>
         </div>

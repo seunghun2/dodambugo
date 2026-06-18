@@ -277,8 +277,10 @@ export default function SignupPage() {
             {/* Step 1: 휴대폰 인증 */}
             {step === 1 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>휴대폰 번호 인증</h2>
-                    <p className={styles.stepDesc}>로그인에 사용할 번호를 입력해 주세요</p>
+                    <h2 className={styles.stepTitle}>
+                        휴대폰 번호<span className={styles.stepTitleSub}>를 인증해 주세요</span>
+                    </h2>
+                    <p className={styles.stepDesc}>로그인에 사용할 번호를 입력해 주세요.</p>
 
                     <input
                         type="tel"
@@ -315,24 +317,25 @@ export default function SignupPage() {
                     )}
 
                     {form.phoneVerified && (
-                        <div className={styles.verified}>인증이 완료되었습니다</div>
+                        <p className={styles.validOk}>인증이 완료되었습니다.</p>
                     )}
 
-                    <button
-                        className={styles.nextBtn}
-                        onClick={nextStep}
-                        disabled={!form.phoneVerified}
-                    >
-                        다음
-                    </button>
+                    <div className={styles.btnRow}>
+                        <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
+                        <button className={styles.nextBtn} onClick={nextStep} disabled={!form.phoneVerified}>
+                            다음단계
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Step 2: 비밀번호 설정 */}
             {step === 2 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>비밀번호 설정</h2>
-                    <p className={styles.stepDesc}>로그인에 사용할 비밀번호를 설정해 주세요</p>
+                    <h2 className={styles.stepTitle}>
+                        비밀번호<span className={styles.stepTitleSub}>를 설정해 주세요</span>
+                    </h2>
+                    <p className={styles.stepDesc}>로그인에 사용할 비밀번호를 설정해 주세요.</p>
 
                     <input
                         type="password"
@@ -341,6 +344,13 @@ export default function SignupPage() {
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                     />
+                    {form.password && form.password.length < 6 && (
+                        <p className={styles.validErr}>비밀번호는 6자리 이상 입력해 주세요.</p>
+                    )}
+                    {form.password.length >= 6 && (
+                        <p className={styles.validOk}>비밀번호가 유효합니다.</p>
+                    )}
+
                     <input
                         type="password"
                         className={styles.input}
@@ -348,37 +358,33 @@ export default function SignupPage() {
                         value={form.passwordConfirm}
                         onChange={(e) => setForm({ ...form, passwordConfirm: e.target.value })}
                     />
+                    {form.passwordConfirm && form.password !== form.passwordConfirm && (
+                        <p className={styles.validErr}>비밀번호가 일치하지 않습니다.</p>
+                    )}
+                    {form.passwordConfirm && form.password === form.passwordConfirm && (
+                        <p className={styles.validOk}>비밀번호가 일치합니다.</p>
+                    )}
 
-                    <div className={styles.checkList}>
-                        <span className={form.password.length >= 6 ? styles.checkOk : styles.checkNo}>
-                            {form.password.length >= 6 ? '✓' : '○'} 6자리 이상
-                        </span>
-                        <span
-                            className={
-                                form.password && form.password === form.passwordConfirm
-                                    ? styles.checkOk
-                                    : styles.checkNo
-                            }
+                    <div className={styles.btnRow}>
+                        <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
+                        <button
+                            className={styles.nextBtn}
+                            onClick={nextStep}
+                            disabled={form.password.length < 6 || form.password !== form.passwordConfirm}
                         >
-                            {form.password && form.password === form.passwordConfirm ? '✓' : '○'} 비밀번호 일치
-                        </span>
+                            다음단계
+                        </button>
                     </div>
-
-                    <button
-                        className={styles.nextBtn}
-                        onClick={nextStep}
-                        disabled={form.password.length < 6 || form.password !== form.passwordConfirm}
-                    >
-                        다음
-                    </button>
                 </div>
             )}
 
             {/* Step 3: 사업자 정보 */}
             {step === 3 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>사업자 정보</h2>
-                    <p className={styles.stepDesc}>정산 및 파트너 관리에 필요한 정보입니다</p>
+                    <h2 className={styles.stepTitle}>
+                        사업자 정보<span className={styles.stepTitleSub}>를 입력해 주세요</span>
+                    </h2>
+                    <p className={styles.stepDesc}>정산 및 파트너 관리에 필요한 정보입니다.</p>
 
                     <input
                         type="text"
@@ -395,21 +401,26 @@ export default function SignupPage() {
                         onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
                     />
 
-                    <button
-                        className={styles.nextBtn}
-                        onClick={nextStep}
-                        disabled={!form.companyName.trim() || !form.ownerName.trim()}
-                    >
-                        다음
-                    </button>
+                    <div className={styles.btnRow}>
+                        <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
+                        <button
+                            className={styles.nextBtn}
+                            onClick={nextStep}
+                            disabled={!form.companyName.trim() || !form.ownerName.trim()}
+                        >
+                            다음단계
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Step 4: 정산 계좌 */}
             {step === 4 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>정산 계좌 등록</h2>
-                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다</p>
+                    <h2 className={styles.stepTitle}>
+                        정산 계좌<span className={styles.stepTitleSub}>를 등록해 주세요</span>
+                    </h2>
+                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다.</p>
 
                     <select
                         className={styles.input}
@@ -462,30 +473,30 @@ export default function SignupPage() {
                         <div className={styles.verified}>계좌 확인 완료 (예금주: {form.accountHolder})</div>
                     )}
 
-                    <button
-                        className={styles.nextBtn}
-                        onClick={nextStep}
-                        disabled={!form.accountVerified}
-                    >
-                        다음
-                    </button>
-
-                    <button className={styles.skipBtn} onClick={nextStep}>
-                        건너뛰기
-                    </button>
+                    <div className={styles.btnRow}>
+                        <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
+                        <button
+                            className={styles.nextBtn}
+                            onClick={nextStep}
+                        >
+                            {form.accountVerified ? '다음단계' : '건너뛰기'}
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Step 5: 추천인 코드 */}
             {step === 5 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>추천인 코드</h2>
-                    <p className={styles.stepDesc}>추천인 코드가 있으시면 입력해 주세요</p>
+                    <h2 className={styles.stepTitle}>
+                        추천인 코드<span className={styles.stepTitleSub}>(선택)</span>
+                    </h2>
+                    <p className={styles.stepDesc}>추천인 코드가 있으시면 입력해 주세요.</p>
 
                     <input
                         type="text"
                         className={styles.input}
-                        placeholder="추천인 코드 (선택)"
+                        placeholder="추천인 코드 입력"
                         value={form.referralCode}
                         onChange={(e) => {
                             const code = e.target.value.toUpperCase();
@@ -501,12 +512,12 @@ export default function SignupPage() {
                     />
 
                     {form.referralInfo && (
-                        <div className={styles.verified}>
+                        <p className={styles.validOk}>
                             추천인 확인: {form.referralInfo.company_name} ({form.referralInfo.owner_name})
-                        </div>
+                        </p>
                     )}
 
-                    <p className={styles.skipText}>추천인 코드가 없으시면 비워두셔도 됩니다</p>
+                    <p className={styles.skipText}>추천인 코드가 없으시면 비워두셔도 됩니다.</p>
 
                     <button className={styles.submitBtn} onClick={handleSubmit} disabled={loading}>
                         {loading ? '가입 중...' : '가입하기'}

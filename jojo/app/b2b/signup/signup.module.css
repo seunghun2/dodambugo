@@ -1,4 +1,4 @@
-/* 회원가입 */
+/* 회원가입 — 바로부고 스타일 */
 
 .container {
     min-height: 100dvh;
@@ -14,11 +14,7 @@
     justify-content: space-between;
     height: 52px;
     padding: 0 16px;
-    border-bottom: 1px solid #F2F4F6;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #fff;
+    border-bottom: 1px solid #E5E8EB;
 }
 
 .backBtn {
@@ -32,10 +28,9 @@
     font-size: 18px;
     color: #191F28;
     cursor: pointer;
-    border-radius: 8px;
 }
 
-.backBtn:active { background: #F2F4F6; }
+.backBtn:active { opacity: 0.5; }
 
 .headerTitle {
     font-size: 15px;
@@ -43,49 +38,60 @@
     color: #191F28;
 }
 
-.headerRight { width: 36px; }
+.headerRight {
+    width: 36px;
+}
 
 /* 프로그레스 */
 .progress {
-    height: 2px;
+    height: 3px;
     background: #F2F4F6;
+    margin: 0 20px 8px;
 }
 
 .progressBar {
     height: 100%;
-    background: #333D4B;
-    transition: width 0.3s ease;
+    background: #8B6C4C;
+    border-radius: 2px;
+    transition: width 0.3s;
 }
 
 .stepLabel {
-    text-align: center;
     font-size: 12px;
-    color: #8B95A1;
-    padding: 10px 0 0;
+    color: #ADB5BD;
+    text-align: right;
+    padding: 0 20px;
+    margin-bottom: 4px;
 }
 
 /* 에러 */
 .error {
-    margin: 12px 20px 0;
+    margin: 8px 20px;
     padding: 10px 14px;
     background: #FFF5F5;
-    border-radius: 10px;
+    border-radius: 8px;
     color: #F04452;
     font-size: 13px;
     text-align: center;
 }
 
-/* 스텝 컨텐츠 */
+/* 스텝 본문 */
 .stepContent {
-    padding: 28px 20px 40px;
+    padding: 24px 20px 40px;
 }
 
+/* 스텝 타이틀 — 키워드 볼드 */
 .stepTitle {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    color: #191F28;
+    color: #8B6C4C;
     margin-bottom: 6px;
-    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+.stepTitleSub {
+    font-weight: 400;
+    color: #191F28;
 }
 
 .stepDesc {
@@ -98,137 +104,156 @@
 /* 인풋 */
 .input {
     width: 100%;
-    height: 50px;
+    height: 52px;
     padding: 0 16px;
     border: 1px solid #E5E8EB;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 15px;
     color: #191F28;
-    background: #F9FAFB;
+    background: #fff;
     outline: none;
     box-sizing: border-box;
     margin-bottom: 10px;
-    transition: border-color 0.15s, background 0.15s;
     -webkit-appearance: none;
+    font-family: inherit;
 }
 
 .input:focus {
-    border-color: #333D4B;
-    background: #fff;
+    border-color: #8B6C4C;
+}
+
+.input::placeholder {
+    color: #ADB5BD;
 }
 
 .input:disabled {
-    color: #ADB5BD;
     background: #F2F4F6;
+    color: #4E5968;
 }
 
-.input::placeholder { color: #ADB5BD; }
-
-select.input {
-    color: #191F28;
-    cursor: pointer;
+/* 인라인 유효성 메시지 */
+.validMsg {
+    font-size: 12px;
+    margin: -6px 0 10px 4px;
+    line-height: 1.3;
 }
 
-/* 인증코드 행 */
+.validOk {
+    composes: validMsg;
+    color: #12B886;
+}
+
+.validErr {
+    composes: validMsg;
+    color: #F04452;
+}
+
+/* 인증 관련 */
 .verifyRow {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.verifyRow .input { flex: 1; }
+.verifyRow .input {
+    flex: 1;
+}
 
 .timer {
+    position: absolute;
+    right: 14px;
     font-size: 14px;
+    font-weight: 600;
     color: #F04452;
-    font-weight: 600;
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
 }
 
-/* 보조 버튼 */
-.subBtn {
-    display: inline-block;
-    height: 44px;
-    padding: 0 20px;
-    background: #fff;
-    border: 1px solid #333D4B;
-    color: #333D4B;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 14px;
-    transition: background 0.15s;
-    font-family: inherit;
-}
-
-.subBtn:active { background: #F9FAFB; }
-
-.subBtn:disabled {
-    border-color: #E5E8EB;
-    color: #ADB5BD;
-    cursor: default;
-}
-
-/* 인증 완료 */
 .verified {
-    padding: 12px 16px;
-    background: #F0FFF4;
-    border-radius: 10px;
-    color: #12B886;
     font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 14px;
-    text-align: center;
+    color: #12B886;
+    font-weight: 500;
+    margin-bottom: 16px;
 }
 
-/* 비밀번호 체크 */
+/* 체크리스트 */
 .checkList {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 24px;
 }
 
-.checkOk { font-size: 13px; color: #12B886; }
-.checkNo { font-size: 13px; color: #CED4DA; }
+.checkOk {
+    font-size: 13px;
+    color: #12B886;
+    font-weight: 500;
+}
 
-/* 다음 버튼 */
-.nextBtn {
-    width: 100%;
+.checkNo {
+    font-size: 13px;
+    color: #ADB5BD;
+}
+
+/* 뒤로가기/다음 2버튼 */
+.btnRow {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.prevBtn {
+    flex: 1;
     height: 52px;
-    background: #333D4B;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
+    background: #fff;
+    border: 1px solid #E5E8EB;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
+    color: #333D4B;
     cursor: pointer;
-    margin-top: 8px;
-    transition: opacity 0.15s;
     font-family: inherit;
 }
 
-.nextBtn:active { opacity: 0.8; }
+.prevBtn:active { background: #F2F4F6; }
+
+.nextBtn {
+    flex: 1.5;
+    height: 52px;
+    background: #8B6C4C;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nextBtn:active { opacity: 0.85; }
 
 .nextBtn:disabled {
-    background: #E5E8EB;
-    color: #ADB5BD;
+    background: #D5C4B0;
     cursor: default;
 }
 
-/* 가입 완료 버튼 */
-.submitBtn {
-    composes: nextBtn;
-    background: #FFD43B;
-    color: #191F28;
+/* 서브 버튼 (인증번호 받기 등) */
+.subBtn {
+    width: 100%;
+    height: 48px;
+    background: #F2F4F6;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333D4B;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-family: inherit;
 }
 
-.submitBtn:disabled {
-    background: #E5E8EB;
-    color: #ADB5BD;
-}
+.subBtn:active { background: #E5E8EB; }
+.subBtn:disabled { color: #ADB5BD; cursor: default; }
 
 /* 건너뛰기 */
 .skipBtn {
@@ -236,18 +261,34 @@ select.input {
     height: 44px;
     background: none;
     border: none;
+    font-size: 14px;
     color: #8B95A1;
-    font-size: 13px;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: 4px;
     font-family: inherit;
 }
 
-.skipBtn:active { color: #4E5968; }
+.skipBtn:active { opacity: 0.5; }
 
 .skipText {
-    font-size: 12px;
+    font-size: 13px;
     color: #8B95A1;
-    text-align: center;
-    margin: 8px 0 14px;
+    margin-bottom: 20px;
 }
+
+/* 가입하기 최종 버튼 */
+.submitBtn {
+    width: 100%;
+    height: 52px;
+    background: #8B6C4C;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.submitBtn:active { opacity: 0.85; }
+.submitBtn:disabled { background: #D5C4B0; cursor: default; }
