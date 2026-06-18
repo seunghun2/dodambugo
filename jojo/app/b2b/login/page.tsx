@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { IconUser, IconLock, IconEyeOff, IconEye } from '@tabler/icons-react';
+import { IconUser, IconLock, IconEyeOff, IconEye, IconCheck } from '@tabler/icons-react';
 import styles from './login.module.css';
 
 function LoginContent() {
@@ -12,6 +12,7 @@ function LoginContent() {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [showPw, setShowPw] = useState(false);
+    const [autoLogin, setAutoLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -35,8 +36,13 @@ function LoginContent() {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                localStorage.setItem('b2b_token', data.token);
-                localStorage.setItem('b2b_user', JSON.stringify(data.user));
+                if (autoLogin) {
+                    localStorage.setItem('b2b_token', data.token);
+                    localStorage.setItem('b2b_user', JSON.stringify(data.user));
+                } else {
+                    sessionStorage.setItem('b2b_token', data.token);
+                    sessionStorage.setItem('b2b_user', JSON.stringify(data.user));
+                }
                 router.push('/b2b/dashboard');
             } else {
                 setError(data.error || '로그인에 실패했습니다.');
@@ -109,6 +115,17 @@ function LoginContent() {
                         </button>
                     </div>
 
+                    {/* 자동로그인 */}
+                    <label className={styles.autoLogin}>
+                        <span
+                            className={`${styles.checkbox} ${autoLogin ? styles.checkboxActive : ''}`}
+                            onClick={() => setAutoLogin(!autoLogin)}
+                        >
+                            {autoLogin && <IconCheck size={12} stroke={3} />}
+                        </span>
+                        <span className={styles.autoLoginText}>자동로그인</span>
+                    </label>
+
                     <button
                         className={styles.loginBtn}
                         onClick={handleLogin}
@@ -120,6 +137,8 @@ function LoginContent() {
 
                 {/* 하단 링크 */}
                 <div className={styles.bottom}>
+                    <span className={styles.bottomLink}>비밀번호 찾기</span>
+                    <span className={styles.bottomDivider}>|</span>
                     <a href={`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`} className={styles.bottomLink}>
                         회원가입
                     </a>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { IconEye, IconEyeOff, IconCheck } from '@tabler/icons-react';
 import commonStyles from '@/components/b2b/common.module.css';
 import styles from './signup.module.css';
 
@@ -23,23 +24,31 @@ interface FormData {
 }
 
 const BANKS = [
-    { code: '004', name: '국민은행' },
-    { code: '088', name: '신한은행' },
-    { code: '020', name: '우리은행' },
-    { code: '081', name: '하나은행' },
-    { code: '011', name: 'NH농협은행' },
-    { code: '003', name: 'IBK기업은행' },
-    { code: '023', name: 'SC제일은행' },
-    { code: '027', name: '씨티은행' },
-    { code: '039', name: '경남은행' },
-    { code: '034', name: '광주은행' },
-    { code: '031', name: '대구은행' },
-    { code: '032', name: '부산은행' },
-    { code: '037', name: '전북은행' },
-    { code: '035', name: '제주은행' },
-    { code: '090', name: '카카오뱅크' },
-    { code: '092', name: '토스뱅크' },
-    { code: '089', name: '케이뱅크' },
+    { code: '004', name: '국민은행', prefix: ['9'] },
+    { code: '088', name: '신한은행', prefix: ['110', '140'] },
+    { code: '020', name: '우리은행', prefix: ['1002', '1005'] },
+    { code: '081', name: '하나은행', prefix: ['910'] },
+    { code: '011', name: 'NH농협은행', prefix: ['351', '302'] },
+    { code: '003', name: 'IBK기업은행', prefix: ['01', '02'] },
+    { code: '023', name: 'SC제일은행', prefix: [] },
+    { code: '027', name: '씨티은행', prefix: [] },
+    { code: '039', name: '경남은행', prefix: [] },
+    { code: '034', name: '광주은행', prefix: [] },
+    { code: '031', name: '대구은행', prefix: [] },
+    { code: '032', name: '부산은행', prefix: [] },
+    { code: '037', name: '전북은행', prefix: [] },
+    { code: '035', name: '제주은행', prefix: [] },
+    { code: '090', name: '카카오뱅크', prefix: ['3333'] },
+    { code: '092', name: '토스뱅크', prefix: ['1000'] },
+    { code: '089', name: '케이뱅크', prefix: ['100'] },
+];
+
+// 비밀번호 규칙
+const PW_RULES = [
+    { key: 'length', label: '8자리 이상', test: (pw: string) => pw.length >= 8 },
+    { key: 'upper', label: '영문 대소문자', test: (pw: string) => /[a-zA-Z]/.test(pw) },
+    { key: 'number', label: '숫자 포함', test: (pw: string) => /[0-9]/.test(pw) },
+    { key: 'special', label: '특수문자 포함', test: (pw: string) => /[!@#$%^&*()_+\-=[\]{};':"|,.<>/?]/.test(pw) },
 ];
 
 export default function SignupPage() {
@@ -50,6 +59,8 @@ export default function SignupPage() {
     const [verifyCode, setVerifyCode] = useState('');
     const [codeSent, setCodeSent] = useState(false);
     const [timer, setTimer] = useState(0);
+    const [showPw, setShowPw] = useState(false);
+    const [showPwConfirm, setShowPwConfirm] = useState(false);
 
     const [form, setForm] = useState<FormData>({
         phone: '',
@@ -86,6 +97,15 @@ export default function SignupPage() {
         return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
+    // 비밀번호 유효성
+    const pwAllValid = PW_RULES.every((r) => r.test(form.password));
+    const pwMatch = form.password === form.passwordConfirm && form.passwordConfirm.length > 0;
+
+    // 계좌번호로 은행 추천
+    const suggestedBanks = form.accountNo.length >= 3
+        ? BANKS.filter((b) => b.prefix.some((p) => form.accountNo.startsWith(p)))
+        : [];
+
     // Step 1: SMS 인증번호 발송
     const sendVerification = async () => {
         const cleanPhone = form.phone.replace(/[^0-9]/g, '');
@@ -97,14 +117,12 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            // 중복 체크
-            const checkRes = await fetch('/api/b2b/signup', {
+            await fetch('/api/b2b/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: cleanPhone, checkOnly: true }),
             });
 
-            // 인증번호 발송
             const res = await fetch('/api/phone-verify/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -224,10 +242,8 @@ export default function SignupPage() {
             const data = await res.json();
 
             if (res.ok && data.success) {
-                // JWT 토큰 저장
                 localStorage.setItem('b2b_token', data.token);
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
-                // 가입 완료 페이지로
                 router.push(`/b2b/signup/complete?code=${data.user.my_referral_code}`);
             } else {
                 setError(data.error || '회원가입에 실패했습니다.');
@@ -238,13 +254,11 @@ export default function SignupPage() {
         setLoading(false);
     };
 
-    // 다음 단계로
     const nextStep = () => {
         setError('');
         setStep((prev) => (prev + 1) as Step);
     };
 
-    // 이전 단계로
     const prevStep = () => {
         setError('');
         if (step === 1) {
@@ -282,14 +296,16 @@ export default function SignupPage() {
                     </h2>
                     <p className={styles.stepDesc}>로그인에 사용할 번호를 입력해 주세요.</p>
 
-                    <input
-                        type="tel"
-                        className={styles.input}
-                        placeholder="010-0000-0000"
-                        value={form.phone}
-                        onChange={(e) => setForm({ ...form, phone: e.target.value, phoneVerified: false })}
-                        disabled={form.phoneVerified}
-                    />
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="tel"
+                            className={styles.input}
+                            placeholder="010-0000-0000"
+                            value={form.phone}
+                            onChange={(e) => setForm({ ...form, phone: e.target.value, phoneVerified: false })}
+                            disabled={form.phoneVerified}
+                        />
+                    </div>
 
                     {!codeSent && !form.phoneVerified && (
                         <button className={styles.subBtn} onClick={sendVerification} disabled={loading}>
@@ -317,7 +333,7 @@ export default function SignupPage() {
                     )}
 
                     {form.phoneVerified && (
-                        <p className={styles.validOk}>인증이 완료되었습니다.</p>
+                        <p className={styles.hintOk}>인증이 완료되었습니다.</p>
                     )}
 
                     <div className={styles.btnRow}>
@@ -335,42 +351,72 @@ export default function SignupPage() {
                     <h2 className={styles.stepTitle}>
                         비밀번호<span className={styles.stepTitleSub}>를 설정해 주세요</span>
                     </h2>
-                    <p className={styles.stepDesc}>로그인에 사용할 비밀번호를 설정해 주세요.</p>
+                    <p className={styles.stepDesc}>영문, 숫자, 특수문자를 조합하여 8자리 이상 입력해 주세요.</p>
 
-                    <input
-                        type="password"
-                        className={styles.input}
-                        placeholder="비밀번호 (6자리 이상)"
-                        value={form.password}
-                        onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    />
-                    {form.password && form.password.length < 6 && (
-                        <p className={styles.validErr}>비밀번호는 6자리 이상 입력해 주세요.</p>
-                    )}
-                    {form.password.length >= 6 && (
-                        <p className={styles.validOk}>비밀번호가 유효합니다.</p>
-                    )}
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>비밀번호</label>
+                        <div className={styles.pwWrap}>
+                            <input
+                                type={showPw ? 'text' : 'password'}
+                                className={styles.input}
+                                placeholder="비밀번호 입력"
+                                value={form.password}
+                                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                className={styles.pwEye}
+                                onClick={() => setShowPw(!showPw)}
+                            >
+                                {showPw ? <IconEye size={18} stroke={1.5} /> : <IconEyeOff size={18} stroke={1.5} />}
+                            </button>
+                        </div>
+                        {form.password && (
+                            <div className={styles.pwRules}>
+                                {PW_RULES.map((rule) => (
+                                    <span
+                                        key={rule.key}
+                                        className={rule.test(form.password) ? styles.ruleOk : styles.ruleItem}
+                                    >
+                                        {rule.test(form.password) ? <IconCheck size={12} stroke={2.5} /> : '○'}{' '}
+                                        {rule.label}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                    <input
-                        type="password"
-                        className={styles.input}
-                        placeholder="비밀번호 확인"
-                        value={form.passwordConfirm}
-                        onChange={(e) => setForm({ ...form, passwordConfirm: e.target.value })}
-                    />
-                    {form.passwordConfirm && form.password !== form.passwordConfirm && (
-                        <p className={styles.validErr}>비밀번호가 일치하지 않습니다.</p>
-                    )}
-                    {form.passwordConfirm && form.password === form.passwordConfirm && (
-                        <p className={styles.validOk}>비밀번호가 일치합니다.</p>
-                    )}
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>비밀번호 확인</label>
+                        <div className={styles.pwWrap}>
+                            <input
+                                type={showPwConfirm ? 'text' : 'password'}
+                                className={styles.input}
+                                placeholder="비밀번호 재입력"
+                                value={form.passwordConfirm}
+                                onChange={(e) => setForm({ ...form, passwordConfirm: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                className={styles.pwEye}
+                                onClick={() => setShowPwConfirm(!showPwConfirm)}
+                            >
+                                {showPwConfirm ? <IconEye size={18} stroke={1.5} /> : <IconEyeOff size={18} stroke={1.5} />}
+                            </button>
+                        </div>
+                        {form.passwordConfirm && (
+                            pwMatch
+                                ? <p className={styles.hintOk}>비밀번호가 일치합니다.</p>
+                                : <p className={styles.hintErr}>비밀번호가 일치하지 않습니다.</p>
+                        )}
+                    </div>
 
                     <div className={styles.btnRow}>
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
                         <button
                             className={styles.nextBtn}
                             onClick={nextStep}
-                            disabled={form.password.length < 6 || form.password !== form.passwordConfirm}
+                            disabled={!pwAllValid || !pwMatch}
                         >
                             다음단계
                         </button>
@@ -386,20 +432,26 @@ export default function SignupPage() {
                     </h2>
                     <p className={styles.stepDesc}>정산 및 파트너 관리에 필요한 정보입니다.</p>
 
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="상호명 (회사명)"
-                        value={form.companyName}
-                        onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-                    />
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="대표자명"
-                        value={form.ownerName}
-                        onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-                    />
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>상호명</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="회사명 또는 장례식장명"
+                            value={form.companyName}
+                            onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                        />
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>대표자명</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="대표자 성함"
+                            value={form.ownerName}
+                            onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
+                        />
+                    </div>
 
                     <div className={styles.btnRow}>
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
@@ -422,42 +474,71 @@ export default function SignupPage() {
                     </h2>
                     <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다.</p>
 
-                    <select
-                        className={styles.input}
-                        value={form.bankName}
-                        onChange={(e) =>
-                            setForm({ ...form, bankName: e.target.value, accountVerified: false })
-                        }
-                    >
-                        <option value="">은행 선택</option>
-                        {BANKS.map((b) => (
-                            <option key={b.code} value={b.name}>
-                                {b.name}
-                            </option>
-                        ))}
-                    </select>
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="계좌번호 (숫자만)"
-                        value={form.accountNo}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                accountNo: e.target.value.replace(/[^0-9]/g, ''),
-                                accountVerified: false,
-                            })
-                        }
-                    />
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="예금주"
-                        value={form.accountHolder}
-                        onChange={(e) =>
-                            setForm({ ...form, accountHolder: e.target.value, accountVerified: false })
-                        }
-                    />
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>계좌번호</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="계좌번호 입력 (숫자만)"
+                            value={form.accountNo}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    accountNo: e.target.value.replace(/[^0-9]/g, ''),
+                                    accountVerified: false,
+                                })
+                            }
+                        />
+                        {/* 은행 자동추천 */}
+                        {suggestedBanks.length > 0 && !form.bankName && (
+                            <>
+                                <p className={styles.hint}>이 은행이 맞으신가요?</p>
+                                <div className={styles.bankSuggestion}>
+                                    {suggestedBanks.map((b) => (
+                                        <button
+                                            key={b.code}
+                                            className={styles.bankChip}
+                                            onClick={() => setForm({ ...form, bankName: b.name, accountVerified: false })}
+                                        >
+                                            {b.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>은행</label>
+                        <select
+                            className={styles.input}
+                            value={form.bankName}
+                            onChange={(e) =>
+                                setForm({ ...form, bankName: e.target.value, accountVerified: false })
+                            }
+                        >
+                            <option value="">은행 선택</option>
+                            {BANKS.map((b) => (
+                                <option key={b.code} value={b.name}>
+                                    {b.name}
+                                </option>
+                            ))}
+                        </select>
+                        {form.bankName && <p className={styles.hintOk}>{form.bankName} 선택됨</p>}
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>예금주</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="예금주 성함"
+                            value={form.accountHolder}
+                            onChange={(e) =>
+                                setForm({ ...form, accountHolder: e.target.value, accountVerified: false })
+                            }
+                        />
+                    </div>
 
                     {!form.accountVerified && (
                         <button
@@ -465,7 +546,7 @@ export default function SignupPage() {
                             onClick={verifyAccount}
                             disabled={loading || !form.bankName || !form.accountNo || !form.accountHolder}
                         >
-                            {loading ? '확인 중...' : '계좌 확인'}
+                            {loading ? '확인 중...' : '계좌 실명 확인'}
                         </button>
                     )}
 
@@ -475,10 +556,7 @@ export default function SignupPage() {
 
                     <div className={styles.btnRow}>
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
-                        <button
-                            className={styles.nextBtn}
-                            onClick={nextStep}
-                        >
+                        <button className={styles.nextBtn} onClick={nextStep}>
                             {form.accountVerified ? '다음단계' : '건너뛰기'}
                         </button>
                     </div>
@@ -493,26 +571,28 @@ export default function SignupPage() {
                     </h2>
                     <p className={styles.stepDesc}>추천인 코드가 있으시면 입력해 주세요.</p>
 
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="추천인 코드 입력"
-                        value={form.referralCode}
-                        onChange={(e) => {
-                            const code = e.target.value.toUpperCase();
-                            setForm({ ...form, referralCode: code });
-                            if (code.length >= 8) {
-                                checkReferral(code);
-                            } else {
-                                setForm((prev) => ({ ...prev, referralCode: code, referralInfo: null }));
-                                setError('');
-                            }
-                        }}
-                        maxLength={8}
-                    />
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="추천인 코드 입력"
+                            value={form.referralCode}
+                            onChange={(e) => {
+                                const code = e.target.value.toUpperCase();
+                                setForm({ ...form, referralCode: code });
+                                if (code.length >= 8) {
+                                    checkReferral(code);
+                                } else {
+                                    setForm((prev) => ({ ...prev, referralCode: code, referralInfo: null }));
+                                    setError('');
+                                }
+                            }}
+                            maxLength={8}
+                        />
+                    </div>
 
                     {form.referralInfo && (
-                        <p className={styles.validOk}>
+                        <p className={styles.hintOk}>
                             추천인 확인: {form.referralInfo.company_name} ({form.referralInfo.owner_name})
                         </p>
                     )}

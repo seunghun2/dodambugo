@@ -1,4 +1,4 @@
-/* 회원가입 — 바로부고 스타일 */
+/* 회원가입 */
 
 .container {
     min-height: 100dvh;
@@ -33,7 +33,7 @@
 .backBtn:active { opacity: 0.5; }
 
 .headerTitle {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: #191F28;
 }
@@ -80,7 +80,7 @@
     padding: 24px 20px 40px;
 }
 
-/* 스텝 타이틀 — 키워드 볼드 */
+/* 스텝 타이틀 */
 .stepTitle {
     font-size: 22px;
     font-weight: 700;
@@ -102,6 +102,18 @@
 }
 
 /* 인풋 */
+.inputGroup {
+    margin-bottom: 16px;
+}
+
+.inputLabel {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333D4B;
+    margin-bottom: 6px;
+}
+
 .input {
     width: 100%;
     height: 52px;
@@ -113,13 +125,17 @@
     background: #fff;
     outline: none;
     box-sizing: border-box;
-    margin-bottom: 10px;
     -webkit-appearance: none;
     font-family: inherit;
+    transition: border-color 0.15s;
 }
 
 .input:focus {
     border-color: #333D4B;
+}
+
+.inputFocusError:focus {
+    border-color: #F04452;
 }
 
 .input::placeholder {
@@ -131,21 +147,65 @@
     color: #4E5968;
 }
 
+/* 비밀번호 인풋 래핑 (눈 토글) */
+.pwWrap {
+    position: relative;
+}
+
+.pwWrap .input {
+    padding-right: 44px;
+}
+
+.pwEye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8B95A1;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+}
+
 /* 인라인 유효성 메시지 */
-.validMsg {
+.hint {
     font-size: 12px;
-    margin: -6px 0 10px 4px;
+    color: #8B95A1;
+    margin-top: 6px;
     line-height: 1.3;
 }
 
-.validOk {
-    composes: validMsg;
+.hintOk {
+    composes: hint;
     color: #12B886;
 }
 
-.validErr {
-    composes: validMsg;
+.hintErr {
+    composes: hint;
     color: #F04452;
+}
+
+/* 비밀번호 조건 체크리스트 */
+.pwRules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-top: 8px;
+}
+
+.ruleItem {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #ADB5BD;
+}
+
+.ruleOk {
+    composes: ruleItem;
+    color: #12B886;
 }
 
 /* 인증 관련 */
@@ -173,33 +233,44 @@
     font-size: 13px;
     color: #12B886;
     font-weight: 500;
-    margin-bottom: 16px;
+    margin-top: 6px;
+    margin-bottom: 12px;
 }
 
-/* 체크리스트 */
-.checkList {
+/* 은행 자동추천 */
+.bankSuggestion {
+    margin-top: 8px;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 24px;
 }
 
-.checkOk {
+.bankChip {
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 13px;
-    color: #12B886;
-    font-weight: 500;
+    border: 1px solid #E5E8EB;
+    background: #fff;
+    color: #4E5968;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
 }
 
-.checkNo {
-    font-size: 13px;
-    color: #ADB5BD;
+.bankChip:active { background: #F2F4F6; }
+
+.bankChipActive {
+    composes: bankChip;
+    background: #333D4B;
+    border-color: #333D4B;
+    color: #fff;
 }
 
 /* 뒤로가기/다음 2버튼 */
 .btnRow {
     display: flex;
     gap: 10px;
-    margin-top: 24px;
+    margin-top: 28px;
 }
 
 .prevBtn {
@@ -233,11 +304,11 @@
 .nextBtn:active { opacity: 0.85; }
 
 .nextBtn:disabled {
-    background: #ADB5BD;
+    background: #D1D6DB;
     cursor: default;
 }
 
-/* 서브 버튼 (인증번호 받기 등) */
+/* 서브 버튼 */
 .subBtn {
     width: 100%;
     height: 48px;
@@ -248,7 +319,7 @@
     font-weight: 600;
     color: #333D4B;
     cursor: pointer;
-    margin-bottom: 10px;
+    margin-top: 8px;
     font-family: inherit;
 }
 
@@ -256,20 +327,6 @@
 .subBtn:disabled { color: #ADB5BD; cursor: default; }
 
 /* 건너뛰기 */
-.skipBtn {
-    width: 100%;
-    height: 44px;
-    background: none;
-    border: none;
-    font-size: 14px;
-    color: #8B95A1;
-    cursor: pointer;
-    margin-top: 4px;
-    font-family: inherit;
-}
-
-.skipBtn:active { opacity: 0.5; }
-
 .skipText {
     font-size: 13px;
     color: #8B95A1;
@@ -288,7 +345,8 @@
     color: #fff;
     cursor: pointer;
     font-family: inherit;
+    margin-top: 8px;
 }
 
 .submitBtn:active { opacity: 0.85; }
-.submitBtn:disabled { background: #ADB5BD; cursor: default; }
+.submitBtn:disabled { background: #D1D6DB; cursor: default; }
