@@ -384,6 +384,19 @@ select.input {
     margin-bottom: 20px;
 }
 
+.skipLink {
+    font-size: 13px;
+    color: #8B95A1;
+    text-align: center;
+    margin-top: 16px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.skipLink:active {
+    color: #6B7684;
+}
+
 /* 가입하기 */
 .submitBtn {
     width: 100%;

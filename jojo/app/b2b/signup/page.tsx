@@ -564,10 +564,9 @@ export default function SignupPage() {
 
                     <div className={styles.btnRow}>
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
-                        <button className={styles.nextBtn} onClick={nextStep}>
-                            {form.accountVerified ? '다음단계' : '건너뛰기'}
-                        </button>
+                        <button className={styles.nextBtn} onClick={nextStep}>다음</button>
                     </div>
+                    <p className={styles.skipLink} onClick={nextStep}>나중에 등록할게요</p>
                 </div>
             )}
 
