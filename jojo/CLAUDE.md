@@ -90,6 +90,10 @@ git show --name-only HEAD | grep -v "^jojo/"
 
 커밋 메시지 접두사: `feat(b2b):`, `fix(b2b):`, `style(b2b):` 등 `(b2b)` 스코프 사용.
 
+배포 브랜치:
+- `main` — 개발용. push해도 Production에 영향 없음 (Preview만 트리거, 현재 에러 무시)
+- `nextjs` — **Production 배포 브랜치**. B2B 완성 후에만 merge할 것
+
 ---
 
 ## 6. B2B 디자인 시스템
