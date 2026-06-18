@@ -66,7 +66,33 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
-## 5. B2B 디자인 시스템
+## 5. Git 커밋/푸시 정책
+
+**jojo는 dodam 모노레포(`seunghun2/dodambugo`) 안의 서브디렉토리이다. 마음부고 코드와 섞이지 않도록 반드시 아래 규칙을 따를 것.**
+
+커밋 시:
+```bash
+# 올바른 방법 — jojo 경로만 스테이징
+cd /Users/el/Desktop/dodam
+git add jojo/
+git commit -m "feat(b2b): 설명"
+
+# 절대 금지 — 루트에서 전체 add
+git add -A   # ❌ 마음부고 파일까지 섞임
+git add .    # ❌ 마음부고 파일까지 섞임
+```
+
+푸시 전 확인:
+```bash
+# 커밋에 jojo/ 외 파일이 없는지 확인
+git show --name-only HEAD | grep -v "^jojo/"
+```
+
+커밋 메시지 접두사: `feat(b2b):`, `fix(b2b):`, `style(b2b):` 등 `(b2b)` 스코프 사용.
+
+---
+
+## 6. B2B 디자인 시스템
 
 **B2B 파트너 앱(`/app/b2b/`, `/components/b2b/`) 작업 시 반드시 `.agent/design-system.md`를 참조할 것.**
 
