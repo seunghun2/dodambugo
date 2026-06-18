@@ -24,24 +24,40 @@ interface FormData {
 }
 
 const BANKS = [
-    { code: '004', name: '국민은행', prefix: ['9'] },
-    { code: '088', name: '신한은행', prefix: ['110', '140'] },
-    { code: '020', name: '우리은행', prefix: ['1002', '1005'] },
-    { code: '081', name: '하나은행', prefix: ['910'] },
-    { code: '011', name: 'NH농협은행', prefix: ['351', '302'] },
-    { code: '003', name: 'IBK기업은행', prefix: ['01', '02'] },
-    { code: '023', name: 'SC제일은행', prefix: [] },
-    { code: '027', name: '씨티은행', prefix: [] },
-    { code: '039', name: '경남은행', prefix: [] },
-    { code: '034', name: '광주은행', prefix: [] },
-    { code: '031', name: '대구은행', prefix: [] },
-    { code: '032', name: '부산은행', prefix: [] },
-    { code: '037', name: '전북은행', prefix: [] },
-    { code: '035', name: '제주은행', prefix: [] },
-    { code: '090', name: '카카오뱅크', prefix: ['3333'] },
-    { code: '092', name: '토스뱅크', prefix: ['1000'] },
-    { code: '089', name: '케이뱅크', prefix: ['100'] },
+    { code: '004', name: '국민은행', prefix: ['9'], fmt: [3, 2, 4, 3] },
+    { code: '088', name: '신한은행', prefix: ['110', '140'], fmt: [3, 3, 6] },
+    { code: '020', name: '우리은행', prefix: ['1002', '1005'], fmt: [4, 3, 6] },
+    { code: '081', name: '하나은행', prefix: ['910'], fmt: [3, 6, 5] },
+    { code: '011', name: 'NH농협은행', prefix: ['351', '302'], fmt: [3, 4, 4, 2] },
+    { code: '003', name: 'IBK기업은행', prefix: ['01', '02'], fmt: [3, 6, 2, 3] },
+    { code: '023', name: 'SC제일은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '027', name: '씨티은행', prefix: [], fmt: [3, 6, 3] },
+    { code: '039', name: '경남은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '034', name: '광주은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '031', name: '대구은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '032', name: '부산은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '037', name: '전북은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '035', name: '제주은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '090', name: '카카오뱅크', prefix: ['3333'], fmt: [4, 2, 7] },
+    { code: '092', name: '토스뱅크', prefix: ['1000'], fmt: [4, 4, 4] },
+    { code: '089', name: '케이뱅크', prefix: ['100'], fmt: [3, 3, 6] },
 ];
+
+// 계좌번호 포맷팅 (은행별 하이픈)
+function formatAccountNo(raw: string, bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank || !raw) return raw;
+    const digits = raw.replace(/[^0-9]/g, '');
+    const parts: string[] = [];
+    let idx = 0;
+    for (const len of bank.fmt) {
+        if (idx >= digits.length) break;
+        parts.push(digits.slice(idx, idx + len));
+        idx += len;
+    }
+    if (idx < digits.length) parts.push(digits.slice(idx));
+    return parts.join('-');
+}
 
 // 비밀번호 규칙
 const PW_RULES = [
@@ -478,23 +494,6 @@ export default function SignupPage() {
                     <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다.</p>
 
                     <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>계좌번호</label>
-                        <input
-                            type="text"
-                            className={styles.input}
-                            placeholder="- 없이 계좌번호 입력"
-                            value={form.accountNo}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    accountNo: e.target.value.replace(/[^0-9]/g, ''),
-                                    accountVerified: false,
-                                })
-                            }
-                        />
-                    </div>
-
-                    <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>은행</label>
                         <select
                             className={styles.input}
@@ -510,6 +509,23 @@ export default function SignupPage() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>계좌번호</label>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder={form.bankName ? formatAccountNo('0'.repeat(14), form.bankName).replace(/0/g, '0') : '계좌번호 입력'}
+                            value={form.bankName ? formatAccountNo(form.accountNo, form.bankName) : form.accountNo}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    accountNo: e.target.value.replace(/[^0-9]/g, ''),
+                                    accountVerified: false,
+                                })
+                            }
+                        />
                     </div>
 
                     <div className={styles.inputGroup}>
