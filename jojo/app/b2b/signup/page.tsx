@@ -24,20 +24,20 @@ interface FormData {
 }
 
 const BANKS = [
-    { code: '004', name: '국민은행', prefix: ['9'], fmt: [3, 2, 4, 3] },
+    { code: '004', name: '국민은행', prefix: ['9'], fmt: [6, 2, 6] },
     { code: '088', name: '신한은행', prefix: ['110', '140'], fmt: [3, 3, 6] },
     { code: '020', name: '우리은행', prefix: ['1002', '1005'], fmt: [4, 3, 6] },
     { code: '081', name: '하나은행', prefix: ['910'], fmt: [3, 6, 5] },
     { code: '011', name: 'NH농협은행', prefix: ['351', '302'], fmt: [3, 4, 4, 2] },
     { code: '003', name: 'IBK기업은행', prefix: ['01', '02'], fmt: [3, 6, 2, 3] },
-    { code: '023', name: 'SC제일은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '023', name: 'SC제일은행', prefix: [], fmt: [3, 2, 6] },
     { code: '027', name: '씨티은행', prefix: [], fmt: [3, 6, 3] },
-    { code: '039', name: '경남은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '039', name: '경남은행', prefix: [], fmt: [3, 2, 6] },
     { code: '034', name: '광주은행', prefix: [], fmt: [3, 3, 6] },
-    { code: '031', name: '대구은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '031', name: '대구은행', prefix: [], fmt: [3, 2, 6, 1] },
     { code: '032', name: '부산은행', prefix: [], fmt: [3, 4, 4, 2] },
-    { code: '037', name: '전북은행', prefix: [], fmt: [3, 3, 6] },
-    { code: '035', name: '제주은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '037', name: '전북은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '035', name: '제주은행', prefix: [], fmt: [2, 2, 6] },
     { code: '090', name: '카카오뱅크', prefix: ['3333'], fmt: [4, 2, 7] },
     { code: '092', name: '토스뱅크', prefix: ['1000'], fmt: [4, 4, 4] },
     { code: '089', name: '케이뱅크', prefix: ['100'], fmt: [3, 3, 6] },
@@ -57,6 +57,13 @@ function formatAccountNo(raw: string, bankName: string): string {
     }
     if (idx < digits.length) parts.push(digits.slice(idx));
     return parts.join('-');
+}
+
+// placeholder 생성 (은행 포맷에 맞는 0 패턴)
+function getPlaceholder(bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank) return '계좌번호 입력';
+    return bank.fmt.map((n) => '0'.repeat(n)).join('-');
 }
 
 // 비밀번호 규칙
@@ -516,7 +523,7 @@ export default function SignupPage() {
                         <input
                             type="text"
                             className={styles.input}
-                            placeholder={form.bankName ? formatAccountNo('0'.repeat(14), form.bankName).replace(/0/g, '0') : '계좌번호 입력'}
+                            placeholder={form.bankName ? getPlaceholder(form.bankName) : '계좌번호 입력'}
                             value={form.bankName ? formatAccountNo(form.accountNo, form.bankName) : form.accountNo}
                             onChange={(e) =>
                                 setForm({
