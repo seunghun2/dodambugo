@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
     };
 
     // Step 1: 인증 확인
-    const confirmCode = async () => {
+    const confirmCode = async (code: string) => {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         setError('');
         setLoading(true);
@@ -87,17 +87,19 @@ export default function ForgotPasswordPage() {
             const res = await fetch('/api/phone-verify/confirm', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: cleanPhone, code: verifyCode }),
+                body: JSON.stringify({ phone: cleanPhone, code }),
             });
             const data = await res.json();
             if (res.ok) {
                 setVerified(true);
                 setStep(2);
             } else {
-                setError(data.error || '인증에 실패했습니다.');
+                setError(data.error || '인증번호가 일치하지 않습니다.');
+                setVerifyCode('');
             }
         } catch {
             setError('인증 확인 중 오류가 발생했습니다.');
+            setVerifyCode('');
         }
         setLoading(false);
     };
@@ -185,14 +187,17 @@ export default function ForgotPasswordPage() {
                                         className={styles.input}
                                         placeholder="인증번호 6자리"
                                         value={verifyCode}
-                                        onChange={(e) => setVerifyCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+                                            setVerifyCode(val);
+                                            if (val.length === 6) confirmCode(val);
+                                        }}
                                         maxLength={6}
+                                        disabled={loading}
                                     />
                                     {timer > 0 && <span className={styles.timer}>{formatTimer(timer)}</span>}
                                 </div>
-                                <button className={styles.subBtn} onClick={confirmCode} disabled={loading || verifyCode.length !== 6}>
-                                    {loading ? '확인 중...' : '인증 확인'}
-                                </button>
+                                {loading && <p className={styles.hint}>인증 확인 중...</p>}
                             </>
                         )}
                     </>
