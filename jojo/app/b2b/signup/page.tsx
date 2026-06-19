@@ -349,7 +349,7 @@ export default function SignupPage() {
                                 />
                                 {timer > 0 && <span className={styles.timer}>{formatTimer(timer)}</span>}
                             </div>
-                            <button className={styles.subBtn} onClick={confirmVerification} disabled={loading}>
+                            <button className={styles.subBtn} onClick={confirmVerification} disabled={loading || verifyCode.length !== 6}>
                                 {loading ? '확인 중...' : '인증 확인'}
                             </button>
                         </>
