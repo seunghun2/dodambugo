@@ -1,11 +1,11 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
-import styles from '../signup.module.css';
 
 function CompleteContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const code = searchParams.get('code') || '';
     const name = (() => {
         try {
@@ -15,65 +15,109 @@ function CompleteContent() {
     })();
 
     return (
-        <div className={styles.container}>
+        <div style={{
+            minHeight: '100dvh',
+            background: '#fff',
+            maxWidth: 480,
+            margin: '0 auto',
+        }}>
             {/* 헤더 */}
-            <div className={styles.header}>
-                <span style={{ width: 36 }} />
-                <span className={styles.headerTitle}>회원가입완료</span>
-                <span style={{ width: 36 }} />
-            </div>
+            <header style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 52,
+                borderBottom: '1px solid #E5E8EB',
+            }}>
+                <span style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>가입 완료</span>
+            </header>
 
-            <div style={{ padding: '80px 28px 40px', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#191F28', lineHeight: '1.4', marginBottom: '16px' }}>
-                    {name ? `${name} 님,` : ''}<br />
-                    <span style={{ color: '#3A8F47' }}>마음부고 파트너</span> 환영합니다!
-                </h2>
-                <p style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '36px', lineHeight: '1.5' }}>
-                    마음부고 파트너의 다양한 서비스를<br />이용하실 수 있습니다.
-                </p>
-
-                {/* 가입 정보 카드 */}
-                <div style={{
-                    border: '1px solid #E5E8EB',
-                    borderRadius: '12px',
-                    padding: '20px',
-                    marginBottom: '40px',
-                    textAlign: 'center',
-                }}>
-                    <p style={{ fontSize: '13px', fontWeight: '600', color: '#3A8F47', marginBottom: '10px' }}>
-                        [가입정보]
-                    </p>
-                    {code && (
-                        <p style={{ fontSize: '14px', color: '#4E5968', marginBottom: '4px' }}>
-                            추천 코드: <strong>{code}</strong>
-                        </p>
-                    )}
-                    <p style={{ fontSize: '12px', color: '#8B95A1' }}>
-                        가입일: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-                    </p>
+            <div style={{ padding: '60px 28px 40px', textAlign: 'center' }}>
+                {/* 체크 아이콘 */}
+                <div style={{ marginBottom: 20 }}>
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                        <circle cx="28" cy="28" r="28" fill="#F0FDF4"/>
+                        <path d="M17 28L24 35L39 20" stroke="#3A8F47" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                 </div>
 
-                {/* 로그인하기 */}
-                <a
-                    href="/b2b/dashboard"
+                <h2 style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: '#1A1A1A',
+                    lineHeight: 1.4,
+                    marginBottom: 8,
+                }}>
+                    {name ? `${name} 님,` : ''}
+                    {name ? <br /> : null}
+                    가입이 완료되었습니다
+                </h2>
+                <p style={{
+                    fontSize: 14,
+                    color: '#8B95A1',
+                    marginBottom: 36,
+                    lineHeight: 1.6,
+                }}>
+                    마음부고 파트너의 다양한 서비스를<br/>이용하실 수 있습니다.
+                </p>
+
+                {/* 추천 코드 */}
+                {code && (
+                    <div style={{
+                        border: '1px solid #E5E8EB',
+                        borderRadius: 12,
+                        padding: '20px 16px',
+                        marginBottom: 32,
+                    }}>
+                        <p style={{ fontSize: 12, color: '#8B95A1', marginBottom: 8 }}>나의 추천 코드</p>
+                        <p style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            color: '#1A1A1A',
+                            letterSpacing: '0.05em',
+                            marginBottom: 12,
+                        }}>{code}</p>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(code);
+                                alert('추천 코드가 복사되었습니다.');
+                            }}
+                            style={{
+                                padding: '8px 20px',
+                                background: '#F2F4F6',
+                                border: 'none',
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: '#4E5968',
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                            }}
+                        >
+                            복사하기
+                        </button>
+                    </div>
+                )}
+
+                {/* 시작하기 */}
+                <button
+                    onClick={() => router.push('/b2b/dashboard')}
                     style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                         width: '100%',
-                        height: '52px',
+                        height: 52,
                         background: '#3A8F47',
                         color: '#fff',
-                        borderRadius: '10px',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        boxSizing: 'border-box',
+                        border: 'none',
+                        borderRadius: 10,
+                        fontSize: 16,
+                        fontWeight: 600,
+                        cursor: 'pointer',
                         fontFamily: 'inherit',
+                        WebkitTapHighlightColor: 'transparent',
                     }}
                 >
-                    로그인하기
-                </a>
+                    시작하기
+                </button>
             </div>
         </div>
     );
