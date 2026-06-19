@@ -137,7 +137,7 @@ function LoginContent() {
 
                 {/* 하단 링크 */}
                 <div className={styles.bottom}>
-                    <span className={styles.bottomLink}>비밀번호 찾기</span>
+                    <a href="/b2b/login/forgot" className={styles.bottomLink}>비밀번호 찾기</a>
                     <span className={styles.bottomDivider}>|</span>
                     <a href={`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`} className={styles.bottomLink}>
                         회원가입
