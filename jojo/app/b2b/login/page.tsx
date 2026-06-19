@@ -137,11 +137,9 @@ function LoginContent() {
 
                 {/* 하단 링크 */}
                 <div className={styles.bottom}>
-                    <a href="/b2b/login/forgot" className={styles.bottomLink}>비밀번호 찾기</a>
+                    <span className={styles.bottomLink} onClick={() => router.push('/b2b/login/forgot')}>비밀번호 찾기</span>
                     <span className={styles.bottomDivider}>|</span>
-                    <a href={`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`} className={styles.bottomLink}>
-                        회원가입
-                    </a>
+                    <span className={styles.bottomLink} onClick={() => router.push(`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`)}>회원가입</span>
                 </div>
             </div>
         </div>
