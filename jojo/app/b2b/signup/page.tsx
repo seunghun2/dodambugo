@@ -66,6 +66,14 @@ function getPlaceholder(bankName: string): string {
     return bank.fmt.map((n) => '0'.repeat(n)).join('-');
 }
 
+// 휴대폰 번호 포맷 (010-0000-0000)
+function formatPhone(val: string): string {
+    const digits = val.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
 // 비밀번호 규칙
 const PW_RULES = [
     { key: 'length', label: '8자리 이상', test: (pw: string) => pw.length >= 8 },
@@ -322,16 +330,17 @@ export default function SignupPage() {
                     <div className={styles.inputGroup}>
                         <input
                             type="tel"
+                            inputMode="numeric"
                             className={styles.input}
                             placeholder="010-0000-0000"
-                            value={form.phone}
-                            onChange={(e) => setForm({ ...form, phone: e.target.value, phoneVerified: false })}
+                            value={formatPhone(form.phone)}
+                            onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 11), phoneVerified: false })}
                             disabled={form.phoneVerified}
                         />
                     </div>
 
                     {!codeSent && !form.phoneVerified && (
-                        <button className={styles.subBtn} onClick={sendVerification} disabled={loading}>
+                        <button className={styles.subBtn} onClick={sendVerification} disabled={loading || form.phone.replace(/[^0-9]/g, '').length !== 11}>
                             {loading ? '발송 중...' : '인증번호 받기'}
                         </button>
                     )}
@@ -340,11 +349,12 @@ export default function SignupPage() {
                         <>
                             <div className={styles.verifyRow}>
                                 <input
-                                    type="text"
+                                    type="tel"
+                                    inputMode="numeric"
                                     className={styles.input}
                                     placeholder="인증번호 6자리"
                                     value={verifyCode}
-                                    onChange={(e) => setVerifyCode(e.target.value)}
+                                    onChange={(e) => setVerifyCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                                     maxLength={6}
                                 />
                                 {timer > 0 && <span className={styles.timer}>{formatTimer(timer)}</span>}
