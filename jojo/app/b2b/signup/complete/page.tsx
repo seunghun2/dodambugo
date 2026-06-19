@@ -14,6 +14,16 @@ function CompleteContent() {
         } catch { return ''; }
     })();
 
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월 ${String(now.getDate()).padStart(2, '0')}일 ${String(now.getHours()).padStart(2, '0')}시 ${String(now.getMinutes()).padStart(2, '0')}분 ${String(now.getSeconds()).padStart(2, '0')}초`;
+
+    const phone = (() => {
+        try {
+            const u = localStorage.getItem('b2b_user');
+            return u ? JSON.parse(u).phone : '';
+        } catch { return ''; }
+    })();
+
     return (
         <div style={{
             minHeight: '100dvh',
@@ -25,79 +35,80 @@ function CompleteContent() {
             <header style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
                 height: 52,
+                padding: '0 16px',
                 borderBottom: '1px solid #E5E8EB',
             }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>가입 완료</span>
+                <button
+                    onClick={() => router.push('/b2b/login')}
+                    style={{
+                        width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'none', border: 'none', fontSize: 18, color: '#1A1A1A', cursor: 'pointer',
+                    }}
+                >‹</button>
+                <span style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>회원가입완료</span>
+                <button
+                    onClick={() => router.push('/b2b/dashboard')}
+                    style={{
+                        width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'none', border: 'none', fontSize: 18, color: '#1A1A1A', cursor: 'pointer',
+                    }}
+                >✕</button>
             </header>
 
             <div style={{ padding: '60px 28px 40px', textAlign: 'center' }}>
-                {/* 체크 아이콘 */}
-                <div style={{ marginBottom: 20 }}>
-                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-                        <circle cx="28" cy="28" r="28" fill="#F0FDF4"/>
-                        <path d="M17 28L24 35L39 20" stroke="#3A8F47" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </div>
-
+                {/* 환영 메시지 */}
                 <h2 style={{
                     fontSize: 22,
                     fontWeight: 700,
                     color: '#1A1A1A',
-                    lineHeight: 1.4,
-                    marginBottom: 8,
+                    lineHeight: 1.5,
+                    marginBottom: 16,
                 }}>
-                    {name ? `${name} 님,` : ''}
-                    {name ? <br /> : null}
-                    가입이 완료되었습니다
+                    {name ? <>{name} 님,<br /></> : null}
+                    <span style={{ fontWeight: 800 }}>마음부고</span> 환영합니다!
                 </h2>
                 <p style={{
                     fontSize: 14,
                     color: '#8B95A1',
-                    marginBottom: 36,
+                    marginBottom: 40,
                     lineHeight: 1.6,
                 }}>
-                    마음부고 파트너의 다양한 서비스를<br/>이용하실 수 있습니다.
+                    마음부고의 다양한 서비스를<br/>이용하실 수 있습니다.
                 </p>
 
-                {/* 추천 코드 */}
-                {code && (
-                    <div style={{
-                        border: '1px solid #E5E8EB',
-                        borderRadius: 12,
-                        padding: '20px 16px',
-                        marginBottom: 32,
-                    }}>
-                        <p style={{ fontSize: 12, color: '#8B95A1', marginBottom: 8 }}>나의 추천 코드</p>
-                        <p style={{
-                            fontSize: 20,
-                            fontWeight: 700,
-                            color: '#1A1A1A',
-                            letterSpacing: '0.05em',
-                            marginBottom: 12,
-                        }}>{code}</p>
-                        <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(code);
-                                alert('추천 코드가 복사되었습니다.');
-                            }}
-                            style={{
-                                padding: '8px 20px',
-                                background: '#F2F4F6',
-                                border: 'none',
-                                borderRadius: 8,
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: '#4E5968',
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                            }}
-                        >
-                            복사하기
-                        </button>
-                    </div>
-                )}
+                {/* 가입정보 카드 */}
+                <div style={{
+                    border: '1px solid #E5E8EB',
+                    borderRadius: 12,
+                    padding: '24px 20px',
+                    marginBottom: 40,
+                    textAlign: 'center',
+                }}>
+                    <p style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: '#1A1A1A',
+                        marginBottom: 16,
+                    }}>[가입정보]</p>
+
+                    {phone && (
+                        <p style={{ fontSize: 14, color: '#4E5968', marginBottom: 6 }}>
+                            ID: <strong>{phone}</strong>
+                        </p>
+                    )}
+
+                    {code && (
+                        <p style={{ fontSize: 14, color: '#4E5968', marginBottom: 6 }}>
+                            추천코드: <strong>{code}</strong>
+                        </p>
+                    )}
+
+                    <p style={{ fontSize: 14, color: '#4E5968' }}>
+                        가입일: {dateStr}
+                    </p>
+                </div>
 
                 {/* 시작하기 */}
                 <button
