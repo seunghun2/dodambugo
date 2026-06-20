@@ -728,17 +728,30 @@
   opacity: 0.3;
 }
 
-/* 대표상주 뱃지 */
+/* 대표상주 말풍선 뱃지 */
 .mnPrimaryBadge {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 4px;
+  position: relative;
+  padding: 4px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
   color: #fff;
   background: #3A8F47;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   letter-spacing: -0.02em;
+}
+
+.mnPrimaryBadge::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 16px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #3A8F47;
 }
 
 /* --- 카드 가로 레이아웃 --- */
@@ -957,13 +970,16 @@
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 600;
-  color: var(--b2b-accent);
-  padding: 2px 6px;
+  color: #3A8F47;
+  background: #E8F5E9;
+  padding: 4px 12px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .mnAccountRegText:hover {
-  text-decoration: underline;
+  background: #C8E6C9;
 }
 
 .mnAccountDetail {
@@ -1014,7 +1030,7 @@
   gap: 6px;
   background: none;
   border: none;
-  border-top: 1px solid var(--b2b-border-light);
+  border-bottom: 1px solid var(--b2b-border-light);
   font-size: 15px;
   font-weight: 600;
   color: var(--b2b-text-primary);
@@ -1022,7 +1038,7 @@
   font-family: inherit;
   letter-spacing: -0.02em;
   transition: all var(--transition-fast);
-  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .mnAddPersonBtn:hover {

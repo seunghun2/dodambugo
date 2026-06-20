@@ -784,9 +784,7 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                         onClick={() => toggleAccount(realIndex)}
                       >
                         <span className={styles.mnAccountToggleLeft}>
-                          <span className={styles.mnAccountChevron}>
-                            {isAccountOpen ? '△' : '▽'}
-                          </span>
+                          <IconChevronDown size={14} className={styles.mnAccountChevron} style={{ transform: isAccountOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
                           <IconWallet size={16} />
                           {hasAccount
                             ? `${item.mourner.bank} ${item.mourner.accountNumber}`
