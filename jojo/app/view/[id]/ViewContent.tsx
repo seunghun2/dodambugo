@@ -90,6 +90,7 @@ interface BugoData {
     applicant_name: string;
     phone_password: string;
     deceased_name: string;
+    b2b_user_id?: string | null;
     gender?: string;
     age?: number;
     death_date?: string;
@@ -686,7 +687,7 @@ ${url}
                                 </div>
                             </a>
                         </div>
-                        <p className="memorial-cta-powered">마음부고</p>
+                        <p className="memorial-cta-powered">{bugo.b2b_user_id ? '부고온' : '마음부고'}</p>
                     </div>
                 </div>
             )}
