@@ -1033,34 +1033,34 @@
   transform: scale(0.98);
 }
 
-/* --- 관계 추가 버튼 (전체 리스트 맨 아래, dashed) --- */
+/* --- 관계 추가 버튼 (전체 리스트 맨 아래, 검정 배경) --- */
 .mnAddRelationBtn {
   width: 100%;
-  height: 44px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--bg-white);
-  border: 1.5px dashed var(--b2b-border);
+  background: #1A1A1A;
+  border: none;
   border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--b2b-text-secondary);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.02em;
   transition: all var(--transition-fast);
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .mnAddRelationBtn:hover {
-  border-color: var(--b2b-accent);
-  color: var(--b2b-accent);
+  background: #333;
 }
 
 .mnAddRelationBtn:active {
   transform: scale(0.98);
+  opacity: 0.9;
 }
 
 /* --- 토스트 --- */
@@ -1150,13 +1150,41 @@
 .mnSheetItem {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 14px 0;
   border-bottom: 1px solid var(--b2b-border-light);
 }
 
 .mnSheetItem:last-child {
   border-bottom: none;
+}
+
+.mnSheetItemDragging {
+  opacity: 0.5;
+  background: var(--bg-gray);
+  border-radius: 8px;
+}
+
+/* 왼쪽: ▲▼ + 드래그 그립 */
+.mnSheetItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mnSheetGrip {
+  cursor: grab;
+  color: var(--b2b-text-tertiary);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  touch-action: none;
+}
+
+.mnSheetGrip:active {
+  cursor: grabbing;
+  color: var(--b2b-text-primary);
 }
 
 .mnSheetItemName {
