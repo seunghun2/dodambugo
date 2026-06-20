@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { IconUpload, IconPlus, IconStar, IconStarFilled, IconCheck } from '@tabler/icons-react';
+import { IconUpload, IconPlus, IconCheck } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
 interface Props {
@@ -25,10 +25,39 @@ const DEATH_TERMS = [
 ];
 
 const LOGO_PRESETS = [
-  { id: 'preed', name: '프리드라이프', url: 'https://via.placeholder.com/150x80?text=PREED' },
-  { id: 'boram', name: '보람상조', url: 'https://via.placeholder.com/150x80?text=BORAM' },
-  { id: 'kyowon', name: '교원라이프', url: 'https://via.placeholder.com/150x80?text=KYOWON' },
-  { id: 'daemyung', name: '대명아임레디', url: 'https://via.placeholder.com/150x80?text=DAEMYUNG' },
+  { id: 'preed', name: '프리드라이프', url: '/images/sangjo/프리드라이프.png' },
+  { id: 'kyowon', name: '교원라이프', url: '/images/sangjo/교원라이프.png' },
+  { id: 'sonoad', name: '소노아임레디', url: '/images/sangjo/소노아임레디.png' },
+  { id: 'yedaham', name: '더케이예다함', url: '/images/sangjo/더케이예다함.png' },
+  { id: 'boram', name: '보람상조', url: '/images/sangjo/보람상조.png' },
+  { id: 'bumo', name: '부모사랑', url: '/images/sangjo/부모사랑.png' },
+  { id: 'sejong', name: '세종라이프', url: '/images/sangjo/세종라이프.png' },
+  { id: 'cktps', name: 'CKTPS라이프', url: '/images/sangjo/CKTPS라이프.png' },
+  { id: 'agape', name: '아가페라이프', url: '/images/sangjo/아가페라이프.png' },
+  { id: 'arum', name: '아름라이프상조', url: '/images/sangjo/아름라이프상조.png' },
+  { id: 'inet', name: '아이넷라이프', url: '/images/sangjo/아이넷라이프.png' },
+  { id: 'sanrim', name: '산림조합라이프', url: '/images/sangjo/산림조합라이프.png' },
+  { id: 'hdtours', name: '에이치디투어즈', url: '/images/sangjo/에이치디투어즈.png' },
+  { id: 'aplus', name: '에이플러스라이프', url: '/images/sangjo/에이플러스라이프.png' },
+  { id: 'yesarang', name: '예사랑라이프', url: '/images/sangjo/예사랑라이프.png' },
+  { id: 'olife', name: '오라이프', url: '/images/sangjo/오라이프.png' },
+  { id: 'wooritour', name: '우리관광', url: '/images/sangjo/우리관광.png' },
+  { id: 'woorijeju', name: '우리제주상조', url: '/images/sangjo/우리제주상조.png' },
+  { id: 'jabin', name: '자빈', url: '/images/sangjo/자빈.png' },
+  { id: 'jhlife', name: '제이에이치라이프', url: '/images/sangjo/제이에이치라이프.png' },
+  { id: 'jklife', name: '제이케이라이프', url: '/images/sangjo/제이케이라이프.png' },
+  { id: 'jejuilchul', name: '제주일출상조', url: '/images/sangjo/제주일출상조.png' },
+  { id: 'jejujangrye', name: '제주장례협동조합', url: '/images/sangjo/제주장례협동조합.png' },
+  { id: 'goodworld', name: '좋은세상', url: '/images/sangjo/좋은세상.png' },
+  { id: 'jiulife', name: '지우라이프상조', url: '/images/sangjo/지우라이프상조.png' },
+  { id: 'hanra', name: '한라상조', url: '/images/sangjo/한라상조.png' },
+  { id: 'happyending', name: '해피엔딩', url: '/images/sangjo/해피엔딩.png' },
+  { id: 'hyundaes', name: '현대에스라이프', url: '/images/sangjo/현대에스라이프.png' },
+  { id: 'hyundaitour', name: '현대투어플랜', url: '/images/sangjo/현대투어플랜.png' },
+  { id: 'hyowon', name: '효원상조', url: '/images/sangjo/효원상조.png' },
+  { id: 'humanlife', name: '휴먼라이프', url: '/images/sangjo/휴먼라이프.png' },
+  { id: 'daehan', name: '대한더라이프', url: '/images/sangjo/대한더라이프.png' },
+  { id: 'thejoeun', name: '더좋은라이프', url: '/images/sangjo/더좋은라이프.png' }
 ];
 
 // 토글 스위치 컴포넌트
@@ -55,32 +84,8 @@ function Toggle({
 export default function OptionsSection({ formData, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showLogoModal, setShowLogoModal] = useState(false);
-  const [activeLogoTab, setActiveLogoTab] = useState<'favorites' | 'presets' | 'custom'>('favorites');
-  const [favoriteLogos, setFavoriteLogos] = useState<string[]>([]);
+  const [activeLogoTab, setActiveLogoTab] = useState<'presets' | 'custom'>('presets');
   
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('b2b_favorite_logos');
-      if (stored) {
-        setFavoriteLogos(JSON.parse(stored));
-      } else {
-        // 프리드라이프, 보람상조를 기본 즐겨찾기로 세팅
-        setFavoriteLogos(['preed', 'boram']);
-        localStorage.setItem('b2b_favorite_logos', JSON.stringify(['preed', 'boram']));
-      }
-    } catch {}
-  }, []);
-
-  const toggleFavoriteLogo = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setFavoriteLogos(prev => {
-      const isFav = prev.includes(id);
-      const next = isFav ? prev.filter(v => v !== id) : [...prev, id];
-      localStorage.setItem('b2b_favorite_logos', JSON.stringify(next));
-      return next;
-    });
-  };
-
   // 바텀시트 스와이프 닫기 로직
   const sheetDragStartY = useRef(0);
   const handleSheetTouchStart = (e: React.TouchEvent) => {
@@ -165,12 +170,6 @@ export default function OptionsSection({ formData, onChange }: Props) {
             
             <div className={styles.logoTabs}>
               <button 
-                className={`${styles.logoTab} ${activeLogoTab === 'favorites' ? styles.logoTabActive : ''}`}
-                onClick={() => setActiveLogoTab('favorites')}
-              >
-                즐겨찾기
-              </button>
-              <button 
                 className={`${styles.logoTab} ${activeLogoTab === 'presets' ? styles.logoTabActive : ''}`}
                 onClick={() => setActiveLogoTab('presets')}
               >
@@ -185,45 +184,9 @@ export default function OptionsSection({ formData, onChange }: Props) {
             </div>
 
             <div className={styles.sheetContent}>
-              {activeLogoTab === 'favorites' && (
-                <div className={styles.logoGrid}>
-                  {favoriteLogos.length === 0 ? (
-                    <div className={styles.favoritesEmpty}>즐겨찾기된 로고가 없습니다.</div>
-                  ) : (
-                    LOGO_PRESETS.filter(p => favoriteLogos.includes(p.id)).map(logo => (
-                      <div 
-                        key={logo.id} 
-                        className={`${styles.logoGridItem} ${formData.partner_logo_url === logo.url ? styles.logoGridItemActive : ''}`}
-                        onClick={() => handleLogoSelect(logo.url)}
-                      >
-                        <div className={styles.logoImgWrapper}>
-                          <img src={logo.url} alt={logo.name} />
-                          {formData.partner_logo_url === logo.url && (
-                            <div className={styles.logoCheckmark}>
-                              <IconCheck size={16} color="white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className={styles.logoItemFooter}>
-                          <span className={styles.logoItemName}>{logo.name}</span>
-                          <button 
-                            type="button" 
-                            className={styles.logoStarBtn}
-                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
-                          >
-                            <IconStarFilled size={18} color="#F1C40F" />
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-
               {activeLogoTab === 'presets' && (
                 <div className={styles.logoGrid}>
                   {LOGO_PRESETS.map(logo => {
-                    const isFav = favoriteLogos.includes(logo.id);
                     return (
                       <div 
                         key={logo.id} 
@@ -240,13 +203,6 @@ export default function OptionsSection({ formData, onChange }: Props) {
                         </div>
                         <div className={styles.logoItemFooter}>
                           <span className={styles.logoItemName}>{logo.name}</span>
-                          <button 
-                            type="button" 
-                            className={styles.logoStarBtn}
-                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
-                          >
-                            {isFav ? <IconStarFilled size={18} color="#F1C40F" /> : <IconStar size={18} color="#DDDDDD" />}
-                          </button>
                         </div>
                       </div>
                     );
