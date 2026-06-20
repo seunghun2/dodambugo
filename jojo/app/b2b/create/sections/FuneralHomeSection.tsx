@@ -80,12 +80,14 @@ export default function FuneralHomeSection({ formData, onChange, onOpenFacilityS
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>장례식장 정보</h2>
+        <h2 className={styles.sectionTitle}>
+          장례식장 정보<span className={styles.requiredMark}>*</span>
+        </h2>
         {!isNoBinso && (
           <div className={styles.favoritesDropdown} ref={dropdownRef}>
             <button
               type="button"
-              className={styles.iconBtn}
+              className={styles.favBtn}
               onClick={() => setShowFavorites((v) => !v)}
             >
               <IconStar size={15} />

@@ -219,6 +219,32 @@
   background: rgba(58, 143, 71, 0.06);
 }
 
+/* 자주찾는 식장 버튼 (회색 pill) */
+.favBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--b2b-text-secondary);
+  background: none;
+  border: 1px solid var(--b2b-border);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  transition: all var(--transition-fast);
+}
+
+.favBtn:active {
+  background: var(--bg-gray);
+}
+
+.favBtn svg {
+  color: #F5A623;
+}
+
 /* ===== 검색 버튼 (인풋 옆) ===== */
 .searchBtn {
   height: 52px;
@@ -529,11 +555,10 @@
   gap: 5px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--bg-white);
-  background: var(--b2b-accent);
+  color: var(--b2b-text-primary);
+  background: none;
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 7px 12px;
+  padding: 6px 0;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.02em;
@@ -541,7 +566,56 @@
 }
 
 .aiBtn:active {
-  opacity: 0.85;
+  opacity: 0.7;
+}
+
+/* AI 뱃지 (파란 원 안에 AI) */
+.aiBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #2B3674;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* 필수 마크 (빨간 *) */
+.requiredMark {
+  color: #E53E3E;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+/* 체크박스 우측 정렬 */
+.checkboxRight {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+  margin-bottom: 12px;
+}
+
+/* 입력필드 + 단위(세) */
+.inputWithUnit {
+  position: relative;
+}
+
+.inputWithUnit .input {
+  padding-right: 36px;
+}
+
+.unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--b2b-text-secondary);
+  pointer-events: none;
 }
 
 /* ===== 반응형 ===== */
