@@ -6,6 +6,14 @@ import { Suspense } from 'react';
 import { IconUser, IconLock, IconEyeOff, IconEye, IconCheck } from '@tabler/icons-react';
 import styles from './login.module.css';
 
+// 휴대폰 번호 포맷 (010-0000-0000)
+function formatPhone(val: string): string {
+    const digits = val.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -26,13 +34,20 @@ function LoginContent() {
             setError('휴대폰 번호와 비밀번호를 입력해 주세요.');
             return;
         }
+
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        if (cleanPhone.length !== 10 && cleanPhone.length !== 11) {
+            setError('올바른 휴대폰 번호 형식이 아닙니다.');
+            return;
+        }
+
         setError('');
         setLoading(true);
         try {
             const res = await fetch('/api/b2b/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, password }),
+                body: JSON.stringify({ phone: cleanPhone, password }),
             });
             const data = await res.json();
             if (res.ok && data.success) {
@@ -75,7 +90,7 @@ function LoginContent() {
                             <path d="M14 3C14 3 7 7 7 14C7 18 9 22 14 26C19 22 21 18 21 14C21 7 14 3 14 3Z" fill="currentColor"/>
                         </svg>
                     </div>
-                    <h1 className={styles.logoText}>마음부고 파트너</h1>
+                    <h1 className={styles.logoText}>부고온 파트너</h1>
                 </div>
 
                 {/* 에러 */}
@@ -90,7 +105,7 @@ function LoginContent() {
                             className={styles.input}
                             placeholder="휴대폰 번호 입력"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(formatPhone(e.target.value))}
                             onKeyDown={handleKeyDown}
                             autoComplete="tel"
                         />

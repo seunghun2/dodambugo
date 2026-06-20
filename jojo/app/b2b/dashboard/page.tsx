@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  IconChevronRight, IconBell, IconFilePlus, IconFileSearch,
-  IconFlower, IconMail, IconWallet, IconUsers
-} from '@tabler/icons-react';
 import { BottomTabBar } from '@/components/b2b/BottomTabBar';
 import styles from './dashboard.module.css';
 
@@ -24,6 +20,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [balanceVisible, setBalanceVisible] = useState(false);
 
+  // 데이터 로딩
   const fetchData = useCallback(async () => {
     const token = localStorage.getItem('b2b_token');
     const userData = localStorage.getItem('b2b_user');
@@ -31,16 +28,54 @@ export default function DashboardPage() {
       router.push('/b2b/login');
       return;
     }
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+
+    // 최신 정보 DB에서 동기화
+    try {
+      const res = await fetch('/api/b2b/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem('b2b_user', JSON.stringify(data.user));
+        }
+      }
+    } catch (err) {
+      console.error('사용자 정보 실시간 동기화 실패:', err);
+    }
   }, [router]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const copyCode = () => {
     if (user) {
       navigator.clipboard.writeText(user.my_referral_code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const shareCode = async () => {
+    if (!user) return;
+    const text = `[부고온 파트너] ${user.owner_name}님이 추천 코드를 보냈습니다.\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n파트너 앱 다운로드: https://bugoon.co.kr/download/partner`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '부고온 파트너 추천',
+          text: text,
+        });
+      } catch (err) {
+        console.error('공유 실패:', err);
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+      }
+    } else {
+      window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     }
   };
 
@@ -52,9 +87,12 @@ export default function DashboardPage() {
     <div className={styles.page}>
       {/* 헤더 */}
       <header className={styles.header}>
-        <span className={styles.headerTitle}>마음부고 파트너</span>
+        <span className={styles.headerTitle}>부고온 파트너</span>
         <button className={styles.headerBtn} onClick={() => {}}>
-          <IconBell size={20} stroke={1.5} />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
         </button>
       </header>
 
@@ -63,25 +101,35 @@ export default function DashboardPage() {
         <div className={styles.ctaText}>
           <h2 className={styles.ctaTitle}>부고장 만들기</h2>
           <p className={styles.ctaDesc}>
-            장례식장, 고인, 상주 정보를{'\n'}등록해 주세요.
+            장례식장, 고인, 상주 정보를{"\n"}등록해 주세요.
           </p>
         </div>
         <div className={styles.ctaIcon}>
-          <IconFilePlus size={30} stroke={1.8} />
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
         </div>
       </section>
 
       {/* 부고장 관리 카드 */}
       <section className={styles.section}>
-        <div className={styles.card} onClick={() => {}}>
+        <div className={styles.card} onClick={() => router.push('/b2b/manage')}>
           <div className={styles.cardLeft}>
             <h3 className={styles.cardTitle}>부고장 관리</h3>
             <p className={styles.cardDesc}>
-              작성한 부고장을 확인하고{'\n'}수정 또는 삭제할 수 있습니다.
+              작성한 부고장을 확인하고{"\n"}수정 또는 삭제할 수 있습니다.
             </p>
           </div>
           <div className={styles.cardIcon}>
-            <IconFileSearch size={26} stroke={1.8} />
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <circle cx="11.5" cy="14.5" r="2.5"></circle>
+              <line x1="13.3" y1="16.3" x2="16" y2="19"></line>
+            </svg>
           </div>
         </div>
       </section>
@@ -89,22 +137,30 @@ export default function DashboardPage() {
       {/* 3열 기능 카드 */}
       <section className={styles.section}>
         <div className={styles.featureGrid}>
-          <div className={styles.featureCard} onClick={() => {}}>
-            <span className={styles.featureLabel}>상주별{'\n'}부고장 보기</span>
+          <div className={styles.featureCard} onClick={() => router.push('/b2b/inquiry')}>
+            <span className={styles.featureLabel}>1:1{"\n"}문의하기</span>
             <div className={styles.featureIcon}>
-              <IconUsers size={22} stroke={1.8} />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
             </div>
           </div>
           <div className={styles.featureCard} onClick={() => router.push('/b2b/wallet')}>
-            <span className={styles.featureLabel}>화환{'\n'}보내기</span>
+            <span className={styles.featureLabel}>화환{"\n"}보내기</span>
             <div className={styles.featureIcon}>
-              <IconFlower size={22} stroke={1.8} />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12"></path>
+              </svg>
             </div>
           </div>
-          <div className={styles.featureCard} onClick={() => {}}>
-            <span className={styles.featureLabel}>답례문{'\n'}보내기</span>
+          <div className={styles.featureCard} onClick={() => router.push('/b2b/manage')}>
+            <span className={styles.featureLabel}>답례문{"\n"}보내기</span>
             <div className={styles.featureIcon}>
-              <IconMail size={22} stroke={1.8} />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
             </div>
           </div>
         </div>
@@ -115,7 +171,17 @@ export default function DashboardPage() {
         <div className={styles.balanceRow}>
           <span className={styles.balanceLabel}>적립 예정 금액</span>
           {balanceVisible ? (
-            <span className={styles.balanceAmount}>{fmt(user.balance || 0)}원</span>
+            <div className={styles.balanceActiveRow}>
+              <span className={styles.balanceAmount} onClick={() => router.push('/b2b/wallet')}>
+                {fmt(user.balance || 0)}원
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px', verticalAlign: 'middle', opacity: 0.7 }}>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              <button className={styles.hideBtn} onClick={(e) => { e.stopPropagation(); setBalanceVisible(false); }}>
+                가리기
+              </button>
+            </div>
           ) : (
             <button className={styles.inquiryBtn} onClick={() => setBalanceVisible(true)}>
               조회하기
@@ -131,9 +197,14 @@ export default function DashboardPage() {
             <span className={styles.referralLabel}>나의 추천 코드</span>
             <span className={styles.referralCode}>{user.my_referral_code}</span>
           </div>
-          <button className={styles.copyBtn} onClick={copyCode}>
-            {copied ? '복사 완료' : '복사'}
-          </button>
+          <div className={styles.btnGroup}>
+            <button className={styles.copyBtn} onClick={copyCode}>
+              {copied ? '복사 완료' : '복사'}
+            </button>
+            <button className={styles.shareBtn} onClick={shareCode}>
+              공유
+            </button>
+          </div>
         </div>
       </section>
 
@@ -142,7 +213,9 @@ export default function DashboardPage() {
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>공지사항</h3>
           <button className={styles.moreBtn}>
-            <IconChevronRight size={18} />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
         <div className={styles.noticeCard}>
@@ -163,4 +236,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconArrowLeft, IconWallet } from '@tabler/icons-react';
 import { BottomTabBar } from '@/components/b2b/BottomTabBar';
-import commonStyles from '@/components/b2b/common.module.css';
 import styles from './wallet.module.css';
 
 interface Transaction {
@@ -25,32 +23,74 @@ export default function WalletPage() {
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [identityVerified, setIdentityVerified] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // 탭 및 필터 상태
+    const [activeTab, setActiveTab] = useState<'reward' | 'withdraw'>('reward');
+    const [rewardFilter, setRewardFilter] = useState<'all' | 'wreath' | 'referral'>('all');
+    const [withdrawSort, setWithdrawSort] = useState<'recent' | 'old'>('recent');
+
+    // 바텀시트 모달 상태
+    const [showRewardFilterModal, setShowRewardFilterModal] = useState(false);
+    const [showWithdrawSortModal, setShowWithdrawSortModal] = useState(false);
 
     const getToken = () => localStorage.getItem('b2b_token');
 
     const fetchWallet = useCallback(async () => {
+        console.log('[CLIENT DEBUG] fetchWallet start');
         const token = getToken();
-        if (!token) { router.push('/b2b/login'); return; }
+        console.log('[CLIENT DEBUG] fetchWallet token exists:', !!token);
+        if (!token) {
+            setLoading(false);
+            router.push('/b2b/login');
+            return;
+        }
 
         try {
+            console.log('[CLIENT DEBUG] Fetching /api/b2b/wallet...');
             const res = await fetch('/api/b2b/wallet', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (res.status === 401) { router.push('/b2b/login'); return; }
+            console.log('[CLIENT DEBUG] Fetch result status:', res.status);
+            if (res.status === 401) {
+                localStorage.removeItem('b2b_token');
+                localStorage.removeItem('b2b_user');
+                router.push('/b2b/login');
+                return;
+            }
             const data = await res.json();
-            setBalance(data.balance);
-            setTransactions(data.transactions);
-        } catch {
+            console.log('[CLIENT DEBUG] Wallet data received:', data);
+            setBalance(data.balance || 0);
+            setTransactions(data.transactions || []);
+            setIdentityVerified(data.identity_verified || false);
+        } catch (err) {
+            console.error('[CLIENT DEBUG] fetchWallet error:', err);
             setError('데이터를 불러오지 못했습니다.');
+        } finally {
+            console.log('[CLIENT DEBUG] fetchWallet finally -> setLoading(false)');
+            setLoading(false);
         }
-        setLoading(false);
     }, [router]);
 
-    useEffect(() => { fetchWallet(); }, [fetchWallet]);
+    useEffect(() => {
+        fetchWallet();
+    }, [fetchWallet]);
 
     const handleWithdraw = async () => {
         const amount = parseInt(withdrawAmount);
-        if (!amount || amount <= 0) { setError('금액을 입력해 주세요.'); return; }
+        if (!amount || amount <= 0) {
+            setError('금액을 입력해 주세요.');
+            return;
+        }
+        if (amount > balance) {
+            setError('환급 가능 금액을 초과하여 신청할 수 없습니다.');
+            return;
+        }
         setError('');
         setWithdrawing(true);
 
@@ -65,78 +105,282 @@ export default function WalletPage() {
             });
             const data = await res.json();
             if (res.ok) {
-                setSuccess('출금 신청이 완료되었습니다.');
+                setSuccess('환급 신청이 완료되었습니다.');
                 setShowWithdraw(false);
                 setWithdrawAmount('');
                 fetchWallet();
                 setTimeout(() => setSuccess(''), 3000);
             } else {
-                setError(data.error);
+                setError(data.error || '환급 신청에 실패했습니다.');
             }
         } catch {
-            setError('출금 신청 중 오류가 발생했습니다.');
+            setError('환급 신청 중 오류가 발생했습니다.');
+        } finally {
+            setWithdrawing(false);
         }
-        setWithdrawing(false);
     };
 
     const formatCurrency = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
+
+    // 누적 적립금 계산 (amount > 0 인 입금 트랜잭션의 총합)
+    const cumulativeReward = useMemo(() => {
+        return transactions
+            .filter(tx => tx.amount > 0)
+            .reduce((sum, tx) => sum + tx.amount, 0);
+    }, [transactions]);
+
+    // 누적 환급금 계산 (amount < 0 인 출금 트랜잭션 절대값의 총합)
+    const cumulativeWithdraw = useMemo(() => {
+        return transactions
+            .filter(tx => tx.amount < 0)
+            .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+    }, [transactions]);
+
+    // 적립내역 리스트 필터링 및 가공
+    const filteredRewards = useMemo(() => {
+        let list = transactions.filter(tx => tx.amount > 0);
+        if (rewardFilter === 'wreath') {
+            list = list.filter(tx => tx.type === 'wreath_reward');
+        } else if (rewardFilter === 'referral') {
+            list = list.filter(tx => tx.type === 'referral_bonus');
+        }
+        // 항상 최신순
+        return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }, [transactions, rewardFilter]);
+
+    // 환급내역 리스트 정렬 및 가공
+    const filteredWithdraws = useMemo(() => {
+        let list = transactions.filter(tx => tx.amount < 0);
+        if (withdrawSort === 'recent') {
+            list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        } else {
+            list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        }
+        return list;
+    }, [transactions, withdrawSort]);
+
+    // 날짜 포맷 (MM.DD)
+    const formatTxDate = (d: string) => {
+        try {
+            const date = new Date(d);
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${m}.${day}`;
+        } catch {
+            return d;
+        }
+    };
 
     const getTypeLabel = (type: string) => {
         switch (type) {
             case 'wreath_reward': return '화환 판매 적립';
             case 'referral_bonus': return '추천 수당';
-            case 'withdrawal': return '출금';
-            default: return type;
+            default: return '적립 완료';
         }
     };
 
-    const formatDate = (d: string) => {
-        const date = new Date(d);
-        return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-    };
+    if (!mounted) {
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p className={styles.loadingText}>정산 정보를 불러오고 있습니다</p>
+            </div>
+        );
+    }
 
-    if (loading) return <div className={styles.loadingState}>불러오는 중...</div>;
+    if (!getToken()) {
+        return null;
+    }
+
+    if (loading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p className={styles.loadingText}>정산 정보를 불러오고 있습니다</p>
+            </div>
+        );
+    }
 
     return (
-        <div className={`${commonStyles.b2bLayout} ${styles.container}`}>
-            <div className={styles.header}>
+        <div className={styles.page}>
+            {/* 헤더 */}
+            <header className={styles.header}>
                 <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
-                    <IconArrowLeft size={20} />
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
                 </button>
-                <span className={styles.headerTitle}>정산</span>
-                <span className={styles.headerRight}></span>
+                <span className={styles.headerTitle}>{activeTab === 'reward' ? '적립내역' : '환급내역'}</span>
+                <button className={styles.menuBtn} onClick={() => router.push('/b2b/settings')}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </header>
+
+            {/* 탭 컨테이너 */}
+            <div className={styles.tabContainer}>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'reward' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTab('reward')}
+                >
+                    적립내역
+                </button>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'withdraw' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTab('withdraw')}
+                >
+                    환급내역
+                </button>
             </div>
 
-            {/* 잔액 카드 */}
-            <div className={styles.balanceCard}>
-                <div className={styles.balanceTop}>
-                    <IconWallet size={18} color="rgba(255,255,255,0.7)" />
-                    <span className={styles.balanceLabel}>내 예치금</span>
-                </div>
-                <p className={styles.balanceAmount}>{formatCurrency(balance)}<span className={styles.won}>원</span></p>
-                <button className={styles.withdrawBtn} onClick={() => setShowWithdraw(true)}>출금 신청</button>
+            {/* 메인 콘텐츠 영역 */}
+            <div className={styles.content}>
+                {error && <div className={styles.error}>{error}</div>}
+                {success && <div className={styles.success}>{success}</div>}
+
+                {activeTab === 'reward' ? (
+                    <div className={styles.rewardSection}>
+                        {/* 환급 가능 금액 영역 */}
+                        <div className={styles.summaryCard}>
+                            <div className={styles.summaryTop}>
+                                <span className={styles.summaryLabel}>환급 가능 금액</span>
+                                <button className={styles.reportBtn}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                    월별 리포트
+                                </button>
+                            </div>
+                            <h2 className={styles.amountDisplay}>{formatCurrency(balance)}원</h2>
+                            <button
+                                className={styles.actionBtn}
+                                onClick={() => {
+                                    if (!identityVerified) {
+                                        router.push('/b2b/wallet/verify');
+                                    } else {
+                                        setShowWithdraw(true);
+                                    }
+                                }}
+                            >
+                                환급신청
+                            </button>
+                        </div>
+
+                        {/* 필터 및 목록 헤더 영역 */}
+                        <div className={styles.listArea}>
+                            <div className={styles.listFilterRow}>
+                                <button className={styles.filterBtn} onClick={() => setShowRewardFilterModal(true)}>
+                                    {rewardFilter === 'all' ? '전체' : rewardFilter === 'wreath' ? '판매수당' : '추천수당'}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                                <span className={styles.sideInfo}>
+                                    누적적립금 {formatCurrency(cumulativeReward)}원
+                                </span>
+                            </div>
+
+                            {/* 리스트 */}
+                            {filteredRewards.length === 0 ? (
+                                <div className={styles.emptyState}>적립된 내역이 없습니다.</div>
+                            ) : (
+                                <div className={styles.rewardList}>
+                                    {filteredRewards.map((tx) => (
+                                        <div key={tx.id} className={styles.listItem}>
+                                            <span className={styles.txDate}>{formatTxDate(tx.created_at)}</span>
+                                            <div className={styles.txMain}>
+                                                <span className={styles.txTitle}>{getTypeLabel(tx.type)}</span>
+                                                <span className={styles.txSub}>{tx.description}</span>
+                                            </div>
+                                            <span className={styles.txAmountPlus}>+{formatCurrency(tx.amount)}원</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className={styles.withdrawSection}>
+                        {/* 환급 금액 요약 */}
+                        <div className={styles.summaryCard}>
+                            <span className={styles.summaryLabel}>환급 금액</span>
+                            <h2 className={styles.amountDisplay} style={{ marginTop: '8px', marginBottom: 0 }}>
+                                {formatCurrency(cumulativeWithdraw)}원
+                            </h2>
+                        </div>
+
+                        {/* 필터 및 목록 헤더 영역 */}
+                        <div className={styles.listArea}>
+                            <div className={styles.listFilterRow}>
+                                <button className={styles.filterBtn} onClick={() => setShowWithdrawSortModal(true)}>
+                                    {withdrawSort === 'recent' ? '최신순' : '과거순'}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* 리스트 */}
+                            {filteredWithdraws.length === 0 ? (
+                                <div className={styles.emptyState}>환급 신청 및 완료 내역이 없습니다.</div>
+                            ) : (
+                                <div className={styles.withdrawList}>
+                                    {filteredWithdraws.map((tx) => {
+                                        const rawAmount = Math.abs(tx.amount);
+                                        const tax = Math.floor(rawAmount * 0.033);
+                                        const netAmount = rawAmount - tax;
+                                        return (
+                                            <div key={tx.id} className={styles.listItem} style={{ alignItems: 'flex-start' }}>
+                                                <span className={styles.txDate} style={{ marginTop: '2px' }}>
+                                                    {formatTxDate(tx.created_at)}
+                                                </span>
+                                                <div className={styles.txMain}>
+                                                    <span className={styles.txTitle}>환급 완료</span>
+                                                    <span className={styles.txSub}>
+                                                        환급신청 {formatCurrency(rawAmount)}원 - 소득공제(3.3%) {formatCurrency(tax)}원 / 최종 환급금 = {formatCurrency(netAmount)}원
+                                                    </span>
+                                                </div>
+                                                <span className={styles.txAmountMinus}>{formatCurrency(netAmount)}원</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {error && <div className={styles.error}>{error}</div>}
-            {success && <div className={styles.success}>{success}</div>}
-
-            {/* 출금 모달 */}
+            {/* 출금 신청 바텀시트 모달 */}
             {showWithdraw && (
-                <div className={styles.modal}>
-                    <div className={styles.modalContent}>
-                        <h3 className={styles.modalTitle}>출금 신청</h3>
-                        <p className={styles.modalDesc}>등록된 정산 계좌로 입금됩니다</p>
-                        <input
-                            type="number"
-                            className={styles.input}
-                            placeholder="출금 금액"
-                            value={withdrawAmount}
-                            onChange={(e) => setWithdrawAmount(e.target.value)}
-                        />
-                        <p className={styles.modalHint}>출금 가능: {formatCurrency(balance)}원</p>
-                        <div className={styles.modalBtns}>
-                            <button className={styles.cancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>취소</button>
-                            <button className={styles.confirmBtn} onClick={handleWithdraw} disabled={withdrawing}>
+                <div className={styles.bottomSheetOverlay} onClick={() => { setShowWithdraw(false); setError(''); }}>
+                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.bottomSheetHeader}>
+                            <h3 className={styles.bottomSheetTitle}>환급 신청</h3>
+                            <p className={styles.bottomSheetDesc}>등록된 정산 계좌로 입금됩니다.</p>
+                        </div>
+                        <div className={styles.inputArea}>
+                            <input
+                                type="number"
+                                className={styles.amountInput}
+                                placeholder="환급 금액"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                            />
+                            <p className={styles.amountHint}>환급 가능: {formatCurrency(balance)}원</p>
+                        </div>
+                        <div className={styles.bottomSheetBtns}>
+                            <button className={styles.sheetCancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>
+                                취소
+                            </button>
+                            <button className={styles.sheetConfirmBtn} onClick={handleWithdraw} disabled={withdrawing}>
                                 {withdrawing ? '처리 중...' : '신청하기'}
                             </button>
                         </div>
@@ -144,31 +388,67 @@ export default function WalletPage() {
                 </div>
             )}
 
-            {/* 내역 리스트 */}
-            <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>입출금 내역</h3>
-                {transactions.length === 0 ? (
-                    <div className={styles.emptyState}>
-                        <p>아직 내역이 없습니다</p>
-                        <p className={styles.emptyHint}>부고를 작성하고 화환이 판매되면 자동으로 적립됩니다</p>
+            {/* 적립내역 필터 바텀시트 */}
+            {showRewardFilterModal && (
+                <div className={styles.bottomSheetOverlay} onClick={() => setShowRewardFilterModal(false)}>
+                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.bottomSheetHeader}>
+                            <h3 className={styles.bottomSheetTitle}>적립 항목 선택</h3>
+                        </div>
+                        <div className={styles.bottomSheetList}>
+                            <button
+                                className={`${styles.bottomSheetItem} ${rewardFilter === 'all' ? styles.activeItem : ''}`}
+                                onClick={() => { setRewardFilter('all'); setShowRewardFilterModal(false); }}
+                            >
+                                전체
+                            </button>
+                            <button
+                                className={`${styles.bottomSheetItem} ${rewardFilter === 'wreath' ? styles.activeItem : ''}`}
+                                onClick={() => { setRewardFilter('wreath'); setShowRewardFilterModal(false); }}
+                            >
+                                판매수당
+                            </button>
+                            <button
+                                className={`${styles.bottomSheetItem} ${rewardFilter === 'referral' ? styles.activeItem : ''}`}
+                                onClick={() => { setRewardFilter('referral'); setShowRewardFilterModal(false); }}
+                            >
+                                추천수당
+                            </button>
+                        </div>
+                        <button className={styles.bottomSheetCancel} onClick={() => setShowRewardFilterModal(false)}>
+                            취소
+                        </button>
                     </div>
-                ) : (
-                    <div className={styles.txList}>
-                        {transactions.map((tx) => (
-                            <div key={tx.id} className={styles.txItem}>
-                                <div>
-                                    <p className={styles.txType}>{getTypeLabel(tx.type)}</p>
-                                    <p className={styles.txDesc}>{tx.description}</p>
-                                    <p className={styles.txDate}>{formatDate(tx.created_at)}</p>
-                                </div>
-                                <span className={tx.amount > 0 ? styles.txPlus : styles.txMinus}>
-                                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}원
-                                </span>
-                            </div>
-                        ))}
+                </div>
+            )}
+
+            {/* 환급내역 정렬 바텀시트 */}
+            {showWithdrawSortModal && (
+                <div className={styles.bottomSheetOverlay} onClick={() => setShowWithdrawSortModal(false)}>
+                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.bottomSheetHeader}>
+                            <h3 className={styles.bottomSheetTitle}>정렬 기준 선택</h3>
+                        </div>
+                        <div className={styles.bottomSheetList}>
+                            <button
+                                className={`${styles.bottomSheetItem} ${withdrawSort === 'recent' ? styles.activeItem : ''}`}
+                                onClick={() => { setWithdrawSort('recent'); setShowWithdrawSortModal(false); }}
+                            >
+                                최신순
+                            </button>
+                            <button
+                                className={`${styles.bottomSheetItem} ${withdrawSort === 'old' ? styles.activeItem : ''}`}
+                                onClick={() => { setWithdrawSort('old'); setShowWithdrawSortModal(false); }}
+                            >
+                                과거순
+                            </button>
+                        </div>
+                        <button className={styles.bottomSheetCancel} onClick={() => setShowWithdrawSortModal(false)}>
+                            취소
+                        </button>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <BottomTabBar />
         </div>

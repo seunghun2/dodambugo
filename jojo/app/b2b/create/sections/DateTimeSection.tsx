@@ -23,6 +23,7 @@ interface Props {
   formData: DateTimeData;
   onChange: (field: string, value: string) => void;
   onClear: (fields: string[]) => void;
+  errors?: Record<string, string>;
 }
 
 // 날짜 포맷: "2026-06-10" → "2026. 06. 10."
@@ -55,6 +56,8 @@ interface DateTimeCardProps {
   onTimeChange: (value: string) => void;
   onClear?: () => void;
   onOpenCalendar: () => void;
+  dateError?: string;
+  timeError?: string;
 }
 
 function DateTimeCard({
@@ -67,6 +70,8 @@ function DateTimeCard({
   onTimeChange,
   onClear,
   onOpenCalendar,
+  dateError,
+  timeError,
 }: DateTimeCardProps) {
   const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatTimeInput(e.target.value);
@@ -89,7 +94,11 @@ function DateTimeCard({
       </div>
       <div className={styles.dtCardFields}>
         {/* 날짜 — 커스텀 캘린더 바텀시트 */}
-        <div className={styles.dtInputWrap} onClick={onOpenCalendar}>
+        <div
+          className={`${styles.dtInputWrap} ${dateError ? styles.inputError : ''}`}
+          onClick={onOpenCalendar}
+          data-error={dateError ? 'true' : undefined}
+        >
           <div className={styles.dtDisplayInput}>
             <span className={dateValue ? styles.dtDisplayText : styles.dtPlaceholder}>
               {dateValue ? formatDate(dateValue) : `${label.replace('일시', '')}일자`}
@@ -99,7 +108,7 @@ function DateTimeCard({
         </div>
 
         {/* 시간 — 직접 숫자 입력 */}
-        <div className={styles.dtInputWrap}>
+        <div className={`${styles.dtInputWrap} ${timeError ? styles.inputError : ''}`} data-error={timeError ? 'true' : undefined}>
           <input
             type="text"
             inputMode="numeric"
@@ -112,11 +121,14 @@ function DateTimeCard({
           <IconClock size={20} className={styles.dtInputIcon} />
         </div>
       </div>
+      {(dateError || timeError) && (
+        <p className={styles.fieldError}>{dateError || timeError}</p>
+      )}
     </div>
   );
 }
 
-export default function DateTimeSection({ formData, onChange, onClear }: Props) {
+export default function DateTimeSection({ formData, onChange, onClear, errors }: Props) {
   const showIlpo = useMemo(
     () => formData.address?.includes('제주'),
     [formData.address],
@@ -194,6 +206,8 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onDateChange={(v) => onChange('funeral_date', v)}
         onTimeChange={(v) => onChange('funeral_time', v)}
         onOpenCalendar={() => openCalendar('funeral_date', '발인일자 선택')}
+        dateError={errors?.funeral_date}
+        timeError={errors?.funeral_time}
       />
 
       {showIlpo && (

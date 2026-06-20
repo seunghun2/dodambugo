@@ -22,7 +22,9 @@ function getUserIdFromToken(request: NextRequest): string | null {
 
 // GET: 예치금 내역 조회
 export async function GET(request: NextRequest) {
+    console.log('[DEBUG] GET /api/b2b/wallet started');
     const userId = getUserIdFromToken(request);
+    console.log('[DEBUG] GET /api/b2b/wallet userId:', userId);
     if (!userId) {
         return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
@@ -32,28 +34,48 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
-    // 잔액 조회
-    const { data: deposit } = await supabase
-        .from('deposits')
-        .select('balance')
-        .eq('user_id', userId)
-        .single();
+    try {
+        console.log('[DEBUG] Fetching balance for user:', userId);
+        // 잔액 조회
+        const { data: deposit, error: depError } = await supabase
+            .from('deposits')
+            .select('balance')
+            .eq('user_id', userId)
+            .single();
+        if (depError) console.error('[DEBUG] depError:', depError);
 
-    // 거래 내역 조회
-    const { data: transactions, count } = await supabase
-        .from('deposit_transactions')
-        .select('*', { count: 'exact' })
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        console.log('[DEBUG] Fetching transactions for user:', userId);
+        // 거래 내역 조회
+        const { data: transactions, count, error: txError } = await supabase
+            .from('deposit_transactions')
+            .select('*', { count: 'exact' })
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+        if (txError) console.error('[DEBUG] txError:', txError);
 
-    return NextResponse.json({
-        balance: deposit?.balance || 0,
-        transactions: transactions || [],
-        total: count || 0,
-        page,
-        limit,
-    });
+        console.log('[DEBUG] Fetching identity_verified for user:', userId);
+        // 본인인증 여부 조회
+        const { data: user, error: userError } = await supabase
+            .from('b2b_users')
+            .select('identity_verified')
+            .eq('id', userId)
+            .single();
+        if (userError) console.error('[DEBUG] userError:', userError);
+
+        console.log('[DEBUG] Returning wallet data successfully');
+        return NextResponse.json({
+            balance: deposit?.balance || 0,
+            transactions: transactions || [],
+            total: count || 0,
+            page,
+            limit,
+            identity_verified: user?.identity_verified || false,
+        });
+    } catch (err) {
+        console.error('[DEBUG] Unexpected error in GET /api/b2b/wallet:', err);
+        return NextResponse.json({ error: '서버 에러가 발생했습니다.' }, { status: 500 });
+    }
 }
 
 // POST: 출금 신청
@@ -95,12 +117,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '잔액이 부족합니다.' }, { status: 400 });
     }
 
-    // 회원 정보 (출금 계좌)
+    // 회원 정보 (출금 계좌 & 본인인증 여부)
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('bank_name, account_no, account_holder')
+        .select('bank_name, account_no, account_holder, identity_verified')
         .eq('id', userId)
         .single();
+
+    if (!user?.identity_verified) {
+        return NextResponse.json(
+            { error: '출금 및 환급을 위해 최초 1회 본인인증이 필요합니다.' },
+            { status: 400 }
+        );
+    }
 
     if (!user?.bank_name || !user?.account_no) {
         return NextResponse.json(

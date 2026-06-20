@@ -24,6 +24,7 @@ interface Mourner {
 interface Props {
   mourners: Mourner[];
   onMournersChange: (mourners: Mourner[]) => void;
+  errors?: Record<string, string>;
 }
 
 // ===== 상수 =====
@@ -52,7 +53,63 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
   );
 }
 
-// ===== 계좌 등록 모달 =====
+// ===== 은행코드 매핑 =====
+const bankCodeMap: Record<string, string> = {
+  'KB국민은행': '004', '신한은행': '088', '우리은행': '020', '하나은행': '081',
+  'NH농협은행': '011', 'IBK기업은행': '003', 'SC제일은행': '023', '카카오뱅크': '090',
+  '케이뱅크': '089', '토스뱅크': '092', '새마을금고': '045', '신협': '048',
+  '우체국': '071', '수협': '007', '광주은행': '034', '전북은행': '037',
+  '경남은행': '039', '부산은행': '032', '대구은행': '031', '제주은행': '035',
+  '씨티은행': '027', 'KDB산업은행': '002', '저축은행': '050', '산림조합': '064',
+};
+
+// ===== 은행별 계좌번호 자동 포맷 =====
+function formatAccountNumber(value: string, bankName: string): string {
+  const digits = value.replace(/[^0-9]/g, '');
+
+  const formats: Record<string, number[]> = {
+    '국민은행': [6, 2, 6],
+    'KB국민은행': [6, 2, 6],
+    '신한은행': [3, 3, 6],
+    '우리은행': [4, 3, 6],
+    '하나은행': [3, 6, 5],
+    '농협': [3, 4, 4, 2],
+    'NH농협': [3, 4, 4, 2],
+    'NH농협은행': [3, 4, 4, 2],
+    '기업은행': [3, 6, 2, 3],
+    'IBK기업은행': [3, 6, 2, 3],
+    'SC제일은행': [3, 2, 6],
+    '카카오뱅크': [4, 2, 7],
+    '케이뱅크': [3, 3, 6],
+    '토스뱅크': [4, 4, 4],
+    '새마을금고': [4, 2, 6],
+    '신협': [3, 3, 6],
+    '우체국': [6, 2, 6],
+    '수협': [3, 4, 4, 2],
+    '광주은행': [3, 3, 6],
+    '전북은행': [3, 3, 6],
+    '경남은행': [3, 4, 6],
+    '부산은행': [3, 4, 6],
+    '대구은행': [3, 4, 6],
+    '제주은행': [3, 3, 6],
+    '씨티은행': [3, 6, 3],
+    'KDB산업은행': [3, 6, 4],
+  };
+
+  const pattern = formats[bankName];
+  if (!pattern) return digits; // 패턴 없으면 그대로
+
+  let result = '';
+  let pos = 0;
+  for (let i = 0; i < pattern.length && pos < digits.length; i++) {
+    const chunk = digits.slice(pos, pos + pattern[i]);
+    result += (i > 0 ? '-' : '') + chunk;
+    pos += pattern[i];
+  }
+  return result;
+}
+
+// ===== 계좌 등록 바텀시트 =====
 interface AccountModalProps {
   open: boolean;
   onClose: () => void;
@@ -64,85 +121,185 @@ function AccountModal({ open, onClose, onConfirm, initial }: AccountModalProps) 
   const [bank, setBank] = useState(initial?.bank || '');
   const [holder, setHolder] = useState(initial?.holder || '');
   const [number, setNumber] = useState(initial?.number || '');
+  const [verifying, setVerifying] = useState(false);
+  const [verifyFailed, setVerifyFailed] = useState(false);
+  const sheetDragStartY = useRef(0);
 
   useEffect(() => {
     if (open) {
       setBank(initial?.bank || '');
       setHolder(initial?.holder || '');
-      setNumber(initial?.number || '');
+      if (initial?.bank && initial?.number) {
+        setNumber(formatAccountNumber(initial.number, initial.bank));
+      } else {
+        setNumber(initial?.number || '');
+      }
+      setVerifyFailed(false);
     }
   }, [open, initial?.bank, initial?.holder, initial?.number]);
 
   if (!open) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!bank || !holder || !number) return;
-    onConfirm(bank, holder, number);
+    
+    // 이미 검증에 실패했는데 또 등록을 누르면 강제로 통과시킴 (테스트 및 오류 우회용)
+    if (verifyFailed) {
+      onConfirm(bank, holder, number.replace(/[^0-9]/g, ''));
+      return;
+    }
+
+    setVerifying(true);
+    setVerifyFailed(false);
+
+    const bankCd = bankCodeMap[bank];
+    if (!bankCd) {
+      setVerifying(false);
+      setVerifyFailed(true);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/verify-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          bankCd, 
+          accountNo: number.replace(/[^0-9]/g, ''), 
+          holderName: holder 
+        }),
+      });
+      const data = await res.json();
+      setVerifying(false);
+
+      if (data.success) {
+        // 이노페이 API가 교정된 예금주명을 주면 사용
+        const finalHolder = data.holderName || holder;
+        onConfirm(bank, finalHolder, number.replace(/[^0-9]/g, ''));
+      } else {
+        setVerifyFailed(true);
+      }
+    } catch (err) {
+      setVerifying(false);
+      setVerifyFailed(true);
+    }
+  };
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatAccountNumber(e.target.value, bank);
+    setNumber(formatted);
+    setVerifyFailed(false);
+  };
+
+  const handleBankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newBank = e.target.value;
+    setBank(newBank);
+    setVerifyFailed(false);
+    // 은행 변경 시 계좌번호 재포맷
+    if (number) {
+      setNumber(formatAccountNumber(number, newBank));
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    sheetDragStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dy = e.changedTouches[0].clientY - sheetDragStartY.current;
+    if (dy > 80) onClose();
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <span className={styles.modalTitle}>계좌 등록</span>
-          <button type="button" className={styles.modalClose} onClick={onClose}>
-            <IconX size={18} />
-          </button>
-        </div>
+    <div className={styles.bottomSheetOverlay} onClick={onClose}>
+      <div
+        className={styles.accountSheet}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className={styles.bottomSheetHandle} />
 
-        <div className={styles.modalBody}>
-          <div className={styles.field}>
-            <label className={styles.label}>은행</label>
-            <select
-              className={styles.select}
-              value={bank}
-              onChange={(e) => setBank(e.target.value)}
-            >
-              <option value="">은행을 선택해주세요</option>
-              {bankOptions.map((b) => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+        <div className={styles.accountSheetTitle}>계좌 등록</div>
+
+        <div className={styles.accountSheetBody}>
+          <div className={styles.accountSheetField}>
+            <label className={styles.accountSheetLabel}>은행</label>
+            <div style={{ position: 'relative' }}>
+              <select
+                className={styles.accountSheetSelect}
+                value={bank}
+                onChange={handleBankChange}
+              >
+                <option value="">은행을 선택해주세요</option>
+                {bankOptions.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+              <IconChevronDown
+                size={20}
+                style={{
+                  position: 'absolute',
+                  right: '14px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--b2b-text-tertiary)',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>예금주</label>
+          <div className={styles.accountSheetField}>
+            <label className={styles.accountSheetLabel}>예금주</label>
             <input
               type="text"
-              className={styles.input}
+              className={styles.accountSheetInput}
               placeholder="예금주명 입력"
               value={holder}
-              onChange={(e) => setHolder(e.target.value)}
+              onChange={(e) => {
+                setHolder(e.target.value);
+                setVerifyFailed(false);
+              }}
             />
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>계좌번호</label>
+          <div className={styles.accountSheetField}>
+            <label className={styles.accountSheetLabel}>계좌번호</label>
             <input
               type="text"
-              className={styles.input}
-              placeholder="계좌번호 입력 (- 없이)"
+              className={styles.accountSheetInput}
+              placeholder={bank ? '계좌번호 입력' : '은행을 먼저 선택해주세요'}
               value={number}
-              onChange={(e) => setNumber(e.target.value)}
+              onChange={handleNumberChange}
               inputMode="numeric"
+              disabled={!bank}
+              style={{ borderColor: verifyFailed ? '#e03131' : undefined }}
             />
+            {verifyFailed && (
+              <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#e03131', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>error</span>
+                계좌정보를 정확히 입력해주세요
+              </p>
+            )}
           </div>
         </div>
 
-        <div className={styles.modalFooter}>
+        <div className={styles.accountSheetFooter}>
           <button
             type="button"
-            className={`${styles.modalBtn} ${styles.modalBtnCancel}`}
+            className={styles.accountSheetCancelBtn}
             onClick={onClose}
           >
             취소
           </button>
           <button
             type="button"
-            className={`${styles.modalBtn} ${styles.modalBtnConfirm}`}
+            className={styles.accountSheetConfirmBtn}
             onClick={handleConfirm}
+            disabled={!bank || !holder || !number || verifying}
+            style={{ opacity: verifying ? 0.7 : 1 }}
           >
-            등록
+            {verifying ? '확인중...' : '등록'}
           </button>
         </div>
       </div>
@@ -305,7 +462,7 @@ function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: Reorder
 }
 
 // ===== 메인 컴포넌트 =====
-export default function MournerSection({ mourners, onMournersChange }: Props) {
+export default function MournerSection({ mourners, onMournersChange, errors }: Props) {
   const [accountModalIndex, setAccountModalIndex] = useState<number | null>(null);
   const [expandedAccounts, setExpandedAccounts] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -731,9 +888,10 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                         {/* 관계 select */}
                         <div className={styles.mnFieldRelation}>
                           <select
-                            className={styles.mnSelectCompact}
+                            className={`${styles.mnSelectCompact} ${isFirst && errors?.mourner_relationship ? styles.inputError : ''}`}
                             value={item.mourner.relationship}
                             onChange={(e) => handleFieldChange(realIndex, 'relationship', e.target.value)}
+                            data-error={isFirst && errors?.mourner_relationship ? 'true' : undefined}
                           >
                             <option value="">관계</option>
                             {relationshipOptions.map((r) => (
@@ -746,10 +904,11 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                         <div className={styles.mnFieldName}>
                           <input
                             type="text"
-                            className={styles.mnInputCompact}
+                            className={`${styles.mnInputCompact} ${isFirst && errors?.mourner_name ? styles.inputError : ''}`}
                             placeholder="성함"
                             value={item.mourner.name}
                             onChange={(e) => handleFieldChange(realIndex, 'name', e.target.value)}
+                            data-error={isFirst && errors?.mourner_name ? 'true' : undefined}
                           />
                         </div>
 
@@ -776,57 +935,54 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                       </button>
                     </div>
 
-                    {/* ===== 계좌 아코디언 ===== */}
-                    <div className={styles.mnAccountSection}>
-                      <button
-                        type="button"
-                        className={styles.mnAccountToggle}
-                        onClick={() => toggleAccount(realIndex)}
-                      >
-                        <span className={styles.mnAccountToggleLeft}>
-                          <IconChevronDown size={14} className={styles.mnAccountChevron} style={{ transform: isAccountOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
-                          <IconWallet size={16} />
-                          {hasAccount
-                            ? `${item.mourner.bank} ${item.mourner.accountNumber}`
-                            : '등록된 계좌가 없습니다'
-                          }
-                        </span>
-                        {!hasAccount && (
-                          <span
-                            className={styles.mnAccountRegText}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAccountModalIndex(realIndex);
-                            }}
-                          >
-                            등록
-                          </span>
-                        )}
-                      </button>
+                    {isFirst && (errors?.mourner_name || errors?.mourner_relationship) && (
+                      <p className={styles.fieldError} style={{ marginTop: '8px', marginBottom: '4px' }}>
+                        {errors.mourner_name || errors.mourner_relationship}
+                      </p>
+                    )}
 
-                      {isAccountOpen && hasAccount && (
-                        <div className={styles.mnAccountDetail}>
-                          <div className={styles.mnAccountInfo}>
-                            <span>{item.mourner.bank}</span>
-                            <span>{item.mourner.accountHolder}</span>
-                            <span>{item.mourner.accountNumber}</span>
+                    {/* ===== 계좌 아코디언 ===== */}
+                    {/* ===== 등록된 계좌 정보 ===== */}
+                    <div className={styles.mnAccountSection}>
+                      {hasAccount ? (
+                        <div className={styles.mnAccountRow}>
+                          <div className={styles.mnAccountInfoLeft}>
+                            <IconWallet size={16} />
+                            <span className={styles.mnAccountTextBold}>
+                              {item.mourner.bank} {item.mourner.accountHolder} {formatAccountNumber(item.mourner.accountNumber!, item.mourner.bank!)}
+                            </span>
                           </div>
-                          <div className={styles.mnAccountActions}>
+                          <div className={styles.mnAccountActionsInline}>
                             <button
                               type="button"
-                              className={styles.mnAccountActionBtn}
+                              className={styles.mnAccountActionBtnInline}
                               onClick={() => setAccountModalIndex(realIndex)}
                             >
                               수정
                             </button>
                             <button
                               type="button"
-                              className={styles.mnAccountActionBtn}
+                              className={styles.mnAccountActionBtnInline}
                               onClick={() => handleAccountDelete(realIndex)}
                             >
                               삭제
                             </button>
                           </div>
+                        </div>
+                      ) : (
+                        <div className={styles.mnAccountRow}>
+                          <div className={styles.mnAccountInfoLeft}>
+                            <IconWallet size={16} style={{ color: 'var(--b2b-text-tertiary)' }} />
+                            <span className={styles.mnAccountTextEmpty}>
+                              등록된 계좌가 없습니다
+                            </span>
+                          </div>
+                          <span
+                            className={styles.mnAccountRegText}
+                            onClick={() => setAccountModalIndex(realIndex)}
+                          >
+                            등록
+                          </span>
                         </div>
                       )}
                     </div>

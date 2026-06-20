@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { IconUpload } from '@tabler/icons-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { IconUpload, IconPlus, IconStar, IconStarFilled, IconCheck } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
 interface Props {
@@ -25,8 +25,10 @@ const DEATH_TERMS = [
 ];
 
 const LOGO_PRESETS = [
-  { value: 'mute', label: '무트' },
-  { value: 'custom', label: '기타' },
+  { id: 'preed', name: '프리드라이프', url: 'https://via.placeholder.com/150x80?text=PREED' },
+  { id: 'boram', name: '보람상조', url: 'https://via.placeholder.com/150x80?text=BORAM' },
+  { id: 'kyowon', name: '교원라이프', url: 'https://via.placeholder.com/150x80?text=KYOWON' },
+  { id: 'daemyung', name: '대명아임레디', url: 'https://via.placeholder.com/150x80?text=DAEMYUNG' },
 ];
 
 // 토글 스위치 컴포넌트
@@ -52,14 +54,46 @@ function Toggle({
 
 export default function OptionsSection({ formData, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showLogoModal, setShowLogoModal] = useState(false);
+  const [activeLogoTab, setActiveLogoTab] = useState<'favorites' | 'presets' | 'custom'>('favorites');
+  const [favoriteLogos, setFavoriteLogos] = useState<string[]>([]);
+  
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('b2b_favorite_logos');
+      if (stored) {
+        setFavoriteLogos(JSON.parse(stored));
+      } else {
+        // 프리드라이프, 보람상조를 기본 즐겨찾기로 세팅
+        setFavoriteLogos(['preed', 'boram']);
+        localStorage.setItem('b2b_favorite_logos', JSON.stringify(['preed', 'boram']));
+      }
+    } catch {}
+  }, []);
 
-  const handleLogoSelect = (type: string) => {
-    if (type === 'mute') {
-      onChange('partner_logo_url', 'mute');
-    } else {
-      // "기타" 선택 시 — 현재 URL 유지 or 비워둠
-      onChange('partner_logo_url', formData.partner_logo_url === 'mute' ? '' : formData.partner_logo_url);
-    }
+  const toggleFavoriteLogo = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setFavoriteLogos(prev => {
+      const isFav = prev.includes(id);
+      const next = isFav ? prev.filter(v => v !== id) : [...prev, id];
+      localStorage.setItem('b2b_favorite_logos', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // 바텀시트 스와이프 닫기 로직
+  const sheetDragStartY = useRef(0);
+  const handleSheetTouchStart = (e: React.TouchEvent) => {
+    sheetDragStartY.current = e.touches[0].clientY;
+  };
+  const handleSheetTouchEnd = (e: React.TouchEvent) => {
+    const dy = e.changedTouches[0].clientY - sheetDragStartY.current;
+    if (dy > 80) setShowLogoModal(false);
+  };
+
+  const handleLogoSelect = (url: string) => {
+    onChange('partner_logo_url', url);
+    setShowLogoModal(false);
   };
 
   const handleFileAttach = () => {
@@ -69,14 +103,16 @@ export default function OptionsSection({ formData, onChange }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // 임시: 로컬 URL 생성 (실제로는 Supabase Storage 업로드)
     const url = URL.createObjectURL(file);
     onChange('partner_logo_url', url);
+    setShowLogoModal(false);
   };
 
   const isLogoOn = !!formData.partner_logo_url;
-  const isCustomLogo =
-    formData.partner_logo_url && formData.partner_logo_url !== 'mute';
+  
+  // 현재 선택된 로고 객체 찾기 (프리셋 중에 있으면)
+  const selectedPreset = LOGO_PRESETS.find(p => p.url === formData.partner_logo_url);
+  const previewName = selectedPreset ? selectedPreset.name : (formData.partner_logo_url ? '직접 등록 로고' : '');
 
   return (
     <section className={styles.section}>
@@ -87,52 +123,164 @@ export default function OptionsSection({ formData, onChange }: Props) {
         <div className={styles.optionInfo}>
           <div className={styles.optionLabel}>상조 로고</div>
           {isLogoOn && (
-            <div className={styles.optionExpand}>
-              <div className={styles.logoSelectRow}>
-                {LOGO_PRESETS.map((preset) => (
-                  <button
-                    key={preset.value}
-                    type="button"
-                    className={`${styles.logoOption} ${
-                      (preset.value === 'mute' && formData.partner_logo_url === 'mute') ||
-                      (preset.value === 'custom' && isCustomLogo)
-                        ? styles.logoOptionActive
-                        : ''
-                    }`}
-                    onClick={() => handleLogoSelect(preset.value)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-              {/* 기타 선택 시 파일 첨부 */}
-              {isCustomLogo && (
-                <>
-                  <button
-                    type="button"
-                    className={styles.fileUploadBtn}
-                    onClick={handleFileAttach}
-                  >
-                    <IconUpload size={16} />
-                    파일 첨부
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className={styles.photoHiddenInput}
-                    onChange={handleFileChange}
-                  />
-                </>
+            <div className={styles.logoPreviewArea}>
+              {formData.partner_logo_url && formData.partner_logo_url !== 'mute' ? (
+                <div className={styles.logoPreviewBox} onClick={() => setShowLogoModal(true)}>
+                  <img src={formData.partner_logo_url} alt="로고" className={styles.logoPreviewImg} />
+                  <span className={styles.logoPreviewText}>{previewName}</span>
+                </div>
+              ) : (
+                <div className={styles.logoRegisterBox} onClick={() => setShowLogoModal(true)}>
+                  <IconPlus size={20} color="var(--gray-400)" />
+                  <span className={styles.logoRegisterText}>로고 등록</span>
+                </div>
               )}
             </div>
           )}
         </div>
         <Toggle
           checked={isLogoOn}
-          onChange={(val) => onChange('partner_logo_url', val ? 'mute' : '')}
+          onChange={(val) => {
+            if (val) {
+              onChange('partner_logo_url', 'mute');
+              setShowLogoModal(true);
+            } else {
+              onChange('partner_logo_url', '');
+            }
+          }}
         />
       </div>
+
+      {/* 로고 바텀시트 모달 */}
+      {showLogoModal && (
+        <div className={styles.bottomSheetOverlay} onClick={() => setShowLogoModal(false)}>
+          <div 
+            className={styles.bottomSheet} 
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleSheetTouchStart}
+            onTouchEnd={handleSheetTouchEnd}
+          >
+            <div className={styles.bottomSheetHandle} />
+            <h3 className={styles.bottomSheetTitle}>로고 등록</h3>
+            
+            <div className={styles.logoTabs}>
+              <button 
+                className={`${styles.logoTab} ${activeLogoTab === 'favorites' ? styles.logoTabActive : ''}`}
+                onClick={() => setActiveLogoTab('favorites')}
+              >
+                즐겨찾기
+              </button>
+              <button 
+                className={`${styles.logoTab} ${activeLogoTab === 'presets' ? styles.logoTabActive : ''}`}
+                onClick={() => setActiveLogoTab('presets')}
+              >
+                상조 로고
+              </button>
+              <button 
+                className={`${styles.logoTab} ${activeLogoTab === 'custom' ? styles.logoTabActive : ''}`}
+                onClick={() => setActiveLogoTab('custom')}
+              >
+                직접 등록
+              </button>
+            </div>
+
+            <div className={styles.sheetContent}>
+              {activeLogoTab === 'favorites' && (
+                <div className={styles.logoGrid}>
+                  {favoriteLogos.length === 0 ? (
+                    <div className={styles.favoritesEmpty}>즐겨찾기된 로고가 없습니다.</div>
+                  ) : (
+                    LOGO_PRESETS.filter(p => favoriteLogos.includes(p.id)).map(logo => (
+                      <div 
+                        key={logo.id} 
+                        className={`${styles.logoGridItem} ${formData.partner_logo_url === logo.url ? styles.logoGridItemActive : ''}`}
+                        onClick={() => handleLogoSelect(logo.url)}
+                      >
+                        <div className={styles.logoImgWrapper}>
+                          <img src={logo.url} alt={logo.name} />
+                          {formData.partner_logo_url === logo.url && (
+                            <div className={styles.logoCheckmark}>
+                              <IconCheck size={16} color="white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.logoItemFooter}>
+                          <span className={styles.logoItemName}>{logo.name}</span>
+                          <button 
+                            type="button" 
+                            className={styles.logoStarBtn}
+                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
+                          >
+                            <IconStarFilled size={18} color="#F1C40F" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeLogoTab === 'presets' && (
+                <div className={styles.logoGrid}>
+                  {LOGO_PRESETS.map(logo => {
+                    const isFav = favoriteLogos.includes(logo.id);
+                    return (
+                      <div 
+                        key={logo.id} 
+                        className={`${styles.logoGridItem} ${formData.partner_logo_url === logo.url ? styles.logoGridItemActive : ''}`}
+                        onClick={() => handleLogoSelect(logo.url)}
+                      >
+                        <div className={styles.logoImgWrapper}>
+                          <img src={logo.url} alt={logo.name} />
+                          {formData.partner_logo_url === logo.url && (
+                            <div className={styles.logoCheckmark}>
+                              <IconCheck size={16} color="white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.logoItemFooter}>
+                          <span className={styles.logoItemName}>{logo.name}</span>
+                          <button 
+                            type="button" 
+                            className={styles.logoStarBtn}
+                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
+                          >
+                            {isFav ? <IconStarFilled size={18} color="#F1C40F" /> : <IconStar size={18} color="#DDDDDD" />}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {activeLogoTab === 'custom' && (
+                <div className={styles.logoCustomArea}>
+                  <div className={styles.logoCustomGuide}>
+                    <p>등록 가이드</p>
+                    <ul>
+                      <li>확장자: png, jpg만 가능</li>
+                      <li>용량: 2MB 이하</li>
+                      <li>배경이 투명한 로고 사용을 권장합니다</li>
+                    </ul>
+                  </div>
+                  <button type="button" className={styles.fileUploadBtnFull} onClick={handleFileAttach}>
+                    <IconUpload size={20} />
+                    <span>이미지 업로드</span>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    className={styles.photoHiddenInput}
+                    onChange={handleFileChange}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 2. 근조화환 받지 않기 */}
       <div className={styles.optionRow}>

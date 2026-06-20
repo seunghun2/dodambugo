@@ -112,15 +112,15 @@
 .select {
   width: 100%;
   height: 52px;
-  padding: 0 36px 0 14px;
+  padding: 0 42px 0 14px;
   border: 1px solid var(--b2b-border);
   border-radius: var(--radius-md);
   font-size: 15px;
   color: var(--b2b-text-primary);
   background-color: var(--bg-white);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7684' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234E5968' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right 16px center;
   appearance: none;
   -webkit-appearance: none;
   outline: none;
@@ -333,7 +333,7 @@
   flex-shrink: 0;
 }
 
-/* ===== 날짜/시간 카드 (부고드림 스타일) ===== */
+/* ===== 날짜/시간 카드 스타일 ===== */
 .dtCard {
   background: var(--bg-gray);
   border-radius: 12px;
@@ -631,7 +631,7 @@
 }
 
 /* =============================================
-   MournerSection 스타일 (부고드림 스타일)
+   MournerSection 스타일
    ============================================= */
 
 /* --- 관계순서 변경 pill 버튼 --- */
@@ -930,27 +930,15 @@
   padding-top: 8px;
 }
 
-.mnAccountToggle {
+.mnAccountRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: none;
-  border: none;
   padding: 6px 0;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--b2b-text-tertiary);
-  letter-spacing: -0.02em;
-  text-align: left;
 }
 
-.mnAccountToggle:hover {
-  color: var(--b2b-text-secondary);
-}
-
-.mnAccountToggleLeft {
+.mnAccountInfoLeft {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -961,9 +949,39 @@
   white-space: nowrap;
 }
 
-.mnAccountChevron {
-  font-size: 10px;
+.mnAccountTextBold {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.mnAccountTextEmpty {
+  font-size: 13px;
+  color: var(--b2b-text-tertiary);
+  letter-spacing: -0.02em;
+}
+
+.mnAccountActionsInline {
+  display: flex;
+  gap: 12px;
   flex-shrink: 0;
+}
+
+.mnAccountActionBtnInline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-text-tertiary);
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--transition-fast);
+}
+
+.mnAccountActionBtnInline:hover {
+  color: var(--b2b-text-secondary);
 }
 
 .mnAccountRegText {
@@ -980,44 +998,6 @@
 
 .mnAccountRegText:hover {
   background: #C8E6C9;
-}
-
-.mnAccountDetail {
-  padding: 8px 0 4px;
-  animation: slideDown 0.2s ease;
-}
-
-.mnAccountInfo {
-  display: flex;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--b2b-text-primary);
-  font-weight: 500;
-  margin-bottom: 6px;
-  flex-wrap: wrap;
-}
-
-.mnAccountActions {
-  display: flex;
-  gap: 8px;
-}
-
-.mnAccountActionBtn {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--b2b-text-tertiary);
-  background: none;
-  border: 1px solid var(--b2b-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 12px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-}
-
-.mnAccountActionBtn:hover {
-  border-color: var(--b2b-text-secondary);
-  color: var(--b2b-text-secondary);
 }
 
 /* --- 인원 추가 버튼 (각 관계 그룹 하단, 텍스트+아이콘) --- */
@@ -1813,7 +1793,7 @@
 .selectTrigger {
   width: 100%;
   height: 52px;
-  padding: 0 14px;
+  padding: 0 16px 0 14px;
   border: 1px solid var(--b2b-border);
   border-radius: var(--radius-md);
   background: var(--bg-white);
@@ -1842,8 +1822,10 @@
 }
 
 .selectTriggerArrow {
-  color: var(--b2b-text-tertiary);
-  font-size: 12px;
+  color: #4E5968;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* ===== 바텀시트 ===== */
@@ -2171,4 +2153,354 @@
 
 .calendarCloseBtn:active {
   background: var(--b2b-border-light);
+}
+
+/* =============================================
+   계좌 등록 바텀시트
+   ============================================= */
+.accountSheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-white);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 24px;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accountSheetTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  text-align: center;
+  padding: 8px 0 20px;
+  letter-spacing: -0.02em;
+}
+
+.accountSheetBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accountSheetField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accountSheetLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--b2b-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.accountSheetSelect,
+.accountSheetInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1.5px solid var(--b2b-border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--b2b-text-primary);
+  background: var(--bg-white);
+  letter-spacing: -0.02em;
+  transition: border-color var(--transition-fast);
+  -webkit-appearance: none;
+}
+
+.accountSheetSelect:focus,
+.accountSheetInput:focus {
+  outline: none;
+  border-color: #3A8F47;
+}
+
+.accountSheetInput:disabled {
+  background: var(--bg-gray);
+  color: var(--b2b-text-tertiary);
+}
+
+.accountSheetFooter {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.accountSheetCancelBtn {
+  flex: 1;
+  height: 50px;
+  background: var(--bg-gray);
+  color: var(--b2b-text-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+}
+
+.accountSheetConfirmBtn {
+  flex: 2;
+  height: 50px;
+  background: #3A8F47;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  transition: opacity var(--transition-fast);
+}
+
+.accountSheetConfirmBtn:disabled {
+  background: var(--b2b-border);
+  cursor: not-allowed;
+}
+
+.accountSheetConfirmBtn:not(:disabled):active {
+  opacity: 0.9;
+}
+.favoritesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md) var(--spacing-xl) var(--spacing-md);
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.favoriteSheetItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--spacing-md);
+  background: var(--bg-gray);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--b2b-border-light);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.favoriteSheetItem:active {
+  background-color: var(--gray-100);
+}
+
+/* 로고 바텀시트 & 미리보기 */
+.logoPreviewArea {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.logoPreviewBox, .logoRegisterBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 120px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.logoPreviewBox {
+  border: 1px solid var(--b2b-border-light);
+  background: white;
+}
+
+.logoPreviewImg {
+  max-width: 80%;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.logoPreviewText {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+.logoRegisterBox {
+  border: 1px dashed var(--gray-400);
+  background: var(--bg-gray);
+  transition: background-color var(--transition-fast);
+}
+
+.logoRegisterBox:active {
+  background-color: var(--gray-200);
+}
+
+.logoRegisterText {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.logoTabs {
+  display: flex;
+  border-bottom: 1px solid var(--b2b-border-light);
+  margin-bottom: 16px;
+}
+
+.logoTab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 14px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-400);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.logoTabActive {
+  color: var(--gray-900);
+  border-bottom-color: var(--gray-900);
+  font-weight: 600;
+}
+
+.logoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  padding: 0 var(--spacing-md) var(--spacing-xl) var(--spacing-md);
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.logoGridItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.logoImgWrapper {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border: 1px solid var(--b2b-border-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  overflow: hidden;
+}
+
+.logoGridItemActive .logoImgWrapper {
+  border: 2px solid var(--accent);
+}
+
+.logoImgWrapper img {
+  max-width: 80%;
+  max-height: 50px;
+  object-fit: contain;
+}
+
+.logoCheckmark {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoItemFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.logoItemName {
+  font-size: 13px;
+  color: var(--gray-800);
+  font-weight: 500;
+}
+
+.logoStarBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoCustomArea {
+  padding: 0 var(--spacing-md) var(--spacing-xl) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.logoCustomGuide {
+  background: var(--bg-gray);
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.logoCustomGuide p {
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--gray-900);
+}
+
+.logoCustomGuide ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+.fileUploadBtnFull {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-white);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.fileUploadBtnFull:active {
+  background: var(--gray-50);
+}
+
+.inputError,
+.input.inputError,
+.selectTrigger.inputError,
+.select.inputError,
+.searchBar.inputError,
+.dtInputWrap.inputError {
+  border-color: var(--b2b-error, #F04452) !important;
+}
+
+.fieldError {
+  font-size: 13px !important;
+  color: var(--b2b-error, #F04452) !important;
+  margin-top: 6px !important;
+  margin-left: 4px !important;
+  display: block !important;
+  text-align: left !important;
 }

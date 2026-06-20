@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at')
+        .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified')
         .eq('id', userId)
         .single();
 

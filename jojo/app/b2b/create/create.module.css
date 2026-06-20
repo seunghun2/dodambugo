@@ -10,8 +10,12 @@
 
 /* 헤더 */
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -64,5 +68,144 @@
 /* 콘텐츠 */
 .content {
   padding: 24px 20px;
+  margin-top: 56px;
+}
+
+/* 미리보기 모달 오버레이 */
+.previewOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* 모달 컨테이너 */
+.previewModal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  max-height: 85dvh;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.previewHeader {
+  padding: 20px 20px 12px 20px;
+  border-bottom: 1px solid var(--b2b-border-light);
+}
+
+.previewTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.previewSubtitle {
+  font-size: 13px;
+  color: var(--b2b-text-secondary);
+  letter-spacing: -0.02em;
+}
+
+/* 모달 본문 스크롤 영역 */
+.previewBody {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.previewInfoRow {
+  display: flex;
+  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.previewInfoRow:last-child {
+  margin-bottom: 0;
+}
+
+.previewLabel {
+  width: 90px;
+  color: var(--b2b-text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+
+.previewValue {
+  color: var(--b2b-text-primary);
+  font-weight: 600;
+  flex: 1;
+  word-break: break-all;
+  letter-spacing: -0.02em;
+}
+
+.previewMournerItem {
+  margin-bottom: 6px;
+}
+.previewMournerItem:last-child {
+  margin-bottom: 0;
+}
+
+/* 모달 하단 버튼 액션 바 */
+.previewFooter {
+  display: flex;
+  padding: 14px 20px 20px 20px;
+  gap: 8px;
+  border-top: 1px solid var(--b2b-border-light);
+}
+
+.btnCancel {
+  flex: 1;
+  height: 48px;
+  background: var(--bg-white);
+  border: 1px solid var(--b2b-border);
+  color: var(--b2b-text-secondary);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.btnCancel:active {
+  background: var(--b2b-border-light);
+}
+
+.btnConfirm {
+  flex: 1.5;
+  height: 48px;
+  background: #3A8F47;
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity var(--transition-fast);
+}
+
+.btnConfirm:active {
+  opacity: 0.9;
 }
 

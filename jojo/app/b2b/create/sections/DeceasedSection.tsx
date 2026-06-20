@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { IconChevronDown } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
 interface DeceasedData {
@@ -17,7 +18,7 @@ interface DeceasedData {
 interface Props {
   formData: DeceasedData;
   onChange: (field: string, value: string | boolean) => void;
-  onOpenAiCapture: () => void;
+  errors?: Record<string, string>;
 }
 
 const RELIGIONS = [
@@ -46,7 +47,7 @@ function getGenderDisplay(gender: string, hideGender: boolean): string {
   return '성별';
 }
 
-export default function DeceasedSection({ formData, onChange, onOpenAiCapture }: Props) {
+export default function DeceasedSection({ formData, onChange, errors }: Props) {
   const hasReligion = formData.religion !== '' && formData.religion !== '무교';
   const [showGenderSheet, setShowGenderSheet] = useState(false);
 
@@ -71,32 +72,32 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
 
   return (
     <section className={styles.section}>
-      {/* 헤더: 고인 정보 * + AI 빈소 정보 촬영 */}
+      {/* 헤더: 고인 정보 * */}
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionTitle}>
           고인 정보<span className={styles.requiredMark}>*</span>
         </h2>
-        <button type="button" className={styles.aiBtn} onClick={onOpenAiCapture}>
-          <span className={styles.aiBadge}>AI</span>
-          빈소 정보 촬영
-        </button>
       </div>
 
       {/* 고인명 */}
       <div className={styles.field}>
         <input
           type="text"
-          className={styles.input}
+          className={`${styles.input} ${errors?.deceased_name ? styles.inputError : ''}`}
           placeholder="고인명"
           value={formData.deceased_name}
           onChange={(e) => onChange('deceased_name', e.target.value)}
+          data-error={errors?.deceased_name ? 'true' : undefined}
         />
+        {errors?.deceased_name && (
+          <p className={styles.fieldError}>{errors.deceased_name}</p>
+        )}
       </div>
 
       {/* 고인나이 + 성별 — 한 줄 50:50 */}
       <div className={styles.row}>
         <div className={styles.fieldFlex1}>
-          <div className={styles.inputWithUnit}>
+          <div className={`${styles.inputWithUnit} ${errors?.age ? styles.inputError : ''}`} data-error={errors?.age ? 'true' : undefined}>
             <input
               type="text"
               inputMode="numeric"
@@ -107,19 +108,26 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
             />
             <span className={styles.unit}>세</span>
           </div>
+          {errors?.age && (
+            <p className={styles.fieldError}>{errors.age}</p>
+          )}
         </div>
         <div className={styles.fieldFlex1}>
           {/* 성별 → 바텀시트 트리거 */}
           <button
             type="button"
-            className={styles.selectTrigger}
+            className={`${styles.selectTrigger} ${errors?.gender ? styles.inputError : ''}`}
             onClick={() => setShowGenderSheet(true)}
+            data-error={errors?.gender ? 'true' : undefined}
           >
             <span className={formData.gender || formData.hide_gender ? styles.selectTriggerText : styles.selectTriggerPlaceholder}>
               {getGenderDisplay(formData.gender, formData.hide_gender)}
             </span>
-            <span className={styles.selectTriggerArrow}>▾</span>
+            <IconChevronDown size={18} stroke={3} className={styles.selectTriggerArrow} />
           </button>
+          {errors?.gender && (
+            <p className={styles.fieldError}>{errors.gender}</p>
+          )}
         </div>
       </div>
 

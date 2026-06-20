@@ -46,10 +46,10 @@ function CompleteContent() {
                 {/* 환영 메시지 */}
                 <h2 className={styles.welcome}>
                     {name ? <>{name} 님,<br /></> : null}
-                    <span className={styles.welcomeBrand}>마음부고</span> 환영합니다!
+                    <span className={styles.welcomeBrand}>부고온</span> 환영합니다!
                 </h2>
                 <p className={styles.desc}>
-                    마음부고의 다양한 서비스를<br/>이용하실 수 있습니다.
+                    부고온의 다양한 서비스를<br/>이용하실 수 있습니다.
                 </p>
 
                 {/* 가입정보 카드 */}

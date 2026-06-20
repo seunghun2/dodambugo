@@ -23,7 +23,7 @@
 }
 
 .headerTitle {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--b2b-text-primary);
   letter-spacing: -0.02em;
@@ -62,26 +62,30 @@
 .ctaText { flex: 1; }
 
 .ctaTitle {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--bg-white);
   margin-bottom: 6px;
 }
 
 .ctaDesc {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
   white-space: pre-line;
 }
 
-.ctaImg {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
+.ctaIcon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: var(--spacing-sm);
   flex-shrink: 0;
-  filter: brightness(1.2);
+  color: #fff;
 }
 
 /* 섹션 */
@@ -105,25 +109,30 @@
 .cardLeft { flex: 1; }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--b2b-text-primary);
   margin-bottom: 6px;
 }
 
 .cardDesc {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--b2b-text-secondary);
   line-height: 1.5;
   white-space: pre-line;
 }
 
-.cardImg {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
+.cardIcon {
+  width: 52px;
+  height: 52px;
+  background: var(--b2b-border-light);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: var(--spacing-sm);
   flex-shrink: 0;
+  color: var(--b2b-text-secondary);
 }
 
 /* 3열 기능 카드 */
@@ -147,18 +156,23 @@
 .featureCard:active { background: var(--b2b-border-light); }
 
 .featureLabel {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--b2b-accent);
+  color: var(--b2b-text-primary);
   line-height: 1.4;
   white-space: pre-line;
 }
 
-.featureImg {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+.featureIcon {
+  width: 44px;
+  height: 44px;
+  background: var(--b2b-border-light);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   align-self: flex-end;
+  color: var(--b2b-text-secondary);
 }
 
 /* 잔액 */
@@ -172,7 +186,7 @@
 }
 
 .balanceLabel {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--b2b-text-secondary);
   font-weight: 500;
 }
@@ -181,7 +195,57 @@
   font-size: 18px;
   font-weight: 700;
   color: var(--b2b-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
 }
+
+.balanceAmount:hover {
+  color: var(--b2b-accent);
+  text-decoration: underline;
+}
+
+.balanceActiveRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hideBtn {
+  height: 32px;
+  padding: 0 12px;
+  background: var(--bg-white);
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--b2b-text-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.hideBtn:hover {
+  background: #f8f9fa;
+  color: var(--b2b-text-secondary);
+}
+
+.inquiryBtn {
+  height: 32px;
+  padding: 0 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-accent);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.inquiryBtn:active { background: var(--b2b-border-light); }
 
 /* 추천 코드 */
 .referralRow {
@@ -222,6 +286,29 @@
 }
 
 .copyBtn:active { background: var(--b2b-border-light); }
+
+.btnGroup {
+  display: flex;
+  gap: 6px;
+}
+
+.shareBtn {
+  height: 32px;
+  padding: 0 14px;
+  background: #3A8F47;
+  border: 1px solid #3A8F47;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.shareBtn:active {
+  opacity: 0.8;
+}
 
 /* 공지사항 */
 .sectionHeader {
@@ -287,3 +374,266 @@
   color: var(--b2b-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
+
+/* 생성된 부고장 목록 */
+.bugoListGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bugoItemCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border: 1px solid var(--b2b-border-light);
+}
+
+.bugoItemCard:active {
+  background: var(--b2b-border-light);
+}
+
+.bugoItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bugoDeceased {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+}
+
+.bugoLocation {
+  font-size: 13px;
+  color: var(--b2b-text-secondary);
+}
+
+.bugoItemRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bugoNumber {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-accent);
+}
+
+/* 확인 팝업 모달 오버레이 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end; /* 바텀시트 모달 형식 */
+  justify-content: center;
+}
+
+.modalContainer {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-white);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 20px 24px 20px;
+  box-sizing: border-box;
+  max-height: 90dvh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  text-align: center;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+/* 모달 내 요약 테이블 */
+.modalTable {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.modalRow {
+  display: flex;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modalLabel {
+  width: 100px;
+  color: var(--b2b-text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.modalValue {
+  color: var(--b2b-text-primary);
+  font-weight: 600;
+  flex: 1;
+  text-align: right;
+  word-break: break-all;
+}
+
+.noInfo {
+  color: #FF4D5B;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.noInfoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #FF4D5B;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* 복제/삭제 버튼 라인 */
+.modalActionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.btnDuplicate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-text-primary);
+  cursor: pointer;
+}
+
+.btnDeleteLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FF4D5B;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 모달 최종 제어 버튼 그룹 */
+.modalButtonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modalRowButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.btnModalModify {
+  flex: 1;
+  height: 48px;
+  background: #F2F4F6;
+  color: var(--b2b-text-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnModalGo {
+  flex: 1.2;
+  height: 48px;
+  background: #3A8F47; /* 남색 배제, 브랜드 초록색 적용 */
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnModalCancel {
+  width: 100%;
+  height: 48px;
+  background: #E5E8EB;
+  color: var(--b2b-text-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 로딩 애니메이션 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 250px;
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid rgba(58, 143, 71, 0.15);
+  border-left-color: #3A8F47;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--b2b-text-secondary);
+  animation: pulse 1.5s ease-in-out infinite;
+  letter-spacing: -0.02em;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+

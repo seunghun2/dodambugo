@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { IconStar, IconStarFilled } from '@tabler/icons-react';
 
 interface Facility {
     id: number;
@@ -23,7 +24,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
     const searchInputRef = useRef<HTMLInputElement>(null);
     const postcodeContainerRef = useRef<HTMLDivElement>(null);
 
-    // 모달 열릴 때 검색창에 포커스 + 초기화
+    // 모달 열릴 때 검색창에 포커스 + 초기화 + 로컬스토리지 즐겨찾기 로드
     useEffect(() => {
         if (isOpen) {
             setSearchQuery('');
@@ -31,8 +32,32 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
             if (activeTab === 'facility') {
                 setTimeout(() => searchInputRef.current?.focus(), 100);
             }
+            
+            try {
+                const stored = localStorage.getItem('b2b_favorite_facilities');
+                if (stored) {
+                    setFavorites(JSON.parse(stored));
+                }
+            } catch {}
         }
     }, [isOpen, activeTab]);
+
+    const [favorites, setFavorites] = useState<{name: string; address: string; tel: string}[]>([]);
+
+    const toggleFavorite = (e: React.MouseEvent, facility: Facility) => {
+        e.stopPropagation();
+        setFavorites(prev => {
+            const isFav = prev.some(f => f.name === facility.name);
+            let next;
+            if (isFav) {
+                next = prev.filter(f => f.name !== facility.name);
+            } else {
+                next = [{ name: facility.name, address: facility.address, tel: facility.phone || '' }, ...prev].slice(0, 10);
+            }
+            localStorage.setItem('b2b_favorite_facilities', JSON.stringify(next));
+            return next;
+        });
+    };
 
     const [allFacilities, setAllFacilities] = useState<Facility[]>([]);
     const [facilitiesLoaded, setFacilitiesLoaded] = useState(false);
@@ -92,9 +117,10 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                 if (window.daum && postcodeContainerRef.current) {
                     new window.daum.Postcode({
                         oncomplete: (data: any) => {
+                            const address = data.roadAddress || data.jibunAddress;
                             onSelect({
                                 name: data.buildingName || '',
-                                address: data.roadAddress || data.jibunAddress
+                                address: address
                             }, 'address');
                             onClose();
                         },
@@ -267,24 +293,45 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                                     검색 결과가 없습니다
                                 </div>
                             )}
-                            {results.map((facility, index) => (
+                            {results.map((facility, index) => {
+                                const isFav = favorites.some(f => f.name === facility.name);
+                                return (
                                 <div
                                     key={facility.id || index}
                                     onClick={() => handleFacilitySelect(facility)}
                                     style={{
                                         padding: '16px',
                                         borderBottom: '1px solid #f0f0f0',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
                                     }}
                                 >
-                                    <div style={{ fontSize: '16px', fontWeight: 500, marginBottom: '4px' }}>
-                                        {highlightMatch(facility.name, searchQuery)}
+                                    <div>
+                                        <div style={{ fontSize: '16px', fontWeight: 500, marginBottom: '4px' }}>
+                                            {highlightMatch(facility.name, searchQuery)}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: '#666' }}>
+                                            {highlightMatch(facility.address || '', searchQuery)}
+                                        </div>
                                     </div>
-                                    <div style={{ fontSize: '14px', color: '#666' }}>
-                                        {highlightMatch(facility.address || '', searchQuery)}
-                                    </div>
+                                    <button 
+                                        type="button" 
+                                        onClick={(e) => toggleFavorite(e, facility)}
+                                        style={{ 
+                                            background: 'none', 
+                                            border: 'none', 
+                                            cursor: 'pointer',
+                                            padding: '8px',
+                                            color: isFav ? '#F1C40F' : '#DDDDDD'
+                                        }}
+                                    >
+                                        {isFav ? <IconStarFilled size={24} /> : <IconStar size={24} />}
+                                    </button>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

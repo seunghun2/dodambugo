@@ -3,8 +3,8 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 
 export const metadata = {
-  title: '마음부고 파트너',
-  description: '마음부고 B2B 파트너 앱 - 화환 판매로 수익을 만드세요',
+  title: '부고온 파트너',
+  description: '부고온 B2B 파트너 앱 - 화환 판매로 수익을 만드세요',
 };
 
 export default function B2BLayout({

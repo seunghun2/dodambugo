@@ -1,154 +1,1027 @@
-/* 설정 */
-
+/* B2B 파트너 마이페이지 및 설정 대개편 스타일 모듈 - Hot Reload Trigger */
 .container {
-    min-height: 100dvh;
-    background: var(--bg-white);
-    max-width: 480px;
-    margin: 0 auto;
-    padding-bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #1A1F26;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 72px; /* BottomTabBar */
+  box-sizing: border-box;
 }
 
+/* 헤더 */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 52px;
-    border-bottom: 1px solid var(--b2b-border-light);
-    position: sticky;
-    top: 0;
-    background: var(--bg-white);
-    z-index: 10;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: #1A1F26;
+  cursor: pointer;
+  padding: 0;
 }
 
 .headerTitle {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--b2b-text-primary);
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A1F26;
 }
 
-.section { padding: var(--spacing-md) 20px 0; }
-
-.card {
-    background: var(--bg-gray);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: var(--spacing-sm);
+.headerRightPlaceholder {
+  width: 36px;
 }
 
-.cardTitle {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--b2b-accent);
-    margin-bottom: var(--spacing-md);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* 탭바 (기업회원 / 장례지도사) */
+.tabContainer {
+  display: flex;
+  background-color: #f1f3f5;
+  border-radius: 24px;
+  padding: 4px;
+  margin: 16px;
 }
 
-.infoGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+.tabBtn {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8E94A0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
-.infoRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.tabActive {
+  background-color: #ffffff;
+  color: #1A1F26;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.infoLabel {
-    font-size: 13px;
-    color: var(--b2b-text-secondary);
+/* 프로필 블록 */
+.profileCard {
+  background-color: #ffffff;
+  padding: 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f3f5;
 }
 
-.infoValue {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--b2b-text-primary);
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.accountValueWrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.profileName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1F26;
 }
 
-.badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--b2b-success);
-    background: var(--success-bg);
-    padding: 2px var(--spacing-sm);
-    border-radius: var(--radius-xs, 4px);
+.profileCompany {
+  font-size: 14px;
+  color: #8E94A0;
+  font-weight: 500;
+}
+
+.infoEditBtn {
+  background: none;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8E94A0;
+  cursor: pointer;
+}
+
+/* 계좌 카드 */
+.accountCard {
+  background-color: #ffffff;
+  padding: 16px;
+  margin-top: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.accountLabel {
+  font-size: 12px;
+  color: #8E94A0;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.accountInfo {
+  font-size: 15px;
+  font-weight: 600;
+  color: #495057;
 }
 
 .changeBtn {
-    height: 34px;
-    padding: 0 14px;
-    background: var(--bg-white);
-    border: 1px solid var(--b2b-border);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--b2b-text-secondary);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background-color var(--transition-fast);
+  background-color: #f1f3f5;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
 }
 
-.changeBtn:active { background: var(--b2b-border-light); }
-
-.menuList {
-    margin: 0 20px;
-    background: var(--bg-gray);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+/* 주요 메뉴 그리드 */
+.menuSection {
+  background-color: #ffffff;
+  padding: 20px 16px;
+  margin-top: 12px;
 }
 
-.menuItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md) 20px;
-    background: none;
-    border: none;
-    border-bottom: 1px solid var(--b2b-border-light);
-    width: 100%;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background-color var(--transition-fast);
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin-bottom: 16px;
 }
 
-.menuItem:last-child { border-bottom: none; }
-.menuItem:active { background: var(--b2b-border-light); }
-
-.menuLabel {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--b2b-text-primary);
+.menuGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.menuLabelDanger {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--b2b-error);
+.gridCard {
+  background-color: #f8f9fa;
+  border: 1px solid #f1f3f5;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.footer {
-    text-align: center;
-    padding: var(--spacing-lg) 20px 40px;
+.gridCard:active {
+  background-color: #f1f3f5;
 }
 
-.footerText {
-    font-size: 11px;
-    color: var(--b2b-text-tertiary);
-    line-height: 1.6;
+.gridLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #495057;
+  white-space: pre-line;
+  line-height: 1.3;
 }
 
-/* 로딩 상태 */
-.loadingState {
-    padding: 60px;
-    text-align: center;
-    color: var(--b2b-text-tertiary);
+.gridIcon {
+  color: #3A8F47;
+}
+
+/* 마이페이지 리스트 */
+.myPageSection {
+  background-color: #ffffff;
+  padding: 20px 16px;
+  margin-top: 12px;
+}
+
+.listGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f8f9fa;
+  cursor: pointer;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.listArrow {
+  color: #adb5bd;
+}
+
+/* 설정 세부 리스트 (토글 등) */
+.settingsSection {
+  padding: 8px 16px 20px 16px;
+  background-color: #ffffff;
+}
+
+.groupTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #adb5bd;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  padding-left: 4px;
+  text-transform: uppercase;
+}
+
+.rowItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 4px;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.rowLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1F26;
+}
+
+.rowDesc {
+  font-size: 12px;
+  color: #8E94A0;
+}
+
+/* 토글 스위치 */
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #3A8F47;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.logoutBtnArea {
+  margin-top: 40px;
+  text-align: center;
+  padding-bottom: 24px;
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #E53E3E;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 화환 가격 설정 */
+.priceIntroBox {
+  background-color: #ffffff;
+  padding: 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.priceIntroTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1f26;
+  margin-bottom: 16px;
+}
+
+.priceIntroDesc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8E94A0;
+  text-align: left;
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+
+.wreathList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+}
+
+.wreathCard {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.wreathImg {
+  width: 80px;
+  height: 80px;
+  background-color: #f1f3f5;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.wreathInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wreathName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1f26;
+}
+
+.wreathPriceRange {
+  font-size: 12px;
+  color: #8E94A0;
+}
+
+.wreathDiscountLimit {
+  font-size: 12px;
+  color: #E53E3E;
+  font-weight: 600;
+}
+
+.discountInputRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.discountInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.discountInput {
+  width: 80px;
+  height: 32px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  text-align: right;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #1a1f26;
+  outline: none;
+}
+
+.discountInput:focus {
+  border-color: #3A8F47;
+}
+
+.discountText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* 화환 가격 저장 버튼 */
+.saveBtnArea {
+  padding: 16px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+}
+
+.saveBtn {
+  width: 100%;
+  height: 50px;
+  background-color: #3A8F47;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+  background-color: #2E7238;
+}
+
+/* 모달 스타일 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1f26;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #adb5bd;
+  cursor: pointer;
+}
+
+.modalBody {
+  padding: 20px 16px;
+}
+
+/* 네임카드(명함) 디자인 */
+.nameCard {
+  background: linear-gradient(135deg, #3A8F47 0%, #2E7238 100%);
+  border-radius: 12px;
+  padding: 24px;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(58, 143, 71, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.nameCard:before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.cardBrand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.cardTitleBadge {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cardOwner {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cardCompany {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 24px;
+}
+
+.cardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 16px;
+}
+
+.cardRow {
+  display: flex;
+  gap: 8px;
+}
+
+.cardLabel {
+  width: 70px;
+  opacity: 0.7;
+}
+
+/* 계좌 정보 입력 */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inputField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.textInput {
+  height: 44px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #1a1f26;
+  outline: none;
+}
+
+.textInput:focus {
+  border-color: #3A8F47;
+}
+
+.confirmBtn {
+  width: 100%;
+  height: 46px;
+  background-color: #3A8F47;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* 추천 회원 목록 */
+.referralStats {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.referralCount {
+  color: #3A8F47;
+}
+
+.referralList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.referralItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f3f5;
+  font-size: 13px;
+}
+
+.refName {
+  font-weight: 600;
+  color: #495057;
+}
+
+.refCompany {
+  color: #8E94A0;
+  margin-left: 8px;
+}
+
+.refDate {
+  color: #adb5bd;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 0;
+  color: #adb5bd;
+  font-size: 13px;
+}
+
+/* 화환 가격 설정 하단 고정 버튼 영역 */
+.bottomFixedBtnArea {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  z-index: 300;
+  box-sizing: border-box;
+}
+
+.bottomFixedBtn {
+  width: 100%;
+  height: 50px;
+  background-color: #1A3088; /* 스크린샷 1번 남색 저장하기 버튼 */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bottomFixedBtn:hover {
+  background-color: #122260;
+}
+
+/* 주요 메뉴 아이콘 미세 조정 */
+.gridIconSvg {
+  color: #4E5968; /* 과한 초록색 대신 가볍게 세팅 */
+}
+
+/* 내정보 상세 뷰 */
+.profileDetailSection {
+  background-color: #ffffff;
+  padding: 32px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.avatarWrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.avatarCircle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #f1f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e9ecef;
+}
+
+.avatarCameraBtn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #4E5968;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profileDetailMeta {
+  text-align: center;
+}
+
+.profileDetailName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin: 0 0 4px 0;
+}
+
+.profileDetailCompany {
+  font-size: 14px;
+  color: #8E94A0;
+  margin: 0;
+  font-weight: 500;
+}
+
+.infoDetailSection {
+  padding: 20px 16px;
+  background-color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.infoGroupTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.detailLabel {
+  font-size: 14px;
+  color: #8E94A0;
+  font-weight: 500;
+}
+
+.detailValueRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailValueText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1F26;
+}
+
+.detailValueCode {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1F26;
+  font-family: monospace;
+}
+
+.detailActionBtn {
+  background: none;
+  border: 1px solid #E5E8EB;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4E5968;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.detailActionBtn:active {
+  background-color: #f8f9fa;
+}
+
+.detailBadge {
+  background-color: #F2F4F6;
+  color: #4E5968;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nameCardMenuRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 12px;
+  background-color: #F8F9FA;
+  border: 1px solid #E5E8EB;
+  border-radius: 8px;
+  margin-top: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nameCardMenuRow:active {
+  background-color: #F2F4F6;
+}
+
+.nameCardMenuLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1F26;
+}
+
+/* 회원탈퇴 */
+.withdrawBody {
+  padding: 32px 16px;
+  background-color: #ffffff;
+  min-height: calc(100vh - 128px);
+}
+
+.withdrawMainTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A1F26;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  margin: 0 0 12px 0;
+}
+
+.withdrawSubDesc {
+  font-size: 14px;
+  color: #4E5968;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.withdrawWarnBox {
+  background-color: #F8F9FA;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 32px;
+}
+
+.withdrawWarnItem {
+  font-size: 13px;
+  color: #4E5968;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.withdrawAgreeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  cursor: pointer;
+}
+
+.customCheckbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ced4da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.customCheckbox.checked {
+  background-color: #3A8F47;
+  border-color: #3A8F47;
+}
+
+.withdrawAgreeText {
+  font-size: 14px;
+  color: #1A1F26;
+  font-weight: 600;
+}
+
+.withdrawBtn {
+  width: 100%;
+  height: 50px;
+  background-color: #E5E8EB;
+  color: #8B95A1;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+}
+
+.withdrawBtn.active {
+  background-color: #E53E3E; /* 경고형 탈퇴 빨간색 버튼 */
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* 문서(약관/개인정보) 뷰 */
+.docViewBody {
+  padding: 24px 16px;
+  background-color: #ffffff;
+  min-height: calc(100vh - 128px);
+}
+
+.docTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin: 0 0 20px 0;
+}
+
+.docContentBox {
+  font-size: 14px;
+  color: #4E5968;
+  line-height: 1.7;
+}
+
+.docContentBox h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin: 24px 0 8px 0;
+}
+
+.docContentBox p {
+  margin: 0 0 12px 0;
 }

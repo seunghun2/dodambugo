@@ -23,7 +23,7 @@ export default function B2BHomePage() {
                         <path d="M14 3C14 3 7 7 7 14C7 18 9 22 14 26C19 22 21 18 21 14C21 7 14 3 14 3Z" fill="currentColor"/>
                     </svg>
                 </div>
-                <p className={styles.name}>마음부고 파트너</p>
+                <p className={styles.name}>부고온 파트너</p>
             </div>
         </div>
     );

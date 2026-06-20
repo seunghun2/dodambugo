@@ -1069,7 +1069,27 @@ ${url}
                                     });
                                 }
 
-                                return allAccounts.map((acc, i) => {
+                                // URL 쿼리 파라미터 'm' (상주명) 에 따른 계좌 필터링 처리
+                                const mParam = searchParams.get('m');
+                                let filteredAccounts = allAccounts;
+
+                                if (mParam) {
+                                    const mournersArr = Array.isArray(bugo.mourners) ? bugo.mourners : [];
+                                    const currentMourner = mournersArr.find((m: any) => m.name === mParam);
+
+                                    if (currentMourner) {
+                                        const displayOpt = (currentMourner as any).accountDisplay || 'mine';
+                                        if (displayOpt === 'none') {
+                                            filteredAccounts = [];
+                                        } else if (displayOpt === 'mine') {
+                                            filteredAccounts = allAccounts.filter(
+                                                acc => acc.name === mParam || acc.holder === mParam
+                                            );
+                                        }
+                                    }
+                                }
+
+                                return filteredAccounts.map((acc, i) => {
                                     const bankLogo = getBankLogo(acc.bank);
                                     return (
                                         <div className="account-card" key={i}>

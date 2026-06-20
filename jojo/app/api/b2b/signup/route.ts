@@ -162,6 +162,9 @@ export async function POST(request: NextRequest) {
                 company_name,
                 owner_name,
                 my_referral_code: newUser.my_referral_code,
+                bank_name: bank_name || null,
+                account_no: account_no || null,
+                account_holder: account_holder || null,
             },
         });
     } catch (error) {

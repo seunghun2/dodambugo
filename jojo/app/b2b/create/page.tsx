@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { IconArrowLeft } from '@tabler/icons-react';
 import FuneralHomeSection from './sections/FuneralHomeSection';
 import DeceasedSection from './sections/DeceasedSection';
 import DateTimeSection from './sections/DateTimeSection';
@@ -67,7 +66,7 @@ export interface BugoFormData {
 }
 
 const initialFormData: BugoFormData = {
-  funeral_type: '일반 장례',
+  funeral_type: '일반장례',
   funeral_home: '',
   room_number: '',
   funeral_home_tel: '',
@@ -133,15 +132,108 @@ export default function B2BCreatePage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showFacilitySearch, setShowFacilitySearch] = useState(false);
-  const [showAiCapture, setShowAiCapture] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
-  // 로그인 확인
+  // B2B 수정 모드 관련 상태 추가
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editBugoNumber, setEditBugoNumber] = useState<string | null>(null);
+
+  // 로그인 확인 및 수정 데이터 조회
   useEffect(() => {
     const token = localStorage.getItem('b2b_token');
     if (!token) {
       router.push('/b2b/login');
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const editNum = params.get('edit');
+    if (editNum) {
+      setEditBugoNumber(editNum);
+      setIsEditMode(true);
+      loadBugoData(editNum);
     }
   }, [router]);
+
+  const loadBugoData = async (bugoNum: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('bugo')
+        .select('*')
+        .eq('bugo_number', bugoNum)
+        .single();
+      
+      if (error) throw error;
+      if (data) {
+        setFormData({
+          funeral_type: data.funeral_type || '일반장례',
+          funeral_home: data.funeral_home || '',
+          room_number: data.room_number || '',
+          funeral_home_tel: data.funeral_home_tel || '',
+          address: data.address || '',
+          address_detail: data.address_detail || '',
+          deceased_name: data.deceased_name || '',
+          age: data.age ? data.age.toString() : '',
+          gender: data.gender || '',
+          hide_gender: data.hide_gender || false,
+          religion: data.religion || '없음',
+          religion_custom: data.religion_custom || '',
+          religious_title: data.religious_title || '',
+          show_religious_title: data.show_religious_title || false,
+          photo_url: data.photo_url || '',
+          show_photo: !!data.photo_url,
+          death_date: data.death_date || '',
+          death_time: data.death_time || '',
+          checkin_date: data.checkin_date || '',
+          checkin_time: data.checkin_time || '',
+          encoffin_date: data.encoffin_date || '',
+          encoffin_time: data.encoffin_time || '',
+          funeral_date: data.funeral_date || '',
+          funeral_time: data.funeral_time || '',
+          ilpo_date: data.ilpo_date || '',
+          ilpo_time: data.ilpo_time || '',
+          burial_place: data.burial_place || '',
+          burial_place2: data.burial_place2 || '',
+          message: data.message || '',
+          show_message: !!data.message,
+          death_term: data.death_term || '별세',
+          partner_logo_url: data.partner_logo_url || '',
+          no_wreath: data.no_wreath || false,
+          auto_reply: data.auto_reply !== false,
+        });
+
+        let parsedMourners: Mourner[] = [];
+        if (data.mourners) {
+          try {
+            parsedMourners = typeof data.mourners === 'string' ? JSON.parse(data.mourners) : data.mourners;
+          } catch (e) {
+            console.error('상주 파싱 에러', e);
+          }
+        }
+        if (!Array.isArray(parsedMourners) || parsedMourners.length === 0) {
+          parsedMourners = [{ relationship: '', name: '', contact: '' }];
+        }
+
+        if (data.account_info) {
+          try {
+            const parsedAcc = typeof data.account_info === 'string' ? JSON.parse(data.account_info) : data.account_info;
+            if (Array.isArray(parsedAcc) && parsedAcc.length > 0) {
+              parsedMourners[0].bank = parsedAcc[0].bank || '';
+              parsedMourners[0].accountNumber = parsedAcc[0].number || '';
+              parsedMourners[0].accountHolder = parsedAcc[0].holder || '';
+            }
+          } catch (e) {
+            console.error('대표상주 계좌 파싱 에러', e);
+          }
+        }
+
+        setMourners(parsedMourners);
+      }
+    } catch (err) {
+      console.error('부고 불러오기 실패:', err);
+      alert('부고 정보를 불러오는데 실패했습니다.');
+    }
+  };
 
   // 폼 필드 업데이트
   const handleChange = useCallback((field: string, value: string | boolean) => {
@@ -166,12 +258,12 @@ export default function B2BCreatePage() {
   }, []);
 
   // 유효성 검사
-  const validate = (): boolean => {
+  const validate = (): Record<string, string> | null => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.deceased_name.trim()) newErrors.deceased_name = '고인명을 입력해주세요';
     if (!formData.age.trim()) newErrors.age = '연세를 입력해주세요';
-    if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
+    if (!formData.gender && !formData.hide_gender) newErrors.gender = '성별을 선택해주세요';
 
     if (formData.funeral_type !== '무빈소장례') {
       if (!formData.funeral_home.trim()) newErrors.funeral_home = '장례식장명을 입력해주세요';
@@ -186,7 +278,7 @@ export default function B2BCreatePage() {
     if (!mourners[0]?.relationship) newErrors.mourner_relationship = '대표상주 관계를 선택해주세요';
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0 ? null : newErrors;
   };
 
   // 저장하기 (임시저장)
@@ -202,33 +294,43 @@ export default function B2BCreatePage() {
           b2bUserId: user.id,
         }),
       });
-      alert('임시저장 되었습니다.');
+      alert('저장되었습니다.');
     } catch {
       alert('저장에 실패했습니다.');
     }
   };
 
-  // 제출
+  // 1단계: 유효성 검사 후 미리보기 모달 표시
   const handleSubmit = async () => {
-    if (!validate()) {
+    const validationErrors = validate();
+    if (validationErrors) {
+      // 첫 번째 에러 메시지 얼럿 노출
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const firstErrorMessage = validationErrors[firstErrorKey];
+      if (firstErrorMessage) alert(firstErrorMessage);
+
       // 첫 번째 에러로 스크롤
-      const firstError = document.querySelector('[data-error]');
-      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const firstError = document.querySelector('[data-error="true"]');
+        firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
       return;
     }
 
+    setShowPreview(true);
+  };
+
+  // 2단계: 실제 제출 처리
+  const handleConfirmSubmit = async () => {
+    if (submitting) return;
     setSubmitting(true);
+    setShowPreview(false);
+
     try {
       const user = JSON.parse(localStorage.getItem('b2b_user') || '{}');
-      const bugoNumber = await generateBugoNumber();
-      const ownerToken = generateOwnerToken();
+      const bugoNumber = isEditMode && editBugoNumber ? editBugoNumber : await generateBugoNumber();
 
-      const bugoData = {
-        bugo_number: bugoNumber,
-        template_id: 'basic',
-        applicant_name: mourners[0]?.name || '',
-        applicant_phone: mourners[0]?.contact || '',
-        phone_password: mourners[0]?.contact || '',
+      const bugoData: any = {
         deceased_name: formData.deceased_name,
         gender: formData.hide_gender ? '' : formData.gender,
         hide_gender: formData.hide_gender,
@@ -271,14 +373,29 @@ export default function B2BCreatePage() {
             }])
           : null,
         photo_url: formData.show_photo ? formData.photo_url : null,
-        status: 'active',
-        owner_token: ownerToken,
-        b2b_user_id: user.id || null,
       };
 
-      const { error } = await supabase.from('bugo').insert([bugoData]);
+      let queryResult;
+      if (isEditMode && editBugoNumber) {
+        queryResult = await supabase
+          .from('bugo')
+          .update(bugoData)
+          .eq('bugo_number', editBugoNumber);
+      } else {
+        const ownerToken = generateOwnerToken();
+        bugoData.bugo_number = bugoNumber;
+        bugoData.template_id = 'basic';
+        bugoData.applicant_name = mourners[0]?.name || '';
+        bugoData.applicant_phone = mourners[0]?.contact || '';
+        bugoData.phone_password = mourners[0]?.contact || '';
+        bugoData.status = 'active';
+        bugoData.owner_token = ownerToken;
+        bugoData.b2b_user_id = user.id || null;
 
-      if (error) throw error;
+        queryResult = await supabase.from('bugo').insert([bugoData]);
+      }
+
+      if (queryResult.error) throw queryResult.error;
 
       // 슬랙 + 알림톡 발송
       await fetch('/api/bugo-notify', {
@@ -294,7 +411,7 @@ export default function B2BCreatePage() {
           funeral_time: formData.funeral_time,
           mourner_name: mourners[0]?.name,
           funeral_type: formData.funeral_type,
-          created_new: true,
+          created_new: !isEditMode,
           phone_changed: false,
         }),
       });
@@ -313,7 +430,7 @@ export default function B2BCreatePage() {
         }
       }
 
-      router.push(`/create/complete/${bugoNumber}`);
+      router.push(`/b2b/create/complete/${bugoNumber}`);
     } catch (err) {
       console.error('부고 생성 실패:', err);
       alert('부고 생성에 실패했습니다. 다시 시도해주세요.');
@@ -327,10 +444,12 @@ export default function B2BCreatePage() {
       {/* 헤더 */}
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => router.back()}>
-          <IconArrowLeft size={22} stroke={1.8} />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
         </button>
-        <h1 className={styles.headerTitle}>부고장 제작</h1>
-        <button className={styles.saveBtn} onClick={handleSave}>
+        <h1 className={styles.headerTitle}>{isEditMode ? '부고장 수정' : '부고장 제작'}</h1>
+        <button className={styles.saveBtn} onClick={handleSubmit}>
           저장하기
         </button>
       </header>
@@ -341,13 +460,14 @@ export default function B2BCreatePage() {
           formData={formData}
           onChange={handleChange}
           onOpenFacilitySearch={() => setShowFacilitySearch(true)}
+          errors={errors}
         />
 
         {/* 고인 정보 */}
         <DeceasedSection
           formData={formData}
           onChange={handleChange}
-          onOpenAiCapture={() => setShowAiCapture(true)}
+          errors={errors}
         />
 
         {/* 영정사진 */}
@@ -363,12 +483,14 @@ export default function B2BCreatePage() {
           formData={formData}
           onChange={handleChange}
           onClear={handleClearFields}
+          errors={errors}
         />
 
         {/* 상주 정보 */}
         <MournerSection
           mourners={mourners}
           onMournersChange={setMourners}
+          errors={errors}
         />
 
         {/* 옵션 */}
@@ -389,6 +511,127 @@ export default function B2BCreatePage() {
           setShowFacilitySearch(false);
         }}
       />
+
+      {/* 미리보기 확인 팝업 모달 */}
+      {showPreview && (
+        <div className={styles.previewOverlay} onClick={() => setShowPreview(false)}>
+          <div className={styles.previewModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.previewHeader}>
+              <h2 className={styles.previewTitle}>모바일 부고장 내용을 확인해주세요</h2>
+              <p className={styles.previewSubtitle}>부고장에 표시될 내용을 꼼꼼하게 확인해보세요.</p>
+            </div>
+            
+            <div className={styles.previewBody}>
+              {/* 장례식장 정보 */}
+              {formData.funeral_type !== '무빈소장례' && formData.funeral_home && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>장례식장</span>
+                  <span className={styles.previewValue}>
+                    {formData.address && <>{formData.address}<br /></>}
+                    {formData.funeral_home} {formData.room_number}
+                  </span>
+                </div>
+              )}
+
+              {/* 고인 정보 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>고인정보</span>
+                <span className={styles.previewValue}>
+                  {formData.deceased_name}
+                  {formData.religion && formData.religion !== '없음' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}` : ''}
+                  {formData.age ? ` / ${formData.age}세` : ''}
+                  {formData.hide_gender ? '' : formData.gender ? ` / ${formData.gender === '남' ? '남성' : '여성'}` : ''}
+                </span>
+              </div>
+
+              {/* 별세일 */}
+              {formData.death_date && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>별세일</span>
+                  <span className={styles.previewValue}>
+                    {formData.death_date}{formData.death_time ? ` / ${formData.death_time}` : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* 입관일 */}
+              {formData.encoffin_date && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>입관일</span>
+                  <span className={styles.previewValue}>
+                    {formData.encoffin_date}{formData.encoffin_time ? ` / ${formData.encoffin_time}` : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* 발인일 */}
+              {formData.funeral_date && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>발인일</span>
+                  <span className={styles.previewValue}>
+                    {formData.funeral_date}{formData.funeral_time ? ` / ${formData.funeral_time}` : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* 일포일시 */}
+              {formData.ilpo_date && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>일포일시</span>
+                  <span className={styles.previewValue}>
+                    {formData.ilpo_date}{formData.ilpo_time ? ` / ${formData.ilpo_time}` : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* 장지 */}
+              {(formData.burial_place || formData.burial_place2) && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>장지</span>
+                  <span className={styles.previewValue}>
+                    {formData.burial_place}
+                    {formData.burial_place2 && ` / ${formData.burial_place2}`}
+                  </span>
+                </div>
+              )}
+
+              {/* 상주 정보 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>상주</span>
+                <div className={styles.previewValue}>
+                  {mourners.filter(m => m.name).map((m, i) => (
+                    <div key={i} className={styles.previewMournerItem}>
+                      [{m.relationship || '상주'}] {m.name} {m.contact ? `(${m.contact})` : ''}
+                      {m.bank && m.accountNumber && (
+                        <div style={{ fontSize: '12px', color: '#666', fontWeight: 'normal', marginTop: '2px' }}>
+                          {m.bank} {m.accountNumber} {m.accountHolder ? `(예금주: ${m.accountHolder})` : ''}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 안내사항 */}
+              {formData.show_message && formData.message && (
+                <div className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>안내사항</span>
+                  <span className={styles.previewValue}>{formData.message}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.previewFooter}>
+              <button className={styles.btnCancel} onClick={() => setShowPreview(false)}>
+                수정하기
+              </button>
+              <button className={styles.btnConfirm} onClick={handleConfirmSubmit} disabled={submitting}>
+                {submitting ? '생성 중...' : '최종 생성하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
