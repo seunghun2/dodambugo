@@ -135,77 +135,39 @@ export default function FuneralHomeSection({ formData, onChange, onOpenFacilityS
       {/* 무빈소장례가 아닐 때만 장례식장 필드 표시 */}
       {!isNoBinso && (
         <>
-          {/* 장례식장명 + 검색 */}
+          {/* 장례식장 검색 바 */}
           <div className={styles.field}>
-            <label className={styles.label}>장례식장명</label>
-            <div className={styles.row}>
-              <div className={styles.fieldFlex1}>
-                <input
-                  type="text"
-                  className={styles.input}
-                  placeholder="장례식장을 검색해주세요"
-                  value={formData.funeral_home}
-                  onChange={(e) => onChange('funeral_home', e.target.value)}
-                  readOnly
-                />
-              </div>
-              <button
-                type="button"
-                className={styles.searchBtn}
-                onClick={onOpenFacilitySearch}
-              >
-                <IconSearch size={18} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                검색
-              </button>
+            <div
+              className={styles.searchBar}
+              onClick={onOpenFacilitySearch}
+            >
+              <span className={styles.searchPlaceholder}>
+                {formData.funeral_home || '장례식장을 검색해주세요'}
+              </span>
+              <IconSearch size={18} stroke={1.8} />
             </div>
           </div>
 
-          {/* 호실 */}
-          <div className={styles.field}>
-            <label className={styles.label}>호실</label>
-            <input
-              type="text"
-              className={styles.input}
-              placeholder="예: 1호실, VIP실"
-              value={formData.room_number}
-              onChange={(e) => onChange('room_number', e.target.value)}
-            />
-          </div>
-
-          {/* 연락처 */}
-          <div className={styles.field}>
-            <label className={styles.label}>장례식장 연락처</label>
-            <input
-              type="tel"
-              className={styles.input}
-              placeholder="예: 02-1234-5678"
-              value={formData.funeral_home_tel}
-              onChange={(e) => onChange('funeral_home_tel', e.target.value)}
-            />
-          </div>
-
-          {/* 주소 */}
-          <div className={styles.field}>
-            <label className={styles.label}>주소</label>
-            <input
-              type="text"
-              className={styles.input}
-              placeholder="장례식장 검색 시 자동입력됩니다"
-              value={formData.address}
-              readOnly
-            />
-          </div>
-
-          {/* 상세주소 */}
-          <div className={styles.field}>
-            <label className={styles.label}>상세주소</label>
-            <input
-              type="text"
-              className={styles.input}
-              placeholder="상세주소 입력 (선택)"
-              value={formData.address_detail}
-              onChange={(e) => onChange('address_detail', e.target.value)}
-            />
+          {/* 장례식장명 + 호실 */}
+          <div className={styles.row}>
+            <div className={styles.fieldFlex1}>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="장례식장명"
+                value={formData.funeral_home}
+                readOnly
+              />
+            </div>
+            <div className={styles.fieldFlex1}>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="호실(예시:102호)"
+                value={formData.room_number}
+                onChange={(e) => onChange('room_number', e.target.value)}
+              />
+            </div>
           </div>
         </>
       )}

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { IconArrowLeft, IconDeviceFloppy } from '@tabler/icons-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import FuneralHomeSection from './sections/FuneralHomeSection';
 import DeceasedSection from './sections/DeceasedSection';
 import DateTimeSection from './sections/DateTimeSection';
@@ -44,16 +44,13 @@ export interface BugoFormData {
   show_photo: boolean;
   // 일시
   death_date: string;
-  death_hour: string;
-  death_minute: string;
+  death_time: string;
   checkin_date: string;
   checkin_time: string;
   encoffin_date: string;
-  encoffin_hour: string;
-  encoffin_minute: string;
+  encoffin_time: string;
   funeral_date: string;
-  funeral_hour: string;
-  funeral_minute: string;
+  funeral_time: string;
   ilpo_date: string;
   ilpo_time: string;
   // 장지
@@ -86,16 +83,13 @@ const initialFormData: BugoFormData = {
   photo_url: '',
   show_photo: false,
   death_date: '',
-  death_hour: '',
-  death_minute: '00',
+  death_time: '',
   checkin_date: '',
   checkin_time: '',
   encoffin_date: '',
-  encoffin_hour: '',
-  encoffin_minute: '00',
+  encoffin_time: '',
   funeral_date: '',
-  funeral_hour: '',
-  funeral_minute: '00',
+  funeral_time: '',
   ilpo_date: '',
   ilpo_time: '',
   burial_place: '',
@@ -184,7 +178,7 @@ export default function B2BCreatePage() {
     }
 
     if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
-    if (!formData.funeral_hour) newErrors.funeral_hour = '발인 시간을 선택해주세요';
+    if (!formData.funeral_time) newErrors.funeral_time = '발인 시간을 입력해주세요';
 
     // 대표상주 확인
     if (!mourners[0]?.name?.trim()) newErrors.mourner_name = '대표상주 성함을 입력해주세요';
@@ -228,14 +222,6 @@ export default function B2BCreatePage() {
       const bugoNumber = await generateBugoNumber();
       const ownerToken = generateOwnerToken();
 
-      const deathTime = formData.death_hour
-        ? `${formData.death_hour}:${formData.death_minute || '00'}`
-        : null;
-      const funeralTime = `${formData.funeral_hour}:${formData.funeral_minute || '00'}`;
-      const encoTime = formData.encoffin_hour
-        ? `${formData.encoffin_hour}:${formData.encoffin_minute || '00'}`
-        : null;
-
       const bugoData = {
         bugo_number: bugoNumber,
         template_id: 'basic',
@@ -259,13 +245,13 @@ export default function B2BCreatePage() {
         address: formData.address || null,
         address_detail: formData.address_detail || null,
         death_date: formData.death_date || null,
-        death_time: deathTime,
+        death_time: formData.death_time || null,
         checkin_date: formData.checkin_date || null,
         checkin_time: formData.checkin_time || null,
         encoffin_date: formData.encoffin_date || null,
-        encoffin_time: encoTime,
+        encoffin_time: formData.encoffin_time || null,
         funeral_date: formData.funeral_date,
-        funeral_time: funeralTime,
+        funeral_time: formData.funeral_time || null,
         ilpo_date: formData.ilpo_date || null,
         ilpo_time: formData.ilpo_time || null,
         burial_place: formData.burial_place || null,
@@ -304,7 +290,7 @@ export default function B2BCreatePage() {
           room_number: formData.room_number,
           address: formData.address,
           funeral_date: formData.funeral_date,
-          funeral_time: funeralTime,
+          funeral_time: formData.funeral_time,
           mourner_name: mourners[0]?.name,
           funeral_type: formData.funeral_type,
           created_new: true,
@@ -344,7 +330,6 @@ export default function B2BCreatePage() {
         </button>
         <h1 className={styles.headerTitle}>부고장 제작</h1>
         <button className={styles.saveBtn} onClick={handleSave}>
-          <IconDeviceFloppy size={16} stroke={1.8} />
           저장하기
         </button>
       </header>
@@ -390,17 +375,6 @@ export default function B2BCreatePage() {
           formData={formData}
           onChange={handleChange}
         />
-      </div>
-
-      {/* 하단 제출 버튼 */}
-      <div className={styles.bottomBar}>
-        <button
-          className={styles.submitBtn}
-          onClick={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? '생성 중...' : '부고장 만들기'}
-        </button>
       </div>
     </div>
   );
