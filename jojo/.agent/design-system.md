@@ -454,3 +454,33 @@ components/b2b/
 |--------|-----|------|
 | WWIT | wwit.design | 한국 앱 UI 패턴 (가장 추천) |
 | Mobbin | mobbin.com | 글로벌 앱 스크린샷 |
+
+---
+
+## 13. 배포 정책
+
+### Vercel 배포
+- **Vercel은 유료 플랜** — 불필요한 배포 최소화
+- 개발 중에는 `npm run dev` (localhost)로 확인
+- **배포는 작업 완료 후 한번에** — 커밋마다 배포하지 않음
+- 빈 커밋으로 빌드 트리거 금지
+- Root Directory: `jojo` (Vercel Settings → Build and Deployment)
+
+### 빌드 확인
+- 배포 전 반드시 `npm run build` 로컬 테스트
+- 빌드 에러 있으면 배포하지 않음
+
+---
+
+## 14. 보호 규칙
+
+### 절대 건드리지 말 것
+- **마음부고 본체 (dodam/)**: B2C 프로덕션 코드 — 수정 금지
+- **nextjs 브랜치**: 프로덕션 배포 브랜치 — 직접 푸시 금지
+- **dodam-next 서브모듈**: 별도 관리
+
+### 수정 범위
+- **jojo/ 내부만** 수정 가능
+- 특히 `jojo/app/b2b/` 하위만 B2B 파트너 앱 코드
+- `jojo/app/api/b2b/` 하위만 B2B API 코드
+

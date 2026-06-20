@@ -97,6 +97,16 @@ html {
     --radius-xl: 20px;
     --radius-2xl: 28px;
     --radius-full: 9999px;
+
+    /* B2B 전용 컬러 */
+    --b2b-accent: #3A8F47;
+    --b2b-text-primary: #191F28;
+    --b2b-text-secondary: #6B7684;
+    --b2b-text-tertiary: #ADB5BD;
+    --b2b-border: #E5E8EB;
+    --b2b-border-light: #F2F4F6;
+    --b2b-success: #12B886;
+    --b2b-error: #F04452;
 }
 
 body {

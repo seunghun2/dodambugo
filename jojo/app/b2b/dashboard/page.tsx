@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconChevronRight, IconBell } from '@tabler/icons-react';
+import {
+  IconChevronRight, IconBell, IconFilePlus, IconFileSearch,
+  IconFlower, IconMail, IconWallet, IconUsers
+} from '@tabler/icons-react';
 import { BottomTabBar } from '@/components/b2b/BottomTabBar';
 import styles from './dashboard.module.css';
 
@@ -19,6 +22,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [copied, setCopied] = useState(false);
+  const [balanceVisible, setBalanceVisible] = useState(false);
 
   const fetchData = useCallback(async () => {
     const token = localStorage.getItem('b2b_token');
@@ -55,14 +59,16 @@ export default function DashboardPage() {
       </header>
 
       {/* CTA 배너 — 부고장 만들기 */}
-      <section className={styles.ctaBanner} onClick={() => router.push('/create')}>
+      <section className={styles.ctaBanner} onClick={() => router.push('/b2b/create')}>
         <div className={styles.ctaText}>
           <h2 className={styles.ctaTitle}>부고장 만들기</h2>
           <p className={styles.ctaDesc}>
             장례식장, 고인, 상주 정보를{'\n'}등록해 주세요.
           </p>
         </div>
-        <img src="/images/b2b/document.png" alt="" className={styles.ctaImg} />
+        <div className={styles.ctaIcon}>
+          <IconFilePlus size={30} stroke={1.8} />
+        </div>
       </section>
 
       {/* 부고장 관리 카드 */}
@@ -74,7 +80,9 @@ export default function DashboardPage() {
               작성한 부고장을 확인하고{'\n'}수정 또는 삭제할 수 있습니다.
             </p>
           </div>
-          <img src="/images/b2b/document.png" alt="" className={styles.cardImg} />
+          <div className={styles.cardIcon}>
+            <IconFileSearch size={26} stroke={1.8} />
+          </div>
         </div>
       </section>
 
@@ -83,15 +91,21 @@ export default function DashboardPage() {
         <div className={styles.featureGrid}>
           <div className={styles.featureCard} onClick={() => {}}>
             <span className={styles.featureLabel}>상주별{'\n'}부고장 보기</span>
-            <img src="/images/b2b/document.png" alt="" className={styles.featureImg} />
+            <div className={styles.featureIcon}>
+              <IconUsers size={22} stroke={1.8} />
+            </div>
           </div>
           <div className={styles.featureCard} onClick={() => router.push('/b2b/wallet')}>
             <span className={styles.featureLabel}>화환{'\n'}보내기</span>
-            <img src="/images/b2b/wreath.png" alt="" className={styles.featureImg} />
+            <div className={styles.featureIcon}>
+              <IconFlower size={22} stroke={1.8} />
+            </div>
           </div>
           <div className={styles.featureCard} onClick={() => {}}>
             <span className={styles.featureLabel}>답례문{'\n'}보내기</span>
-            <img src="/images/b2b/envelope.png" alt="" className={styles.featureImg} />
+            <div className={styles.featureIcon}>
+              <IconMail size={22} stroke={1.8} />
+            </div>
           </div>
         </div>
       </section>
@@ -100,7 +114,13 @@ export default function DashboardPage() {
       <section className={styles.section}>
         <div className={styles.balanceRow}>
           <span className={styles.balanceLabel}>적립 예정 금액</span>
-          <span className={styles.balanceAmount}>{fmt(user.balance || 0)}원</span>
+          {balanceVisible ? (
+            <span className={styles.balanceAmount}>{fmt(user.balance || 0)}원</span>
+          ) : (
+            <button className={styles.inquiryBtn} onClick={() => setBalanceVisible(true)}>
+              조회하기
+            </button>
+          )}
         </div>
       </section>
 
@@ -143,3 +163,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

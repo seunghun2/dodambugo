@@ -1,0 +1,103 @@
+/* B2B 부고장 제작 페이지 */
+
+.page {
+  min-height: 100dvh;
+  background: var(--bg-white);
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+/* 헤더 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 var(--spacing-md);
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--b2b-border);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--b2b-text-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.headerTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+}
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 14px;
+  background: var(--b2b-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bg-white);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--transition-fast);
+}
+
+.saveBtn:active { opacity: 0.85; }
+
+/* 콘텐츠 */
+.content {
+  padding: 24px 20px;
+}
+
+/* 하단 고정 바 */
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 20px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg-white);
+  border-top: 1px solid var(--b2b-border);
+}
+
+.submitBtn {
+  width: 100%;
+  height: 52px;
+  background: var(--b2b-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--bg-white);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--transition-fast);
+}
+
+.submitBtn:active { opacity: 0.85; }
+.submitBtn:disabled {
+  background: var(--b2b-border);
+  color: var(--b2b-text-tertiary);
+  cursor: default;
+}
