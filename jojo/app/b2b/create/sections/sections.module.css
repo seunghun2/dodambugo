@@ -634,7 +634,7 @@
    MournerSection 스타일 (부고드림 스타일)
    ============================================= */
 
-/* --- 관계순서 변경 pill 버튼 (회색, 초록X) --- */
+/* --- 관계순서 변경 pill 버튼 --- */
 .mnReorderPill {
   display: inline-flex;
   align-items: center;
@@ -654,16 +654,6 @@
 
 .mnReorderPill:active {
   background: var(--bg-gray);
-}
-
-.mnReorderPillActive {
-  background: var(--b2b-text-primary);
-  color: var(--bg-white);
-  border-color: var(--b2b-text-primary);
-}
-
-.mnReorderPillActive:active {
-  opacity: 0.9;
 }
 
 /* --- 관계 탭/뱃지 --- */
@@ -708,6 +698,11 @@
   gap: 0;
 }
 
+/* --- 관계 그룹 래퍼 --- */
+.mnRelationGroup {
+  margin-bottom: 4px;
+}
+
 /* --- 상주 카드 --- */
 .mnCard {
   background: var(--bg-white);
@@ -739,8 +734,8 @@
   border-radius: 4px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--bg-white);
-  background: var(--b2b-accent);
+  color: #fff;
+  background: #3A8F47;
   margin-bottom: 8px;
   letter-spacing: -0.02em;
 }
@@ -1008,17 +1003,10 @@
   color: var(--b2b-text-secondary);
 }
 
-/* --- 하단 버튼 --- */
-.mnBottomBtns {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-/* 인원 추가: 아웃라인 스타일 */
+/* --- 인원 추가 버튼 (각 관계 그룹 하단, dashed) --- */
 .mnAddPersonBtn {
-  flex: 1;
-  height: 46px;
+  width: 100%;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1033,6 +1021,7 @@
   font-family: inherit;
   letter-spacing: -0.02em;
   transition: all var(--transition-fast);
+  margin-bottom: 4px;
 }
 
 .mnAddPersonBtn:hover {
@@ -1044,35 +1033,193 @@
   transform: scale(0.98);
 }
 
-/* 관계 추가: 검정 배경 */
+/* --- 관계 추가 버튼 (전체 리스트 맨 아래, dashed) --- */
 .mnAddRelationBtn {
-  flex: 1;
-  height: 46px;
+  width: 100%;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--b2b-text-primary);
-  border: none;
+  background: var(--bg-white);
+  border: 1.5px dashed var(--b2b-border);
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
-  color: var(--bg-white);
+  color: var(--b2b-text-secondary);
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.02em;
   transition: all var(--transition-fast);
+  margin-top: 8px;
 }
 
 .mnAddRelationBtn:hover {
-  opacity: 0.9;
+  border-color: var(--b2b-accent);
+  color: var(--b2b-accent);
 }
 
 .mnAddRelationBtn:active {
   transform: scale(0.98);
 }
 
-/* --- 관계 추가 모달 바디 --- */
+/* --- 토스트 --- */
+.mnToast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  z-index: 9999;
+  animation: mnToastIn 0.25s ease, mnToastOut 0.25s ease 1.75s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes mnToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes mnToastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+
+/* --- 관계순서 변경 바텀시트 --- */
+.mnSheetOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.mnSheetContent {
+  background: var(--bg-white);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 70vh;
+  overflow-y: auto;
+  animation: mnSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mnSheetSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.mnSheetHandle {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+.mnSheetHandleBar {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--b2b-border);
+}
+
+.mnSheetTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  padding: 8px 20px 16px;
+  letter-spacing: -0.02em;
+}
+
+.mnSheetList {
+  padding: 0 20px;
+}
+
+.mnSheetItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--b2b-border-light);
+}
+
+.mnSheetItem:last-child {
+  border-bottom: none;
+}
+
+.mnSheetItemName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--b2b-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.mnSheetItemBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.mnSheetArrow {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-gray);
+  border: 1px solid var(--b2b-border-light);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--b2b-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.mnSheetArrow:hover:not(:disabled) {
+  background: var(--b2b-border-light);
+  color: var(--b2b-text-primary);
+}
+
+.mnSheetArrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.mnSheetFooter {
+  padding: 16px 20px 24px;
+}
+
+.mnSheetConfirmBtn {
+  width: 100%;
+  height: 50px;
+  background: #2B3674;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  transition: opacity var(--transition-fast);
+}
+
+.mnSheetConfirmBtn:active {
+  opacity: 0.9;
+}
+
+/* --- 관계 추가 모달 바디 (레거시 호환) --- */
 .mnRelModalBody {
   padding: 8px 16px 16px;
   display: flex;
