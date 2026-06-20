@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { IconStar, IconStarFilled } from '@tabler/icons-react';
+import { IconStar, IconStarFilled, IconX, IconSearch } from '@tabler/icons-react';
 
 interface Facility {
     id: number;
@@ -207,7 +207,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                             justifyContent: 'center'
                         }}
                     >
-                        <span className="material-symbols-outlined" style={{ color: '#333' }}>close</span>
+                        <IconX size={24} color="#333" stroke={1.8} />
                     </button>
                     <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>주소 찾기</h2>
                 </div>
@@ -269,16 +269,17 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                                 }}
                             />
                             <span
-                                className="material-symbols-outlined"
                                 style={{
                                     position: 'absolute',
                                     right: '28px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    color: '#888'
+                                    color: '#888',
+                                    display: 'flex',
+                                    alignItems: 'center'
                                 }}
                             >
-                                search
+                                <IconSearch size={20} stroke={1.8} />
                             </span>
                         </div>
 

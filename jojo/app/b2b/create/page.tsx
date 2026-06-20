@@ -141,6 +141,7 @@ export default function B2BCreatePage() {
   // 로그인 확인 및 수정 데이터 조회
   useEffect(() => {
     const token = localStorage.getItem('b2b_token');
+    const userStr = localStorage.getItem('b2b_user');
     if (!token) {
       router.push('/b2b/login');
       return;
@@ -152,6 +153,57 @@ export default function B2BCreatePage() {
       setEditBugoNumber(editNum);
       setIsEditMode(true);
       loadBugoData(editNum);
+    } else if (userStr) {
+      // [신규 작성 모드] 로그인 파트너의 장례식장 정보 및 자주찾는 식장 정보 자동 완성
+      try {
+        const user = JSON.parse(userStr);
+        if (user.company_name) {
+          // 1. 소속 회사/장례식장명을 기본값으로 설정
+          setFormData(prev => ({
+            ...prev,
+            funeral_home: user.company_name,
+          }));
+
+          // 2. 자주찾는 식장 목록(b2b_favorite_facilities)에서 주소/연락처 검색 및 매칭
+          const stored = localStorage.getItem('b2b_favorite_facilities');
+          if (stored) {
+            const favorites = JSON.parse(stored);
+            const matched = favorites.find((f: any) => f.name === user.company_name);
+            if (matched) {
+              setFormData(prev => ({
+                ...prev,
+                funeral_home: matched.name,
+                address: matched.address || '',
+                funeral_home_tel: matched.tel || '',
+              }));
+            } else if (favorites.length > 0) {
+              // 매칭되는 항목이 없더라도 자주찾는 목록의 첫 번째 식장으로 채워줌
+              setFormData(prev => ({
+                ...prev,
+                funeral_home: favorites[0].name,
+                address: favorites[0].address || '',
+                funeral_home_tel: favorites[0].tel || '',
+              }));
+            }
+          }
+        } else {
+          // company_name이 없더라도 자주찾는 식장이 등록되어 있다면 첫 번째 항목 자동 채우기
+          const stored = localStorage.getItem('b2b_favorite_facilities');
+          if (stored) {
+            const favorites = JSON.parse(stored);
+            if (favorites.length > 0) {
+              setFormData(prev => ({
+                ...prev,
+                funeral_home: favorites[0].name,
+                address: favorites[0].address || '',
+                funeral_home_tel: favorites[0].tel || '',
+              }));
+            }
+          }
+        }
+      } catch (e) {
+        console.error('B2B 파트너 장례식장 자동 완성 로드 오류:', e);
+      }
     }
   }, [router]);
 
@@ -416,17 +468,17 @@ export default function B2BCreatePage() {
         }),
       });
 
-      // 자주찾는 식장 저장
+      // 자주찾는 식장 저장 (b2b_favorite_facilities 키로 통일)
       if (formData.funeral_home && user.id) {
-        const saved = JSON.parse(localStorage.getItem('b2b_fav_facilities') || '[]');
+        const saved = JSON.parse(localStorage.getItem('b2b_favorite_facilities') || '[]');
         const exists = saved.find((f: { name: string }) => f.name === formData.funeral_home);
         if (!exists && saved.length < 10) {
           saved.push({
             name: formData.funeral_home,
             address: formData.address,
-            phone: formData.funeral_home_tel,
+            tel: formData.funeral_home_tel,
           });
-          localStorage.setItem('b2b_fav_facilities', JSON.stringify(saved));
+          localStorage.setItem('b2b_favorite_facilities', JSON.stringify(saved));
         }
       }
 
