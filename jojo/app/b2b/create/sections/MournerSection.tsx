@@ -149,7 +149,7 @@ function AccountModal({ open, onClose, onConfirm, initial }: AccountModalProps) 
   );
 }
 
-// ===== 관계순서 변경 바텀시트 =====
+// ===== 관계순서 변경 바텀시트 (왼쪽 드래그 핸들 + 드래그 리오더) =====
 interface ReorderSheetProps {
   open: boolean;
   onClose: () => void;
@@ -160,7 +160,10 @@ interface ReorderSheetProps {
 function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: ReorderSheetProps) {
   const [localOrder, setLocalOrder] = useState<string[]>(relationOrder);
   const sheetRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef(0);
+  const sheetDragStartY = useRef(0);
+  // 아이템 드래그
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if (open) {
@@ -182,15 +185,45 @@ function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: Reorder
     setLocalOrder(updated);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    dragStartY.current = e.touches[0].clientY;
+  // 시트 스와이프 닫기
+  const handleSheetTouchStart = (e: React.TouchEvent) => {
+    sheetDragStartY.current = e.touches[0].clientY;
+  };
+  const handleSheetTouchEnd = (e: React.TouchEvent) => {
+    const dy = e.changedTouches[0].clientY - sheetDragStartY.current;
+    if (dy > 80) onClose();
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const dy = e.changedTouches[0].clientY - dragStartY.current;
-    if (dy > 80) {
-      onClose();
+  // 아이템 드래그 리오더 (pointer events)
+  const itemDragStart = useRef({ y: 0, idx: 0 });
+  const handleItemPointerDown = (e: React.PointerEvent, idx: number) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setDragIdx(idx);
+    itemDragStart.current = { y: e.clientY, idx };
+  };
+
+  const handleItemPointerMove = (e: React.PointerEvent) => {
+    if (dragIdx === null) return;
+    const dy = e.clientY - itemDragStart.current.y;
+    const itemHeight = 56; // 대략적인 아이템 높이
+    const steps = Math.round(dy / itemHeight);
+    if (steps !== 0) {
+      const fromIdx = itemDragStart.current.idx;
+      const toIdx = Math.max(0, Math.min(localOrder.length - 1, fromIdx + steps));
+      if (toIdx !== fromIdx) {
+        const updated = [...localOrder];
+        const [removed] = updated.splice(fromIdx, 1);
+        updated.splice(toIdx, 0, removed);
+        setLocalOrder(updated);
+        itemDragStart.current = { y: e.clientY, idx: toIdx };
+        setDragIdx(toIdx);
+      }
     }
+  };
+
+  const handleItemPointerUp = () => {
+    setDragIdx(null);
   };
 
   if (!open) return null;
@@ -201,10 +234,9 @@ function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: Reorder
         ref={sheetRef}
         className={styles.mnSheetContent}
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={handleSheetTouchStart}
+        onTouchEnd={handleSheetTouchEnd}
       >
-        {/* 드래그 핸들 바 */}
         <div className={styles.mnSheetHandle}>
           <div className={styles.mnSheetHandleBar} />
         </div>
@@ -213,26 +245,43 @@ function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: Reorder
 
         <div className={styles.mnSheetList}>
           {localOrder.map((rel, idx) => (
-            <div key={rel} className={styles.mnSheetItem}>
-              <span className={styles.mnSheetItemName}>{rel}</span>
-              <div className={styles.mnSheetItemBtns}>
-                <button
-                  type="button"
-                  className={styles.mnSheetArrow}
-                  onClick={() => handleMoveUp(idx)}
-                  disabled={idx === 0}
+            <div
+              key={`${rel}-${idx}`}
+              ref={(el) => { if (el) itemRefs.current.set(idx, el); }}
+              className={`${styles.mnSheetItem} ${dragIdx === idx ? styles.mnSheetItemDragging : ''}`}
+              onPointerMove={dragIdx !== null ? handleItemPointerMove : undefined}
+              onPointerUp={dragIdx !== null ? handleItemPointerUp : undefined}
+            >
+              {/* 왼쪽: 드래그 핸들 + ▲▼ */}
+              <div className={styles.mnSheetItemLeft}>
+                <div className={styles.mnSheetItemBtns}>
+                  <button
+                    type="button"
+                    className={styles.mnSheetArrow}
+                    onClick={() => handleMoveUp(idx)}
+                    disabled={idx === 0}
+                  >
+                    ▲
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.mnSheetArrow}
+                    onClick={() => handleMoveDown(idx)}
+                    disabled={idx === localOrder.length - 1}
+                  >
+                    ▼
+                  </button>
+                </div>
+                <div
+                  className={styles.mnSheetGrip}
+                  onPointerDown={(e) => handleItemPointerDown(e, idx)}
+                  style={{ touchAction: 'none' }}
                 >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  className={styles.mnSheetArrow}
-                  onClick={() => handleMoveDown(idx)}
-                  disabled={idx === localOrder.length - 1}
-                >
-                  ▼
-                </button>
+                  <IconGripVertical size={18} />
+                </div>
               </div>
+              {/* 오른쪽: 관계명 */}
+              <span className={styles.mnSheetItemName}>{rel}</span>
             </div>
           ))}
         </div>
@@ -377,22 +426,38 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
     [mourners, onMournersChange],
   );
 
-  // --- 순서 변경 (버튼) ---
+  // --- 순서 변경 (같은 관계 그룹 내에서만 이동) ---
   const handleMoveUp = useCallback(
-    (index: number) => {
-      if (index <= 0) return;
+    (index: number, relation: string) => {
+      // 같은 관계의 이전 인원 찾기
+      let prevIdx = -1;
+      for (let i = index - 1; i >= 0; i--) {
+        if ((mourners[i].relationship || '') === relation) {
+          prevIdx = i;
+          break;
+        }
+      }
+      if (prevIdx < 0) return;
       const updated = [...mourners];
-      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      [updated[prevIdx], updated[index]] = [updated[index], updated[prevIdx]];
       onMournersChange(updated);
     },
     [mourners, onMournersChange],
   );
 
   const handleMoveDown = useCallback(
-    (index: number) => {
-      if (index >= mourners.length - 1) return;
+    (index: number, relation: string) => {
+      // 같은 관계의 다음 인원 찾기
+      let nextIdx = -1;
+      for (let i = index + 1; i < mourners.length; i++) {
+        if ((mourners[i].relationship || '') === relation) {
+          nextIdx = i;
+          break;
+        }
+      }
+      if (nextIdx < 0) return;
       const updated = [...mourners];
-      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      [updated[index], updated[nextIdx]] = [updated[nextIdx], updated[index]];
       onMournersChange(updated);
     },
     [mourners, onMournersChange],
@@ -633,13 +698,13 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
 
                     {/* 카드 본체: 가로 레이아웃 */}
                     <div className={styles.mnCardRow}>
-                      {/* 드래그 핸들 / 리오더 버튼 */}
+                      {/* 드래그 핸들 / 인원 리오더 버튼 (같은 관계 그룹 내) */}
                       <div className={styles.mnDragHandle}>
                         <button
                           type="button"
                           className={styles.mnReorderArrow}
-                          onClick={() => handleMoveUp(realIndex)}
-                          disabled={realIndex === 0}
+                          onClick={() => handleMoveUp(realIndex, group.relation)}
+                          disabled={group.items[0]?.originalIndex === realIndex}
                         >
                           <IconChevronUp size={14} />
                         </button>
@@ -653,8 +718,8 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                         <button
                           type="button"
                           className={styles.mnReorderArrow}
-                          onClick={() => handleMoveDown(realIndex)}
-                          disabled={realIndex === mourners.length - 1}
+                          onClick={() => handleMoveDown(realIndex, group.relation)}
+                          disabled={group.items[group.items.length - 1]?.originalIndex === realIndex}
                         >
                           <IconChevronDown size={14} />
                         </button>
@@ -775,20 +840,20 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                 className={styles.mnAddPersonBtn}
                 onClick={() => handleAddPerson(group.relation)}
               >
-                ➕ 인원 추가
+                <IconPlus size={16} /> 인원 추가
               </button>
             </div>
           );
         })}
       </div>
 
-      {/* ===== 관계 추가 버튼 (전체 리스트 맨 아래) ===== */}
+      {/* ===== 관계 추가 버튼 (전체 리스트 맨 아래, 검정 배경) ===== */}
       <button
         type="button"
         className={styles.mnAddRelationBtn}
         onClick={handleAddRelation}
       >
-        ➕ 관계 추가
+        관계 추가
       </button>
 
       {/* ===== 관계순서 변경 바텀시트 ===== */}

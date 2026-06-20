@@ -2080,13 +2080,13 @@
 
 /* 오늘 */
 .calendarDayToday {
-  background: var(--bg-gray);
+  background: #E2E8F0;
   font-weight: 700;
 }
 
 /* 선택된 날짜 */
 .calendarDaySelected {
-  background: #2B3674 !important;
+  background: #3A8F47 !important;
   color: #fff !important;
   font-weight: 700;
 }
