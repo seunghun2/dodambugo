@@ -2,7 +2,7 @@
 
 .page {
   min-height: 100dvh;
-  background: #fff;
+  background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
   padding-bottom: 72px;
@@ -15,17 +15,17 @@
   justify-content: space-between;
   height: 52px;
   padding: 0 20px;
-  border-bottom: 1px solid #F2F4F6;
+  border-bottom: 1px solid var(--b2b-border-light);
   position: sticky;
   top: 0;
-  background: #fff;
+  background: var(--bg-white);
   z-index: 10;
 }
 
 .headerTitle {
   font-size: 17px;
   font-weight: 700;
-  color: #191F28;
+  color: var(--b2b-text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -37,19 +37,19 @@
   justify-content: center;
   background: none;
   border: none;
-  color: #4E5968;
+  color: var(--b2b-text-secondary);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
-.headerBtn:active { background: #F2F4F6; }
+.headerBtn:active { background: var(--b2b-border-light); }
 
 /* CTA 배너 */
 .ctaBanner {
-  margin: 16px 20px 0;
+  margin: var(--spacing-md) 20px 0;
   padding: 20px;
-  background: #3A8F47;
-  border-radius: 16px;
+  background: var(--b2b-accent);
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -64,13 +64,13 @@
 .ctaTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: var(--bg-white);
   margin-bottom: 6px;
 }
 
 .ctaDesc {
   font-size: 13px;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
   line-height: 1.5;
   white-space: pre-line;
 }
@@ -79,14 +79,14 @@
   width: 72px;
   height: 72px;
   object-fit: contain;
-  margin-left: 12px;
+  margin-left: var(--spacing-sm);
   flex-shrink: 0;
   filter: brightness(1.2);
 }
 
 /* 섹션 */
 .section {
-  padding: 16px 20px 0;
+  padding: var(--spacing-md) 20px 0;
 }
 
 /* 일반 카드 */
@@ -95,25 +95,25 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  background: #F9FAFB;
-  border-radius: 14px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
-.card:active { background: #F2F4F6; }
+.card:active { background: var(--b2b-border-light); }
 
 .cardLeft { flex: 1; }
 
 .cardTitle {
   font-size: 16px;
   font-weight: 700;
-  color: #191F28;
+  color: var(--b2b-text-primary);
   margin-bottom: 6px;
 }
 
 .cardDesc {
   font-size: 13px;
-  color: #8B95A1;
+  color: var(--b2b-text-secondary);
   line-height: 1.5;
   white-space: pre-line;
 }
@@ -122,7 +122,7 @@
   width: 60px;
   height: 60px;
   object-fit: contain;
-  margin-left: 12px;
+  margin-left: var(--spacing-sm);
   flex-shrink: 0;
 }
 
@@ -137,19 +137,19 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px 14px 12px;
-  background: #F9FAFB;
-  border-radius: 14px;
+  padding: var(--spacing-md) 14px var(--spacing-sm);
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   min-height: 120px;
 }
 
-.featureCard:active { background: #F2F4F6; }
+.featureCard:active { background: var(--b2b-border-light); }
 
 .featureLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #3A8F47;
+  color: var(--b2b-accent);
   line-height: 1.4;
   white-space: pre-line;
 }
@@ -167,20 +167,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  background: #F9FAFB;
-  border-radius: 14px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
 }
 
 .balanceLabel {
   font-size: 14px;
-  color: #8B95A1;
+  color: var(--b2b-text-secondary);
   font-weight: 500;
 }
 
 .balanceAmount {
   font-size: 18px;
   font-weight: 700;
-  color: #191F28;
+  color: var(--b2b-text-primary);
 }
 
 /* 추천 코드 */
@@ -188,14 +188,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: #F9FAFB;
-  border-radius: 14px;
+  padding: var(--spacing-md) 20px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
 }
 
 .referralLabel {
   font-size: 12px;
-  color: #8B95A1;
+  color: var(--b2b-text-secondary);
   display: block;
   margin-bottom: 2px;
 }
@@ -203,59 +203,60 @@
 .referralCode {
   font-size: 16px;
   font-weight: 700;
-  color: #191F28;
+  color: var(--b2b-text-primary);
   letter-spacing: 1px;
 }
 
 .copyBtn {
   height: 32px;
   padding: 0 14px;
-  background: #fff;
-  border: 1px solid #E5E8EB;
-  border-radius: 8px;
+  background: var(--bg-white);
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 600;
-  color: #4E5968;
+  color: var(--b2b-text-secondary);
   cursor: pointer;
   font-family: inherit;
+  transition: background-color var(--transition-fast);
 }
 
-.copyBtn:active { background: #F2F4F6; }
+.copyBtn:active { background: var(--b2b-border-light); }
 
 /* 공지사항 */
 .sectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .sectionTitle {
   font-size: 17px;
   font-weight: 700;
-  color: #191F28;
+  color: var(--b2b-text-primary);
 }
 
 .moreBtn {
   background: none;
   border: none;
-  color: #8B95A1;
+  color: var(--b2b-text-secondary);
   cursor: pointer;
-  padding: 4px;
+  padding: var(--spacing-xs);
 }
 
 .noticeCard {
-  background: #F9FAFB;
-  border-radius: 14px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .noticeItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 16px;
-  border-bottom: 1px solid #F2F4F6;
+  gap: var(--spacing-sm);
+  padding: 14px var(--spacing-md);
+  border-bottom: 1px solid var(--b2b-border-light);
 }
 
 .noticeItem:last-child { border-bottom: none; }
@@ -264,16 +265,16 @@
   flex-shrink: 0;
   font-size: 11px;
   font-weight: 600;
-  color: #3A8F47;
-  background: #E5E8EB;
-  padding: 2px 8px;
-  border-radius: 4px;
+  color: var(--b2b-accent);
+  background: var(--b2b-border);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-xs, 4px);
 }
 
 .noticeText {
   flex: 1;
   font-size: 13px;
-  color: #3A8F47;
+  color: var(--b2b-text-primary);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,6 +284,6 @@
 .noticeDate {
   flex-shrink: 0;
   font-size: 11px;
-  color: #ADB5BD;
+  color: var(--b2b-text-tertiary);
   font-variant-numeric: tabular-nums;
 }

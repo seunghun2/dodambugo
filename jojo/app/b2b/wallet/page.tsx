@@ -95,7 +95,7 @@ export default function WalletPage() {
         return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <div style={{ padding: 60, textAlign: 'center', color: 'var(--gray-500)' }}>불러오는 중...</div>;
+    if (loading) return <div className={styles.loadingState}>불러오는 중...</div>;
 
     return (
         <div className={`${commonStyles.b2bLayout} ${styles.container}`}>

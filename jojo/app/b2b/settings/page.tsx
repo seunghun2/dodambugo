@@ -48,7 +48,7 @@ export default function SettingsPage() {
 
     if (!user) {
         return (
-            <div style={{ padding: '60px', textAlign: 'center', color: 'var(--gray-500)' }}>
+            <div className={styles.loadingState}>
                 불러오는 중...
             </div>
         );
