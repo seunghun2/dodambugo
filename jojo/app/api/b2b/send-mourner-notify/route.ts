@@ -71,8 +71,9 @@ export async function POST(request: NextRequest) {
             if (!m.contact) continue;
             const phone = m.contact.replace(/-/g, '');
 
-            // 상주 이름별 맞춤 부고장 링크
-            const customUrl = `${origin || 'http://localhost:3000'}/view/${bugo_number}?m=${encodeURIComponent(m.name)}`;
+            // 상주 인덱스 기반(없으면 이름 폴백) 맞춤 부고장 링크
+            const mParamValue = m.originalIndex !== undefined ? m.originalIndex : encodeURIComponent(m.name);
+            const customUrl = `${origin || 'http://localhost:3000'}/view/${bugo_number}?m=${mParamValue}`;
 
             if (type === 'sms') {
                 const text = `[부고 안내]

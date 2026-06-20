@@ -119,6 +119,8 @@ interface BugoData {
     ilpo_time?: string;
     hide_funeral?: boolean;
     hide_flower_order?: boolean;
+    religious_title?: string | null;
+    show_religious_title?: boolean;
 }
 
 // 상주 관계 + 고인 성별 → 고인-상주 관계 자동 매핑
@@ -615,6 +617,9 @@ ${url}
     // 템플릿 이미지 결정
     const getTemplateImage = () => {
         const templateId = bugo.template_id || 'basic';
+        if (templateId === 'basic' && bugo.photo_url) {
+            return '/images/template-basic-pik1.png';
+        }
         return `/images/template-${templateId}.png`;
     };
 
@@ -696,14 +701,55 @@ ${url}
             {toastMessage && <div className="toast" style={{ color: '#FFFFFF', display: 'flex', alignItems: 'center', background: '#000000' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" style={{ marginRight: '8px' }}><polyline points="20 6 9 17 4 12"></polyline></svg>{toastMessage}</div>}
 
             {/* ========================================
-                헤더 섹션 - 템플릿 이미지 + 동적 텍스트
+                헤더 섹션 - 템플릿 이미지 + 동적 텍스트 (사진 유무에 따른 분기)
             ======================================== */}
-            <div className={`header-section template-${bugo.template_id || 'basic'}`}>
+            <div className={`header-section template-${bugo.template_id || 'basic'} ${bugo.photo_url ? 'has-photo' : ''}`}>
                 <Image src={getTemplateImage()} alt="" className="header-bg" width={600} height={800} priority />
                 {/* 동적 텍스트만 오버레이 - 이미지에 謹弔/부고 등 정적 텍스트 포함됨 */}
                 <div className="header-text-overlay">
+                    {bugo.photo_url ? (
+                        /* 고인 사진이 있을 때 */
+                        <div className="header-photo-container">
+                            <div className="header-photo-title-img-wrapper">
+                                <img 
+                                    src="/images/template-basic-pik2.png" 
+                                    alt="부고" 
+                                    className="header-photo-title-img" 
+                                />
+                            </div>
+                            <div className="header-deceased-photo-wrapper">
+                                <img 
+                                    src={bugo.photo_url} 
+                                    alt="고인 영정 사진" 
+                                    className="header-deceased-photo" 
+                                />
+                            </div>
+                            <div className="header-deceased-title">
+                                故 {bugo.deceased_name}님
+                                {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
+                            </div>
+                            {bugo.religious_title && (
+                                <div className="header-religious-title">
+                                    {bugo.religious_title}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* 고인 사진이 없을 때 (기존 텍스트 레이아웃) */
+                        <div className={`header-deceased-info ${!bugo.religious_title ? 'no-religious-title' : ''}`}>
+                            <div className="header-deceased-title">
+                                故 {bugo.deceased_name}님
+                                {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
+                            </div>
+                            {bugo.religious_title && (
+                                <div className="header-religious-title">
+                                    {bugo.religious_title}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <p className="header-dynamic-text">
-                        故{bugo.deceased_name}님께서 {bugo.death_date ? formatDateShort(bugo.death_date) : ''}<br />
+                        {bugo.death_date ? formatDateShort(bugo.death_date) : ''} 故 {bugo.deceased_name}님께서<br />
                         별세하셨기에 삼가 알려드립니다.<br />
                         마음으로 따뜻한 위로 부탁드리며<br />
                         고인의 명복을 빌어주시길 바랍니다.
@@ -1070,13 +1116,22 @@ ${url}
                                     });
                                 }
 
-                                // URL 쿼리 파라미터 'm' (상주명) 에 따른 계좌 필터링 처리
+                                // URL 쿼리 파라미터 'm' (인덱스 또는 상주명) 에 따른 계좌 필터링 처리
                                 const mParam = searchParams.get('m');
                                 let filteredAccounts = allAccounts;
 
                                 if (mParam) {
                                     const mournersArr = Array.isArray(bugo.mourners) ? bugo.mourners : [];
-                                    const currentMourner = mournersArr.find((m: any) => m.name === mParam);
+                                    const isNumeric = /^\d+$/.test(mParam);
+                                    let currentMourner = null;
+
+                                    if (isNumeric) {
+                                        const idx = parseInt(mParam, 10);
+                                        currentMourner = mournersArr[idx];
+                                    } else {
+                                        // 하이브리드 폴백: 기존 텍스트(이름) 대응
+                                        currentMourner = mournersArr.find((m: any) => m.name === mParam);
+                                    }
 
                                     if (currentMourner) {
                                         const displayOpt = (currentMourner as any).accountDisplay || 'mine';
@@ -1084,7 +1139,7 @@ ${url}
                                             filteredAccounts = [];
                                         } else if (displayOpt === 'mine') {
                                             filteredAccounts = allAccounts.filter(
-                                                acc => acc.name === mParam || acc.holder === mParam
+                                                acc => acc.name === currentMourner.name || acc.holder === currentMourner.name
                                             );
                                         }
                                     }

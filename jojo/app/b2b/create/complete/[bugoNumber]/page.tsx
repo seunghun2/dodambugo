@@ -114,7 +114,9 @@ export default function B2BCompletePage() {
   // 발송 실행 및 DB 저장
   const handleSend = async (type: 'sms' | 'alimtalk') => {
     if (sending) return;
-    const sendTargets = mourners.filter(m => m.send && m.contact?.trim());
+    const sendTargets = mourners
+      .map((m, originalIndex) => ({ ...m, originalIndex }))
+      .filter(m => m.send && m.contact?.trim());
     if (sendTargets.length === 0) {
       alert('발송할 대상을 선택하거나 연락처를 올바르게 입력해주세요.');
       return;
