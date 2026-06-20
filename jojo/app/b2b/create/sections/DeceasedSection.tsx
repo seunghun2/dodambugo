@@ -117,9 +117,12 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
         </label>
       </div>
 
-      {/* 종교 + 직분/세례명/호칭 — 한 줄 */}
+      {/* 구분선 */}
+      <div className={styles.divider} />
+
+      {/* 종교 + 직분/세례명/호칭 — 한 줄 50:50 */}
       <div className={styles.row}>
-        <div className={styles.fieldNarrow}>
+        <div className={styles.fieldFlex1}>
           <select
             className={styles.select}
             value={formData.religion}

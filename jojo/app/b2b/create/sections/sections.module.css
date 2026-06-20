@@ -55,6 +55,13 @@
   flex-shrink: 0;
 }
 
+/* 섹션 내 구분선 */
+.divider {
+  height: 1px;
+  background: var(--b2b-border-light);
+  margin: 4px 0 16px 0;
+}
+
 .label {
   display: block;
   font-size: 16px;
@@ -360,86 +367,51 @@
   min-width: 0;
 }
 
-.dtDateInput {
-  width: 100%;
-  height: 48px;
-  padding: 0 40px 0 14px;
-  border: 1px solid var(--b2b-border);
-  border-radius: var(--radius-md);
-  font-size: 15px;
-  color: var(--b2b-text-primary);
-  background: var(--bg-white);
-  outline: none;
-  font-family: inherit;
-  letter-spacing: -0.02em;
-  transition: border-color var(--transition-fast);
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.dtDateInput:focus {
-  border-color: var(--b2b-accent);
-  box-shadow: 0 0 0 3px rgba(58, 143, 71, 0.08);
-}
-
-/* 기본 브라우저 date picker 아이콘 숨기기 (커스텀 아이콘 사용) */
-.dtDateInput::-webkit-calendar-picker-indicator {
+/* 숨겨진 네이티브 input (날짜/시간) */
+.dtHiddenInput {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
   width: 100%;
   height: 100%;
   opacity: 0;
   cursor: pointer;
+  z-index: 2;
+  box-sizing: border-box;
 }
 
-.dtTimeInput {
+/* 표시용 커스텀 레이어 */
+.dtDisplayInput {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 48px;
-  padding: 0 40px 0 14px;
+  padding: 0 14px;
+  background: var(--bg-white);
   border: 1px solid var(--b2b-border);
   border-radius: var(--radius-md);
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.dtDisplayText {
   font-size: 15px;
   color: var(--b2b-text-primary);
-  background: var(--bg-white);
-  outline: none;
-  font-family: inherit;
   letter-spacing: -0.02em;
-  transition: border-color var(--transition-fast);
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
 }
 
-.dtTimeInput:focus {
-  border-color: var(--b2b-accent);
-  box-shadow: 0 0 0 3px rgba(58, 143, 71, 0.08);
-}
-
-/* 기본 브라우저 time picker 아이콘 숨기기 */
-.dtTimeInput::-webkit-calendar-picker-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
+.dtPlaceholder {
+  font-size: 15px;
+  color: var(--b2b-text-tertiary);
+  letter-spacing: -0.02em;
 }
 
 .dtInputIcon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
   color: var(--b2b-text-tertiary);
-  pointer-events: none;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 380px) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { IconCalendar, IconClock } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
@@ -24,6 +24,22 @@ interface Props {
   onClear: (fields: string[]) => void;
 }
 
+// 날짜 포맷: "2026-06-10" → "2026. 06. 10."
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${y}. ${m}. ${d}.`;
+}
+
+// 시간 포맷: "14:00" → "오후 02:00"
+function formatTime(timeStr: string): string {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h < 12 ? '오전' : '오후';
+  const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${period} ${String(displayH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 interface DateTimeCardProps {
   label: string;
   required?: boolean;
@@ -32,6 +48,7 @@ interface DateTimeCardProps {
   onClear?: () => void;
   dateValue: string;
   timeValue: string;
+  datePlaceholder?: string;
   onDateChange: (value: string) => void;
   onTimeChange: (value: string) => void;
 }
@@ -44,14 +61,19 @@ function DateTimeCard({
   onClear,
   dateValue,
   timeValue,
+  datePlaceholder,
   onDateChange,
   onTimeChange,
 }: DateTimeCardProps) {
+  const dateRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className={styles.dtCard}>
       <div className={styles.dtCardHeader}>
-        <span className={`${styles.dtCardLabel} ${required ? styles.required : ''}`}>
+        <span className={styles.dtCardLabel}>
           {label}
+          {required && <span className={styles.requiredMark}>*</span>}
         </span>
         {showClear && onClear && (
           <label className={styles.clearCheck}>
@@ -67,25 +89,38 @@ function DateTimeCard({
         )}
       </div>
       <div className={styles.dtCardFields}>
-        <div className={styles.dtInputWrap}>
+        {/* 날짜 */}
+        <div className={styles.dtInputWrap} onClick={() => dateRef.current?.showPicker?.()}>
           <input
+            ref={dateRef}
             type="date"
-            className={styles.dtDateInput}
+            className={styles.dtHiddenInput}
             value={dateValue}
             onChange={(e) => onDateChange(e.target.value)}
-            placeholder="연도. 월. 일"
           />
-          <IconCalendar size={20} className={styles.dtInputIcon} />
+          <div className={styles.dtDisplayInput}>
+            <span className={dateValue ? styles.dtDisplayText : styles.dtPlaceholder}>
+              {dateValue ? formatDate(dateValue) : (datePlaceholder || `${label.replace('일시', '')}일자`)}
+            </span>
+            <IconCalendar size={20} className={styles.dtInputIcon} />
+          </div>
         </div>
-        <div className={styles.dtInputWrap}>
+
+        {/* 시간 */}
+        <div className={styles.dtInputWrap} onClick={() => timeRef.current?.showPicker?.()}>
           <input
+            ref={timeRef}
             type="time"
-            className={styles.dtTimeInput}
+            className={styles.dtHiddenInput}
             value={timeValue}
             onChange={(e) => onTimeChange(e.target.value)}
-            placeholder="00:00"
           />
-          <IconClock size={20} className={styles.dtInputIcon} />
+          <div className={styles.dtDisplayInput}>
+            <span className={timeValue ? styles.dtDisplayText : styles.dtPlaceholder}>
+              {timeValue ? formatTime(timeValue) : '00:00'}
+            </span>
+            <IconClock size={20} className={styles.dtInputIcon} />
+          </div>
         </div>
       </div>
     </div>
@@ -98,7 +133,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
     [formData.address],
   );
 
-  // 지우기 핸들러
   const handleClearDeath = useCallback(() => {
     onClear(['death_date', 'death_time']);
   }, [onClear]);
@@ -119,7 +153,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>일시 정보</h2>
 
-      {/* 별세일시 */}
       <DateTimeCard
         label="별세일시"
         dateValue={formData.death_date}
@@ -130,7 +163,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onClear={handleClearDeath}
       />
 
-      {/* 입실일시 */}
       <DateTimeCard
         label="입실일시"
         dateValue={formData.checkin_date}
@@ -141,7 +173,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onClear={handleClearCheckin}
       />
 
-      {/* 입관일시 */}
       <DateTimeCard
         label="입관일시"
         dateValue={formData.encoffin_date}
@@ -152,7 +183,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onClear={handleClearEncoffin}
       />
 
-      {/* 발인일시 (필수 — 지우기 없음) */}
       <DateTimeCard
         label="발인일시"
         required
@@ -163,7 +193,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onTimeChange={(v) => onChange('funeral_time', v)}
       />
 
-      {/* 일포일시 — 제주 주소일 때만 노출 */}
       {showIlpo && (
         <DateTimeCard
           label="일포일시"
