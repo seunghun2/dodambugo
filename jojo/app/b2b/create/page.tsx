@@ -10,6 +10,7 @@ import DateTimeSection from './sections/DateTimeSection';
 import MournerSection from './sections/MournerSection';
 import PhotoSection from './sections/PhotoSection';
 import OptionsSection from './sections/OptionsSection';
+import FacilitySearchModal from '@/components/FacilitySearchModal';
 import styles from './create.module.css';
 
 // === 타입 ===
@@ -376,6 +377,18 @@ export default function B2BCreatePage() {
           onChange={handleChange}
         />
       </div>
+
+      {/* 장례식장 검색 모달 */}
+      <FacilitySearchModal
+        isOpen={showFacilitySearch}
+        onClose={() => setShowFacilitySearch(false)}
+        onSelect={(facility) => {
+          handleChange('funeral_home', facility.name);
+          handleChange('address', facility.address);
+          handleChange('funeral_home_tel', facility.phone || '');
+          setShowFacilitySearch(false);
+        }}
+      />
     </div>
   );
 }

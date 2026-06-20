@@ -106,25 +106,28 @@ export default function PhotoSection({ showPhoto, photoUrl, onToggle, onPhotoCha
 
   return (
     <section className={styles.section}>
-      <h2 className={styles.sectionTitle}>영정사진</h2>
+      {/* 헤더: 영정사진 + 체크박스 */}
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>영정사진</h2>
+        <label className={styles.checkbox}>
+          <input
+            type="checkbox"
+            checked={showPhoto}
+            onChange={(e) => handleToggle(e.target.checked)}
+          />
+          영정사진 추가
+        </label>
+      </div>
 
-      {/* 체크박스 */}
-      <label className={styles.photoCheck}>
-        <input
-          type="checkbox"
-          className={styles.photoCheckbox}
-          checked={showPhoto}
-          onChange={(e) => handleToggle(e.target.checked)}
-        />
-        <span className={styles.photoCheckLabel}>영정사진 추가</span>
-      </label>
+      {/* 안내문 */}
+      <p className={styles.photoInfo}>
+        <span className={styles.photoInfoIcon}>✓</span>
+        <span>선택사항 영정사진을 추가하시면 모바일 부고장에서 영정사진이 보여집니다. (최대 15MB)</span>
+      </p>
 
-      {/* 안내문 + 업로드 영역 */}
+      {/* 업로드 영역 */}
       {showPhoto && (
         <>
-          <p className={styles.photoInfo}>
-            선택사항 영정사진을 추가하시면 모바일 부고장에서 영정사진이 보여집니다. (최대 15MB)
-          </p>
 
           {/* 업로드 중 */}
           {uploading && (

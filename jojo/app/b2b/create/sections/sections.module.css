@@ -5,7 +5,14 @@
 
 /* ===== 섹션 레이아웃 ===== */
 .section {
-  margin-bottom: 32px;
+  margin-bottom: 0;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--b2b-border-light);
+  margin-top: 28px;
+}
+
+.section:first-child {
+  margin-top: 0;
 }
 
 .sectionTitle {
@@ -23,10 +30,14 @@
   margin-bottom: 16px;
 }
 
+.sectionHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
 /* ===== 행/필드 ===== */
 .row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
@@ -37,6 +48,11 @@
 .fieldFlex1 {
   flex: 1;
   min-width: 0;
+}
+
+.fieldNarrow {
+  width: 38%;
+  flex-shrink: 0;
 }
 
 .label {
@@ -1481,10 +1497,30 @@
 }
 
 .photoInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 13px;
-  color: var(--b2b-text-tertiary);
+  color: var(--b2b-text-secondary);
   line-height: 1.6;
-  margin: 10px 0;
+  margin: 0 0 12px 0;
+  padding: 12px 14px;
+  background: #F0FFF4;
+  border-radius: var(--radius-md);
+}
+
+.photoInfoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: var(--b2b-accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .photoDropzone {

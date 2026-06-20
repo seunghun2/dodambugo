@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { IconSearch, IconStar, IconChevronDown } from '@tabler/icons-react';
+import { IconSearch, IconStar } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
 interface FuneralHomeData {
@@ -90,9 +90,8 @@ export default function FuneralHomeSection({ formData, onChange, onOpenFacilityS
               className={styles.favBtn}
               onClick={() => setShowFavorites((v) => !v)}
             >
-              <IconStar size={15} />
+              <IconStar size={14} />
               자주찾는 식장
-              <IconChevronDown size={13} />
             </button>
             {showFavorites && (
               <div className={styles.favoritesPanel}>
