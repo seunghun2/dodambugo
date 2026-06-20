@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IconCalendar, IconClock } from '@tabler/icons-react';
+import CalendarPicker from './CalendarPicker';
 import styles from './sections.module.css';
 
 interface DateTimeData {
@@ -31,14 +32,13 @@ function formatDate(dateStr: string): string {
   return `${y}. ${m}. ${d}.`;
 }
 
-// 시간 입력 자동 포맷: 숫자만 입력 → HH:MM
+// 시간 입력 자동 포맷
 function formatTimeInput(raw: string): string {
   const digits = raw.replace(/\D/g, '').slice(0, 4);
   if (digits.length <= 2) return digits;
   return digits.slice(0, 2) + ':' + digits.slice(2);
 }
 
-// 시간 표시값 → API값 (HH:MM)
 function timeDisplayToValue(display: string): string {
   const digits = display.replace(/\D/g, '');
   if (digits.length < 4) return display;
@@ -54,6 +54,7 @@ interface DateTimeCardProps {
   onDateChange: (value: string) => void;
   onTimeChange: (value: string) => void;
   onClear?: () => void;
+  onOpenCalendar: () => void;
 }
 
 function DateTimeCard({
@@ -65,19 +66,13 @@ function DateTimeCard({
   onDateChange,
   onTimeChange,
   onClear,
+  onOpenCalendar,
 }: DateTimeCardProps) {
-  const dateRef = useRef<HTMLInputElement>(null);
-
-  // 시간 입력 핸들러
   const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatTimeInput(e.target.value);
-    // HH:MM 완성 시 API 값으로 변환
     const apiValue = timeDisplayToValue(formatted);
     onTimeChange(apiValue);
   };
-
-  // 시간 표시값
-  const timeDisplay = timeValue || '';
 
   return (
     <div className={styles.dtCard}>
@@ -87,25 +82,14 @@ function DateTimeCard({
           {required && <span className={styles.requiredMark}>*</span>}
         </span>
         {showClear && onClear && (
-          <button
-            type="button"
-            className={styles.clearBtn}
-            onClick={onClear}
-          >
+          <button type="button" className={styles.clearBtn} onClick={onClear}>
             □ 지우기
           </button>
         )}
       </div>
       <div className={styles.dtCardFields}>
-        {/* 날짜 — native date picker */}
-        <div className={styles.dtInputWrap} onClick={() => dateRef.current?.showPicker?.()}>
-          <input
-            ref={dateRef}
-            type="date"
-            className={styles.dtHiddenInput}
-            value={dateValue}
-            onChange={(e) => onDateChange(e.target.value)}
-          />
+        {/* 날짜 — 커스텀 캘린더 바텀시트 */}
+        <div className={styles.dtInputWrap} onClick={onOpenCalendar}>
           <div className={styles.dtDisplayInput}>
             <span className={dateValue ? styles.dtDisplayText : styles.dtPlaceholder}>
               {dateValue ? formatDate(dateValue) : `${label.replace('일시', '')}일자`}
@@ -121,7 +105,7 @@ function DateTimeCard({
             inputMode="numeric"
             className={styles.timeTextInput}
             placeholder="00:00"
-            value={timeDisplay}
+            value={timeValue}
             onChange={handleTimeInput}
             maxLength={5}
           />
@@ -137,6 +121,9 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
     () => formData.address?.includes('제주'),
     [formData.address],
   );
+
+  // 캘린더 팝업 상태: { field, title }
+  const [calendarState, setCalendarState] = useState<{ field: string; title: string } | null>(null);
 
   const handleClearDeath = useCallback(() => {
     onClear(['death_date', 'death_time']);
@@ -154,6 +141,16 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
     onClear(['ilpo_date', 'ilpo_time']);
   }, [onClear]);
 
+  const openCalendar = (field: string, title: string) => {
+    setCalendarState({ field, title });
+  };
+
+  const handleCalendarSelect = (date: string) => {
+    if (calendarState) {
+      onChange(calendarState.field, date);
+    }
+  };
+
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>일시 정보</h2>
@@ -165,6 +162,7 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onDateChange={(v) => onChange('death_date', v)}
         onTimeChange={(v) => onChange('death_time', v)}
         onClear={handleClearDeath}
+        onOpenCalendar={() => openCalendar('death_date', '별세일자 선택')}
       />
 
       <DateTimeCard
@@ -174,6 +172,7 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onDateChange={(v) => onChange('checkin_date', v)}
         onTimeChange={(v) => onChange('checkin_time', v)}
         onClear={handleClearCheckin}
+        onOpenCalendar={() => openCalendar('checkin_date', '입실일자 선택')}
       />
 
       <DateTimeCard
@@ -183,6 +182,7 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         onDateChange={(v) => onChange('encoffin_date', v)}
         onTimeChange={(v) => onChange('encoffin_time', v)}
         onClear={handleClearEncoffin}
+        onOpenCalendar={() => openCalendar('encoffin_date', '입관일자 선택')}
       />
 
       <DateTimeCard
@@ -193,6 +193,7 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         timeValue={formData.funeral_time}
         onDateChange={(v) => onChange('funeral_date', v)}
         onTimeChange={(v) => onChange('funeral_time', v)}
+        onOpenCalendar={() => openCalendar('funeral_date', '발인일자 선택')}
       />
 
       {showIlpo && (
@@ -203,8 +204,18 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
           onDateChange={(v) => onChange('ilpo_date', v)}
           onTimeChange={(v) => onChange('ilpo_time', v)}
           onClear={handleClearIlpo}
+          onOpenCalendar={() => openCalendar('ilpo_date', '일포일자 선택')}
         />
       )}
+
+      {/* 캘린더 바텀시트 */}
+      <CalendarPicker
+        isOpen={!!calendarState}
+        title={calendarState?.title || ''}
+        value={(calendarState && (formData as unknown as Record<string, string>)[calendarState.field]) || ''}
+        onSelect={handleCalendarSelect}
+        onClose={() => setCalendarState(null)}
+      />
     </section>
   );
 }
