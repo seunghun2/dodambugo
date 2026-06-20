@@ -7,6 +7,7 @@ import {
   IconChevronDown,
   IconPlus,
   IconGripVertical,
+  IconWallet,
 } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
@@ -786,6 +787,7 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
                           <span className={styles.mnAccountChevron}>
                             {isAccountOpen ? '△' : '▽'}
                           </span>
+                          <IconWallet size={16} />
                           {hasAccount
                             ? `${item.mourner.bank} ${item.mourner.accountNumber}`
                             : '등록된 계좌가 없습니다'

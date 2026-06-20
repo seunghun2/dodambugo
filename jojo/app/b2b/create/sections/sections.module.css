@@ -565,14 +565,14 @@
   opacity: 0.7;
 }
 
-/* AI 뱃지 (파란 원 안에 AI) */
+/* AI 뱃지 (초록 원 안에 AI) */
 .aiBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 22px;
   height: 22px;
-  background: #2B3674;
+  background: #3A8F47;
   color: #fff;
   border-radius: 50%;
   font-size: 9px;
@@ -667,13 +667,13 @@
 .mnTab {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 14px;
   font-weight: 600;
-  background: var(--bg-gray);
-  border: 1px solid var(--b2b-border-light);
+  background: var(--bg-white);
+  border: 1.5px solid var(--b2b-border);
   color: var(--b2b-text-secondary);
   cursor: pointer;
   font-family: inherit;
@@ -686,9 +686,10 @@
 }
 
 .mnTabActive {
-  background: var(--b2b-text-primary);
-  color: var(--bg-white);
+  background: var(--bg-white);
+  color: var(--b2b-text-primary);
   border-color: var(--b2b-text-primary);
+  font-weight: 700;
 }
 
 /* --- 카드 리스트 --- */
@@ -1003,34 +1004,33 @@
   color: var(--b2b-text-secondary);
 }
 
-/* --- 인원 추가 버튼 (각 관계 그룹 하단, dashed) --- */
+/* --- 인원 추가 버튼 (각 관계 그룹 하단, 텍스트+아이콘) --- */
 .mnAddPersonBtn {
   width: 100%;
-  height: 44px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--bg-white);
-  border: 1.5px dashed var(--b2b-border);
-  border-radius: var(--radius-md);
-  font-size: 14px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--b2b-border-light);
+  font-size: 15px;
   font-weight: 600;
-  color: var(--b2b-text-secondary);
+  color: var(--b2b-text-primary);
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.02em;
   transition: all var(--transition-fast);
-  margin-bottom: 4px;
+  margin-top: 4px;
 }
 
 .mnAddPersonBtn:hover {
-  border-color: var(--b2b-accent);
   color: var(--b2b-accent);
 }
 
 .mnAddPersonBtn:active {
-  transform: scale(0.98);
+  opacity: 0.7;
 }
 
 /* --- 관계 추가 버튼 (전체 리스트 맨 아래, 검정 배경) --- */
@@ -1231,7 +1231,7 @@
 .mnSheetConfirmBtn {
   width: 100%;
   height: 50px;
-  background: #2B3674;
+  background: #3A8F47;
   color: #fff;
   border: none;
   border-radius: var(--radius-md);
