@@ -23,8 +23,11 @@ export default function SettingsPage() {
     const [referralCount, setReferralCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
-    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy'
-    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy'>('main');
+    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'
+    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'>('main');
+
+    // FAQ 다중 오픈 상태
+    const [openFaqIndexes, setOpenFaqIndexes] = useState<number[]>([]);
 
     // 모달 활성화 상태
     const [showInfoModal, setShowInfoModal] = useState(false);
@@ -109,7 +112,22 @@ export default function SettingsPage() {
 
     useEffect(() => {
         fetchUser();
+        // 쿼리 스트링 파싱하여 초기 뷰 설정 (?view=faq 또는 ?view=notice)
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const viewParam = params.get('view');
+            if (viewParam === 'faq' || viewParam === 'notice') {
+                setView(viewParam as any);
+            }
+        }
     }, [fetchUser]);
+
+    const handleBackToSettings = () => {
+        setView('settings_main');
+        if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', '/b2b/settings');
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('b2b_token');
@@ -606,7 +624,7 @@ export default function SettingsPage() {
 
                     {/* 고객지원 그룹 */}
                     <div className={styles.groupTitle}>고객지원</div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => router.push('/b2b/notice')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('notice')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>공지사항</span>
                         </div>
@@ -614,7 +632,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => router.push('/b2b/faq')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('faq')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>자주 묻는 질문</span>
                         </div>
@@ -1222,5 +1240,212 @@ export default function SettingsPage() {
         );
     }
 
+    // ==========================================
+    // 9. 자주묻는질문 뷰 ('faq')
+    // ==========================================
+    if (view === 'faq') {
+        const toggleFaq = (index: number) => {
+            setOpenFaqIndexes(prev =>
+                prev.includes(index)
+                    ? prev.filter(i => i !== index)
+                    : [...prev, index]
+            );
+        };
+
+        return (
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <button className={styles.backBtn} onClick={handleBackToSettings}>
+                        <B2BIcon name="chevron-left" size={24} />
+                    </button>
+                    <span className={styles.headerTitle}>자주 묻는 질문</span>
+                    <button className={styles.menuBtn} onClick={() => alert('메뉴 기능이 준비 중입니다.')}>
+                        <B2BIcon name="menu" size={24} />
+                    </button>
+                </header>
+
+                <div className={styles.faqList}>
+                    {b2bFaqData.map((item, index) => {
+                        const isActive = openFaqIndexes.includes(index);
+                        return (
+                            <div
+                                key={index}
+                                className={`${styles.faqItem} ${isActive ? styles.faqItemActive : ''}`}
+                            >
+                                <div className={styles.faqQuestion} onClick={() => toggleFaq(index)}>
+                                    <div className={styles.questionMain}>
+                                        <span className={styles.qPrefix}>Q</span>
+                                        <span className={styles.questionText}>{item.question}</span>
+                                    </div>
+                                    <span className={styles.faqIcon} style={{ transform: isActive ? 'rotate(180deg)' : 'none', display: 'flex', alignItems: 'center' }}>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div className={styles.faqAnswer} style={{ maxHeight: isActive ? '300px' : '0' }}>
+                                    <div className={styles.answerContent}>
+                                        <div className={styles.aBadge}>A</div>
+                                        <p className={styles.answerText}>{item.answer}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <BottomTabBar />
+            </div>
+        );
+    }
+
+    // ==========================================
+    // 10. 공지사항 뷰 ('notice')
+    // ==========================================
+    if (view === 'notice') {
+        return (
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <button className={styles.backBtn} onClick={handleBackToSettings}>
+                        <B2BIcon name="chevron-left" size={24} />
+                    </button>
+                    <span className={styles.headerTitle}>공지사항</span>
+                    <button className={styles.menuBtn} onClick={() => alert('메뉴 기능이 준비 중입니다.')}>
+                        <B2BIcon name="menu" size={24} />
+                    </button>
+                </header>
+
+                <div className={styles.noticeList}>
+                    {noticeData.map((item) => (
+                        <div
+                            key={item.id}
+                            className={styles.noticeItem}
+                            onClick={() => alert('공지사항 상세 내용이 곧 준비됩니다.')}
+                        >
+                            <div className={styles.noticeMain}>
+                                <div className={styles.titleRow}>
+                                    {item.isFixed && <span className={styles.noticeBadge}>공지</span>}
+                                    <span className={styles.noticeTitle}>{item.title}</span>
+                                </div>
+                                <span className={styles.noticeDate}>{item.date}</span>
+                            </div>
+                            <span className={styles.arrowIcon}>
+                                <B2BIcon name="chevron-right" size={20} />
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                <BottomTabBar />
+            </div>
+        );
+    }
+
     return null;
 }
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+const b2bFaqData: FAQItem[] = [
+  {
+    question: '부고장 내에 화환보내기 버튼이 보이지 않습니다.',
+    answer: '부고장 내 하단의 근조화환 보내기 버튼은 발인 진행이 되지 않은 부고에서만 구매가 가능합니다.\n또한 부고장 생성 시, \'근조화환 받지 않기\'를 설정하였는지 확인해주세요.',
+  },
+  {
+    question: '부고장 내에 부의금 보내기에 카드결제를 안보이게 할 수 있나요?',
+    answer: '현재 카드 결제 기능만 별도로 숨기는 기능은 제공되지 않습니다.\n부고장 생성 시, 상주님의 계좌번호를 입력하지 않으면 카드 결제 또한 노출되지 않으니, 이 점 참고하여 이용해 주세요.',
+  },
+  {
+    question: '부고장 내에 상주 자리 앞부분을 공란으로 맞추려면 어떻게 해야하나요?',
+    answer: 'ㅁ 을 입력해주시면 공란으로 변경되어 노출됩니다.',
+  },
+  {
+    question: '계좌번호 입력을 했는데 부고장(부의금보내기)에 안보여요',
+    answer: '계좌번호 정보는 부고장 생성 단계에서 노출 여부를 선택하거나, 상주별 발송 설정 화면에서 계좌 노출 규칙(내 계좌만 노출, 모든 계좌 노출 등)을 개별 지정하여 표시되도록 설정해야 합니다.',
+  },
+  {
+    question: '부고온 고객센터가 어떻게 되나요?',
+    answer: '현재 고객센터는 유선 상담을 운영하고 있지 않으며, 1:1문의만 지원하고 있습니다.',
+  },
+  {
+    question: '내 정보에 고유번호는 무엇인가요?',
+    answer: '고유번호는 고객님의 추천코드로 부고온에서 랜덤으로 부여하고 있습니다.\n가입자가 추천인 입력시 회원님의 고유번호 입력 하시면 됩니다.',
+  },
+  {
+    question: '적립금은 언제 지급되나요?',
+    answer: '적립금은 상품 결제 기준 24시간 후에 적립됩니다.',
+  },
+  {
+    question: '환급신청을 했는데 언제 지급되나요?',
+    answer: '적립금(포인트) 환급은 당일 지급을 원칙으로 하고 있습니다.\n자세한 내용은 부고온 공지사항을 참조하시길 바랍니다.',
+  },
+  {
+    question: '환급신청 시 인증 과정에서 오류가 나요',
+    answer: '신청자와 입력하신 예금주 정보가 동일한지 먼저 확인 부탁드립니다.\n또한, 발급일자는 가장 최근에 발급 받으신 주민등록증 하단의 날짜를 입력해 주세요.\n이는 원활한 소득공제 처리를 위한 절차이오니, 번거로우시더라도 양해 부탁드립니다.',
+  },
+  {
+    question: '장례식장 별로 다른 화환이 나와요. 화환 상품 추가 가능한가요?',
+    answer: '지역 또는 장례식장 별 반입 가능한 화환이 달라 내부적으로 노출 가능한 화환을 제한하고 있습니다.',
+  },
+];
+
+interface NoticeItem {
+  id: number;
+  title: string;
+  date: string;
+  isFixed: boolean;
+}
+
+const noticeData: NoticeItem[] = [
+  {
+    id: 1,
+    title: '[공지] 등급별 포인트 지급 누락 관련 안내',
+    date: '2025/10/31',
+    isFixed: true,
+  },
+  {
+    id: 2,
+    title: '화환 판매금액 설정 기능 추가 안내',
+    date: '2025/05/22',
+    isFixed: true,
+  },
+  {
+    id: 3,
+    title: '부고온 화환 수수료 안내',
+    date: '2025/05/16',
+    isFixed: true,
+  },
+  {
+    id: 4,
+    title: '[공지] 부고온 등급별 혜택 변경',
+    date: '2025/06/17',
+    isFixed: true,
+  },
+  {
+    id: 5,
+    title: '[공지] 빈소현황판 AI 분석 기능 안내',
+    date: '2025/03/18',
+    isFixed: true,
+  },
+  {
+    id: 6,
+    title: '[공지] PC버전 로그인 계정 생성 방법 안내',
+    date: '2025/02/04',
+    isFixed: true,
+  },
+  {
+    id: 7,
+    title: '[공지] 답례글 관련 안내',
+    date: '2024/09/26',
+    isFixed: false,
+  },
+  {
+    id: 8,
+    title: '[공지] 실시간 환급금 자동이체 시행 안내',
+    date: '2024/11/20',
+    isFixed: false,
+  },
+];
