@@ -2,7 +2,7 @@
 
 .page {
     min-height: 100dvh;
-    background: #fff;
+    background: var(--bg-white);
     max-width: 480px;
     margin: 0 auto;
 }
@@ -12,8 +12,8 @@
     align-items: center;
     justify-content: space-between;
     height: 52px;
-    padding: 0 16px;
-    border-bottom: 1px solid #E5E8EB;
+    padding: 0 var(--spacing-md);
+    border-bottom: 1px solid var(--b2b-border);
 }
 
 .headerBtn {
@@ -25,7 +25,7 @@
     background: none;
     border: none;
     font-size: 18px;
-    color: #1A1A1A;
+    color: var(--b2b-text-primary);
     cursor: pointer;
     outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -34,7 +34,7 @@
 .headerTitle {
     font-size: 16px;
     font-weight: 600;
-    color: #1A1A1A;
+    color: var(--b2b-text-primary);
 }
 
 .inner {
@@ -49,9 +49,9 @@
 .welcome {
     font-size: 22px;
     font-weight: 700;
-    color: #1A1A1A;
+    color: var(--b2b-text-primary);
     line-height: 1.5;
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-md);
 }
 
 .welcomeBrand {
@@ -60,16 +60,16 @@
 
 .desc {
     font-size: 14px;
-    color: #8B95A1;
+    color: var(--b2b-text-secondary);
     margin-bottom: 40px;
     line-height: 1.6;
 }
 
 /* 가입정보 카드 */
 .infoCard {
-    border: 1px solid #E5E8EB;
-    border-radius: 12px;
-    padding: 24px 20px;
+    border: 1px solid var(--b2b-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) 20px;
     margin-bottom: 40px;
     text-align: center;
 }
@@ -77,13 +77,13 @@
 .infoLabel {
     font-size: 14px;
     font-weight: 700;
-    color: #1A1A1A;
-    margin-bottom: 16px;
+    color: var(--b2b-text-primary);
+    margin-bottom: var(--spacing-md);
 }
 
 .infoRow {
     font-size: 14px;
-    color: #4E5968;
+    color: var(--b2b-text-secondary);
     margin-bottom: 6px;
 }
 
@@ -99,16 +99,17 @@
 .startBtn {
     width: 100%;
     height: 52px;
-    background: #3A8F47;
-    color: #fff;
+    background: var(--b2b-accent);
+    color: var(--bg-white);
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--transition-fast);
 }
 
 .startBtn:active {
