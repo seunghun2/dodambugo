@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { IconUpload, IconPlus, IconCheck } from '@tabler/icons-react';
+import { IconUpload, IconPlus, IconStar, IconStarFilled, IconCheck } from '@tabler/icons-react';
 import styles from './sections.module.css';
 
 interface Props {
@@ -84,8 +84,32 @@ function Toggle({
 export default function OptionsSection({ formData, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showLogoModal, setShowLogoModal] = useState(false);
-  const [activeLogoTab, setActiveLogoTab] = useState<'presets' | 'custom'>('presets');
+  const [activeLogoTab, setActiveLogoTab] = useState<'favorites' | 'presets' | 'custom'>('favorites');
+  const [favoriteLogos, setFavoriteLogos] = useState<string[]>([]);
   
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('b2b_favorite_logos');
+      if (stored) {
+        setFavoriteLogos(JSON.parse(stored));
+      } else {
+        // 프리드라이프, 보람상조를 기본 즐겨찾기로 세팅
+        setFavoriteLogos(['preed', 'boram']);
+        localStorage.setItem('b2b_favorite_logos', JSON.stringify(['preed', 'boram']));
+      }
+    } catch {}
+  }, []);
+
+  const toggleFavoriteLogo = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setFavoriteLogos(prev => {
+      const isFav = prev.includes(id);
+      const next = isFav ? prev.filter(v => v !== id) : [...prev, id];
+      localStorage.setItem('b2b_favorite_logos', JSON.stringify(next));
+      return next;
+    });
+  };
+
   // 바텀시트 스와이프 닫기 로직
   const sheetDragStartY = useRef(0);
   const handleSheetTouchStart = (e: React.TouchEvent) => {
@@ -170,6 +194,12 @@ export default function OptionsSection({ formData, onChange }: Props) {
             
             <div className={styles.logoTabs}>
               <button 
+                className={`${styles.logoTab} ${activeLogoTab === 'favorites' ? styles.logoTabActive : ''}`}
+                onClick={() => setActiveLogoTab('favorites')}
+              >
+                즐겨찾기
+              </button>
+              <button 
                 className={`${styles.logoTab} ${activeLogoTab === 'presets' ? styles.logoTabActive : ''}`}
                 onClick={() => setActiveLogoTab('presets')}
               >
@@ -184,9 +214,45 @@ export default function OptionsSection({ formData, onChange }: Props) {
             </div>
 
             <div className={styles.sheetContent}>
+              {activeLogoTab === 'favorites' && (
+                <div className={styles.logoGrid}>
+                  {favoriteLogos.length === 0 ? (
+                    <div className={styles.favoritesEmpty}>즐겨찾기된 로고가 없습니다.</div>
+                  ) : (
+                    LOGO_PRESETS.filter(p => favoriteLogos.includes(p.id)).map(logo => (
+                      <div 
+                        key={logo.id} 
+                        className={`${styles.logoGridItem} ${formData.partner_logo_url === logo.url ? styles.logoGridItemActive : ''}`}
+                        onClick={() => handleLogoSelect(logo.url)}
+                      >
+                        <div className={styles.logoImgWrapper}>
+                          <img src={logo.url} alt={logo.name} />
+                          {formData.partner_logo_url === logo.url && (
+                            <div className={styles.logoCheckmark}>
+                              <IconCheck size={16} color="white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.logoItemFooter}>
+                          <span className={styles.logoItemName}>{logo.name}</span>
+                          <button 
+                            type="button" 
+                            className={styles.logoStarBtn}
+                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
+                          >
+                            <IconStarFilled size={18} color="#F1C40F" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
               {activeLogoTab === 'presets' && (
                 <div className={styles.logoGrid}>
                   {LOGO_PRESETS.map(logo => {
+                    const isFav = favoriteLogos.includes(logo.id);
                     return (
                       <div 
                         key={logo.id} 
@@ -203,6 +269,13 @@ export default function OptionsSection({ formData, onChange }: Props) {
                         </div>
                         <div className={styles.logoItemFooter}>
                           <span className={styles.logoItemName}>{logo.name}</span>
+                          <button 
+                            type="button" 
+                            className={styles.logoStarBtn}
+                            onClick={(e) => toggleFavoriteLogo(e, logo.id)}
+                          >
+                            {isFav ? <IconStarFilled size={18} color="#F1C40F" /> : <IconStar size={18} color="#DDDDDD" />}
+                          </button>
                         </div>
                       </div>
                     );

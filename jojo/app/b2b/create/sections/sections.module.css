@@ -2419,18 +2419,24 @@
 .logoItemFooter {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 0 4px;
 }
 
 .logoItemName {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--gray-800);
   font-weight: 600;
 }
 
 .logoStarBtn {
-  display: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logoCustomArea {
