@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { IconCamera } from '@tabler/icons-react';
+import React, { useState } from 'react';
 import styles from './sections.module.css';
 
 interface DeceasedData {
@@ -21,12 +20,6 @@ interface Props {
   onOpenAiCapture: () => void;
 }
 
-const GENDERS = [
-  { value: '', label: '성별' },
-  { value: '남', label: '남' },
-  { value: '여', label: '여' },
-];
-
 const RELIGIONS = [
   { value: '', label: '종교' },
   { value: '불교', label: '불교' },
@@ -45,12 +38,35 @@ function getReligiousTitlePlaceholder(religion: string): string {
   }
 }
 
+// 성별 표시 텍스트
+function getGenderDisplay(gender: string, hideGender: boolean): string {
+  if (hideGender) return '미노출';
+  if (gender === '남') return '남성';
+  if (gender === '여') return '여성';
+  return '성별';
+}
+
 export default function DeceasedSection({ formData, onChange, onOpenAiCapture }: Props) {
   const hasReligion = formData.religion !== '' && formData.religion !== '무교';
+  const [showGenderSheet, setShowGenderSheet] = useState(false);
 
   const handleAgeChange = (value: string) => {
     const cleaned = value.replace(/\D/g, '').slice(0, 3);
     onChange('age', cleaned);
+  };
+
+  const handleGenderSelect = (option: string) => {
+    if (option === '미노출') {
+      onChange('hide_gender', true);
+      onChange('gender', '');
+    } else if (option === '남성') {
+      onChange('hide_gender', false);
+      onChange('gender', '남');
+    } else if (option === '여성') {
+      onChange('hide_gender', false);
+      onChange('gender', '여');
+    }
+    setShowGenderSheet(false);
   };
 
   return (
@@ -66,7 +82,7 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
         </button>
       </div>
 
-      {/* 고인명 — label 없이 placeholder만 */}
+      {/* 고인명 */}
       <div className={styles.field}>
         <input
           type="text"
@@ -77,7 +93,7 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
         />
       </div>
 
-      {/* 고인나이 + 성별 — 한 줄 */}
+      {/* 고인나이 + 성별 — 한 줄 50:50 */}
       <div className={styles.row}>
         <div className={styles.fieldFlex1}>
           <div className={styles.inputWithUnit}>
@@ -93,28 +109,18 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
           </div>
         </div>
         <div className={styles.fieldFlex1}>
-          <select
-            className={styles.select}
-            value={formData.gender}
-            onChange={(e) => onChange('gender', e.target.value)}
+          {/* 성별 → 바텀시트 트리거 */}
+          <button
+            type="button"
+            className={styles.selectTrigger}
+            onClick={() => setShowGenderSheet(true)}
           >
-            {GENDERS.map((g) => (
-              <option key={g.value} value={g.value}>{g.label}</option>
-            ))}
-          </select>
+            <span className={formData.gender || formData.hide_gender ? styles.selectTriggerText : styles.selectTriggerPlaceholder}>
+              {getGenderDisplay(formData.gender, formData.hide_gender)}
+            </span>
+            <span className={styles.selectTriggerArrow}>▾</span>
+          </button>
         </div>
-      </div>
-
-      {/* 부고장 성별 미노출 — 우측 정렬 */}
-      <div className={styles.checkboxRight}>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={formData.hide_gender}
-            onChange={(e) => onChange('hide_gender', e.target.checked)}
-          />
-          부고장 성별 미노출
-        </label>
       </div>
 
       {/* 구분선 */}
@@ -162,6 +168,44 @@ export default function DeceasedSection({ formData, onChange, onOpenAiCapture }:
             />
             부고장 호칭 노출
           </label>
+        </div>
+      )}
+
+      {/* 성별 바텀시트 */}
+      {showGenderSheet && (
+        <div className={styles.bottomSheetOverlay} onClick={() => setShowGenderSheet(false)}>
+          <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.bottomSheetHandle} />
+            <div className={styles.bottomSheetTitle}>성별</div>
+            <button
+              type="button"
+              className={`${styles.bottomSheetOption} ${formData.hide_gender ? styles.bottomSheetOptionActive : ''}`}
+              onClick={() => handleGenderSelect('미노출')}
+            >
+              미노출
+            </button>
+            <button
+              type="button"
+              className={`${styles.bottomSheetOption} ${!formData.hide_gender && formData.gender === '남' ? styles.bottomSheetOptionActive : ''}`}
+              onClick={() => handleGenderSelect('남성')}
+            >
+              남성
+            </button>
+            <button
+              type="button"
+              className={`${styles.bottomSheetOption} ${!formData.hide_gender && formData.gender === '여' ? styles.bottomSheetOptionActive : ''}`}
+              onClick={() => handleGenderSelect('여성')}
+            >
+              여성
+            </button>
+            <button
+              type="button"
+              className={styles.bottomSheetCancel}
+              onClick={() => setShowGenderSheet(false)}
+            >
+              취소
+            </button>
+          </div>
         </div>
       )}
     </section>

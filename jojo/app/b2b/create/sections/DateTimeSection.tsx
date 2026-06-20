@@ -31,42 +31,53 @@ function formatDate(dateStr: string): string {
   return `${y}. ${m}. ${d}.`;
 }
 
-// 시간 포맷: "14:00" → "오후 02:00"
-function formatTime(timeStr: string): string {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':').map(Number);
-  const period = h < 12 ? '오전' : '오후';
-  const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${period} ${String(displayH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+// 시간 입력 자동 포맷: 숫자만 입력 → HH:MM
+function formatTimeInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return digits.slice(0, 2) + ':' + digits.slice(2);
+}
+
+// 시간 표시값 → API값 (HH:MM)
+function timeDisplayToValue(display: string): string {
+  const digits = display.replace(/\D/g, '');
+  if (digits.length < 4) return display;
+  return digits.slice(0, 2) + ':' + digits.slice(2, 4);
 }
 
 interface DateTimeCardProps {
   label: string;
   required?: boolean;
   showClear?: boolean;
-  isCleared?: boolean;
-  onClear?: () => void;
   dateValue: string;
   timeValue: string;
-  datePlaceholder?: string;
   onDateChange: (value: string) => void;
   onTimeChange: (value: string) => void;
+  onClear?: () => void;
 }
 
 function DateTimeCard({
   label,
   required,
   showClear = true,
-  isCleared,
-  onClear,
   dateValue,
   timeValue,
-  datePlaceholder,
   onDateChange,
   onTimeChange,
+  onClear,
 }: DateTimeCardProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-  const timeRef = useRef<HTMLInputElement>(null);
+
+  // 시간 입력 핸들러
+  const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatTimeInput(e.target.value);
+    // HH:MM 완성 시 API 값으로 변환
+    const apiValue = timeDisplayToValue(formatted);
+    onTimeChange(apiValue);
+  };
+
+  // 시간 표시값
+  const timeDisplay = timeValue || '';
 
   return (
     <div className={styles.dtCard}>
@@ -76,20 +87,17 @@ function DateTimeCard({
           {required && <span className={styles.requiredMark}>*</span>}
         </span>
         {showClear && onClear && (
-          <label className={styles.clearCheck}>
-            <input
-              type="checkbox"
-              checked={isCleared}
-              onChange={(e) => {
-                if (e.target.checked) onClear();
-              }}
-            />
-            지우기
-          </label>
+          <button
+            type="button"
+            className={styles.clearBtn}
+            onClick={onClear}
+          >
+            □ 지우기
+          </button>
         )}
       </div>
       <div className={styles.dtCardFields}>
-        {/* 날짜 */}
+        {/* 날짜 — native date picker */}
         <div className={styles.dtInputWrap} onClick={() => dateRef.current?.showPicker?.()}>
           <input
             ref={dateRef}
@@ -100,27 +108,24 @@ function DateTimeCard({
           />
           <div className={styles.dtDisplayInput}>
             <span className={dateValue ? styles.dtDisplayText : styles.dtPlaceholder}>
-              {dateValue ? formatDate(dateValue) : (datePlaceholder || `${label.replace('일시', '')}일자`)}
+              {dateValue ? formatDate(dateValue) : `${label.replace('일시', '')}일자`}
             </span>
             <IconCalendar size={20} className={styles.dtInputIcon} />
           </div>
         </div>
 
-        {/* 시간 */}
-        <div className={styles.dtInputWrap} onClick={() => timeRef.current?.showPicker?.()}>
+        {/* 시간 — 직접 숫자 입력 */}
+        <div className={styles.dtInputWrap}>
           <input
-            ref={timeRef}
-            type="time"
-            className={styles.dtHiddenInput}
-            value={timeValue}
-            onChange={(e) => onTimeChange(e.target.value)}
+            type="text"
+            inputMode="numeric"
+            className={styles.timeTextInput}
+            placeholder="00:00"
+            value={timeDisplay}
+            onChange={handleTimeInput}
+            maxLength={5}
           />
-          <div className={styles.dtDisplayInput}>
-            <span className={timeValue ? styles.dtDisplayText : styles.dtPlaceholder}>
-              {timeValue ? formatTime(timeValue) : '00:00'}
-            </span>
-            <IconClock size={20} className={styles.dtInputIcon} />
-          </div>
+          <IconClock size={20} className={styles.dtInputIcon} />
         </div>
       </div>
     </div>
@@ -159,7 +164,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         timeValue={formData.death_time}
         onDateChange={(v) => onChange('death_date', v)}
         onTimeChange={(v) => onChange('death_time', v)}
-        isCleared={!formData.death_date && !formData.death_time}
         onClear={handleClearDeath}
       />
 
@@ -169,7 +173,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         timeValue={formData.checkin_time}
         onDateChange={(v) => onChange('checkin_date', v)}
         onTimeChange={(v) => onChange('checkin_time', v)}
-        isCleared={!formData.checkin_date && !formData.checkin_time}
         onClear={handleClearCheckin}
       />
 
@@ -179,7 +182,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
         timeValue={formData.encoffin_time}
         onDateChange={(v) => onChange('encoffin_date', v)}
         onTimeChange={(v) => onChange('encoffin_time', v)}
-        isCleared={!formData.encoffin_date && !formData.encoffin_time}
         onClear={handleClearEncoffin}
       />
 
@@ -200,7 +202,6 @@ export default function DateTimeSection({ formData, onChange, onClear }: Props) 
           timeValue={formData.ilpo_time}
           onDateChange={(v) => onChange('ilpo_date', v)}
           onTimeChange={(v) => onChange('ilpo_time', v)}
-          isCleared={!formData.ilpo_date && !formData.ilpo_time}
           onClear={handleClearIlpo}
         />
       )}

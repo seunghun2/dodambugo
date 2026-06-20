@@ -41,6 +41,16 @@ const bankOptions = [
   'KDB산업은행', '저축은행', '산림조합',
 ];
 
+// ===== 토스트 컴포넌트 =====
+function Toast({ message, visible }: { message: string; visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <div className={styles.mnToast}>
+      {message}
+    </div>
+  );
+}
+
 // ===== 계좌 등록 모달 =====
 interface AccountModalProps {
   open: boolean;
@@ -139,46 +149,105 @@ function AccountModal({ open, onClose, onConfirm, initial }: AccountModalProps) 
   );
 }
 
-// ===== 관계 추가 모달 =====
-interface RelationModalProps {
+// ===== 관계순서 변경 바텀시트 =====
+interface ReorderSheetProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (rel: string) => void;
-  existingRelations: string[];
+  relationOrder: string[];
+  onConfirm: (newOrder: string[]) => void;
 }
 
-function RelationModal({ open, onClose, onSelect, existingRelations }: RelationModalProps) {
+function ReorderBottomSheet({ open, onClose, relationOrder, onConfirm }: ReorderSheetProps) {
+  const [localOrder, setLocalOrder] = useState<string[]>(relationOrder);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef(0);
+
+  useEffect(() => {
+    if (open) {
+      setLocalOrder(relationOrder);
+    }
+  }, [open, relationOrder]);
+
+  const handleMoveUp = (idx: number) => {
+    if (idx <= 0) return;
+    const updated = [...localOrder];
+    [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+    setLocalOrder(updated);
+  };
+
+  const handleMoveDown = (idx: number) => {
+    if (idx >= localOrder.length - 1) return;
+    const updated = [...localOrder];
+    [updated[idx], updated[idx + 1]] = [updated[idx + 1], updated[idx]];
+    setLocalOrder(updated);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dy = e.changedTouches[0].clientY - dragStartY.current;
+    if (dy > 80) {
+      onClose();
+    }
+  };
+
   if (!open) return null;
 
-  const available = relationshipOptions.filter((r) => !existingRelations.includes(r));
-
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <span className={styles.modalTitle}>관계 추가</span>
-          <button type="button" className={styles.modalClose} onClick={onClose}>
-            <IconX size={18} />
-          </button>
+    <div className={styles.mnSheetOverlay} onClick={onClose}>
+      <div
+        ref={sheetRef}
+        className={styles.mnSheetContent}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* 드래그 핸들 바 */}
+        <div className={styles.mnSheetHandle}>
+          <div className={styles.mnSheetHandleBar} />
         </div>
-        <div className={styles.mnRelModalBody}>
-          {available.length === 0 ? (
-            <p className={styles.mnRelModalEmpty}>추가 가능한 관계가 없습니다</p>
-          ) : (
-            available.map((rel) => (
-              <button
-                key={rel}
-                type="button"
-                className={styles.mnRelModalItem}
-                onClick={() => {
-                  onSelect(rel);
-                  onClose();
-                }}
-              >
-                {rel}
-              </button>
-            ))
-          )}
+
+        <div className={styles.mnSheetTitle}>관계순서 변경</div>
+
+        <div className={styles.mnSheetList}>
+          {localOrder.map((rel, idx) => (
+            <div key={rel} className={styles.mnSheetItem}>
+              <span className={styles.mnSheetItemName}>{rel}</span>
+              <div className={styles.mnSheetItemBtns}>
+                <button
+                  type="button"
+                  className={styles.mnSheetArrow}
+                  onClick={() => handleMoveUp(idx)}
+                  disabled={idx === 0}
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className={styles.mnSheetArrow}
+                  onClick={() => handleMoveDown(idx)}
+                  disabled={idx === localOrder.length - 1}
+                >
+                  ▼
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className={styles.mnSheetFooter}>
+          <button
+            type="button"
+            className={styles.mnSheetConfirmBtn}
+            onClick={() => {
+              onConfirm(localOrder);
+              onClose();
+            }}
+          >
+            수정하기
+          </button>
         </div>
       </div>
     </div>
@@ -187,11 +256,12 @@ function RelationModal({ open, onClose, onSelect, existingRelations }: RelationM
 
 // ===== 메인 컴포넌트 =====
 export default function MournerSection({ mourners, onMournersChange }: Props) {
-  const [reorderMode, setReorderMode] = useState(false);
   const [accountModalIndex, setAccountModalIndex] = useState<number | null>(null);
   const [expandedAccounts, setExpandedAccounts] = useState<Set<number>>(new Set());
-  const [showRelationModal, setShowRelationModal] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [showReorderSheet, setShowReorderSheet] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
 
   // Drag state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -201,21 +271,68 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
   const dragCurrentY = useRef(0);
   const dragClone = useRef<HTMLDivElement | null>(null);
 
-  // --- 관계별 그룹핑 ---
+  // --- 토스트 표시 ---
+  const showToast = useCallback((msg: string) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
+  }, []);
+
+  // --- 관계별 그룹핑 (순서 유지) ---
+  const getRelationOrder = useCallback((): string[] => {
+    const seen = new Set<string>();
+    const order: string[] = [];
+    for (const m of mourners) {
+      const rel = m.relationship || '';
+      if (!seen.has(rel)) {
+        seen.add(rel);
+        order.push(rel);
+      }
+    }
+    return order;
+  }, [mourners]);
+
+  const relationOrder = getRelationOrder();
+
   const relationGroups = mourners.reduce<Record<string, number>>((acc, m) => {
     const rel = m.relationship || '미지정';
     acc[rel] = (acc[rel] || 0) + 1;
     return acc;
   }, {});
 
-  const existingRelations = Object.keys(relationGroups).filter((r) => r !== '미지정');
+  // --- 관계별 상주 그룹 (원본 인덱스 유지) ---
+  const getGroupedMourners = useCallback(() => {
+    const groups: { relation: string; items: { mourner: Mourner; originalIndex: number }[] }[] = [];
+    const groupMap = new Map<string, { mourner: Mourner; originalIndex: number }[]>();
 
-  // --- 필터된 상주 목록 ---
-  const filteredMourners = activeTab
-    ? mourners
-        .map((m, i) => ({ ...m, originalIndex: i }))
-        .filter((m) => (m.relationship || '미지정') === activeTab)
-    : mourners.map((m, i) => ({ ...m, originalIndex: i }));
+    for (let i = 0; i < mourners.length; i++) {
+      const rel = mourners[i].relationship || '';
+      if (!groupMap.has(rel)) {
+        groupMap.set(rel, []);
+      }
+      groupMap.get(rel)!.push({ mourner: mourners[i], originalIndex: i });
+    }
+
+    // 관계 순서대로 그룹 생성
+    for (const rel of relationOrder) {
+      const items = groupMap.get(rel);
+      if (items && items.length > 0) {
+        groups.push({ relation: rel, items });
+      }
+    }
+
+    return groups;
+  }, [mourners, relationOrder]);
+
+  const groupedMourners = getGroupedMourners();
+
+  // --- 필터된 그룹 목록 ---
+  const displayGroups = activeTab
+    ? groupedMourners.filter((g) => {
+        const tabKey = activeTab === '미지정' ? '' : activeTab;
+        return g.relation === tabKey;
+      })
+    : groupedMourners;
 
   // --- 상주 필드 변경 ---
   const handleFieldChange = useCallback(
@@ -227,26 +344,28 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
     [mourners, onMournersChange],
   );
 
-  // --- 인원 추가 (같은 관계) ---
-  const handleAddPerson = useCallback(() => {
-    const rel = activeTab && activeTab !== '미지정' ? activeTab : '';
-    onMournersChange([
-      ...mourners,
-      { relationship: rel, name: '', contact: '' },
-    ]);
-  }, [mourners, onMournersChange, activeTab]);
-
-  // --- 관계 추가 ---
-  const handleAddRelation = useCallback(
-    (rel: string) => {
+  // --- 인원 추가 (같은 관계 그룹에) ---
+  const handleAddPerson = useCallback(
+    (relation: string) => {
+      if (relation === '') {
+        showToast('관계를 설정해주세요');
+        return;
+      }
       onMournersChange([
         ...mourners,
-        { relationship: rel, name: '', contact: '' },
+        { relationship: relation, name: '', contact: '' },
       ]);
-      setActiveTab(rel);
     },
-    [mourners, onMournersChange],
+    [mourners, onMournersChange, showToast],
   );
+
+  // --- 관계 추가 (관계 미지정 새 상주 추가) ---
+  const handleAddRelation = useCallback(() => {
+    onMournersChange([
+      ...mourners,
+      { relationship: '', name: '', contact: '' },
+    ]);
+  }, [mourners, onMournersChange]);
 
   // --- 삭제 ---
   const handleDelete = useCallback(
@@ -282,7 +401,6 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
   // --- 드래그 리오더 (pointer events) ---
   const handlePointerDown = useCallback(
     (e: React.PointerEvent, index: number) => {
-      if (!reorderMode) return;
       e.preventDefault();
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
 
@@ -308,7 +426,7 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
         el.style.opacity = '0.3';
       }
     },
-    [reorderMode],
+    [],
   );
 
   const handlePointerMove = useCallback(
@@ -329,7 +447,6 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
       cardRefs.current.forEach((cardEl, idx) => {
         if (idx === dragIndex) return;
         const r = cardEl.getBoundingClientRect();
-        const mid = r.top + r.height / 2;
         if (e.clientY > r.top && e.clientY < r.bottom) {
           overIdx = idx;
         }
@@ -411,6 +528,40 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
     [mourners, onMournersChange],
   );
 
+  // --- 관계순서 변경 확정 ---
+  const handleReorderConfirm = useCallback(
+    (newOrder: string[]) => {
+      // 기존 관계별 그룹을 새 순서대로 재배열
+      const groupMap = new Map<string, Mourner[]>();
+      for (const m of mourners) {
+        const rel = m.relationship || '';
+        if (!groupMap.has(rel)) {
+          groupMap.set(rel, []);
+        }
+        groupMap.get(rel)!.push(m);
+      }
+
+      const reordered: Mourner[] = [];
+      for (const rel of newOrder) {
+        const items = groupMap.get(rel);
+        if (items) {
+          reordered.push(...items);
+          groupMap.delete(rel);
+        }
+      }
+      // 혹시 남은 관계 (newOrder에 없는 것들)
+      groupMap.forEach((items) => {
+        reordered.push(...items);
+      });
+
+      onMournersChange(reordered);
+    },
+    [mourners, onMournersChange],
+  );
+
+  // --- 관계 display name ---
+  const getRelationDisplayName = (rel: string) => (rel === '' ? '미지정' : rel);
+
   return (
     <section className={styles.section}>
       {/* ===== 헤더 ===== */}
@@ -418,8 +569,8 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
         <h2 className={styles.sectionTitle}>상주정보</h2>
         <button
           type="button"
-          className={`${styles.mnReorderPill} ${reorderMode ? styles.mnReorderPillActive : ''}`}
-          onClick={() => setReorderMode((v) => !v)}
+          className={styles.mnReorderPill}
+          onClick={() => setShowReorderSheet(true)}
         >
           관계순서 변경
         </button>
@@ -448,199 +599,204 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
         </div>
       )}
 
-      {/* ===== 상주 카드 리스트 ===== */}
+      {/* ===== 관계별 그룹 카드 리스트 ===== */}
       <div className={styles.mnCardList}>
-        {filteredMourners.map((mourner, idx) => {
-          const realIndex = mourner.originalIndex;
-          const isFirst = realIndex === 0;
-          const hasAccount = !!(mourner.bank && mourner.accountNumber);
-          const isAccountOpen = expandedAccounts.has(realIndex);
-          const isDragOver = dragOverIndex === realIndex;
+        {displayGroups.map((group) => {
+          const displayRel = getRelationDisplayName(group.relation);
 
           return (
-            <div
-              key={realIndex}
-              ref={(el) => {
-                if (el) cardRefs.current.set(realIndex, el);
-              }}
-              className={`${styles.mnCard} ${isDragOver ? styles.mnCardDragOver : ''} ${
-                dragIndex === realIndex ? styles.mnCardDragging : ''
-              }`}
-              onPointerMove={dragIndex !== null ? handlePointerMove : undefined}
-              onPointerUp={dragIndex !== null ? handlePointerUp : undefined}
-            >
-              {/* 대표상주 뱃지 */}
-              {isFirst && (
-                <span className={styles.mnPrimaryBadge}>대표상주</span>
-              )}
+            <div key={group.relation} className={styles.mnRelationGroup}>
+              {/* 그룹 내 상주 카드들 */}
+              {group.items.map((item) => {
+                const realIndex = item.originalIndex;
+                const isFirst = realIndex === 0;
+                const hasAccount = !!(item.mourner.bank && item.mourner.accountNumber);
+                const isAccountOpen = expandedAccounts.has(realIndex);
+                const isDragOver = dragOverIndex === realIndex;
 
-              {/* 카드 본체: 가로 레이아웃 */}
-              <div className={styles.mnCardRow}>
-                {/* 드래그 핸들 / 리오더 버튼 */}
-                {reorderMode && (
-                  <div className={styles.mnDragHandle}>
-                    <button
-                      type="button"
-                      className={styles.mnReorderArrow}
-                      onClick={() => handleMoveUp(realIndex)}
-                      disabled={realIndex === 0}
-                    >
-                      <IconChevronUp size={14} />
-                    </button>
-                    <div
-                      className={styles.mnGripArea}
-                      onPointerDown={(e) => handlePointerDown(e, realIndex)}
-                      style={{ touchAction: 'none' }}
-                    >
-                      <IconGripVertical size={16} />
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.mnReorderArrow}
-                      onClick={() => handleMoveDown(realIndex)}
-                      disabled={realIndex === mourners.length - 1}
-                    >
-                      <IconChevronDown size={14} />
-                    </button>
-                  </div>
-                )}
+                return (
+                  <div
+                    key={realIndex}
+                    ref={(el) => {
+                      if (el) cardRefs.current.set(realIndex, el);
+                    }}
+                    className={`${styles.mnCard} ${isDragOver ? styles.mnCardDragOver : ''} ${
+                      dragIndex === realIndex ? styles.mnCardDragging : ''
+                    }`}
+                    onPointerMove={dragIndex !== null ? handlePointerMove : undefined}
+                    onPointerUp={dragIndex !== null ? handlePointerUp : undefined}
+                  >
+                    {/* 대표상주 뱃지 */}
+                    {isFirst && (
+                      <span className={styles.mnPrimaryBadge}>대표상주</span>
+                    )}
 
-                {/* 입력 필드들 */}
-                <div className={styles.mnFieldsRow}>
-                  {/* 관계 select */}
-                  <div className={styles.mnFieldRelation}>
-                    <select
-                      className={styles.mnSelectCompact}
-                      value={mourner.relationship}
-                      onChange={(e) => handleFieldChange(realIndex, 'relationship', e.target.value)}
-                    >
-                      <option value="">관계</option>
-                      {relationshipOptions.map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </div>
+                    {/* 카드 본체: 가로 레이아웃 */}
+                    <div className={styles.mnCardRow}>
+                      {/* 드래그 핸들 / 리오더 버튼 */}
+                      <div className={styles.mnDragHandle}>
+                        <button
+                          type="button"
+                          className={styles.mnReorderArrow}
+                          onClick={() => handleMoveUp(realIndex)}
+                          disabled={realIndex === 0}
+                        >
+                          <IconChevronUp size={14} />
+                        </button>
+                        <div
+                          className={styles.mnGripArea}
+                          onPointerDown={(e) => handlePointerDown(e, realIndex)}
+                          style={{ touchAction: 'none' }}
+                        >
+                          <IconGripVertical size={16} />
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.mnReorderArrow}
+                          onClick={() => handleMoveDown(realIndex)}
+                          disabled={realIndex === mourners.length - 1}
+                        >
+                          <IconChevronDown size={14} />
+                        </button>
+                      </div>
 
-                  {/* 성함 */}
-                  <div className={styles.mnFieldName}>
-                    <input
-                      type="text"
-                      className={styles.mnInputCompact}
-                      placeholder="성함"
-                      value={mourner.name}
-                      onChange={(e) => handleFieldChange(realIndex, 'name', e.target.value)}
-                    />
-                  </div>
+                      {/* 입력 필드들 */}
+                      <div className={styles.mnFieldsRow}>
+                        {/* 관계 select */}
+                        <div className={styles.mnFieldRelation}>
+                          <select
+                            className={styles.mnSelectCompact}
+                            value={item.mourner.relationship}
+                            onChange={(e) => handleFieldChange(realIndex, 'relationship', e.target.value)}
+                          >
+                            <option value="">관계</option>
+                            {relationshipOptions.map((r) => (
+                              <option key={r} value={r}>{r}</option>
+                            ))}
+                          </select>
+                        </div>
 
-                  {/* 연락처 */}
-                  <div className={styles.mnFieldContact}>
-                    <input
-                      type="tel"
-                      className={styles.mnInputCompact}
-                      placeholder="연락처"
-                      value={mourner.contact}
-                      onChange={(e) => handleFieldChange(realIndex, 'contact', e.target.value)}
-                    />
-                  </div>
-                </div>
+                        {/* 성함 */}
+                        <div className={styles.mnFieldName}>
+                          <input
+                            type="text"
+                            className={styles.mnInputCompact}
+                            placeholder="성함"
+                            value={item.mourner.name}
+                            onChange={(e) => handleFieldChange(realIndex, 'name', e.target.value)}
+                          />
+                        </div>
 
-                {/* 삭제 버튼 */}
-                <button
-                  type="button"
-                  className={`${styles.mnDeleteBtn} ${isFirst ? styles.mnDeleteBtnDisabled : ''}`}
-                  onClick={() => handleDelete(realIndex)}
-                  disabled={isFirst}
-                >
-                  삭제
-                </button>
-              </div>
+                        {/* 연락처 */}
+                        <div className={styles.mnFieldContact}>
+                          <input
+                            type="tel"
+                            className={styles.mnInputCompact}
+                            placeholder="연락처"
+                            value={item.mourner.contact}
+                            onChange={(e) => handleFieldChange(realIndex, 'contact', e.target.value)}
+                          />
+                        </div>
+                      </div>
 
-              {/* ===== 계좌 아코디언 ===== */}
-              <div className={styles.mnAccountSection}>
-                <button
-                  type="button"
-                  className={styles.mnAccountToggle}
-                  onClick={() => toggleAccount(realIndex)}
-                >
-                  <span className={styles.mnAccountToggleLeft}>
-                    <span className={styles.mnAccountChevron}>
-                      {isAccountOpen ? '△' : '▽'}
-                    </span>
-                    {hasAccount
-                      ? `${mourner.bank} ${mourner.accountNumber}`
-                      : '등록된 계좌가 없습니다'
-                    }
-                  </span>
-                  {!hasAccount && (
-                    <span
-                      className={styles.mnAccountRegText}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setAccountModalIndex(realIndex);
-                      }}
-                    >
-                      등록
-                    </span>
-                  )}
-                </button>
-
-                {isAccountOpen && hasAccount && (
-                  <div className={styles.mnAccountDetail}>
-                    <div className={styles.mnAccountInfo}>
-                      <span>{mourner.bank}</span>
-                      <span>{mourner.accountHolder}</span>
-                      <span>{mourner.accountNumber}</span>
-                    </div>
-                    <div className={styles.mnAccountActions}>
+                      {/* 삭제 버튼 */}
                       <button
                         type="button"
-                        className={styles.mnAccountActionBtn}
-                        onClick={() => setAccountModalIndex(realIndex)}
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.mnAccountActionBtn}
-                        onClick={() => handleAccountDelete(realIndex)}
+                        className={`${styles.mnDeleteBtn} ${isFirst ? styles.mnDeleteBtnDisabled : ''}`}
+                        onClick={() => handleDelete(realIndex)}
+                        disabled={isFirst}
                       >
                         삭제
                       </button>
                     </div>
+
+                    {/* ===== 계좌 아코디언 ===== */}
+                    <div className={styles.mnAccountSection}>
+                      <button
+                        type="button"
+                        className={styles.mnAccountToggle}
+                        onClick={() => toggleAccount(realIndex)}
+                      >
+                        <span className={styles.mnAccountToggleLeft}>
+                          <span className={styles.mnAccountChevron}>
+                            {isAccountOpen ? '△' : '▽'}
+                          </span>
+                          {hasAccount
+                            ? `${item.mourner.bank} ${item.mourner.accountNumber}`
+                            : '등록된 계좌가 없습니다'
+                          }
+                        </span>
+                        {!hasAccount && (
+                          <span
+                            className={styles.mnAccountRegText}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAccountModalIndex(realIndex);
+                            }}
+                          >
+                            등록
+                          </span>
+                        )}
+                      </button>
+
+                      {isAccountOpen && hasAccount && (
+                        <div className={styles.mnAccountDetail}>
+                          <div className={styles.mnAccountInfo}>
+                            <span>{item.mourner.bank}</span>
+                            <span>{item.mourner.accountHolder}</span>
+                            <span>{item.mourner.accountNumber}</span>
+                          </div>
+                          <div className={styles.mnAccountActions}>
+                            <button
+                              type="button"
+                              className={styles.mnAccountActionBtn}
+                              onClick={() => setAccountModalIndex(realIndex)}
+                            >
+                              수정
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.mnAccountActionBtn}
+                              onClick={() => handleAccountDelete(realIndex)}
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+                );
+              })}
+
+              {/* ===== 인원 추가 버튼 (각 관계 그룹 하단) ===== */}
+              <button
+                type="button"
+                className={styles.mnAddPersonBtn}
+                onClick={() => handleAddPerson(group.relation)}
+              >
+                ➕ 인원 추가
+              </button>
             </div>
           );
         })}
       </div>
 
-      {/* ===== 하단 버튼 ===== */}
-      <div className={styles.mnBottomBtns}>
-        <button
-          type="button"
-          className={styles.mnAddPersonBtn}
-          onClick={handleAddPerson}
-        >
-          <IconPlus size={16} />
-          인원 추가
-        </button>
-        <button
-          type="button"
-          className={styles.mnAddRelationBtn}
-          onClick={() => setShowRelationModal(true)}
-        >
-          <IconPlus size={16} />
-          관계 추가
-        </button>
-      </div>
+      {/* ===== 관계 추가 버튼 (전체 리스트 맨 아래) ===== */}
+      <button
+        type="button"
+        className={styles.mnAddRelationBtn}
+        onClick={handleAddRelation}
+      >
+        ➕ 관계 추가
+      </button>
 
-      {/* ===== 관계 추가 모달 ===== */}
-      <RelationModal
-        open={showRelationModal}
-        onClose={() => setShowRelationModal(false)}
-        onSelect={handleAddRelation}
-        existingRelations={existingRelations}
+      {/* ===== 관계순서 변경 바텀시트 ===== */}
+      <ReorderBottomSheet
+        open={showReorderSheet}
+        onClose={() => setShowReorderSheet(false)}
+        relationOrder={relationOrder.filter((r) => r !== '')}
+        onConfirm={handleReorderConfirm}
       />
 
       {/* ===== 계좌 등록 모달 ===== */}
@@ -658,6 +814,9 @@ export default function MournerSection({ mourners, onMournersChange }: Props) {
             : undefined
         }
       />
+
+      {/* ===== 토스트 ===== */}
+      <Toast message={toastMsg} visible={toastVisible} />
     </section>
   );
 }
