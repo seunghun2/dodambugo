@@ -1,0 +1,176 @@
+.titleArea {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* 필터 검색바 */
+.filterBar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+.selectInput {
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background-color: #ffffff;
+    color: #0f172a;
+    min-width: 160px;
+    appearance: auto;
+}
+
+.selectInput:focus {
+    border-color: #d4a84b;
+}
+
+/* 테이블 카드 */
+.tableCard {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f8fafc;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 18px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* 뱃지 스타일 */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badgePending {
+    background-color: #fffbeb;
+    color: #b45309;
+}
+
+.badgeApproved {
+    background-color: #f0fdf4;
+    color: #16a34a;
+}
+
+.badgeRejected {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+/* 액션 버튼 그룹 */
+.btnGroup {
+    display: flex;
+    gap: 6px;
+}
+
+.actionBtn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.approveBtn {
+    background-color: #d4a84b;
+    color: #ffffff;
+}
+
+.approveBtn:hover {
+    background-color: #c5973b;
+}
+
+.rejectBtn {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+.rejectBtn:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.emptyState {
+    padding: 48px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.excelBtn {
+    padding: 10px 16px;
+    background-color: #2e7238;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-left: 12px;
+}
+
+.excelBtn:hover {
+    background-color: #23582b;
+}
+

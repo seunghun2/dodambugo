@@ -1,0 +1,118 @@
+.container {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+.sidebarSpacing {
+    padding-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.mainContent {
+    flex: 1;
+    padding: 40px;
+    background-color: #f8fafc;
+}
+
+.loginOverlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f1f5f9;
+    padding: 20px;
+}
+
+.loginCard {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+.loginTitle {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #1e293b;
+    letter-spacing: -0.5px;
+}
+
+.loginSubtitle {
+    font-size: 14px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.inputLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.loginInput {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    color: #0f172a;
+}
+
+.loginInput:focus {
+    border-color: #d4a84b;
+}
+
+.errorMsg {
+    color: #ef4444;
+    font-size: 13px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 14px;
+    background-color: #d4a84b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.submitBtn:hover {
+    background-color: #c5973b;
+}
+
+@media (max-width: 768px) {
+    .sidebarSpacing {
+        padding-left: 0;
+        padding-bottom: 60px; /* 모바일 하단 내비 높이 */
+    }
+    
+    .mainContent {
+        padding: 20px;
+    }
+}

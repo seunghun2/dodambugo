@@ -1,0 +1,363 @@
+.container {
+    padding: 0;
+}
+
+.titleArea {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.totalCount {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.btnRefresh, .btnExcel, .btnCreate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnRefresh {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.btnRefresh:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.btnExcel {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.btnExcel:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.btnCreate {
+    background-color: #1e293b;
+    border: none;
+    color: #ffffff;
+}
+
+.btnCreate:hover {
+    background-color: #0f172a;
+}
+
+.contentArea {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* 테이블 카드 */
+.tableCard {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    min-width: 0;
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f8fafc;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 18px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.table tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.table tr.selectedRow td {
+    background-color: #fefcf6;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* 공지 고정 뱃지 */
+.fixedBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.dateCell {
+    color: #64748b;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* 우측 Panel/Drawer 카드 */
+.panelCard {
+    width: 380px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    position: sticky;
+    top: 24px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.panelTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.btnClose {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.btnClose:hover {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.panelContent {
+    padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* 폼 스타일 */
+.formGroup {
+    margin-bottom: 16px;
+}
+
+.label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.input, .textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.input:focus, .textarea:focus {
+    border-color: #d4a84b;
+}
+
+.textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+/* 체크박스 그룹 */
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkboxLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 버튼 그룹 */
+.btnGroup {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+}
+
+.btnSubmit {
+    flex: 1;
+    padding: 10px 16px;
+    background-color: #d4a84b;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: center;
+}
+
+.btnSubmit:hover {
+    background-color: #c5973b;
+}
+
+.btnDelete {
+    padding: 10px 16px;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnDelete:hover {
+    background-color: #fecaca;
+}
+
+.btnCancel {
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnCancel:hover {
+    background-color: #f1f5f9;
+}
+
+.emptyPanelState {
+    padding: 60px 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1024px) {
+    .contentArea {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .panelCard {
+        width: 100%;
+        position: static;
+    }
+}

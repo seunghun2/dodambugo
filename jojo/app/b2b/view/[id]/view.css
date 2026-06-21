@@ -2470,18 +2470,22 @@ button.memorial-cta-item {
 
 /* B2B 제휴 브랜드 최상단 로고 탑 바 */
 .b2b-top-header-bar {
+    position: sticky;
+    top: 0;
     width: 100%;
-    height: 56px;
+    height: 70px;
     background: #FFFFFF;
-    border-bottom: 1px solid #F2F4F6;
+    border-bottom: 1px solid #EAEAEA;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 16px;
+    padding: 0 20px;
+    z-index: 1000; /* 스크롤이나 다른 레이어에 가려지지 않도록 최상위 z-index 지정 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* 탑메뉴처럼 살짝 뜨는 섀도우 효과 */
 }
 
 .b2b-top-header-logo {
-    height: 36px;
+    height: 68px; /* 탑 바 하단 구분선이 로고 이미지 배경에 덮여 사라지지 않도록 68px로 조절 */
     width: auto;
     object-fit: contain;
 }

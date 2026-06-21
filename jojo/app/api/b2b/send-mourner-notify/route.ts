@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
             // 상주 인덱스 기반(없으면 이름 폴백) 맞춤 부고장 링크
             const mParamValue = m.originalIndex !== undefined ? m.originalIndex : encodeURIComponent(m.name);
-            const customUrl = `${origin || 'http://localhost:3000'}/view/${bugo_number}?m=${mParamValue}`;
+            const customUrl = `${origin || 'http://localhost:3000'}/b2b/view/${bugo_number}?m=${mParamValue}`;
 
             if (type === 'sms') {
                 const text = `[부고 안내]

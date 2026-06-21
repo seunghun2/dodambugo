@@ -630,7 +630,11 @@ ${url}
                 {/* B2B 제휴 브랜드 최상단 로고 탑 바 */}
                 {bugo.partner_logo_url && bugo.partner_logo_url !== 'mute' && (
                     <div className="b2b-top-header-bar">
-                        <img src={bugo.partner_logo_url} alt="제휴 브랜드 로고" className="b2b-top-header-logo" />
+                        {mounted ? (
+                            <img src={bugo.partner_logo_url} alt="제휴 브랜드 로고" className="b2b-top-header-logo" />
+                        ) : (
+                            <div className="b2b-top-header-logo-placeholder" style={{ height: '68px', width: '200px' }} />
+                        )}
                     </div>
                 )}
 
@@ -814,6 +818,15 @@ ${url}
                             </div>
                         </>
                     )}
+                    {bugo.encoffin_date && (
+                        <>
+                            <div className="funeral-info-divider"></div>
+                            <div className="funeral-info-row">
+                                <span className="funeral-info-label">입관</span>
+                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
+                            </div>
+                        </>
+                    )}
                     {bugo.death_date && (
                         <>
                             <div className="funeral-info-divider"></div>
@@ -865,15 +878,13 @@ ${url}
                             </div>
                         </>
                     )}
-                    {bugo.message && (
-                        <>
-                            <div className="funeral-info-divider"></div>
-                            <div className="funeral-info-row">
-                                <span className="funeral-info-label">안내사항</span>
-                                <span className="funeral-info-value">{bugo.message}</span>
-                            </div>
-                        </>
-                    )}
+                    <div className="funeral-info-divider"></div>
+                    <div className="funeral-info-row">
+                        <span className="funeral-info-label">안내사항</span>
+                        <span className="funeral-info-value">
+                            {bugo.message && bugo.message.trim() ? bugo.message : "뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다."}
+                        </span>
+                    </div>
                 </div>
             </section>
 

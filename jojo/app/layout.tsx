@@ -15,6 +15,7 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 import MicrosoftClarity from '@/components/MicrosoftClarity';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Script from 'next/script';
 
 export const metadata = {
   title: '마음부고 - 무료 모바일 부고장 만들기 | 3분 완성, 카카오톡 공유',
@@ -78,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" {...mantineHtmlProps}>
+    <html lang="ko" {...mantineHtmlProps} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="format-detection" content="telephone=no, address=no, email=no" />
@@ -107,9 +108,16 @@ export default function RootLayout({
           rel="stylesheet"
         />
         {/* 카카오 SDK */}
-        <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" crossOrigin="anonymous" async />
+        <Script 
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" 
+          integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" 
+          crossOrigin="anonymous" 
+          strategy="afterInteractive"
+        />
         {/* Material Symbols 폰트 로딩 감지 */}
-        <script
+        <Script
+          id="material-symbols-font-loader"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

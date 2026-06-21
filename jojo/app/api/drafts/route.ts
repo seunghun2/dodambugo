@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { draftId, formData, templateId, ipAddress } = body;
+        const { draftId, formData, templateId, ipAddress, b2bUserId } = body;
 
         // 새 ID 생성 또는 기존 ID 사용
         const id = draftId || crypto.randomUUID();
@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
             applicant_name: formData.applicant_name || null,
             applicant_phone: formData.applicant_phone || null,
             ip_address: ipAddress || null,
+            b2b_user_id: b2bUserId || null,
             updated_at: new Date().toISOString(),
         };
 

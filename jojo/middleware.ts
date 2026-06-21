@@ -192,14 +192,31 @@ function notifySlack(ip: string, reason: string) {
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // 개발 환경(NODE_ENV === 'development')에서는 모든 IP 차단 및 감지 로직을 스킵
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.next();
+  }
+
   // 클라이언트 IP 가져오기
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
     || '';
 
-  // 관리자는 모든 차단/감지 스킵 (하드코딩 IP + 어드민 로그인 쿠키)
+  // 사설 IP 대역 (10.x.x.x, 172.16.x.x~172.31.x.x, 192.168.x.x) 체크
+  const isPrivateIp = (ipAddress: string) => {
+    if (!ipAddress) return false;
+    if (ipAddress === '127.0.0.1' || ipAddress === '::1') return true;
+    const parts = ipAddress.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(isNaN)) return false;
+    if (parts[0] === 10) return true;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    return false;
+  };
+
+  // 관리자 및 사설 IP는 모든 차단/감지 스킵 (하드코딩 IP + 어드민 로그인 쿠키 + 사설 IP)
   const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
-  if (ADMIN_IPS.includes(ip) || isAdminCookie) {
+  if (ADMIN_IPS.includes(ip) || isAdminCookie || isPrivateIp(ip)) {
     return NextResponse.next();
   }
 

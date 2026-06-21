@@ -6,6 +6,47 @@ import { BottomTabBar } from '@/components/b2b/BottomTabBar';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import styles from './settings.module.css';
 
+const BANKS = [
+    { code: '004', name: '국민은행', prefix: ['9'], fmt: [6, 2, 6] },
+    { code: '088', name: '신한은행', prefix: ['110', '140'], fmt: [3, 3, 6] },
+    { code: '020', name: '우리은행', prefix: ['1002', '1005'], fmt: [4, 3, 6] },
+    { code: '081', name: '하나은행', prefix: ['910'], fmt: [3, 6, 5] },
+    { code: '011', name: 'NH농협은행', prefix: ['351', '302'], fmt: [3, 4, 4, 2] },
+    { code: '003', name: 'IBK기업은행', prefix: ['01', '02'], fmt: [3, 6, 2, 3] },
+    { code: '023', name: 'SC제일은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '027', name: '씨티은행', prefix: [], fmt: [3, 6, 3] },
+    { code: '039', name: '경남은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '034', name: '광주은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '031', name: '대구은행', prefix: [], fmt: [3, 2, 6, 1] },
+    { code: '032', name: '부산은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '037', name: '전북은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '035', name: '제주은행', prefix: [], fmt: [2, 2, 6] },
+    { code: '090', name: '카카오뱅크', prefix: ['3333'], fmt: [4, 2, 7] },
+    { code: '092', name: '토스뱅크', prefix: ['1000'], fmt: [4, 4, 4] },
+    { code: '089', name: '케이뱅크', prefix: ['100'], fmt: [3, 3, 6] },
+];
+
+function formatAccountNo(raw: string, bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank || !raw) return raw;
+    const digits = raw.replace(/[^0-9]/g, '');
+    const parts: string[] = [];
+    let idx = 0;
+    for (const len of bank.fmt) {
+        if (idx >= digits.length) break;
+        parts.push(digits.slice(idx, idx + len));
+        idx += len;
+    }
+    if (idx < digits.length) parts.push(digits.slice(idx));
+    return parts.join('-');
+}
+
+function getPlaceholder(bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank) return '계좌번호 입력';
+    return bank.fmt.map((n) => '0'.repeat(n)).join('-');
+}
+
 interface User {
     id: string;
     phone: string;
@@ -29,16 +70,51 @@ export default function SettingsPage() {
     // FAQ 다중 오픈 상태
     const [openFaqIndexes, setOpenFaqIndexes] = useState<number[]>([]);
 
+    // 공지사항 데이터 및 다중 오픈 상태
+    const [notices, setNotices] = useState<any[]>([]);
+    const [noticesLoading, setNoticesLoading] = useState(false);
+    const [openNoticeIds, setOpenNoticeIds] = useState<string[]>([]);
+
+    const fetchNotices = useCallback(async () => {
+        setNoticesLoading(true);
+        try {
+            const res = await fetch('/api/b2b/notices');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.notices) {
+                    setNotices(data.notices);
+                }
+            }
+        } catch (err) {
+            console.error('공지사항 로드 오류:', err);
+        } finally {
+            setNoticesLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (view === 'notice') {
+            fetchNotices();
+        }
+    }, [view, fetchNotices]);
+
     // 모달 활성화 상태
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showAccountModal, setShowAccountModal] = useState(false);
     const [showReferralModal, setShowReferralModal] = useState(false);
-    const [showNameCardModal, setShowNameCardModal] = useState(false);
+
+    // 비밀번호 변경 모달 상태
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     // 계좌 변경 폼 입력값
     const [bankName, setBankName] = useState('');
     const [accountNo, setAccountNo] = useState('');
     const [accountHolder, setAccountHolder] = useState('');
+    const [accountVerified, setAccountVerified] = useState(false);
+    const [accountVerifyLoading, setAccountVerifyLoading] = useState(false);
 
     // 토글 스위치 상태값들 (설정 & 알림 용)
     const [isBalanceVisible, setIsBalanceVisible] = useState(true);
@@ -99,6 +175,7 @@ export default function SettingsPage() {
                 setBankName(data.user.bank_name || '');
                 setAccountNo(data.user.account_no || '');
                 setAccountHolder(data.user.account_holder || data.user.owner_name || '');
+                setAccountVerified(!!data.user.bank_name && !!data.user.account_no);
                 
                 // 로컬 스토리지 데이터 최신화
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
@@ -135,14 +212,83 @@ export default function SettingsPage() {
         router.push('/b2b/login');
     };
 
-    const handleUpdateAccount = async () => {
-        if (!bankName || !accountNo) {
-            alert('은행명과 계좌번호를 모두 입력해 주세요.');
+    const handleUpdatePassword = async () => {
+        if (!newPassword || !newPasswordConfirm) {
+            setPasswordError('비밀번호를 입력해주세요.');
             return;
         }
 
-        const token = getToken();
+        if (newPassword !== newPasswordConfirm) {
+            setPasswordError('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+            return;
+        }
+
+        if (!user || !user.phone) {
+            setPasswordError('사용자 휴대폰 정보가 없습니다.');
+            return;
+        }
+
+        setPasswordError('');
         try {
+            const res = await fetch('/api/b2b/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: user.phone,
+                    newPassword: newPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert('비밀번호가 성공적으로 변경되었습니다.');
+                setShowPasswordModal(false);
+                setNewPassword('');
+                setNewPasswordConfirm('');
+            } else {
+                setPasswordError(data.error || '비밀번호 변경에 실패했습니다.');
+            }
+        } catch {
+            setPasswordError('비밀번호 변경 과정에 서버 오류가 발생했습니다.');
+        }
+    };
+
+    const verifyAndSaveAccount = async () => {
+        if (!bankName || !accountNo || !accountHolder) {
+            alert('은행, 계좌번호, 예금주를 모두 입력해 주세요.');
+            return;
+        }
+        setAccountVerifyLoading(true);
+
+        try {
+            const bank = BANKS.find((b) => b.name === bankName);
+            if (!bank) {
+                alert('올바른 은행을 선택해 주세요.');
+                return;
+            }
+            // 1. 계좌 실명 확인
+            const verifyRes = await fetch('/api/verify-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bankCd: bank.code,
+                    accountNo: accountNo.replace(/[^0-9]/g, ''),
+                    holderName: accountHolder,
+                }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (!verifyData.success) {
+                alert(verifyData.message || '계좌 실명 확인에 실패했습니다. 정보를 다시 확인해 주세요.');
+                return;
+            }
+
+            // 2. 인증 성공 시 즉시 DB 업데이트
+            const token = getToken();
             const res = await fetch('/api/b2b/me', {
                 method: 'PATCH',
                 headers: {
@@ -157,7 +303,7 @@ export default function SettingsPage() {
             });
 
             if (res.ok) {
-                alert('정산 계좌 정보가 변경되었습니다.');
+                alert('정산 계좌 정보가 안전하게 변경되었습니다.');
                 setShowAccountModal(false);
                 fetchUser();
             } else {
@@ -165,6 +311,8 @@ export default function SettingsPage() {
             }
         } catch {
             alert('오류가 발생했습니다. 다시 시도해 주세요.');
+        } finally {
+            setAccountVerifyLoading(false);
         }
     };
 
@@ -258,7 +406,13 @@ export default function SettingsPage() {
                             {user.bank_name ? `${user.bank_name} ${maskAccountNo(user.account_no)}` : '등록된 계좌 없음'}
                         </span>
                     </div>
-                    <button className={styles.changeBtn} onClick={() => setShowAccountModal(true)}>
+                    <button className={styles.changeBtn} onClick={() => {
+                        setBankName(user.bank_name || '');
+                        setAccountNo(user.account_no || '');
+                        setAccountHolder(user.account_holder || user.owner_name || '');
+                        setAccountVerified(!!user.bank_name && !!user.account_no);
+                        setShowAccountModal(true);
+                    }}>
                         {user.bank_name ? '변경하기' : '등록하기'}
                     </button>
                 </div>
@@ -326,12 +480,6 @@ export default function SettingsPage() {
                                 <B2BIcon name="chevron-right" size={18} />
                             </span>
                         </div>
-                        <div className={styles.listItem} onClick={() => setShowNameCardModal(true)}>
-                            <span className={styles.listLabel}>네임카드</span>
-                            <span className={styles.listArrow}>
-                                <B2BIcon name="chevron-right" size={18} />
-                            </span>
-                        </div>
                         <div className={styles.listItem} onClick={() => setView('settings_main')}>
                             <span className={styles.listLabel}>설정</span>
                             <span className={styles.listArrow}>
@@ -371,8 +519,8 @@ export default function SettingsPage() {
 
                 {/* 정산 계좌 변경 모달 */}
                 {showAccountModal && (
-                    <div className={styles.modalOverlay} onClick={() => setShowAccountModal(false)}>
-                        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                    <div className={styles.bottomSheetOverlay} onClick={() => setShowAccountModal(false)}>
+                        <div className={styles.bottomSheetContent} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
                                 <h3 className={styles.modalTitle}>정산 계좌 정보 설정</h3>
                                 <button className={styles.closeBtn} onClick={() => setShowAccountModal(false)}>×</button>
@@ -380,23 +528,35 @@ export default function SettingsPage() {
                             <div className={styles.modalBody}>
                                 <div className={styles.inputGroup}>
                                     <div className={styles.inputField}>
-                                        <span className={styles.inputLabel}>은행명</span>
-                                        <input 
-                                            type="text" 
-                                            className={styles.textInput} 
-                                            placeholder="은행명 입력 (예: 국민은행)" 
+                                        <span className={styles.inputLabel}>은행</span>
+                                        <select
+                                            className={styles.textInput}
                                             value={bankName}
-                                            onChange={(e) => setBankName(e.target.value)}
-                                        />
+                                            onChange={(e) => {
+                                                setBankName(e.target.value);
+                                                setAccountVerified(false);
+                                            }}
+                                            style={{ backgroundColor: '#fff', appearance: 'auto' }}
+                                        >
+                                            <option value="">은행을 선택해 주세요</option>
+                                            {BANKS.map((b) => (
+                                                <option key={b.code} value={b.name}>
+                                                    {b.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className={styles.inputField}>
                                         <span className={styles.inputLabel}>계좌번호</span>
                                         <input 
                                             type="text" 
                                             className={styles.textInput} 
-                                            placeholder="계좌번호 입력 (-없이)" 
-                                            value={accountNo}
-                                            onChange={(e) => setAccountNo(e.target.value.replace(/[^0-9]/g, ''))}
+                                            placeholder={bankName ? getPlaceholder(bankName) : '계좌번호 입력'} 
+                                            value={bankName ? formatAccountNo(accountNo, bankName) : accountNo}
+                                            onChange={(e) => {
+                                                setAccountNo(e.target.value.replace(/[^0-9]/g, ''));
+                                                setAccountVerified(false);
+                                            }}
                                         />
                                     </div>
                                     <div className={styles.inputField}>
@@ -406,11 +566,19 @@ export default function SettingsPage() {
                                             className={styles.textInput} 
                                             placeholder="예금주 성명" 
                                             value={accountHolder}
-                                            onChange={(e) => setAccountHolder(e.target.value)}
+                                            onChange={(e) => {
+                                                setAccountHolder(e.target.value);
+                                                setAccountVerified(false);
+                                            }}
                                         />
                                     </div>
-                                    <button className={styles.confirmBtn} onClick={handleUpdateAccount}>
-                                        저장하기
+
+                                    <button
+                                        className={styles.confirmBtn}
+                                        onClick={verifyAndSaveAccount}
+                                        disabled={accountVerifyLoading || !bankName || !accountNo || !accountHolder}
+                                    >
+                                        {accountVerifyLoading ? '실명 확인 중...' : '실명 확인 후 저장하기'}
                                     </button>
                                 </div>
                             </div>
@@ -486,37 +654,64 @@ export default function SettingsPage() {
                     </div>
                 )}
 
-                {/* 네임카드(명함) 모달 */}
-                {showNameCardModal && (
-                    <div className={styles.modalOverlay} onClick={() => setShowNameCardModal(false)}>
-                        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                {/* 비밀번호 변경 모달 */}
+                {showPasswordModal && (
+                    <div className={styles.bottomSheetOverlay} onClick={() => setShowPasswordModal(false)}>
+                        <div className={styles.bottomSheetContent} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
-                                <h3 className={styles.modalTitle}>모바일 지도사 네임카드</h3>
-                                <button className={styles.closeBtn} onClick={() => setShowNameCardModal(false)}>×</button>
+                                <h3 className={styles.modalTitle}>비밀번호 변경</h3>
+                                <button className={styles.closeBtn} onClick={() => setShowPasswordModal(false)}>×</button>
                             </div>
                             <div className={styles.modalBody}>
-                                <div className={styles.nameCard}>
-                                    <div className={styles.cardTop}>
-                                        <span className={styles.cardBrand}>BUGO ON PARTNER</span>
-                                        <span className={styles.cardTitleBadge}>장례지도사</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>새 비밀번호</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="8자 이상의 새 비밀번호"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
                                     </div>
-                                    <h4 className={styles.cardOwner}>{user.owner_name}</h4>
-                                    <p className={styles.cardCompany}>{user.company_name}</p>
-                                    
-                                    <div className={styles.cardDetails}>
-                                        <div className={styles.cardRow}>
-                                            <span className={styles.cardLabel}>연락처</span>
-                                            <span>{formatPhone(user.phone)}</span>
-                                        </div>
-                                        <div className={styles.cardRow}>
-                                            <span className={styles.cardLabel}>추천 코드</span>
-                                            <span style={{ fontWeight: 'bold' }}>{user.my_referral_code}</span>
-                                        </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>비밀번호 확인</label>
+                                        <input
+                                            type="password"
+                                            value={newPasswordConfirm}
+                                            onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                                            placeholder="비밀번호 재입력"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
                                     </div>
+                                    {passwordError && (
+                                        <p style={{ color: '#E74C3C', fontSize: '12px', margin: 0 }}>
+                                            {passwordError}
+                                        </p>
+                                    )}
                                 </div>
-
-                                <button className={styles.confirmBtn} onClick={shareCode}>
-                                    명함 공유하기 (SMS)
+                                <button 
+                                    className={styles.confirmBtn} 
+                                    style={{ backgroundColor: '#2E7238', color: '#ffffff' }}
+                                    onClick={handleUpdatePassword}
+                                >
+                                    변경하기
                                 </button>
                             </div>
                         </div>
@@ -1053,13 +1248,6 @@ export default function SettingsPage() {
                         </div>
                     </div>
                     <div className={styles.detailRow}>
-                        <span className={styles.detailLabel}>직책</span>
-                        <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>팀장</span>
-                            <span className={styles.detailBadge}>관리자</span>
-                        </div>
-                    </div>
-                    <div className={styles.detailRow}>
                         <span className={styles.detailLabel}>소속</span>
                         <div className={styles.detailValueRow}>
                             <span className={styles.detailValueText}>{user.company_name}</span>
@@ -1069,44 +1257,13 @@ export default function SettingsPage() {
                         </div>
                     </div>
                     <div className={styles.detailRow}>
-                        <span className={styles.detailLabel}>보안 비밀번호</span>
-                        <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>••••</span>
-                            <button className={styles.detailActionBtn} onClick={() => alert('보안 간편 비밀번호 변경 기능이 준비되었습니다.')}>
-                                변경하기
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className={styles.infoGroupTitle} style={{ marginTop: '20px' }}>연락처</div>
-                    <div className={styles.detailRow}>
-                        <span className={styles.detailLabel}>휴대폰</span>
-                        <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>{formatPhone(user.phone)}</span>
-                        </div>
-                    </div>
-
-                    <div className={styles.infoGroupTitle} style={{ marginTop: '20px' }}>PC 계정정보</div>
-                    <div className={styles.detailRow}>
-                        <span className={styles.detailLabel}>아이디</span>
-                        <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>wsh991</span>
-                        </div>
-                    </div>
-                    <div className={styles.detailRow}>
                         <span className={styles.detailLabel}>비밀번호</span>
                         <div className={styles.detailValueRow}>
                             <span className={styles.detailValueText}>••••</span>
-                            <button className={styles.detailActionBtn} onClick={() => alert('PC 계정 비밀번호 변경 기능이 준비되었습니다.')}>
+                            <button className={styles.detailActionBtn} onClick={() => { setPasswordError(''); setShowPasswordModal(true); }}>
                                 변경하기
                             </button>
                         </div>
-                    </div>
-
-                    {/* 네임카드 바로가기 리스트 메뉴 */}
-                    <div className={styles.nameCardMenuRow} onClick={() => setShowNameCardModal(true)}>
-                        <span className={styles.nameCardMenuLabel}>네임카드</span>
-                        <B2BIcon name="chevron-right" size={20} color="#adb5bd" />
                     </div>
                 </div>
 
@@ -1303,6 +1460,14 @@ export default function SettingsPage() {
     // 10. 공지사항 뷰 ('notice')
     // ==========================================
     if (view === 'notice') {
+        const toggleNotice = (id: string) => {
+            setOpenNoticeIds(prev =>
+                prev.includes(id)
+                    ? prev.filter(item => item !== id)
+                    : [...prev, id]
+            );
+        };
+
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
@@ -1310,30 +1475,60 @@ export default function SettingsPage() {
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>공지사항</span>
-                    <button className={styles.menuBtn} onClick={() => alert('메뉴 기능이 준비 중입니다.')}>
-                        <B2BIcon name="menu" size={24} />
-                    </button>
+                    <div className={styles.headerRightPlaceholder} />
                 </header>
 
                 <div className={styles.noticeList}>
-                    {noticeData.map((item) => (
-                        <div
-                            key={item.id}
-                            className={styles.noticeItem}
-                            onClick={() => alert('공지사항 상세 내용이 곧 준비됩니다.')}
-                        >
-                            <div className={styles.noticeMain}>
-                                <div className={styles.titleRow}>
-                                    {item.isFixed && <span className={styles.noticeBadge}>공지</span>}
-                                    <span className={styles.noticeTitle}>{item.title}</span>
-                                </div>
-                                <span className={styles.noticeDate}>{item.date}</span>
-                            </div>
-                            <span className={styles.arrowIcon}>
-                                <B2BIcon name="chevron-right" size={20} />
-                            </span>
+                    {noticesLoading ? (
+                        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                            로딩 중...
                         </div>
-                    ))}
+                    ) : notices.length === 0 ? (
+                        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                            등록된 공지사항이 없습니다.
+                        </div>
+                    ) : (
+                        notices.map((item) => {
+                            const isOpen = openNoticeIds.includes(item.id);
+                            const noticeDate = item.created_at
+                                ? new Date(item.created_at).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                  }).replace(/\. /g, '-').replace(/\./, '')
+                                : '';
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`${styles.noticeWrapper} ${isOpen ? styles.noticeItemActive : ''}`}
+                                    style={{ borderBottom: '1px solid #f1f3f5' }}
+                                >
+                                    <div
+                                        className={styles.noticeItem}
+                                        onClick={() => toggleNotice(item.id)}
+                                        style={{ borderBottom: 'none' }}
+                                    >
+                                        <div className={styles.noticeMain}>
+                                            <div className={styles.titleRow}>
+                                                {item.is_fixed && <span className={styles.noticeBadge}>공지</span>}
+                                                <span className={styles.noticeTitle}>{item.title}</span>
+                                            </div>
+                                            <span className={styles.noticeDate}>{noticeDate}</span>
+                                        </div>
+                                        <span className={`${styles.arrowIcon} ${isOpen ? styles.arrowIconActive : ''}`}>
+                                            <B2BIcon name="chevron-right" size={20} />
+                                        </span>
+                                    </div>
+                                    <div className={`${styles.noticeContentPanel} ${isOpen ? styles.noticeContentPanelActive : ''}`}>
+                                        <div className={styles.noticeContent}>
+                                            {item.content}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
 
                 <BottomTabBar />

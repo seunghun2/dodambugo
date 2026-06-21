@@ -74,6 +74,11 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 });
     }
 
+    // 계좌 정보 변경 시 신분증 인증 상태 초기화
+    if (updates.bank_name !== undefined || updates.account_no !== undefined) {
+        updates.identity_verified = false;
+    }
+
     updates.updated_at = new Date().toISOString();
 
     const { error } = await supabase

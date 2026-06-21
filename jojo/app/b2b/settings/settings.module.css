@@ -635,6 +635,8 @@ input:checked + .slider:before {
 }
 
 .textInput {
+  width: 100%;
+  box-sizing: border-box;
   height: 44px;
   border: 1px solid #ced4da;
   border-radius: 6px;
@@ -659,6 +661,12 @@ input:checked + .slider:before {
   font-weight: 600;
   cursor: pointer;
   margin-top: 8px;
+}
+
+.confirmBtn:disabled {
+  background-color: #dee2e6;
+  color: #adb5bd;
+  cursor: not-allowed;
 }
 
 /* 추천 회원 목록 */
@@ -1200,4 +1208,68 @@ input:checked + .slider:before {
   align-items: center;
   justify-content: center;
   color: #b0b8c1;
+  transition: transform 0.2s ease;
+}
+
+.arrowIconActive {
+  transform: rotate(90deg);
+  color: #4e5968;
+}
+
+.noticeItemActive {
+  background-color: #f8fafc;
+}
+
+.noticeContentPanel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f8fafc;
+}
+
+.noticeContentPanelActive {
+  max-height: 1000px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.noticeContent {
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #4e5968;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 아래에서 위로 올라오는 바텀 시트 스타일 */
+.bottomSheetOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end; /* 아래에 정렬 */
+  justify-content: center;
+  z-index: 1000;
+}
+
+.bottomSheetContent {
+  width: 100%;
+  max-width: 480px; /* B2B 레이아웃 또는 모바일 가로폭 */
+  background-color: #ffffff;
+  border-radius: 24px 24px 0 0; /* 상단만 라운드 처리 */
+  overflow: hidden;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  padding-bottom: env(safe-area-inset-bottom, 20px); /* 노치 대응 */
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

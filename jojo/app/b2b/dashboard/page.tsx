@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [copied, setCopied] = useState(false);
   const [balanceVisible, setBalanceVisible] = useState(false);
+  const [notices, setNotices] = useState<any[]>([]);
 
   // 데이터 로딩
   const fetchData = useCallback(async () => {
@@ -48,9 +49,25 @@ export default function DashboardPage() {
     }
   }, [router]);
 
+  // 공지사항 로드
+  const fetchNotices = useCallback(async () => {
+    try {
+      const res = await fetch('/api/b2b/notices');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.notices) {
+          setNotices(data.notices.slice(0, 2));
+        }
+      }
+    } catch (err) {
+      console.error('공지사항 로드 실패:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchNotices();
+  }, [fetchData, fetchNotices]);
 
   const copyCode = () => {
     if (user) {
@@ -212,23 +229,40 @@ export default function DashboardPage() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>공지사항</h3>
-          <button className={styles.moreBtn}>
+          <button className={styles.moreBtn} onClick={() => router.push('/b2b/settings?view=notice')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
         </div>
         <div className={styles.noticeCard}>
-          <div className={styles.noticeItem}>
-            <span className={styles.noticeBadge}>공지</span>
-            <span className={styles.noticeText}>답례메시지 자동 발송 시간 변경 안내</span>
-            <span className={styles.noticeDate}>2026-06-15</span>
-          </div>
-          <div className={styles.noticeItem}>
-            <span className={styles.noticeBadge}>공지</span>
-            <span className={styles.noticeText}>화환 판매금액 설정 기능 추가 안내</span>
-            <span className={styles.noticeDate}>2026-05-22</span>
-          </div>
+          {notices.length > 0 ? (
+            notices.map((notice) => {
+              const noticeDate = notice.created_at
+                ? new Date(notice.created_at).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                  }).replace(/\. /g, '-').replace(/\./, '')
+                : '';
+              return (
+                <div 
+                  key={notice.id} 
+                  className={styles.noticeItem}
+                  onClick={() => router.push('/b2b/settings?view=notice')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className={styles.noticeBadge}>공지</span>
+                  <span className={styles.noticeText}>{notice.title}</span>
+                  <span className={styles.noticeDate}>{noticeDate}</span>
+                </div>
+              );
+            })
+          ) : (
+            <div className={styles.noticeItem}>
+              <span className={styles.noticeText}>등록된 공지사항이 없습니다.</span>
+            </div>
+          )}
         </div>
       </section>
 

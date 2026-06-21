@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { unstable_cache } from 'next/cache';
+import { redirect } from 'next/navigation';
 import ViewContent from './ViewContent';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -107,6 +108,11 @@ function BugoSkeleton() {
 async function BugoContentLoader({ id }: { id: string }) {
     // 캐시된 부고 데이터 조회 (60초 캐시)
     const bugoData = await getCachedBugo(id);
+
+    // B2B 부고장인 경우 B2B 전용 뷰 경로로 즉시 리다이렉트
+    if (bugoData && bugoData.b2b_user_id) {
+        redirect(`/b2b/view/${id}`);
+    }
 
     // 부고를 찾을 수 없는 경우
     if (!bugoData) {

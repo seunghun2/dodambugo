@@ -41,7 +41,7 @@ export default function B2BCompletePage() {
   // 현재 브라우저 도메인 주소 추출
   const bugoUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
-    return `${window.location.origin}/view/${params.bugoNumber}`;
+    return `${window.location.origin}/b2b/view/${params.bugoNumber}`;
   }, [params.bugoNumber]);
 
   // DB에서 생성된 부고 데이터 및 상주 목록 조회

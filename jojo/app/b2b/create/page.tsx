@@ -289,7 +289,13 @@ export default function B2BCreatePage() {
 
   // 폼 필드 업데이트
   const handleChange = useCallback((field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const next = { ...prev, [field]: value };
+      if (field === 'funeral_type' && value === '무빈소장례') {
+        next.no_wreath = true;
+      }
+      return next;
+    });
     // 에러 클리어
     setErrors(prev => {
       const next = { ...prev };

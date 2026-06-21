@@ -84,6 +84,9 @@ export async function POST(request: NextRequest) {
                 owner_name: user.owner_name,
                 my_referral_code: user.my_referral_code,
                 balance: deposit?.balance || 0,
+                bank_name: user.bank_name || null,
+                account_no: user.account_no || null,
+                account_holder: user.account_holder || null,
             },
         });
     } catch (error) {
