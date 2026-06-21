@@ -2,24 +2,13 @@
    부고온 B2B 파트너 - 디자인 시스템 공통 스타일
    ============================================= */
 
-/* ===== 기본 타이포그래피 ===== */
 .b2bLayout {
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.02em !important;
   line-height: 1.5 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
 
-.b2bLayout input,
-.b2bLayout select,
-.b2bLayout button {
-  font-family: inherit;
-  letter-spacing: -0.02em;
-}
-
-/* ===== 디자인 토큰 (CSS 변수) ===== */
-:global(:root) {
   /* 간격 */
   --space-xs: 4px;
   --space-sm: 8px;
@@ -63,6 +52,13 @@
   --b2b-primary-hover: #FCC419;
   --b2b-success: #20C997;
   --b2b-error: #FF6B6B;
+}
+
+.b2bLayout input,
+.b2bLayout select,
+.b2bLayout button {
+  font-family: inherit;
+  letter-spacing: -0.02em;
 }
 
 /* ===== 공통 버튼 호버/액티브 효과 ===== */
