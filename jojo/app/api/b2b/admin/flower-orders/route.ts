@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
 
     try {
-        // 1. B2B 파트너와 연계된 완료(completed) 상태인 화환 주문만 inner join 조회
+        // 1. B2B 파트너와 연계된 결제 완료 이상 상태인 화환 주문 inner join 조회
         let query = supabase
             .from('flower_orders')
             .select(`
@@ -32,6 +32,11 @@ export async function GET(request: NextRequest) {
                 recipient_name,
                 funeral_home,
                 room,
+                address,
+                sender_name,
+                sender_phone,
+                ribbon_text1,
+                ribbon_text2,
                 bugo!inner (
                     id,
                     deceased_name,
@@ -39,7 +44,7 @@ export async function GET(request: NextRequest) {
                     b2b_users ( company_name, owner_name )
                 )
             `)
-            .eq('status', 'completed');
+            .neq('status', 'pending');
 
         if (search) {
             query = query.or(`product_name.ilike.%${search}%,recipient_name.ilike.%${search}%,funeral_home.ilike.%${search}%`);
@@ -96,10 +101,16 @@ export async function GET(request: NextRequest) {
                 product_name: o.product_name,
                 price,
                 payment_method: o.payment_method || 'CARD',
+                status: o.status,
                 created_at: o.created_at,
                 recipient_name: o.recipient_name,
                 funeral_home: o.funeral_home,
                 room: o.room,
+                address: o.address || '',
+                sender_name: o.sender_name || '',
+                sender_phone: o.sender_phone || '',
+                ribbon_text1: o.ribbon_text1 || '',
+                ribbon_text2: o.ribbon_text2 || '',
                 deceased_name: bugo?.deceased_name || '알 수 없음',
                 company_name: b2bUser?.company_name || '알 수 없음',
                 owner_name: b2bUser?.owner_name || '알 수 없음',

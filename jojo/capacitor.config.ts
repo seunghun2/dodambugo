@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'kr.co.bugoapp.partner',
-  appName: '마음부고 파트너',
+  appName: '부고온 파트너',
   webDir: 'out',
   server: {
     // 프로덕션: 서버 URL로 로드 (API routes 사용 가능)

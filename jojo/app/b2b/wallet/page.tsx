@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomTabBar } from '@/components/b2b/BottomTabBar';
+import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
 
 interface Transaction {
@@ -32,7 +33,7 @@ export default function WalletPage() {
 
     // 탭 및 필터 상태
     const [activeTab, setActiveTab] = useState<'reward' | 'withdraw'>('reward');
-    const [rewardFilter, setRewardFilter] = useState<'all' | 'wreath' | 'referral'>('all');
+    const [rewardFilter, setRewardFilter] = useState<'all' | 'wreath' | 'referral' | 'condolence'>('all');
     const [withdrawSort, setWithdrawSort] = useState<'recent' | 'old'>('recent');
 
     // 바텀시트 모달 상태
@@ -143,6 +144,8 @@ export default function WalletPage() {
             list = list.filter(tx => tx.type === 'wreath_reward');
         } else if (rewardFilter === 'referral') {
             list = list.filter(tx => tx.type === 'referral_bonus');
+        } else if (rewardFilter === 'condolence') {
+            list = list.filter(tx => tx.type === 'condolence_reward');
         }
         // 항상 최신순
         return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -175,6 +178,7 @@ export default function WalletPage() {
         switch (type) {
             case 'wreath_reward': return '화환 판매 적립';
             case 'referral_bonus': return '추천 수당';
+            case 'condolence_reward': return '조의금 수당';
             default: return '적립 완료';
         }
     };
@@ -277,7 +281,7 @@ export default function WalletPage() {
                         <div className={styles.listArea}>
                             <div className={styles.listFilterRow}>
                                 <button className={styles.filterBtn} onClick={() => setShowRewardFilterModal(true)}>
-                                    {rewardFilter === 'all' ? '전체' : rewardFilter === 'wreath' ? '판매수당' : '추천수당'}
+                                    {rewardFilter === 'all' ? '전체' : rewardFilter === 'wreath' ? '판매수당' : rewardFilter === 'referral' ? '추천수당' : '조의금수당'}
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
@@ -359,96 +363,175 @@ export default function WalletPage() {
             </div>
 
             {/* 출금 신청 바텀시트 모달 */}
-            {showWithdraw && (
-                <div className={styles.bottomSheetOverlay} onClick={() => { setShowWithdraw(false); setError(''); }}>
-                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.bottomSheetHeader}>
-                            <h3 className={styles.bottomSheetTitle}>환급 신청</h3>
-                            <p className={styles.bottomSheetDesc}>등록된 정산 계좌로 입금됩니다.</p>
-                        </div>
-                        <div className={styles.inputArea}>
-                            <input
-                                type="number"
-                                className={styles.amountInput}
-                                placeholder="환급 금액"
-                                value={withdrawAmount}
-                                onChange={(e) => setWithdrawAmount(e.target.value)}
-                            />
-                            <p className={styles.amountHint}>환급 가능: {formatCurrency(balance)}원</p>
-                        </div>
-                        <div className={styles.bottomSheetBtns}>
-                            <button className={styles.sheetCancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>
-                                취소
-                            </button>
-                            <button className={styles.sheetConfirmBtn} onClick={handleWithdraw} disabled={withdrawing}>
-                                {withdrawing ? '처리 중...' : '신청하기'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {showWithdraw && (
+                    <motion.div 
+                        className={styles.bottomSheetOverlay} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => { setShowWithdraw(false); setError(''); }}
+                    >
+                        <motion.div 
+                            className={styles.bottomSheetContainer}
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                            drag="y"
+                            dragConstraints={{ top: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(event, info) => {
+                                if (info.offset.y > 100) {
+                                    setShowWithdraw(false);
+                                    setError('');
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={styles.dragHandle} />
+                            <div className={styles.bottomSheetHeader}>
+                                <h3 className={styles.bottomSheetTitle}>환급 신청</h3>
+                                <p className={styles.bottomSheetDesc}>등록된 정산 계좌로 입금됩니다.</p>
+                            </div>
+                            <div className={styles.inputArea}>
+                                <input
+                                    type="number"
+                                    className={styles.amountInput}
+                                    placeholder="환급 금액"
+                                    value={withdrawAmount}
+                                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                                />
+                                <p className={styles.amountHint}>환급 가능: {formatCurrency(balance)}원</p>
+                            </div>
+                            <div className={styles.bottomSheetBtns}>
+                                <button className={styles.sheetCancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>
+                                    취소
+                                </button>
+                                <button className={styles.sheetConfirmBtn} onClick={handleWithdraw} disabled={withdrawing}>
+                                    {withdrawing ? '처리 중...' : '신청하기'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* 적립내역 필터 바텀시트 */}
-            {showRewardFilterModal && (
-                <div className={styles.bottomSheetOverlay} onClick={() => setShowRewardFilterModal(false)}>
-                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.bottomSheetHeader}>
-                            <h3 className={styles.bottomSheetTitle}>적립 항목 선택</h3>
-                        </div>
-                        <div className={styles.bottomSheetList}>
-                            <button
-                                className={`${styles.bottomSheetItem} ${rewardFilter === 'all' ? styles.activeItem : ''}`}
-                                onClick={() => { setRewardFilter('all'); setShowRewardFilterModal(false); }}
-                            >
-                                전체
+            <AnimatePresence>
+                {showRewardFilterModal && (
+                    <motion.div 
+                        className={styles.bottomSheetOverlay} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowRewardFilterModal(false)}
+                    >
+                        <motion.div 
+                            className={styles.bottomSheetContainer}
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                            drag="y"
+                            dragConstraints={{ top: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(event, info) => {
+                                if (info.offset.y > 100) {
+                                    setShowRewardFilterModal(false);
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={styles.dragHandle} />
+                            <div className={styles.bottomSheetHeader}>
+                                <h3 className={styles.bottomSheetTitle}>적립 항목 선택</h3>
+                            </div>
+                            <div className={styles.bottomSheetList}>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${rewardFilter === 'all' ? styles.activeItem : ''}`}
+                                    onClick={() => { setRewardFilter('all'); setShowRewardFilterModal(false); }}
+                                >
+                                    전체
+                                </button>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${rewardFilter === 'wreath' ? styles.activeItem : ''}`}
+                                    onClick={() => { setRewardFilter('wreath'); setShowRewardFilterModal(false); }}
+                                >
+                                    판매수당
+                                </button>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${rewardFilter === 'referral' ? styles.activeItem : ''}`}
+                                    onClick={() => { setRewardFilter('referral'); setShowRewardFilterModal(false); }}
+                                >
+                                    추천수당
+                                </button>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${rewardFilter === 'condolence' ? styles.activeItem : ''}`}
+                                    onClick={() => { setRewardFilter('condolence'); setShowRewardFilterModal(false); }}
+                                >
+                                    조의금수당
+                                </button>
+                            </div>
+                            <button className={styles.bottomSheetCancel} onClick={() => setShowRewardFilterModal(false)}>
+                                취소
                             </button>
-                            <button
-                                className={`${styles.bottomSheetItem} ${rewardFilter === 'wreath' ? styles.activeItem : ''}`}
-                                onClick={() => { setRewardFilter('wreath'); setShowRewardFilterModal(false); }}
-                            >
-                                판매수당
-                            </button>
-                            <button
-                                className={`${styles.bottomSheetItem} ${rewardFilter === 'referral' ? styles.activeItem : ''}`}
-                                onClick={() => { setRewardFilter('referral'); setShowRewardFilterModal(false); }}
-                            >
-                                추천수당
-                            </button>
-                        </div>
-                        <button className={styles.bottomSheetCancel} onClick={() => setShowRewardFilterModal(false)}>
-                            취소
-                        </button>
-                    </div>
-                </div>
-            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* 환급내역 정렬 바텀시트 */}
-            {showWithdrawSortModal && (
-                <div className={styles.bottomSheetOverlay} onClick={() => setShowWithdrawSortModal(false)}>
-                    <div className={styles.bottomSheetContainer} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.bottomSheetHeader}>
-                            <h3 className={styles.bottomSheetTitle}>정렬 기준 선택</h3>
-                        </div>
-                        <div className={styles.bottomSheetList}>
-                            <button
-                                className={`${styles.bottomSheetItem} ${withdrawSort === 'recent' ? styles.activeItem : ''}`}
-                                onClick={() => { setWithdrawSort('recent'); setShowWithdrawSortModal(false); }}
-                            >
-                                최신순
+            <AnimatePresence>
+                {showWithdrawSortModal && (
+                    <motion.div 
+                        className={styles.bottomSheetOverlay} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowWithdrawSortModal(false)}
+                    >
+                        <motion.div 
+                            className={styles.bottomSheetContainer}
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                            drag="y"
+                            dragConstraints={{ top: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(event, info) => {
+                                if (info.offset.y > 100) {
+                                    setShowWithdrawSortModal(false);
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={styles.dragHandle} />
+                            <div className={styles.bottomSheetHeader}>
+                                <h3 className={styles.bottomSheetTitle}>정렬 기준 선택</h3>
+                            </div>
+                            <div className={styles.bottomSheetList}>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${withdrawSort === 'recent' ? styles.activeItem : ''}`}
+                                    onClick={() => { setWithdrawSort('recent'); setShowWithdrawSortModal(false); }}
+                                >
+                                    최신순
+                                </button>
+                                <button
+                                    className={`${styles.bottomSheetItem} ${withdrawSort === 'old' ? styles.activeItem : ''}`}
+                                    onClick={() => { setWithdrawSort('old'); setShowWithdrawSortModal(false); }}
+                                >
+                                    과거순
+                                </button>
+                            </div>
+                            <button className={styles.bottomSheetCancel} onClick={() => setShowWithdrawSortModal(false)}>
+                                취소
                             </button>
-                            <button
-                                className={`${styles.bottomSheetItem} ${withdrawSort === 'old' ? styles.activeItem : ''}`}
-                                onClick={() => { setWithdrawSort('old'); setShowWithdrawSortModal(false); }}
-                            >
-                                과거순
-                            </button>
-                        </div>
-                        <button className={styles.bottomSheetCancel} onClick={() => setShowWithdrawSortModal(false)}>
-                            취소
-                        </button>
-                    </div>
-                </div>
-            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <BottomTabBar />
         </div>

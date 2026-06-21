@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendLMS } from '@/lib/solapi';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,6 +95,29 @@ export async function PATCH(request: NextRequest) {
         if (error) throw error;
 
         console.log(`✅ B2B 파트너 상태 업데이트: ID=${partnerId}, Status=${status}`);
+
+        // 가입 승인인 경우 LMS 문자 알림 발송
+        if (status === 'approved') {
+            try {
+                const partnerPhone = data.phone.replace(/-/g, '');
+                const msg = `[부고온] 파트너 가입 승인 완료 안내
+
+안녕하세요, ${data.company_name} ${data.owner_name} 파트너님.
+부고온 파트너 가입 승인이 완료되었습니다.
+
+이제 파트너 앱에 로그인하여 모바일 부고장 개설 및 수당 적립 혜택을 이용하실 수 있습니다.
+
+■ 파트너 로그인: https://bugoon.co.kr/b2b/login
+■ 추천 코드: ${data.my_referral_code}
+
+이용해주셔서 감사합니다.`;
+                
+                await sendLMS(partnerPhone, '[부고온] 파트너 승인 완료', msg);
+                console.log(`📱 [B2B] 파트너 승인 안내 문자 발송 완료: ${partnerPhone}`);
+            } catch (smsErr) {
+                console.error('❌ [B2B] 파트너 승인 안내 문자 발송 오류:', smsErr);
+            }
+        }
 
         return NextResponse.json({ success: true, partner: data });
     } catch (error: any) {

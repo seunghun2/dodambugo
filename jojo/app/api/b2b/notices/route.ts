@@ -40,6 +40,10 @@ export async function GET(request: NextRequest) {
             success: true,
             notices: data,
             totalCount: count || 0
+        }, {
+            headers: {
+                'Cache-Control': 'public, max-age=60, stale-while-revalidate=30'
+            }
         });
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });

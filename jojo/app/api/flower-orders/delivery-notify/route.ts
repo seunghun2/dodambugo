@@ -91,6 +91,47 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '알림톡 발송 실패: ' + (result.errorMessage || result.errorCode) }, { status: 500 });
         }
 
+        // 📱 [B2B] 파트너에게 화환 배송 완료 안내 문자 발송
+        if (type === 'delivered' && order.bugo_id) {
+            try {
+                const { data: bugoData } = await supabase
+                    .from('bugo')
+                    .select('b2b_user_id')
+                    .eq('id', order.bugo_id)
+                    .single();
+
+                if (bugoData?.b2b_user_id) {
+                    const { data: partnerUser } = await supabase
+                        .from('b2b_users')
+                        .select('phone, company_name, owner_name')
+                        .eq('id', bugoData.b2b_user_id)
+                        .single();
+
+                    if (partnerUser?.phone) {
+                        const partnerPhone = partnerUser.phone.replace(/-/g, '');
+                        const { sendLMS } = await import('@/lib/solapi');
+
+                        const partnerMsg = `[부고온] 파트너 화환 배송 완료 안내
+
+안녕하세요, ${partnerUser.company_name} ${partnerUser.owner_name} 파트너님.
+개설하신 부고에서 주문된 화환의 배송이 완료되었습니다.
+
+■ 고인명: 故 ${deceasedName || ''}
+■ 상품명: ${order.product_name || ''}
+■ 주문자: ${order.sender_name || ''}
+■ 배송처: ${order.funeral_home || ''} ${order.room || ''}
+
+부고온 파트너 서비스를 이용해 주셔서 감사합니다.`;
+
+                        await sendLMS(partnerPhone, '[부고온] 화환 배송 완료', partnerMsg);
+                        console.log(`📱 [B2B] 파트너 화환 배송 완료 문자 발송 완료: ${partnerPhone}`);
+                    }
+                }
+            } catch (partnerErr) {
+                console.error('❌ [B2B] 파트너 화환 배송 완료 알림 발송 실패:', partnerErr);
+            }
+        }
+
         // 상태 업데이트
         const newStatus = type === 'delivering' ? 'delivering' : 'delivered';
         await supabase
