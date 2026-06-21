@@ -87,7 +87,11 @@ export default function DashboardPage() {
           title: '부고온 파트너 추천',
           text: text,
         });
-      } catch (err) {
+      } catch (err: any) {
+        // 사용자가 단순히 공유창을 닫은 경우(AbortError)는 에러 처리 및 SMS 이동을 하지 않고 조용히 리턴합니다.
+        if (err?.name === 'AbortError') {
+          return;
+        }
         console.error('공유 실패:', err);
         window.location.href = `sms:?body=${encodeURIComponent(text)}`;
       }
