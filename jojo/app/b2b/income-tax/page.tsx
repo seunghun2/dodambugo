@@ -21,7 +21,7 @@ export default function IncomeTaxPage() {
             <main className="legal-content">
                 <section className="terms-section">
                     <p className="privacy-intro" style={{ fontWeight: '500', color: 'var(--gray-900)' }}>
-                        마음부고 B2B 파트너(이하 "파트너") 정산금 지급 시 발생하는 사업소득 원천징수 신고를 위해, 세법에 따른 동의 사항을 다음과 같이 안내해 드립니다.
+                        부고온 B2B 파트너(이하 "파트너") 정산금 지급 시 발생하는 사업소득 원천징수 신고를 위해, 세법에 따른 동의 사항을 다음과 같이 안내해 드립니다.
                     </p>
                 </section>
 
@@ -87,7 +87,7 @@ export default function IncomeTaxPage() {
 
                 <section className="terms-section" style={{ marginTop: '30px', padding: '16px', background: 'var(--gray-50)', borderRadius: '8px', border: '1px solid var(--gray-200)' }}>
                     <p style={{ margin: 0, textAlign: 'center', fontWeight: '600', color: 'var(--gray-900)' }}>
-                        본인은 마음부고의 소득세 원천징수 및 관련 개인정보·고유식별정보의 수집, 이용, 제3자 제공 사항을 충분히 이해하였으며, 이에 동의합니다.
+                        본인은 부고온의 소득세 원천징수 및 관련 개인정보·고유식별정보의 수집, 이용, 제3자 제공 사항을 충분히 이해하였으며, 이에 동의합니다.
                     </p>
                 </section>
             </main>
