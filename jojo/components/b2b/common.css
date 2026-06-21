@@ -50,6 +50,10 @@
 }
 
 /* ===== 기본 타이포그래피 ===== */
+body {
+  background-color: var(--b2b-bg, #F8F9FB);
+}
+
 .b2bLayout {
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.02em !important;
