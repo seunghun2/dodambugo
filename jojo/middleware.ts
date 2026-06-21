@@ -157,8 +157,6 @@ function trackBugoView(ip: string, bugoNumber: string) {
   }
 }
 
-
-
 // IP 자동 차단 (DB 저장)
 function autoBlockIP(ip: string, reason: string) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
@@ -191,147 +189,160 @@ function notifySlack(ip: string, reason: string) {
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const host = request.headers.get('host') || '';
+  const hostLower = host.toLowerCase();
 
-  // 개발 환경(NODE_ENV === 'development')에서는 모든 IP 차단 및 감지 로직을 스킵
-  if (process.env.NODE_ENV === 'development') {
-    return NextResponse.next();
+  // B2B 전용 서브도메인 여부 감지 (partner.* 또는 b2b.*) - 대소문자 구분 없이 다양한 환경 지원
+  const isB2BSubdomain =
+    hostLower.startsWith('partner.') ||
+    hostLower.startsWith('b2b.') ||
+    hostLower.startsWith('partner-') ||
+    hostLower.startsWith('b2b-') ||
+    hostLower.includes('.partner.') ||
+    hostLower.includes('.b2b.') ||
+    hostLower.includes('.partner-') ||
+    hostLower.includes('.b2b-');
+
+  // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화)
+  if (!isB2BSubdomain && path.startsWith('/b2b')) {
+    return new NextResponse(null, { status: 404 });
   }
 
-  // 클라이언트 IP 가져오기
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || '';
+  // 개발 환경(NODE_ENV === 'development')이 아닐 때만 보안/차단/로깅 로직 실행
+  if (process.env.NODE_ENV !== 'development') {
+    // 클라이언트 IP 가져오기
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || '';
 
-  // 사설 IP 대역 (10.x.x.x, 172.16.x.x~172.31.x.x, 192.168.x.x) 체크
-  const isPrivateIp = (ipAddress: string) => {
-    if (!ipAddress) return false;
-    if (ipAddress === '127.0.0.1' || ipAddress === '::1') return true;
-    const parts = ipAddress.split('.').map(Number);
-    if (parts.length !== 4 || parts.some(isNaN)) return false;
-    if (parts[0] === 10) return true;
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-    if (parts[0] === 192 && parts[1] === 168) return true;
-    return false;
-  };
+    // 사설 IP 대역 (10.x.x.x, 172.16.x.x~172.31.x.x, 192.168.x.x) 체크
+    const isPrivateIp = (ipAddress: string) => {
+      if (!ipAddress) return false;
+      if (ipAddress === '127.0.0.1' || ipAddress === '::1') return true;
+      const parts = ipAddress.split('.').map(Number);
+      if (parts.length !== 4 || parts.some(isNaN)) return false;
+      if (parts[0] === 10) return true;
+      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+      if (parts[0] === 192 && parts[1] === 168) return true;
+      return false;
+    };
 
-  // 관리자 및 사설 IP는 모든 차단/감지 스킵 (하드코딩 IP + 어드민 로그인 쿠키 + 사설 IP)
-  const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
-  if (ADMIN_IPS.includes(ip) || isAdminCookie || isPrivateIp(ip)) {
-    return NextResponse.next();
-  }
+    // 관리자 및 사설 IP 여부
+    const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
+    const isExcluded = ADMIN_IPS.includes(ip) || isAdminCookie || isPrivateIp(ip);
 
-  // 접속 로그 기록 (논블로킹, 어드민 제외 후)
-  logAccess(
-    ip,
-    path,
-    request.headers.get('user-agent') || '',
-    request.headers.get('referer') || ''
-  );
+    if (!isExcluded) {
+      // 접속 로그 기록 (논블로킹)
+      logAccess(
+        ip,
+        path,
+        request.headers.get('user-agent') || '',
+        request.headers.get('referer') || ''
+      );
 
-  // 🇨🇳 중국 IP 차단 (Vercel geo 감지 + IP 대역 fallback)
-  const country = (request as any).geo?.country || request.headers.get('x-vercel-ip-country') || '';
-  if (country === 'CN') {
-    return new NextResponse(infiniteLoadingHtml, {
-      status: 200,
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
-  }
+      // 🇨🇳 중국 IP 차단 (Vercel geo 감지 + IP 대역 fallback)
+      const country = (request as any).geo?.country || request.headers.get('x-vercel-ip-country') || '';
+      if (country === 'CN') {
+        return new NextResponse(infiniteLoadingHtml, {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        });
+      }
 
-  // 봇/크롤러 User-Agent 감지
-  const ua = request.headers.get('user-agent') || '';
+      // 봇/크롤러 User-Agent 감지
+      const ua = request.headers.get('user-agent') || '';
+      const friendlyBots = /vercel|googlebot|bingbot|yandex|naverbot|daumoa|kakaotalk/i;
 
-  // Vercel + 검색엔진 봇은 화이트리스트 (감지/차단 스킵)
-  const friendlyBots = /vercel|googlebot|bingbot|yandex|naverbot|daumoa|kakaotalk/i;
-  if (friendlyBots.test(ua)) {
-    return NextResponse.next();
-  }
+      if (!friendlyBots.test(ua)) {
+        // 악성 봇/크롤러 감지 → 자동 차단
+        const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium/i;
+        if (botPatterns.test(ua)) {
+          autoBlockIP(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
+          notifySlack(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
+          if (!cachedBlockedIPs.includes(ip)) {
+            cachedBlockedIPs.push(ip);
+          }
+        }
 
-  // 악성 봇/크롤러 감지 → 자동 차단 (모든 페이지)
-  const botPatterns = /python|scrapy|curl\/|wget|httpclient|java\/|libwww|mechanize|phantom|selenium/i;
-  if (botPatterns.test(ua)) {
-    autoBlockIP(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
-    notifySlack(ip, `[자동] 봇/크롤러 감지 (UA: ${ua.substring(0, 80)})`);
-    if (!cachedBlockedIPs.includes(ip)) {
-      cachedBlockedIPs.push(ip);
+        // 부고 열람 감지 (/view/숫자 패턴만)
+        const bugoMatch = path.match(/^\/view\/(\d+)$/);
+        if (bugoMatch) {
+          trackBugoView(ip, bugoMatch[1]);
+        }
+
+        // 총 방문 횟수 감지
+        if (!/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(path) && !path.startsWith('/view') && !path.startsWith('/create') && !path.startsWith('/guide') && !path.startsWith('/admin')) {
+          const count = (visitCounter.get(ip) || 0) + 1;
+          visitCounter.set(ip, count);
+          if (count >= VISIT_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+            const reason = `[자동] 과다 방문 (${count}회/24시간)`;
+            autoBlockIP(ip, reason);
+            notifySlack(ip, reason);
+            cachedBlockedIPs.push(ip);
+            visitCounter.delete(ip);
+          }
+        }
+
+        // 의심 페이지 과다 열람 감지
+        if (SUSPICIOUS_PAGES.includes(path)) {
+          const count = (policyCounter.get(ip) || 0) + 1;
+          policyCounter.set(ip, count);
+          if (count >= SUSPICIOUS_PAGE_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
+            const reason = `[자동] 의심 페이지 과다 열람 (${count}회)`;
+            autoBlockIP(ip, reason);
+            notifySlack(ip, reason);
+            cachedBlockedIPs.push(ip);
+            policyCounter.delete(ip);
+          }
+        }
+      }
+
+      // 부고 생성 완료 → 자동 차단 해제 (실제 고객이므로)
+      if (path.startsWith('/create/complete')) {
+        if (cachedBlockedIPs.includes(ip)) {
+          cachedBlockedIPs = cachedBlockedIPs.filter(blocked => blocked !== ip);
+        }
+        if (SUPABASE_URL && SUPABASE_KEY) {
+          fetch(`${SUPABASE_URL}/rest/v1/blocked_ips?ip_address=eq.${ip}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_active: false, reason: '[자동 해제] 부고 생성 완료 - 실제 고객' }),
+          }).catch(() => { });
+        }
+        visitCounter.delete(ip);
+        viewTracker.delete(ip);
+      }
+
+      // 차단 IP 체크
+      const blockedIPs = await getBlockedIPs();
+      if (blockedIPs.includes(ip)) {
+        return new NextResponse(infiniteLoadingHtml, {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        });
+      }
     }
   }
 
-  // 부고 열람 감지 (/view/숫자 패턴만)
-  const bugoMatch = path.match(/^\/view\/(\d+)$/);
-  if (bugoMatch) {
-    trackBugoView(ip, bugoMatch[1]);
-  }
+  // B2B subdomain rewrite logic
+  if (isB2BSubdomain) {
+    // static assets, _next 내부 파일, api 경로는 rewrite 대상에서 제외
+    const isStaticOrApi =
+      path.startsWith('/_next') ||
+      path.startsWith('/_vercel') ||
+      path.startsWith('/api') ||
+      path.startsWith('/favicon.ico') ||
+      /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map)$/.test(path);
 
-
-
-  // 총 방문 횟수 감지 (같은 페이지 반복 방문 포함, /view·/create·/guide·/admin 제외 - 고객/관리자 정상 이용)
-  if (!/\.(css|js|json|ico|png|jpg|svg|webp)$/.test(path) && !path.startsWith('/view') && !path.startsWith('/create') && !path.startsWith('/guide') && !path.startsWith('/admin')) {
-    const count = (visitCounter.get(ip) || 0) + 1;
-    visitCounter.set(ip, count);
-    if (count >= VISIT_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
-      const reason = `[자동] 과다 방문 (${count}회/24시간)`;
-      autoBlockIP(ip, reason);
-      notifySlack(ip, reason);
-      cachedBlockedIPs.push(ip);
-      visitCounter.delete(ip);
+    if (!isStaticOrApi && !path.startsWith('/b2b')) {
+      // B2B 서브도메인인데 /b2b로 시작하지 않는 경우, 서버 내부적으로 /b2b를 붙여서 rewrite 처리
+      const rewriteUrl = new URL(`/b2b${path}`, request.url);
+      return NextResponse.rewrite(rewriteUrl);
     }
-  }
-
-  // 의심 페이지 과다 열람 감지 (약관/개인정보/연락처)
-  if (SUSPICIOUS_PAGES.includes(path)) {
-    const count = (policyCounter.get(ip) || 0) + 1;
-    policyCounter.set(ip, count);
-    if (count >= SUSPICIOUS_PAGE_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
-      const reason = `[자동] 의심 페이지 과다 열람 (${count}회)`;
-      autoBlockIP(ip, reason);
-      notifySlack(ip, reason);
-      cachedBlockedIPs.push(ip);
-      policyCounter.delete(ip);
-    }
-  }
-
-  // 검색 페이지 과다 방문 감지 — 비활성화 (실제 고객도 차단됨)
-  // if (path === '/search') {
-  //   const count = (searchCounter.get(ip) || 0) + 1;
-  //   searchCounter.set(ip, count);
-  //   if (count >= SEARCH_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
-  //     const reason = `[자동] 검색 페이지 과다 방문 (${count}회)`;
-  //     autoBlockIP(ip, reason);
-  //     notifySlack(ip, reason);
-  //     cachedBlockedIPs.push(ip);
-  //     searchCounter.delete(ip);
-  //   }
-  // }
-
-  // 부고 생성 완료 → 자동 차단 해제 (실제 고객이므로)
-  if (path.startsWith('/create/complete')) {
-    if (cachedBlockedIPs.includes(ip)) {
-      cachedBlockedIPs = cachedBlockedIPs.filter(blocked => blocked !== ip);
-    }
-    // DB에서도 해제
-    if (SUPABASE_URL && SUPABASE_KEY) {
-      fetch(`${SUPABASE_URL}/rest/v1/blocked_ips?ip_address=eq.${ip}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_active: false, reason: '[자동 해제] 부고 생성 완료 - 실제 고객' }),
-      }).catch(() => { });
-    }
-    visitCounter.delete(ip);
-    viewTracker.delete(ip);
-  }
-
-  // 차단 IP 체크
-  const blockedIPs = await getBlockedIPs();
-
-  if (blockedIPs.includes(ip)) {
-    return new NextResponse(infiniteLoadingHtml, {
-      status: 200,
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    });
   }
 
   return NextResponse.next();
@@ -343,4 +354,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
-

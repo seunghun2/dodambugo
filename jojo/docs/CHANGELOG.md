@@ -2,6 +2,25 @@
 
 ## 2026-06-21
 
+### B2B 신분증 OCR 자동 검증 및 지연 자동 송금 시스템 구축
+- **신분증 OCR 자동 검증 시뮬레이션 API 구축**:
+  - [verify/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/verify/route.ts)에서 사용자가 업로드한 신분증 이미지 OCR 파싱 결과를 처리합니다.
+  - 가입한 이름과 신분증 파싱 결과 이름이 일치하면 `verification_status`를 `'verified'`로 업데이트하고, 보류된 출금 요청이 있을 경우 1시간 뒤 자동 실행되도록 `auto_approve_at` 시간을 설정합니다.
+  - 이름이 불일치하면 상태를 `'failed'`로 설정하고, 관리자에게 즉각 Slack 경보를 발송하여 수동 확인 및 재승인이 가능하도록 처리합니다.
+- **지연 자동 송금 Cron 배치 API 구축**:
+  - [auto-approve-withdrawals/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/cron/auto-approve-withdrawals/route.ts)에서 `auto_approve_at <= now()` 조건에 해당하는 출금 요청을 자동으로 조회합니다.
+  - Innopay 송금대행 Proxy API(`http://49.50.139.204/proxy/transfer`)를 호출하여 실시간 송금을 요청합니다.
+  - 송금이 완료되면 Supabase RPC `approve_withdrawal_request`를 실행하여 정산 잔액 차감 및 최종 승인 처리를 하고, 관리자 Slack으로 성공 메시지를 전송합니다.
+  - 은행 점검 시간이나 계좌 번호 오류 등의 이유로 송금이 거절되면 `auto_approve_at`을 `null`로 초기화하여 무한 재시도 루프를 방지하고, 관리자가 재확인할 수 있도록 Slack 경보를 보냅니다.
+
+### B2B 가상계좌 입금 Callback 정산 수당 자동 적립 연동
+- **Innopay Callback 가상계좌(vbank) 연동**:
+  - [webhook/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/payment/innopay/webhook/route.ts)에서 가상계좌 입금이 완료되는 순간, B2B 파트너에게 약정된 화환 수당(10,000원)과 추천인(Recommender) 보너스(2,000원)를 즉시 자동 적립하고 입출금 내역에 트랜잭션을 기록하는 로직을 이식하였습니다.
+
+### B2B 페이지 전체 브랜딩 텍스트 전수 치환 ("마음부고" -> "부고온")
+- **B2B 전용 페이지 텍스트 치환**:
+  - `income-tax`, `privacy`, `signup`, `terms`, `wallet/verify` 및 조문객용 B2B 뷰 페이지([ViewContent.tsx](file:///Users/el/Desktop/dodam/jojo/app/b2b/view/[id]/ViewContent.tsx) 하단 푸터 영역)에 잔존하던 모든 "마음부고" 브랜드명을 B2B 전용 명칭인 "부고온"으로 전수 치환하여 브랜딩 정체성을 통일하였습니다.
+
 ### B2B 부고장 제작 로고 선택 UI 및 특정 로고 개선 (피드백 반영 완료)
 - **상조사 로고 32종 및 더좋은라이프 로고 가공 방식 변경 (흰색 배경화)**:
   - 투명 PNG 앤티앨리어싱 훼손에 따른 로고 깨짐 문제를 방지하기 위해 로고 이미지를 **순수 흰색 배경** 캔버스 `(200x100)` 기반으로 일괄 재생성했습니다.
