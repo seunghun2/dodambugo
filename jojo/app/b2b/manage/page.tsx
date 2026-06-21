@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { BottomTabBar } from '@/components/b2b/BottomTabBar';
 import styles from './manage.module.css';
 
 interface User {
@@ -591,6 +592,7 @@ export default function B2BManagePage() {
           </div>
         </div>
       )}
+      <BottomTabBar />
     </div>
   );
 }
