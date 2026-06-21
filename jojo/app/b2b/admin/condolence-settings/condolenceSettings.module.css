@@ -1,0 +1,426 @@
+.container {
+    padding: 0;
+}
+
+.titleArea {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btnRefresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnRefresh:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* Card layout */
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* Beautiful dark/navy-tinted status card */
+.statusCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: #f8fafc;
+}
+
+.statusLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.statusIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #334155;
+    color: #d4a84b;
+}
+
+.statusIconActive {
+    background-color: #d4a84b;
+    color: #1e293b;
+}
+
+.statusTitle {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+
+.statusDesc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0 0 4px 0;
+}
+
+.statusUpdated {
+    font-size: 11px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Deposit Balance Card: Premium Navy-to-Dark gradient with Gold accents */
+.depositCard {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+    color: #f8fafc;
+    margin-bottom: 24px;
+}
+
+.depositHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.depositTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.depositRefreshBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    transition: color 0.2s ease;
+}
+
+.depositRefreshBtn:hover {
+    color: #d4a84b;
+}
+
+.depositAmount {
+    font-size: 28px;
+    font-weight: 700;
+    color: #d4a84b;
+    margin-bottom: 8px;
+}
+
+.depositDetail {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Settings and Options Cards */
+.cardTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cardDesc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+}
+
+/* Amount lists */
+.amountList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.amountItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.amountItemInactive {
+    opacity: 0.6;
+    background-color: #f1f5f9;
+}
+
+.amountInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.amountLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 100px;
+}
+
+.amountValue {
+    font-size: 14px;
+    color: #475569;
+}
+
+/* Custom Toggles/Switches */
+.toggle {
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    border: none;
+    background-color: #cbd5e1;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toggleActive {
+    background-color: #d4a84b;
+}
+
+.toggleKnob {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggleActive .toggleKnob {
+    transform: translateX(22px);
+}
+
+/* Toggle Small */
+.toggleSm {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    border: none;
+    background-color: #cbd5e1;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toggleSmActive {
+    background-color: #d4a84b;
+}
+
+.toggleKnobSm {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.toggleSmActive .toggleKnobSm {
+    transform: translateX(18px);
+}
+
+/* Form inputs & grid */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+    overflow: hidden;
+}
+
+.inputWrapper:focus-within {
+    border-color: #d4a84b;
+}
+
+.input {
+    flex: 1;
+    border: none;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    color: #0f172a;
+    background-color: transparent;
+}
+
+.inputSuffix {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #64748b;
+    background-color: #f8fafc;
+    border-left: 1px solid #e2e8f0;
+}
+
+.formHelp {
+    font-size: 11px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.formActions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.saveBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: #d4a84b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+    background-color: #c5973b;
+}
+
+.saveBtn:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* Spinner and general styles */
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Alert / Toast messages */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.alertError {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.alertSuccess {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.loadingSpinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    color: #94a3b8;
+    font-size: 14px;
+}

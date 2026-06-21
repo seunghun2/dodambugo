@@ -15,7 +15,9 @@ import {
     IconQuestionMark,
     IconClipboardList,
     IconBan,
-    IconCash
+    IconCash,
+    IconPackage,
+    IconAdjustments
 } from '@tabler/icons-react';
 import styles from './B2BAdminSidebar.module.css';
 
@@ -51,6 +53,16 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             href: '/b2b/admin/flower-orders',
             label: 'B2B 화환 주문',
             icon: <IconFlower stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/products',
+            label: '상품 등록',
+            icon: <IconPackage stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/condolence-settings',
+            label: '조의금 설정',
+            icon: <IconAdjustments stroke={1.5} size={22} />
         },
         {
             href: '/b2b/admin/burial-reviews',
