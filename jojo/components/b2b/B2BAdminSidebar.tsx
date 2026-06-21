@@ -111,7 +111,7 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             
             <nav className={styles.menuList}>
                 {menuItems.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = pathname === item.href || (item.href !== '/b2b/admin' && pathname.startsWith(item.href + '/'));
                     return (
                         <Link 
                             key={item.href} 

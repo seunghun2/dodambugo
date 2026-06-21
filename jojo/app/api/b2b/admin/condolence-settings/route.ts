@@ -62,8 +62,8 @@ export async function PATCH(request: NextRequest) {
 
             const { error: updateError } = await supabase
                 .from('condolence_amounts')
-                .update({ is_active })
-                .eq('id', id);
+                .update({ is_active: Boolean(is_active) })
+                .eq('id', Number(id));
 
             if (updateError) throw updateError;
 
@@ -87,11 +87,11 @@ export async function PATCH(request: NextRequest) {
             }
 
             const updateData: any = { updated_at: new Date().toISOString() };
-            if (is_active !== undefined) updateData.is_active = is_active;
-            if (fee_rate !== undefined) updateData.fee_rate = fee_rate;
-            if (daily_limit !== undefined) updateData.daily_limit = daily_limit;
-            if (min_amount !== undefined) updateData.min_amount = min_amount;
-            if (max_amount !== undefined) updateData.max_amount = max_amount;
+            if (is_active !== undefined) updateData.is_active = Boolean(is_active);
+            if (fee_rate !== undefined) updateData.fee_rate = Number(fee_rate);
+            if (daily_limit !== undefined) updateData.daily_limit = Number(daily_limit);
+            if (min_amount !== undefined) updateData.min_amount = Number(min_amount);
+            if (max_amount !== undefined) updateData.max_amount = Number(max_amount);
 
             const { error: updateError } = await supabase
                 .from('condolence_config')

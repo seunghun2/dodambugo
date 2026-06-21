@@ -72,11 +72,11 @@ export default function CondolenceSettingsPage() {
         try {
             const res = await fetch('/api/condolence/transfer/balance');
             const data = await res.json();
-            if (data.success) {
+            if (data.success && data.data) {
                 setDepositBalance({
-                    remainAmt: Number(data.data.remainAmt).toLocaleString(),
-                    totDptAmt: Number(data.data.totDptAmt).toLocaleString(),
-                    totWdrAmt: Number(data.data.totWdrAmt).toLocaleString(),
+                    remainAmt: Number(data.data.remainAmt || 0).toLocaleString(),
+                    totDptAmt: Number(data.data.totDptAmt || 0).toLocaleString(),
+                    totWdrAmt: Number(data.data.totWdrAmt || 0).toLocaleString(),
                     loading: false,
                 });
             } else {

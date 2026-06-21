@@ -76,18 +76,12 @@ export async function POST(request: NextRequest) {
             .insert({
                 name,
                 price: Number(price),
-                discount_price: discount_price ? Number(discount_price) : null,
+                discount_price: (discount_price !== null && discount_price !== undefined) ? Number(discount_price) : null,
                 category: category || '근조화환',
                 images: images || [],
                 description: description || '',
                 is_active: is_active ?? true,
-                sort_order: sort_order !== undefined ? Number(sort_order) : 0,
-                // 기본값들 채우기
-                include_regions: [],
-                exclude_regions: [],
-                exclude_facilities: [],
-                regional_prices: {},
-                special_surcharges: {}
+                sort_order: sort_order !== undefined ? Number(sort_order) : 0
             })
             .select()
             .single();
@@ -129,11 +123,13 @@ export async function PATCH(request: NextRequest) {
         const updateData: any = {};
         if (name !== undefined) updateData.name = name;
         if (price !== undefined) updateData.price = Number(price);
-        if (discount_price !== undefined) updateData.discount_price = discount_price ? Number(discount_price) : null;
+        if (discount_price !== undefined) {
+            updateData.discount_price = (discount_price !== null && discount_price !== undefined) ? Number(discount_price) : null;
+        }
         if (category !== undefined) updateData.category = category;
         if (images !== undefined) updateData.images = images;
         if (description !== undefined) updateData.description = description;
-        if (is_active !== undefined) updateData.is_active = is_active;
+        if (is_active !== undefined) updateData.is_active = Boolean(is_active);
         if (sort_order !== undefined) updateData.sort_order = Number(sort_order);
         updateData.updated_at = new Date().toISOString();
 

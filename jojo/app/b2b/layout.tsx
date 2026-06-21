@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
+import '@/components/b2b/common.css';
 
 export const metadata = {
   title: '부고온 파트너',

@@ -229,7 +229,7 @@ export default function B2BAdminProductsPage() {
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const fileExt = file.name.split('.').pop();
+                const fileExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() || 'png' : 'png';
                 const fileName = `product_${Date.now()}_${i}.${fileExt}`;
                 const filePath = `products/${fileName}`;
 

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEye, IconEyeOff, IconCheck } from '@tabler/icons-react';
-import commonStyles from '@/components/b2b/common.module.css';
 import styles from './signup.module.css';
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -312,7 +311,7 @@ export default function SignupPage() {
     };
 
     return (
-        <div className={`${commonStyles.b2bLayout} ${styles.container}`}>
+        <div className={`b2bLayout ${styles.container}`}>
             {/* 헤더 */}
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={prevStep}>
