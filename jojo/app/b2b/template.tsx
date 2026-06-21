@@ -16,12 +16,11 @@ export default function B2BTemplate({ children }: { children: React.ReactNode })
   return (
     <motion.div
       key={pathname}
-      initial={{ x: '10%', opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ 
-        type: 'tween', 
-        ease: 'easeOut', 
-        duration: 0.22 
+        ease: 'easeInOut', 
+        duration: 0.15 
       }}
       style={{ 
         width: '100%', 
