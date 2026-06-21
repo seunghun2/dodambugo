@@ -24,8 +24,7 @@ export async function GET(request: NextRequest) {
                 id,
                 order_number,
                 product_name,
-                amt,
-                tax_free_amt,
+                product_price,
                 payment_method,
                 status,
                 created_at,
@@ -89,7 +88,7 @@ export async function GET(request: NextRequest) {
 
         // 4. 최종 결과 가공
         const formattedOrders = ordersData.map(o => {
-            const price = (Number(o.amt) || 0) + (Number(o.tax_free_amt) || 0);
+            const price = Number(o.product_price) || 0;
             const txInfo = txMap[o.id] || { reward: 0, bonus: 0 };
 
             const bugo = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;

@@ -402,6 +402,14 @@ export async function POST(request: NextRequest) {
                                 updated_at: new Date().toISOString(),
                             })
                             .eq('user_id', partnerId);
+                    } else {
+                        await supabase
+                            .from('deposits')
+                            .insert({
+                                user_id: partnerId,
+                                balance: rewardAmount,
+                                updated_at: new Date().toISOString(),
+                            });
                     }
 
                     // 4. 적립 내역 기록
@@ -447,6 +455,14 @@ export async function POST(request: NextRequest) {
                                     updated_at: new Date().toISOString(),
                                 })
                                 .eq('user_id', partnerInfo.recommender_id);
+                        } else {
+                            await supabase
+                                .from('deposits')
+                                .insert({
+                                    user_id: partnerInfo.recommender_id,
+                                    balance: bonusAmount,
+                                    updated_at: new Date().toISOString(),
+                                });
                         }
 
                         // 추천인 내역 기록

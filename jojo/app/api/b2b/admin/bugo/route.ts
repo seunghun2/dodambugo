@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
                 mourner_name,
                 mourners,
                 funeral_home,
-                room,
+                room_number,
                 created_at,
                 b2b_user_id,
                 b2b_users ( company_name, owner_name, phone )
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
                 mourner_name: b.mourner_name,
                 mourners: b.mourners,
                 funeral_home: b.funeral_home,
-                room: b.room,
+                room: b.room_number,
                 created_at: b.created_at,
                 company_name: b2bUser?.company_name || '알 수 없음',
                 owner_name: b2bUser?.owner_name || '알 수 없음',

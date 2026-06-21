@@ -92,6 +92,9 @@ export default function SignupPage() {
     const [timer, setTimer] = useState(0);
     const [showPw, setShowPw] = useState(false);
     const [showPwConfirm, setShowPwConfirm] = useState(false);
+    const [agreeTerms, setAgreeTerms] = useState(false);
+    const [agreePrivacy, setAgreePrivacy] = useState(false);
+    const [showModal, setShowModal] = useState<'terms' | 'privacy' | null>(null);
 
     const [form, setForm] = useState<FormData>({
         phone: '',
@@ -131,6 +134,12 @@ export default function SignupPage() {
     // 비밀번호 유효성
     const pwAllValid = PW_RULES.every((r) => r.test(form.password));
     const pwMatch = form.password === form.passwordConfirm && form.passwordConfirm.length > 0;
+
+    const handleAllAgree = () => {
+        const nextState = !(agreeTerms && agreePrivacy);
+        setAgreeTerms(nextState);
+        setAgreePrivacy(nextState);
+    };
 
     // 계좌번호로 은행 추천
     const suggestedBanks = form.accountNo.length >= 3
@@ -342,8 +351,84 @@ export default function SignupPage() {
                         />
                     </div>
 
+                    {/* 약관 동의 영역 */}
+                    <div className={styles.termsArea}>
+                        {/* 개별 약관 1 */}
+                        <div className={styles.termItem} onClick={() => setAgreeTerms(!agreeTerms)}>
+                            <div className={styles.termLeft}>
+                                <div className={`${styles.checkbox} ${agreeTerms ? styles.checkboxChecked : ''}`}>
+                                    {agreeTerms && (
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <span>
+                                    <span className={styles.termRequired}>[필수]</span> B2B 파트너 이용약관 동의
+                                </span>
+                            </div>
+                            <button 
+                                className={styles.arrowBtn} 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowModal('terms');
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* 개별 약관 2 */}
+                        <div className={styles.termItem} onClick={() => setAgreePrivacy(!agreePrivacy)}>
+                            <div className={styles.termLeft}>
+                                <div className={`${styles.checkbox} ${agreePrivacy ? styles.checkboxChecked : ''}`}>
+                                    {agreePrivacy && (
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <span>
+                                    <span className={styles.termRequired}>[필수]</span> B2B 파트너 개인정보처리방침 동의
+                                </span>
+                            </div>
+                            <button 
+                                className={styles.arrowBtn} 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowModal('privacy');
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* 전체 동의 */}
+                        <div
+                            className={`${styles.allAgreeBox} ${agreeTerms && agreePrivacy ? styles.allAgreeBoxActive : ''}`}
+                            onClick={handleAllAgree}
+                        >
+                            <div className={`${styles.checkbox} ${agreeTerms && agreePrivacy ? styles.checkboxChecked : ''}`}>
+                                {agreeTerms && agreePrivacy && (
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className={styles.allAgreeText}>전체 동의하기</span>
+                        </div>
+                    </div>
+
                     {!codeSent && !form.phoneVerified && (
-                        <button className={styles.subBtn} onClick={sendVerification} disabled={loading || form.phone.replace(/[^0-9]/g, '').length !== 11}>
+                        <button 
+                            className={styles.subBtn} 
+                            onClick={sendVerification} 
+                            disabled={loading || form.phone.replace(/[^0-9]/g, '').length !== 11 || !agreeTerms || !agreePrivacy}
+                        >
                             {loading ? '발송 중...' : '인증번호 받기'}
                         </button>
                     )}
@@ -377,7 +462,7 @@ export default function SignupPage() {
 
                     <div className={styles.btnRow}>
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
-                        <button className={styles.nextBtn} onClick={nextStep} disabled={!form.phoneVerified}>
+                        <button className={styles.nextBtn} onClick={nextStep} disabled={!form.phoneVerified || !agreeTerms || !agreePrivacy}>
                             다음단계
                         </button>
                     </div>
@@ -625,6 +710,55 @@ export default function SignupPage() {
                     <button className={styles.submitBtn} onClick={handleSubmit} disabled={loading}>
                         {loading ? '가입 중...' : '가입하기'}
                     </button>
+                </div>
+            )}
+            {/* 약관 상세 모달 */}
+            {showModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowModal(null)}>
+                    <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h3 className={styles.modalTitle}>
+                                {showModal === 'terms' ? 'B2B 파트너 이용약관' : 'B2B 파트너 개인정보처리방침'}
+                            </h3>
+                            <button className={styles.modalCloseBtn} onClick={() => setShowModal(null)}>×</button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            {showModal === 'terms' ? (
+                                `제 1 조 (목적)
+본 약관은 마음부고(이하 "회사")가 제공하는 B2B 파트너 서비스의 이용과 관련하여 회사와 파트너 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
+
+제 2 조 (정의)
+1. "파트너 서비스"라 함은 파트너가 모바일 부고 플랫폼을 활용하여 부고장을 대행 작성하거나 화환 주문을 유치하고 이에 따른 수당(정산금)을 지급받을 수 있도록 제공하는 서비스를 말합니다.
+2. "파트너"라 함은 본 약관에 동의하고 파트너 가입 신청을 하여 회사의 승인을 받은 자를 말합니다.
+
+제 3 조 (정산 및 수당 지급)
+1. 화환 주문으로 인한 수당은 주문 배송 완료 및 구매 확정 건에 한하여 산정 적립됩니다.
+2. 개인(프리랜서) 파트너의 경우 사업소득세 3.3% 원천징수 세액을 공제한 후 잔액을 지급합니다.
+
+제 4 조 (파트너의 의무)
+1. 가입 신청 시 허위 정보를 등록하거나 타인의 명의를 도용해서는 안 됩니다.
+2. 비정상적인 어뷰징 행위로 정산금을 부정 취득할 경우 즉시 자격이 상실됩니다.
+
+※ 전체 약관 내용은 /b2b/terms 페이지에서 확인하실 수 있습니다.`
+                            ) : (
+                                `1. 수집하는 개인정보 항목:
+- 필수: 휴대폰 번호, 상호명, 대표자명, 비밀번호
+- 선택/정산: 은행명, 계좌번호, 예금주명
+- 원천징수 신고 시: 성명, 주민등록번호, 본인인증 정보
+
+2. 수집 및 이용 목적:
+- 파트너 회원 가입 및 관리
+- 정산금 지급 및 송금 처리
+- 프리랜서 사업소득(3.3%) 원천징수 세무 신고 대행
+
+3. 보유 및 이용 기간:
+- 파트너 서비스 회원 탈퇴 시 즉시 파기
+- 단, 세무 신고 자료는 관련 세법에 의거하여 5년간 보관합니다.
+
+※ 전체 개인정보처리방침 내용은 /b2b/privacy 페이지에서 확인하실 수 있습니다.`
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
