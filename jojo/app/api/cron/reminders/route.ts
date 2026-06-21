@@ -82,17 +82,19 @@ export async function GET(request: NextRequest) {
 
                 const phone = draft.applicant_phone.replace(/-/g, '');
                 try {
-                    const templateId = draft.template_id || 'basic';
-                    const continueUrl = `https://maeumbugo.co.kr/create/${templateId}?draft=${draft.id}`;
+                    const isB2B = !!draft.b2b_user_id;
+                    const brand = isB2B ? '부고온' : '마음부고';
+                    const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
+                    const continueUrl = `https://${domain}/create/${templateId}?draft=${draft.id}`;
 
-                    await sendSMS(phone, `[마음부고] 작성 중인 부고장이 있습니다.
+                    await sendSMS(phone, `[${brand}] 작성 중인 부고장이 있습니다.
 
 故 ${draft.deceased_name || ''} 님의 부고장이 임시저장되어 있습니다.
 
 아래 링크에서 이어서 작성하실 수 있습니다.
 ${continueUrl}
 
-문의: 마음부고`);
+문의: ${brand}`);
                     await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
                     console.log(`✅ 임시저장 리마인더: ${draft.id} → ${phone}`);
                     results.draft.sent++;

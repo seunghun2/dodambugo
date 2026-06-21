@@ -26,8 +26,14 @@ export async function POST(request: NextRequest) {
             expires: Date.now() + 3 * 60 * 1000,
         });
 
+        // B2B 분기 처리 (헤더나 레퍼러 분석)
+        const referer = request.headers.get('referer') || '';
+        const host = request.headers.get('host') || '';
+        const isB2B = host.includes('bugoon') || host.includes('partner') || host.includes('b2b') || referer.includes('/b2b');
+        const brand = isB2B ? '부고온' : '마음부고';
+
         // SMS 발송
-        await sendSMS(cleanPhone, `[마음부고] 인증번호 [${code}]를 입력해주세요.`);
+        await sendSMS(cleanPhone, `[${brand}] 인증번호 [${code}]를 입력해주세요.`);
 
         console.log(`📱 인증번호 발송: ${cleanPhone} → ${code}`);
 
