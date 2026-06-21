@@ -192,16 +192,20 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const hostLower = host.toLowerCase();
 
-  // B2B 전용 서브도메인 여부 감지 (partner.* 또는 b2b.*) - 대소문자 구분 없이 다양한 환경 지원
+  // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
   const isB2BSubdomain =
     hostLower.startsWith('partner.') ||
     hostLower.startsWith('b2b.') ||
+    hostLower.startsWith('bugoon.') ||
     hostLower.startsWith('partner-') ||
     hostLower.startsWith('b2b-') ||
+    hostLower.startsWith('bugoon-') ||
     hostLower.includes('.partner.') ||
     hostLower.includes('.b2b.') ||
+    hostLower.includes('.bugoon.') ||
     hostLower.includes('.partner-') ||
-    hostLower.includes('.b2b-');
+    hostLower.includes('.b2b-') ||
+    hostLower.includes('.bugoon-');
 
   // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화)
   if (!isB2BSubdomain && path.startsWith('/b2b')) {
