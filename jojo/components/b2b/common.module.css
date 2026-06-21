@@ -19,7 +19,7 @@
 }
 
 /* ===== 디자인 토큰 (CSS 변수) ===== */
-:root {
+:global(:root) {
   /* 간격 */
   --space-xs: 4px;
   --space-sm: 8px;
