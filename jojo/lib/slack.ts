@@ -249,3 +249,80 @@ export async function sendBurialReviewNotification(review: {
 
     return sendToWebhook(webhookUrl!, { text });
 }
+
+/**
+ * B2B 신분증 자동 검증 실패 알림 전송 (#01_04_B2B검증실패)
+ */
+export async function sendB2BVerificationFailureNotification(info: {
+    partner_name: string;
+    company_name: string;
+    phone: string;
+    expected_name: string;
+    parsed_name: string;
+    id_card_url: string;
+    reason: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+
+    const text = `⚠️ [부고온 B2B] 신분증 자동 검증 실패 (수동 확인 필요)
+- 파트너사: ${info.company_name} (대표자: ${info.partner_name})
+- 연락처: ${info.phone}
+- 가입자 실명: ${info.expected_name}
+- 신분증 추출 실명: ${info.parsed_name || '(추출 실패)'}
+- 실패 사유: ${info.reason}
+- 신분증 파일 경로: ${info.id_card_url}
+- 어드민 링크: https://maeumbugo.co.kr/b2b/admin/partners`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
+ * B2B 자동 출금 이체 성공 알림 전송
+ */
+export async function sendB2BAutoWithdrawalSuccessNotification(info: {
+    company_name: string;
+    owner_name: string;
+    amount: number;
+    bank_name: string;
+    account_no: string;
+    account_holder: string;
+    request_id: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const amountFormatted = info.amount.toLocaleString();
+
+    const text = `✅ [부고온 B2B] 신분증 인증 회원 첫 출금 자동 이체 성공
+- 파트너사: ${info.company_name} (대표자: ${info.owner_name})
+- 출금액: ${amountFormatted}원
+- 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
+- 신청 ID: ${info.request_id}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
+ * B2B 자동 출금 이체 실패 알림 전송
+ */
+export async function sendB2BAutoWithdrawalFailureNotification(info: {
+    company_name: string;
+    owner_name: string;
+    amount: number;
+    bank_name: string;
+    account_no: string;
+    account_holder: string;
+    request_id: string;
+    reason: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+    const amountFormatted = info.amount.toLocaleString();
+
+    const text = `🚨 [부고온 B2B] 신분증 인증 회원 첫 출금 자동 이체 실패 (수동 처리 필요)
+- 파트너사: ${info.company_name} (대표자: ${info.owner_name})
+- 출금액: ${amountFormatted}원
+- 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
+- 신청 ID: ${info.request_id}
+- 실패 사유: ${info.reason}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+

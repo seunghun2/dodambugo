@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import styles from './form.module.css';
 
 export default function VerifyFormPage() {
@@ -23,6 +24,50 @@ export default function VerifyFormPage() {
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
     const [smsError, setSmsError] = useState('');
     const [smsSuccess, setSmsSuccess] = useState('');
+
+    // 신분증 업로드 상태
+    const [idCardFile, setIdCardFile] = useState<File | null>(null);
+    const [idCardUrl, setIdCardUrl] = useState('');
+    const [idCardUploadProgress, setIdCardUploadProgress] = useState(0);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIdCardFile(file);
+        setError('');
+        setIdCardUploadProgress(10);
+
+        const b2bUser = localStorage.getItem('b2b_user');
+        if (!b2bUser) {
+            setError('로그인 정보가 유효하지 않습니다.');
+            setIdCardUploadProgress(0);
+            return;
+        }
+        const user = JSON.parse(b2bUser);
+        const userId = user.id;
+
+        try {
+            const fileExt = file.name.split('.').pop();
+            const filePath = `id_cards/${userId}/${Date.now()}.${fileExt}`;
+            
+            setIdCardUploadProgress(30);
+            
+            const { data, error: uploadError } = await supabase.storage
+                .from('b2b-id-cards')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            setIdCardUploadProgress(70);
+            setIdCardUrl(filePath);
+            setIdCardUploadProgress(100);
+        } catch (err: any) {
+            console.error('신분증 업로드 오류:', err);
+            setError('신분증 이미지 업로드에 실패했습니다. 다시 시도해 주세요: ' + (err.message || ''));
+            setIdCardUploadProgress(0);
+        }
+    };
 
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -124,6 +169,7 @@ export default function VerifyFormPage() {
                     id_issue_date: idType === '주민등록증' ? idIssueDate : null,
                     driver_license_no: idType === '운전면허증' ? driverLicenseNo : null,
                     identity_phone: phone,
+                    id_card_url: idCardUrl,
                 }),
             });
 
@@ -155,6 +201,7 @@ export default function VerifyFormPage() {
         rrnFront.length === 6 &&
         rrnBack.length === 7 &&
         isPhoneVerified &&
+        idCardUrl !== '' && // 신분증 업로드 필수
         (idType === '주민등록증' ? idIssueDate.trim() !== '' : driverLicenseNo.trim() !== '');
 
     return (
@@ -302,6 +349,31 @@ export default function VerifyFormPage() {
 
                         {smsSuccess && <p className={styles.successText}>{smsSuccess}</p>}
                         {smsError && <p className={styles.errorText}>{smsError}</p>}
+                    </div>
+
+                    {/* 신분증 이미지 업로드 */}
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>신분증 이미지 업로드 (최초 1회 필수)</label>
+                        <div className={styles.fileUploadRow}>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className={styles.fileInput}
+                                id="id-card-upload"
+                                style={{ display: 'none' }}
+                            />
+                            <label htmlFor="id-card-upload" className={styles.fileLabelBtn}>
+                                {idCardFile ? '파일 변경' : '신분증 이미지 업로드'}
+                            </label>
+                            {idCardFile && <span className={styles.fileName}>{idCardFile.name}</span>}
+                        </div>
+                        {idCardUploadProgress > 0 && idCardUploadProgress < 100 && (
+                            <div className={styles.progressBar}>
+                                <div className={styles.progressFill} style={{ width: `${idCardUploadProgress}%` }} />
+                            </div>
+                        )}
+                        {idCardUrl && <p className={styles.successText}>✓ 신분증 업로드 완료</p>}
                     </div>
 
                     {/* 제출 버튼 */}
