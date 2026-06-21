@@ -64,8 +64,129 @@ export async function POST(request: NextRequest) {
             } else {
                 orderData = updatedOrder;
                 console.log('✅ 주문 상태 업데이트 완료');
+
+                // =============================================
+                // [B2B] 화환 판매 시 파트너 예치금 자동 적립 (가상계좌)
+                // =============================================
+                if (orderData?.bugo_id) {
+                    try {
+                        // 1. 이 부고에 연결된 B2B 파트너 조회
+                        const { data: bugoRecord } = await supabase
+                            .from('bugo')
+                            .select('b2b_user_id')
+                            .eq('id', orderData.bugo_id)
+                            .single();
+
+                        if (bugoRecord?.b2b_user_id) {
+                            const partnerId = bugoRecord.b2b_user_id;
+
+                            // 2. 적립금액 설정 조회
+                            const { data: rewardSetting } = await supabase
+                                .from('b2b_settings')
+                                .select('value')
+                                .eq('key', 'wreath_reward_amount')
+                                .single();
+                            const rewardAmount = parseInt(rewardSetting?.value || '10000');
+
+                            // 3. 파트너 예치금 적립 (직접 잔액 업데이트)
+                            const { data: currentDeposit } = await supabase
+                                .from('deposits')
+                                .select('balance')
+                                .eq('user_id', partnerId)
+                                .single();
+
+                            if (currentDeposit) {
+                                await supabase
+                                    .from('deposits')
+                                    .update({
+                                        balance: (currentDeposit.balance || 0) + rewardAmount,
+                                        updated_at: new Date().toISOString(),
+                                    })
+                                    .eq('user_id', partnerId);
+                            } else {
+                                await supabase
+                                    .from('deposits')
+                                    .insert({
+                                        user_id: partnerId,
+                                        balance: rewardAmount,
+                                        updated_at: new Date().toISOString(),
+                                    });
+                            }
+
+                            // 4. 적립 내역 기록
+                            await supabase
+                                .from('deposit_transactions')
+                                .insert({
+                                    user_id: partnerId,
+                                    amount: rewardAmount,
+                                    type: 'wreath_reward',
+                                    description: `화환 판매 적립 (가상계좌 입금 완료 - ${orderData.product_name || '화환'})`,
+                                    related_order_id: String(orderData.id || moid),
+                                });
+
+                            console.log(`✅ [B2B-Webhook] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
+
+                            // 5. 추천인 보너스 적립
+                            const { data: partnerInfo } = await supabase
+                                .from('b2b_users')
+                                .select('recommender_id')
+                                .eq('id', partnerId)
+                                .single();
+
+                            if (partnerInfo?.recommender_id) {
+                                const { data: bonusSetting } = await supabase
+                                    .from('b2b_settings')
+                                    .select('value')
+                                    .eq('key', 'referral_bonus_amount')
+                                    .single();
+                                const bonusAmount = parseInt(bonusSetting?.value || '2000');
+
+                                // 추천인 잔액 업데이트
+                                const { data: refDeposit } = await supabase
+                                    .from('deposits')
+                                    .select('balance')
+                                    .eq('user_id', partnerInfo.recommender_id)
+                                    .single();
+
+                                if (refDeposit) {
+                                    await supabase
+                                        .from('deposits')
+                                        .update({
+                                            balance: (refDeposit.balance || 0) + bonusAmount,
+                                            updated_at: new Date().toISOString(),
+                                        })
+                                        .eq('user_id', partnerInfo.recommender_id);
+                                } else {
+                                    await supabase
+                                        .from('deposits')
+                                        .insert({
+                                            user_id: partnerInfo.recommender_id,
+                                            balance: bonusAmount,
+                                            updated_at: new Date().toISOString(),
+                                        });
+                                }
+
+                                // 추천인 적립 내역 기록
+                                await supabase
+                                    .from('deposit_transactions')
+                                    .insert({
+                                        user_id: partnerInfo.recommender_id,
+                                        amount: bonusAmount,
+                                        type: 'referral_bonus',
+                                        description: `추천 수당 (추천한 파트너의 가상계좌 화환 판매)`,
+                                        related_order_id: String(orderData.id || moid),
+                                    });
+
+                                console.log(`✅ [B2B-Webhook] 추천인 ${partnerInfo.recommender_id}에게 보너스 ${bonusAmount}원 적립 완료`);
+                            }
+                        }
+                    } catch (b2bErr) {
+                        console.error('❌ [B2B-Webhook] 가상계좌 입금 파트너 적립 중 에러:', b2bErr);
+                    }
+                }
             }
         }
+
 
         // 📱 알림톡 발송 (입금 완료)
         if (orderData?.sender_phone) {
