@@ -30,6 +30,15 @@ export async function GET(request: NextRequest) {
                 room_number,
                 created_at,
                 b2b_user_id,
+                funeral_type,
+                view_count,
+                flower_count,
+                ip_address,
+                deleted_at,
+                template_id,
+                message,
+                address,
+                hide_flower_order,
                 b2b_users ( company_name, owner_name, phone )
             `)
             .not('b2b_user_id', 'is', null);
@@ -58,7 +67,16 @@ export async function GET(request: NextRequest) {
                 created_at: b.created_at,
                 company_name: b2bUser?.company_name || '알 수 없음',
                 owner_name: b2bUser?.owner_name || '알 수 없음',
-                phone: b2bUser?.phone || ''
+                phone: b2bUser?.phone || '',
+                funeral_type: b.funeral_type,
+                view_count: b.view_count || 0,
+                flower_count: b.flower_count || 0,
+                ip_address: b.ip_address || '',
+                deleted_at: b.deleted_at,
+                template_id: b.template_id,
+                message: b.message || '',
+                address: b.address || '',
+                hide_flower_order: b.hide_flower_order
             };
         }) || [];
 

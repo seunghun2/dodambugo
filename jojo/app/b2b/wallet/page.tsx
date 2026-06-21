@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomTabBar } from '@/components/b2b/BottomTabBar';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
 
@@ -533,7 +533,6 @@ export default function WalletPage() {
                 )}
             </AnimatePresence>
 
-            <BottomTabBar />
         </div>
     );
 }

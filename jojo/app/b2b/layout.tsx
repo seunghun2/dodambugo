@@ -8,6 +8,8 @@ export const metadata = {
   description: '부고온 B2B 파트너 앱 - 화환 판매로 수익을 만드세요',
 };
 
+import { B2BLayoutClient } from '@/components/b2b/B2BLayoutClient';
+
 export default function B2BLayout({
   children,
 }: {
@@ -15,5 +17,9 @@ export default function B2BLayout({
 }) {
   // MainLayout(상단 네비바) 없이 children만 렌더링
   // 앱으로 래핑될 화면이므로 독립 레이아웃 사용
-  return <>{children}</>;
+  return (
+    <B2BLayoutClient>
+      {children}
+    </B2BLayoutClient>
+  );
 }

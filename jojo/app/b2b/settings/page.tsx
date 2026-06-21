@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomTabBar } from '@/components/b2b/BottomTabBar';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import styles from './settings.module.css';
 
@@ -717,8 +716,6 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 )}
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -878,8 +875,6 @@ export default function SettingsPage() {
                         </button>
                     </div>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1000,8 +995,6 @@ export default function SettingsPage() {
                         </label>
                     </div>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1266,8 +1259,6 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1320,8 +1311,6 @@ export default function SettingsPage() {
                         탈퇴하기
                     </button>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1355,8 +1344,6 @@ export default function SettingsPage() {
                         <p>2. 회원은 적립금 정산 시 부과되는 세금(원천징수 3.3%) 신고를 위해 주민등록번호 등 소득증빙 세무 신고 목적의 필수 정보를 필수적으로 제출해야 합니다.</p>
                     </div>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1391,8 +1378,6 @@ export default function SettingsPage() {
                         <p>- 서비스 회원탈퇴 시 즉시 파기. 단, 관련 세법 및 국세기본법에 의한 정산 증빙용 거래기록은 5년간 보관함.</p>
                     </div>
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1450,8 +1435,6 @@ export default function SettingsPage() {
                         );
                     })}
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }
@@ -1530,8 +1513,6 @@ export default function SettingsPage() {
                         })
                     )}
                 </div>
-
-                <BottomTabBar />
             </div>
         );
     }

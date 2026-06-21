@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomTabBar } from '@/components/b2b/BottomTabBar';
+
 import styles from './dashboard.module.css';
 
 interface User {
@@ -270,7 +270,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <BottomTabBar />
     </div>
   );
 }

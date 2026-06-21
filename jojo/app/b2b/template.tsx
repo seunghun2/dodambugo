@@ -6,13 +6,6 @@ import { usePathname } from 'next/navigation';
 export default function B2BTemplate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // B2B 어드민 페이지(/b2b/admin/...)는 사이드바 레이아웃 형태이므로 전체 슬라이딩 애니메이션에서 제외
-  const isAdminPage = pathname?.startsWith('/b2b/admin');
-
-  if (isAdminPage) {
-    return <>{children}</>;
-  }
-
   return (
     <motion.div
       key={pathname}
