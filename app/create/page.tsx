@@ -112,7 +112,6 @@ function CreatePageContent() {
         setFormData(prev => ({
             ...prev,
             death_date: formatDate(today),
-            encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
         }));
     }, []);
