@@ -367,7 +367,7 @@ export default function WriteFormPage() {
             const result = await response.json();
             if (result.draftId) {
                 setDraftId(result.draftId);
-                localStorage.setItem(`bugo_draft_id_${templateId}`, result.draftId);
+                localStorage.setItem('bugo_draft_id', result.draftId);
             }
         } catch (error) {
             console.error('Draft save to DB failed:', error);
@@ -389,13 +389,28 @@ export default function WriteFormPage() {
             templateId,
             savedAt: new Date().toISOString()
         };
-        localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+        localStorage.setItem('bugo_draft', JSON.stringify(draftData));
 
         // DB에도 저장 (새로 추가)
         await saveDraftToDb();
 
         setDraftModalOpen(false);
         router.push('/');
+    };
+
+    const handleThemeChangeClick = () => {
+        const draftData = {
+            formData,
+            mourners,
+            accounts,
+            showAccount,
+            showBurial,
+            showPhoto,
+            photoUrl,
+            templateId,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('bugo_draft', JSON.stringify(draftData));
     };
 
 
@@ -512,7 +527,7 @@ export default function WriteFormPage() {
         }
 
         // 2. 복제 데이터 없으면 draft 확인
-        const draft = localStorage.getItem(`bugo_draft_${templateId}`);
+        const draft = localStorage.getItem('bugo_draft');
         if (draft) {
             try {
                 const parsed = JSON.parse(draft);
@@ -561,11 +576,11 @@ export default function WriteFormPage() {
                     templateId,
                     savedAt: new Date().toISOString()
                 };
-                localStorage.setItem(`bugo_draft_${templateId}`, JSON.stringify(draftData));
+                localStorage.setItem('bugo_draft', JSON.stringify(draftData));
 
                 // DB에도 저장 (IP 추적용)
                 try {
-                    const savedDraftId = localStorage.getItem(`bugo_draft_id_${templateId}`);
+                    const savedDraftId = localStorage.getItem('bugo_draft_id');
                     const response = await fetch('/api/drafts', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -578,7 +593,7 @@ export default function WriteFormPage() {
                     });
                     const result = await response.json();
                     if (result.draftId && !savedDraftId) {
-                        localStorage.setItem(`bugo_draft_id_${templateId}`, result.draftId);
+                        localStorage.setItem('bugo_draft_id', result.draftId);
                     }
                 } catch (error) {
                     console.error('Auto-save to DB failed:', error);
@@ -1311,7 +1326,13 @@ export default function WriteFormPage() {
                                 {/* 선택된 템플릿 표시 */}
                                 <div className="selected-template-banner">
                                     <span>선택된 양식: <strong>{template.name}</strong></span>
-                                    <Link href={`/create?change=${templateId}${editBugoNumber ? `&edit=${editBugoNumber}` : ''}`} className="btn-change-template">변경</Link>
+                                    <Link 
+                                        href={`/create?change=${templateId}${editBugoNumber ? `&edit=${editBugoNumber}` : ''}`} 
+                                        className="btn-change-template"
+                                        onClick={handleThemeChangeClick}
+                                    >
+                                        변경
+                                    </Link>
                                 </div>
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>
