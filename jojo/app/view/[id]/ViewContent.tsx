@@ -807,7 +807,7 @@ ${url}
                             </div>
                         </>
                     )}
-                    {bugo.encoffin_date && (
+                    {isB2b && bugo.encoffin_date && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">

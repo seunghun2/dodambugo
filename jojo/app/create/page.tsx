@@ -47,6 +47,8 @@ function CreatePageContent() {
 
     // 템플릿 변경 모드 (from query param)
     const changeFrom = searchParams.get('change');
+    const editParam = searchParams.get('edit');
+    const editSuffix = editParam ? `?edit=${editParam}` : '';
 
     // Form 데이터
     const [formData, setFormData] = useState({
@@ -344,7 +346,7 @@ function CreatePageContent() {
                                             className="template-phone" 
                                             onClick={() => {
                                                 if (changeFrom === template.id) return;
-                                                router.push(`/create/${template.id}`);
+                                                router.push(`/create/${template.id}${editSuffix}`);
                                             }} 
                                             style={{ cursor: changeFrom === template.id ? 'default' : 'pointer' }}
                                         >
@@ -356,7 +358,7 @@ function CreatePageContent() {
                                                     className="template-name" 
                                                     onClick={() => {
                                                         if (changeFrom === template.id) return;
-                                                        router.push(`/create/${template.id}`);
+                                                        router.push(`/create/${template.id}${editSuffix}`);
                                                     }} 
                                                     style={{ cursor: changeFrom === template.id ? 'default' : 'pointer' }}
                                                 >
@@ -372,14 +374,14 @@ function CreatePageContent() {
                                             </div>
                                             {changeFrom === template.id ? (
                                                 <Link
-                                                    href={`/create/${template.id}`}
+                                                    href={`/create/${template.id}${editSuffix}`}
                                                     className="btn-current-template"
                                                 >
                                                     사용중
                                                 </Link>
                                             ) : (
                                                 <Link
-                                                    href={`/create/${template.id}`}
+                                                    href={`/create/${template.id}${editSuffix}`}
                                                     className="btn-use-template"
                                                 >
                                                     {changeFrom ? '변경하기' : '제작하기'}

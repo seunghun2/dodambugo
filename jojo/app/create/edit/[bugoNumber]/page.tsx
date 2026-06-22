@@ -14,14 +14,14 @@ export default function EditRedirectPage() {
             try {
                 const { data, error } = await supabase
                     .from('bugo')
-                    .select('template')
+                    .select('template_id')
                     .eq('bugo_number', params.bugoNumber)
                     .single();
 
                 if (error) throw error;
 
                 // 템플릿 페이지로 리다이렉트 (edit 쿼리 파라미터와 함께)
-                const template = data?.template || 'basic';
+                const template = data?.template_id || 'basic';
                 router.replace(`/create/${template}?edit=${params.bugoNumber}`);
             } catch (err) {
                 console.error(err);
