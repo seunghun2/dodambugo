@@ -6,8 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// Edge Runtime
-export const runtime = 'edge';
+// Node.js Runtime for stable cache and DB connections
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
@@ -18,8 +17,8 @@ function getSupabase() {
 }
 
 // 캐시된 부고 조회 (60초)
-const getCachedBugo = unstable_cache(
-    async (id: string) => {
+const getCachedBugo = (id: string) => unstable_cache(
+    async () => {
         const supabase = getSupabase();
         const isUUID = id.includes('-') && id.length > 10;
 
@@ -31,9 +30,9 @@ const getCachedBugo = unstable_cache(
             return result.data?.[0] || null;
         }
     },
-    ['bugo-data'],
+    ['bugo-data', id],
     { revalidate: 60 }
-);
+)();
 
 // 캐시된 상품 조회 (30초)
 const getCachedProducts = unstable_cache(
