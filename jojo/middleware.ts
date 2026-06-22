@@ -234,9 +234,14 @@ export async function middleware(request: NextRequest) {
       return false;
     };
 
-    // 관리자 및 사설 IP 여부
+    // 관리자, 사설 IP, B2B 접속 여부 체크 (B2B 사용자는 차단 대상에서 예외 처리)
     const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
-    const isExcluded = ADMIN_IPS.includes(ip) || isAdminCookie || isPrivateIp(ip);
+    const isExcluded = 
+      ADMIN_IPS.includes(ip) || 
+      isAdminCookie || 
+      isPrivateIp(ip) || 
+      isB2BSubdomain || 
+      path.startsWith('/b2b');
 
     if (!isExcluded) {
       // 접속 로그 기록 (논블로킹)
