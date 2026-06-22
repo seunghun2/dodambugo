@@ -628,9 +628,9 @@ export default function WriteFormPage() {
                     death_time: data.death_time || '',
                     death_hour: data.death_time?.split(':')[0] || '',
                     death_minute: data.death_time?.split(':')[1] || '00',
-                    encoffin_date: data.encoffin_date || '',
-                    encoffin_hour: data.encoffin_time?.split(':')[0] || '',
-                    encoffin_minute: data.encoffin_time?.split(':')[1] || '00',
+                    encoffin_date: '',
+                    encoffin_hour: '',
+                    encoffin_minute: '00',
                     funeral_date: data.funeral_date || '',
                     funeral_time: data.funeral_time || '',
                     funeral_hour: data.funeral_time?.split(':')[0] || '',
@@ -1118,6 +1118,7 @@ export default function WriteFormPage() {
             const bugoData = {
                 bugo_number: bugoNumber,
                 template_id: templateId,
+                template: templateId,
                 applicant_name: formData.applicant_name,
                 applicant_phone: formData.applicant_phone,
                 phone_password: formData.applicant_phone, // 비밀번호로도 사용
