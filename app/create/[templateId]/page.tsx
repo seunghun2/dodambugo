@@ -793,7 +793,6 @@ export default function WriteFormPage() {
         setFormData(prev => ({
             ...prev,
             death_date: formatDate(today),
-            encoffin_date: formatDate(tomorrow),
             funeral_date: formatDate(dayAfter),
             // ilpo_date는 showIlpo 토글 ON일 때만 설정 (제주도 전용)
         }));
@@ -1298,7 +1297,7 @@ export default function WriteFormPage() {
                                 {/* 선택된 템플릿 표시 */}
                                 <div className="selected-template-banner">
                                     <span>선택된 양식: <strong>{template.name}</strong></span>
-                                    <Link href={`/create?change=${templateId}`} className="btn-change-template">변경</Link>
+                                    <Link href={`/create?change=${templateId}${editBugoNumber ? `&edit=${editBugoNumber}` : ''}`} className="btn-change-template">변경</Link>
                                 </div>
 
                                 <form className="bugo-form" onSubmit={handleSubmit}>
