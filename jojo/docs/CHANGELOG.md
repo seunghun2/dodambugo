@@ -2,6 +2,16 @@
 
 ## 2026-06-22
 
+### B2B 부고 조회 실서버 DB 외래키 복원 및 IDOR 취약점/정산수당 계산 보완
+- **B2B 부고 조회 API 오류 및 화면 500 에러 해결**:
+  - 실서버(프로덕션) Supabase 데이터베이스에 `flower_orders.bugo_id` -> `bugo.id` 외래키 제약조건(`flower_orders_bugo_id_fkey`)이 누락되어 PostgREST 묵시적 조인 select 쿼리가 실패(500)하고 화면에 "부고 데이터를 가져오는데 실패했습니다"라는 경고 배너가 출력되던 문제를 실서버 DB DDL 제약조건 적용으로 완전히 해결했습니다.
+- **B2B 부고장 수정화면 IDOR 권한 검증 추가**:
+  - `app/b2b/create/page.tsx` 내의 `loadBugoData` 함수에서 `localStorage`에 저장된 현재 로그인한 B2B 파트너의 ID와 조회한 부고의 `b2b_user_id`를 대조하여, 타인의 부고 데이터를 무단 조회 및 수정할 수 없도록 권한 검증 로직을 추가했습니다.
+- **B2B 조의금 수당 적립 요율 동적 설정 보완 (역마진 방지)**:
+  - `app/api/payment/innopay/approve/route.ts` 내의 조의금 결제 승인 로직에서, 고정된 8.6% 전액 적립 방식을 배제하고 `b2b_settings` 테이블의 `b2b_condolence_fee_rate` 값을 동적으로 조회하여 해당 요율(설정 누락 시 기본 5%)로 적립되도록 보완하여 역마진 발생 가능성을 원천 차단했습니다.
+- **Vercel 빌드 모듈 누락(Module not found) 해결**:
+  - `lib/b2b.ts` 및 `app/b2b/view/...` 등의 B2B 신규 래퍼 페이지들이 git 스테이징에 누락된 채 원격 빌드가 돌며 발생했던 `Module not found: Can't resolve '@/lib/b2b'` 빌드 깨짐 현상을 로컬 빌드 무결성 검증 후 누락 파일을 모두 git에 추가 및 push하여 해결하였습니다.
+
 ### B2B 대시보드 직접 화환 주문 플로우 구축 및 감사장 404 라우팅 개선
 - **대시보드 화환 주문 버튼 & 아이콘 개선**:
   - `app/b2b/dashboard/page.tsx` 내의 화환 주문 버튼 링크를 기존 부고 선택 창 대신 직접 화환 리스트(`/b2b/flower`)로 연결되도록 변경하고, 햅쌀/해 아이콘 대신 직관적인 꽃 아이콘으로 교체하였습니다.
