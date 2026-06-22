@@ -3,8 +3,6 @@ import { unstable_cache } from 'next/cache';
 import PaymentContent from '@/app/view/[id]/payment/[productId]/PaymentContent';
 import '@/app/view/[id]/order/[productId]/order.css';
 
-export const runtime = 'edge';
-
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,43 +10,49 @@ function getSupabase() {
     );
 }
 
-const getCachedBugo = unstable_cache(
-    async (bugoId: string, isUUID: boolean) => {
-        const supabase = getSupabase();
-        if (isUUID) {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name')
-                .eq('id', bugoId)
-                .limit(1);
-            return data?.[0] || null;
-        } else {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name')
-                .eq('bugo_number', bugoId)
-                .order('created_at', { ascending: false })
-                .limit(1);
-            return data?.[0] || null;
-        }
-    },
-    ['bugo-payment'],
-    { revalidate: 300 }
-);
+async function getCachedBugo(bugoId: string, isUUID: boolean) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            if (isUUID) {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name')
+                    .eq('id', bugoId)
+                    .limit(1);
+                return data?.[0] || null;
+            } else {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name')
+                    .eq('bugo_number', bugoId)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                return data?.[0] || null;
+            }
+        },
+        [`bugo-payment-${bugoId}`],
+        { revalidate: 300 }
+    );
+    return getCached();
+}
 
-const getCachedProduct = unstable_cache(
-    async (productNumber: string) => {
-        const supabase = getSupabase();
-        const { data } = await supabase
-            .from('flower_products')
-            .select('*')
-            .eq('sort_order', parseInt(productNumber))
-            .single();
-        return data;
-    },
-    ['flower-product-payment'],
-    { revalidate: 3600 }
-);
+async function getCachedProduct(productNumber: string) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            const { data } = await supabase
+                .from('flower_products')
+                .select('*')
+                .eq('sort_order', parseInt(productNumber))
+                .single();
+            return data;
+        },
+        [`flower-product-payment-${productNumber}`],
+        { revalidate: 3600 }
+    );
+    return getCached();
+}
 
 export default async function B2BPaymentPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
     const { id, productId } = await params;

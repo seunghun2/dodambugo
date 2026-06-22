@@ -2,8 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import OrderContent from './OrderContent';
 
-export const runtime = 'edge';
-
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

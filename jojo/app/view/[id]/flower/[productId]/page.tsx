@@ -3,9 +3,7 @@ import { unstable_cache } from 'next/cache';
 import FlowerDetailContent from './FlowerDetailContent';
 import './flower-detail.css';
 
-// Edge Runtime - Cold Start 최소화
-export const runtime = 'edge';
-
+// 서버 사이드 Supabase 클라이언트
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,20 +11,23 @@ function getSupabase() {
     );
 }
 
-// 캐시된 상품 조회 (1시간) - sort_order로 조회
-const getCachedProduct = unstable_cache(
-    async (productNumber: string) => {
-        const supabase = getSupabase();
-        const { data } = await supabase
-            .from('flower_products')
-            .select('*')
-            .eq('sort_order', parseInt(productNumber))
-            .single();
-        return data;
-    },
-    ['flower-product'],
-    { revalidate: 3600 } // 1시간 캐시
-);
+// 캐시된 상품 조회 (1시간) - 캐시 키 동적 생성
+async function getCachedProduct(productNumber: string) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            const { data } = await supabase
+                .from('flower_products')
+                .select('*')
+                .eq('sort_order', parseInt(productNumber))
+                .single();
+            return data;
+        },
+        [`flower-product-${productNumber}`],
+        { revalidate: 3600 } // 1시간 캐시
+    );
+    return getCached();
+}
 
 // 서버 컴포넌트 - 상품 데이터를 서버에서 미리 불러옴
 export default async function FlowerDetailPage({ params }: { params: Promise<{ id: string; productId: string }> }) {

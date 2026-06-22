@@ -3,8 +3,6 @@ import { unstable_cache } from 'next/cache';
 import OrderContent from '@/app/view/[id]/order/[productId]/OrderContent';
 import '@/app/view/[id]/order/[productId]/order.css';
 
-export const runtime = 'edge';
-
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,29 +10,32 @@ function getSupabase() {
     );
 }
 
-const getCachedBugo = unstable_cache(
-    async (bugoId: string, isUUID: boolean) => {
-        const supabase = getSupabase();
-        if (isUUID) {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
-                .eq('id', bugoId)
-                .limit(1);
-            return data?.[0] || null;
-        } else {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
-                .eq('bugo_number', bugoId)
-                .order('created_at', { ascending: false })
-                .limit(1);
-            return data?.[0] || null;
-        }
-    },
-    ['bugo-order'],
-    { revalidate: 300 }
-);
+async function getCachedBugo(bugoId: string, isUUID: boolean) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            if (isUUID) {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+                    .eq('id', bugoId)
+                    .limit(1);
+                return data?.[0] || null;
+            } else {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+                    .eq('bugo_number', bugoId)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                return data?.[0] || null;
+            }
+        },
+        [`bugo-order-${bugoId}`],
+        { revalidate: 300 }
+    );
+    return getCached();
+}
 
 async function getCachedProduct(productNumber: string) {
     const getCached = unstable_cache(

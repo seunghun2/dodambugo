@@ -3,9 +3,7 @@ import { unstable_cache } from 'next/cache';
 import OrderContent from './OrderContent';
 import './order.css';
 
-// Edge Runtime - Cold Start 최소화
-export const runtime = 'edge';
-
+// 서버 사이드 Supabase 클라이언트
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,30 +11,33 @@ function getSupabase() {
     );
 }
 
-// 캐시된 부고 조회 (5분)
-const getCachedBugo = unstable_cache(
-    async (bugoId: string, isUUID: boolean) => {
-        const supabase = getSupabase();
-        if (isUUID) {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
-                .eq('id', bugoId)
-                .limit(1);
-            return data?.[0] || null;
-        } else {
-            const { data } = await supabase
-                .from('bugo')
-                .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
-                .eq('bugo_number', bugoId)
-                .order('created_at', { ascending: false })
-                .limit(1);
-            return data?.[0] || null;
-        }
-    },
-    ['bugo-order'],
-    { revalidate: 300 } // 5분 캐시
-);
+// 캐시된 부고 조회 (5분) - 캐시 키 동적 생성
+async function getCachedBugo(bugoId: string, isUUID: boolean) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            if (isUUID) {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+                    .eq('id', bugoId)
+                    .limit(1);
+                return data?.[0] || null;
+            } else {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+                    .eq('bugo_number', bugoId)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                return data?.[0] || null;
+            }
+        },
+        [`bugo-order-${bugoId}`],
+        { revalidate: 300 } // 5분 캐시
+    );
+    return getCached();
+}
 
 // 캐시된 상품 조회 (1시간) - 캐시 키 동적 생성
 async function getCachedProduct(productNumber: string) {

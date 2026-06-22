@@ -3,8 +3,6 @@ import { unstable_cache } from 'next/cache';
 import FlowerDetailContent from '@/app/view/[id]/flower/[productId]/FlowerDetailContent';
 import '@/app/view/[id]/flower/[productId]/flower-detail.css';
 
-export const runtime = 'edge';
-
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,19 +10,22 @@ function getSupabase() {
     );
 }
 
-const getCachedProduct = unstable_cache(
-    async (productNumber: string) => {
-        const supabase = getSupabase();
-        const { data } = await supabase
-            .from('flower_products')
-            .select('*')
-            .eq('sort_order', parseInt(productNumber))
-            .single();
-        return data;
-    },
-    ['flower-product'],
-    { revalidate: 3600 }
-);
+async function getCachedProduct(productNumber: string) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            const { data } = await supabase
+                .from('flower_products')
+                .select('*')
+                .eq('sort_order', parseInt(productNumber))
+                .single();
+            return data;
+        },
+        [`flower-product-${productNumber}`],
+        { revalidate: 3600 }
+    );
+    return getCached();
+}
 
 export default async function B2BFlowerDetailPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
     const { id, productId } = await params;
