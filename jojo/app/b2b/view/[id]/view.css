@@ -1,9 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
+:root {
+    --primary: #3A8F47;
+    --primary-dark: #2D6E37;
+}
+
 /* ========================================
    XD 디자인 정밀 복제 - view.css
    Canvas: 360 x 650px (헤더) / 전체 스크롤
    Font: KoPubWorld바탕체 (XD 스펙), NanumMyeongjo (폴백)
 ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
 
 /* KoPub 바탕체 - 웹폰트 */
 @font-face {
@@ -173,8 +180,8 @@
 .btn-home {
     display: inline-block;
     padding: 14px 40px;
-    background: #FFD43B;
-    color: #1A1A1A;
+    background: #3A8F47;
+    color: #FFFFFF;
     border-radius: 50px;
     text-decoration: none;
     font-weight: 600;
@@ -184,7 +191,7 @@
 }
 
 .btn-home:hover {
-    background: #FCC419;
+    background: #2D6E37;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -1989,8 +1996,8 @@ button.memorial-cta-item {
     justify-content: center;
     gap: 8px;
     padding: 16px 24px;
-    background: #FFD43B;
-    color: #000000;
+    background: #3A8F47;
+    color: #FFFFFF;
     border: none;
     border-radius: 50px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -2002,11 +2009,11 @@ button.memorial-cta-item {
 }
 
 .btn-floating-flower:hover {
-    background: #FCC419;
+    background: #2D6E37;
 }
 
 .btn-floating-flower:active {
-    background: #FFD43B;
+    background: #3A8F47;
 }
 
 .btn-floating-flower .material-symbols-outlined {

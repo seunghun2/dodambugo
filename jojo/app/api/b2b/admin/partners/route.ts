@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendLMS } from '@/lib/solapi';
+import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,7 +43,30 @@ export async function GET(request: NextRequest) {
 
         if (error) throw error;
 
-        // 결과 가공 (deposits.balance 조인 데이터 매핑)
+        // 각 파트너별 최근 부고 생성 일시 조회 (b2b_user_id 별로 그룹화)
+        const { data: latestBugos, error: bugoError } = await supabase
+            .from('bugo')
+            .select('b2b_user_id, created_at')
+            .is('deleted_at', null)
+            .not('b2b_user_id', 'is', null);
+
+        if (bugoError) {
+            console.error('B2B 파트너 최근 부고 조회 중 오류:', bugoError);
+        }
+
+        const latestBugoMap: Record<string, string> = {};
+        if (latestBugos) {
+            latestBugos.forEach((b: any) => {
+                const userId = b.b2b_user_id;
+                if (!userId) return;
+                const date = b.created_at;
+                if (!latestBugoMap[userId] || new Date(date) > new Date(latestBugoMap[userId])) {
+                    latestBugoMap[userId] = date;
+                }
+            });
+        }
+
+        // 결과 가공 (deposits.balance 조인 데이터 매핑 및 최근 부고 생성 일시 추가)
         const formattedPartners = partners?.map(p => ({
             id: p.id,
             phone: p.phone,
@@ -54,7 +78,8 @@ export async function GET(request: NextRequest) {
             my_referral_code: p.my_referral_code,
             status: p.status,
             created_at: p.created_at,
-            balance: p.deposits?.[0]?.balance || 0
+            balance: p.deposits?.[0]?.balance || 0,
+            last_bugo_at: latestBugoMap[p.id] || null
         })) || [];
 
         return NextResponse.json({ success: true, partners: formattedPartners });
@@ -123,5 +148,39 @@ export async function PATCH(request: NextRequest) {
     } catch (error: any) {
         console.error('B2B 파트너 상태 업데이트 API 오류:', error);
         return NextResponse.json({ error: '파트너 상태 변경에 실패했습니다.' }, { status: 500 });
+    }
+}
+
+// POST: B2B 파트너 비밀번호 초기화 (기본값 '00000000')
+export async function POST(request: NextRequest) {
+    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    if (!isAdmin) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+    }
+
+    try {
+        const body = await request.json();
+        const { partnerId } = body;
+
+        if (!partnerId) {
+            return NextResponse.json({ error: '파트너 ID가 필요합니다.' }, { status: 400 });
+        }
+
+        const defaultPassword = '00000000';
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+        const { error } = await supabase
+            .from('b2b_users')
+            .update({ password_hash: hashedPassword })
+            .eq('id', partnerId);
+
+        if (error) throw error;
+
+        console.log(`🔑 B2B 파트너 비밀번호 초기화: ID=${partnerId}`);
+
+        return NextResponse.json({ success: true, tempPassword: defaultPassword });
+    } catch (error: any) {
+        console.error('B2B 파트너 비밀번호 초기화 API 오류:', error);
+        return NextResponse.json({ error: '비밀번호 초기화에 실패했습니다.' }, { status: 500 });
     }
 }

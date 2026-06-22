@@ -852,3 +852,74 @@ html.fonts-loaded .order-page .material-symbols-outlined {
     margin: 8px 0;
     line-height: 1.5;
 }
+
+/* ==========================================
+   B2B Theme (Green Accent) Overrides
+   ========================================== */
+.order-page.b2b-theme .order-loading .loading-spinner {
+    border-top-color: #3A8F47 !important;
+}
+.order-page.b2b-theme .order-error button {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page.b2b-theme .form-group input:focus,
+.order-page.b2b-theme .form-group select:focus,
+.order-page.b2b-theme .message-select:focus,
+.order-page.b2b-theme input:focus,
+.order-page.b2b-theme select:focus {
+    border-color: #3A8F47 !important;
+}
+.order-page.b2b-theme .order-footer .btn-payment,
+.order-page.b2b-theme .btn-payment {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page.b2b-theme .order-footer .btn-payment:hover,
+.order-page.b2b-theme .btn-payment:hover {
+    background: #2D6E37 !important;
+}
+.order-page.b2b-theme .btn-confirm {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page.b2b-theme .btn-confirm:hover {
+    background: #2D6E37 !important;
+}
+.order-page.b2b-theme .payment-method-btn:hover {
+    border-color: #3A8F47 !important;
+}
+.order-page.b2b-theme .payment-method-btn.active {
+    border-color: #3A8F47 !important;
+    background: #EDF7ED !important;
+    color: #3A8F47 !important;
+}
+.order-page.b2b-theme .payment-method-btn.active .material-symbols-outlined {
+    color: #3A8F47 !important;
+}
+.order-page.b2b-theme .privacy-modal .btn-confirm,
+.order-page.b2b-theme .privacy-modal .btn-payment {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page.b2b-theme .privacy-modal .btn-confirm:hover,
+.order-page.b2b-theme .privacy-modal .btn-payment:hover {
+    background: #2D6E37 !important;
+}
+.order-page.b2b-theme .terms-checkbox input[type="checkbox"]:checked+.checkmark {
+    background: #3A8F47 !important;
+    border-color: #3A8F47 !important;
+}
+.order-page.b2b-theme .terms-checkbox input[type="checkbox"]:checked+.checkmark::after {
+    color: #FFFFFF !important;
+}
+.order-page.b2b-theme .complete-icon {
+    color: #3A8F47 !important;
+}
+.order-page.b2b-theme .btn-change-recipient {
+    border-color: #3A8F47 !important;
+    color: #3A8F47 !important;
+}
+.order-page.b2b-theme .btn-change-recipient:hover {
+    background: #EDF7ED !important;
+}

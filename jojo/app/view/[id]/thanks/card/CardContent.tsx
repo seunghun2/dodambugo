@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useIsB2b } from '@/lib/b2b';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -82,6 +83,7 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
 };
 
 export default function CardContent({ bugo, bugoId }: CardContentProps) {
+    const isB2b = useIsB2b();
     // thanks_religion이 저장되어 있으면 그걸 사용
     const religionType = (bugo.thanks_religion as ReligionType) || getReligionType(bugo.religion);
     const customMessages = parseCustomMessages(bugo.thanks_message);
@@ -112,7 +114,7 @@ export default function CardContent({ bugo, bugoId }: CardContentProps) {
     const displayMessage = getDisplayMessage();
 
     return (
-        <div className="thanks-page">
+        <div className={`thanks-page ${isB2b ? 'b2b-theme' : ''}`}>
             {/* 배경 이미지 - 상단부터 (탭 없음) */}
             <div className="thanks-bg" style={{ top: 0 }}>
                 <Image

@@ -550,11 +550,11 @@ export default function SignupPage() {
                 </div>
             )}
 
-            {/* Step 3: 사업자 정보 */}
+            {/* Step 3: 소속 정보 */}
             {step === 3 && (
                 <div className={styles.stepContent}>
                     <h2 className={styles.stepTitle}>
-                        사업자 정보<span className={styles.stepTitleSub}>를 입력해 주세요</span>
+                        소속<span className={styles.stepTitleSub}>을 입력해 주세요</span>
                     </h2>
                     <p className={styles.stepDesc}>정산 및 파트너 관리에 필요한 정보입니다.</p>
 
@@ -569,11 +569,11 @@ export default function SignupPage() {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>대표자명</label>
+                        <label className={styles.inputLabel}>성함</label>
                         <input
                             type="text"
                             className={styles.input}
-                            placeholder="대표자 성함"
+                            placeholder="성함 입력"
                             value={form.ownerName}
                             onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
                         />

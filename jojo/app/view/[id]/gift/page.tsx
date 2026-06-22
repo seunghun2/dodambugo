@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import './gift.css';
@@ -73,6 +73,9 @@ const SAMPLE_GIFTS: GiftProduct[] = [
 export default function GiftPage() {
     const params = useParams();
     const router = useRouter();
+    const pathname = usePathname();
+    const isB2b = pathname.startsWith('/b2b');
+    const pathPrefix = isB2b ? '/b2b' : '';
     const bugoId = params?.id as string;
 
     const [bugoInfo, setBugoInfo] = useState<BugoInfo | null>(null);
@@ -103,7 +106,7 @@ export default function GiftPage() {
     };
 
     const handleSelectProduct = (product: GiftProduct) => {
-        router.push(`/view/${bugoId}/gift/${product.id}`);
+        router.push(`${pathPrefix}/view/${bugoId}/gift/${product.id}`);
     };
 
     const formatPrice = (price: number) => {

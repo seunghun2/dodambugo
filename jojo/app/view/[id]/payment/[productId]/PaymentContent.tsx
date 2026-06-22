@@ -1,9 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 import '@/app/view/[id]/order/[productId]/order.css';
 
 // INNOPAY 타입 선언
@@ -60,6 +61,8 @@ interface PaymentContentProps {
 
 export default function PaymentContent({ initialBugo, initialProduct, bugoId, productId }: PaymentContentProps) {
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
     const bugo = initialBugo;
     const product = initialProduct;
 
@@ -169,6 +172,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     payment_method: paymentMethod,
                     payment_status: 'pending', // 결제 대기 상태
                     moid: moid, // 주문번호 저장
+                    partner_data: orderData.partner_data || null,
                 }),
             });
 
@@ -214,7 +218,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
-                returnUrl: `${window.location.origin}/view/${bugoId}/payment/callback`,
+                returnUrl: `${window.location.origin}${pathPrefix}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
                 mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id, originalTaxFreeAmt: String(product.price) }),
                 vBankExpDate: paymentMethod === 'virtual' ? getVBankExpDate() : '', // 가상계좌 입금기한
@@ -269,7 +273,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     setSdkLoaded(true);
                 }}
             />
-            <div className="order-page">
+            <div className={`order-page payment-page ${isB2b ? 'b2b-theme' : ''}`}>
                 {/* 헤더 */}
                 <header className="order-header">
                     <button className="back-btn" onClick={() => router.back()}>
@@ -360,7 +364,10 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                             <div className="modal-header">
                                 <h3>개인정보 수집/제공 동의</h3>
                                 <button className="modal-close" onClick={() => setPrivacyModalOpen(false)}>
-                                    <span className="material-symbols-outlined">close</span>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
                                 </button>
                             </div>
                             <div className="modal-content">

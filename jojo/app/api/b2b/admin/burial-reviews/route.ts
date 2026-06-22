@@ -30,7 +30,7 @@ export async function GET() {
         const { data: bugos } = await supabase
             .from('bugo')
             .select('bugo_number, mourner_name, phone_password, applicant_phone, funeral_home, deceased_name, b2b_user_id')
-            .in('bugo_number', bugoNumbers.map(Number));
+            .in('bugo_number', bugoNumbers.map(String));
 
         if (!bugos || bugos.length === 0) {
             return NextResponse.json({ success: true, reviews: [] });

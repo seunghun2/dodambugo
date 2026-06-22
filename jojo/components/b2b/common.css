@@ -243,3 +243,169 @@ body {
   border-radius: 2px 2px 0 0;
   transition: all var(--transition-spring);
 }
+
+/* ==========================================================================
+   부고온 B2B 전용 뷰/주문/결제 페이지 테마 오버라이드 (초록색 #3A8F47 일괄 변경)
+   B2C 일반페이지에는 영향을 주지 않고 B2B 도메인/경로 내에서만 작동합니다.
+   ========================================================================== */
+
+/* 1. Condolence (조의금 카드결제) */
+.condolence-page .form-input:focus {
+    border-color: #3A8F47 !important;
+}
+.condolence-page .amount-button:hover {
+    border-color: #3A8F47 !important;
+}
+.condolence-page .amount-button.selected {
+    background: #EDF7ED !important;
+    border-color: #3A8F47 !important;
+    color: #3A8F47 !important;
+}
+.condolence-page .payment-method-btn:hover {
+    border-color: #3A8F47 !important;
+}
+.condolence-page .payment-method-btn.active {
+    border-color: #3A8F47 !important;
+    background: #EDF7ED !important;
+    color: #3A8F47 !important;
+}
+.condolence-page .payment-method-btn.active svg {
+    color: #3A8F47 !important;
+}
+.condolence-page .agreement-label input[type="checkbox"]:checked {
+    accent-color: #3A8F47 !important;
+}
+.condolence-page .agreement-label input[type="checkbox"] {
+    accent-color: #3A8F47 !important;
+}
+.condolence-page .submit-button.active {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.condolence-page .submit-button.active:hover {
+    background: #2D6E37 !important;
+}
+.condolence-page .confirm-modal-btn {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+
+/* 2. Condolence History (조의금 내역) */
+.history-page .history-header {
+    border-top-color: #3A8F47 !important;
+}
+.history-page .auth-box .form-input:focus {
+    border-color: #3A8F47 !important;
+}
+.history-page .auth-box .btn-auth {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.history-page .btn-action-primary {
+    background: #3A8F47 !important;
+    border-color: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+
+/* 3. Flower Detail (화환 상세) */
+.flower-detail-page .flower-detail-error button {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.flower-detail-page .strip-thumb.active {
+    border-color: #3A8F47 !important;
+}
+.flower-detail-page .flower-detail-footer .btn-order {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.flower-detail-page .flower-detail-footer .btn-order:hover {
+    background: #2D6E37 !important;
+}
+
+/* 4. Order Form (화환 주문서) */
+.order-page .order-header {
+    border-top: 3px solid #3A8F47 !important;
+}
+.order-page .step-badge {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page .form-input:focus,
+.order-page .form-textarea:focus,
+.order-page .form-select:focus,
+.order-page .form-group input:focus,
+.order-page input:focus {
+    border-color: #3A8F47 !important;
+}
+.order-page .order-footer .btn-payment {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page .order-footer .btn-payment:hover {
+    background: #2D6E37 !important;
+}
+.order-page .mourner-select-btn {
+    border-color: #3A8F47 !important;
+    color: #3A8F47 !important;
+}
+.order-page .mourner-select-btn:hover {
+    background: #EDF7ED !important;
+}
+.order-page .btn-mourner-add {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.order-page .btn-mourner-add:hover {
+    background: #2D6E37 !important;
+}
+
+/* 5. Payment Page (화환 결제창) */
+.payment-page .order-header {
+    border-top: 3px solid #3A8F47 !important;
+}
+.payment-page .form-group input:focus,
+.payment-page input:focus {
+    border-color: #3A8F47 !important;
+}
+.payment-page .payment-method-btn:hover {
+    border-color: #3A8F47 !important;
+}
+.payment-page .payment-method-btn.active {
+    border-color: #3A8F47 !important;
+    background: #EDF7ED !important;
+    color: #3A8F47 !important;
+}
+.payment-page .payment-method-btn.active svg {
+    color: #3A8F47 !important;
+}
+.payment-page .agreement-label input[type="checkbox"] {
+    accent-color: #3A8F47 !important;
+}
+.payment-page .btn-payment {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.payment-page .btn-payment:hover {
+    background: #2D6E37 !important;
+}
+
+/* 6. Thanks (감사 전송) */
+.thanks-page .tab-btn.active {
+    border-color: #3A8F47 !important;
+    color: #3A8F47 !important;
+}
+.thanks-page .btn-action-primary {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.thanks-page .btn-action-primary:hover {
+    background: #2D6E37 !important;
+}
+.thanks-page .card-cta-btn {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.thanks-page .card-cta-btn:active {
+    background: #2D6E37 !important;
+}

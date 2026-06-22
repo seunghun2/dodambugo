@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import styles from './BottomTabBar.module.css';
 import { B2BIcon } from './B2BIcon';
 
@@ -11,14 +12,16 @@ const tabs = [
   { id: 'settings', label: '설정', href: '/b2b/settings' },
 ] as const;
 
-export function BottomTabBar() {
+function BottomTabBarContent() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectMode = searchParams ? searchParams.get('select') : null;
 
   return (
     <nav className={styles.tabBar}>
       {tabs.map((tab) => {
-        const active = pathname.startsWith(tab.href);
+        const active = pathname.startsWith(tab.href) && !(tab.id === 'manage' && selectMode);
         const strokeWidth = active ? 1.8 : 1.5;
 
         return (
@@ -38,5 +41,13 @@ export function BottomTabBar() {
         );
       })}
     </nav>
+  );
+}
+
+export function BottomTabBar() {
+  return (
+    <Suspense fallback={null}>
+      <BottomTabBarContent />
+    </Suspense>
   );
 }

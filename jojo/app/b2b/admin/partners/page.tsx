@@ -24,6 +24,7 @@ interface Partner {
     status: 'pending' | 'approved' | 'rejected' | 'blocked';
     created_at: string;
     balance: number;
+    last_bugo_at?: string | null;
 }
 
 export default function PartnersPage() {
@@ -101,6 +102,34 @@ export default function PartnersPage() {
         }
     };
 
+    // 비밀번호 초기화 ('00000000' 기본값 설정)
+    const handleResetPassword = async (partnerId: string, companyName: string) => {
+        if (!confirm(`[${companyName}] 파트너의 비밀번호를 초기화하시겠습니까?\n초기화 시 비밀번호는 '00000000'(숫자 0 8자리)으로 변경됩니다.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/b2b/admin/partners', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ partnerId }),
+            });
+
+            if (!res.ok) {
+                throw new Error('비밀번호 초기화에 실패했습니다.');
+            }
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`비밀번호가 성공적으로 초기화되었습니다.\n초기화된 비밀번호: ${data.tempPassword}`);
+            } else {
+                alert(data.error || '오류가 발생했습니다.');
+            }
+        } catch (err: any) {
+            alert(err.message || '네트워크 오류가 발생했습니다.');
+        }
+    };
+
     const getStatusBadge = (status: Partner['status']) => {
         switch (status) {
             case 'pending':
@@ -136,7 +165,7 @@ export default function PartnersPage() {
             return;
         }
 
-        const headers = ['가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', '예치금 잔고', '나의 추천인 코드', '가입상태'];
+        const headers = ['가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', '예치금 잔고', '나의 추천인 코드', '가입상태', '최근 들어온 일시'];
         const rows = partners.map(p => [
             formatDate(p.created_at),
             p.company_name,
@@ -147,7 +176,8 @@ export default function PartnersPage() {
             p.account_holder || '미등록',
             String(p.balance),
             p.my_referral_code,
-            p.status === 'pending' ? '승인대기' : p.status === 'approved' ? '승인완료' : p.status === 'rejected' ? '가입반려' : '계정차단'
+            p.status === 'pending' ? '승인대기' : p.status === 'approved' ? '승인완료' : p.status === 'rejected' ? '가입반려' : '계정차단',
+            p.last_bugo_at ? formatDate(p.last_bugo_at) : '-'
         ]);
 
         const csvContent = 
@@ -240,6 +270,7 @@ export default function PartnersPage() {
                                     <th>예치금 잔고</th>
                                     <th>추천인 코드</th>
                                     <th>상태</th>
+                                    <th>최근 들어온 일시</th>
                                     <th>액션</th>
                                 </tr>
                             </thead>
@@ -266,6 +297,9 @@ export default function PartnersPage() {
                                             {partner.my_referral_code}
                                         </td>
                                         <td>{getStatusBadge(partner.status)}</td>
+                                        <td style={{ fontSize: '13px', color: '#64748b' }}>
+                                            {partner.last_bugo_at ? formatDate(partner.last_bugo_at) : '-'}
+                                        </td>
                                         <td>
                                             <div className={styles.btnGroup}>
                                                 {partner.status === 'pending' && (
@@ -312,6 +346,16 @@ export default function PartnersPage() {
                                                         </div>
                                                     </button>
                                                 )}
+                                                <button 
+                                                    className={`${styles.actionBtn} ${styles.resetPwBtn}`}
+                                                    onClick={() => handleResetPassword(partner.id, partner.company_name)}
+                                                    title="비밀번호 초기화"
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <IconRefresh stroke={1.5} size={14} />
+                                                        <span>비번 초기화</span>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

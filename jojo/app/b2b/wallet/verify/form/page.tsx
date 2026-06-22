@@ -210,7 +210,7 @@ export default function VerifyFormPage() {
             <header className={styles.header}>
                 <button className={styles.backBtn} onClick={() => router.push('/b2b/wallet/verify')}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                        <polyline points="15 18 9 12 15 6" />
                     </svg>
                 </button>
             </header>

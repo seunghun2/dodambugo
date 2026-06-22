@@ -175,17 +175,11 @@ export default function B2BInquiryPage() {
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
+            <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <span className={styles.headerTitle}>1:1 문의</span>
-        <button className={styles.menuBtn} onClick={() => router.push('/b2b/settings')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+        <div className={styles.headerRightPlaceholder} />
       </header>
 
       {/* 탭 헤더 */}

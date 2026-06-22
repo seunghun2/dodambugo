@@ -213,6 +213,11 @@
   color: #8E94A0;
 }
 
+.badgeThanksSent {
+  background: #EBF3FF;
+  color: #1E6FD9;
+}
+
 /* 확인 팝업 모달 오버레이 */
 .modalOverlay {
   position: fixed;
@@ -383,6 +388,28 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.btnModalWreath {
+  width: 100%;
+  height: 48px;
+  background: #FFF5F5;
+  color: #E84C4C;
+  border: 1px solid #FFE3E3;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s ease;
+}
+
+.btnModalWreath:active {
+  background: #FFE8E8;
 }
 
 /* 바텀시트 필터 */

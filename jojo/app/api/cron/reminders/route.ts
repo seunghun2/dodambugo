@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
                     const isB2B = !!draft.b2b_user_id;
                     const brand = isB2B ? '부고온' : '마음부고';
                     const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
+                    const templateId = draft.template_id || 'basic';
                     const continueUrl = `https://${domain}/create/${templateId}?draft=${draft.id}`;
 
                     await sendSMS(phone, `[${brand}] 작성 중인 부고장이 있습니다.

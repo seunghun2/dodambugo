@@ -35,6 +35,10 @@
   justify-content: center;
 }
 
+.headerRightPlaceholder {
+  width: 32px;
+}
+
 .headerTitle {
   font-size: 18px;
   font-weight: 700;

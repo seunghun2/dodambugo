@@ -324,7 +324,10 @@ function CreatePageContent() {
                                         const notice = document.getElementById('templateNotice');
                                         if (notice) notice.style.display = 'none';
                                     }}>
-                                        <span className="material-symbols-outlined">close</span>
+                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                             <line x1="18" y1="6" x2="6" y2="18"></line>
+                                             <line x1="6" y1="6" x2="18" y2="18"></line>
+                                         </svg>
                                     </button>
                                 </div>
                             )}
@@ -884,7 +887,10 @@ function CreatePageContent() {
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #eee' }}>
                             <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 600 }}>{previewTemplate.name} 미리보기</h3>
                             <button type="button" onClick={() => setPreviewTemplate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#666' }}>close</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
                             </button>
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>

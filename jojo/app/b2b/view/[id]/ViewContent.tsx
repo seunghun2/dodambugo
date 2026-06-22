@@ -311,10 +311,8 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     }, [bugo.id]);
 
 
-    // 스크롤 시 플로팅 화환 버튼 표시 (상주가 아닐 때만)
+    // 스크롤 시 플로팅 화환 버튼 표시
     useEffect(() => {
-        if (isOwner) return; // 상주는 표시 안 함
-
         const handleScroll = () => {
             const scrollY = window.scrollY;
             if (scrollY > 100) {
@@ -326,33 +324,33 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [isOwner]);
+    }, []);
 
     // 🚀 Prefetch: 모달 열릴 때 주문/상세 페이지 미리 로드
     useEffect(() => {
-        if (flowerModalOpen && selectedFlower) {
-            router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
-            router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
+        if (mounted && flowerModalOpen && selectedFlower) {
+            router.prefetch(`/b2b/view/${params.id}/order/${selectedFlower}`);
+            router.prefetch(`/b2b/view/${params.id}/flower/${selectedFlower}`);
         }
-    }, [flowerModalOpen, selectedFlower, router, params.id]);
+    }, [mounted, flowerModalOpen, selectedFlower, router, params.id]);
 
     // 🚀 Prefetch: 상품 변경 시 해당 페이지 미리 로드
     useEffect(() => {
-        if (selectedFlower) {
-            router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
-            router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
+        if (mounted && selectedFlower) {
+            router.prefetch(`/b2b/view/${params.id}/order/${selectedFlower}`);
+            router.prefetch(`/b2b/view/${params.id}/flower/${selectedFlower}`);
         }
-    }, [selectedFlower, router, params.id]);
+    }, [mounted, selectedFlower, router, params.id]);
 
     // 🚀 초기 Prefetch: 모든 상품 페이지 미리 로드 (페이지 로드 시)
     useEffect(() => {
-        if (flowerProducts.length > 0) {
+        if (mounted && flowerProducts.length > 0) {
             flowerProducts.forEach(product => {
-                router.prefetch(`/view/${params.id}/order/${product.sort_order}`);
-                router.prefetch(`/view/${params.id}/flower/${product.sort_order}`);
+                router.prefetch(`/b2b/view/${params.id}/order/${product.sort_order}`);
+                router.prefetch(`/b2b/view/${params.id}/flower/${product.sort_order}`);
             });
         }
-    }, [flowerProducts, router, params.id]);
+    }, [mounted, flowerProducts, router, params.id]);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -1207,7 +1205,7 @@ ${url}
                                                         fontWeight: 500
                                                     }}
                                                     onClick={() => {
-                                                        window.location.href = `/view/${params.id}/condolence?m=${i}`;
+                                                        window.location.href = `/b2b/view/${params.id}/condolence?m=${i}`;
                                                     }}
                                                 >
                                                     카드결제
@@ -1222,9 +1220,8 @@ ${url}
                 </div>
             )}
 
-            {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 일반 장례일 때만 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                mounted && !isOwner && !bugo.hide_flower_order && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                mounted && !bugo.hide_flower_order && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
                     >
@@ -1237,7 +1234,7 @@ ${url}
                                         sessionStorage.setItem(`product_cache_${selectedFlower}`, JSON.stringify(product));
                                         sessionStorage.setItem(`bugo_cache_${params.id}`, JSON.stringify(bugo));
                                     }
-                                    router.push(`/view/${params.id}/flower/${selectedFlower}`);
+                                    router.push(`/b2b/view/${params.id}/flower/${selectedFlower}`);
                                 }
                             }}
                         >
@@ -1253,7 +1250,7 @@ ${url}
                                         sessionStorage.setItem(`bugo_cache_${params.id}`, JSON.stringify(bugo));
                                     }
                                     gaEvents.startFlowerOrder(String(selectedFlower));
-                                    router.push(`/view/${params.id}/order/${selectedFlower}`);
+                                    router.push(`/b2b/view/${params.id}/order/${selectedFlower}`);
                                 } else {
                                     gaEvents.clickFlowerButton();
                                     gaEvents.openFlowerModal();
@@ -1274,7 +1271,10 @@ ${url}
                         <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
                             <div className="flower-modal-header">
                                 <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
-                                    <span className="material-symbols-outlined">close</span>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
                                 </button>
                                 <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                                 <p className="flower-modal-subtitle">

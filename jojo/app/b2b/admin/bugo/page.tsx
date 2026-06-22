@@ -550,7 +550,7 @@ export default function BugoPage() {
 
                                 <div className={styles.detailActions}>
                                     <Link
-                                        href={`/view/${selectedBugo.bugo_number}`}
+                                        href={`/b2b/view/${selectedBugo.bugo_number}`}
                                         target="_blank"
                                         className={`${styles.btnAction} ${styles.primary}`}
                                     >

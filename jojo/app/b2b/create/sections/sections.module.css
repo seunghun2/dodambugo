@@ -422,12 +422,6 @@
   transform: translateY(-50%);
 }
 
-@media (max-width: 380px) {
-  .dtCardFields {
-    flex-direction: column;
-    gap: 8px;
-  }
-}
 
 /* ===== (레거시) 날짜/시간 그룹 — 다른 섹션 호환용 ===== */
 .dateTimeGroup {
@@ -616,11 +610,6 @@
 
 /* ===== 반응형 ===== */
 @media (max-width: 380px) {
-  .row {
-    flex-direction: column;
-    gap: 0;
-  }
-
   .dateTimeFields {
     flex-wrap: wrap;
   }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -106,6 +107,8 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
 
 export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
     // thanks_religion이 저장되어 있으면 그걸 사용, 없으면 기존 religion 사용
     const initialReligion = (bugo as any).thanks_religion || getReligionType(bugo.religion);
     const [activeTab, setActiveTab] = useState<ReligionType>(initialReligion);
@@ -261,22 +264,58 @@ ${mournerName} 배상`;
     };
 
     return (
-        <div className="thanks-page">
+        <div className={`thanks-page ${isB2b ? 'b2b-theme' : ''}`}>
+            {/* 상단 헤더 */}
+            <header className="thanks-header" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '52px', background: '#FFFFFF', borderBottom: '1px solid #EEEEEE', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110, maxWidth: '430px', margin: '0 auto' }}>
+                <button
+                    className="thanks-back-btn"
+                    onClick={() => {
+                        if (isB2b) {
+                            router.push('/b2b/manage');
+                        } else {
+                            router.push(`/view/${bugoId}`);
+                        }
+                    }}
+                    style={{ position: 'absolute', left: '16px', background: 'none', border: 'none', color: '#333333', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', zIndex: 120 }}
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+                <h1 className="thanks-header-title" style={{ fontFamily: "'Pretendard', sans-serif", fontSize: '16px', fontWeight: 700, color: '#333333', letterSpacing: '-0.02em' }}>감사 인사 보내기</h1>
+            </header>
+
             {/* 탭 네비게이션 */}
-            <div className="thanks-tabs">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        className={`thanks-tab ${activeTab === tab.key ? 'active' : ''}`}
-                        onClick={() => handleTabChange(tab.key)}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
+            <div className="thanks-tabs" style={{ position: 'fixed', top: '52px', left: 0, right: 0, display: 'flex', background: '#FFFFFF', borderBottom: '1px solid #EEEEEE', zIndex: 100, maxWidth: '430px', margin: '0 auto' }}>
+                {tabs.map((tab) => {
+                    const isActive = activeTab === tab.key;
+                    return (
+                        <button
+                            key={tab.key}
+                            className={`thanks-tab ${isActive ? 'active' : ''}`}
+                            onClick={() => handleTabChange(tab.key)}
+                            style={{
+                                flex: 1,
+                                padding: '16px 0',
+                                background: 'none',
+                                border: 'none',
+                                fontFamily: "'Pretendard', sans-serif",
+                                fontSize: '14px',
+                                fontWeight: isActive ? 600 : 500,
+                                color: isActive ? (isB2b ? '#3A8F47' : '#333333') : '#888888',
+                                borderBottom: isActive ? `2px solid ${isB2b ? '#3A8F47' : '#333333'}` : 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {tab.label}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* 카드 래퍼 - 배경 + 콘텐츠 함께 스크롤 */}
-            <div className="thanks-card-wrapper">
+            <div className="thanks-card-wrapper" style={{ position: 'relative', minHeight: 'calc(100vh - 104px - 80px)', margin: '104px 20px 0', overflow: 'hidden' }}>
                 {/* 배경 이미지 */}
                 <div className="thanks-bg">
                     <Image
@@ -325,6 +364,18 @@ ${mournerName} 배상`;
                 <button
                     className="thanks-cta-btn"
                     onClick={() => setIsShareModalOpen(true)}
+                    style={{
+                        flex: 1,
+                        padding: '16px',
+                        backgroundColor: isB2b ? '#3A8F47' : '#FFCC45',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontFamily: "'Pretendard', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: 600,
+                        color: isB2b ? '#FFFFFF' : '#000000',
+                        cursor: 'pointer'
+                    }}
                 >
                     감사장 전달하기
                 </button>
@@ -362,6 +413,11 @@ ${mournerName} 배상`;
                                 className="thanks-modal-save"
                                 onClick={handleSaveMessage}
                                 disabled={isSaving}
+                                style={{
+                                    backgroundColor: isB2b ? '#3A8F47' : '#FFCC45',
+                                    color: isB2b ? '#FFFFFF' : '#000000',
+                                    border: 'none'
+                                }}
                             >
                                 {isSaving ? '저장 중...' : '저장하기'}
                             </button>

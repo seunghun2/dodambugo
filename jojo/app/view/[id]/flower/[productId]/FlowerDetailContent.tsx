@@ -1,10 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
+import { useIsB2b } from '@/lib/b2b';
 import 'swiper/css';
 import './flower-detail.css';
 
@@ -25,6 +26,8 @@ interface FlowerDetailContentProps {
 
 export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDetailContentProps) {
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
     const product = initialProduct;
     const productNumber = product.sort_order; // URL용 (정수)
     const [selectedImage, setSelectedImage] = useState(0);
@@ -43,7 +46,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
     };
 
     return (
-        <div className="flower-detail-page">
+        <div className={`flower-detail-page ${isB2b ? 'b2b-theme' : ''}`}>
             {/* 헤더 */}
             <header className="flower-detail-header">
                 <button className="back-btn" onClick={() => router.back()}>
@@ -203,7 +206,7 @@ export default function FlowerDetailContent({ initialProduct, bugoId }: FlowerDe
             <div className="flower-detail-footer">
                 <button
                     className="btn-order"
-                    onClick={() => router.push(`/view/${bugoId}/order/${productNumber}`)}
+                    onClick={() => router.push(`${pathPrefix}/view/${bugoId}/order/${productNumber}`)}
                 >
                     주문하기
                 </button>

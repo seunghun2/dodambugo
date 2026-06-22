@@ -2,6 +2,52 @@
 
 ## 2026-06-22
 
+### B2B 대시보드 직접 화환 주문 플로우 구축 및 감사장 404 라우팅 개선
+- **대시보드 화환 주문 버튼 & 아이콘 개선**:
+  - `app/b2b/dashboard/page.tsx` 내의 화환 주문 버튼 링크를 기존 부고 선택 창 대신 직접 화환 리스트(`/b2b/flower`)로 연결되도록 변경하고, 햅쌀/해 아이콘 대신 직관적인 꽃 아이콘으로 교체하였습니다.
+- **B2B 전용 화환 리스트 및 주문서 화면 신설**:
+  - `app/b2b/flower/page.tsx` 및 `flower.module.css`: DB의 활성 상품 목록을 로드하여 깔끔한 모바일 규격의 카드 목록으로 표시하는 전용 페이지를 구축했습니다.
+  - `app/b2b/flower/order/[productId]/page.tsx` 및 `OrderContent.tsx`, `order.module.css`: 선택한 화환에 대한 주문 상세 페이지를 구현했습니다. 상주 정보 입력 단계에서 자신의 등록된 부고장 목록을 선택해 자동 입력(Read-only 상태로 변환)할 수도 있고, 타 장례식장의 경우 직접 입력도 지원합니다.
+  - 직접 입력하여 주문하는 경우, 기존의 PG 결제/콜백/슬랙 등 기존 흐름과 100% 호환되도록 Supabase에 임시 `bugo` 레코드를 자동 인서트하고 결제창(`/view/[id]/payment/[productId]`)으로 넘기도록 안전하게 우회 처리했습니다.
+- **B2B 파트너 정산 수당 적립 예외 로직 보완**:
+  - `app/view/[id]/payment/[productId]/PaymentContent.tsx` 및 `app/api/flower-orders/route.ts`에 `partner_data` 필드 연동을 추가해 주문자가 B2B 파트너일 때 파트너 ID가 주문 레코드에 안전하게 보존되도록 개선했습니다.
+  - `app/api/payment/innopay/approve/route.ts` 및 `webhook/route.ts` 정산 배치 로직을 업데이트하여, 부고 소유자뿐만 아니라 주문서의 `partner_data.b2b_user_id`를 검출해 직접 입력 주문 시에도 파트너에게 10,000원의 판매 정산 수당이 정상 지급되도록 보완했습니다.
+- **B2B 서브도메인 내 감사장 경로 404 버그 해결 및 헤더 뒤로가기 스타일 복원**:
+  - B2B 서브도메인에서 `/view/[id]/thanks` 경로가 미들웨어에 의해 `/b2b/view/[id]/thanks`로 리라이팅될 때 라우트가 없어 404가 나던 오류를 해결하기 위해 `app/b2b/view/[id]/thanks/page.tsx` 래퍼 페이지를 신설하여 B2C 화면을 그대로 포팅/공유하도록 처리했습니다.
+  - `ThanksContent.tsx` 내의 감사장 헤더 및 뒤로가기 버튼(`thanks-header`, `thanks-back-btn`)이 마크업에는 정의되어 있었으나 `thanks.css` 내 스타일 누락으로 인해 화면 상단 탭에 가려져 보이지 않던 문제를 헤더 고정 스타일 정의 및 탭/래퍼 마진(탑 오프셋 104px) 조정으로 해결하여 화면에 정상 노출되도록 복원했습니다.
+
+### B2B 모바일 부고장 뷰 404 및 주소창 b2b/ 누락 문제 해결
+- **B2B 뷰 진입 경로 수정**:
+  - `app/b2b/admin/bugo/page.tsx` 내의 "부고장 보기" 링크 주소를 `/b2b/view/${selectedBugo.bugo_number}`로 수정하여 브라우저 주소창에 `/b2b` 프리픽스가 정상적으로 표시 및 유지되도록 수정했습니다.
+  - `app/b2b/manage/page.tsx` 내의 "감사장 전송" 링크 주소를 `/b2b/view/${b.bugo_number}/thanks`로 수정하였습니다.
+- **B2B 뷰 하위 404 에러 방지용 래퍼 페이지 구축**:
+  - `/app/b2b/view/[id]` 하위에 일반 B2C 뷰에서 사용되는 상세/주문/결제 관련 경로들에 대응하는 **9개의 B2B용 래퍼 페이지**를 신설하여 404 에러를 원천 해결하였습니다:
+    - `/app/b2b/view/[id]/flower/[productId]/page.tsx`
+    - `/app/b2b/view/[id]/order/[productId]/page.tsx`
+    - `/app/b2b/view/[id]/payment/[productId]/page.tsx`
+    - `/app/b2b/view/[id]/payment/callback/page.tsx`
+    - `/app/b2b/view/[id]/condolence/page.tsx`
+    - `/app/b2b/view/[id]/condolence/complete/page.tsx`
+    - `/app/b2b/view/[id]/condolence/history/page.tsx`
+    - `/app/b2b/view/[id]/gift/page.tsx`
+    - `/app/b2b/view/[id]/thanks/card/page.tsx`
+    - `/app/b2b/view/[id]/order/complete/page.tsx`
+    - `/app/b2b/view/[id]/order/vbank-pending/page.tsx`
+- **B2C/B2B 공용 컴포넌트의 동적 주소 프리픽스 대응**:
+  - B2C 공용 클라이언트 컴포넌트(`CondolenceContent`, `FlowerDetailContent`, `OrderContent`, `PaymentContent`, `ThanksContent`, `GiftPage`, `OrderCompletePage`, `VBankPendingPage`, `PaymentCallbackPage`)들에서 현재 URL 경로를 감지하여 주소창이 `/b2b/view/...`로 시작하면 다음 흐름 및 결제 콜백 등의 리다이렉트 시에도 자동으로 `/b2b` 프리픽스를 유지하도록 수정했습니다.
+  - `app/b2b/view/[id]/ViewContent.tsx` 내의 모든 prefetch 및 redirect 경로를 B2B 하위 경로(`/b2b/view/...`)로 수정하였습니다.
+- **Next.js Router prefetch 런타임 에러 수정**:
+  - `ViewContent.tsx` (B2C & B2B) 내의 세 가지 prefetch `useEffect` 훅에 `mounted` 검사(`if (mounted && ...)`)를 추가하여, Next.js hydration 또는 TurboPack 개발 환경에서 라우터가 완전히 로드되기 전에 `router.prefetch`가 호출되어 발생하던 `Router action dispatched before initialization` 런타임 에러를 해결했습니다.
+
+### B2B 부고장 상세 정보 확인 모달 개선
+- **화환 주문하기 버튼 제거**:
+  - `app/b2b/manage/page.tsx` 내의 모바일 부고장 상세 정보 확인 바텀시트 모달에서 불필요했던 "화환 주문하기" 버튼을 제거하였습니다.
+
+### B2B 하단 탭바 선택 모드(답례문/화환) 네비게이션 활성화 버그 수정
+- **하단 탭 활성화 로직 개선**:
+  - `components/b2b/BottomTabBar.tsx`에서 대시보드로부터 '답례문 보내기' 또는 '화환 보내기' 버튼을 클릭하여 이동했을 때(URL에 `?select=thanks` 또는 `?select=flower` 쿼리 파라미터가 있을 때) 하단 '부고' 탭이 활성화 상태로 표시되지 않도록 수정하였습니다.
+  - Next.js App Router 빌드 시 정적 분석 에러 및 수화(hydration) 경고 방지를 위해 `BottomTabBar` 내부를 `Suspense` 바운더리로 감싸도록 최적화했습니다.
+
 ### B2B 전용 서브도메인 라우팅 실서버 배포 완료
 - **Vercel 실서버(dodam-next) 배포 연동**:
   - 기존 테스트 프로젝트(`jojo`)로 잘못 연동되어 환경 변수가 누락되었던 문제를 로컬 작업 폴더를 실서버 프로젝트인 `dodam-next`로 올바르게 재연동하여 해결하였습니다.

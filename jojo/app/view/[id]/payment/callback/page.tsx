@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation';
 import { gaEvents } from '@/components/GoogleAnalytics';
 
 // 모듈 레벨: React StrictMode에서도 중복 실행 완전 차단
@@ -11,6 +11,9 @@ export default function PaymentCallbackPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const params = useParams();
+    const pathname = usePathname();
+    const isB2b = pathname.startsWith('/b2b');
+    const pathPrefix = isB2b ? '/b2b' : '';
     const routeBugoId = params.id as string;  // URL 경로에서 id 추출 (폴백용)
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [message, setMessage] = useState('결제를 처리하고 있습니다...');
@@ -104,7 +107,7 @@ export default function PaymentCallbackPage() {
 
                 // 입금 대기 페이지로 이동
                 setTimeout(() => {
-                    router.push(`/view/${finalBugoId}/order/vbank-pending`);
+                    router.push(`${pathPrefix}/view/${finalBugoId}/order/vbank-pending`);
                 }, 1000);
                 return;
             }
@@ -220,7 +223,7 @@ export default function PaymentCallbackPage() {
                         if (orderNumber && orderNumber.startsWith('CO')) {
                             router.push(`/order/${orderNumber}`);
                         } else {
-                            router.push(`/view/${finalBugoId2}/condolence/complete`);
+                            router.push(`${pathPrefix}/view/${finalBugoId2}/condolence/complete`);
                         }
                     }, 1000);
                     return;
@@ -232,7 +235,7 @@ export default function PaymentCallbackPage() {
                         router.push(`/order/${orderNumber}`);
                     } else {
                         if (finalBugoId2) {
-                            router.push(`/view/${finalBugoId2}/order/complete`);
+                            router.push(`${pathPrefix}/view/${finalBugoId2}/order/complete`);
                         } else {
                             router.push('/');
                         }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 interface VBankInfo {
@@ -18,6 +18,9 @@ interface VBankInfo {
 export default function VBankPendingPage() {
     const params = useParams();
     const router = useRouter();
+    const pathname = usePathname();
+    const isB2b = pathname.startsWith('/b2b');
+    const pathPrefix = isB2b ? '/b2b' : '';
     const bugoId = params.id as string;
     const [vbankInfo, setVbankInfo] = useState<VBankInfo | null>(null);
 
@@ -66,7 +69,6 @@ export default function VBankPendingPage() {
             minHeight: '100vh',
             backgroundColor: '#f8f9fa',
         }}>
-            {/* 헤더 */}
             <div style={{
                 textAlign: 'center',
                 padding: '40px 0',
@@ -76,7 +78,7 @@ export default function VBankPendingPage() {
                     height: '64px',
                     margin: '0 auto 16px',
                     borderRadius: '50%',
-                    backgroundColor: '#FFC107',
+                    backgroundColor: isB2b ? '#3A8F47' : '#FFC107',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -108,14 +110,14 @@ export default function VBankPendingPage() {
                 marginBottom: '20px',
             }}>
                 <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>입금은행</p>
+                    <p style={{ fontSize: '13px', color: '#88', marginBottom: '4px' }}>입금은행</p>
                     <p style={{ fontSize: '18px', fontWeight: 600, color: '#1A1A1A' }}>
                         {vbankInfo.bankName}
                     </p>
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>계좌번호</p>
+                    <p style={{ fontSize: '13px', color: '#88', marginBottom: '4px' }}>계좌번호</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <p style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', letterSpacing: '1px' }}>
                             {vbankInfo.accountNo}
@@ -124,7 +126,7 @@ export default function VBankPendingPage() {
                             onClick={copyAccountNo}
                             style={{
                                 padding: '6px 12px',
-                                backgroundColor: '#4A7C59',
+                                backgroundColor: isB2b ? '#3A8F47' : '#4A7C59',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '6px',
@@ -138,26 +140,26 @@ export default function VBankPendingPage() {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>예금주</p>
+                    <p style={{ fontSize: '13px', color: '#88', marginBottom: '4px' }}>예금주</p>
                     <p style={{ fontSize: '16px', fontWeight: 500, color: '#1A1A1A' }}>
                         {vbankInfo.depositName || '마음부고'}
                     </p>
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>입금금액</p>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#4A7C59' }}>
+                    <p style={{ fontSize: '13px', color: '#88', marginBottom: '4px' }}>입금금액</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: isB2b ? '#3A8F47' : '#4A7C59' }}>
                         {Number(vbankInfo.amt).toLocaleString()}원
                     </p>
                 </div>
 
                 <div style={{
                     padding: '12px',
-                    backgroundColor: '#FFF3CD',
+                    backgroundColor: isB2b ? '#EDF7ED' : '#FFF3CD',
                     borderRadius: '8px',
-                    border: '1px solid #FFEEBA',
+                    border: isB2b ? '1px solid #C3E6CB' : '1px solid #FFEEBA',
                 }}>
-                    <p style={{ fontSize: '13px', color: '#856404' }}>
+                    <p style={{ fontSize: '13px', color: isB2b ? '#1E4620' : '#856404' }}>
                         ⏰ 입금기한: <strong>{formatExpDate(vbankInfo.expDate)} 23:59</strong>까지
                     </p>
                 </div>
@@ -175,7 +177,7 @@ export default function VBankPendingPage() {
                 </h3>
                 <ul style={{
                     fontSize: '13px',
-                    color: '#666',
+                    color: '#66',
                     paddingLeft: '16px',
                     lineHeight: 1.8,
                 }}>
@@ -187,12 +189,12 @@ export default function VBankPendingPage() {
 
             {/* 버튼 */}
             <Link
-                href={`/view/${bugoId}`}
+                href={`${pathPrefix}/view/${bugoId}`}
                 style={{
                     display: 'block',
                     width: '100%',
                     padding: '16px',
-                    backgroundColor: '#4A7C59',
+                    backgroundColor: isB2b ? '#3A8F47' : '#4A7C59',
                     color: 'white',
                     textAlign: 'center',
                     borderRadius: '12px',

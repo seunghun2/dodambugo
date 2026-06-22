@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useIsB2b } from '@/lib/b2b';
 // supabase는 필요할 때만 동적 로드
 import NaverMap from '@/components/NaverMap';
 import { gaEvents } from '@/components/GoogleAnalytics';
@@ -190,6 +191,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const isB2b = useIsB2b();
 
     // owner=true 파라미터 처리: localStorage에 저장하고 URL에서 제거
     const [isOwner, setIsOwner] = useState(false);
@@ -329,29 +331,29 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
 
     // 🚀 Prefetch: 모달 열릴 때 주문/상세 페이지 미리 로드
     useEffect(() => {
-        if (flowerModalOpen && selectedFlower) {
+        if (mounted && flowerModalOpen && selectedFlower) {
             router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
             router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
         }
-    }, [flowerModalOpen, selectedFlower, router, params.id]);
+    }, [mounted, flowerModalOpen, selectedFlower, router, params.id]);
 
     // 🚀 Prefetch: 상품 변경 시 해당 페이지 미리 로드
     useEffect(() => {
-        if (selectedFlower) {
+        if (mounted && selectedFlower) {
             router.prefetch(`/view/${params.id}/order/${selectedFlower}`);
             router.prefetch(`/view/${params.id}/flower/${selectedFlower}`);
         }
-    }, [selectedFlower, router, params.id]);
+    }, [mounted, selectedFlower, router, params.id]);
 
     // 🚀 초기 Prefetch: 모든 상품 페이지 미리 로드 (페이지 로드 시)
     useEffect(() => {
-        if (flowerProducts.length > 0) {
+        if (mounted && flowerProducts.length > 0) {
             flowerProducts.forEach(product => {
                 router.prefetch(`/view/${params.id}/order/${product.sort_order}`);
                 router.prefetch(`/view/${params.id}/flower/${product.sort_order}`);
             });
         }
-    }, [flowerProducts, router, params.id]);
+    }, [mounted, flowerProducts, router, params.id]);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -624,7 +626,7 @@ ${url}
     };
 
     return (
-        <main className="view-page">
+        <main className={`view-page ${isB2b ? 'b2b-theme' : ''}`}>
             {/* 발인 완료 추모 오버레이 */}
             {showMemorialOverlay && (
                 <div className="memorial-overlay">
@@ -1261,7 +1263,10 @@ ${url}
                         <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
                             <div className="flower-modal-header">
                                 <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
-                                    <span className="material-symbols-outlined">close</span>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
                                 </button>
                                 <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                                 <p className="flower-modal-subtitle">

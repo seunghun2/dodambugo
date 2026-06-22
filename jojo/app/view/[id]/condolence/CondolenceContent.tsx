@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 import '@/app/view/[id]/order/[productId]/order.css';
 import './condolence.css';
 
@@ -113,6 +114,8 @@ const AMOUNT_OPTIONS_FALLBACK = [
 export default function CondolenceContent({ account }: { account: AccountInfo | null }) {
     const params = useParams();
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
 
     const [buyerName, setBuyerName] = useState('');
     const [buyerPhone, setBuyerPhone] = useState('');
@@ -228,7 +231,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
             buyerName: buyerName,
             buyerTel: buyerPhone.replace(/-/g, ''),
             buyerEmail: 'condolence@maeumbugo.co.kr',
-            returnUrl: `${window.location.origin}/view/${params.id}/payment/callback?type=condolence`,
+            returnUrl: `${window.location.origin}${pathPrefix}/view/${params.id}/payment/callback?type=condolence`,
             currency: 'KRW',
             mallReserved: JSON.stringify({
                 bugoId: params.id,
@@ -248,7 +251,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
 
     if (!account) {
         return (
-            <main className="condolence-page">
+            <main className={`condolence-page ${isB2b ? 'b2b-theme' : ''}`}>
                 <header className="condolence-header">
                     <button className="back-button" onClick={() => router.back()}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -261,7 +264,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                 <div className="loading-container">
                     계좌 정보가 없습니다.<br />
                     <button
-                        style={{ marginTop: 16, padding: '12px 24px', background: '#FCC419', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit' }}
+                        style={{ marginTop: 16, padding: '12px 24px', background: isB2b ? '#3A8F47' : '#FCC419', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', color: isB2b ? '#FFFFFF' : 'inherit' }}
                         onClick={() => router.back()}
                     >
                         돌아가기
@@ -293,7 +296,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                     setSdkLoaded(true);
                 }}
             />
-            <main className="condolence-page">
+            <main className={`condolence-page ${isB2b ? 'b2b-theme' : ''}`}>
                 <header className="condolence-header">
                     <button className="back-button" onClick={() => router.back()}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -423,7 +426,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                                     <li className="required-term">
                                         <span className="term-bullet">•</span>
                                         <span className="term-text">개인정보 수집 및 이용안내(필수)</span>
-                                        <a href="/privacy" target="_blank" className="terms-link">
+                                        <a href={isB2b ? '/b2b/condolence-privacy' : '/privacy'} target="_blank" className="terms-link">
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M9 18l6-6-6-6" />
                                             </svg>
@@ -432,7 +435,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                                     <li className="required-term">
                                         <span className="term-bullet">•</span>
                                         <span className="term-text">전자금융거래 이용약관(필수)</span>
-                                        <a href="/terms" target="_blank" className="terms-link">
+                                        <a href={isB2b ? '/b2b/condolence-terms' : '/terms'} target="_blank" className="terms-link">
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M9 18l6-6-6-6" />
                                             </svg>

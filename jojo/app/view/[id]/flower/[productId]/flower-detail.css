@@ -357,3 +357,21 @@
 .flower-detail-footer .btn-order:hover {
     background: #FCC419;
 }
+
+/* ==========================================
+   B2B Theme (Green Accent) Overrides
+   ========================================== */
+.flower-detail-page.b2b-theme .flower-detail-error button {
+    background: #3A8F47;
+    color: #FFFFFF;
+}
+.flower-detail-page.b2b-theme .strip-thumb.active {
+    border-color: #3A8F47;
+}
+.flower-detail-page.b2b-theme .flower-detail-footer .btn-order {
+    background: #3A8F47;
+    color: #FFFFFF;
+}
+.flower-detail-page.b2b-theme .flower-detail-footer .btn-order:hover {
+    background: #2D6E37;
+}

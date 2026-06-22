@@ -28,7 +28,7 @@ export async function GET() {
         const { data: bugos } = await supabase
             .from('bugo')
             .select('bugo_number, mourner_name, phone_password, applicant_phone, funeral_home, deceased_name')
-            .in('bugo_number', bugoNumbers.map(Number));
+            .in('bugo_number', bugoNumbers.map(String));
 
         const bugoMap: Record<string, any> = {};
         bugos?.forEach(b => {

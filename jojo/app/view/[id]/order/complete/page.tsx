@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 import '../[productId]/order.css';
 
 export default function OrderCompletePage() {
     const params = useParams();
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
     const bugoId = params.id as string;
 
     const [orderData, setOrderData] = useState<any>(null);
@@ -125,7 +128,7 @@ export default function OrderCompletePage() {
     }
 
     return (
-        <div className="order-page">
+        <div className={`order-page ${isB2b ? 'b2b-theme' : ''}`}>
             <header className="order-header" style={{ justifyContent: 'center' }}>
                 <h1>주문완료</h1>
             </header>
@@ -286,7 +289,7 @@ export default function OrderCompletePage() {
             {/* 하단 버튼 */}
             <div className="order-footer">
                 <Link
-                    href={`/view/${bugoId}`}
+                    href={`${pathPrefix}/view/${bugoId}`}
                     className="btn-payment"
                     style={{
                         textDecoration: 'none',

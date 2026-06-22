@@ -641,3 +641,49 @@
     font-size: 14px;
     cursor: pointer;
 }
+
+/* ==========================================
+   B2B Theme (Green Accent) Overrides
+   ========================================== */
+.condolence-page.b2b-theme .form-input:focus {
+    border-color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .amount-button:hover {
+    border-color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .amount-button.selected {
+    background: #EDF7ED !important;
+    border-color: #3A8F47 !important;
+    color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .payment-method-btn:hover {
+    border-color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .payment-method-btn.active {
+    border-color: #3A8F47 !important;
+    background: #EDF7ED !important;
+    color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .payment-method-btn.active svg {
+    color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .agreement-label input[type="checkbox"]:checked {
+    accent-color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .agreement-label input[type="checkbox"] {
+    accent-color: #3A8F47 !important;
+}
+.condolence-page.b2b-theme .submit-button.active {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.condolence-page.b2b-theme .submit-button.active:hover {
+    background: #2D6E37 !important;
+}
+.condolence-page.b2b-theme .confirm-modal-btn {
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
+}
+.condolence-page.b2b-theme .confirm-modal-btn:hover {
+    background: #2D6E37 !important;
+}

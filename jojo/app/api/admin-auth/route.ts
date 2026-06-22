@@ -34,14 +34,23 @@ export async function POST(request: NextRequest) {
             }
 
             // 응답에 admin_ip 쿠키 설정 (미들웨어에서 화이트리스트 판별용)
+            const host = request.headers.get('host') || '';
+            const isProdDomain = host.includes('maeumbugo.co.kr');
+
             const response = NextResponse.json({ success: true });
-            response.cookies.set('admin_ip', 'true', {
+            const cookieOptions: any = {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
                 maxAge: 60 * 60 * 24 * 365, // 1년
                 path: '/',
-            });
+            };
+
+            if (isProdDomain) {
+                cookieOptions.domain = '.maeumbugo.co.kr';
+            }
+
+            response.cookies.set('admin_ip', 'true', cookieOptions);
             return response;
         } else {
             return NextResponse.json({ error: 'Invalid password' }, { status: 401 });

@@ -11,6 +11,7 @@ import {
     IconFileText
 } from '@tabler/icons-react';
 import styles from './flowerOrders.module.css';
+import { supabase } from '@/lib/supabase';
 
 interface B2BOrder {
     id: string;
@@ -45,6 +46,8 @@ export default function FlowerOrdersPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const [updating, setUpdating] = useState(false);
+    const [products, setProducts] = useState<any[]>([]);
+    const [changingProduct, setChangingProduct] = useState(false);
     const [notifyLogs, setNotifyLogs] = useState<{ time: string; message: string; type: 'success' | 'error' }[]>([]);
 
     const addNotifyLog = (message: string, type: 'success' | 'error' = 'success') => {
@@ -85,6 +88,44 @@ export default function FlowerOrdersPage() {
     useEffect(() => {
         fetchOrders();
     }, [searchQuery]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        const { data, error } = await supabase
+            .from('flower_products')
+            .select('id, name, price, discount_price, category, is_active, sort_order')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true });
+        if (!error && data) {
+            setProducts(data);
+        }
+    };
+
+    // 상품 변경 함수
+    const updateProduct = async (orderId: string, productName: string, productPrice: number) => {
+        setChangingProduct(true);
+        try {
+            const res = await fetch('/api/flower-orders', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: orderId, product_name: productName, product_price: productPrice }),
+            });
+            if (res.ok) {
+                addNotifyLog(`[상품변경] 상품이 "${productName}" (${productPrice.toLocaleString()}원)으로 변경되었습니다.`);
+                fetchOrders();
+            } else {
+                const data = await res.json();
+                addNotifyLog(`[상품변경 실패] ${data.error || '에러 발생'}`, 'error');
+            }
+        } catch (err: any) {
+            addNotifyLog(`[상품변경 오류] ${err.message || '네트워크 에러'}`, 'error');
+        } finally {
+            setChangingProduct(false);
+        }
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -416,7 +457,37 @@ export default function FlowerOrdersPage() {
                             <div className={styles.detailGroup}>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>상품명</span>
-                                    <span className={styles.detailValue}>{selectedOrder.product_name}</span>
+                                    <select
+                                        value={selectedOrder.product_name}
+                                        onChange={(e) => {
+                                            const selected = products.find(p => p.name === e.target.value);
+                                            if (selected && selected.name !== selectedOrder.product_name) {
+                                                if (confirm(`상품을 "${selected.name}"(${selected.price.toLocaleString()}원)으로 변경하시겠습니까?\n\n※ 변경 후 알림톡 발송 시 변경된 상품명으로 발송됩니다.`)) {
+                                                    updateProduct(selectedOrder.id, selected.name, selected.price);
+                                                }
+                                            }
+                                        }}
+                                        disabled={changingProduct || selectedOrder.status === 'cancelled'}
+                                        style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '6px',
+                                            border: '1px solid #cbd5e1',
+                                            fontSize: '13px',
+                                            fontWeight: '500',
+                                            outline: 'none',
+                                            cursor: selectedOrder.status === 'cancelled' ? 'not-allowed' : 'pointer',
+                                            maxWidth: '220px'
+                                        }}
+                                    >
+                                        {!products.find(p => p.name === selectedOrder.product_name) && (
+                                            <option value={selectedOrder.product_name}>{selectedOrder.product_name}</option>
+                                        )}
+                                        {products.map(p => (
+                                            <option key={p.id} value={p.name}>
+                                                {p.name} ({p.price.toLocaleString()}원)
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>결제금액</span>

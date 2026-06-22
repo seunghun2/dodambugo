@@ -7,7 +7,7 @@ import styles from './sections.module.css';
 interface Props {
   formData: {
     partner_logo_url: string;
-    no_wreath: boolean;
+    hide_flower_order: boolean;
     message: string;
     show_message: boolean;
     death_term: string;
@@ -320,8 +320,8 @@ export default function OptionsSection({ formData, onChange }: Props) {
           </div>
         </div>
         <Toggle
-          checked={formData.no_wreath}
-          onChange={(val) => onChange('no_wreath', val)}
+          checked={formData.hide_flower_order}
+          onChange={(val) => onChange('hide_flower_order', val)}
         />
       </div>
 

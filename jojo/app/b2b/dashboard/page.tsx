@@ -20,6 +20,11 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [balanceVisible, setBalanceVisible] = useState(false);
   const [notices, setNotices] = useState<any[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 데이터 로딩
   const fetchData = useCallback(async () => {
@@ -102,7 +107,7 @@ export default function DashboardPage() {
 
   const fmt = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
 
-  if (!user) return null;
+  if (!mounted || !user) return null;
 
   return (
     <div className={styles.page}>
@@ -166,16 +171,17 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className={styles.featureCard} onClick={() => router.push('/b2b/wallet')}>
+          <div className={styles.featureCard} onClick={() => router.push('/b2b/flower')}>
             <span className={styles.featureLabel}>화환{"\n"}보내기</span>
             <div className={styles.featureIcon}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12"></path>
+                <circle cx="12" cy="12" r="3" fill="currentColor" style={{ opacity: 0.15 }} />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M12 2a3 3 0 0 1 3 3c0 .562 -.259 1.442 -.776 2.64l-.724 1.36l1.76 -1.893c.499 -.6 .922 -1 1.27 -1.205a2.968 2.968 0 0 1 4.07 1.099a3.011 3.011 0 0 1 -1.09 4.098c-.374 .217 -.99 .396 -1.846 .535l-2.664 .366l2.4 .326c1 .145 1.698 .337 2.11 .576a3.011 3.011 0 0 1 1.09 4.098a2.968 2.968 0 0 1 -4.07 1.098c-.348 -.202 -.771 -.604 -1.27 -1.205l-1.76 -1.893l.724 1.36c.516 1.199 .776 2.079 .776 2.64a3 3 0 0 1 -6 0c0 -.562 .259 -1.442 .776 -2.64l.724 -1.36l-1.76 1.893c-.499 .601 -.922 1 -1.27 1.205a2.968 2.968 0 0 1 -4.07 -1.098a3.011 3.011 0 0 1 1.09 -4.098c.374 -.218 .99 -.396 1.846 -.536l2.664 -.366l-2.4 -.325c-1 -.145 -1.698 -.337 -2.11 -.576a3.011 3.011 0 0 1 -1.09 -4.099a2.968 2.968 0 0 1 4.07 -1.099c.348 .203 .771 .604 1.27 1.205l1.76 1.894c-1 -2.292 -1.5 -3.625 -1.5 -4a3 3 0 0 1 3 -3" />
               </svg>
             </div>
           </div>
-          <div className={styles.featureCard} onClick={() => router.push('/b2b/manage')}>
+          <div className={styles.featureCard} onClick={() => router.push('/b2b/manage?select=thanks')}>
             <span className={styles.featureLabel}>답례문{"\n"}보내기</span>
             <div className={styles.featureIcon}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

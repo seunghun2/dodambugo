@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 import styles from './manage.module.css';
@@ -36,13 +36,21 @@ interface BugoItem {
   contact?: string;
   account_info?: string;
   status?: string;
+  thanks_sent?: boolean;
 }
 
-export default function B2BManagePage() {
+function B2BManagePageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectMode = searchParams ? searchParams.get('select') : null;
   const [user, setUser] = useState<User | null>(null);
   const [bugoList, setBugoList] = useState<BugoItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 모달 상태
   const [selectedBugo, setSelectedBugo] = useState<BugoItem | null>(null);
@@ -243,7 +251,7 @@ export default function B2BManagePage() {
     return list;
   }, [bugoList, searchTerm, statusFilter, sortOrder, todayStr]);
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className={styles.page} style={{ justifyContent: 'center', alignItems: 'center' }}>
         <div className={styles.loadingContainer}>
@@ -260,7 +268,7 @@ export default function B2BManagePage() {
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
+            <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <div className={styles.searchBar}>
@@ -288,6 +296,24 @@ export default function B2BManagePage() {
         </div>
       </header>
 
+      {selectMode && (
+        <div style={{
+          backgroundColor: '#F2F4F6',
+          color: '#4E5968',
+          padding: '12px 16px',
+          fontSize: '14px',
+          fontWeight: 700,
+          textAlign: 'center',
+          borderBottom: '1px solid #E5E8EB',
+          letterSpacing: '-0.02em',
+          wordBreak: 'keep-all'
+        }}>
+          {selectMode === 'flower' 
+            ? '근조화환을 보낼 부고장을 선택해주세요.' 
+            : '발인 후 자동으로 답례문이 보내집니다.'}
+        </div>
+      )}
+
       {/* 리스트 건수 및 필터 정렬 버튼 */}
       <div className={styles.listSummary}>
         <span className={styles.countText}>
@@ -298,7 +324,7 @@ export default function B2BManagePage() {
             className={styles.filterButton}
             onClick={() => setShowStatusModal(true)}
           >
-            {statusFilter === 'all' ? '전체' : statusFilter === 'making' ? '제작중' : '발인완료'}
+            {statusFilter === 'all' ? '전체' : statusFilter === 'making' ? '진행중' : '발인완료'}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
               <polyline points="6 9 12 15 18 9" />
             </svg>
@@ -327,13 +353,42 @@ export default function B2BManagePage() {
             const mournersText = getMournersText(b.mourners);
             const locationText = `${b.funeral_home || ''} ${b.room_number || ''}`.trim() || '빈소 정보 없음';
 
+            // Determine badge status
+            let badgeText = isDone ? '발인 완료' : '진행중';
+            let badgeClass = isDone ? styles.badgeDone : styles.badgeMaking;
+
+            if (selectMode === 'thanks') {
+              if (!isDone) {
+                badgeText = '진행중 (발송불가)';
+                badgeClass = styles.badgeMaking;
+              } else {
+                if (b.thanks_sent) {
+                  badgeText = '답례문 발송완료';
+                  badgeClass = styles.badgeThanksSent;
+                } else {
+                  badgeText = '발송 대기';
+                  badgeClass = styles.badgeDone;
+                }
+              }
+            }
+
             return (
               <div
                 key={b.bugo_number}
                 className={styles.itemCard}
                 onClick={() => {
-                  setSelectedBugo(b);
-                  setShowModal(true);
+                  if (selectMode === 'flower') {
+                    router.push(`/b2b/view/${b.bugo_number}?flower=open`);
+                  } else if (selectMode === 'thanks') {
+                    if (!isDone) {
+                      alert('발인 완료 이후에 답례문을 전송할 수 있습니다.');
+                      return;
+                    }
+                    router.push(`/b2b/view/${b.bugo_number}/thanks`);
+                  } else {
+                    setSelectedBugo(b);
+                    setShowModal(true);
+                  }
                 }}
               >
                 <div className={styles.itemMain}>
@@ -344,8 +399,8 @@ export default function B2BManagePage() {
                   <p className={styles.subText}>
                     {mournersText}, {locationText}
                   </p>
-                  <span className={`${styles.badge} ${isDone ? styles.badgeDone : styles.badgeMaking}`}>
-                    {isDone ? '발인 완료' : '제작중'}
+                  <span className={`${styles.badge} ${badgeClass}`}>
+                    {badgeText}
                   </span>
                 </div>
               </div>
@@ -540,7 +595,7 @@ export default function B2BManagePage() {
                   setShowStatusModal(false);
                 }}
               >
-                제작중
+                진행중
               </button>
               <button
                 className={`${styles.bottomSheetItem} ${statusFilter === 'done' ? styles.activeItem : ''}`}
@@ -593,5 +648,20 @@ export default function B2BManagePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function B2BManagePage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.page} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p className={styles.loadingText}>로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <B2BManagePageContent />
+    </Suspense>
   );
 }

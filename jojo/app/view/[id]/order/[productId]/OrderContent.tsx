@@ -1,8 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 import './order.css';
 
 interface FlowerProduct {
@@ -34,6 +35,8 @@ interface OrderContentProps {
 
 export default function OrderContent({ initialBugo, initialProduct, bugoId, productId }: OrderContentProps) {
     const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
     const bugo = initialBugo;
     const product = initialProduct;
 
@@ -119,16 +122,16 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
         // GA: 화환 주문 제출 이벤트
         gaEvents.submitFlowerOrder(productId, product.discount_price || product.price);
         // payment 페이지로 이동
-        router.push(`/view/${bugoId}/payment/${productId}`);
+        router.push(`${pathPrefix}/view/${bugoId}/payment/${productId}`);
     };
 
     // 로딩/에러 처리는 서버 컴포넌트에서 담당
 
     return (
-        <div className="order-page">
+        <div className={`order-page ${isB2b ? 'b2b-theme' : ''}`}>
             {/* 헤더 */}
             <header className="order-header">
-                <button className="back-btn" onClick={() => router.push(`/view/${bugoId}?flower=open`)}>
+                <button className="back-btn" onClick={() => router.push(`${pathPrefix}/view/${bugoId}?flower=open`)}>
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <h1>주문하기</h1>
@@ -250,7 +253,10 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                             <div className="recipient-modal-header">
                                 <h3>상주 변경</h3>
                                 <button className="btn-modal-close" onClick={() => setRecipientModalOpen(false)}>
-                                    <span className="material-symbols-outlined">close</span>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
                                 </button>
                             </div>
                             <div className="recipient-modal-content">

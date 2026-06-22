@@ -61,7 +61,7 @@ export interface BugoFormData {
   show_message: boolean;
   death_term: string;
   partner_logo_url: string;
-  no_wreath: boolean;
+  hide_flower_order: boolean;
   auto_reply: boolean;
 }
 
@@ -98,7 +98,7 @@ const initialFormData: BugoFormData = {
   show_message: false,
   death_term: '별세',
   partner_logo_url: '',
-  no_wreath: false,
+  hide_flower_order: false,
   auto_reply: true,
 };
 
@@ -157,7 +157,9 @@ export default function B2BCreatePage() {
       // [신규 작성 모드] 로그인 파트너의 장례식장 정보 및 자주찾는 식장 정보 자동 완성
       try {
         const user = JSON.parse(userStr);
-        if (user.company_name) {
+        const hasFuneralInCompany = user.company_name && (user.company_name.includes('장례식장') || user.company_name.includes('장례'));
+
+        if (hasFuneralInCompany) {
           // 1. 소속 회사/장례식장명을 기본값으로 설정
           setFormData(prev => ({
             ...prev,
@@ -178,20 +180,6 @@ export default function B2BCreatePage() {
               }));
             } else if (favorites.length > 0) {
               // 매칭되는 항목이 없더라도 자주찾는 목록의 첫 번째 식장으로 채워줌
-              setFormData(prev => ({
-                ...prev,
-                funeral_home: favorites[0].name,
-                address: favorites[0].address || '',
-                funeral_home_tel: favorites[0].tel || '',
-              }));
-            }
-          }
-        } else {
-          // company_name이 없더라도 자주찾는 식장이 등록되어 있다면 첫 번째 항목 자동 채우기
-          const stored = localStorage.getItem('b2b_favorite_facilities');
-          if (stored) {
-            const favorites = JSON.parse(stored);
-            if (favorites.length > 0) {
               setFormData(prev => ({
                 ...prev,
                 funeral_home: favorites[0].name,
@@ -250,7 +238,7 @@ export default function B2BCreatePage() {
           show_message: !!data.message,
           death_term: data.death_term || '별세',
           partner_logo_url: data.partner_logo_url || '',
-          no_wreath: data.no_wreath || false,
+          hide_flower_order: data.hide_flower_order || false,
           auto_reply: data.auto_reply !== false,
         });
 
@@ -292,7 +280,7 @@ export default function B2BCreatePage() {
     setFormData(prev => {
       const next = { ...prev, [field]: value };
       if (field === 'funeral_type' && value === '무빈소장례') {
-        next.no_wreath = true;
+        next.hide_flower_order = true;
       }
       return next;
     });
@@ -420,7 +408,7 @@ export default function B2BCreatePage() {
         message: formData.show_message ? formData.message : null,
         death_term: formData.death_term || '별세',
         partner_logo_url: formData.partner_logo_url || null,
-        no_wreath: formData.no_wreath,
+        hide_flower_order: formData.hide_flower_order,
         auto_reply: formData.auto_reply,
         mourners: JSON.stringify(mourners.filter(m => m.name)),
         account_info: mourners[0]?.bank
@@ -503,7 +491,7 @@ export default function B2BCreatePage() {
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => router.back()}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
+            <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <h1 className={styles.headerTitle}>{isEditMode ? '부고장 수정' : '부고장 제작'}</h1>
