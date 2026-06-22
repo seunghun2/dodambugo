@@ -1,0 +1,370 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: #ffffff;
+  padding-bottom: 90px;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid #F2F4F6;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #1A1F27;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1F27;
+  letter-spacing: -0.02em;
+}
+
+.headerRightPlaceholder {
+  width: 32px;
+}
+
+/* 로딩 & 에러 */
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(58, 143, 71, 0.15);
+  border-left-color: #3A8F47;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #4E5968;
+}
+
+.errorTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1F27;
+  margin-bottom: 16px;
+}
+
+.errorBtn {
+  padding: 12px 24px;
+  background: #3A8F47;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 상품명 섹션 */
+.productTitleSection {
+  text-align: center;
+  padding: 24px 20px 16px;
+}
+
+.productName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1F27;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.productSubtitle {
+  font-size: 14px;
+  color: #8E94A0;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 이미지 슬라이더 */
+.imageSection {
+  position: relative;
+  width: 100%;
+}
+
+.mainSwiper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #F8F9FA;
+}
+
+.swiperImageWrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiperImageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* 하단 오버레이 */
+.imageOverlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+/* 썸네일 스트립 */
+.thumbnailStrip {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stripThumb {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 0;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: -6px;
+  position: relative;
+}
+
+.stripThumb:first-child {
+  margin-left: 0;
+  z-index: 1;
+}
+
+.stripThumb:nth-child(2) {
+  z-index: 2;
+}
+
+.stripThumb:nth-child(3) {
+  z-index: 1;
+}
+
+.stripThumb.active {
+  border-color: #3A8F47;
+  z-index: 3;
+  transform: scale(1.15);
+}
+
+.stripThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 페이지 인디케이터 */
+.pageIndicator {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pageIndicator .divider {
+  opacity: 0.6;
+  margin: 0 2px;
+}
+
+/* 정보 섹션들 */
+.productInfoSection, .deliverySection, .refundSection {
+  padding: 20px;
+  border-top: 8px solid #F8F9FA;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A1F27;
+  margin: 0 0 16px 0;
+}
+
+.infoItem {
+  margin-bottom: 16px;
+}
+
+.infoItem:last-child {
+  margin-bottom: 0;
+}
+
+.infoLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4E5968;
+  margin-bottom: 6px;
+}
+
+.infoContent {
+  font-size: 14px;
+  color: #333F50;
+  line-height: 1.6;
+  white-space: pre-line;
+  margin: 0;
+}
+
+/* 배송 안내 */
+.deliveryNotice {
+  font-size: 13px;
+  color: #8E94A0;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.deliveryItem {
+  margin-bottom: 16px;
+}
+
+.deliveryItem:last-child {
+  margin-bottom: 0;
+}
+
+.deliveryLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333F50;
+  margin-bottom: 4px;
+}
+
+.deliveryItem p {
+  font-size: 13px;
+  color: #4E5968;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 교환/환불 */
+.refundNotice {
+  font-size: 13px;
+  color: #8E94A0;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.refundDesc {
+  font-size: 14px;
+  color: #333F50;
+  margin: 0 0 16px 0;
+}
+
+.refundItem {
+  margin-bottom: 16px;
+}
+
+.refundItem:last-child {
+  margin-bottom: 0;
+}
+
+.refundLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333F50;
+  margin-bottom: 4px;
+}
+
+.refundItem p {
+  font-size: 13px;
+  color: #4E5968;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 푸터 고정 버튼 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px;
+  background: #FFFFFF;
+  border-top: 1px solid #F2F4F6;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+@media (max-width: 480px) {
+  .footer {
+    left: 0;
+    transform: none;
+    max-width: 100%;
+  }
+}
+
+.btnOrder {
+  width: 100%;
+  height: 52px;
+  background: #3A8F47;
+  border: none;
+  border-radius: 26px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(58, 143, 71, 0.2);
+  transition: background 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnOrder:active {
+  background: #2E7238;
+  transform: scale(0.98);
+}

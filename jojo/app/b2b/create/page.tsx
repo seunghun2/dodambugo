@@ -197,6 +197,14 @@ export default function B2BCreatePage() {
 
   const loadBugoData = async (bugoNum: string) => {
     try {
+      const b2bUserStr = typeof window !== 'undefined' ? localStorage.getItem('b2b_user') : null;
+      const b2bUser = b2bUserStr ? JSON.parse(b2bUserStr) : null;
+      if (!b2bUser || !b2bUser.id) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        router.push('/b2b/login');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('bugo')
         .select('*')
@@ -205,6 +213,11 @@ export default function B2BCreatePage() {
       
       if (error) throw error;
       if (data) {
+        if (data.b2b_user_id !== b2bUser.id) {
+          alert('해당 부고장에 대한 관리 권한이 없습니다.');
+          router.push('/b2b/manage');
+          return;
+        }
         setFormData({
           funeral_type: data.funeral_type || '일반장례',
           funeral_home: data.funeral_home || '',

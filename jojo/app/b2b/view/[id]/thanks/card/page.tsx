@@ -1,0 +1,50 @@
+import { createClient } from '@supabase/supabase-js';
+import { notFound } from 'next/navigation';
+import CardContent from '@/app/view/[id]/thanks/card/CardContent';
+import '@/app/view/[id]/thanks/thanks.css';
+import '@/app/view/[id]/thanks/card/card.css';
+
+export const runtime = 'edge';
+
+function getSupabase() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+}
+
+export const revalidate = 60;
+
+interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default async function B2BThanksCardPage({ params }: PageProps) {
+    const { id } = await params;
+    const supabase = getSupabase();
+
+    const isUUID = id.includes('-') && id.length > 10;
+    let data = null;
+
+    if (isUUID) {
+        const result = await supabase
+            .from('bugo')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
+            .eq('id', id)
+            .single();
+        data = result.data;
+    } else {
+        const result = await supabase
+            .from('bugo')
+            .select('id, deceased_name, mourner_name, religion, funeral_date, thanks_message, thanks_religion')
+            .eq('bugo_number', id)
+            .single();
+        data = result.data;
+    }
+
+    if (!data) {
+        notFound();
+    }
+
+    return <CardContent bugo={data} bugoId={id} />;
+}

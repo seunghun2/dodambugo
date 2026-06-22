@@ -593,44 +593,63 @@ export async function POST(request: NextRequest) {
                         try {
                             const partnerId = bugoData.b2b_user_id;
 
-                            // 파트너 예치금 조회
-                            const { data: currentDeposit } = await supabase
-                                .from('deposits')
-                                .select('balance')
-                                .eq('user_id', partnerId)
+                            // B2B 수당율 설정 조회
+                            const { data: feeRateSetting } = await supabase
+                                .from('b2b_settings')
+                                .select('value')
+                                .eq('key', 'b2b_condolence_fee_rate')
                                 .single();
-
-                            if (currentDeposit) {
-                                await supabase
-                                    .from('deposits')
-                                    .update({
-                                        balance: (currentDeposit.balance || 0) + fee,
-                                        updated_at: new Date().toISOString(),
-                                    })
-                                    .eq('user_id', partnerId);
-                            } else {
-                                // 예치금 테이블에 없으면 새로 생성
-                                await supabase
-                                    .from('deposits')
-                                    .insert({
-                                        user_id: partnerId,
-                                        balance: fee,
-                                        updated_at: new Date().toISOString(),
-                                    });
+                            
+                            let rewardRate = 0.05; // 기본값 5%
+                            if (feeRateSetting?.value) {
+                                const parsedVal = parseFloat(feeRateSetting.value);
+                                if (!isNaN(parsedVal)) {
+                                    rewardRate = parsedVal >= 1 ? parsedVal / 100 : parsedVal;
+                                }
                             }
 
-                            // 적립 내역 기록
-                            await supabase
-                                .from('deposit_transactions')
-                                .insert({
-                                    user_id: partnerId,
-                                    amount: fee,
-                                    type: 'condolence_reward',
-                                    description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
-                                    related_order_id: condolenceOrderNumber || moid,
-                                });
+                            const condolenceReward = Math.floor(selectedAmount * rewardRate);
 
-                            console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${fee}원 적립 완료`);
+                            if (condolenceReward > 0) {
+                                // 파트너 예치금 조회
+                                const { data: currentDeposit } = await supabase
+                                    .from('deposits')
+                                    .select('balance')
+                                    .eq('user_id', partnerId)
+                                    .single();
+
+                                if (currentDeposit) {
+                                    await supabase
+                                        .from('deposits')
+                                        .update({
+                                            balance: (currentDeposit.balance || 0) + condolenceReward,
+                                            updated_at: new Date().toISOString(),
+                                        })
+                                        .eq('user_id', partnerId);
+                                } else {
+                                    // 예치금 테이블에 없으면 새로 생성
+                                    await supabase
+                                        .from('deposits')
+                                        .insert({
+                                            user_id: partnerId,
+                                            balance: condolenceReward,
+                                            updated_at: new Date().toISOString(),
+                                        });
+                                }
+
+                                // 적립 내역 기록
+                                await supabase
+                                    .from('deposit_transactions')
+                                    .insert({
+                                        user_id: partnerId,
+                                        amount: condolenceReward,
+                                        type: 'condolence_reward',
+                                        description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
+                                        related_order_id: condolenceOrderNumber || moid,
+                                    });
+
+                                console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${condolenceReward}원 적립 완료 (수당율: ${rewardRate * 100}%)`);
+                            }
                         } catch (b2bCondolenceError) {
                             console.error('❌ [B2B] 조의금 예치금 적립 오류 (결제는 정상):', b2bCondolenceError);
                         }
