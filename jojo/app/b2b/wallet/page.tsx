@@ -25,6 +25,7 @@ export default function WalletPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [identityVerified, setIdentityVerified] = useState(false);
+    const [partnerType, setPartnerType] = useState<'individual' | 'business'>('individual');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -69,6 +70,7 @@ export default function WalletPage() {
             setBalance(data.balance || 0);
             setTransactions(data.transactions || []);
             setIdentityVerified(data.identity_verified || false);
+            setPartnerType(data.partner_type || 'individual');
         } catch (err) {
             console.error('[CLIENT DEBUG] fetchWallet error:', err);
             setError('데이터를 불러오지 못했습니다.');
@@ -330,22 +332,45 @@ export default function WalletPage() {
                                 <div className={styles.emptyState}>환급 신청 및 완료 내역이 없습니다.</div>
                             ) : (
                                 <div className={styles.withdrawList}>
-                                    {filteredWithdraws.map((tx) => {
+                                    {filteredWithdraws.map((tx: any) => {
                                         const rawAmount = Math.abs(tx.amount);
-                                        const tax = Math.floor(rawAmount * 0.033);
-                                        const netAmount = rawAmount - tax;
+                                        const isBiz = tx.partner_type === 'business';
+                                        
+                                        const tax = tx.withholding_tax !== undefined ? (tx.withholding_tax + tx.local_income_tax) : Math.floor(rawAmount * 0.033);
+                                        const vat = tx.vat !== undefined ? tx.vat : Math.floor(rawAmount * 0.1);
+                                        const netAmount = tx.net_amount !== undefined ? tx.net_amount : (isBiz ? rawAmount + vat : rawAmount - tax);
+                                        
+                                        let statusLabel = '환급 완료';
+                                        if (tx.status === 'pending') statusLabel = '환급 대기';
+                                        else if (tx.status === 'rejected') statusLabel = '환급 반려';
+
                                         return (
                                             <div key={tx.id} className={styles.listItem} style={{ alignItems: 'flex-start' }}>
                                                 <span className={styles.txDate} style={{ marginTop: '2px' }}>
                                                     {formatTxDate(tx.created_at)}
                                                 </span>
                                                 <div className={styles.txMain}>
-                                                    <span className={styles.txTitle}>환급 완료</span>
+                                                    <span className={styles.txTitle} style={{ 
+                                                        color: tx.status === 'pending' ? '#E28743' : tx.status === 'rejected' ? '#E53E3E' : 'inherit' 
+                                                    }}>
+                                                        {statusLabel}
+                                                    </span>
                                                     <span className={styles.txSub}>
-                                                        환급신청 {formatCurrency(rawAmount)}원 - 소득공제(3.3%) {formatCurrency(tax)}원 / 최종 환급금 = {formatCurrency(netAmount)}원
+                                                        {isBiz ? (
+                                                            <>
+                                                                환급신청(공급가액) {formatCurrency(rawAmount)}원 + 부가세(10%) {formatCurrency(vat)}원 (세금계산서 발행) / 최종 지급액 = {formatCurrency(netAmount)}원
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                환급신청 {formatCurrency(rawAmount)}원 - 소득공제(3.3%) {formatCurrency(tax)}원 / 최종 지급액 = {formatCurrency(netAmount)}원
+                                                            </>
+                                                        )}
                                                     </span>
                                                 </div>
-                                                <span className={styles.txAmountMinus}>{formatCurrency(netAmount)}원</span>
+                                                <span className={styles.txAmountMinus} style={{
+                                                    color: tx.status === 'rejected' ? '#A0AEC0' : undefined,
+                                                    textDecoration: tx.status === 'rejected' ? 'line-through' : undefined
+                                                }}>{formatCurrency(netAmount)}원</span>
                                             </div>
                                         );
                                     })}
@@ -392,11 +417,53 @@ export default function WalletPage() {
                                 <input
                                     type="number"
                                     className={styles.amountInput}
-                                    placeholder="환급 금액"
+                                    placeholder="환급 신청 금액"
                                     value={withdrawAmount}
                                     onChange={(e) => setWithdrawAmount(e.target.value)}
                                 />
                                 <p className={styles.amountHint}>환급 가능: {formatCurrency(balance)}원</p>
+                                
+                                {withdrawAmount && parseInt(withdrawAmount) > 0 && (
+                                    <div style={{ marginTop: '16px', padding: '12px', background: '#F8F9FA', borderRadius: '6px', fontSize: '13px', border: '1px solid #E9ECEF', textAlign: 'left' }}>
+                                        {partnerType === 'business' ? (
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                    <span>신청 금액 (공급가액)</span>
+                                                    <span style={{ fontWeight: '600' }}>{formatCurrency(parseInt(withdrawAmount))}원</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: '#3A8F47' }}>
+                                                    <span>부가세 (10%)</span>
+                                                    <span>+{formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.1))}원</span>
+                                                </div>
+                                                <div style={{ borderTop: '1px solid #E9ECEF', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#1A1F26' }}>
+                                                    <span>예상 최종 입금액</span>
+                                                    <span>{formatCurrency(Math.floor(parseInt(withdrawAmount) * 1.1))}원</span>
+                                                </div>
+                                                <p style={{ fontSize: '11px', color: '#868E96', marginTop: '8px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
+                                                    ※ 사업자 파트너는 정산 승인 전까지 [공급가액 {formatCurrency(parseInt(withdrawAmount))}원 / 세액 {formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.1))}원]의 세금계산서를 발행해 주셔야 송금 처리가 완료됩니다.
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                    <span>신청 금액</span>
+                                                    <span style={{ fontWeight: '600' }}>{formatCurrency(parseInt(withdrawAmount))}원</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: '#E53E3E' }}>
+                                                    <span>원천징수 세액 (3.3%)</span>
+                                                    <span>-{formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
+                                                </div>
+                                                <div style={{ borderTop: '1px solid #E9ECEF', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#1A1F26' }}>
+                                                    <span>예상 최종 입금액</span>
+                                                    <span>{formatCurrency(parseInt(withdrawAmount) - Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
+                                                </div>
+                                                <p style={{ fontSize: '11px', color: '#868E96', marginTop: '8px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
+                                                    ※ 개인(프리랜서) 대상자는 소득세법에 따라 3.3% 원천세가 공제된 금액으로 지급됩니다.
+                                                </p>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className={styles.bottomSheetBtns}>
                                 <button className={styles.sheetCancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>

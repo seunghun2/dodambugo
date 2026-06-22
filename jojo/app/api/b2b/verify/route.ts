@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const {
+            partner_type = 'individual',
             identity_name,
             rrn_front,
             rrn_back,
@@ -53,21 +54,13 @@ export async function POST(request: NextRequest) {
             id_issue_date,
             driver_license_no,
             identity_phone,
-            id_card_url
+            id_card_url,
+            // 사업자 관련 필드
+            business_no,
+            company_name,
+            owner_name,
+            business_license_url
         } = body;
-
-        // 필수 필드 유효성 검사
-        if (!identity_name || !rrn_front || !rrn_back || !identity_type || !identity_phone || !id_card_url) {
-            return NextResponse.json({ error: '필수 정보를 모두 입력해주세요 (신분증 첨부 필수).' }, { status: 400 });
-        }
-
-        if (identity_type === '주민등록증' && !id_issue_date) {
-            return NextResponse.json({ error: '주민등록증 발급일자를 입력해주세요.' }, { status: 400 });
-        }
-
-        if (identity_type === '운전면허증' && !driver_license_no) {
-            return NextResponse.json({ error: '운전면허증 면허번호를 입력해주세요.' }, { status: 400 });
-        }
 
         // 1. 파트너 회원 정보 DB 조회
         const { data: userData, error: userError } = await supabase
@@ -80,90 +73,190 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '사용자 정보를 찾을 수 없습니다.' }, { status: 404 });
         }
 
-        // 2. 신분증 OCR 파싱 시뮬레이션
-        const parsedName = await parseIdCardName(id_card_url, userData.owner_name);
-        const isNameMatched = parsedName && parsedName.trim() === userData.owner_name.trim();
-
-        if (isNameMatched) {
-            // 검증 성공 처리
-            const updates = {
-                identity_verified: true,
-                identity_name,
-                rrn_front,
-                rrn_back,
-                identity_type,
-                id_issue_date: identity_type === '주민등록증' ? id_issue_date : null,
-                driver_license_no: identity_type === '운전면허증' ? driver_license_no : null,
-                identity_phone,
-                id_card_url,
-                verification_status: 'verified',
-                updated_at: new Date().toISOString()
-            };
-
-            const { error: updateErr } = await supabase
-                .from('b2b_users')
-                .update(updates)
-                .eq('id', userId);
-
-            if (updateErr) {
-                console.error('본인인증 성공 정보 업데이트 실패:', updateErr);
-                return NextResponse.json({ error: '본인인증 정보 저장에 실패했습니다.' }, { status: 500 });
+        if (partner_type === 'business') {
+            // 사업자 필수 필드 유효성 검사
+            if (!company_name || !owner_name || !business_no || !business_license_url || !identity_phone) {
+                return NextResponse.json({ error: '사업자 필수 정보를 모두 입력해주세요 (사업자등록증 첨부 필수).' }, { status: 400 });
             }
 
-            // 첫 출금신청이 대기(pending) 중인 경우, 1시간 후 자동 승인 스케줄링 처리
-            const { data: pendingRequests } = await supabase
-                .from('withdrawal_requests')
-                .select('id')
-                .eq('user_id', userId)
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
+            // 사업자 대표명 및 회사명 일치 검증 (가입 정보와 대조)
+            const parsedOwnerName = owner_name; // 모의 OCR 성공 가정
+            const isMatched = parsedOwnerName.trim() === userData.owner_name.trim();
 
-            if (pendingRequests && pendingRequests.length > 0) {
-                const oneHourLater = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-                await supabase
+            if (isMatched) {
+                const updates = {
+                    identity_verified: true,
+                    partner_type: 'business',
+                    company_name,
+                    owner_name,
+                    business_no,
+                    business_license_url,
+                    identity_phone,
+                    verification_status: 'verified',
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error: updateErr } = await supabase
+                    .from('b2b_users')
+                    .update(updates)
+                    .eq('id', userId);
+
+                if (updateErr) {
+                    console.error('B2B 사업자 정보 업데이트 실패:', updateErr);
+                    return NextResponse.json({ error: '사업자 정보 저장에 실패했습니다.' }, { status: 500 });
+                }
+
+                // 첫 출금신청이 대기(pending) 중인 경우, 1시간 후 자동 승인 스케줄링 처리
+                const { data: pendingRequests } = await supabase
                     .from('withdrawal_requests')
-                    .update({ auto_approve_at: oneHourLater })
-                    .eq('id', pendingRequests[0].id);
-                console.log(`⏰ [B2B] 출금 신청(ID: ${pendingRequests[0].id}) 1시간 뒤 자동 이체 스케줄링 완료: ${oneHourLater}`);
-            }
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
 
-            return NextResponse.json({ success: true, message: '본인인증 및 신분증 자동 검증이 완료되었습니다. 1시간 뒤 출금이 승인됩니다.' });
+                if (pendingRequests && pendingRequests.length > 0) {
+                    const oneHourLater = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+                    await supabase
+                        .from('withdrawal_requests')
+                        .update({ auto_approve_at: oneHourLater })
+                        .eq('id', pendingRequests[0].id);
+                    console.log(`⏰ [B2B] 사업자 출금 신청(ID: ${pendingRequests[0].id}) 1시간 뒤 자동 이체 스케줄링 완료: ${oneHourLater}`);
+                }
+
+                return NextResponse.json({ success: true, message: '사업자등록증 정보 검증이 완료되었습니다. 1시간 뒤 출금이 승인됩니다.' });
+            } else {
+                // 검증 실패 처리
+                const updates = {
+                    identity_verified: false,
+                    verification_status: 'failed',
+                    updated_at: new Date().toISOString()
+                };
+
+                await supabase
+                    .from('b2b_users')
+                    .update(updates)
+                    .eq('id', userId);
+
+                // 관리자 슬랙 채널 알림 발송
+                const failReason = `가입자 성명(${userData.owner_name})과 대표자 성명(${owner_name}) 불일치`;
+                try {
+                    await sendB2BVerificationFailureNotification({
+                        partner_name: owner_name,
+                        company_name: company_name || '알 수 없음',
+                        phone: identity_phone,
+                        expected_name: userData.owner_name,
+                        parsed_name: parsedOwnerName,
+                        id_card_url: business_license_url,
+                        reason: failReason
+                    });
+                } catch (slackErr) {
+                    console.error('❌ 슬랙 실패 알림 전송 에러:', slackErr);
+                }
+
+                return NextResponse.json({ 
+                    error: `사업자 검증에 실패했습니다. (${failReason}) 관리자 수동 승인 진행을 위해 알림이 발송되었습니다.` 
+                }, { status: 400 });
+            }
         } else {
-            // 검증 실패 처리
-            const updates = {
-                identity_verified: false,
-                id_card_url,
-                verification_status: 'failed',
-                updated_at: new Date().toISOString()
-            };
-
-            await supabase
-                .from('b2b_users')
-                .update(updates)
-                .eq('id', userId);
-
-            // 관리자 슬랙 채널 알림 발송
-            const failReason = parsedName ? `가입자 성명(${userData.owner_name})과 신분증 추출 성명(${parsedName}) 불일치` : '신분증에서 성명 추출 실패';
-            try {
-                await sendB2BVerificationFailureNotification({
-                    partner_name: userData.owner_name,
-                    company_name: userData.company_name || '알 수 없음',
-                    phone: userData.phone || '알 수 없음',
-                    expected_name: userData.owner_name,
-                    parsed_name: parsedName || '',
-                    id_card_url,
-                    reason: failReason
-                });
-            } catch (slackErr) {
-                console.error('❌ 슬랙 실패 알림 전송 에러:', slackErr);
+            // 개인/프리랜서 기존 로직
+            if (!identity_name || !rrn_front || !rrn_back || !identity_type || !identity_phone || !id_card_url) {
+                return NextResponse.json({ error: '필수 정보를 모두 입력해주세요 (신분증 첨부 필수).' }, { status: 400 });
             }
 
-            return NextResponse.json({ 
-                error: `신분증 검증에 실패했습니다. (${failReason}) 관리자 수동 승인 진행을 위해 알림이 발송되었습니다.` 
-            }, { status: 400 });
+            if (identity_type === '주민등록증' && !id_issue_date) {
+                return NextResponse.json({ error: '주민등록증 발급일자를 입력해주세요.' }, { status: 400 });
+            }
+
+            if (identity_type === '운전면허증' && !driver_license_no) {
+                return NextResponse.json({ error: '운전면허증 면허번호를 입력해주세요.' }, { status: 400 });
+            }
+
+            // 신분증 OCR 파싱 시뮬레이션
+            const parsedName = await parseIdCardName(id_card_url, userData.owner_name);
+            const isNameMatched = parsedName && parsedName.trim() === userData.owner_name.trim();
+
+            if (isNameMatched) {
+                // 검증 성공 처리
+                const updates = {
+                    identity_verified: true,
+                    partner_type: 'individual',
+                    identity_name,
+                    rrn_front,
+                    rrn_back,
+                    identity_type,
+                    id_issue_date: identity_type === '주민등록증' ? id_issue_date : null,
+                    driver_license_no: identity_type === '운전면허증' ? driver_license_no : null,
+                    identity_phone,
+                    id_card_url,
+                    verification_status: 'verified',
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error: updateErr } = await supabase
+                    .from('b2b_users')
+                    .update(updates)
+                    .eq('id', userId);
+
+                if (updateErr) {
+                    console.error('본인인증 성공 정보 업데이트 실패:', updateErr);
+                    return NextResponse.json({ error: '본인인증 정보 저장에 실패했습니다.' }, { status: 500 });
+                }
+
+                // 첫 출금신청이 대기(pending) 중인 경우, 1시간 후 자동 승인 스케줄링 처리
+                const { data: pendingRequests } = await supabase
+                    .from('withdrawal_requests')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                if (pendingRequests && pendingRequests.length > 0) {
+                    const oneHourLater = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+                    await supabase
+                        .from('withdrawal_requests')
+                        .update({ auto_approve_at: oneHourLater })
+                        .eq('id', pendingRequests[0].id);
+                    console.log(`⏰ [B2B] 출금 신청(ID: ${pendingRequests[0].id}) 1시간 뒤 자동 이체 스케줄링 완료: ${oneHourLater}`);
+                }
+
+                return NextResponse.json({ success: true, message: '본인인증 및 신분증 자동 검증이 완료되었습니다. 1시간 뒤 출금이 승인됩니다.' });
+            } else {
+                // 검증 실패 처리
+                const updates = {
+                    identity_verified: false,
+                    id_card_url,
+                    verification_status: 'failed',
+                    updated_at: new Date().toISOString()
+                };
+
+                await supabase
+                    .from('b2b_users')
+                    .update(updates)
+                    .eq('id', userId);
+
+                // 관리자 슬랙 채널 알림 발송
+                const failReason = parsedName ? `가입자 성명(${userData.owner_name})과 신분증 추출 성명(${parsedName}) 불일치` : '신분증에서 성명 추출 실패';
+                try {
+                    await sendB2BVerificationFailureNotification({
+                        partner_name: userData.owner_name,
+                        company_name: userData.company_name || '알 수 없음',
+                        phone: userData.phone || '알 수 없음',
+                        expected_name: userData.owner_name,
+                        parsed_name: parsedName || '',
+                        id_card_url,
+                        reason: failReason
+                    });
+                } catch (slackErr) {
+                    console.error('❌ 슬랙 실패 알림 전송 에러:', slackErr);
+                }
+
+                return NextResponse.json({ 
+                    error: `신분증 검증에 실패했습니다. (${failReason}) 관리자 수동 승인 진행을 위해 알림이 발송되었습니다.` 
+                }, { status: 400 });
+            }
         }
     } catch (err) {
         console.error('API 에러:', err);
-        return NextResponse.json({ error: '서ver 내부 오류가 발생했습니다.' }, { status: 500 });
+        return NextResponse.json({ error: '서버 내부 오류가 발생했습니다.' }, { status: 500 });
     }
 }

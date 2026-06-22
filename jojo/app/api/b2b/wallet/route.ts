@@ -54,23 +54,51 @@ export async function GET(request: NextRequest) {
             .range(offset, offset + limit - 1);
         if (txError) console.error('[DEBUG] txError:', txError);
 
-        console.log('[DEBUG] Fetching identity_verified for user:', userId);
-        // 본인인증 여부 조회
+        console.log('[DEBUG] Fetching identity_verified and partner_type for user:', userId);
+        // 본인인증 여부 및 파트너 유형 조회
         const { data: user, error: userError } = await supabase
             .from('b2b_users')
-            .select('identity_verified')
+            .select('identity_verified, partner_type')
             .eq('id', userId)
             .single();
         if (userError) console.error('[DEBUG] userError:', userError);
 
+        // 해당 유저의 모든 withdrawal_requests 조회하여 트랜잭션 정보에 매핑
+        const { data: withdrawals } = await supabase
+            .from('withdrawal_requests')
+            .select('*')
+            .eq('user_id', userId);
+
+        const enrichedTransactions = (transactions || []).map(tx => {
+            if (tx.amount < 0 && (tx.type === 'withdrawal' || tx.type === 'withdrawal_reject')) {
+                const matchingReq = (withdrawals || []).find(w => 
+                    w.amount === Math.abs(tx.amount) &&
+                    Math.abs(new Date(w.created_at).getTime() - new Date(tx.created_at).getTime()) < 10000
+                );
+                if (matchingReq) {
+                    return {
+                        ...tx,
+                        partner_type: matchingReq.partner_type || 'individual',
+                        withholding_tax: matchingReq.withholding_tax || 0,
+                        local_income_tax: matchingReq.local_income_tax || 0,
+                        vat: matchingReq.vat || 0,
+                        net_amount: matchingReq.net_amount || Math.abs(tx.amount),
+                        status: matchingReq.status
+                    };
+                }
+            }
+            return tx;
+        });
+
         console.log('[DEBUG] Returning wallet data successfully');
         return NextResponse.json({
             balance: deposit?.balance || 0,
-            transactions: transactions || [],
+            transactions: enrichedTransactions,
             total: count || 0,
             page,
             limit,
             identity_verified: user?.identity_verified || false,
+            partner_type: user?.partner_type || 'individual',
         });
     } catch (err) {
         console.error('[DEBUG] Unexpected error in GET /api/b2b/wallet:', err);
@@ -138,35 +166,22 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // 출금 신청 INSERT
-    const { error: withdrawError } = await supabase
-        .from('withdrawal_requests')
-        .insert({
-            user_id: userId,
-            amount,
-            bank_name: user.bank_name,
-            account_no: user.account_no,
-            account_holder: user.account_holder,
-            status: 'pending',
-        });
-
-    if (withdrawError) {
-        return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
-    }
-
-    // 예치금 차감
-    await supabase
-        .from('deposits')
-        .update({ balance: deposit.balance - amount, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-
-    // 거래 내역 INSERT
-    await supabase.from('deposit_transactions').insert({
-        user_id: userId,
-        amount: -amount,
-        type: 'withdrawal',
-        description: `출금 신청 (${user.bank_name} ${user.account_no})`,
+    // PL/pgSQL RPC를 통한 안전한 단일 트랜잭션 처리
+    const { data: success, error: withdrawError } = await supabase.rpc('create_withdrawal_request', {
+        p_user_id: userId,
+        p_amount: amount,
+        p_bank_name: user.bank_name,
+        p_account_no: user.account_no,
+        p_account_holder: user.account_holder
     });
+
+    if (withdrawError || !success) {
+        console.error('[DEBUG] Withdrawal RPC error:', withdrawError);
+        return NextResponse.json(
+            { error: withdrawError?.message || '출금 신청에 실패했습니다.' },
+            { status: 500 }
+        );
+    }
 
     return NextResponse.json({ success: true, message: '출금 신청이 완료되었습니다.' });
 }
