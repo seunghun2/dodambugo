@@ -1,0 +1,107 @@
+.titleArea {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    max-width: 600px;
+    padding: 32px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 14px;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #d4a84b;
+}
+
+.input {
+    flex: 1;
+    border: none;
+    padding: 12px 0;
+    font-size: 15px;
+    outline: none;
+    color: #0f172a;
+    background-color: transparent;
+}
+
+.unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    margin-left: 8px;
+}
+
+.description {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.saveBtn {
+    margin-top: 12px;
+    padding: 14px;
+    background-color: #d4a84b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.saveBtn:hover {
+    background-color: #c5973b;
+}
+
+.saveBtn:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}

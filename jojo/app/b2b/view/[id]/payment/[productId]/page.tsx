@@ -1,0 +1,83 @@
+import { createClient } from '@supabase/supabase-js';
+import { unstable_cache } from 'next/cache';
+import PaymentContent from '@/app/view/[id]/payment/[productId]/PaymentContent';
+import '@/app/view/[id]/order/[productId]/order.css';
+
+function getSupabase() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+}
+
+async function getCachedBugo(bugoId: string, isUUID: boolean) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            if (isUUID) {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name')
+                    .eq('id', bugoId)
+                    .limit(1);
+                return data?.[0] || null;
+            } else {
+                const { data } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name')
+                    .eq('bugo_number', bugoId)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                return data?.[0] || null;
+            }
+        },
+        [`bugo-payment-${bugoId}`],
+        { revalidate: 300 }
+    );
+    return getCached();
+}
+
+async function getCachedProduct(productNumber: string) {
+    const getCached = unstable_cache(
+        async () => {
+            const supabase = getSupabase();
+            const { data } = await supabase
+                .from('flower_products')
+                .select('*')
+                .eq('sort_order', parseInt(productNumber))
+                .single();
+            return data;
+        },
+        [`flower-product-payment-${productNumber}`],
+        { revalidate: 3600 }
+    );
+    return getCached();
+}
+
+export default async function B2BPaymentPage({ params }: { params: Promise<{ id: string; productId: string }> }) {
+    const { id, productId } = await params;
+    const isUUID = id.includes('-') && id.length > 10;
+
+    const [bugoData, productData] = await Promise.all([
+        getCachedBugo(id, isUUID),
+        getCachedProduct(productId)
+    ]);
+
+    if (!productData) {
+        return (
+            <div className="order-error">
+                <h2>상품을 찾을 수 없습니다</h2>
+                <a href={`/b2b/view/${id}`}>돌아가기</a>
+            </div>
+        );
+    }
+
+    return (
+        <PaymentContent
+            initialBugo={bugoData}
+            initialProduct={productData}
+            bugoId={id}
+            productId={productId}
+        />
+    );
+}

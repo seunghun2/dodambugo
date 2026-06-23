@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-41LNKTBH4W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-41LNKTBH4W');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>부의금 카드결제 - 마음부고</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 부의금 카드결제 페이지 - 주문하기 UI 스타일 */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .condolence-page {
+            min-height: 100vh;
+            background: #F5F5F5;
+            padding-bottom: 100px;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+
+        .condolence-page * {
+            font-family: inherit !important;
+        }
+
+        /* PC 중앙 정렬 */
+        @media (min-width: 481px) {
+            .condolence-page {
+                max-width: 360px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* 헤더 */
+        .condolence-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #F0F0F0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #1A1A1A;
+            margin-right: 8px;
+        }
+
+        .condolence-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1A1A1A;
+            margin: 0;
+        }
+
+        /* Content */
+        .condolence-content {
+            padding: 16px;
+        }
+
+        /* 상주 정보 카드 */
+        .account-body {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bank-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+        }
+
+        .account-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .bank-name {
+            font-size: 13px;
+            color: #888888;
+        }
+
+        .account-number-display {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A1A1A;
+            margin-bottom: 12px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #1A1A1A;
+            background: #FFFFFF;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #FFD43B;
+        }
+
+        .form-input::placeholder {
+            color: #AAAAAA;
+        }
+
+        /* 금액 선택 */
+        .amount-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .amount-button {
+            padding: 14px 8px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            background: #FFFFFF;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .amount-button:hover {
+            border-color: #FFD43B;
+        }
+
+        .amount-button.selected {
+            background: #FFF9E6;
+            border-color: #FFD43B;
+            font-weight: 600;
+        }
+
+        /* 결제 금액 요약 */
+        .payment-summary {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .payment-summary.show {
+            display: block;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .summary-row:nth-last-child(2) {
+            border-bottom: none;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .summary-value {
+            font-size: 13px;
+            color: #888888;
+        }
+
+        .summary-row.total {
+            padding-top: 10px;
+            margin-top: 2px;
+            border-top: 1px solid #CCCCCC;
+            border-bottom: none;
+        }
+
+        .summary-row.total .summary-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1A1A1A;
+        }
+
+        .summary-row.total .summary-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333333;
+        }
+
+        /* 결제 방식 */
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+        }
+
+        .payment-method-btn {
+            flex: 1;
+            padding: 16px 8px;
+            background: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .payment-method-btn:hover {
+            border-color: #FFD43B;
+        }
+
+        .payment-method-btn.active {
+            border-color: #FFD43B;
+            background: #FFF9E6;
+            color: #1A1A1A;
+        }
+
+        .payment-notices {
+            margin-top: 12px;
+        }
+
+        .payment-notices p {
+            font-size: 11px;
+            color: #888888;
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        /* 하단 결제 버튼 - 고정 */
+        .condolence-footer {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 360px;
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            background: #FFFFFF;
+            border-top: 1px solid #F0F0F0;
+            box-sizing: border-box;
+            z-index: 2001;
+        }
+
+        @media (max-width: 480px) {
+            .condolence-footer {
+                left: 0;
+                transform: none;
+                max-width: 100%;
+            }
+        }
+
+        .privacy-notice-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #888888;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .privacy-notice-link:hover {
+            color: #666666;
+        }
+
+        .submit-button {
+            width: 100%;
+            height: 56px;
+            background: #E0E0E0;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #999999;
+            cursor: not-allowed;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .submit-button.active {
+            background: #FFD43B;
+            color: #1A1A1A;
+            cursor: pointer;
+        }
+
+        .submit-button.active:hover {
+            background: #FCC419;
+        }
+
+        /* 약관 모달 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .privacy-modal {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            max-width: 360px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
+            max-height: 60vh;
+            margin-bottom: 80px;
+        }
+
+        @media (max-width: 480px) {
+            .privacy-modal {
+                max-width: 100%;
+            }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A1A1A;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #888888;
+        }
+
+        .modal-content {
+            padding: 16px 20px 24px;
+        }
+
+        .terms-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 16px 0;
+        }
+
+        .terms-list li {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .terms-list li:last-child {
+            border-bottom: none;
+        }
+
+        .term-bullet {
+            font-size: 14px;
+            color: #1A1A1A;
+            margin-right: 8px;
+        }
+
+        .term-text {
+            font-size: 14px;
+            color: #1A1A1A;
+            flex: 1;
+        }
+
+        .terms-link {
+            color: #888888;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        /* 결제 확인 모달 */
+        .confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .confirm-modal {
+            position: relative;
+            background: #FFFFFF;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 320px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .confirm-modal-x {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999999;
+        }
+
+        .confirm-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A1A;
+            margin-bottom: 16px;
+        }
+
+        .confirm-modal-desc {
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .confirm-modal-desc strong {
+            color: #1A1A1A;
+        }
+
+        .confirm-modal-sub {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 20px;
+        }
+
+        .confirm-modal-info {
+            background: #F8F8F8;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .confirm-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .confirm-info-row:first-child {
+            padding-top: 0;
+        }
+
+        .confirm-info-row:last-child {
+            padding-bottom: 0;
+        }
+
+        .confirm-info-label {
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .confirm-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .confirm-modal-btn {
+            width: 100%;
+            padding: 14px;
+            background: #FFD43B;
+            color: #1A1A1A;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        .confirm-modal-btn:hover {
+            background: #FCC419;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="condolence-page">
+        <!-- 헤더 -->
+        <header class="condolence-header">
+            <button class="back-button" onclick="history.back()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <h1>부의금 카드결제</h1>
+            <div style="width:40px"></div>
+        </header>
+
+        <div class="condolence-content">
+            <!-- 상주 계좌 정보 -->
+            <section class="form-section">
+                <label class="form-label">홍길동 (장남)</label>
+                <div class="account-body">
+                    <img src="bankicon/국민은행.svg" alt="국민은행" class="bank-logo"
+                        onerror="this.style.display='none'">
+                    <div class="account-text">
+                        <span class="bank-name">국민은행(홍길동)</span>
+                        <span class="account-number-display">123-456-789012</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 보내시는 분 정보 -->
+            <section class="form-section">
+                <label class="form-label">보내시는 분(성함 및 연락처)</label>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="buyerName" placeholder="보내시는 분 성함">
+                </div>
+                <div class="form-group">
+                    <input type="tel" class="form-input" id="buyerPhone" placeholder="010-0000-0000" maxlength="13">
+                </div>
+            </section>
+
+            <!-- 금액 선택 -->
+            <section class="form-section">
+                <label class="form-label">마음을 전하실 금액을 선택해주세요</label>
+                <div class="amount-grid">
+                    <button type="button" class="amount-button" data-amount="50000" onclick="selectAmount(this, 50000)">5만원</button>
+                    <button type="button" class="amount-button" data-amount="100000" onclick="selectAmount(this, 100000)">10만원</button>
+                    <button type="button" class="amount-button" data-amount="200000" onclick="selectAmount(this, 200000)">20만원</button>
+                    <button type="button" class="amount-button" data-amount="300000" onclick="selectAmount(this, 300000)">30만원</button>
+                    <button type="button" class="amount-button" data-amount="500000" onclick="selectAmount(this, 500000)">50만원</button>
+                    <button type="button" class="amount-button" data-amount="1000000" onclick="selectAmount(this, 1000000)">100만원</button>
+                </div>
+            </section>
+
+            <!-- 결제 금액 요약 -->
+            <section class="payment-summary" id="paymentSummary">
+                <div class="summary-row">
+                    <span class="summary-label">결제금액</span>
+                    <span class="summary-value" id="summaryAmount">0원</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">이용수수료(8.6%)</span>
+                    <span class="summary-value" id="summaryFee">0원</span>
+                </div>
+                <div class="summary-row total">
+                    <span class="summary-label">총 결제금액</span>
+                    <span class="summary-value" id="summaryTotal">0원</span>
+                </div>
+            </section>
+
+            <!-- 결제 방식 -->
+            <section class="form-section">
+                <label class="form-label">결제 방식</label>
+                <div class="payment-methods">
+                    <button type="button" class="payment-method-btn active" onclick="selectPayment(this, 'card')">
+                        카드
+                    </button>
+                    <button type="button" class="payment-method-btn" onclick="selectPayment(this, 'simple')">
+                        간편결제
+                    </button>
+                </div>
+                <div class="payment-notices">
+                    <p>* 법인카드로 결제하시면 접대비 증빙이 가능합니다.</p>
+                    <p>* 본 서비스는 장례식장과 별개로 운영됩니다.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- 약관 모달 -->
+        <div class="modal-overlay hidden" id="termsModal" onclick="closeTermsModal()">
+            <div class="privacy-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>개인정보 수집/제공 동의</h3>
+                    <button class="modal-close" onclick="closeTermsModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <ul class="terms-list">
+                        <li>
+                            <span class="term-bullet">•</span>
+                            <span class="term-text">개인정보 수집 및 이용안내(필수)</span>
+                            <a href="condolence-privacy.html" target="_blank" class="terms-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 18l6-6-6-6" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <span class="term-bullet">•</span>
+                            <span class="term-text">전자금융거래 이용약관(필수)</span>
+                            <a href="condolence-terms.html" target="_blank" class="terms-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 18l6-6-6-6" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <span class="term-bullet">•</span>
+                            <span class="term-text">개인정보 제3자 제공/위탁안내(필수)</span>
+                            <a href="condolence-privacy-third.html" target="_blank" class="terms-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 18l6-6-6-6" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <span class="term-bullet">•</span>
+                            <span class="term-text">[부의금]환불 불가 약관(필수)</span>
+                            <a href="condolence-refund.html" target="_blank" class="terms-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 18l6-6-6-6" />
+                                </svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 결제 버튼 -->
+        <div class="condolence-footer">
+            <div class="privacy-notice-link" onclick="openTermsModal()">
+                약관 및 주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </div>
+            <button type="button" class="submit-button" id="submitBtn" onclick="handlePayment()" disabled>
+                결제하기
+            </button>
+        </div>
+
+        <!-- 결제 확인 모달 -->
+        <div class="confirm-modal-overlay hidden" id="confirmModal" onclick="closeConfirmModal()">
+            <div class="confirm-modal" onclick="event.stopPropagation()">
+                <button class="confirm-modal-x" onclick="closeConfirmModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 class="confirm-modal-title">주의사항</h3>
+                <p class="confirm-modal-desc">
+                    부의금 결제는 상주님의 계좌로<br>
+                    <strong>즉시 입금되어 환불이 불가능합니다.</strong>
+                </p>
+                <p class="confirm-modal-sub">결제금액이 맞는지 한 번 더 확인해주세요.</p>
+
+                <div class="confirm-modal-info">
+                    <div class="confirm-info-row">
+                        <span class="confirm-info-label">받는 분에게 표시</span>
+                        <span class="confirm-info-value" id="confirmName"></span>
+                    </div>
+                    <div class="confirm-info-row">
+                        <span class="confirm-info-label">결제금액</span>
+                        <span class="confirm-info-value" id="confirmAmount"></span>
+                    </div>
+                    <div class="confirm-info-row">
+                        <span class="confirm-info-label">결제수단</span>
+                        <span class="confirm-info-value" id="confirmMethod"></span>
+                    </div>
+                </div>
+
+                <button class="confirm-modal-btn" onclick="confirmPayment()">
+                    동의하고 결제하기
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let selectedAmount = null;
+        let paymentMethod = 'card';
+
+        // 전화번호 포맷
+        document.getElementById('buyerPhone').addEventListener('input', function (e) {
+            let numbers = e.target.value.replace(/[^\d]/g, '');
+            if (numbers.length <= 3) {
+                e.target.value = numbers;
+            } else if (numbers.length <= 7) {
+                e.target.value = numbers.slice(0, 3) + '-' + numbers.slice(3);
+            } else {
+                e.target.value = numbers.slice(0, 3) + '-' + numbers.slice(3, 7) + '-' + numbers.slice(7, 11);
+            }
+            updateSubmitButton();
+        });
+
+        document.getElementById('buyerName').addEventListener('input', updateSubmitButton);
+
+        // 금액 선택
+        function selectAmount(btn, amount) {
+            document.querySelectorAll('.amount-button').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAmount = amount;
+
+            // 요약 표시
+            const summary = document.getElementById('paymentSummary');
+            summary.classList.add('show');
+            document.getElementById('summaryAmount').textContent = amount.toLocaleString() + '원';
+            document.getElementById('summaryFee').textContent = Math.round(amount * 0.086).toLocaleString() + '원';
+            document.getElementById('summaryTotal').textContent = Math.round(amount * 1.086).toLocaleString() + '원';
+
+            updateSubmitButton();
+        }
+
+        // 결제 방식 선택
+        function selectPayment(btn, method) {
+            document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            paymentMethod = method;
+        }
+
+        // 제출 버튼 상태 업데이트
+        function updateSubmitButton() {
+            const name = document.getElementById('buyerName').value.trim();
+            const phone = document.getElementById('buyerPhone').value.trim();
+            const btn = document.getElementById('submitBtn');
+
+            if (name && phone && selectedAmount) {
+                btn.classList.add('active');
+                btn.disabled = false;
+                btn.textContent = Math.round(selectedAmount * 1.086).toLocaleString() + '원 결제하기';
+            } else {
+                btn.classList.remove('active');
+                btn.disabled = true;
+                btn.textContent = '결제하기';
+            }
+        }
+
+        // 결제 버튼 클릭
+        function handlePayment() {
+            const name = document.getElementById('buyerName').value.trim();
+            const phone = document.getElementById('buyerPhone').value.trim();
+
+            if (!name || !phone || !selectedAmount) {
+                alert('모든 정보를 입력해주세요.');
+                return;
+            }
+
+            // 확인 모달 열기
+            document.getElementById('confirmName').textContent = name;
+            document.getElementById('confirmAmount').textContent = Math.round(selectedAmount * 1.086).toLocaleString() + '원';
+            document.getElementById('confirmMethod').textContent = paymentMethod === 'card' ? '카드결제' : '간편결제';
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        // 확인 모달 닫기
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        // 결제 확인
+        function confirmPayment() {
+            closeConfirmModal();
+            alert('결제 모듈이 연동되지 않은 데모 페이지입니다.');
+        }
+
+        // 약관 모달
+        function openTermsModal() {
+            document.getElementById('termsModal').classList.remove('hidden');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('termsModal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

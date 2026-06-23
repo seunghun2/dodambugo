@@ -1,0 +1,237 @@
+/* 상세 페이지 - CSS Module */
+
+.detailPage {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding-bottom: 100px;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+@media (min-width: 431px) {
+    .detailPage {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* 헤더 */
+.detailHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.headerTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* 상품 정보 */
+.productSection {
+    background: white;
+    margin-bottom: 12px;
+}
+
+.productImage {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.productImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.productInfo {
+    padding: 20px;
+}
+
+.productName {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.productDesc {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+.productPrice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.discountPercent {
+    font-size: 18px;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.originalPrice {
+    font-size: 14px;
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.finalPrice {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* 정보 테이블 */
+.infoTableSection {
+    background: white;
+    padding: 20px;
+    border-bottom: 8px solid #f1f5f9;
+}
+
+.infoTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.infoTable tr {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.infoTable tr:last-child {
+    border-bottom: none;
+}
+
+.infoTable th {
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    text-align: left;
+    vertical-align: top;
+    width: 80px;
+}
+
+.infoTable td {
+    padding: 12px 0;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* 이용방법 */
+.usageSection {
+    background: white;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.sectionTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.usageList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.usageList li {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.7;
+    padding: 4px 0;
+    padding-left: 12px;
+    position: relative;
+}
+
+.usageList li::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: #9ca3af;
+}
+
+/* 하단 고정 버튼 */
+.submitSection {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: white;
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+}
+
+.submitBtn {
+    flex: 1;
+    width: 100%;
+    padding: 16px 24px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submitBtn:hover {
+    background: #FCC419;
+}
+
+/* 상품 없음 */
+.notFound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+}
+
+.notFound p {
+    font-size: 16px;
+    color: #6b7280;
+}
+
+.notFound button {
+    padding: 12px 24px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}

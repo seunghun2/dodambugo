@@ -1,0 +1,2367 @@
+/* ========================================
+   XD 디자인 정밀 복제 - view.css
+   Canvas: 360 x 650px (헤더) / 전체 스크롤
+   Font: KoPubWorld바탕체 (XD 스펙), NanumMyeongjo (폴백)
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
+/* KoPub 바탕체 - 웹폰트 */
+@font-face {
+    font-family: 'KoPub Batang';
+    src: url('https://cdn.jsdelivr.net/gh/nicediy/kopubwebfonts@master/fonts/KoPubBatang-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* view-page 내에서만 명조체 적용 */
+
+/* ========================================
+   기본 레이아웃
+======================================== */
+.view-page {
+    max-width: 430px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    min-height: 100vh;
+    padding-bottom: 0;
+    font-family: 'Nanum Myeongjo', serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 장례식장명 헤더 바 */
+.funeral-home-header {
+    padding: 16px 20px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* 섹션 구분선 */
+.section-divider {
+    height: 8px;
+    background: #F5F5F5;
+}
+
+/* 토스트 */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000 !important;
+    color: #FFFFFF !important;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 99999;
+    animation: fadeInOut 2s ease-in-out;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+/* ========================================
+   로딩/에러 상태
+======================================== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Nanum Myeongjo', serif;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #E5E5E5;
+    border-top: 3px solid #9E8566;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-container p {
+    font-size: 14px;
+    color: #555555;
+}
+
+/* 에러 화면 - 모던 스타일 */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #F8F9FA;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.error-content {
+    text-align: center;
+    max-width: 320px;
+}
+
+.error-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+}
+
+.error-ribbon {
+    width: 100px;
+    height: auto;
+    margin-bottom: 24px;
+}
+
+.error-content h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 12px;
+}
+
+.error-content p {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.btn-home {
+    display: inline-block;
+    padding: 14px 40px;
+    background: #FFD43B;
+    color: #1A1A1A;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-home:hover {
+    background: #FCC419;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   헤더 섹션 - 템플릿 이미지 + 동적 텍스트
+   XD 플로우 12 스펙: 360 x 650px 기준
+======================================== */
+.header-section {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    aspect-ratio: 360 / 650;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.header-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 동적 텍스트 오버레이 - 이미지 위에 고인명/날짜만 표시 */
+.header-text-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 20px;
+}
+
+/* 동적 텍스트 스타일 - 기본 (370px 이상): KoPubWorld바탕체 Bold 16px, line-height 26px */
+.header-dynamic-text {
+    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+    margin-top: 12px;
+}
+
+/* 369px 이하 소형 화면 모바일 최적화 (2px 축소 및 레이아웃 찌그러짐 대응) */
+@media (max-width: 369px) {
+    .header-dynamic-text {
+        font-size: 14px;
+        line-height: 22px;
+    }
+    .header-deceased-title {
+        font-size: 21px;
+    }
+    .header-deceased-age {
+        font-size: 16px;
+    }
+    .header-deceased-info {
+        margin-bottom: 26px;
+    }
+    .header-deceased-info.no-religious-title {
+        margin-bottom: 12px; /* 모바일에서 직함이 없을 시 더욱 당김 */
+    }
+
+    /* 장례식장 박스 360px 반응형 찌그러짐 대응 */
+    .funeral-box-inline {
+        padding: 12px 16px;
+        gap: 0;
+        justify-content: center;
+        flex-wrap: nowrap;
+    }
+    .funeral-name {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    .funeral-divider {
+        margin: 0 8px;
+        white-space: nowrap;
+    }
+    .funeral-room {
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    /* 발인 및 장지 테이블 360px 반응형 찌그러짐 대응 */
+    .funeral-info-table {
+        gap: 10px;
+    }
+    .funeral-info-row {
+        gap: 8px;
+    }
+    .funeral-info-label {
+        width: 55px;
+        font-size: 14px;
+    }
+    .funeral-info-value {
+        font-size: 14px;
+    }
+
+    /* 상주 테이블 360px 반응형 찌그러짐 대응 */
+    .mourner-row {
+        padding: 2px 0 10px 0;
+    }
+    .mourner-rel {
+        width: 55px;
+        font-size: 14px;
+    }
+    .mourner-name {
+        font-size: 14px;
+    }
+    .mourner-names {
+        font-size: 14px;
+    }
+
+    /* 모바일에서 사진(photo)이 존재할 때의 반응형 스타일 */
+    .has-photo .header-text-overlay {
+        top: 10% !important; /* 더 위로 배치하여 세로 공간 확보 */
+    }
+    .header-photo-container {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .header-photo-title-img-wrapper {
+        width: 140px; /* 모바일에서 붓글씨 크기 더욱 키움 */
+        margin-bottom: 2px;
+    }
+    .header-deceased-photo-wrapper {
+        width: 105px;
+        height: 131px;
+        border-radius: 10px;
+    }
+    .has-photo .header-deceased-title {
+        font-size: 19px;
+    }
+    .has-photo .header-deceased-age {
+        font-size: 14px;
+    }
+    .has-photo .header-dynamic-text {
+        font-size: 13px;
+        line-height: 20px;
+    }
+}
+
+/* ========================================
+   템플릿별 텍스트 위치/색상 (XD 플로우 12 정밀 스펙)
+   위치는 top 기준으로 설정 (본문 텍스트 Y 위치)
+======================================== */
+
+/* Basic (아트보드 8) - 본문 Y: 375px, 색상: #000000 */
+.template-basic .header-text-overlay {
+    top: 58.5%;
+}
+
+.template-basic .header-deceased-title,
+.template-basic .header-religious-title,
+.template-basic .header-dynamic-text {
+    color: #000000;
+}
+
+/* Border (아트보드 9) - 본문 Y: 339px, 색상: #1C1C1C */
+.template-border .header-text-overlay {
+    top: 53.5%;
+}
+
+.template-border .header-deceased-title,
+.template-border .header-religious-title,
+.template-border .header-dynamic-text {
+    color: #1C1C1C;
+}
+
+/* Ribbon (아트보드 10) - 본문 Y: 377px, 색상: #3B4551 */
+.template-ribbon .header-text-overlay {
+    top: 58.5%;
+}
+
+.template-ribbon .header-deceased-title,
+.template-ribbon .header-religious-title,
+.template-ribbon .header-dynamic-text {
+    color: #3B4551;
+}
+
+/* Flower (아트보드 11) - 본문 Y: 187px, 색상: #FFFFFF */
+.template-flower .header-text-overlay {
+    top: 28.5%;
+}
+
+.template-flower .header-deceased-title,
+.template-flower .header-religious-title,
+.template-flower .header-dynamic-text {
+    color: #FFFFFF;
+}
+
+/* 신규 고인 인적정보 오버레이 스타일 */
+.header-deceased-info {
+    margin-bottom: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-deceased-info.no-religious-title {
+    margin-bottom: 16px; /* 직함(집사 등)이 없으면 그 높이만큼 마진을 축소해서 본문을 위로 당김 */
+}
+
+/* 사진이 포함된 헤더 스타일 */
+.header-photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.header-photo-title-img-wrapper {
+    width: 180px; /* 붓글씨 이미지 가로폭을 더욱 듬직하게 키움 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.header-photo-title-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* 꽃 템플릿일 때는 붓글씨 이미지 색상 반전 (필터 적용하여 흰색으로 변경) */
+.template-flower .header-photo-title-img {
+    filter: invert(100%) brightness(200%);
+}
+
+.header-deceased-photo-wrapper {
+    width: 125px;
+    height: 156px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background: #EAEAEA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-deceased-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 사진이 있을 때 오버레이 top 위치 강제 조정 */
+.has-photo .header-text-overlay {
+    top: 15% !important;
+}
+
+/* 사진이 있는 헤더에서 고인명/직분 스타일 조율 */
+.has-photo .header-deceased-title {
+    font-size: 22px;
+    margin-top: 4px;
+}
+
+.has-photo .header-deceased-age {
+    font-size: 16px;
+}
+
+.has-photo .header-religious-title {
+    margin-top: -4px;
+}
+
+.header-deceased-title {
+    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.header-deceased-age {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.header-religious-title {
+    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 10px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.template-flower .header-religious-title {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ========================================
+   섹션 공통
+======================================== */
+.section {
+    padding: 24px 16px;
+}
+
+.section:last-of-type {
+    border-bottom: none;
+}
+
+/* 섹션 타이틀 - NanumMyeongjo ExtraBold 18px #111111 */
+.section-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 16px;
+}
+
+/* 상주 섹션 타이틀만 라인 */
+.mourners-section .section-title {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+/* ========================================
+   빈소 오시는 길
+======================================== */
+.address-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.address-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* 주소 텍스트 - NanumMyeongjo Bold 15px #555555 */
+.address-text {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #555555;
+    line-height: 1.5;
+}
+
+/* 장례식장명 - 2px 작게 */
+.address-funeral-home {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888888;
+}
+
+/* 주소 복사 버튼 - 112 x 48px, bg #F5F5F5, radius 8px */
+.btn-copy-address {
+    width: 112px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: #F5F5F5;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.btn-copy-address:active {
+    background: #EBEBEB;
+}
+
+/* 지도 - 360 x 209px */
+.map-container {
+    width: calc(100% + 32px);
+    height: 209px;
+    margin: 0 -16px 16px -16px;
+    background: #F0F0F0;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 내비 버튼 - 160 x 48px each */
+.navi-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 46px;
+}
+
+.navi-btn {
+    flex: 1;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 6px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+    cursor: pointer;
+}
+
+.navi-btn:active {
+    background: #FAFAFA;
+}
+
+.navi-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* 장례식장 박스 */
+.funeral-box {
+    width: 100%;
+    padding: 16px 0;
+    margin: 0 auto;
+    background: #F7F7F7;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* 장례식장 박스 - 인라인 (한 줄) */
+.funeral-box-inline {
+    flex-direction: row;
+    gap: 0;
+    padding: 16px 20px;
+}
+
+/* 장례식장 박스 - 헤더 아래 카드 형태 */
+.funeral-box-top {
+    margin: 20px auto;
+    width: calc(100% - 40px);
+}
+
+/* 장례식장 이름 - 15px #111111 (완전 진하게) */
+.funeral-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 600;
+    /* 조금 더 두껍게 */
+    color: #111111;
+}
+
+/* 구분선 */
+.funeral-divider {
+    margin: 0 12px;
+    color: #DDDDDD;
+    font-weight: 300;
+}
+
+/* 호실 - Bold 16px 도담 브랜드 컬러 (네이비) */
+.funeral-room {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2C3E50;
+}
+
+/* 장례식장 전화하기 버튼 */
+.call-funeral-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.call-btn-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.call-btn-title {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.call-btn-number {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+}
+
+/* 전화 바텀시트 모달 */
+.phone-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.phone-modal {
+    width: 100%;
+    max-width: 360px;
+    background: #FFFFFF;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.phone-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.phone-modal-header h3 {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.phone-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.phone-modal-content {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.phone-modal-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.phone-modal-number {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 24px;
+}
+
+.phone-modal-call-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    background: #4CAF50;
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* ========================================
+   상주
+======================================== */
+.mourners-table {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+}
+
+.mourner-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 0 12px 0;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.mourner-row:last-child {
+    border-bottom: none;
+}
+
+/* 관계 - Bold 16px #999999, width 65px */
+.mourner-rel {
+    width: 65px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+}
+
+/* 이름 - Regular 16px #444444 */
+.mourner-name {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+/* 이름들 (그룹핑) */
+.mourner-names {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+/* 전화 아이콘 */
+.mourner-tel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #FAF8F5;
+    border-radius: 50%;
+    text-decoration: none;
+}
+
+.mourner-tel svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* 인라인 전화 아이콘 (작게) */
+.mourner-tel-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+.mourner-tel-inline svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* 부고 알리기 / 부의금 보내기 버튼 */
+.mourner-action-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.mourner-action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: #FAFAFA;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.action-btn-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.mourner-action-btn span {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+}
+
+/* ========================================
+   액션 바 - 새 디자인 (부의금/공유)
+======================================== */
+.action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.action-bar-split {
+    /* 2분할일 때 */
+}
+
+.action-bar-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.action-bar-btn:active {
+    background: #F9F9F9;
+}
+
+.action-bar-btn svg {
+    flex-shrink: 0;
+    stroke: #333333;
+}
+
+.action-bar-divider {
+    width: 1px;
+    height: 24px;
+    background: #E5E5E5;
+}
+
+
+/* ========================================
+   발인 및 장지
+======================================== */
+.funeral-info-table {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 10px;
+}
+
+/* 장지 행들 간격 타이트하게 */
+.burial-row {
+    margin-top: -8px;
+}
+
+.funeral-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.funeral-info-divider {
+    height: 1px;
+    background: #F5F5F5;
+    margin: 4px 0;
+}
+
+/* 고인/발인 강조 */
+.funeral-highlight .funeral-info-label,
+.funeral-highlight .funeral-info-value {
+    font-weight: 600;
+    color: #111111;
+}
+
+/* 라벨 - 16px #999999 (상주 관계와 동일) */
+.funeral-info-label {
+    width: 65px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+}
+
+/* 값 - 16px #444444 */
+.funeral-info-value {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+/* 장지 박스 - bg #686868, white text */
+.burial-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    background: #686868;
+    border-radius: 4px;
+}
+
+.burial-label {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.burial-text {
+    margin-left: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+}
+
+.burial-section {
+    align-items: flex-start;
+}
+
+.burial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.burial-item {
+    display: flex;
+    align-items: center;
+}
+
+/* ========================================
+   안내사항
+======================================== */
+.notice-section {
+    padding-left: 10px;
+}
+
+.notice-text {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #444444;
+    line-height: 1.6;
+}
+
+/* ========================================
+   계좌 정보
+======================================== */
+.account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.account-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #FAFAFA;
+    border-radius: 8px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.account-bank {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #999999;
+}
+
+.account-number {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.account-holder {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #9E8566;
+}
+
+.btn-copy {
+    padding: 8px 16px;
+    background: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+    cursor: pointer;
+}
+
+.btn-copy:active {
+    background: #F5F5F5;
+}
+
+/* ========================================
+   추모글 (방명록)
+======================================== */
+.guestbook-section {
+    background: #FAFAFA;
+}
+
+.guestbook-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.form-input {
+    height: 48px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: #333333;
+}
+
+.form-input::placeholder {
+    color: #B4B4B4;
+}
+
+.form-textarea {
+    height: 100px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: #333333;
+    resize: none;
+}
+
+.form-textarea::placeholder {
+    color: #B4B4B4;
+}
+
+.btn-submit {
+    height: 48px;
+    background: #9E8566;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.btn-submit:active {
+    background: #8A7559;
+}
+
+.guestbook-empty {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.guestbook-empty p {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: #B4B4B4;
+}
+
+/* ========================================
+   꽃으로 마음을 보내신 분
+======================================== */
+.flower-section {
+    background: #FAFAFA;
+    padding-bottom: 80px;
+}
+
+.flower-send-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.flower-send-btn:active {
+    background: #F5F5F5;
+}
+
+.flower-icon {
+    font-size: 18px;
+}
+
+.flower-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.flower-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.flower-item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.flower-item-content {
+    flex: 1;
+}
+
+.flower-item-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.flower-item-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+}
+
+.flower-empty {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.flower-empty p {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: #999999;
+}
+
+.flower-sender-item {
+    padding: 16px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #F0F0F0;
+}
+
+.flower-sender-name {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.flower-sender-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999999;
+}
+
+/* ========================================
+   하단 버튼 - 328 x 82px
+======================================== */
+.bottom-buttons {
+    width: 328px;
+    height: 82px;
+    margin: 24px auto;
+    background: #FFFFFF;
+    border: 1px solid #F3F3F3;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.bottom-btn {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #444444;
+}
+
+.bottom-btn:disabled {
+    color: #B4B4B4;
+    cursor: not-allowed;
+}
+
+.bottom-btn:active:not(:disabled) {
+    background: #FAFAFA;
+}
+
+.bottom-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 50px;
+    background: #F3F3F3;
+}
+
+/* ========================================
+   마무리 메시지
+======================================== */
+.footer-message {
+    padding: 24px 16px 40px;
+    text-align: center;
+}
+
+/* Bold 16px #B4B4B4 */
+.footer-message p {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.7;
+    color: #B4B4B4;
+}
+
+/* ========================================
+   공유 모달
+======================================== */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.share-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.share-content {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    background: #FFFFFF;
+    border-radius: 20px 20px 0 0;
+    padding: 0 0 40px 0;
+    animation: slideUpModal 0.3s ease-out;
+}
+
+.share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 16px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.share-header h3 {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111111;
+}
+
+.share-close {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #999999;
+    cursor: pointer;
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #F5F5F5;
+    cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    text-align: left;
+}
+
+.share-option:last-child {
+    border-bottom: none;
+}
+
+.share-option img {
+    width: 32px;
+    height: 32px;
+}
+
+.share-option:active {
+    background: #FAFAFA;
+}
+
+/* ========================================
+   반응형
+======================================== */
+@media (min-width: 361px) {
+    .view-page {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* ========================================
+   부의금 계좌 바텀시트 모달
+======================================== */
+.account-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10001;
+}
+
+.account-bottom-sheet {
+    width: 100%;
+    max-width: 430px;
+    max-height: 75vh;
+    background: #FFFFFF;
+    border-radius: 20px 20px 0 0;
+    animation: slideUpModal 0.15s ease-out;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@keyframes slideUpModal {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.sheet-header h3 {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111111;
+}
+
+.sheet-close {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #999999;
+    cursor: pointer;
+}
+
+.account-bottom-sheet .account-intro {
+    padding: 24px 20px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.5;
+    background: #F8F8F8;
+}
+
+.account-bottom-sheet .account-list {
+    padding: 16px 20px 60px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.account-bottom-sheet .account-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    border: 1px solid #EEEEEE;
+}
+
+.account-bottom-sheet .account-card:last-child {
+    margin-bottom: 0;
+}
+
+.account-bottom-sheet .account-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 16px 20px 12px;
+}
+
+.account-bottom-sheet .account-rel {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+}
+
+.account-bottom-sheet .account-name {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.account-bottom-sheet .account-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 8px;
+}
+
+.account-bottom-sheet .account-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+}
+
+.account-bottom-sheet .bank-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-right: 10px;
+    margin-left: -4px;
+}
+
+.account-bottom-sheet .account-bank-holder {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+}
+
+.account-bottom-sheet .account-number {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111111;
+    letter-spacing: 0.5px;
+    margin-top: -2px;
+}
+
+.account-bottom-sheet .btn-copy-account {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: #FFFFFF;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #555555;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.account-bottom-sheet .btn-copy-account .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.account-bottom-sheet .btn-copy-account:active {
+    background: #F5F5F5;
+}
+
+/* ========================================
+   기본 정보 테이블 (고인/상주/별세/발인/빈소)
+======================================== */
+.info-table-section {
+    padding: 24px 16px;
+}
+
+.info-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-table-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.info-table-row.mourner-info {
+    align-items: flex-start;
+}
+
+.info-table-label {
+    width: 45px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #999999;
+    flex-shrink: 0;
+}
+
+.info-table-value {
+    flex: 1;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 1.5;
+}
+
+/* 상주 목록 */
+.info-table-value.mourner-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mourner-info-row {
+    display: flex;
+    align-items: center;
+}
+
+.mourner-rel-label {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.mourner-name-list {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #333333;
+}
+
+/* 주소 복사 버튼 (인라인) */
+.address-copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #4A90D9;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.address-copy-btn:hover {
+    text-decoration: underline;
+}
+
+.address-copy-btn svg {
+    flex-shrink: 0;
+}
+
+/* ========================================
+   발인 완료 추모 오버레이 (Option D)
+======================================== */
+.memorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 오버레이 표시 시 body 스크롤 방지 */
+body:has(.memorial-overlay) {
+    overflow: hidden;
+}
+
+.memorial-content {
+    text-align: center;
+    color: white;
+    padding: 60px 20px 40px;
+    flex-shrink: 0;
+}
+
+.memorial-ribbon {
+    width: 120px;
+    height: auto;
+    margin-bottom: 32px;
+    filter: brightness(0) invert(1);
+}
+
+.memorial-message {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.memorial-sub {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* CTA 섹션 */
+.memorial-cta-section {
+    padding: 0 20px 48px;
+    width: 100%;
+    max-width: 400px;
+    flex-shrink: 0;
+}
+
+.memorial-cta-divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 auto 28px;
+}
+
+.memorial-cta-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.memorial-cta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.memorial-cta-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+}
+
+button.memorial-cta-item {
+    width: 100%;
+    text-align: left;
+}
+
+.memorial-cta-item:hover,
+.memorial-cta-item:active {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.memorial-cta-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.memorial-cta-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: rgba(255, 255, 255, 0.55);
+}
+
+/* 부의금 아이콘 색상 */
+.memorial-cta-icon-condolence {
+    background: rgba(180, 160, 130, 0.12);
+}
+
+.memorial-cta-icon-condolence svg {
+    stroke: rgba(210, 190, 160, 0.7);
+}
+
+.memorial-cta-condolence:hover .memorial-cta-icon-condolence {
+    background: rgba(180, 160, 130, 0.2);
+}
+
+/* 답례품 아이콘 색상 */
+.memorial-cta-icon-gift {
+    background: rgba(200, 150, 150, 0.12);
+}
+
+.memorial-cta-icon-gift svg {
+    stroke: rgba(220, 170, 170, 0.7);
+}
+
+.memorial-cta-gift:hover .memorial-cta-icon-gift {
+    background: rgba(200, 150, 150, 0.2);
+}
+
+.memorial-cta-text {
+    flex: 1;
+}
+
+.memorial-cta-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 3px;
+}
+
+.memorial-cta-item-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.memorial-cta-arrow {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.memorial-cta-powered {
+    text-align: center;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.15);
+    margin-top: 20px;
+}
+
+/* ========================================
+   플로팅 화환 보내기 버튼 - 스크롤 시 표시
+   ======================================== */
+.floating-flower-cta {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    width: calc(100% - 32px);
+    max-width: 328px;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s ease-out;
+    display: flex;
+    gap: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.floating-flower-cta.show {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.floating-flower-cta.hide {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%) translateY(100px);
+}
+
+/* 모달 열렸을 때 */
+.floating-flower-cta.modal-open {
+    justify-content: flex-end;
+    max-width: 440px;
+}
+
+/* 돋보기 버튼 - 플로팅 */
+.btn-flower-search-floating {
+    width: 0;
+    height: 52px;
+    border: none;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-right: 0;
+    transition: all 0.3s ease-out;
+    pointer-events: none;
+}
+
+.btn-flower-search-floating.show {
+    width: 52px;
+    border: 1px solid #E5E5E5;
+    opacity: 1;
+    margin-right: 12px;
+    pointer-events: auto;
+}
+
+.btn-flower-search-floating .material-symbols-outlined {
+    font-size: 22px;
+    color: #666666;
+}
+
+.btn-floating-flower {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 24px;
+    background: #FFD43B;
+    color: #000000;
+    border: none;
+    border-radius: 50px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-out;
+}
+
+.btn-floating-flower:hover {
+    background: #FCC419;
+}
+
+.btn-floating-flower:active {
+    background: #FFD43B;
+}
+
+.btn-floating-flower .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* 부의금 플로팅 버튼 */
+.btn-floating-condolence {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    background: #FFFFFF;
+    color: #333333;
+    border: 1px solid #E0E0E0;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-out;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.btn-floating-condolence:active {
+    background: #F5F5F5;
+}
+
+/* ========================================
+   화환 주문 바텀시트 모달
+======================================== */
+.flower-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.flower-modal {
+    width: 100%;
+    max-width: 480px;
+    height: calc(70vh + 30px);
+    max-height: calc(70vh + 30px);
+    background: #FFFFFF;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* 헤더 */
+.flower-modal-header {
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.flower-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flower-modal-close .material-symbols-outlined {
+    font-size: 24px;
+    color: #666666;
+}
+
+.flower-modal-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #1A1A1A;
+    margin-bottom: 12px;
+}
+
+.flower-modal-subtitle {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* 상품 리스트 */
+.flower-product-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 100px 20px;
+    /* 하단에 버튼 공간 */
+}
+
+.flower-product-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #F0F0F0;
+    cursor: pointer;
+}
+
+.flower-product-item:last-child {
+    border-bottom: none;
+}
+
+.flower-product-item .flower-radio {
+    width: 22px;
+    height: 22px;
+    margin-top: 4px;
+    border: 2px solid #CCCCCC;
+    border-radius: 50%;
+    background: #FFFFFF;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.flower-product-item .flower-radio.checked {
+    border-color: var(--primary, #FFD43B);
+    background: #FFFFFF;
+    box-shadow: inset 0 0 0 5px var(--primary, #FFD43B);
+}
+
+.flower-product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F5F5F5;
+    flex-shrink: 0;
+}
+
+.flower-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flower-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.flower-product-name {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 4px;
+}
+
+.flower-product-desc {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.flower-product-price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flower-product-price .original-price {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #AAAAAA;
+    text-decoration: line-through;
+}
+
+.flower-product-price .sale-price {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+
+/* 하단 버튼 */
+.flower-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #F0F0F0;
+    background: #FFFFFF;
+}
+
+.btn-flower-search {
+    width: 52px;
+    height: 52px;
+    border: 1px solid #E5E5E5;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-flower-search .material-symbols-outlined {
+    font-size: 22px;
+    color: #666666;
+}
+
+.btn-flower-order {
+    flex: 1;
+    height: 52px;
+    background: var(--primary, #FFD43B);
+    border: none;
+    border-radius: 50px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    cursor: pointer;
+}
+
+.btn-flower-order:hover,
+.btn-flower-order:active {
+    background: var(--primary-dark, #FCC419);
+}
+
+/* ========================================
+   Footer - PG 승인용 사업자 정보
+======================================== */
+.view-footer {
+    margin-top: 40px;
+    padding: 24px 20px;
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
+    background: #F5F5F5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+}
+
+.view-footer p {
+    font-size: 11px;
+    color: #888888;
+    line-height: 1.8;
+    margin: 0;
+    text-align: left;
+}
+
+.view-footer-company {
+    font-size: 13px !important;
+    font-weight: 600;
+    color: #555555 !important;
+    margin-bottom: 8px !important;
+}
+
+.view-footer-copyright {
+    margin-top: 12px !important;
+    font-size: 10px !important;
+    color: #AAAAAA !important;
+}
+
+/* ========================================
+   카드결제 버튼 - 부의금 모달
+======================================== */
+.account-bottom-sheet .account-card .btn-card-payment {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    background: #FFFFFF !important;
+    border: none !important;
+    border-top: 1px solid #EEEEEE !important;
+    border-radius: 0 !important;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.account-bottom-sheet .account-card .btn-card-payment:hover {
+    background: #F9F9F9 !important;
+}
+
+.account-bottom-sheet .account-card .btn-card-payment:active {
+    background: #F0F0F0 !important;
+}
+
+/* ========================================
+   스켈레톤 로딩 UI
+======================================== */
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-box {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-header {
+    height: 300px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-title {
+    width: 120px;
+    height: 28px;
+}
+
+.skeleton-text-lg {
+    width: 200px;
+    height: 20px;
+}
+
+.skeleton-text-md {
+    width: 160px;
+    height: 16px;
+}
+
+.skeleton-label {
+    width: 60px;
+    height: 18px;
+}
+
+.skeleton-value {
+    flex: 1;
+    height: 18px;
+}
+
+.skeleton-button {
+    width: 100%;
+    height: 48px;
+    border-radius: 8px;
+}

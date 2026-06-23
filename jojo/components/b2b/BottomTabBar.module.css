@@ -1,0 +1,44 @@
+/* 하단 탭바 */
+
+.tabBar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #F2F4F6;
+    padding: 6px 0 0;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    z-index: 100;
+}
+
+.tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tab:active { opacity: 0.6; }
+
+.tabIcon { color: #ADB5BD; }
+.tabLabel {
+    font-size: 10px;
+    color: #ADB5BD;
+    font-weight: 500;
+}
+
+.tabActive .tabIcon { color: #3A8F47; }
+.tabActive .tabLabel {
+    color: #3A8F47;
+    font-weight: 700;
+}

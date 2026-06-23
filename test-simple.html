@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정중형 템플릿 순수 테스트 (CSS 없음)</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            font-family: 'Noto Serif KR', serif;
+        }
+        
+        .info {
+            max-width: 480px;
+            margin: 0 auto 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .info h1 {
+            margin: 0 0 16px 0;
+            font-size: 24px;
+            color: #3182F6;
+        }
+        
+        .info ul {
+            margin: 0;
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .info strong {
+            color: #191F28;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>✅ 정중형 템플릿 순수 테스트</h1>
+        <ul>
+            <li><strong>외부 CSS 없음</strong> - 모든 스타일이 인라인으로 적용됨</li>
+            <li><strong>폰트:</strong> 16px bold (font-weight: 700)</li>
+            <li><strong>정렬:</strong> center (중앙)</li>
+            <li><strong>위치:</strong> 이미지 높이의 45%에서 16px 위</li>
+            <li><strong>목적:</strong> 스타일이 정확히 적용되는지 순수 확인</li>
+        </ul>
+    </div>
+
+    <!-- 정중형 템플릿 (인라인 스타일만 사용) -->
+    <div style="position: relative; width: 100%; max-width: 480px; margin: 0 auto; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15); background: white;">
+        <img src="images/template-ribbon.png" alt="정중형 템플릿" style="width: 100%; height: auto; display: block;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 110%; text-align: center; pointer-events: none; z-index: 2;">
+            <p style="display: block; font-family: 'Noto Serif KR', serif; font-size: 16px; font-weight: 700; color: #1a1a1a; line-height: 1.8; text-align: center; width: 100%; margin: 0; padding: 0 8%; box-sizing: border-box;">
+                故홍길동님께서 11월 25일<br>
+                별세하셨기에 삼가 알려드립니다.<br>
+                마음으로 따뜻한 위로 부탁드리며<br>
+                고인의 명복을 빌어주시길 바랍니다.
+            </p>
+        </div>
+    </div>
+
+    <div class="info" style="margin-top: 20px;">
+        <h1>🔍 확인사항</h1>
+        <ul>
+            <li>✅ 텍스트가 <strong>16px bold</strong>로 보이나요?</li>
+            <li>✅ 텍스트가 <strong>중앙 정렬</strong>되어 있나요?</li>
+            <li>✅ 텍스트가 이미지 위에 <strong>올바른 위치</strong>에 있나요?</li>
+            <li>✅ 4줄의 텍스트가 모두 보이나요?</li>
+        </ul>
+        <p style="margin-top: 16px; padding: 12px; background: #E8F3FF; border-radius: 6px; font-size: 14px; color: #191F28;">
+            <strong>💡 이 페이지에서 제대로 보인다면:</strong><br>
+            → CSS 파일 문제입니다. view.html의 CSS를 확인해야 합니다.<br><br>
+            <strong>💡 이 페이지에서도 안 보인다면:</strong><br>
+            → 브라우저 문제이거나 이미지 경로 문제입니다.
+        </p>
+    </div>
+
+    <script>
+        // 계산된 스타일 확인
+        window.addEventListener('load', function() {
+            const textElement = document.querySelector('p');
+            const computed = window.getComputedStyle(textElement);
+            
+            console.log('=== 순수 테스트 페이지 스타일 확인 ===');
+            console.log('font-size:', computed.fontSize);
+            console.log('font-weight:', computed.fontWeight);
+            console.log('text-align:', computed.textAlign);
+            console.log('font-family:', computed.fontFamily);
+            console.log('color:', computed.color);
+            console.log('line-height:', computed.lineHeight);
+            console.log('display:', computed.display);
+            
+            // 경고 표시
+            if (computed.fontSize !== '16px') {
+                alert('⚠️ 경고: font-size가 16px가 아닙니다: ' + computed.fontSize);
+            }
+            if (computed.fontWeight !== '700') {
+                alert('⚠️ 경고: font-weight가 700이 아닙니다: ' + computed.fontWeight);
+            }
+            if (computed.textAlign !== 'center') {
+                alert('⚠️ 경고: text-align이 center가 아닙니다: ' + computed.textAlign);
+            }
+        });
+    </script>
+</body>
+</html>

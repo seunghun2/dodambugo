@@ -1,0 +1,472 @@
+/* 정산 및 지갑 관리 스타일 */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #1A1F26;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 72px; /* BottomTabBar 공간 */
+}
+
+/* 헤더 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.backBtn, .menuBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: #1A1F26;
+  cursor: pointer;
+  padding: 0;
+}
+
+.headerTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A1F26;
+}
+
+.headerRightPlaceholder {
+  width: 36px;
+}
+
+/* 탭 바 */
+.tabContainer {
+  display: flex;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.tabBtn {
+  flex: 1;
+  text-align: center;
+  padding: 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #8E94A0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tabActive {
+  color: #3A8F47;
+  border-bottom-color: #3A8F47;
+}
+
+/* 콘텐츠 영역 */
+.content {
+  flex: 1;
+  background-color: #f8f9fa;
+  padding: 16px 16px 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 알림/에러 */
+.error {
+  padding: 12px;
+  background-color: #FFF5F5;
+  color: #E53E3E;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.success {
+  padding: 12px;
+  background-color: #F0FDF4;
+  color: #3A8F47;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 요약 카드 */
+.summaryCard {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summaryLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8E94A0;
+}
+
+.reportBtn {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #E5E8EB;
+  color: #4E5968;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.amountDisplay {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin: 16px 0;
+}
+
+.actionBtn {
+  width: 100%;
+  height: 48px;
+  background-color: #3A8F47; /* 브랜드 초록색 */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.actionBtn:hover {
+  background-color: #2F7A3C;
+}
+
+/* 필터 및 목록 */
+.rewardSection, .withdrawSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.listArea {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.listFilterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1F26;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sideInfo {
+  font-size: 12px;
+  color: #8E94A0;
+  font-weight: 500;
+}
+
+/* 빈 상태 */
+.emptyState {
+  padding: 48px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  color: #8E94A0;
+  font-size: 14px;
+}
+
+/* 거래 목록 */
+.rewardList, .withdrawList {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.txDate {
+  font-size: 12px;
+  color: #8E94A0;
+  font-weight: 500;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.txMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.txTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1F26;
+}
+
+.txSub {
+  font-size: 11px;
+  color: #8E94A0;
+  line-height: 1.4;
+}
+
+.txAmountPlus {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2F7A3C; /* 초록색 적립 */
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.txAmountMinus {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1F26; /* 일반 텍스트 환급 */
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* 로딩 애니메이션 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f1f3f5;
+  border-top-color: #3A8F47;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loadingText {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #8E94A0;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 바텀시트 모달 (공통) */
+.bottomSheetOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.bottomSheetContainer {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 32px 20px;
+  box-sizing: border-box;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.bottomSheetHeader {
+  margin-bottom: 20px;
+}
+
+.bottomSheetTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1F26;
+  margin: 0;
+}
+
+.bottomSheetDesc {
+  font-size: 13px;
+  color: #8E94A0;
+  margin: 6px 0 0 0;
+}
+
+/* 환급 금액 인풋 */
+.inputArea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.amountInput {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  box-sizing: border-box;
+  color: #1A1F26;
+  transition: border-color 0.2s ease;
+}
+
+.amountInput:focus {
+  border-color: #3A8F47;
+}
+
+.amountHint {
+  font-size: 12px;
+  color: #8E94A0;
+  text-align: center;
+  margin: 0;
+}
+
+.bottomSheetBtns {
+  display: flex;
+  gap: 12px;
+}
+
+.sheetCancelBtn {
+  flex: 1;
+  height: 48px;
+  background-color: #f1f3f5;
+  color: #4E5968;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheetConfirmBtn {
+  flex: 1;
+  height: 48px;
+  background-color: #3A8F47;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheetConfirmBtn:disabled {
+  background-color: #e9ecef;
+  color: #8E94A0;
+  cursor: not-allowed;
+}
+
+/* 필터 항목 리스트 */
+.bottomSheetList {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.bottomSheetItem {
+  width: 100%;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4E5968;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.bottomSheetItem:hover {
+  background-color: #f8f9fa;
+}
+
+.activeItem {
+  color: #3A8F47;
+  background-color: #EBF7EE;
+}
+
+.bottomSheetCancel {
+  width: 100%;
+  height: 48px;
+  background-color: #f1f3f5;
+  color: #4E5968;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dragHandle {
+  width: 36px;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  margin: 8px auto 16px auto;
+}
+

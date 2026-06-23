@@ -1,0 +1,467 @@
+.titleArea {
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* 상단 정보 영역 */
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.totalCount {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.btnRefresh {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnRefresh:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* 필터 검색바 */
+.filterBar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+.searchInput {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    color: #0f172a;
+}
+
+.searchInput:focus {
+    border-color: #d4a84b;
+}
+
+.searchBtn {
+    padding: 10px 20px;
+    background-color: #1e293b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.searchBtn:hover {
+    background-color: #0f172a;
+}
+
+.excelBtn {
+    padding: 10px 16px;
+    background-color: #2e7238;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-left: auto;
+}
+
+.excelBtn:hover {
+    background-color: #23582b;
+}
+
+/* 메인 레이아웃 구역 */
+.contentArea {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: flex-start;
+}
+
+.tablePanel {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 테이블 카드 */
+.tableCard {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f8fafc;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 18px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.selectedRow td {
+    background-color: #fdfbe8 !important;
+}
+
+.deletedRow td {
+    color: #94a3b8 !important;
+    text-decoration: line-through;
+}
+
+.deletedIcon {
+    color: #ef4444;
+    margin-right: 4px;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* 필터 입력 행 */
+.filterRow th {
+    padding: 8px 10px;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.filterRow input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: normal;
+    outline: none;
+    background: #ffffff;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.filterRow input:focus {
+    border-color: #d4a84b;
+}
+
+.filterRow select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    background: #ffffff;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+/* 상세 보기 패널 */
+.detailPanel {
+    width: 380px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 600;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.btnClose {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.btnClose:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.detailContent {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detailSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detailSection:last-child {
+    border-bottom: none;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.detailRow label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.detailRow span {
+    color: #0f172a;
+    font-weight: 600;
+    text-align: right;
+}
+
+.bugoNum {
+    color: #d4a84b !important;
+    font-family: monospace;
+    font-weight: 700;
+}
+
+.messageBox {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    color: #334155;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.detailActions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.btnAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.btnAction:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.btnAction.primary {
+    background: #1e293b;
+    color: #ffffff;
+    border: none;
+}
+
+.btnAction.primary:hover {
+    background: #0f172a;
+}
+
+.btnAction.danger {
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+
+.btnAction.danger:hover {
+    background: #fecaca;
+}
+
+.btnAction.success {
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #86efac;
+}
+
+.btnAction.success:hover {
+    background: #bbf7d0;
+}
+
+.panelEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #94a3b8;
+    font-size: 14px;
+    gap: 12px;
+    text-align: center;
+}
+
+.panelEmptyIcon {
+    color: #cbd5e1;
+}
+
+/* 페이지네이션 */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pageBtn {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #334155;
+    transition: all 0.2s ease;
+}
+
+.pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageBtn.active {
+    background: #1e293b;
+    color: #ffffff;
+    border-color: #1e293b;
+}
+
+.pageInfo {
+    margin-left: 12px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.emptyState {
+    padding: 48px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+    .contentArea {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .detailPanel {
+        width: 100%;
+        position: static;
+        max-height: none;
+        margin-top: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .filterBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .excelBtn {
+        margin-left: 0;
+    }
+}
