@@ -11,19 +11,37 @@ export default function B2BHomePage() {
         const timer = setTimeout(() => {
             const token = localStorage.getItem('b2b_token');
             router.replace(token ? '/b2b/dashboard' : '/b2b/login');
-        }, 1600);
+        }, 3000);
         return () => clearTimeout(timer);
     }, [router]);
 
     return (
-        <div className={styles.page}>
-            <div className={styles.center}>
-                <div className={styles.mark}>
-                    <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
-                        <path d="M14 3C14 3 7 7 7 14C7 18 9 22 14 26C19 22 21 18 21 14C21 7 14 3 14 3Z" fill="currentColor"/>
-                    </svg>
+        <div className={styles.splashContainer}>
+            {/* Panning Background Image */}
+            <div className={styles.backgroundImage} />
+            
+            {/* Dark Overlay for Text Legibility */}
+            <div className={styles.overlay} />
+
+            {/* Content Layer */}
+            <div className={styles.content}>
+                {/* Main Slogan Image (Fade-in) */}
+                <div className={styles.middleTextContainer}>
+                    <img
+                        src="/images/splash/font.png"
+                        alt="부고온은 장례지도사와 함께합니다."
+                        className={styles.fontImage}
+                    />
                 </div>
-                <p className={styles.name}>부고온 파트너</p>
+                
+                {/* Bottom Logo (Fade-in) */}
+                <div className={styles.bottomLogoContainer}>
+                    <img
+                        src="/images/splash/logo.png"
+                        alt="부고온"
+                        className={styles.bottomLogo}
+                    />
+                </div>
             </div>
         </div>
     );
