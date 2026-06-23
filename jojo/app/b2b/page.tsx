@@ -37,7 +37,7 @@ export default function B2BHomePage() {
                 {/* Bottom Logo (Fade-in) */}
                 <div className={styles.bottomLogoContainer}>
                     <img
-                        src="/images/splash/logo.png"
+                        src="/images/splash/splashloㅎo.png"
                         alt="부고온"
                         className={styles.bottomLogo}
                     />

@@ -29,6 +29,13 @@
   letter-spacing: -0.02em;
 }
 
+.headerLogo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
 .headerBtn {
   width: 36px;
   height: 36px;
