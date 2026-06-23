@@ -48,12 +48,7 @@ export async function GET(request: NextRequest) {
             processed_at: r.processed_at,
             company_name: r.b2b_users?.company_name || '알 수 없음',
             owner_name: r.b2b_users?.owner_name || '알 수 없음',
-            phone: r.b2b_users?.phone || '',
-            partner_type: r.partner_type || 'individual',
-            withholding_tax: r.withholding_tax || 0,
-            local_income_tax: r.local_income_tax || 0,
-            vat: r.vat || 0,
-            net_amount: r.net_amount || r.amount
+            phone: r.b2b_users?.phone || ''
         })) || [];
 
         return NextResponse.json({ success: true, requests: formattedRequests });
@@ -134,20 +129,17 @@ export async function POST(request: NextRequest) {
                 String(now.getMinutes()).padStart(2, '0') +
                 String(now.getSeconds()).padStart(2, '0');
 
-            // 3. 이노페이 송금 API 호출
+            // 3. 이노페이 송금 API 호출 (로컬 개발 환경인 경우 모의 성공 처리)
             console.log('📤 [B2B] 이노페이 송금 API 호출 시작...', {
                 bankCode,
                 accountHolder: requestData.account_holder,
-                amount: requestData.amount,
-                netAmount: requestData.net_amount || requestData.amount
+                amount: requestData.amount
             });
 
-            try {
-                let transferResult;
-                if (txMoid.startsWith('B2BWD_TEST_') || requestData.account_no === '444-555-666666') {
-                    console.log('🧪 [TEST] Mocking B2B transfer API success');
-                    transferResult = { resultCode: '0000', resultMsg: '테스트 송금 성공', tid: 'TEST_TRANSFER_TID' };
-                } else {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('💡 [B2B] 로컬 개발 환경 감지 - 이노페이 송금 모의 성공 처리');
+            } else {
+                try {
                     const transferRes = await fetch('http://49.50.139.204/proxy/transfer', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -159,25 +151,24 @@ export async function POST(request: NextRequest) {
                             bankCode: bankCode,
                             acntNo: cleanAccNo,
                             acntNm: requestData.account_holder,
-                            amt: String(requestData.net_amount || requestData.amount),
+                            amt: String(requestData.amount),
                             depAcntNo: '66400001397152',
                             depAcntNm: '부고온정산',
                         }),
                     });
 
-                    transferResult = await transferRes.json();
-                }
+                    const transferResult = await transferRes.json();
+                    console.log('📥 [B2B] 송금 결과:', transferResult);
 
-                console.log('📥 [B2B] 송금 결과:', transferResult);
-
-                if (transferResult.resultCode !== '0000') {
-                    return NextResponse.json({ 
-                        error: `이노페이 송금 실패: ${transferResult.resultMsg || '알 수 없는 오류'}` 
-                    }, { status: 400 });
+                    if (transferResult.resultCode !== '0000') {
+                        return NextResponse.json({ 
+                            error: `이노페이 송금 실패: ${transferResult.resultMsg || '알 수 없는 오류'}` 
+                        }, { status: 400 });
+                    }
+                } catch (transferErr: any) {
+                    console.error('이노페이 송금 API 연동 오류:', transferErr);
+                    return NextResponse.json({ error: `이노페이 송금 API 연동 중 오류 발생: ${transferErr.message}` }, { status: 500 });
                 }
-            } catch (transferErr: any) {
-                console.error('이노페이 송금 API 연동 오류:', transferErr);
-                return NextResponse.json({ error: `이노페이 송금 API 연동 중 오류 발생: ${transferErr.message}` }, { status: 500 });
             }
 
             // 4. 송금 성공 시 RPC 호출하여 승인 완료 처리
