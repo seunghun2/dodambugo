@@ -136,39 +136,35 @@ export async function POST(request: NextRequest) {
                 amount: requestData.amount
             });
 
-            if (process.env.NODE_ENV === 'development') {
-                console.log('💡 [B2B] 로컬 개발 환경 감지 - 이노페이 송금 모의 성공 처리');
-            } else {
-                try {
-                    const transferRes = await fetch('http://49.50.139.204/proxy/transfer', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            mid: 'bumaeum02m',
-                            merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
-                            moid: txMoid,
-                            req_dt: reqDt,
-                            bankCode: bankCode,
-                            acntNo: cleanAccNo,
-                            acntNm: requestData.account_holder,
-                            amt: String(requestData.amount),
-                            depAcntNo: '66400001397152',
-                            depAcntNm: '부고온정산',
-                        }),
-                    });
+            try {
+                const transferRes = await fetch('http://49.50.139.204/proxy/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mid: 'bumaeum02m',
+                        merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
+                        moid: txMoid,
+                        req_dt: reqDt,
+                        bankCode: bankCode,
+                        acntNo: cleanAccNo,
+                        acntNm: requestData.account_holder,
+                        amt: String(requestData.amount),
+                        depAcntNo: '66400001397152',
+                        depAcntNm: '부고온정산',
+                    }),
+                });
 
-                    const transferResult = await transferRes.json();
-                    console.log('📥 [B2B] 송금 결과:', transferResult);
+                const transferResult = await transferRes.json();
+                console.log('📥 [B2B] 송금 결과:', transferResult);
 
-                    if (transferResult.resultCode !== '0000') {
-                        return NextResponse.json({ 
-                            error: `이노페이 송금 실패: ${transferResult.resultMsg || '알 수 없는 오류'}` 
-                        }, { status: 400 });
-                    }
-                } catch (transferErr: any) {
-                    console.error('이노페이 송금 API 연동 오류:', transferErr);
-                    return NextResponse.json({ error: `이노페이 송금 API 연동 중 오류 발생: ${transferErr.message}` }, { status: 500 });
+                if (transferResult.resultCode !== '0000') {
+                    return NextResponse.json({ 
+                        error: `이노페이 송금 실패: ${transferResult.resultMsg || '알 수 없는 오류'}` 
+                    }, { status: 400 });
                 }
+            } catch (transferErr: any) {
+                console.error('이노페이 송금 API 연동 오류:', transferErr);
+                return NextResponse.json({ error: `이노페이 송금 API 연동 중 오류 발생: ${transferErr.message}` }, { status: 500 });
             }
 
             // 4. 송금 성공 시 RPC 호출하여 승인 완료 처리
