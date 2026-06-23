@@ -154,56 +154,13 @@ export default function B2BCreatePage() {
       setIsEditMode(true);
       loadBugoData(editNum);
     } else if (userStr) {
-      // [신규 작성 모드] 로그인 파트너의 장례식장 정보 및 자주찾는 식장 정보 자동 완성
-      try {
-        const user = JSON.parse(userStr);
-        if (user.company_name) {
-          // 1. 소속 회사/장례식장명을 기본값으로 설정
-          setFormData(prev => ({
-            ...prev,
-            funeral_home: user.company_name,
-          }));
-
-          // 2. 자주찾는 식장 목록(b2b_favorite_facilities)에서 주소/연락처 검색 및 매칭
-          const stored = localStorage.getItem('b2b_favorite_facilities');
-          if (stored) {
-            const favorites = JSON.parse(stored);
-            const matched = favorites.find((f: any) => f.name === user.company_name);
-            if (matched) {
-              setFormData(prev => ({
-                ...prev,
-                funeral_home: matched.name,
-                address: matched.address || '',
-                funeral_home_tel: matched.tel || '',
-              }));
-            } else if (favorites.length > 0) {
-              // 매칭되는 항목이 없더라도 자주찾는 목록의 첫 번째 식장으로 채워줌
-              setFormData(prev => ({
-                ...prev,
-                funeral_home: favorites[0].name,
-                address: favorites[0].address || '',
-                funeral_home_tel: favorites[0].tel || '',
-              }));
-            }
-          }
-        } else {
-          // company_name이 없더라도 자주찾는 식장이 등록되어 있다면 첫 번째 항목 자동 채우기
-          const stored = localStorage.getItem('b2b_favorite_facilities');
-          if (stored) {
-            const favorites = JSON.parse(stored);
-            if (favorites.length > 0) {
-              setFormData(prev => ({
-                ...prev,
-                funeral_home: favorites[0].name,
-                address: favorites[0].address || '',
-                funeral_home_tel: favorites[0].tel || '',
-              }));
-            }
-          }
-        }
-      } catch (e) {
-        console.error('B2B 파트너 장례식장 자동 완성 로드 오류:', e);
-      }
+      // [신규 작성 모드] 더 이상 소속 상조회사/회사명(user.company_name)을 장례식장명에 자동 대입하지 않고 빈 칸으로 시작합니다.
+      setFormData(prev => ({
+        ...prev,
+        funeral_home: '',
+        address: '',
+        funeral_home_tel: '',
+      }));
     }
   }, [router]);
 
