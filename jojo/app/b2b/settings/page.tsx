@@ -1401,7 +1401,9 @@ export default function SettingsPage() {
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>자주 묻는 질문</span>
-                    <div className={styles.headerRightPlaceholder} />
+                    <button className={styles.menuBtn} onClick={() => alert('메뉴 기능이 준비 중입니다.')}>
+                        <B2BIcon name="menu" size={24} />
+                    </button>
                 </header>
 
                 <div className={styles.faqList}>

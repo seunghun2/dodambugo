@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         .eq('key', 'min_withdrawal_amount')
         .single();
 
-    const minAmount = parseInt(minSetting?.value || '50000');
+    const minAmount = parseInt(minSetting?.value || '10000');
     if (amount < minAmount) {
         return NextResponse.json(
             { error: `최소 출금 금액은 ${minAmount.toLocaleString()}원입니다.` },
@@ -166,22 +166,35 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // PL/pgSQL RPC를 통한 안전한 단일 트랜잭션 처리
-    const { data: success, error: withdrawError } = await supabase.rpc('create_withdrawal_request', {
-        p_user_id: userId,
-        p_amount: amount,
-        p_bank_name: user.bank_name,
-        p_account_no: user.account_no,
-        p_account_holder: user.account_holder
-    });
+    // 출금 신청 INSERT
+    const { error: withdrawError } = await supabase
+        .from('withdrawal_requests')
+        .insert({
+            user_id: userId,
+            amount,
+            bank_name: user.bank_name,
+            account_no: user.account_no,
+            account_holder: user.account_holder,
+            status: 'pending',
+        });
 
-    if (withdrawError || !success) {
-        console.error('[DEBUG] Withdrawal RPC error:', withdrawError);
-        return NextResponse.json(
-            { error: withdrawError?.message || '출금 신청에 실패했습니다.' },
-            { status: 500 }
-        );
+    if (withdrawError) {
+        return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
     }
+
+    // 예치금 차감
+    await supabase
+        .from('deposits')
+        .update({ balance: deposit.balance - amount, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+    // 거래 내역 INSERT
+    await supabase.from('deposit_transactions').insert({
+        user_id: userId,
+        amount: -amount,
+        type: 'withdrawal',
+        description: `출금 신청 (${user.bank_name} ${user.account_no})`,
+    });
 
     return NextResponse.json({ success: true, message: '출금 신청이 완료되었습니다.' });
 }

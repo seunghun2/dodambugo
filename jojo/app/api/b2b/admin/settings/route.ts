@@ -9,7 +9,7 @@ const supabase = createClient(
 const DEFAULT_SETTINGS = {
     wreath_reward_amount: '10000',
     referral_bonus_amount: '2000',
-    min_withdrawal_amount: '50000',
+    min_withdrawal_amount: '10000',
 };
 
 // GET: B2B 설정 전체 조회

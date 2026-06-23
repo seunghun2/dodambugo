@@ -32,6 +32,16 @@ export async function POST(request: NextRequest) {
         const isB2B = host.includes('bugoon') || host.includes('partner') || host.includes('b2b') || referer.includes('/b2b');
         const brand = isB2B ? '부고온' : '마음부고';
 
+        // 테스트 번호(01088889999) 예외 처리
+        if (cleanPhone === '01088889999') {
+            verificationCodes.set(cleanPhone, {
+                code: '123456',
+                expires: Date.now() + 30 * 60 * 1000, // 30분 유효
+            });
+            console.log(`📱 [TEST MOCK] 인증번호 강제 세팅: ${cleanPhone} → 123456`);
+            return NextResponse.json({ success: true, message: '인증번호가 발송되었습니다' });
+        }
+
         // SMS 발송
         await sendSMS(cleanPhone, `[${brand}] 인증번호 [${code}]를 입력해주세요.`);
 

@@ -5,7 +5,7 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import './globals.css';
 
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
 import { dodamTheme } from '@/lib/theme';
@@ -83,7 +83,17 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="format-detection" content="telephone=no, address=no, email=no" />
-        <ColorSchemeScript defaultColorScheme="light" />
+        <script
+          id="mantine-color-scheme-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var colorScheme = localStorage.getItem('mantine-color-scheme') || 'light';
+                document.documentElement.setAttribute('data-mantine-color-scheme', colorScheme);
+              } catch (e) {}
+            `,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />

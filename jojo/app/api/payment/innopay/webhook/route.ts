@@ -68,35 +68,17 @@ export async function POST(request: NextRequest) {
                 // =============================================
                 // [B2B] 화환 판매 시 파트너 예치금 자동 적립 (가상계좌)
                 // =============================================
-                if (orderData?.bugo_id || orderData?.partner_data) {
+                if (orderData?.bugo_id) {
                     try {
                         // 1. 이 부고에 연결된 B2B 파트너 조회
-                        let partnerId = null;
-                        if (orderData?.bugo_id) {
-                            const { data: bugoRecord } = await supabase
-                                .from('bugo')
-                                .select('b2b_user_id')
-                                .eq('id', orderData.bugo_id)
-                                .single();
-                            if (bugoRecord?.b2b_user_id) {
-                                partnerId = bugoRecord.b2b_user_id;
-                            }
-                        }
+                        const { data: bugoRecord } = await supabase
+                            .from('bugo')
+                            .select('b2b_user_id')
+                            .eq('id', orderData.bugo_id)
+                            .single();
 
-                        if (!partnerId && orderData?.partner_data) {
-                            try {
-                                const pData = typeof orderData.partner_data === 'string'
-                                    ? JSON.parse(orderData.partner_data)
-                                    : orderData.partner_data;
-                                if (pData?.b2b_user_id) {
-                                    partnerId = pData.b2b_user_id;
-                                }
-                            } catch (e) {
-                                console.error('Failed to parse partner_data in webhook API:', e);
-                            }
-                        }
-
-                        if (partnerId) {
+                        if (bugoRecord?.b2b_user_id) {
+                            const partnerId = bugoRecord.b2b_user_id;
 
                             // 2. 적립금액 설정 조회
                             const { data: rewardSetting } = await supabase

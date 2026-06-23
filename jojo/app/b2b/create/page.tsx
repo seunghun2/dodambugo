@@ -61,7 +61,7 @@ export interface BugoFormData {
   show_message: boolean;
   death_term: string;
   partner_logo_url: string;
-  hide_flower_order: boolean;
+  no_wreath: boolean;
   auto_reply: boolean;
 }
 
@@ -98,7 +98,7 @@ const initialFormData: BugoFormData = {
   show_message: false,
   death_term: '별세',
   partner_logo_url: '',
-  hide_flower_order: false,
+  no_wreath: false,
   auto_reply: true,
 };
 
@@ -157,9 +157,7 @@ export default function B2BCreatePage() {
       // [신규 작성 모드] 로그인 파트너의 장례식장 정보 및 자주찾는 식장 정보 자동 완성
       try {
         const user = JSON.parse(userStr);
-        const hasFuneralInCompany = user.company_name && (user.company_name.includes('장례식장') || user.company_name.includes('장례'));
-
-        if (hasFuneralInCompany) {
+        if (user.company_name) {
           // 1. 소속 회사/장례식장명을 기본값으로 설정
           setFormData(prev => ({
             ...prev,
@@ -188,6 +186,20 @@ export default function B2BCreatePage() {
               }));
             }
           }
+        } else {
+          // company_name이 없더라도 자주찾는 식장이 등록되어 있다면 첫 번째 항목 자동 채우기
+          const stored = localStorage.getItem('b2b_favorite_facilities');
+          if (stored) {
+            const favorites = JSON.parse(stored);
+            if (favorites.length > 0) {
+              setFormData(prev => ({
+                ...prev,
+                funeral_home: favorites[0].name,
+                address: favorites[0].address || '',
+                funeral_home_tel: favorites[0].tel || '',
+              }));
+            }
+          }
         }
       } catch (e) {
         console.error('B2B 파트너 장례식장 자동 완성 로드 오류:', e);
@@ -197,14 +209,6 @@ export default function B2BCreatePage() {
 
   const loadBugoData = async (bugoNum: string) => {
     try {
-      const b2bUserStr = typeof window !== 'undefined' ? localStorage.getItem('b2b_user') : null;
-      const b2bUser = b2bUserStr ? JSON.parse(b2bUserStr) : null;
-      if (!b2bUser || !b2bUser.id) {
-        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-        router.push('/b2b/login');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('bugo')
         .select('*')
@@ -213,11 +217,6 @@ export default function B2BCreatePage() {
       
       if (error) throw error;
       if (data) {
-        if (data.b2b_user_id !== b2bUser.id) {
-          alert('해당 부고장에 대한 관리 권한이 없습니다.');
-          router.push('/b2b/manage');
-          return;
-        }
         setFormData({
           funeral_type: data.funeral_type || '일반장례',
           funeral_home: data.funeral_home || '',
@@ -251,7 +250,7 @@ export default function B2BCreatePage() {
           show_message: !!data.message,
           death_term: data.death_term || '별세',
           partner_logo_url: data.partner_logo_url || '',
-          hide_flower_order: data.hide_flower_order || false,
+          no_wreath: data.hide_flower_order || false,
           auto_reply: data.auto_reply !== false,
         });
 
@@ -293,7 +292,7 @@ export default function B2BCreatePage() {
     setFormData(prev => {
       const next = { ...prev, [field]: value };
       if (field === 'funeral_type' && value === '무빈소장례') {
-        next.hide_flower_order = true;
+        next.no_wreath = true;
       }
       return next;
     });
@@ -387,7 +386,7 @@ export default function B2BCreatePage() {
 
     try {
       const user = JSON.parse(localStorage.getItem('b2b_user') || '{}');
-      const bugoNumber = isEditMode && editBugoNumber ? editBugoNumber : await generateBugoNumber();
+      const token = localStorage.getItem('b2b_token');
 
       const bugoData: any = {
         deceased_name: formData.deceased_name,
@@ -421,7 +420,7 @@ export default function B2BCreatePage() {
         message: formData.show_message ? formData.message : null,
         death_term: formData.death_term || '별세',
         partner_logo_url: formData.partner_logo_url || null,
-        hide_flower_order: formData.hide_flower_order,
+        hide_flower_order: formData.no_wreath,
         auto_reply: formData.auto_reply,
         mourners: JSON.stringify(mourners.filter(m => m.name)),
         account_info: mourners[0]?.bank
@@ -434,34 +433,33 @@ export default function B2BCreatePage() {
         photo_url: formData.show_photo ? formData.photo_url : null,
       };
 
-      let queryResult;
-      if (isEditMode && editBugoNumber) {
-        queryResult = await supabase
-          .from('bugo')
-          .update(bugoData)
-          .eq('bugo_number', editBugoNumber);
-      } else {
-        const ownerToken = generateOwnerToken();
-        bugoData.bugo_number = bugoNumber;
-        bugoData.template_id = 'basic';
-        bugoData.applicant_name = mourners[0]?.name || '';
-        bugoData.applicant_phone = mourners[0]?.contact || '';
-        bugoData.phone_password = mourners[0]?.contact || '';
-        bugoData.status = 'active';
-        bugoData.owner_token = ownerToken;
-        bugoData.b2b_user_id = user.id || null;
+      const response = await fetch('/api/b2b/bugo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bugoData,
+          isEditMode,
+          editBugoNumber,
+          mourners,
+        }),
+      });
 
-        queryResult = await supabase.from('bugo').insert([bugoData]);
+      if (!response.ok) {
+        const resData = await response.json();
+        throw new Error(resData.error || '부고 저장 API 요청 실패');
       }
 
-      if (queryResult.error) throw queryResult.error;
+      const { bugo_number: resultBugoNumber } = await response.json();
 
       // 슬랙 + 알림톡 발송
       await fetch('/api/bugo-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bugo_number: bugoNumber,
+          bugo_number: resultBugoNumber,
           deceased_name: formData.deceased_name,
           funeral_home: formData.funeral_home,
           room_number: formData.room_number,
@@ -489,10 +487,10 @@ export default function B2BCreatePage() {
         }
       }
 
-      router.push(`/b2b/create/complete/${bugoNumber}`);
-    } catch (err) {
+      router.push(`/b2b/create/complete/${resultBugoNumber}`);
+    } catch (err: any) {
       console.error('부고 생성 실패:', err);
-      alert('부고 생성에 실패했습니다. 다시 시도해주세요.');
+      alert(err.message || '부고 생성에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
     }
@@ -504,7 +502,7 @@ export default function B2BCreatePage() {
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => router.back()}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
+            <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
         <h1 className={styles.headerTitle}>{isEditMode ? '부고장 수정' : '부고장 제작'}</h1>

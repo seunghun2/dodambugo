@@ -425,43 +425,21 @@ export default function WalletPage() {
                                 
                                 {withdrawAmount && parseInt(withdrawAmount) > 0 && (
                                     <div style={{ marginTop: '16px', padding: '12px', background: '#F8F9FA', borderRadius: '6px', fontSize: '13px', border: '1px solid #E9ECEF', textAlign: 'left' }}>
-                                        {partnerType === 'business' ? (
-                                            <>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                                    <span>신청 금액 (공급가액)</span>
-                                                    <span style={{ fontWeight: '600' }}>{formatCurrency(parseInt(withdrawAmount))}원</span>
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: '#3A8F47' }}>
-                                                    <span>부가세 (10%)</span>
-                                                    <span>+{formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.1))}원</span>
-                                                </div>
-                                                <div style={{ borderTop: '1px solid #E9ECEF', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#1A1F26' }}>
-                                                    <span>예상 최종 입금액</span>
-                                                    <span>{formatCurrency(Math.floor(parseInt(withdrawAmount) * 1.1))}원</span>
-                                                </div>
-                                                <p style={{ fontSize: '11px', color: '#868E96', marginTop: '8px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
-                                                    ※ 사업자 파트너는 정산 승인 전까지 [공급가액 {formatCurrency(parseInt(withdrawAmount))}원 / 세액 {formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.1))}원]의 세금계산서를 발행해 주셔야 송금 처리가 완료됩니다.
-                                                </p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                                    <span>신청 금액</span>
-                                                    <span style={{ fontWeight: '600' }}>{formatCurrency(parseInt(withdrawAmount))}원</span>
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: '#E53E3E' }}>
-                                                    <span>원천징수 세액 (3.3%)</span>
-                                                    <span>-{formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
-                                                </div>
-                                                <div style={{ borderTop: '1px solid #E9ECEF', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#1A1F26' }}>
-                                                    <span>예상 최종 입금액</span>
-                                                    <span>{formatCurrency(parseInt(withdrawAmount) - Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
-                                                </div>
-                                                <p style={{ fontSize: '11px', color: '#868E96', marginTop: '8px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
-                                                    ※ 개인(프리랜서) 대상자는 소득세법에 따라 3.3% 원천세가 공제된 금액으로 지급됩니다.
-                                                </p>
-                                            </>
-                                        )}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                            <span>신청 금액</span>
+                                            <span style={{ fontWeight: '600' }}>{formatCurrency(parseInt(withdrawAmount))}원</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: '#E53E3E' }}>
+                                            <span>원천징수 세액 (3.3%)</span>
+                                            <span>-{formatCurrency(Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
+                                        </div>
+                                        <div style={{ borderTop: '1px solid #E9ECEF', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#1A1F26' }}>
+                                            <span>예상 최종 입금액</span>
+                                            <span>{formatCurrency(parseInt(withdrawAmount) - Math.floor(parseInt(withdrawAmount) * 0.033))}원</span>
+                                        </div>
+                                        <p style={{ fontSize: '11px', color: '#868E96', marginTop: '8px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
+                                            ※ 개인(프리랜서) 대상자는 소득세법에 따라 3.3% 원천세가 공제된 금액으로 지급됩니다.
+                                        </p>
                                     </div>
                                 )}
                             </div>

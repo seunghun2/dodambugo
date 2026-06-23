@@ -7,7 +7,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// Node.js Runtime for stable cache and DB connections
+// Edge Runtime - Cold Start 거의 없음!
+export const runtime = 'edge';
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {

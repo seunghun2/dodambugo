@@ -138,70 +138,23 @@ export async function POST(request: NextRequest) {
 
         // INNOPAY 승인 API 호출
         console.log('📤 INNOPAY API 호출 시작...');
-        let approveResult;
-        let isSuccess = false;
-        let approveResponseOk = true;
-        let approveResponseStatus = 200;
+        const approveResponse = await fetch('https://api.innopay.co.kr/v1/transactions/pay', {
+            method: 'POST',
+            headers: {
+                'Payment-Token': paymentToken,
+                'Merchant-Key': process.env.INNOPAY_LICENSE_KEY || '',
+                'Content-Type': 'application/json; charset=utf-8',
+            },
+            body: JSON.stringify({
+                tid,
+                mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
+                amt,
+                taxFreeAmt: taxFreeAmt || '0',
+                moid,
+            }),
+        });
 
-        if (tid === 'TEST_TID_MOCK') {
-            console.log('🧪 [TEST] Mocking INNOPAY approval response');
-            approveResult = {
-                success: true,
-                resultCode: '0000',
-                resultMsg: '테스트 결제 승인 성공',
-                data: {
-                    tid: 'TEST_TID_MOCK',
-                    payMethod: payMethod || 'CARD',
-                    amt: amt,
-                    etc: {
-                        mallReserved: JSON.stringify({
-                            orderId: orderId,
-                            bugoId: moid // moid에 bugoId(숫자형태)를 실어 보낼 수 있음
-                        })
-                    }
-                }
-            };
-            isSuccess = true;
-        } else {
-            const approveResponse = await fetch('https://api.innopay.co.kr/v1/transactions/pay', {
-                method: 'POST',
-                headers: {
-                    'Payment-Token': paymentToken,
-                    'Merchant-Key': process.env.INNOPAY_LICENSE_KEY || '',
-                    'Content-Type': 'application/json; charset=utf-8',
-                },
-                body: JSON.stringify({
-                    tid,
-                    mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
-                    amt,
-                    taxFreeAmt: taxFreeAmt || '0',
-                    moid,
-                }),
-            });
-
-            approveResponseStatus = approveResponse.status;
-            approveResponseOk = approveResponse.ok;
-            approveResult = await approveResponse.json();
-
-            // INNOPAY HTTP 에러 체크
-            if (!approveResponseOk) {
-                console.log('❌ INNOPAY HTTP 에러:', approveResponseStatus);
-                return NextResponse.json(
-                    {
-                        success: false,
-                        error: approveResult.message || approveResult.resultMsg || '결제 승인 실패',
-                        code: approveResult.code || approveResult.resultCode,
-                        innopayResponse: approveResult,  // 전체 응답 포함
-                    },
-                    { status: 400 }
-                );
-            }
-
-            isSuccess = approveResult.success === true ||
-                approveResult.resultCode === '0000' ||
-                approveResult.resultCode === '00';
-        }
-
+        const approveResult = await approveResponse.json();
         console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
         // 상세 결제정보 필드 로깅 (카드사/간편결제 종류 확인용)
         if (approveResult.data) {
@@ -212,6 +165,27 @@ export async function POST(request: NextRequest) {
                 epay: approveResult.data.epay,
             }));
         }
+
+        // INNOPAY HTTP 에러 체크
+        if (!approveResponse.ok) {
+            console.log('❌ INNOPAY HTTP 에러:', approveResponse.status);
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: approveResult.message || approveResult.resultMsg || '결제 승인 실패',
+                    code: approveResult.code || approveResult.resultCode,
+                    innopayResponse: approveResult,  // 전체 응답 포함
+                },
+                { status: 400 }
+            );
+        }
+
+        // 승인 성공 체크 - INNOPAY는 success 필드 사용
+        // 성공: {success: true, data: {...}}
+        // 실패: {success: false, error: {...}} 또는 {resultCode: 'XXXX', resultMsg: '...'}
+        const isSuccess = approveResult.success === true ||
+            approveResult.resultCode === '0000' ||
+            approveResult.resultCode === '00';
 
         if (!isSuccess) {
             const errorInfo = approveResult.error || {};
@@ -393,35 +367,17 @@ export async function POST(request: NextRequest) {
         // =============================================
         // [B2B] 화환 판매 시 파트너 예치금 자동 적립
         // =============================================
-        if (orderData?.bugo_id || orderData?.partner_data) {
+        if (orderData?.bugo_id) {
             try {
                 // 1. 이 부고에 연결된 B2B 파트너 조회
-                let partnerId = null;
-                if (orderData?.bugo_id) {
-                    const { data: bugoRecord } = await supabase
-                        .from('bugo')
-                        .select('b2b_user_id')
-                        .eq('id', orderData.bugo_id)
-                        .single();
-                    if (bugoRecord?.b2b_user_id) {
-                        partnerId = bugoRecord.b2b_user_id;
-                    }
-                }
+                const { data: bugoRecord } = await supabase
+                    .from('bugo')
+                    .select('b2b_user_id')
+                    .eq('id', orderData.bugo_id)
+                    .single();
 
-                if (!partnerId && orderData?.partner_data) {
-                    try {
-                        const pData = typeof orderData.partner_data === 'string'
-                            ? JSON.parse(orderData.partner_data)
-                            : orderData.partner_data;
-                        if (pData?.b2b_user_id) {
-                            partnerId = pData.b2b_user_id;
-                        }
-                    } catch (e) {
-                        console.error('Failed to parse partner_data in approve API:', e);
-                    }
-                }
-
-                if (partnerId) {
+                if (bugoRecord?.b2b_user_id) {
+                    const partnerId = bugoRecord.b2b_user_id;
 
                     // 2. 적립금액 설정 조회
                     const { data: rewardSetting } = await supabase
@@ -619,63 +575,44 @@ export async function POST(request: NextRequest) {
                         try {
                             const partnerId = bugoData.b2b_user_id;
 
-                            // B2B 수당율 설정 조회
-                            const { data: feeRateSetting } = await supabase
-                                .from('b2b_settings')
-                                .select('value')
-                                .eq('key', 'b2b_condolence_fee_rate')
+                            // 파트너 예치금 조회
+                            const { data: currentDeposit } = await supabase
+                                .from('deposits')
+                                .select('balance')
+                                .eq('user_id', partnerId)
                                 .single();
-                            
-                            let rewardRate = 0.05; // 기본값 5%
-                            if (feeRateSetting?.value) {
-                                const parsedVal = parseFloat(feeRateSetting.value);
-                                if (!isNaN(parsedVal)) {
-                                    rewardRate = parsedVal >= 1 ? parsedVal / 100 : parsedVal;
-                                }
-                            }
 
-                            const condolenceReward = Math.floor(selectedAmount * rewardRate);
-
-                            if (condolenceReward > 0) {
-                                // 파트너 예치금 조회
-                                const { data: currentDeposit } = await supabase
-                                    .from('deposits')
-                                    .select('balance')
-                                    .eq('user_id', partnerId)
-                                    .single();
-
-                                if (currentDeposit) {
-                                    await supabase
-                                        .from('deposits')
-                                        .update({
-                                            balance: (currentDeposit.balance || 0) + condolenceReward,
-                                            updated_at: new Date().toISOString(),
-                                        })
-                                        .eq('user_id', partnerId);
-                                } else {
-                                    // 예치금 테이블에 없으면 새로 생성
-                                    await supabase
-                                        .from('deposits')
-                                        .insert({
-                                            user_id: partnerId,
-                                            balance: condolenceReward,
-                                            updated_at: new Date().toISOString(),
-                                        });
-                                }
-
-                                // 적립 내역 기록
+                            if (currentDeposit) {
                                 await supabase
-                                    .from('deposit_transactions')
+                                    .from('deposits')
+                                    .update({
+                                        balance: (currentDeposit.balance || 0) + fee,
+                                        updated_at: new Date().toISOString(),
+                                    })
+                                    .eq('user_id', partnerId);
+                            } else {
+                                // 예치금 테이블에 없으면 새로 생성
+                                await supabase
+                                    .from('deposits')
                                     .insert({
                                         user_id: partnerId,
-                                        amount: condolenceReward,
-                                        type: 'condolence_reward',
-                                        description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
-                                        related_order_id: condolenceOrderNumber || moid,
+                                        balance: fee,
+                                        updated_at: new Date().toISOString(),
                                     });
-
-                                console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${condolenceReward}원 적립 완료 (수당율: ${rewardRate * 100}%)`);
                             }
+
+                            // 적립 내역 기록
+                            await supabase
+                                .from('deposit_transactions')
+                                .insert({
+                                    user_id: partnerId,
+                                    amount: fee,
+                                    type: 'condolence_reward',
+                                    description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
+                                    related_order_id: condolenceOrderNumber || moid,
+                                });
+
+                            console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${fee}원 적립 완료`);
                         } catch (b2bCondolenceError) {
                             console.error('❌ [B2B] 조의금 예치금 적립 오류 (결제는 정상):', b2bCondolenceError);
                         }

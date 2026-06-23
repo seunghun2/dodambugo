@@ -64,7 +64,13 @@ export default function VerifyFormPage() {
                 .from('b2b-id-cards')
                 .upload(filePath, file);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn('Storage upload error bypassed in development mode:', uploadError);
+                } else {
+                    throw uploadError;
+                }
+            }
 
             setIdCardUploadProgress(70);
             setIdCardUrl(filePath);
@@ -253,31 +259,11 @@ export default function VerifyFormPage() {
             </header>
 
             <div className={styles.content}>
-                {/* 파트너 유형 선택 탭 */}
-                <div className={styles.typeTabContainer}>
-                    <button
-                        type="button"
-                        className={`${styles.typeTabBtn} ${partnerType === 'individual' ? styles.typeTabActive : ''}`}
-                        onClick={() => { setPartnerType('individual'); setIdCardFile(null); setIdCardUrl(''); setError(''); }}
-                    >
-                        개인 (3.3% 원천징수)
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.typeTabBtn} ${partnerType === 'business' ? styles.typeTabActive : ''}`}
-                        onClick={() => { setPartnerType('business'); setIdCardFile(null); setIdCardUrl(''); setError(''); }}
-                    >
-                        사업자 (세금계산서)
-                    </button>
-                </div>
-
                 <h1 className={styles.title}>
-                    {partnerType === 'individual' ? '개인 정보 입력(소득증빙)' : '사업자 정보 입력(세금정산)'}
+                    개인 정보 입력(소득증빙)
                 </h1>
                 <p className={styles.redAlert}>
-                    {partnerType === 'individual' 
-                        ? '입력해주신 개인정보를 바탕으로 사업소득 신고가 진행될 예정입니다. 따라서 신청자와 예금주의 정보를 동일하게 입력 부탁드립니다.'
-                        : '입력해주신 사업자정보를 바탕으로 세금계산서 매칭 및 부가세 정산이 진행될 예정입니다. 따라서 사업자등록증 정보와 동일하게 입력 부탁드립니다.'}
+                    입력해주신 개인정보를 바탕으로 사업소득 신고가 진행될 예정입니다. 따라서 신청자와 예금주의 정보를 동일하게 입력 부탁드립니다.
                 </p>
 
                 {error && <p className={styles.errorText} style={{ marginBottom: '16px' }}>{error}</p>}

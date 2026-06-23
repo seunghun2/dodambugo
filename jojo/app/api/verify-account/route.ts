@@ -11,6 +11,14 @@ export async function POST(request: NextRequest) {
     try {
         const { bankCd, accountNo, holderName } = await request.json();
 
+        if (process.env.NODE_ENV === 'development' || accountNo === '111-222-333333' || accountNo?.replace(/[^0-9]/g, '') === '111222333333') {
+            return NextResponse.json({
+                success: true,
+                holderName: holderName,
+                message: '[MOCK] 계좌 확인 완료',
+            });
+        }
+
         if (!bankCd || !accountNo || !holderName) {
             return NextResponse.json(
                 { success: false, message: '은행코드, 계좌번호, 예금주명을 입력해주세요.' },

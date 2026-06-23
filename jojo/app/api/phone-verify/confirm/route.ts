@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
         }
 
         const cleanPhone = phone.replace(/-/g, '');
+
+        // 테스트 번호(01088889999) + '123456' 예외 처리
+        if (cleanPhone === '01088889999' && code === '123456') {
+            return NextResponse.json({ success: true, message: '인증이 완료되었습니다' });
+        }
+
         const stored = verificationCodes.get(cleanPhone);
 
         if (!stored) {

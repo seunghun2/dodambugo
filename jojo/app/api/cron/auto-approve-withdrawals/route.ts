@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
             const companyName = req.b2b_users?.company_name || '알 수 없음';
             const ownerName = req.b2b_users?.owner_name || '알 수 없음';
 
-            console.log(`🚀 [Cron] 자동 이체 처리 중: ID=${req.id}, 파트너=${companyName}(${ownerName}), 금액=${req.amount}, 실지급액=${req.net_amount || req.amount}`);
+            console.log(`🚀 [Cron] 자동 이체 처리 중: ID=${req.id}, 파트너=${companyName}(${ownerName}), 금액=${req.amount}`);
 
             // 2. 은행 코드 식별
             const bankCode = getBankCode(req.bank_name);
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
                         bankCode: bankCode,
                         acntNo: cleanAccNo,
                         acntNm: req.account_holder,
-                        amt: String(req.net_amount || req.amount),
+                        amt: String(req.amount),
                         depAcntNo: '66400001397152',
                         depAcntNm: '부고온정산',
                     }),
