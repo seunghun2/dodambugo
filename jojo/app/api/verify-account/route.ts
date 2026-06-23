@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     try {
         const { bankCd, accountNo, holderName } = await request.json();
 
-        if (process.env.NODE_ENV === 'development' || accountNo === '111-222-333333' || accountNo?.replace(/[^0-9]/g, '') === '111222333333') {
+        if (accountNo === '111-222-333333' || accountNo?.replace(/[^0-9]/g, '') === '111222333333') {
             return NextResponse.json({
                 success: true,
                 holderName: holderName,
