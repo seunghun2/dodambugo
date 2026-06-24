@@ -144,10 +144,16 @@ function displayBugo(data) {
         document.getElementById('deathDatetime').textContent = deathDateTime;
     }
     
+    // ─── 장례 표시 로직 (공통 규칙: jojo/lib/funeral-display.ts 참조) ───
+    // - 입관: B2C에서는 절대 표시하지 않음 (B2B만 encoffin_date 있을 때 표시)
+    // - 무빈소장례: 발인, 장지 숨김
+    // - '일반 장례'(공백있음) / '일반장례'(공백없음) 둘 다 일반 장례로 취급
+    // ─────────────────────────────────────────────────────────────────────
+    
     // 입관일 노출은 B2C 마음부고 라이브에서 완전 제외
     document.getElementById('encoffinRow').style.display = 'none';
     
-    // 발인 정보
+    // 발인 정보 — 무빈소장례이면 숨김
     if (data.funeral_date && data.funeral_type !== '무빈소장례') {
         const funeralDate = new Date(data.funeral_date);
         const funeralTime = data.funeral_time || '';

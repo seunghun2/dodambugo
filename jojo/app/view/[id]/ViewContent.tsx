@@ -3,6 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import {
+    shouldShowFuneralHomeBox,
+    shouldShowIlpo,
+    shouldShowFuneral,
+    shouldShowBurialPlace,
+    shouldShowMap,
+    shouldShowFlowerSection,
+    getCeremonyLabel,
+} from '@/lib/funeral-display';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 // supabase는 필요할 때만 동적 로드
 import NaverMap from '@/components/NaverMap';
@@ -761,7 +770,7 @@ ${url}
             <div className="section-divider"></div>
 
             {/* 장례식장 박스 - 일반 장례일 때만, 헤더 바로 아래 */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && bugo.funeral_home && (
+            {shouldShowFuneralHomeBox({ funeralType: bugo.funeral_type, funeralHome: bugo.funeral_home }) && (
                 <>
                     <div className="funeral-box funeral-box-inline funeral-box-top">
                         <span className="funeral-name">{bugo.funeral_home}</span>
@@ -789,19 +798,19 @@ ${url}
                     </div>
                     <div className="funeral-info-divider"></div>
                     {/* 일포일시 - 있으면 진하게 표시 (발인보다 먼저) */}
-                    {bugo.ilpo_date && bugo.funeral_type !== '무빈소장례' && (
+                    {shouldShowIlpo({ funeralType: bugo.funeral_type, ilpoDate: bugo.ilpo_date }) && (
                         <div className="funeral-info-row funeral-highlight">
                             <span className="funeral-info-label">일포</span>
-                            <span className="funeral-info-value">{formatDate(bugo.ilpo_date)} {bugo.ilpo_time || ''}</span>
+                            <span className="funeral-info-value">{formatDate(bugo.ilpo_date!)} {bugo.ilpo_time || ''}</span>
                         </div>
                     )}
                     {/* 발인 - 일포가 있으면 연하게, hide_funeral이 true이거나 무빈소장례면 숨김 */}
-                    {bugo.funeral_date && !bugo.hide_funeral && bugo.funeral_type !== '무빈소장례' && (
+                    {shouldShowFuneral({ funeralType: bugo.funeral_type, funeralDate: bugo.funeral_date, hideFuneral: bugo.hide_funeral }) && (
                         <>
-                            {bugo.ilpo_date && bugo.funeral_type !== '무빈소장례' && <div className="funeral-info-divider"></div>}
+                            {shouldShowIlpo({ funeralType: bugo.funeral_type, ilpoDate: bugo.ilpo_date }) && <div className="funeral-info-divider"></div>}
                             <div className={`funeral-info-row ${bugo.ilpo_date ? '' : 'funeral-highlight'}`}>
                                 <span className="funeral-info-label">발인</span>
-                                <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
+                                <span className="funeral-info-value">{formatDate(bugo.funeral_date!)} {bugo.funeral_time || ''}</span>
                             </div>
                         </>
                     )}
@@ -814,28 +823,18 @@ ${url}
                             </div>
                         </>
                     )}
-                    {/* 가족장일 때 빈소 표시 */}
-                    {bugo.funeral_type === '가족장' && (
+                    {/* 가족장/무빈소장례일 때 빈소 라벨 표시 — lib/funeral-display.ts 참조 */}
+                    {getCeremonyLabel(bugo.funeral_type) && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
                                 <span className="funeral-info-label">빈소</span>
-                                <span className="funeral-info-value">가족장</span>
-                            </div>
-                        </>
-                    )}
-                    {/* 무빈소장례일 때 빈소 표시 */}
-                    {bugo.funeral_type === '무빈소장례' && (
-                        <>
-                            <div className="funeral-info-divider"></div>
-                            <div className="funeral-info-row">
-                                <span className="funeral-info-label">빈소</span>
-                                <span className="funeral-info-value">무빈소</span>
+                                <span className="funeral-info-value">{getCeremonyLabel(bugo.funeral_type)}</span>
                             </div>
                         </>
                     )}
                     {/* 장지 - 1개면 단순 표시, 2개면 1차/2차 표시 (무빈소장례면 숨김) */}
-                    {bugo.burial_place && !bugo.burial_place2 && bugo.funeral_type !== '무빈소장례' && (
+                    {shouldShowBurialPlace({ funeralType: bugo.funeral_type, burialPlace: bugo.burial_place }) && !bugo.burial_place2 && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
@@ -844,7 +843,7 @@ ${url}
                             </div>
                         </>
                     )}
-                    {bugo.burial_place && bugo.burial_place2 && bugo.funeral_type !== '무빈소장례' && (
+                    {shouldShowBurialPlace({ funeralType: bugo.funeral_type, burialPlace: bugo.burial_place }) && bugo.burial_place2 && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row burial-multi">
@@ -956,7 +955,7 @@ ${url}
             {/* ========================================
                 빈소 오시는 길 - 일반 장례일 때만 표시
             ======================================== */}
-            {(!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+            {shouldShowMap(bugo.funeral_type) && (
                 <section className="section">
                     <h2 className="section-title">빈소 오시는 길</h2>
 
@@ -1016,7 +1015,7 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 일반 장례일 때만 표시
             ======================================== */}
-            {mounted && !bugo.hide_flower_order && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+            {mounted && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order }) && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
@@ -1202,7 +1201,7 @@ ${url}
 
             {/* 모바일 플로팅 화환 보내기/주문하기 버튼 - 일반 장례일 때만 표시 (상주/발인완료/모달오픈 시 숨김) */}
             {
-                mounted && !isOwner && !bugo.hide_flower_order && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (!bugo.funeral_type || bugo.funeral_type === '일반 장례') && (
+                mounted && !isOwner && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order }) && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
                     >
