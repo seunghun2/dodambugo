@@ -7,9 +7,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// Edge Runtime - Cold Start 거의 없음!
-export const runtime = 'edge';
-
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
     return createClient(
@@ -18,7 +15,7 @@ function getSupabase() {
     );
 }
 
-// 캐시된 부고 조회 (60초)
+// 캐시된 부고 조회 (5초)
 const getCachedBugo = (id: string) => unstable_cache(
     async () => {
         const supabase = getSupabase();
@@ -33,7 +30,7 @@ const getCachedBugo = (id: string) => unstable_cache(
         }
     },
     ['bugo-data', id],
-    { revalidate: 60 }
+    { revalidate: 5 }
 )();
 
 // 캐시된 상품 조회 (30초)
@@ -47,8 +44,8 @@ const getCachedProducts = unstable_cache(
     { revalidate: 30 }
 );
 
-// ISR: 60초마다 재생성 (CDN 캐싱)
-export const revalidate = 60;
+// ISR: 5초마다 재생성 (CDN 캐싱)
+export const revalidate = 5;
 
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
