@@ -144,21 +144,17 @@ function displayBugo(data) {
         document.getElementById('deathDatetime').textContent = deathDateTime;
     }
     
-    if (data.encoffin_date) {
-        const encoffinDate = new Date(data.encoffin_date);
-        const encoffinTime = data.encoffin_time || '';
-        const encoffinDateTime = formatDateTimeFromParts(encoffinDate, encoffinTime);
-        document.getElementById('encoffinDatetime').textContent = encoffinDateTime;
-    } else {
-        document.getElementById('encoffinRow').style.display = 'none';
-    }
+    // 입관일 노출은 B2C 마음부고 라이브에서 완전 제외
+    document.getElementById('encoffinRow').style.display = 'none';
     
     // 발인 정보
-    if (data.funeral_date) {
+    if (data.funeral_date && data.funeral_type !== '무빈소장례') {
         const funeralDate = new Date(data.funeral_date);
         const funeralTime = data.funeral_time || '';
         const funeralDateTime = formatDateTimeFromParts(funeralDate, funeralTime);
         document.getElementById('funeralDatetime').textContent = funeralDateTime;
+    } else {
+        document.getElementById('funeralRow').style.display = 'none';
     }
     
     if (data.funeral_type) {
@@ -167,7 +163,7 @@ function displayBugo(data) {
         document.getElementById('funeralTypeRow').style.display = 'none';
     }
     
-    if (data.burial_place) {
+    if (data.burial_place && data.funeral_type !== '무빈소장례') {
         document.getElementById('burialPlace').textContent = data.burial_place;
     } else {
         document.getElementById('burialPlaceRow').style.display = 'none';

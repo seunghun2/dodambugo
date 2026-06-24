@@ -789,28 +789,19 @@ ${url}
                     </div>
                     <div className="funeral-info-divider"></div>
                     {/* 일포일시 - 있으면 진하게 표시 (발인보다 먼저) */}
-                    {bugo.ilpo_date && (
+                    {bugo.ilpo_date && bugo.funeral_type !== '무빈소장례' && (
                         <div className="funeral-info-row funeral-highlight">
                             <span className="funeral-info-label">일포</span>
                             <span className="funeral-info-value">{formatDate(bugo.ilpo_date)} {bugo.ilpo_time || ''}</span>
                         </div>
                     )}
-                    {/* 발인 - 일포가 있으면 연하게, hide_funeral이 true면 숨김 */}
-                    {bugo.funeral_date && !bugo.hide_funeral && (
+                    {/* 발인 - 일포가 있으면 연하게, hide_funeral이 true이거나 무빈소장례면 숨김 */}
+                    {bugo.funeral_date && !bugo.hide_funeral && bugo.funeral_type !== '무빈소장례' && (
                         <>
-                            {bugo.ilpo_date && <div className="funeral-info-divider"></div>}
+                            {bugo.ilpo_date && bugo.funeral_type !== '무빈소장례' && <div className="funeral-info-divider"></div>}
                             <div className={`funeral-info-row ${bugo.ilpo_date ? '' : 'funeral-highlight'}`}>
                                 <span className="funeral-info-label">발인</span>
                                 <span className="funeral-info-value">{formatDate(bugo.funeral_date)} {bugo.funeral_time || ''}</span>
-                            </div>
-                        </>
-                    )}
-                    {bugo.encoffin_date && (
-                        <>
-                            <div className="funeral-info-divider"></div>
-                            <div className="funeral-info-row">
-                                <span className="funeral-info-label">입관</span>
-                                <span className="funeral-info-value">{formatDate(bugo.encoffin_date)} {bugo.encoffin_time || ''}</span>
                             </div>
                         </>
                     )}
@@ -843,8 +834,8 @@ ${url}
                             </div>
                         </>
                     )}
-                    {/* 장지 - 1개면 단순 표시, 2개면 1차/2차 표시 */}
-                    {bugo.burial_place && !bugo.burial_place2 && (
+                    {/* 장지 - 1개면 단순 표시, 2개면 1차/2차 표시 (무빈소장례면 숨김) */}
+                    {bugo.burial_place && !bugo.burial_place2 && bugo.funeral_type !== '무빈소장례' && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row">
@@ -853,7 +844,7 @@ ${url}
                             </div>
                         </>
                     )}
-                    {bugo.burial_place && bugo.burial_place2 && (
+                    {bugo.burial_place && bugo.burial_place2 && bugo.funeral_type !== '무빈소장례' && (
                         <>
                             <div className="funeral-info-divider"></div>
                             <div className="funeral-info-row burial-multi">
