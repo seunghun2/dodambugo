@@ -297,7 +297,47 @@ export default function WriteFormPage() {
 
     // 클라이언트 마운트 상태 (hydration 에러 방지)
     const [mounted, setMounted] = useState(false);
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+        setMounted(true);
+        if (process.env.NODE_ENV === 'development') {
+            const draft = localStorage.getItem('bugo_draft');
+            const clone = sessionStorage.getItem('clone_bugo_data');
+            if (!draft && !clone) {
+                setFormData(prev => ({
+                    ...prev,
+                    applicant_name: '백승훈',
+                    applicant_phone: '010-6426-2393',
+                    primary_mourner: '백승훈',
+                    relationship: '장남',
+                    deceased_name: '김순자 (B2C 테스트)',
+                    age: '87',
+                    gender: '여',
+                    funeral_home: '테스트 서울장례식장',
+                    room_number: '특1호실',
+                    address: '서울특별시 강남구 테헤란로 123',
+                    address_detail: '테스트 서울장례식장 특1호실',
+                    death_date: new Date().toISOString().slice(0, 10),
+                    death_hour: '06',
+                    death_minute: '30',
+                    encoffin_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+                    encoffin_hour: '10',
+                    encoffin_minute: '00',
+                    funeral_date: new Date(Date.now() + 172800000).toISOString().slice(0, 10),
+                    funeral_hour: '09',
+                    funeral_minute: '00',
+                    burial_place: '서울추모공원',
+                }));
+                setMourners([
+                    { relationship: '장남', name: '백승훈', contact: '010-6426-2393' }
+                ]);
+                setAccounts([
+                    { bank: '국민은행', holder: '백승훈', number: '48710201225438' }
+                ]);
+                setIsAccountSaved(true);
+                setShowAccount(true);
+            }
+        }
+    }, []);
 
     // 폼 섹션별 GA 트래킹 (IntersectionObserver)
     const trackedSteps = useRef<Set<string>>(new Set());

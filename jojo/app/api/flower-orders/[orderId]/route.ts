@@ -34,6 +34,18 @@ export async function GET(
             return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
         }
 
+        // 부고번호(bugo_number) 조회 후 추가
+        if (data.bugo_id) {
+            const { data: bugoData } = await supabase
+                .from('bugo')
+                .select('bugo_number')
+                .eq('id', data.bugo_id)
+                .single();
+            if (bugoData) {
+                data.bugo_number = bugoData.bugo_number;
+            }
+        }
+
         return NextResponse.json(data);
     } catch (err) {
         console.error('주문 조회 오류:', err);

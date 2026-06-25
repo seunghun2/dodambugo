@@ -179,18 +179,20 @@
 
 .table th {
     background: #f8fafc;
-    padding: 14px 16px;
-    font-size: 13px;
+    padding: 10px 8px;
+    font-size: 12px;
     font-weight: 600;
     color: #475569;
     border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
 }
 
 .table td {
-    padding: 14px 16px;
-    font-size: 14px;
+    padding: 10px 8px;
+    font-size: 12px;
     color: #334155;
     border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;
 }
 
 .table tr {

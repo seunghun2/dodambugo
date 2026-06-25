@@ -206,6 +206,16 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 return date.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD 형식
             };
 
+            // returnUrl에 사용할 B2B prefix 동적 감지 (포트 3001 = B2B)
+            const dynamicPrefix = (() => {
+                const h = window.location.hostname;
+                const p = window.location.port;
+                if (p === '3001' || h.includes('partner') || h.includes('b2b') || h.includes('bugoon') || window.location.pathname.startsWith('/b2b')) {
+                    return '/b2b';
+                }
+                return '';
+            })();
+
             // INNOPAY 결제창 호출
             window.innopay.goPay({
                 payMethod: payMethodMap[paymentMethod] || 'CARD',
@@ -218,7 +228,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
-                returnUrl: `${window.location.origin}${pathPrefix}/view/${bugoId}/payment/callback`,
+                returnUrl: `${window.location.origin}${dynamicPrefix}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
                 mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id, originalTaxFreeAmt: String(product.price) }),
                 vBankExpDate: paymentMethod === 'virtual' ? getVBankExpDate() : '', // 가상계좌 입금기한

@@ -13,14 +13,17 @@ export function useIsB2b() {
 
     const checkB2b = () => {
         if (typeof window !== 'undefined') {
-            if (window.location.hostname.includes('localhost') || 
-                window.location.hostname.includes('127.0.0.1') ||
-                window.location.hostname.startsWith('192.168.')) {
-                return pathname?.startsWith('/b2b') || false;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+
+            if (hostname.includes('localhost') || 
+                hostname.includes('127.0.0.1') ||
+                hostname.startsWith('192.168.')) {
+                return port === '3001' || pathname?.startsWith('/b2b') || false;
             }
-            return window.location.hostname.includes('partner') || 
-                   window.location.hostname.includes('b2b') || 
-                   window.location.hostname.includes('bugoon') ||
+            return hostname.includes('partner') || 
+                   hostname.includes('b2b') || 
+                   hostname.includes('bugoon') ||
                    pathname?.startsWith('/b2b') || 
                    false;
         }

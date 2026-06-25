@@ -145,10 +145,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '잔액이 부족합니다.' }, { status: 400 });
     }
 
-    // 회원 정보 (출금 계좌 & 본인인증 여부)
+    // 회원 정보 (출금 계좌 & 본인인증 여부 및 파트너 유형)
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('bank_name, account_no, account_holder, identity_verified')
+        .select('bank_name, account_no, account_holder, identity_verified, partner_type')
         .eq('id', userId)
         .single();
 
@@ -166,7 +166,23 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // 출금 신청 INSERT
+    // 세금 및 실수령액 계산 로직
+    const isBiz = user.partner_type === 'business';
+    let withholding_tax = 0;
+    let local_income_tax = 0;
+    let vat = 0;
+    let net_amount = amount;
+
+    if (isBiz) {
+        vat = Math.floor(amount * 0.1);
+        net_amount = amount + vat;
+    } else {
+        withholding_tax = Math.floor(amount * 0.03);
+        local_income_tax = Math.floor(amount * 0.003);
+        net_amount = amount - withholding_tax - local_income_tax;
+    }
+
+    // 출금 신청 INSERT (세금 및 실수령액 사전 적재)
     const { error: withdrawError } = await supabase
         .from('withdrawal_requests')
         .insert({
@@ -176,6 +192,11 @@ export async function POST(request: NextRequest) {
             account_no: user.account_no,
             account_holder: user.account_holder,
             status: 'pending',
+            partner_type: user.partner_type || 'individual',
+            withholding_tax,
+            local_income_tax,
+            vat,
+            net_amount,
         });
 
     if (withdrawError) {

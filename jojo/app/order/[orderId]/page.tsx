@@ -24,6 +24,7 @@ interface OrderData {
     created_at: string;
     approved_at: string;
     bugo_id: string;
+    bugo_number?: string;
     tid: string;
 }
 
@@ -442,7 +443,7 @@ export default function OrderDetailPage() {
             <div className="order-footer">
                 {order.bugo_id ? (
                     <Link
-                        href={`/view/${order.bugo_id}`}
+                        href={`/view/${order.bugo_number || order.bugo_id}`}
                         className="btn-payment"
                         style={{
                             textDecoration: 'none',

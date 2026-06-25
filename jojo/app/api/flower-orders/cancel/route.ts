@@ -112,17 +112,65 @@ export async function POST(request: NextRequest) {
             console.error('취소 사유 저장 실패 (무시):', e);
         }
 
-        // 4. 부고 정보 조회 (부고번호 필요)
+        // 4. 부고 정보 조회 (부고번호 및 B2B 파트너 ID 조회)
         let bugoNumber = '';
+        let partnerId = null;
         console.log('🔍 부고 조회:', { bugo_id: order.bugo_id });
         if (order.bugo_id) {
             const { data: bugoData, error: bugoError } = await supabase
                 .from('bugo')
-                .select('bugo_number')
+                .select('bugo_number, b2b_user_id')
                 .eq('id', order.bugo_id)
                 .single();
             console.log('🔍 부고 조회 결과:', { bugoData, bugoError });
             bugoNumber = bugoData?.bugo_number || '';
+            partnerId = bugoData?.b2b_user_id || null;
+        }
+
+        // B2B 수당 회수 로직 추가
+        if (partnerId) {
+            try {
+                // 1. 수당 적립금 설정값 조회
+                const { data: rewardSetting } = await supabase
+                    .from('b2b_settings')
+                    .select('value')
+                    .eq('key', 'wreath_reward_amount')
+                    .single();
+                const rewardAmount = parseInt(rewardSetting?.value || '10000');
+
+                // 2. 현재 잔액 조회
+                const { data: currentDeposit } = await supabase
+                    .from('deposits')
+                    .select('balance')
+                    .eq('user_id', partnerId)
+                    .single();
+
+                if (currentDeposit) {
+                    const newBalance = Math.max(0, (currentDeposit.balance || 0) - rewardAmount);
+                    // 3. 잔액 차감
+                    await supabase
+                        .from('deposits')
+                        .update({
+                            balance: newBalance,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('user_id', partnerId);
+                    
+                    console.log(`📉 B2B 수당 회수 성공: Partner=${partnerId}, Amount=-${rewardAmount}, NewBalance=${newBalance}`);
+                }
+
+                // 4. 회수 트랜잭션 기록
+                await supabase
+                    .from('deposit_transactions')
+                    .insert({
+                        user_id: partnerId,
+                        amount: -rewardAmount,
+                        type: 'reward_cancel',
+                        description: `화환 주문 취소로 인한 수당 회수 (${order.order_number})`,
+                    });
+            } catch (err) {
+                console.error('❌ B2B 수당 회수 처리 중 에러:', err);
+            }
         }
 
         // 5. 알림톡 발송 (고객에게)

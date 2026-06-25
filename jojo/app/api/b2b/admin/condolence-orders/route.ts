@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     try {
         const { data: b2bBugos, error: bugoError } = await supabase
             .from('bugo')
-            .select('bugo_number, b2b_user_id, b2b_users ( company_name, owner_name )')
+            .select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name )')
             .not('b2b_user_id', 'is', null);
 
         if (bugoError) throw bugoError;
@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: true, orders: [] });
         }
 
-        const bugoNumbers = b2bBugos.map(b => String(b.bugo_number));
+        const bugoIds = b2bBugos.map(b => String(b.id));
         
         const partnerMap = new Map<string, { company_name: string; owner_name: string }>();
         b2bBugos.forEach(b => {
-            if (b.bugo_number) {
-                partnerMap.set(String(b.bugo_number), {
+            if (b.id) {
+                partnerMap.set(String(b.id), {
                     company_name: (b.b2b_users as any)?.company_name || '알 수 없음',
                     owner_name: (b.b2b_users as any)?.owner_name || '알 수 없음'
                 });
@@ -39,17 +39,26 @@ export async function GET(request: NextRequest) {
         const { data: orders, error: orderError } = await supabase
             .from('condolence_orders')
             .select('*')
-            .in('bugo_number', bugoNumbers)
+            .in('bugo_number', bugoIds)
             .order('created_at', { ascending: false });
 
         if (orderError) throw orderError;
 
         const formattedOrders = orders?.map(o => {
-            const partner = partnerMap.get(String(o.bugo_number));
+            const realBugo = b2bBugos.find(b => String(b.id) === String(o.bugo_number));
+            const b2bUser = realBugo?.b2b_users;
+            const companyName = Array.isArray(b2bUser) 
+                ? (b2bUser[0] as any)?.company_name 
+                : (b2bUser as any)?.company_name;
+            const ownerName = Array.isArray(b2bUser) 
+                ? (b2bUser[0] as any)?.owner_name 
+                : (b2bUser as any)?.owner_name;
+
             return {
                 ...o,
-                company_name: partner?.company_name || '일반 B2C',
-                owner_name: partner?.owner_name || '-'
+                bugo_number: realBugo?.bugo_number || o.bugo_number,
+                company_name: companyName || '일반 B2C',
+                owner_name: ownerName || '-'
             };
         }) || [];
 

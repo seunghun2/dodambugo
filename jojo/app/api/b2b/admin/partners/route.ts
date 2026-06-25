@@ -23,10 +23,7 @@ export async function GET(request: NextRequest) {
         // 1. b2b_users 조회
         let query = supabase
             .from('b2b_users')
-            .select(`
-                *,
-                deposits ( balance )
-            `);
+            .select('*');
 
         if (status !== 'all') {
             query = query.eq('status', status);
@@ -42,6 +39,24 @@ export async function GET(request: NextRequest) {
         const { data: partners, error } = await query;
 
         if (error) throw error;
+
+        // 2. deposits 전체 조회하여 user_id -> balance 맵 생성
+        const { data: deposits, error: depError } = await supabase
+            .from('deposits')
+            .select('user_id, balance');
+
+        if (depError) {
+            console.error('B2B 파트너 예치금 잔액 조회 오류:', depError);
+        }
+
+        const balanceMap = new Map<string, number>();
+        if (deposits) {
+            deposits.forEach((d: any) => {
+                if (d.user_id) {
+                    balanceMap.set(String(d.user_id), Number(d.balance || 0));
+                }
+            });
+        }
 
         // 각 파트너별 최근 부고 생성 일시 조회 (b2b_user_id 별로 그룹화)
         const { data: latestBugos, error: bugoError } = await supabase
@@ -66,7 +81,7 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        // 결과 가공 (deposits.balance 조인 데이터 매핑 및 최근 부고 생성 일시 추가)
+        // 결과 가공
         const formattedPartners = partners?.map(p => ({
             id: p.id,
             phone: p.phone,
@@ -78,7 +93,7 @@ export async function GET(request: NextRequest) {
             my_referral_code: p.my_referral_code,
             status: p.status,
             created_at: p.created_at,
-            balance: p.deposits?.[0]?.balance || 0,
+            balance: balanceMap.get(String(p.id)) || 0,
             last_bugo_at: latestBugoMap[p.id] || null
         })) || [];
 

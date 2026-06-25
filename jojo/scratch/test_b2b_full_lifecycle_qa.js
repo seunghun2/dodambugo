@@ -248,6 +248,11 @@ async function runFullLifecycleQA() {
         await page.fill('input[placeholder="고인명"]', '김고인');
         await page.fill('input[placeholder="고인나이"]', '80');
         
+        // 자주찾는 식장 선택
+        await page.click('button:has-text("자주찾는 식장")');
+        await page.waitForSelector('text=시뮬레이션상조');
+        await page.click('text=시뮬레이션상조');
+        
         // 성별 선택 (바텀시트 오픈 및 선택)
         await page.click('button[class*="selectTrigger"]');
         await page.waitForSelector('button:has-text("남성")');

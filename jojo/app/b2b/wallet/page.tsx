@@ -141,9 +141,9 @@ export default function WalletPage() {
 
     // 적립내역 리스트 필터링 및 가공
     const filteredRewards = useMemo(() => {
-        let list = transactions.filter(tx => tx.amount > 0);
+        let list = transactions.filter(tx => tx.amount > 0 || tx.type === 'reward_cancel');
         if (rewardFilter === 'wreath') {
-            list = list.filter(tx => tx.type === 'wreath_reward');
+            list = list.filter(tx => tx.type === 'wreath_reward' || tx.type === 'reward_cancel');
         } else if (rewardFilter === 'referral') {
             list = list.filter(tx => tx.type === 'referral_bonus');
         } else if (rewardFilter === 'condolence') {
@@ -179,6 +179,7 @@ export default function WalletPage() {
     const getTypeLabel = (type: string) => {
         switch (type) {
             case 'wreath_reward': return '화환 판매 적립';
+            case 'reward_cancel': return '화환 판매 취소';
             case 'referral_bonus': return '추천 수당';
             case 'condolence_reward': return '조의금 수당';
             default: return '적립 완료';
@@ -292,16 +293,21 @@ export default function WalletPage() {
                                 <div className={styles.emptyState}>적립된 내역이 없습니다.</div>
                             ) : (
                                 <div className={styles.rewardList}>
-                                    {filteredRewards.map((tx) => (
-                                        <div key={tx.id} className={styles.listItem}>
-                                            <span className={styles.txDate}>{formatTxDate(tx.created_at)}</span>
-                                            <div className={styles.txMain}>
-                                                <span className={styles.txTitle}>{getTypeLabel(tx.type)}</span>
-                                                <span className={styles.txSub}>{tx.description}</span>
+                                    {filteredRewards.map((tx) => {
+                                        const isMinus = tx.amount < 0;
+                                        return (
+                                            <div key={tx.id} className={styles.listItem}>
+                                                <span className={styles.txDate}>{formatTxDate(tx.created_at)}</span>
+                                                <div className={styles.txMain}>
+                                                    <span className={styles.txTitle}>{getTypeLabel(tx.type)}</span>
+                                                    <span className={styles.txSub}>{tx.description}</span>
+                                                </div>
+                                                <span className={isMinus ? styles.txAmountMinus : styles.txAmountPlus}>
+                                                    {isMinus ? '' : '+'}{formatCurrency(tx.amount)}원
+                                                </span>
                                             </div>
-                                            <span className={styles.txAmountPlus}>+{formatCurrency(tx.amount)}원</span>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

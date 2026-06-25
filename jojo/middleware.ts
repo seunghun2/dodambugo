@@ -192,11 +192,13 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const hostLower = host.toLowerCase();
 
+  // 로컬 호스트 여부 감지 (localhost, 127.0.0.1, 192.168.x.x 등)
+  const isLocal = hostLower.startsWith('localhost') || hostLower.startsWith('127.0.0.1') || hostLower.startsWith('192.168.');
+
   // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
   const isB2BSubdomain =
-    hostLower.startsWith('localhost') ||
-    hostLower.startsWith('127.0.0.1') ||
-    hostLower.startsWith('192.168.') ||
+    // 로컬 환경에서는 포트 3001번만 B2B로 인정하고, 3000번은 B2C로 판별
+    (isLocal ? hostLower.includes(':3001') : false) ||
     hostLower.startsWith('partner.') ||
     hostLower.startsWith('b2b.') ||
     hostLower.startsWith('bugoon.') ||
@@ -210,8 +212,8 @@ export async function middleware(request: NextRequest) {
     hostLower.includes('.b2b-') ||
     hostLower.includes('.bugoon-');
 
-  // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화)
-  if (!isB2BSubdomain && path.startsWith('/b2b')) {
+  // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화) - 로컬 환경 또는 개발 모드에서는 허용
+  if (process.env.NODE_ENV !== 'development' && !isLocal && !isB2BSubdomain && path.startsWith('/b2b')) {
     return new NextResponse(null, { status: 404 });
   }
 
@@ -351,7 +353,12 @@ export async function middleware(request: NextRequest) {
       /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map)$/.test(path);
 
     if (!isStaticOrApi && !path.startsWith('/b2b')) {
-      // B2B 서브도메인인데 /b2b로 시작하지 않는 경우, 서버 내부적으로 /b2b를 붙여서 rewrite 처리
+      // /order 경로는 redirect(302)로 URL을 명시적으로 변경 (B2B 주문 페이지 표시)
+      if (path.startsWith('/order')) {
+        const redirectUrl = new URL(`/b2b${path}`, request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
+      // 나머지 경로는 서버 내부적으로 /b2b를 붙여서 rewrite 처리
       const rewriteUrl = new URL(`/b2b${path}`, request.url);
       return NextResponse.rewrite(rewriteUrl);
     }

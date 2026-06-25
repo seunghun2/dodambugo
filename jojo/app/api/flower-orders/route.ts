@@ -36,7 +36,26 @@ export async function GET(request: NextRequest) {
             query = query.eq('status', status);
         }
         if (bugoId) {
-            query = query.eq('bugo_id', bugoId);
+            const isUUID = bugoId.includes('-') && bugoId.length > 10;
+            if (isUUID) {
+                query = query.eq('bugo_id', bugoId);
+            } else {
+                // 부고번호로 부고 조회하여 실제 UUID(id) 가져오기
+                const { data: bugoData } = await supabase
+                    .from('bugo')
+                    .select('id')
+                    .eq('bugo_number', bugoId)
+                    .is('deleted_at', null)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                if (bugoData) {
+                    query = query.eq('bugo_id', bugoData.id);
+                } else {
+                    // 없는 부고 번호인 경우 빈 결과 유도
+                    query = query.eq('bugo_id', '00000000-0000-0000-0000-000000000000');
+                }
+            }
         }
 
         const { data, error, count } = await query;

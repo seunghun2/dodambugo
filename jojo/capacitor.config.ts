@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     // 프로덕션: 서버 URL로 로드 (API routes 사용 가능)
-    url: 'https://partner.bugoon.com',
+    url: 'https://bugoon.maeumbugo.co.kr',
     cleartext: true,
   },
   plugins: {

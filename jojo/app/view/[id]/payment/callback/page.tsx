@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation';
 import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
 
 // 모듈 레벨: React StrictMode에서도 중복 실행 완전 차단
 let paymentProcessed = false;
@@ -12,9 +13,10 @@ export default function PaymentCallbackPage() {
     const searchParams = useSearchParams();
     const params = useParams();
     const pathname = usePathname();
-    const isB2b = pathname.startsWith('/b2b');
-    const pathPrefix = isB2b ? '/b2b' : '';
+    const isB2b = useIsB2b();
     const routeBugoId = params.id as string;  // URL 경로에서 id 추출 (폴백용)
+    
+
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [message, setMessage] = useState('결제를 처리하고 있습니다...');
 
@@ -26,6 +28,11 @@ export default function PaymentCallbackPage() {
                 return;
             }
             paymentProcessed = true;
+
+            // 페이지 진입 시점의 pathname에서 B2B prefix 추출 (가장 확실한 방법)
+            const currentPath = window.location.pathname;
+            const pathPrefix = currentPath.startsWith('/b2b') ? '/b2b' : 
+                              (window.location.port === '3001' ? '/b2b' : '');
             // URL 파라미터에서 결제 정보 추출
             // useSearchParams가 비어있을 수 있으므로 window.location.search 폴백 사용
             const urlParams = new URLSearchParams(window.location.search);
@@ -107,7 +114,7 @@ export default function PaymentCallbackPage() {
 
                 // 입금 대기 페이지로 이동
                 setTimeout(() => {
-                    router.push(`${pathPrefix}/view/${finalBugoId}/order/vbank-pending`);
+                    window.location.href = `${pathPrefix}/view/${finalBugoId}/order/vbank-pending`;
                 }, 1000);
                 return;
             }
@@ -221,9 +228,9 @@ export default function PaymentCallbackPage() {
 
                     setTimeout(() => {
                         if (orderNumber && orderNumber.startsWith('CO')) {
-                            router.push(`/order/${orderNumber}`);
+                            window.location.href = `${pathPrefix}/order/${orderNumber}`;
                         } else {
-                            router.push(`${pathPrefix}/view/${finalBugoId2}/condolence/complete`);
+                            window.location.href = `${pathPrefix}/view/${finalBugoId2}/condolence/complete`;
                         }
                     }, 1000);
                     return;
@@ -231,15 +238,11 @@ export default function PaymentCallbackPage() {
 
                 // 화환 결제인 경우 (기존 로직)
                 setTimeout(() => {
-                    if (orderNumber) {
-                        router.push(`/order/${orderNumber}`);
-                    } else {
-                        if (finalBugoId2) {
-                            router.push(`${pathPrefix}/view/${finalBugoId2}/order/complete`);
-                        } else {
-                            router.push('/');
-                        }
-                    }
+                    console.log('🔍 [REDIRECT] pathPrefix:', pathPrefix, 'orderNumber:', orderNumber);
+                    const finalUrl = orderNumber 
+                        ? `${pathPrefix}/order/${orderNumber}`
+                        : (finalBugoId2 ? `${pathPrefix}/view/${finalBugoId2}/order/complete` : '/');
+                    window.location.href = finalUrl;
                 }, 1500);
 
             } catch (err: any) {

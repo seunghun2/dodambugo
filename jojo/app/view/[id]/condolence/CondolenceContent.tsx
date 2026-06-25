@@ -117,6 +117,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
     const isB2b = useIsB2b();
     const pathPrefix = isB2b ? '/b2b' : '';
 
+    const [isMounted, setIsMounted] = useState(false);
     const [buyerName, setBuyerName] = useState('');
     const [buyerPhone, setBuyerPhone] = useState('');
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
@@ -125,6 +126,13 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [sdkLoaded, setSdkLoaded] = useState(typeof window !== 'undefined' && !!window.innopay);
     const [amountOptions, setAmountOptions] = useState(AMOUNT_OPTIONS_FALLBACK);
+
+    const isB2bActive = isMounted && isB2b;
+
+    // 마운트 감지
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // DB에서 활성화된 금액 옵션 가져오기
     useEffect(() => {
@@ -264,7 +272,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                 <div className="loading-container">
                     계좌 정보가 없습니다.<br />
                     <button
-                        style={{ marginTop: 16, padding: '12px 24px', background: isB2b ? '#3A8F47' : '#FCC419', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', color: isB2b ? '#FFFFFF' : 'inherit' }}
+                        style={{ marginTop: 16, padding: '12px 24px', background: isB2bActive ? '#3A8F47' : '#FCC419', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', color: isB2bActive ? '#FFFFFF' : 'inherit' }}
                         onClick={() => router.back()}
                     >
                         돌아가기
@@ -296,7 +304,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                     setSdkLoaded(true);
                 }}
             />
-            <main className={`condolence-page ${isB2b ? 'b2b-theme' : ''}`}>
+            <main className={`condolence-page ${isB2bActive ? 'b2b-theme' : ''}`}>
                 <header className="condolence-header">
                     <button className="back-button" onClick={() => router.back()}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
