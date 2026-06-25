@@ -1,0 +1,22 @@
+node_modules
+.next
+.git
+.agent
+dodam-next
+tmp
+scratch
+*.xd
+*.psd
+*.pptx
+*.pdf
+제안서 폴더
+대대손손보고서
+계약서
+tree
+감사메세지png
+메인이미지
+adminimg
+bankicon
+app_backup
+components_backup
+scripts_backup

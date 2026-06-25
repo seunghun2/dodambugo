@@ -250,6 +250,9 @@ export default function B2BCreatePage() {
       const next = { ...prev, [field]: value };
       if (field === 'funeral_type' && value === '무빈소장례') {
         next.no_wreath = true;
+      } else if (field === 'funeral_type' && prev.funeral_type === '무빈소장례') {
+        // 무빈소→일반 전환 시 화환 숨김 복원
+        next.no_wreath = false;
       }
       return next;
     });
