@@ -1,5 +1,18 @@
 # 마음부고 변경 이력
 
+## 2026-06-25
+
+### B2B URL 유실 오류 수정 및 미들웨어 로컬 환경 차단 우회 패치
+- **B2B/B2C 결제 후 주소 유실(UUID Reversion) 오류 수정**:
+  - 화환 주문서 결제 성공 후 돌아가기 및 공유 URL 등이 데이터베이스 내부 UUID(`/view/cf09e833-...`)로 노출되던 문제를 수정하여, 항상 `bugo_number`(`/view/8888`)가 주소창에 올바르게 보존되고 전달되도록 API와 상세 페이지를 보완했습니다.
+  - `app/api/flower-orders/[orderId]/route.ts`에 `bugo_number` 응답 필드를 신설하고, `app/api/flower-orders/route.ts`에서 UUID와 bugo_number를 둘 다 처리할 수 있도록 GET 조회를 개선했습니다.
+  - `app/order/[orderId]/page.tsx` 및 `app/b2b/order/[orderId]/page.tsx` 내의 돌아가기 링크가 `order.bugo_number || order.bugo_id` 형식을 활용하도록 수정했습니다.
+- **로컬 미들웨어 포트 분리 및 404 차단 우회**:
+  - `middleware.ts`: 로컬 호스트 테스트 시 포트 3000번은 B2C(마음부고), 3001번은 B2B(부고온)로 명확히 판별되도록 포트 감지 조건을 고도화했습니다.
+  - 로컬 환경 접속의 경우, 운영계 도메인 제한을 가정한 `/b2b` 직접 접근 차단 로직(404 리턴)에 걸려 크롬 HTTP 404 에러가 발생하던 현상을 방지하고자 로컬 호스트 접속 시 차단막을 우회하도록 처리했습니다.
+- **Vercel 빌드 내 bankicon 제외 패턴 오류 조치**:
+  - `.vercelignore`: Vercel 배포 제외 목록에 들어있던 `bankicon`이 Next.js 프로젝트 리소스인 `jojo/public/images/bankicon` 디렉토리까지 빌드에서 차단해 라이브 서버에서 은행 로고가 404 에러로 깨지던 문제를 수정했습니다. 루트 전용 패턴인 `/bankicon`으로 교정함으로써 Next.js 내의 자산들이 올바르게 업로드 및 배포되도록 조치했습니다.
+
 ## 2026-06-24
 
 ### B2B 파트너 정산 사업자 유형 삭제 및 최소 출금액 10,000원 정합성 패치
