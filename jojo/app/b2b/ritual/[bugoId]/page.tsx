@@ -85,8 +85,17 @@ const RELIGION_SVGS = {
 // ─── 테두리 무늬 스킨 렌더링 헬퍼 함수 및 경로 계산 ───
 
 const getScallopPath = (width: number, height: number) => {
-  const m = 5.67; // 테두리 여백
-  const arcSize = 22; // 반원 크기 (클수록 반원 개수 줄어듦)
+  let m = 5.67; // 테두리 여백
+  let arcSize = 22; // 반원 크기 (클수록 반원 개수 줄어듦)
+  
+  if (width <= 25) { // honbaek print (23)
+    m = 2.0;
+    arcSize = 6.0;
+  } else if (width <= 65) { // honbaek preview (60)
+    m = 4.0;
+    arcSize = 12.0;
+  }
+
   let path = '';
   
   // 1. 상단 물결 (아래로 볼록)
@@ -200,38 +209,76 @@ const renderBorderSvg = (w: number, h: number, skin: 'none' | 'scallop' | 'doubl
   }
 
   if (skin === 'double') {
+    let m2 = 5.67;
+    let m3 = 11.34;
+    let sw1 = 0.75;
+    let sw2 = 1.5;
+    let sw3 = 0.75;
+    
+    if (w <= 25) { // honbaek print (23)
+      m2 = 2.0;
+      m3 = 4.0;
+      sw1 = 0.5;
+      sw2 = 0.75;
+      sw3 = 0.5;
+    } else if (w <= 65) { // honbaek preview (60)
+      m2 = 4.0;
+      m3 = 8.0;
+      sw1 = 0.5;
+      sw2 = 1.0;
+      sw3 = 0.5;
+    }
+
     return (
       <svg
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
         viewBox={`0 0 ${w} ${h}`}
         shapeRendering="geometricPrecision"
       >
-        <rect x="0.5" y="0.5" width={w - 1} height={h - 1} fill="none" stroke="#1a1311" strokeWidth="0.75" shapeRendering="geometricPrecision" />
-        <rect x="5.67" y="5.67" width={w - 11.34} height={h - 11.34} fill="none" stroke="#1a1311" strokeWidth="1.5" strokeMiterlimit="10" shapeRendering="geometricPrecision" />
-        <rect x="11.34" y="11.34" width={w - 22.68} height={h - 22.68} fill="none" stroke="#1a1311" strokeWidth="0.75" strokeMiterlimit="10" shapeRendering="geometricPrecision" />
+        <rect x="0.5" y="0.5" width={w - 1} height={h - 1} fill="none" stroke="#1a1311" strokeWidth={sw1} shapeRendering="geometricPrecision" />
+        <rect x={m2} y={m2} width={w - m2 * 2} height={h - m2 * 2} fill="none" stroke="#1a1311" strokeWidth={sw2} strokeMiterlimit="10" shapeRendering="geometricPrecision" />
+        <rect x={m3} y={m3} width={w - m3 * 2} height={h - m3 * 2} fill="none" stroke="#1a1311" strokeWidth={sw3} strokeMiterlimit="10" shapeRendering="geometricPrecision" />
       </svg>
     );
   }
 
   if (skin === 'corner') {
-    const t = 1.0;
-    const m = 5.67;
+    let t = 1.0;
+    let m = 5.67;
+    let sqSize = 5.0;
+    let innerLen = 6.0;
+    let outerLen = 9.5;
+    
+    if (w <= 25) { // honbaek print
+      t = 0.5;
+      m = 2.0;
+      sqSize = 2.0;
+      innerLen = 2.0;
+      outerLen = 3.5;
+    } else if (w <= 65) { // honbaek preview
+      t = 0.75;
+      m = 4.0;
+      sqSize = 3.5;
+      innerLen = 4.0;
+      outerLen = 6.0;
+    }
+
     const getCornerPathString = (x: number, y: number, dx: number, dy: number) => {
-      const x0 = dx === 1 ? x : x - 5;
-      const y0 = dy === 1 ? y : y - 5;
+      const x0 = dx === 1 ? x : x - sqSize;
+      const y0 = dy === 1 ? y : y - sqSize;
       
       // 사각형을 겹침 없이 완전히 닫아서 렌더링
-      const sqPath = `M ${x0} ${y0} h 5 v 5 h -5 z`;
+      const sqPath = `M ${x0} ${y0} h ${sqSize} v ${sqSize} h -${sqSize} z`;
 
-      // 사각형의 안쪽 꼭짓점에서 출발해 안쪽 방향으로 정확히 6px만 뻗어 나가는 격자선
-      const innerX = x0 + (dx === 1 ? 5 : 0);
-      const innerY = y0 + (dy === 1 ? 5 : 0);
-      const innerH = `M ${innerX} ${innerY} h ${dx * 6}`;
-      const innerV = `M ${innerX} ${innerY} v ${dy * 6}`;
+      // 사각형의 안쪽 꼭짓점에서 출발해 안쪽 방향으로 격자선
+      const innerX = x0 + (dx === 1 ? sqSize : 0);
+      const innerY = y0 + (dy === 1 ? sqSize : 0);
+      const innerH = `M ${innerX} ${innerY} h ${dx * innerLen}`;
+      const innerV = `M ${innerX} ${innerY} v ${dy * innerLen}`;
 
-      // 외부 꺾쇠 역시 교차점에서 정확하게 맞물려 끝나도록 9.5px 길이로 정합
-      const outerH = `M ${x} ${y + dy * 9.5} h ${dx * 9.5}`;
-      const outerV = `M ${x + dx * 9.5} ${y} v ${dy * 9.5}`;
+      // 외부 꺾쇠 교차점에서 정확하게 맞물리도록 정합
+      const outerH = `M ${x} ${y + dy * outerLen} h ${dx * outerLen}`;
+      const outerV = `M ${x + dx * outerLen} ${y} v ${dy * outerLen}`;
 
       return `${sqPath} ${innerH} ${innerV} ${outerH} ${outerV}`;
     };
@@ -241,10 +288,10 @@ const renderBorderSvg = (w: number, h: number, skin: 'none' | 'scallop' | 'doubl
       getCornerPathString(w - m, m, -1, 1),
       getCornerPathString(m, h - m, 1, -1),
       getCornerPathString(w - m, h - m, -1, -1),
-      `M ${m + 9.5} ${m} H ${w - m - 9.5}`,
-      `M ${m + 9.5} ${h - m} H ${w - m - 9.5}`,
-      `M ${m} ${m + 9.5} V ${h - m - 9.5}`,
-      `M ${w - m} ${m + 9.5} V ${h - m - 9.5}`
+      `M ${m + outerLen} ${m} H ${w - m - outerLen}`,
+      `M ${m + outerLen} ${h - m} H ${w - m - outerLen}`,
+      `M ${m} ${m + outerLen} V ${h - m - outerLen}`,
+      `M ${w - m} ${m + outerLen} V ${h - m - outerLen}`
     ].join(' ');
 
     return (
@@ -260,13 +307,17 @@ const renderBorderSvg = (w: number, h: number, skin: 'none' | 'scallop' | 'doubl
   }
 
   if (skin === 'scallop') {
+    let strokeW = 1.5;
+    if (w <= 25) strokeW = 0.75;
+    else if (w <= 65) strokeW = 1.0;
+
     return (
       <svg
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
         viewBox={`0 0 ${w} ${h}`}
         shapeRendering="geometricPrecision"
       >
-        <rect x="0.5" y="0.5" width={w - 1} height={h - 1} fill="none" stroke="#1a1311" strokeWidth="1.5" shapeRendering="geometricPrecision" />
+        <rect x="0.5" y="0.5" width={w - 1} height={h - 1} fill="none" stroke="#1a1311" strokeWidth={strokeW} shapeRendering="geometricPrecision" />
         <path d={getScallopPath(w, h)} fill="#1a1311" stroke="none" shapeRendering="geometricPrecision" />
       </svg>
     );
@@ -281,30 +332,68 @@ const getBorderSvgString = (w: number, h: number, skin: 'none' | 'scallop' | 'do
     return '';
   }
   if (skin === 'double') {
+    let m2 = 5.67;
+    let m3 = 11.34;
+    let sw1 = 0.75;
+    let sw2 = 1.5;
+    let sw3 = 0.75;
+    
+    if (w <= 25) { // honbaek print (23)
+      m2 = 2.0;
+      m3 = 4.0;
+      sw1 = 0.5;
+      sw2 = 0.75;
+      sw3 = 0.5;
+    } else if (w <= 65) { // honbaek preview (60)
+      m2 = 4.0;
+      m3 = 8.0;
+      sw1 = 0.5;
+      sw2 = 1.0;
+      sw3 = 0.5;
+    }
+
     return `
       <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 ${w} ${h}" shape-rendering="geometricPrecision">
-        <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" fill="none" stroke="#1a1311" stroke-width="0.75" shape-rendering="geometricPrecision" />
-        <rect x="5.67" y="5.67" width="${w - 11.34}" height="${h - 11.34}" fill="none" stroke="#1a1311" stroke-width="1.5" stroke-miterlimit="10" shape-rendering="geometricPrecision" />
-        <rect x="11.34" y="11.34" width="${w - 22.68}" height="${h - 22.68}" fill="none" stroke="#1a1311" stroke-width="0.75" stroke-miterlimit="10" shape-rendering="geometricPrecision" />
+        <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" fill="none" stroke="#1a1311" stroke-width="${sw1}" shape-rendering="geometricPrecision" />
+        <rect x="${m2}" y="${m2}" width="${w - m2 * 2}" height="${h - m2 * 2}" fill="none" stroke="#1a1311" stroke-width="${sw2}" stroke-miterlimit="10" shape-rendering="geometricPrecision" />
+        <rect x="${m3}" y="${m3}" width="${w - m3 * 2}" height="${h - m3 * 2}" fill="none" stroke="#1a1311" stroke-width="${sw3}" stroke-miterlimit="10" shape-rendering="geometricPrecision" />
       </svg>
     `;
   }
   if (skin === 'corner') {
-    const t = 1.0;
-    const m = 5.67;
+    let t = 1.0;
+    let m = 5.67;
+    let sqSize = 5.0;
+    let innerLen = 6.0;
+    let outerLen = 9.5;
+    
+    if (w <= 25) { // honbaek print
+      t = 0.5;
+      m = 2.0;
+      sqSize = 2.0;
+      innerLen = 2.0;
+      outerLen = 3.5;
+    } else if (w <= 65) { // honbaek preview
+      t = 0.75;
+      m = 4.0;
+      sqSize = 3.5;
+      innerLen = 4.0;
+      outerLen = 6.0;
+    }
+
     const getCornerPathString = (x: number, y: number, dx: number, dy: number) => {
-      const x0 = dx === 1 ? x : x - 5;
-      const y0 = dy === 1 ? y : y - 5;
+      const x0 = dx === 1 ? x : x - sqSize;
+      const y0 = dy === 1 ? y : y - sqSize;
       
-      const sqPath = `M ${x0} ${y0} h 5 v 5 h -5 z`;
+      const sqPath = `M ${x0} ${y0} h ${sqSize} v ${sqSize} h -${sqSize} z`;
 
-      const innerX = x0 + (dx === 1 ? 5 : 0);
-      const innerY = y0 + (dy === 1 ? 5 : 0);
-      const innerH = `M ${innerX} ${innerY} h ${dx * 6}`;
-      const innerV = `M ${innerX} ${innerY} v ${dy * 6}`;
+      const innerX = x0 + (dx === 1 ? sqSize : 0);
+      const innerY = y0 + (dy === 1 ? sqSize : 0);
+      const innerH = `M ${innerX} ${innerY} h ${dx * innerLen}`;
+      const innerV = `M ${innerX} ${innerY} v ${dy * innerLen}`;
 
-      const outerH = `M ${x} ${y + dy * 9.5} h ${dx * 9.5}`;
-      const outerV = `M ${x + dx * 9.5} ${y} v ${dy * 9.5}`;
+      const outerH = `M ${x} ${y + dy * outerLen} h ${dx * outerLen}`;
+      const outerV = `M ${x + dx * outerLen} ${y} v ${dy * outerLen}`;
 
       return `${sqPath} ${innerH} ${innerV} ${outerH} ${outerV}`;
     };
@@ -314,10 +403,10 @@ const getBorderSvgString = (w: number, h: number, skin: 'none' | 'scallop' | 'do
       getCornerPathString(w - m, m, -1, 1),
       getCornerPathString(m, h - m, 1, -1),
       getCornerPathString(w - m, h - m, -1, -1),
-      `M ${m + 9.5} ${m} H ${w - m - 9.5}`,
-      `M ${m + 9.5} ${h - m} H ${w - m - 9.5}`,
-      `M ${m} ${m + 9.5} V ${h - m - 9.5}`,
-      `M ${w - m} ${m + 9.5} V ${h - m - 9.5}`
+      `M ${m + outerLen} ${m} H ${w - m - outerLen}`,
+      `M ${m + outerLen} ${h - m} H ${w - m - outerLen}`,
+      `M ${m} ${m + outerLen} V ${h - m - outerLen}`,
+      `M ${w - m} ${m + outerLen} V ${h - m - outerLen}`
     ].join(' ');
 
     return `
@@ -328,9 +417,13 @@ const getBorderSvgString = (w: number, h: number, skin: 'none' | 'scallop' | 'do
     `;
   }
   if (skin === 'scallop') {
+    let strokeW = 1.5;
+    if (w <= 25) strokeW = 0.75;
+    else if (w <= 65) strokeW = 1.0;
+
     return `
       <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 ${w} ${h}" shape-rendering="geometricPrecision">
-        <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" fill="none" stroke="#1a1311" stroke-width="1.5" shape-rendering="geometricPrecision" />
+        <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" fill="none" stroke="#1a1311" stroke-width="${strokeW}" shape-rendering="geometricPrecision" />
         <path d="${getScallopPath(w, h)}" fill="#1a1311" stroke="none" shape-rendering="geometricPrecision" />
       </svg>
     `;
