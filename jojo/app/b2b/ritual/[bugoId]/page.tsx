@@ -966,7 +966,7 @@ export default function RitualDetailPage() {
           align-items: center;
         }
         .phrase-char {
-          font-size: ${jibangSize === 'christian_catholic' ? '13' : '16'}px;
+          font-size: ${jibangSize === 'christian_catholic' ? '15' : '18'}px;
           color: #333;
           font-weight: 500;
           line-height: 1.35;
