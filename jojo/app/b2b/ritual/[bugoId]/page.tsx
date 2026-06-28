@@ -1067,41 +1067,7 @@ export default function RitualDetailPage() {
           <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--b2b-text-primary)', display: 'block', marginBottom: '12px' }}>
             대상 고인 정보
           </span>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>고인 성함</label>
-            <input
-              className={styles.formInput}
-              type="text"
-              value={deceasedName}
-              onChange={(e) => setDeceasedName(e.target.value)}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.formLabel}>관계</label>
-              <select
-                className={styles.formSelect}
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-              >
-                {RELATIONSHIPS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.formLabel}>성별</label>
-              <select
-                className={styles.formSelect}
-                value={gender}
-                onChange={(e) => setGender(e.target.value as 'male' | 'female')}
-              >
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-              </select>
-            </div>
-          </div>
+          {/* 고인 정보(성함, 관계, 성별)는 DB에서 연동되어 프리필되므로 입력 폼에서는 제외합니다. */}
 
           {/* 종교별 직분/세례명 필드 분기 */}
           {(religion === 'christian' || religion === 'catholic') && (
