@@ -966,7 +966,7 @@ export default function RitualDetailPage() {
           align-items: center;
         }
         .phrase-char {
-          font-size: ${jibangSize === 'christian_catholic' ? '11' : '14'}px;
+          font-size: ${jibangSize === 'christian_catholic' ? '13' : '16'}px;
           color: #333;
           font-weight: 500;
           line-height: 1.35;
@@ -1419,7 +1419,7 @@ export default function RitualDetailPage() {
                       if (col.type === 'phrase') {
                         const isLeft = col.side === 'left';
                         const isCatholicSize = jibangSize === 'christian_catholic';
-                        const offsetPx = isCatholicSize ? '23px' : '26px';
+                        const offsetPx = isCatholicSize ? '13px' : '16px';
                         return (
                           <div key={cIdx} style={{
                             position: 'absolute',
@@ -1428,7 +1428,7 @@ export default function RitualDetailPage() {
                             bottom: '12%',
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: isCatholicSize ? '9px' : '11px',
+                            fontSize: isCatholicSize ? '11px' : '13px',
                             color: '#333', fontWeight: 500,
                             lineHeight: '1.35', gap: '0px',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif"
