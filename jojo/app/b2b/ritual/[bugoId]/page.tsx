@@ -772,25 +772,25 @@ export default function RitualDetailPage() {
       if (isHanja) {
         hanjaColumnsHtml = activeLines.map((line, cIdx) => {
           const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+          const lineChars = line.split('');
+          const readingChars = readingLine.split('');
           
-          const readingCharsHtml = readingLine.split('').map(c => 
-            c === ' ' 
-              ? `<span class="reading-char" style="visibility: hidden; height: 18px;"> </span>`
-              : `<span class="reading-char">${c}</span>`
-          ).join('');
+          const pairsHtml = lineChars.map((c, chIdx) => {
+            const rc = readingChars[chIdx] || '';
+            const isSpace = c === ' ';
+            
+            if (isSpace) {
+              return `<div class="char-pair space-row"></div>`;
+            }
+            return `
+              <div class="char-pair">
+                <span class="reading-char">${rc}</span>
+                <span class="hanja-char">${c}</span>
+              </div>
+            `;
+          }).join('');
           
-          const charsHtml = line.split('').map(c => 
-            c === ' ' 
-              ? `<span class="hanja-char" style="visibility: hidden; height: 26px;"> </span>`
-              : `<span class="hanja-char">${c}</span>`
-          ).join('');
-          
-          return `
-            <div class="pair-container">
-              <div class="reading-col">${readingCharsHtml}</div>
-              <div class="hanja-col">${charsHtml}</div>
-            </div>
-          `;
+          return `<div class="pair-column">${pairsHtml}</div>`;
         }).join('');
       }
 
@@ -799,15 +799,20 @@ export default function RitualDetailPage() {
         <html><head><title>축문 - 故 ${deceasedName}</title>
         <style>
           @page { size: A4; margin: 0; }
-          html, body { margin: 0; padding: 0; height: 100%; width: 100%; }
+          html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
           body { 
             font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif; 
+            background: #fff;
+          }
+          .print-page {
+            width: 210mm;
+            height: 297mm;
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            background: #fff;
             padding: 30mm;
+            margin: 0 auto;
           }
           .content { 
             display: flex;
@@ -839,44 +844,44 @@ export default function RitualDetailPage() {
             text-align: center;
             width: 100%;
           }
-          .pair-container {
-            display: flex;
-            flex-direction: row-reverse;
-            gap: 6px;
-          }
-          .hanja-col {
+          .pair-column {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
+          }
+          .char-pair {
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          }
+          .space-row {
+            height: 24px;
+            visibility: hidden;
           }
           .hanja-char {
             font-size: 26px;
             line-height: 1.2;
             color: #1a1a1a;
             font-weight: 700;
-            display: block;
-          }
-          .reading-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
           }
           .reading-char {
             font-size: 18px;
             line-height: 1.2;
             color: #555;
             font-weight: 500;
-            display: block;
           }
         </style></head>
         <body>
-          <div class="content">
-            ${isHanja
-              ? hanjaColumnsHtml
-              : activeLines.map(line => `<div class="line">${line}</div>`).join('')
-            }
+          <div class="print-page">
+            <div class="content">
+              ${isHanja
+                ? hanjaColumnsHtml
+                : activeLines.map(line => `<div class="line">${line}</div>`).join('')
+              }
+            </div>
           </div>
           <script>window.onload = function() { window.print(); }</script>
         </body></html>
@@ -1456,73 +1461,51 @@ export default function RitualDetailPage() {
                 {(chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? (
                   chukmunResult.lines.map((line, cIdx) => {
                     const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+                    const lineChars = line.split('');
+                    const readingChars = readingLine.split('');
                     return (
                       <div
                         key={cIdx}
                         style={{
                           display: 'flex',
-                          flexDirection: 'row-reverse',
+                          flexDirection: 'column',
+                          alignItems: 'center',
                           gap: '4px',
-                          alignItems: 'flex-start',
                         }}
                       >
-                        {/* 한글 독음 열 (오른쪽) */}
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          {readingLine.split('').map((char, chIdx) => (
-                            <span
+                        {lineChars.map((char, chIdx) => {
+                          const readingChar = readingChars[chIdx] || '';
+                          const isSpace = char === ' ';
+                          return (
+                            <div
                               key={chIdx}
                               style={{
-                                fontSize: '8px',
-                                lineHeight: '1.2',
-                                display: 'block',
-                                color: '#666',
-                                visibility: char === ' ' ? 'hidden' : 'visible',
-                                height: char === ' ' ? '8px' : 'auto'
+                                display: 'flex',
+                                flexDirection: 'row-reverse',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                height: isSpace ? '12px' : 'auto',
+                                visibility: isSpace ? 'hidden' : 'visible'
                               }}
                             >
-                              {char}
-                            </span>
-                          ))}
-                        </div>
-                        {/* 한문 열 (왼쪽) */}
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          {line.split('').map((char, chIdx) => (
-                            <span
-                              key={chIdx}
-                              style={{
-                                fontSize: '11px',
-                                lineHeight: '1.2',
-                                display: 'block',
-                                color: '#111',
-                                fontWeight: 'bold',
-                                visibility: char === ' ' ? 'hidden' : 'visible',
-                                height: char === ' ' ? '11px' : 'auto'
-                              }}
-                            >
-                              {char}
-                            </span>
-                          ))}
-                        </div>
+                              {/* 한글 독음 (오른쪽) */}
+                              <span style={{ fontSize: '8px', lineHeight: '1.2', color: '#666' }}>
+                                {readingChar}
+                              </span>
+                              {/* 한문 (왼쪽) */}
+                              <span style={{ fontSize: '11px', lineHeight: '1.2', color: '#111', fontWeight: 'bold' }}>
+                                {char}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   })
                 ) : (religion === 'christian' || religion === 'catholic') ? (
                   chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', color: '#2b5f3a', fontWeight: 'bold', width: '100%' }}>{line}</div>
+                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', color: '#1a1a1a', fontWeight: 'bold', width: '100%' }}>{line}</div>
                   ))
                 ) : (
                   chukmunResult.koreanLines.map((line, i) => (
