@@ -719,14 +719,7 @@ export default function RitualDetailPage() {
         });
       }
 
-      // Affiliation column (천주교연령회연합회 등)
-      if (affiliation) {
-        cols.push({
-          type: 'affiliation' as const,
-          chars: affiliation.split(''),
-          showCross: false,
-        });
-      }
+
 
       return cols;
     } else {
@@ -982,9 +975,14 @@ export default function RitualDetailPage() {
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
                   const isLeft = col.side === 'left';
-                  const borderStyle = isLeft ? 'border-right: 1px solid #ccc; padding-right: 6px; margin-right: 6px;' : 'border-left: 1px solid #ccc; padding-left: 6px; margin-left: 6px;';
+                  const isCatholicSize = jibangSize === 'christian_catholic';
+                  const offsetVal = isCatholicSize ? '5mm' : '8mm';
+                  const borderStyle = isLeft 
+                    ? 'border-right: 1px dashed #ccc; padding-right: 5px;' 
+                    : 'border-left: 1px dashed #ccc; padding-left: 5px;';
+                  const positionStyle = isLeft ? `left: ${offsetVal};` : `right: ${offsetVal};`;
                   return `
-                    <div class="column" style="${borderStyle} justify-content: center; flex: none;">
+                    <div class="column" style="position: absolute; ${positionStyle} top: 12%; bottom: 12%; justify-content: center; flex: none; ${borderStyle}">
                       ${col.chars.map((c: string) => `<div class="phrase-char">${c}</div>`).join('')}
                     </div>
                   `;
@@ -1416,15 +1414,19 @@ export default function RitualDetailPage() {
                     return cols.map((col: any, cIdx: number) => {
                       if (col.type === 'phrase') {
                         const isLeft = col.side === 'left';
+                        const isCatholicSize = jibangSize === 'christian_catholic';
+                        const offsetPx = isCatholicSize ? '8px' : '14px';
                         return (
                           <div key={cIdx} style={{
+                            position: 'absolute',
+                            [isLeft ? 'left' : 'right']: offsetPx,
+                            top: '12%',
+                            bottom: '12%',
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
-                            paddingLeft: isLeft ? '0' : '4px',
-                            paddingRight: isLeft ? '4px' : '0',
-                            borderLeft: isLeft ? '0' : '1px solid #ddd',
-                            borderRight: isLeft ? '1px solid #ddd' : '0',
-                            fontSize: jibangSize === 'christian_catholic' ? '9px' : '11px',
+                            [isLeft ? 'paddingRight' : 'paddingLeft']: '5px',
+                            [isLeft ? 'borderRight' : 'borderLeft']: '1px dashed #ccc',
+                            fontSize: isCatholicSize ? '9px' : '11px',
                             color: '#333', fontWeight: 500,
                             lineHeight: '1.35', gap: '0px',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif"
