@@ -51,6 +51,8 @@ export interface ChukmunResult {
   fullText: string;
   /** 한문 축문 각 줄 텍스트 배열 */
   lines: string[];
+  /** 한자 축문의 한글 독음 각 줄 텍스트 배열 */
+  readingLines: string[];
   /** 한글 축문 전체 텍스트 */
   koreanFullText: string;
   /** 한글 축문 각 줄 텍스트 배열 */
@@ -137,6 +139,20 @@ const MONTH_CHINESE: readonly string[] = [
   '七月', '八月', '九月', '十月', '十一月', '十二月',
 ];
 
+/** 월 이름 (한글) */
+const MONTH_KOREAN: readonly string[] = [
+  '', '정월', '이월', '삼월', '사월', '오월', '유월',
+  '칠월', '팔월', '구월', '시월', '동짓달', '섣달',
+];
+
+/** 일 이름 (한글 순우리말) */
+const DAYS_KOREAN: readonly string[] = [
+  '',
+  '초하루', '초이틀', '초사흘', '초나흘', '초닷새', '초엿새', '초이레', '초여드레', '초아흐레', '초열흘',
+  '열하루', '열이틀', '열사흘', '열나흘', '열닷새', '열엿새', '열이레', '열여드레', '열아흐레', '스무날',
+  '스물하루', '스물이틀', '스물사흘', '스물나흘', '스물닷새', '스물엿새', '스물이레', '스물여드레', '스물아흐레', '그믐', '스물한날'
+];
+
 // ─── 유틸리티 ────────────────────────────────────────────────────
 
 /** 일(日)을 한문 숫자 표기로 변환 */
@@ -174,6 +190,27 @@ function buildDeceasedLine(item: { deceasedName: string; relationship: string; g
   }
 }
 
+/** 한문 글자를 한글 음독으로 변환하는 사전 매핑 함수 */
+export function translateHanjaToHangul(text: string): string {
+  const dict: Record<string, string> = {
+    '維': '유', '歲': '세', '次': '차', '朔': '삭', '孝': '효', '子': '자', '孫': '손', '曾': '증', 
+    '未': '미', '亡': '망', '人': '인', '夫': '부', '弟': '제', '父': '부', '舅': '구', '敢': '감', 
+    '昭': '소', '고': '고', '告': '고', '于': '우', '顯': '현', '考': '고', '妣': '비', '祖': '조', '學': '학',
+    '生': '생', '孺': '유', '府': '부', '君': '군', '氏': '씨', '序': '서', '遷': '천', '易': '역', 
+    '追': '추', '遠': '원', '感': '감', '時': '시', '昊': '호', '天': '천', '罔': '망', '極': '극', 
+    '謹': '근', '以': '이', '清': '청', '酌': '작', '庶': '서', '羞': '수', '恭': '공', '修': '수', 
+    '薦': '천', '事': '사', '伸': '신', '奠': '전', '獻': '헌', '尙': '상', '饗': '향', '靈': '영', 
+    '輿': '여', '旣': '기', '整': '정', '往': '왕', '卽': '즉', '幽': '유', '宅': '택', '載': '재', 
+    '將': '장', '永': '영', '終': '종', '嗚': '오', '呼': '호', '哀': '애', '哉': '재', '伏': '복', 
+    '惟': '유', '形': '형', '歸': '귀', '室': '실', '堂': '당', '主': '주', '成': '성', '尊': '존', 
+    '舍': '사', '舊': '구', '從': '종', '新': '신', '是': '시', '憑': '빙', '墳': '분', '墓': '묘', 
+    '體': '체', '魄': '백', '夙': '숙', '安': '안', '土': '토', '地': '지', '之': '지', '神': '신', 
+    '玆': '자', '爲': '위', '營': '영', '建': '건', '德': '덕', '守': '수', '護': '호', '庇': '비', 
+    '佑': '우', '俾': '비', '無': '무', '後': '후', '艱': '간', '祗': '지'
+  };
+  return text.split('').map(char => dict[char] || char).join('');
+}
+
 // ─── 핵심 함수 ───────────────────────────────────────────────────
 
 /**
@@ -186,20 +223,29 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  // 1. 천간 지지 간지 자동 계산
-  const systemYearGanji = getYearGanji(year).hanja;
-  const systemMonthGanji = getMonthGanji(year, month).hanja;
-  const systemDayGanji = getDayGanji(year, month, day).hanja;
+  // 1. 천간 지지 간지 자동 계산 (한문용)
+  const systemYearGanji = getYearGanji(year);
+  const systemMonthGanji = getMonthGanji(year, month);
+  const systemDayGanji = getDayGanji(year, month, day);
 
   const monthNameHan = MONTH_CHINESE[month] || `${month}月`;
   const dayNameHan = dayToChinese(day);
 
-  // 2. 한문 상주 호칭 및 고인 호칭
+  // 2. 천간 지지 간지 자동 계산 (한글 독음용)
+  const yearGanjiKor = systemYearGanji.korean;
+  const monthGanjiKor = systemMonthGanji.korean;
+  const dayGanjiKor = systemDayGanji.korean;
+
+  const monthNameKor = MONTH_KOREAN[month] || `${month}월`;
+  const dayNameKor = DAYS_KOREAN[day] || `${day}일`;
+
+  // 3. 한문 상주 호칭 및 고인 호칭
   const mournerTitleHan = MOURNER_TITLE_HAN[relationship] || '孝子';
   const deceasedLineHan = buildDeceasedLine({ deceasedName, relationship, gender, bonGwan, familyName });
 
-  // 3. 한문 축문 날짜/제주 구성
-  const dateLineHan = `維 歲次 ${systemYearGanji} ${monthNameHan} ${systemMonthGanji}朔 ${dayNameHan} ${systemDayGanji}`;
+  // 4. 한문 축문 날짜/제주 구성 (한자와 독음을 각각 구성)
+  const dateLineHan = `維 歲次 ${systemYearGanji.hanja} ${monthNameHan} ${systemMonthGanji.hanja}朔 ${dayNameHan} ${systemDayGanji.hanja}`;
+  const dateLineReading = `유세차 ${yearGanjiKor}년 ${monthNameKor} ${monthGanjiKor}삭 ${dayNameKor} ${dayGanjiKor}일`;
   const mournerLineHan = `${mournerTitleHan} ${mournerName} 敢昭告于`;
 
   // ── 한글 호칭 구성 ──
@@ -222,11 +268,12 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
     return {
       fullText: lines.join('\n'),
       lines,
+      readingLines: lines,
       koreanFullText: lines.join('\n'),
       koreanLines: lines,
       meta: {
         occasionType,
-        date: { year, month, day, yearGanji: systemYearGanji, monthGanji: systemMonthGanji, dayGanji: systemDayGanji }
+        date: { year, month, day, yearGanji: systemYearGanji.hanja, monthGanji: systemMonthGanji.hanja, dayGanji: systemDayGanji.hanja }
       }
     };
   }
@@ -409,9 +456,17 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
       ];
   }
 
+  const readingLines = lines.map(line => {
+    if (line === dateLineHan) {
+      return dateLineReading;
+    }
+    return translateHanjaToHangul(line);
+  });
+
   return {
     fullText: lines.join('\n'),
     lines,
+    readingLines,
     koreanFullText: koreanLines.join('\n'),
     koreanLines,
     meta: {
@@ -420,9 +475,9 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
         year,
         month,
         day,
-        yearGanji: systemYearGanji,
-        monthGanji: systemMonthGanji,
-        dayGanji: systemDayGanji,
+        yearGanji: systemYearGanji.hanja,
+        monthGanji: systemMonthGanji.hanja,
+        dayGanji: systemDayGanji.hanja,
       },
     },
   };

@@ -767,17 +767,30 @@ export default function RitualDetailPage() {
       const isHanja = chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic';
       const activeLines = isHanja ? chukmunResult.lines : chukmunResult.koreanLines;
 
-      // 한문 모드: 각 줄을 개별 세로 열로 렌더링 (우측 -> 좌측 순서)
+      // 한문 모드: 각 줄과 그에 대응하는 한글 음독을 개별 세로 열로 병기 렌더링 (우측 -> 좌측 순서)
       let hanjaColumnsHtml = '';
       if (isHanja) {
-        hanjaColumnsHtml = activeLines.map(line => {
-          const chars = line.split('');
-          const charsHtml = chars.map(c => 
+        hanjaColumnsHtml = activeLines.map((line, cIdx) => {
+          const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+          
+          const readingCharsHtml = readingLine.split('').map(c => 
+            c === ' ' 
+              ? `<span class="reading-char" style="visibility: hidden; height: 18px;"> </span>`
+              : `<span class="reading-char">${c}</span>`
+          ).join('');
+          
+          const charsHtml = line.split('').map(c => 
             c === ' ' 
               ? `<span class="hanja-char" style="visibility: hidden; height: 26px;"> </span>`
               : `<span class="hanja-char">${c}</span>`
           ).join('');
-          return `<div class="hanja-col">${charsHtml}</div>`;
+          
+          return `
+            <div class="pair-container">
+              <div class="reading-col">${readingCharsHtml}</div>
+              <div class="hanja-col">${charsHtml}</div>
+            </div>
+          `;
         }).join('');
       }
 
@@ -807,7 +820,7 @@ export default function RitualDetailPage() {
               flex-direction: row-reverse;
               justify-content: center;
               align-items: flex-start;
-              gap: 32px;
+              gap: 28px;
             ` : `
               flex-direction: column;
               justify-content: center;
@@ -826,6 +839,11 @@ export default function RitualDetailPage() {
             text-align: center;
             width: 100%;
           }
+          .pair-container {
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 6px;
+          }
           .hanja-col {
             display: flex;
             flex-direction: column;
@@ -836,6 +854,20 @@ export default function RitualDetailPage() {
             font-size: 26px;
             line-height: 1.2;
             color: #1a1a1a;
+            font-weight: 700;
+            display: block;
+          }
+          .reading-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+          }
+          .reading-char {
+            font-size: 18px;
+            line-height: 1.2;
+            color: #555;
+            font-weight: 500;
             display: block;
           }
         </style></head>
@@ -1398,54 +1430,103 @@ export default function RitualDetailPage() {
                     flexDirection: 'row-reverse',
                     justifyContent: 'center',
                     alignItems: 'flex-start',
-                    padding: '30px 16px',
-                    minHeight: '380px',
-                    gap: '20px',
-                    overflowX: 'auto'
+                    padding: '24px 16px',
+                    width: '270px',
+                    height: '382px',
+                    boxSizing: 'border-box',
+                    gap: '12px',
+                    overflow: 'hidden',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
                   } : {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    padding: '30px 20px',
-                    minHeight: '380px'
+                    padding: '24px 20px',
+                    width: '270px',
+                    height: '382px',
+                    boxSizing: 'border-box',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                    overflow: 'hidden'
                   }
                 }
               >
                 {(chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? (
-                  chukmunResult.lines.map((line, cIdx) => (
-                    <div
-                      key={cIdx}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      {line.split('').map((char, chIdx) => (
-                        <span
-                          key={chIdx}
+                  chukmunResult.lines.map((line, cIdx) => {
+                    const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+                    return (
+                      <div
+                        key={cIdx}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row-reverse',
+                          gap: '4px',
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        {/* 한글 독음 열 (오른쪽) */}
+                        <div
                           style={{
-                            fontSize: '14px',
-                            lineHeight: '1.2',
-                            display: 'block',
-                            visibility: char === ' ' ? 'hidden' : 'visible',
-                            height: char === ' ' ? '14px' : 'auto'
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
-                          {char}
-                        </span>
-                      ))}
-                    </div>
-                  ))
+                          {readingLine.split('').map((char, chIdx) => (
+                            <span
+                              key={chIdx}
+                              style={{
+                                fontSize: '8px',
+                                lineHeight: '1.2',
+                                display: 'block',
+                                color: '#666',
+                                visibility: char === ' ' ? 'hidden' : 'visible',
+                                height: char === ' ' ? '8px' : 'auto'
+                              }}
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </div>
+                        {/* 한문 열 (왼쪽) */}
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          {line.split('').map((char, chIdx) => (
+                            <span
+                              key={chIdx}
+                              style={{
+                                fontSize: '11px',
+                                lineHeight: '1.2',
+                                display: 'block',
+                                color: '#111',
+                                fontWeight: 'bold',
+                                visibility: char === ' ' ? 'hidden' : 'visible',
+                                height: char === ' ' ? '11px' : 'auto'
+                              }}
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (religion === 'christian' || religion === 'catholic') ? (
                   chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.08em', fontSize: '13px', lineHeight: '2.2', textAlign: 'center', color: '#2b5f3a', fontWeight: 'bold', width: '100%' }}>{line}</div>
+                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', color: '#2b5f3a', fontWeight: 'bold', width: '100%' }}>{line}</div>
                   ))
                 ) : (
                   chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.08em', fontSize: '13px', lineHeight: '2.2', textAlign: 'center', width: '100%' }}>{line}</div>
+                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', width: '100%' }}>{line}</div>
                   ))
                 )}
               </div>
