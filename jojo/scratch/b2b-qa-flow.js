@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 1. Load Environment Variables from .env.production.local
-const envPath = path.resolve(__dirname, '../.env.production.local');
+const envPath = path.resolve(__dirname, '../.env.local');
 let envData = {};
 if (fs.existsSync(envPath)) {
     const envContent = fs.readFileSync(envPath, 'utf8');
