@@ -1206,19 +1206,7 @@ export default function RitualDetailPage() {
             </div>
           )}
 
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>맺음말 문구</label>
-            <select
-              className={styles.formSelect}
-              value={endingWord}
-              onChange={(e) => setEndingWord(e.target.value as typeof endingWord)}
-            >
-              <option value="神位">神位 (신위 - 일반 전통)</option>
-              <option value="靈駕">靈駕 (영가 - 불교식)</option>
-              <option value="安息">安息 (안식 - 기독교/천주교식)</option>
-              <option value="없음">직접수정 / 없음</option>
-            </select>
-          </div>
+
         </div>
 
         {/* 축문 설정 섹션 */}
