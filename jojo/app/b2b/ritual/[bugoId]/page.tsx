@@ -695,9 +695,10 @@ export default function RitualDetailPage() {
       }
 
       const cols: any[] = [];
+      const showPhrase = christianPhrase !== '없음';
 
-      // Left phrase column (전체기도일 때만 빛기도가 왼쪽으로 감)
-      if (christianPhrase === '전체기도') {
+      // Left phrase column (빛기도)
+      if (showPhrase) {
         cols.push({
           type: 'phrase' as const,
           chars: '영원한빛을그에게비추소서'.split(''),
@@ -709,18 +710,11 @@ export default function RitualDetailPage() {
       // Main column
       cols.push(mainCol);
 
-      // Right phrase column (전체기도/안식기도는 안식기도가 우측, 빛기도 단독선택 시 빛기도가 우측)
-      if (christianPhrase === '전체기도' || christianPhrase === '안식기도') {
+      // Right phrase column (안식기도)
+      if (showPhrase) {
         cols.push({
           type: 'phrase' as const,
           chars: '주님그에게영원한안식을주소서'.split(''),
-          side: 'right' as const,
-          showCross: false,
-        });
-      } else if (christianPhrase === '빛기도') {
-        cols.push({
-          type: 'phrase' as const,
-          chars: '영원한빛을그에게비추소서'.split(''),
           side: 'right' as const,
           showCross: false,
         });
@@ -1178,8 +1172,7 @@ export default function RitualDetailPage() {
                   value={christianPhrase}
                   onChange={(e) => setChristianPhrase(e.target.value as typeof christianPhrase)}
                 >
-                  <option value="안식기도">안식기도 ("주님 그에게 영원한 안식을 주소서")</option>
-                  <option value="빛기도">빛기도 ("영원한 빛을 그에게 비추소서")</option>
+                  <option value="전체기도">기도문구 표시 ("영원한 빛을..." / "주님 그에게...")</option>
                   <option value="없음">표시 안 함 (본체만 출력)</option>
                 </select>
               </div>
@@ -1428,7 +1421,7 @@ export default function RitualDetailPage() {
                             bottom: '12%',
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: isCatholicSize ? '11px' : '13px',
+                            fontSize: isCatholicSize ? '9px' : '11px',
                             color: '#333', fontWeight: 500,
                             lineHeight: '1.35', gap: '0px',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif"
