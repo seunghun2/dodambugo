@@ -94,6 +94,8 @@ const getScallopPath = (width: number, height: number) => {
   } else if (width <= 65 && height > 250) { // honbaek preview (60, 320)
     m = 4.0;
     countX = 6;
+  } else if (width >= 100) { // christian preview (105), general preview (140)
+    countX = 16;
   }
 
   let path = '';
