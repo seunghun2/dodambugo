@@ -460,12 +460,8 @@ export default function RitualDetailPage() {
   const [deceasedName, setDeceasedName] = useState('');
   const [relationship, setRelationship] = useState('아버지');
   const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [bonGwan, setBonGwan] = useState('');
-  const [familyName, setFamilyName] = useState('');
-  
   // 모달 팝업 상태
   const [isDeceasedModalOpen, setIsDeceasedModalOpen] = useState(false);
-  const [useTraditionalFemaleName, setUseTraditionalFemaleName] = useState(false);
 
   // 종교별 세부옵션
   const [endingWord, setEndingWord] = useState<'神位' | '靈駕' | '安息' | '없음'>('神位');
@@ -609,8 +605,6 @@ export default function RitualDetailPage() {
     deceasedName,
     relationship,
     gender,
-    bonGwan: bonGwan || undefined,
-    familyName: familyName || undefined,
     religion,
     endingWord,
     christianTitle: christianTitle === '선택 안 함' ? undefined : christianTitle,
@@ -623,8 +617,6 @@ export default function RitualDetailPage() {
     deceasedName,
     relationship,
     gender,
-    bonGwan: bonGwan || undefined,
-    familyName: familyName || undefined,
     religion,
     endingWord,
     christianTitle: christianTitle === '선택 안 함' ? undefined : christianTitle,
@@ -640,8 +632,6 @@ export default function RitualDetailPage() {
     deceasedName,
     relationship,
     gender,
-    bonGwan: bonGwan || undefined,
-    familyName: familyName || undefined,
     religion,
   });
 
@@ -747,9 +737,6 @@ export default function RitualDetailPage() {
       const pos = gender === 'male' ? '學生' : '孺人';
       
       const hanjaLines: string[] = [translate(title), translate(pos)];
-      if (gender === 'female' && useTraditionalFemaleName && bonGwan && familyName) {
-        hanjaLines.push(`${bonGwan}${familyName}${translate('氏')}`);
-      }
       if (gender === 'male') {
         hanjaLines.push(translate('府君'));
       }
@@ -1193,18 +1180,6 @@ export default function RitualDetailPage() {
                 <span style={{ fontWeight: 600, color: '#222' }}>{christianTitle}</span>
               </div>
             )}
-            {gender === 'female' && (religion === 'general' || religion === 'buddhism') && useTraditionalFemaleName && (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#888' }}>본관</span>
-                  <span style={{ fontWeight: 600, color: '#222' }}>{bonGwan || '-'}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#888' }}>성씨</span>
-                  <span style={{ fontWeight: 600, color: '#222' }}>{familyName || '-'}</span>
-                </div>
-              </>
-            )}
           </div>
 
           {/* 기독교/천주교일 경우 측면 기도 문구 선택 드롭다운은 설정 폼 아래에 계속 노출 */}
@@ -1315,42 +1290,6 @@ export default function RitualDetailPage() {
                   </div>
                 )}
 
-                {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: 600, color: '#555', marginTop: '6px' }}>
-                      <input
-                        type="checkbox"
-                        checked={useTraditionalFemaleName}
-                        onChange={(e) => setUseTraditionalFemaleName(e.target.checked)}
-                        style={{ accentColor: 'var(--b2b-accent)', cursor: 'pointer' }}
-                      />
-                      전통 본관/성씨 표기 사용 (예: 김해 김씨)
-                    </label>
-
-                    {useTraditionalFemaleName && (
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                        <div className={styles.formGroup} style={{ flex: 1 }}>
-                          <label className={styles.formLabel}>본관 (예: 김해)</label>
-                          <input
-                            className={styles.formInput}
-                            type="text"
-                            value={bonGwan}
-                            onChange={(e) => setBonGwan(e.target.value)}
-                          />
-                        </div>
-                        <div className={styles.formGroup} style={{ flex: 1 }}>
-                          <label className={styles.formLabel}>성씨 (예: 김)</label>
-                          <input
-                            className={styles.formInput}
-                            type="text"
-                            value={familyName}
-                            onChange={(e) => setFamilyName(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
