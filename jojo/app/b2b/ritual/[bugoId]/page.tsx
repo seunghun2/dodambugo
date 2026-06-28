@@ -91,15 +91,15 @@ const getScallopPath = (width: number, height: number) => {
   
   // 1. 네 모서리 라운드 코너 (바깥쪽 볼록으로 모서리 연결)
   // 좌상단
-  path += ` M ${m},${m + r} A ${r},${r} 0 0,1 ${m + r},${m}`;
+  path += ` M ${m},${m + r} A ${r},${r} 0 0,0 ${m + r},${m}`;
   // 우상단
-  path += ` M ${width - m - r},${m} A ${r},${r} 0 0,1 ${width - m},${m + r}`;
+  path += ` M ${width - m - r},${m} A ${r},${r} 0 0,0 ${width - m},${m + r}`;
   // 우하단
-  path += ` M ${width - m},${height - m - r} A ${r},${r} 0 0,1 ${width - m - r},${height - m}`;
+  path += ` M ${width - m},${height - m - r} A ${r},${r} 0 0,0 ${width - m - r},${height - m}`;
   // 좌하단
-  path += ` M ${m + r},${height - m} A ${r},${r} 0 0,1 ${m},${height - m - r}`;
+  path += ` M ${m + r},${height - m} A ${r},${r} 0 0,0 ${m},${height - m - r}`;
   
-  // 2. 상단 물결 (위로 볼록: sweep-flag = 0)
+  // 2. 상단 물결 (위로 볼록: sweep-flag = 1)
   const startX = m + r;
   const endX = width - m - r;
   const lenX = endX - startX;
@@ -108,16 +108,16 @@ const getScallopPath = (width: number, height: number) => {
   const rX = stepX / 2;
   for (let i = 0; i < countX; i++) {
     const x = startX + i * stepX;
-    path += ` M ${x},${m} a ${rX},${rX} 0 0,0 ${stepX},0`;
+    path += ` M ${x},${m} a ${rX},${rX} 0 0,1 ${stepX},0`;
   }
   
-  // 3. 하단 물결 (아래로 볼록: sweep-flag = 1)
+  // 3. 하단 물결 (아래로 볼록: sweep-flag = 0)
   for (let i = 0; i < countX; i++) {
     const x = startX + i * stepX;
-    path += ` M ${x},${height - m} a ${rX},${rX} 0 0,1 ${stepX},0`;
+    path += ` M ${x},${height - m} a ${rX},${rX} 0 0,0 ${stepX},0`;
   }
   
-  // 4. 좌측 물결 (왼쪽으로 볼록: sweep-flag = 1)
+  // 4. 좌측 물결 (왼쪽으로 볼록: sweep-flag = 0)
   const startY = m + r;
   const endY = height - m - r;
   const lenY = endY - startY;
@@ -126,13 +126,13 @@ const getScallopPath = (width: number, height: number) => {
   const rY = stepY / 2;
   for (let i = 0; i < countY; i++) {
     const y = startY + i * stepY;
-    path += ` M ${m},${y} a ${rY},${rY} 0 0,1 0,${stepY}`;
+    path += ` M ${m},${y} a ${rY},${rY} 0 0,0 0,${stepY}`;
   }
   
-  // 5. 우측 물결 (오른쪽으로 볼록: sweep-flag = 0)
+  // 5. 우측 물결 (오른쪽으로 볼록: sweep-flag = 1)
   for (let i = 0; i < countY; i++) {
     const y = startY + i * stepY;
-    path += ` M ${width - m},${y} a ${rY},${rY} 0 0,0 0,${stepY}`;
+    path += ` M ${width - m},${y} a ${rY},${rY} 0 0,1 0,${stepY}`;
   }
   
   return path;
@@ -814,7 +814,7 @@ export default function RitualDetailPage() {
           align-items: center;
           justify-content: center;
           gap: 2px;
-          flex: none;
+          flex: 1;
         }
         .char {
           font-size: ${isWipae ? '48' : '44'}px;
@@ -851,20 +851,20 @@ export default function RitualDetailPage() {
           <div class="cutlabel">절취선을 따라 잘라 주세요 (${isWipae ? '위패' : '지방'} 규격: ${widthCm} x ${heightCm}cm)</div>
           <div class="paper">
             ${borderSvgHtml}
-            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 12px; position: relative; z-index: 1;">
+            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 0px; position: relative; z-index: 1;">
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
                   const isLeft = christianPhrase === '빛기도';
                   const borderStyle = isLeft ? 'border-right: 1px solid #ccc; padding-right: 8px;' : 'border-left: 1px solid #ccc; padding-left: 8px;';
                   return `
-                    <div class="column" style="${borderStyle} justify-content: center;">
+                    <div class="column" style="${borderStyle} justify-content: center; flex: 1;">
                       ${col.chars.map((c: string) => `<div class="phrase-char">${c}</div>`).join('')}
                     </div>
                   `;
                 }
                 if (col.type === 'name') {
                   return `
-                    <div class="column" style="justify-content: center; gap: 20px;">
+                    <div class="column" style="justify-content: center; gap: 20px; flex: 1;">
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
                         ${col.chars.map((c: string) => `<div class="name-char">${c}</div>`).join('')}
                       </div>
@@ -1237,7 +1237,7 @@ export default function RitualDetailPage() {
                   jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
                   borderSkin
                 )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '6px', height: '100%', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '0px', height: '100%', position: 'relative', zIndex: 1 }}>
                   {buildTabletColumns(false).map((col: any, cIdx: number) => {
                     if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
@@ -1281,7 +1281,7 @@ export default function RitualDetailPage() {
                         <div key={cIdx} style={{
                           display: 'flex', flexDirection: 'column', alignItems: 'center',
                           justifyContent: 'center',
-                          flex: 'none', gap: '8px'
+                          flex: 1, gap: '8px'
                         }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             {col.chars.map((c: string, i: number) => (
@@ -1364,78 +1364,81 @@ export default function RitualDetailPage() {
           {/* 2. 축문 미리보기 */}
           {activeTab === 'chukmun' && (
             <div className={styles.chukmunPreview}>
-              {(() => {
-                const isHanja = chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic';
-                const paperStyle = isHanja ? {
-                  display: 'flex',
-                  flexDirection: 'row-reverse' as const,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  writingMode: 'vertical-rl' as const,
-                  textOrientation: 'upright' as const,
-                  padding: '30px 20px',
-                  minHeight: '380px',
-                  gap: '16px',
-                  overflowX: 'auto' as const
-                } : {
-                  padding: '30px 20px',
-                  minHeight: '380px'
-                };
+              <div 
+                className={styles.chukmunPaper} 
+                style={
+                  (chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? {
+                    display: 'flex',
+                    flexDirection: 'row-reverse',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'upright',
+                    padding: '30px 20px',
+                    minHeight: '380px',
+                    gap: '16px',
+                    overflowX: 'auto'
+                  } : {
+                    padding: '30px 20px',
+                    minHeight: '380px'
+                  }
+                }
+              >
+                {(chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? (
+                  chukmunResult.lines.map((line, i) => (
+                    <div 
+                      key={i} 
+                      className={styles.chukmunLine} 
+                      style={{ 
+                        margin: '0 4px',
+                        writingMode: 'vertical-rl',
+                        whiteSpace: 'nowrap',
+                        textIndent: '0',
+                        fontSize: '14px',
+                        lineHeight: '2.2',
+                        letterSpacing: '0.18em',
+                        textAlign: 'right'
+                      }}
+                    >
+                      {line}
+                    </div>
+                  ))
+                ) : (religion === 'christian' || religion === 'catholic') ? (
+                  chukmunResult.koreanLines.map((line, i) => (
+                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.01em', fontSize: '13px', lineHeight: '2.0', textAlign: 'left', textIndent: '0', color: '#2b5f3a', fontWeight: 'bold' }}>{line}</div>
+                  ))
+                ) : (
+                  chukmunResult.koreanLines.map((line, i) => (
+                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.02em', fontSize: '13px', lineHeight: '1.8', textAlign: 'left', textIndent: '0' }}>{line}</div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
 
-                return (
-                  <div className={styles.chukmunPaper} style={paperStyle}>
-                    {isHanja ? (
-                      chukmunResult.lines.map((line, i) => (
-                        <div 
-                          key={i} 
-                          className={styles.chukmunLine} 
-                          style={{ 
-                            margin: '0 4px',
-                            writingMode: 'vertical-rl',
-                            whiteSpace: 'nowrap',
-                            textIndent: '0',
-                            fontSize: '14px',
-                            lineHeight: '2.2',
-                            letterSpacing: '0.18em',
-                            textAlign: 'right'
-                          }}
-                        >
-                          {line}
-                        </div>
-                      ))
-                    ) : (religion === 'christian' || religion === 'catholic') ? (
-                      chukmunResult.koreanLines.map((line, i) => (
-                        <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.01em', fontSize: '13px', lineHeight: '2.0', textAlign: 'left', textIndent: '0', color: '#2b5f3a', fontWeight: 'bold' }}>{line}</div>
-                      ))
-                    ) : (
-                      chukmunResult.koreanLines.map((line, i) => (
-                        <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.02em', fontSize: '13px', lineHeight: '1.8', textAlign: 'left', textIndent: '0' }}>{line}</div>
-                      ))
-                        if (col.type === 'name') {
-                      return (
-                        <div key={cIdx} style={{
-                          display: 'flex', flexDirection: 'column', alignItems: 'center',
-                          justifyContent: 'center',
-                          flex: 'none', gap: '8px'
-                        }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                            {col.chars.map((c: string, i: number) => (
-                              <div key={i} style={{ fontSize: '30px', fontWeight: 700, color: '#1a1311', fontFamily: "'Batang', 'Nanum Myeongjo', serif" }}>
-                                {c}
-                              </div>
-                            ))}
-                          </div>
-                          <div style={{
-                            fontSize: '13px', color: '#666', fontWeight: 600,
-                            display: 'flex', flexDirection: 'column', alignItems: 'center',
-                            fontFamily: "'Batang', 'Nanum Myeongjo', serif"
-                          }}>
-                            <div>고</div>
-                            <div>인</div>
-                          </div>
-                        </div>
-                      );
-                    }  if (col.type === 'phrase') {
+          {/* 3. 위패 미리보기 */}
+          {activeTab === 'wipae' && (
+            <div className={styles.jibangPreview}>
+              <div
+                className={styles.jibangPaper}
+                style={{
+                  width: jibangSize === 'honbaek' ? 60 : jibangSize === 'christian_catholic' ? 105 : 140,
+                  minHeight: jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
+                  border: 'none',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                  backgroundColor: '#fff',
+                  padding: '32px 14px 24px 14px',
+                  position: 'relative',
+                }}
+              >
+                {renderBorderSvg(
+                  jibangSize === 'honbaek' ? 60 : jibangSize === 'christian_catholic' ? 105 : 140,
+                  jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
+                  borderSkin
+                )}
+                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '6px', height: '100%', position: 'relative', zIndex: 1 }}>
+                  {buildTabletColumns(true).map((col: any, cIdx: number) => {
+                    if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
                       return (
                         <div key={cIdx} style={{
