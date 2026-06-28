@@ -85,12 +85,23 @@ const RELIGION_SVGS = {
 // ─── 테두리 무늬 스킨 렌더링 헬퍼 함수 및 경로 계산 ───
 
 const getScallopPath = (width: number, height: number) => {
-  const m = 5.67;
+  const m = 5.67; // 테두리 여백
+  const r = 16.0; // 모서리 둥글기 기본 스케일
   let path = '';
   
-  // 상단 물결 (바깥 - 위 방향으로 볼록)
-  const startX = m;
-  const endX = width - m;
+  // 1. 네 모서리 라운드 코너 (바깥쪽 볼록으로 모서리 연결)
+  // 좌상단
+  path += ` M ${m},${m + r} A ${r},${r} 0 0,1 ${m + r},${m}`;
+  // 우상단
+  path += ` M ${width - m - r},${m} A ${r},${r} 0 0,1 ${width - m},${m + r}`;
+  // 우하단
+  path += ` M ${width - m},${height - m - r} A ${r},${r} 0 0,1 ${width - m - r},${height - m}`;
+  // 좌하단
+  path += ` M ${m + r},${height - m} A ${r},${r} 0 0,1 ${m},${height - m - r}`;
+  
+  // 2. 상단 물결 (위로 볼록: sweep-flag = 0)
+  const startX = m + r;
+  const endX = width - m - r;
   const lenX = endX - startX;
   const countX = Math.round(lenX / 30.0);
   const stepX = lenX / countX;
@@ -100,25 +111,25 @@ const getScallopPath = (width: number, height: number) => {
     path += ` M ${x},${m} a ${rX},${rX} 0 0,0 ${stepX},0`;
   }
   
-  // 하단 물결 (바깥 - 아래 방향으로 볼록)
+  // 3. 하단 물결 (아래로 볼록: sweep-flag = 1)
   for (let i = 0; i < countX; i++) {
     const x = startX + i * stepX;
-    path += ` M ${x + stepX},${height - m} a ${rX},${rX} 0 0,0 -${stepX},0`;
+    path += ` M ${x},${height - m} a ${rX},${rX} 0 0,1 ${stepX},0`;
   }
   
-  // 좌측 물결 (바깥 - 왼쪽 방향으로 볼록)
-  const startY = m;
-  const endY = height - m;
+  // 4. 좌측 물결 (왼쪽으로 볼록: sweep-flag = 1)
+  const startY = m + r;
+  const endY = height - m - r;
   const lenY = endY - startY;
   const countY = Math.round(lenY / 30.0);
   const stepY = lenY / countY;
   const rY = stepY / 2;
   for (let i = 0; i < countY; i++) {
     const y = startY + i * stepY;
-    path += ` M ${m},${y + stepY} a ${rY},${rY} 0 0,0 0,-${stepY}`;
+    path += ` M ${m},${y} a ${rY},${rY} 0 0,1 0,${stepY}`;
   }
   
-  // 우측 물결 (바깥 - 오른쪽 방향으로 볼록)
+  // 5. 우측 물결 (오른쪽으로 볼록: sweep-flag = 0)
   for (let i = 0; i < countY; i++) {
     const y = startY + i * stepY;
     path += ` M ${width - m},${y} a ${rY},${rY} 0 0,0 0,${stepY}`;
@@ -795,7 +806,7 @@ export default function RitualDetailPage() {
           justify-content: center;
           box-sizing: border-box;
           background: #fff;
-          padding: 32px 12px;
+          padding: 32px 20px;
         }
         .column {
           display: flex;
@@ -840,7 +851,7 @@ export default function RitualDetailPage() {
           <div class="cutlabel">절취선을 따라 잘라 주세요 (${isWipae ? '위패' : '지방'} 규격: ${widthCm} x ${heightCm}cm)</div>
           <div class="paper">
             ${borderSvgHtml}
-            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 16px; position: relative; z-index: 1;">
+            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 12px; position: relative; z-index: 1;">
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
                   const isLeft = christianPhrase === '빛기도';
@@ -853,7 +864,7 @@ export default function RitualDetailPage() {
                 }
                 if (col.type === 'name') {
                   return `
-                    <div class="column" style="justify-content: center; padding-top: 48px; padding-bottom: 24px; gap: 48px;">
+                    <div class="column" style="justify-content: center; gap: 20px;">
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
                         ${col.chars.map((c: string) => `<div class="name-char">${c}</div>`).join('')}
                       </div>
@@ -1212,21 +1223,21 @@ export default function RitualDetailPage() {
               <div
                 className={styles.jibangPaper}
                 style={{
-                  width: jibangSize === 'honbaek' ? 54 : jibangSize === 'christian_catholic' ? 95 : 130,
+                  width: jibangSize === 'honbaek' ? 60 : jibangSize === 'christian_catholic' ? 105 : 140,
                   minHeight: jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
                   border: 'none',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
                   backgroundColor: '#fff',
-                  padding: '32px 8px 24px 8px',
+                  padding: '32px 14px 24px 14px',
                   position: 'relative',
                 }}
               >
                 {renderBorderSvg(
-                  jibangSize === 'honbaek' ? 54 : jibangSize === 'christian_catholic' ? 95 : 130,
+                  jibangSize === 'honbaek' ? 60 : jibangSize === 'christian_catholic' ? 105 : 140,
                   jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
                   borderSkin
                 )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '8px', height: '100%', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '6px', height: '100%', position: 'relative', zIndex: 1 }}>
                   {buildTabletColumns(false).map((col: any, cIdx: number) => {
                     if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
@@ -1269,8 +1280,8 @@ export default function RitualDetailPage() {
                       return (
                         <div key={cIdx} style={{
                           display: 'flex', flexDirection: 'column', alignItems: 'center',
-                          justifyContent: 'center', padding: '24px 0 12px 0',
-                          flex: 'none', gap: '24px'
+                          justifyContent: 'center',
+                          flex: 'none', gap: '8px'
                         }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             {col.chars.map((c: string, i: number) => (
@@ -1280,7 +1291,7 @@ export default function RitualDetailPage() {
                             ))}
                           </div>
                           <div style={{
-                            fontSize: '13px', color: '#666', fontWeight: 600,
+                            fontSize: '12px', color: '#666', fontWeight: 600,
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif"
                           }}>
@@ -1400,36 +1411,31 @@ export default function RitualDetailPage() {
                       chukmunResult.koreanLines.map((line, i) => (
                         <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.02em', fontSize: '13px', lineHeight: '1.8', textAlign: 'left', textIndent: '0' }}>{line}</div>
                       ))
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* 3. 위패 미리보기 */}
-          {activeTab === 'wipae' && (
-            <div className={styles.jibangPreview}>
-              <div
-                className={styles.jibangPaper}
-                style={{
-                  width: jibangSize === 'honbaek' ? 54 : jibangSize === 'christian_catholic' ? 95 : 130,
-                  minHeight: jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
-                  border: 'none',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-                  backgroundColor: '#fff',
-                  padding: '32px 8px 24px 8px',
-                  position: 'relative',
-                }}
-              >
-                {renderBorderSvg(
-                  jibangSize === 'honbaek' ? 54 : jibangSize === 'christian_catholic' ? 95 : 130,
-                  jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
-                  borderSkin
-                )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '8px', height: '100%', position: 'relative', zIndex: 1 }}>
-                  {buildTabletColumns(true).map((col: any, cIdx: number) => {
-                    if (col.type === 'phrase') {
+                        if (col.type === 'name') {
+                      return (
+                        <div key={cIdx} style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center',
+                          justifyContent: 'center',
+                          flex: 'none', gap: '8px'
+                        }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                            {col.chars.map((c: string, i: number) => (
+                              <div key={i} style={{ fontSize: '30px', fontWeight: 700, color: '#1a1311', fontFamily: "'Batang', 'Nanum Myeongjo', serif" }}>
+                                {c}
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{
+                            fontSize: '13px', color: '#666', fontWeight: 600,
+                            display: 'flex', flexDirection: 'column', alignItems: 'center',
+                            fontFamily: "'Batang', 'Nanum Myeongjo', serif"
+                          }}>
+                            <div>고</div>
+                            <div>인</div>
+                          </div>
+                        </div>
+                      );
+                    }  if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
                       return (
                         <div key={cIdx} style={{
