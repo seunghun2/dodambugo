@@ -56,7 +56,7 @@ const RELATION_GENDER: Record<string, 'male' | 'female'> = {
 };
 
 /** 기독교/천주교 직분 목록 */
-const CHRISTIAN_TITLES = ['성도', '집사', '권사', '장로', '권찰', '목사', '전도사', '신부', '수녀', '선택 안 함'];
+const CHRISTIAN_TITLES = ['성도/聖徒', '집사/執事', '권사/勸士', '장로/長老', '권찰/勸察', '목사/牧師', '전도사/傳道師', '신부/神父', '수녀/修女', '선택 안 함'];
 
 // ─── 종교별 인라인 SVG 아이콘 (아트보드 – 1.svg 원본 path 추출) ───
 
@@ -450,6 +450,8 @@ export default function RitualDetailPage() {
 
   // 3. 축문 문자 선택 상태 ('korean': 쉬운 한글, 'hanja': 전통 한문)
   const [chukmunTextType, setChukmunTextType] = useState<'korean' | 'hanja'>('korean');
+  // 3-1. 위패 문자 선택 상태 ('korean': 한글, 'hanja': 漢文)
+  const [wipaeTextType, setWipaeTextType] = useState<'korean' | 'hanja'>('korean');
 
   // 고인 정보 상태
   const [deceasedName, setDeceasedName] = useState('');
@@ -638,6 +640,20 @@ export default function RitualDetailPage() {
 
   const buildTabletColumns = (isWipae: boolean) => {
     const isChristianOrCatholic = religion === 'christian' || religion === 'catholic';
+    const isKorean = wipaeTextType === 'korean';
+
+    const translate = (str: string) => {
+      if (!isKorean) return str;
+      const dict: Record<string, string> = {
+        '顯考': '현고', '顯妣': '현비', '顯祖考': '현조고', '顯祖妣': '현조비',
+        '顯曾祖考': '현증조고', '顯曾祖妣': '현증조비', '亡夫': '망부', '亡室': '망실',
+        '顯兄': '현형', '亡子': '망자', '亡婦': '망부',
+        '學生': '학생', '孺人': '유인', '府君': '부군',
+        '神位': '신위', '靈駕': '영가', '安息': '안식',
+        '氏': '씨'
+      };
+      return dict[str] || str;
+    };
 
     if (isChristianOrCatholic) {
       // 1. 기독교/천주교 룰
@@ -648,19 +664,22 @@ export default function RitualDetailPage() {
         mainLines.push('故');
       }
       if (christianTitle && christianTitle !== '선택 안 함') {
-        mainLines.push(christianTitle);
-      }
-      if (baptismName && baptismPosition === 'above') {
-        mainLines.push(baptismName);
+        const titleParts = christianTitle.split('/');
+        const titleStr = wipaeTextType === 'hanja' && titleParts[1] ? titleParts[1] : titleParts[0];
+        if (titleStr) {
+          mainLines.push(titleStr);
+        }
       }
       mainLines.push(deceasedName);
-      if (baptismName && baptismPosition === 'below') {
-        mainLines.push('(');
-        mainLines.push(baptismName);
-        mainLines.push(')');
-      }
+      
       if (endingWord !== '없음') {
-        const ending = endingWord === '安息' ? '안식' : endingWord === '神位' ? '신위' : endingWord;
+        const ending = endingWord === '安息' 
+          ? (wipaeTextType === 'hanja' ? '安息' : '안식')
+          : endingWord === '神位'
+          ? (wipaeTextType === 'hanja' ? '神位' : '신위')
+          : endingWord === '靈駕'
+          ? (wipaeTextType === 'hanja' ? '靈駕' : '영가')
+          : endingWord;
         mainLines.push(ending);
       }
 
@@ -670,16 +689,55 @@ export default function RitualDetailPage() {
         showCross: true,
       };
 
-      // 기독교/천주교: phrase/affiliation 없이 main 열만 중앙정렬
-      return [mainCol];
+      // 혼백명패는 극도로 좁으므로 무조건 main 열만 반환
+      if (jibangSize === 'honbaek') {
+        return [mainCol];
+      }
+
+      const cols: any[] = [];
+
+      // Left phrase column (빛기도 또는 전체기도)
+      if (christianPhrase === '전체기도' || christianPhrase === '빛기도') {
+        cols.push({
+          type: 'phrase' as const,
+          chars: '영원한빛을그에게비추소서'.split(''),
+          side: 'left' as const,
+          showCross: false,
+        });
+      }
+
+      // Main column
+      cols.push(mainCol);
+
+      // Right phrase column (안식기도 또는 전체기도)
+      if (christianPhrase === '전체기도' || christianPhrase === '안식기도') {
+        cols.push({
+          type: 'phrase' as const,
+          chars: '주님그에게영원한안식을주소서'.split(''),
+          side: 'right' as const,
+          showCross: false,
+        });
+      }
+
+      // Affiliation column (천주교연령회연합회 등)
+      if (affiliation) {
+        cols.push({
+          type: 'affiliation' as const,
+          chars: affiliation.split(''),
+          showCross: false,
+        });
+      }
+
+      return cols;
     } else {
       // 2. 일반/불교 룰
       if (jibangSize === 'honbaek') {
         // 혼백·명패 크기는 극도로 좁아서 1열로만 렌더링
         const lines = isWipae ? wipaeResult.lines : jibangResult.lines;
+        const translatedLines = lines.map(translate);
         return [{
           type: 'hanja' as const,
-          chars: lines.join('').split(''),
+          chars: translatedLines.join('').split(''),
         }];
       }
 
@@ -687,15 +745,15 @@ export default function RitualDetailPage() {
       const title = RELATIONSHIP_TITLE[relationship] || '顯考';
       const pos = gender === 'male' ? '學生' : '孺人';
       
-      const hanjaLines: string[] = [title, pos];
+      const hanjaLines: string[] = [translate(title), translate(pos)];
       if (gender === 'female' && bonGwan && familyName) {
-        hanjaLines.push(`${bonGwan}${familyName}氏`);
+        hanjaLines.push(`${bonGwan}${familyName}${translate('氏')}`);
       }
       if (gender === 'male') {
-        hanjaLines.push('府君');
+        hanjaLines.push(translate('府君'));
       }
       if (endingWord !== '없음') {
-        hanjaLines.push(endingWord);
+        hanjaLines.push(translate(endingWord));
       }
 
       const hanjaCol = {
@@ -908,7 +966,7 @@ export default function RitualDetailPage() {
           align-items: center;
         }
         .phrase-char {
-          font-size: 15px;
+          font-size: ${jibangSize === 'christian_catholic' ? '11' : '14'}px;
           color: #333;
           font-weight: 500;
           line-height: 1.35;
@@ -923,8 +981,8 @@ export default function RitualDetailPage() {
             <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 16px; position: relative; z-index: 1;">
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
-                  const isLeft = christianPhrase === '빛기도';
-                  const borderStyle = isLeft ? 'border-right: 1px solid #ccc; padding-right: 8px;' : 'border-left: 1px solid #ccc; padding-left: 8px;';
+                  const isLeft = col.side === 'left';
+                  const borderStyle = isLeft ? 'border-right: 1px solid #ccc; padding-right: 6px; margin-right: 6px;' : 'border-left: 1px solid #ccc; padding-left: 6px; margin-left: 6px;';
                   return `
                     <div class="column" style="${borderStyle} justify-content: center; flex: none;">
                       ${col.chars.map((c: string) => `<div class="phrase-char">${c}</div>`).join('')}
@@ -1058,6 +1116,32 @@ export default function RitualDetailPage() {
                   <option value="corner">모서리 무늬</option>
                 </select>
               </div>
+
+              <div style={{ marginTop: '12px' }}>
+                <label className={styles.formLabel}>문자 표기</label>
+                <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="wipaeTextType"
+                      checked={wipaeTextType === 'hanja'}
+                      onChange={() => setWipaeTextType('hanja')}
+                      style={{ accentColor: 'var(--b2b-accent)' }}
+                    />
+                    漢文
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="wipaeTextType"
+                      checked={wipaeTextType === 'korean'}
+                      onChange={() => setWipaeTextType('korean')}
+                      style={{ accentColor: 'var(--b2b-accent)' }}
+                    />
+                    한글
+                  </label>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -1072,29 +1156,17 @@ export default function RitualDetailPage() {
           {/* 종교별 직분/세례명 필드 분기 */}
           {(religion === 'christian' || religion === 'catholic') && (
             <>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <div className={styles.formGroup} style={{ flex: 1 }}>
-                  <label className={styles.formLabel}>직분</label>
-                  <select
-                    className={styles.formSelect}
-                    value={christianTitle}
-                    onChange={(e) => setChristianTitle(e.target.value)}
-                  >
-                    {CHRISTIAN_TITLES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className={styles.formGroup} style={{ flex: 1 }}>
-                  <label className={styles.formLabel}>세례명 (선택)</label>
-                  <input
-                    className={styles.formInput}
-                    type="text"
-                    placeholder="예: 요한"
-                    value={baptismName}
-                    onChange={(e) => setBaptismName(e.target.value)}
-                  />
-                </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>직분</label>
+                <select
+                  className={styles.formSelect}
+                  value={christianTitle}
+                  onChange={(e) => setChristianTitle(e.target.value)}
+                >
+                  {CHRISTIAN_TITLES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.formGroup}>
@@ -1348,11 +1420,12 @@ export default function RitualDetailPage() {
                           <div key={cIdx} style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
-                            paddingLeft: isLeft ? '0' : '8px',
-                            paddingRight: isLeft ? '8px' : '0',
+                            paddingLeft: isLeft ? '0' : '4px',
+                            paddingRight: isLeft ? '4px' : '0',
                             borderLeft: isLeft ? '0' : '1px solid #ddd',
                             borderRight: isLeft ? '1px solid #ddd' : '0',
-                            fontSize: '12px', color: '#333', fontWeight: 500,
+                            fontSize: jibangSize === 'christian_catholic' ? '9px' : '11px',
+                            color: '#333', fontWeight: 500,
                             lineHeight: '1.35', gap: '0px',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif"
                           }}>
@@ -1368,7 +1441,8 @@ export default function RitualDetailPage() {
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
                             paddingLeft: '4px',
-                            fontSize: '10px', color: '#777', fontWeight: 500,
+                            fontSize: jibangSize === 'christian_catholic' ? '8px' : '10px',
+                            color: '#777', fontWeight: 500,
                             lineHeight: '1.25', gap: '0px',
                             fontFamily: "'Batang', 'Nanum Myeongjo', serif",
                             opacity: 0.85
