@@ -465,6 +465,7 @@ export default function RitualDetailPage() {
   
   // 모달 팝업 상태
   const [isDeceasedModalOpen, setIsDeceasedModalOpen] = useState(false);
+  const [useTraditionalFemaleName, setUseTraditionalFemaleName] = useState(false);
 
   // 종교별 세부옵션
   const [endingWord, setEndingWord] = useState<'神位' | '靈駕' | '安息' | '없음'>('神位');
@@ -746,7 +747,7 @@ export default function RitualDetailPage() {
       const pos = gender === 'male' ? '學生' : '孺人';
       
       const hanjaLines: string[] = [translate(title), translate(pos)];
-      if (gender === 'female' && bonGwan && familyName) {
+      if (gender === 'female' && useTraditionalFemaleName && bonGwan && familyName) {
         hanjaLines.push(`${bonGwan}${familyName}${translate('氏')}`);
       }
       if (gender === 'male') {
@@ -1192,7 +1193,7 @@ export default function RitualDetailPage() {
                 <span style={{ fontWeight: 600, color: '#222' }}>{christianTitle}</span>
               </div>
             )}
-            {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
+            {gender === 'female' && (religion === 'general' || religion === 'buddhism') && useTraditionalFemaleName && (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#888' }}>본관</span>
@@ -1315,25 +1316,39 @@ export default function RitualDetailPage() {
                 )}
 
                 {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <div className={styles.formGroup} style={{ flex: 1 }}>
-                      <label className={styles.formLabel}>본관 (예: 김해)</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: 600, color: '#555', marginTop: '6px' }}>
                       <input
-                        className={styles.formInput}
-                        type="text"
-                        value={bonGwan}
-                        onChange={(e) => setBonGwan(e.target.value)}
+                        type="checkbox"
+                        checked={useTraditionalFemaleName}
+                        onChange={(e) => setUseTraditionalFemaleName(e.target.checked)}
+                        style={{ accentColor: 'var(--b2b-accent)', cursor: 'pointer' }}
                       />
-                    </div>
-                    <div className={styles.formGroup} style={{ flex: 1 }}>
-                      <label className={styles.formLabel}>성씨 (예: 김)</label>
-                      <input
-                        className={styles.formInput}
-                        type="text"
-                        value={familyName}
-                        onChange={(e) => setFamilyName(e.target.value)}
-                      />
-                    </div>
+                      전통 본관/성씨 표기 사용 (예: 김해 김씨)
+                    </label>
+
+                    {useTraditionalFemaleName && (
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                          <label className={styles.formLabel}>본관 (예: 김해)</label>
+                          <input
+                            className={styles.formInput}
+                            type="text"
+                            value={bonGwan}
+                            onChange={(e) => setBonGwan(e.target.value)}
+                          />
+                        </div>
+                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                          <label className={styles.formLabel}>성씨 (예: 김)</label>
+                          <input
+                            className={styles.formInput}
+                            type="text"
+                            value={familyName}
+                            onChange={(e) => setFamilyName(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
