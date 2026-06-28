@@ -92,7 +92,7 @@ const getScallopPath = (width: number, height: number) => {
   const startX = m;
   const endX = width - m;
   const lenX = endX - startX;
-  const countX = Math.round(lenX / 11.1);
+  const countX = Math.round(lenX / 30.0);
   const stepX = lenX / countX;
   const rX = stepX / 2;
   for (let i = 0; i < countX; i++) {
@@ -110,7 +110,7 @@ const getScallopPath = (width: number, height: number) => {
   const startY = m;
   const endY = height - m;
   const lenY = endY - startY;
-  const countY = Math.round(lenY / 11.1);
+  const countY = Math.round(lenY / 30.0);
   const stepY = lenY / countY;
   const rY = stepY / 2;
   for (let i = 0; i < countY; i++) {
@@ -658,16 +658,62 @@ export default function RitualDetailPage() {
       const printWindow = window.open('', '_blank');
       if (!printWindow) return;
 
-      const activeLines = chukmunTextType === 'korean' ? chukmunResult.koreanLines : chukmunResult.lines;
+      const isHanja = chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic';
+      const activeLines = isHanja ? chukmunResult.lines : chukmunResult.koreanLines;
 
       printWindow.document.write(`
         <!DOCTYPE html>
         <html><head><title>축문 - 故 ${deceasedName}</title>
         <style>
-          @page { size: A4; margin: 30mm; }
-          body { font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif; margin: 0; padding: 0; }
-          .content { text-align: center; padding-top: 40px; }
-          .line { font-size: ${chukmunTextType === 'korean' ? '16' : '20'}px; line-height: 2.2; letter-spacing: ${chukmunTextType === 'korean' ? '0.05em' : '0.15em'}; color: #1a1a1a; word-break: keep-all; }
+          @page { size: A4; margin: 0; }
+          html, body { margin: 0; padding: 0; height: 100%; width: 100%; }
+          body { 
+            font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: #fff;
+            padding: 30mm;
+          }
+          .content { 
+            display: flex;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 100%;
+            box-sizing: border-box;
+            ${isHanja ? `
+              writing-mode: vertical-rl;
+              text-orientation: upright;
+              flex-direction: row-reverse;
+              justify-content: center;
+              align-items: center;
+              gap: 24px;
+            ` : `
+              flex-direction: column;
+              justify-content: center;
+              align-items: flex-start;
+              gap: 16px;
+              width: 80%;
+            `}
+          }
+          .line { 
+            color: #1a1a1a; 
+            word-break: keep-all;
+            white-space: nowrap;
+            ${isHanja ? `
+              font-size: 28px;
+              line-height: 2.3;
+              letter-spacing: 0.25em;
+              text-align: right;
+            ` : `
+              font-size: 24px;
+              line-height: 2.0;
+              letter-spacing: 0.05em;
+              text-align: left;
+            `}
+          }
         </style></head>
         <body>
           <div class="content">
@@ -746,7 +792,7 @@ export default function RitualDetailPage() {
           display: flex; 
           flex-direction: row;
           align-items: stretch; 
-          justify-content: space-evenly;
+          justify-content: center;
           box-sizing: border-box;
           background: #fff;
           padding: 32px 12px;
@@ -757,7 +803,7 @@ export default function RitualDetailPage() {
           align-items: center;
           justify-content: center;
           gap: 2px;
-          flex: 1;
+          flex: none;
         }
         .char {
           font-size: ${isWipae ? '48' : '44'}px;
@@ -794,7 +840,7 @@ export default function RitualDetailPage() {
           <div class="cutlabel">절취선을 따라 잘라 주세요 (${isWipae ? '위패' : '지방'} 규격: ${widthCm} x ${heightCm}cm)</div>
           <div class="paper">
             ${borderSvgHtml}
-            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 28px; position: relative; z-index: 1;">
+            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 16px; position: relative; z-index: 1;">
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
                   const isLeft = christianPhrase === '빛기도';
@@ -1180,7 +1226,7 @@ export default function RitualDetailPage() {
                   jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
                   borderSkin
                 )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '14px', height: '100%', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '8px', height: '100%', position: 'relative', zIndex: 1 }}>
                   {buildTabletColumns(false).map((col: any, cIdx: number) => {
                     if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
@@ -1224,7 +1270,7 @@ export default function RitualDetailPage() {
                         <div key={cIdx} style={{
                           display: 'flex', flexDirection: 'column', alignItems: 'center',
                           justifyContent: 'center', padding: '24px 0 12px 0',
-                          flex: 1, gap: '24px'
+                          flex: 'none', gap: '24px'
                         }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             {col.chars.map((c: string, i: number) => (
@@ -1307,21 +1353,57 @@ export default function RitualDetailPage() {
           {/* 2. 축문 미리보기 */}
           {activeTab === 'chukmun' && (
             <div className={styles.chukmunPreview}>
-              <div className={styles.chukmunPaper} style={{ padding: '30px 20px', minHeight: '380px' }}>
-                {(religion === 'christian' || religion === 'catholic') ? (
-                  chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.01em', fontSize: '13px', lineHeight: '2.0', textAlign: 'left', textIndent: '0', color: '#2b5f3a', fontWeight: 'bold' }}>{line}</div>
-                  ))
-                ) : chukmunTextType === 'korean' ? (
-                  chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.02em', fontSize: '13px', lineHeight: '1.8', textAlign: 'left', textIndent: '0' }}>{line}</div>
-                  ))
-                ) : (
-                  chukmunResult.lines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine}>{line}</div>
-                  ))
-                )}
-              </div>
+              {(() => {
+                const isHanja = chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic';
+                const paperStyle = isHanja ? {
+                  display: 'flex',
+                  flexDirection: 'row-reverse' as const,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  writingMode: 'vertical-rl' as const,
+                  textOrientation: 'upright' as const,
+                  padding: '30px 20px',
+                  minHeight: '380px',
+                  gap: '16px',
+                  overflowX: 'auto' as const
+                } : {
+                  padding: '30px 20px',
+                  minHeight: '380px'
+                };
+
+                return (
+                  <div className={styles.chukmunPaper} style={paperStyle}>
+                    {isHanja ? (
+                      chukmunResult.lines.map((line, i) => (
+                        <div 
+                          key={i} 
+                          className={styles.chukmunLine} 
+                          style={{ 
+                            margin: '0 4px',
+                            writingMode: 'vertical-rl',
+                            whiteSpace: 'nowrap',
+                            textIndent: '0',
+                            fontSize: '14px',
+                            lineHeight: '2.2',
+                            letterSpacing: '0.18em',
+                            textAlign: 'right'
+                          }}
+                        >
+                          {line}
+                        </div>
+                      ))
+                    ) : (religion === 'christian' || religion === 'catholic') ? (
+                      chukmunResult.koreanLines.map((line, i) => (
+                        <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.01em', fontSize: '13px', lineHeight: '2.0', textAlign: 'left', textIndent: '0', color: '#2b5f3a', fontWeight: 'bold' }}>{line}</div>
+                      ))
+                    ) : (
+                      chukmunResult.koreanLines.map((line, i) => (
+                        <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.02em', fontSize: '13px', lineHeight: '1.8', textAlign: 'left', textIndent: '0' }}>{line}</div>
+                      ))
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -1345,7 +1427,7 @@ export default function RitualDetailPage() {
                   jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370,
                   borderSkin
                 )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '14px', height: '100%', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', width: '100%', alignItems: 'stretch', justifyContent: 'center', gap: '8px', height: '100%', position: 'relative', zIndex: 1 }}>
                   {buildTabletColumns(true).map((col: any, cIdx: number) => {
                     if (col.type === 'phrase') {
                       const isLeft = col.side === 'left';
@@ -1389,7 +1471,7 @@ export default function RitualDetailPage() {
                         <div key={cIdx} style={{
                           display: 'flex', flexDirection: 'column', alignItems: 'center',
                           justifyContent: 'center', padding: '24px 0 12px 0',
-                          flex: 1, gap: '24px'
+                          flex: 'none', gap: '24px'
                         }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             {col.chars.map((c: string, i: number) => (
