@@ -86,14 +86,14 @@ const RELIGION_SVGS = {
 
 const getScallopPath = (width: number, height: number) => {
   let m = 5.67; // 테두리 여백
-  let arcSize = 22; // 반원 크기 (클수록 반원 개수 줄어듦)
+  let countX = 10; // 상/하단 물결 개수 (기본 10개)
   
   if (width <= 25) { // honbaek print (23)
     m = 2.0;
-    arcSize = 6.0;
+    countX = 4;
   } else if (width <= 65) { // honbaek preview (60)
     m = 4.0;
-    arcSize = 12.0;
+    countX = 6;
   }
 
   let path = '';
@@ -102,7 +102,6 @@ const getScallopPath = (width: number, height: number) => {
   const startX = m;
   const endX = width - m;
   const lenX = endX - startX;
-  const countX = Math.max(2, Math.round(lenX / arcSize));
   const stepX = lenX / countX;
   const rX = stepX / 2;
   for (let i = 0; i < countX; i++) {
@@ -116,11 +115,11 @@ const getScallopPath = (width: number, height: number) => {
     path += ` M ${x},${height - m} a ${rX},${rX} 0 0,0 ${stepX},0 Z`;
   }
   
-  // 3. 좌측 물결 (오른쪽으로 볼록)
+  // 3. 좌측 물결 (오른쪽으로 볼록) - 상하단 물결 크기(stepX)에 맞춰 좌우 물결 개수(countY) 자동 산출
   const startY = m;
   const endY = height - m;
   const lenY = endY - startY;
-  const countY = Math.max(2, Math.round(lenY / arcSize));
+  const countY = Math.max(2, Math.round(lenY / stepX));
   const stepY = lenY / countY;
   const rY = stepY / 2;
   for (let i = 0; i < countY; i++) {
