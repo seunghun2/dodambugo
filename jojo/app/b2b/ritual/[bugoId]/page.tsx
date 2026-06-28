@@ -983,7 +983,7 @@ export default function RitualDetailPage() {
                 if (col.type === 'phrase') {
                   const isLeft = col.side === 'left';
                   const isCatholicSize = jibangSize === 'christian_catholic';
-                  const offsetVal = isCatholicSize ? '5mm' : '8mm';
+                  const offsetVal = isCatholicSize ? '12.5mm' : '15mm';
                   const positionStyle = isLeft ? `left: ${offsetVal};` : `right: ${offsetVal};`;
                   return `
                     <div class="column" style="position: absolute; ${positionStyle} top: 12%; bottom: 12%; justify-content: center; flex: none;">
@@ -1419,7 +1419,7 @@ export default function RitualDetailPage() {
                       if (col.type === 'phrase') {
                         const isLeft = col.side === 'left';
                         const isCatholicSize = jibangSize === 'christian_catholic';
-                        const offsetPx = isCatholicSize ? '8px' : '14px';
+                        const offsetPx = isCatholicSize ? '23px' : '26px';
                         return (
                           <div key={cIdx} style={{
                             position: 'absolute',
@@ -1484,7 +1484,7 @@ export default function RitualDetailPage() {
                       }
                       if (col.type === 'main') {
                         return (
-                          <div key={cIdx} className={styles.jibangColumn} style={{ flex: 'none', borderRight: isSingleColumn ? 'none' : undefined, paddingRight: isSingleColumn ? '0' : undefined }}>
+                          <div key={cIdx} className={styles.jibangColumn} style={{ flex: 'none', borderRight: 'none', paddingRight: '0' }}>
                             {religion === 'christian' && (
                               <svg width="18" height="24.8" viewBox="0 0 20.5 28.2" fill="none" style={{ marginBottom: '6px' }}>
                                 <path d="M 7.681,28.162 L 7.681,12.801 L 0.0,12.801 L 0.0,7.681 L 7.681,7.681 L 7.681,0.0 L 12.801,0.0 L 12.801,7.681 L 20.481,7.681 L 20.481,12.801 L 12.800,12.801 L 12.800,28.162 Z" fill="#de0615"/>
