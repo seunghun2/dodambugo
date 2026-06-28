@@ -1463,7 +1463,7 @@ export default function RitualDetailPage() {
                           }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                               {col.chars.map((c: string, i: number) => (
-                                <div key={i} style={{ fontSize: jibangSize === 'honbaek' ? '16px' : jibangSize === 'christian_catholic' ? '24px' : '30px', fontWeight: 700, color: '#1a1311', fontFamily: "'Batang', 'Nanum Myeongjo', serif" }}>
+                                 <div key={i} style={{ fontSize: jibangSize === 'honbaek' ? '12px' : jibangSize === 'christian_catholic' ? '18px' : '22px', fontWeight: 700, color: '#1a1311', fontFamily: "'Batang', 'Nanum Myeongjo', serif" }}>
                                   {c}
                                 </div>
                               ))}
@@ -1500,7 +1500,7 @@ export default function RitualDetailPage() {
                                     key={i}
                                     className={styles.jibangChar}
                                     style={{
-                                      fontSize: jibangSize === 'honbaek' ? '14px' : jibangSize === 'christian_catholic' ? '22px' : '28px',
+                                      fontSize: jibangSize === 'honbaek' ? '11px' : jibangSize === 'christian_catholic' ? '16px' : '19px',
                                       transform: isParenthesis ? 'rotate(90deg)' : 'none',
                                       display: isParenthesis ? 'inline-block' : 'block',
                                       margin: isParenthesis ? '2px 0' : '0'
@@ -1530,7 +1530,7 @@ export default function RitualDetailPage() {
                                     key={i}
                                     className={styles.jibangChar}
                                     style={{
-                                      fontSize: jibangSize === 'honbaek' ? '14px' : jibangSize === 'christian_catholic' ? '22px' : '28px',
+                                      fontSize: jibangSize === 'honbaek' ? '11px' : jibangSize === 'christian_catholic' ? '16px' : '19px',
                                       transform: isParenthesis ? 'rotate(90deg)' : 'none',
                                       display: isParenthesis ? 'inline-block' : 'block',
                                       margin: isParenthesis ? '2px 0' : '0'
