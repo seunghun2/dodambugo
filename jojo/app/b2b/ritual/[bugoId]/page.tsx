@@ -61,21 +61,21 @@ const CHRISTIAN_TITLES = ['성도/聖徒', '집사/執事', '권사/勸士', '�
 // ─── 종교별 인라인 SVG 아이콘 (아트보드 – 1.svg 원본 path 추출) ───
 
 const RELIGION_SVGS = {
-  // 기독교 단일 십자가 (아트보드 – 6.svg, #de0615)
+  // 기독교 단일 십자가 (아트보드 – 6.svg, #de0615) - 2px 확대
   christian: `
-    <svg width="20.5" height="28.2" viewBox="0 0 20.5 28.2" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+    <svg width="22.5" height="30.2" viewBox="0 0 20.5 28.2" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
       <path d="M 7.681,28.162 L 7.681,12.801 L 0.0,12.801 L 0.0,7.681 L 7.681,7.681 L 7.681,0.0 L 12.801,0.0 L 12.801,7.681 L 20.481,7.681 L 20.481,12.801 L 12.800,12.801 L 12.800,28.162 Z" fill="#de0615"/>
     </svg>
   `,
-  // 천주교 trefoil 십자가 (아트보드 – 2.svg, #262727)
+  // 천주교 trefoil 십자가 (아트보드 – 2.svg, #262727) - 2px 확대
   catholic: `
-    <svg width="25.8" height="34.0" viewBox="0 0 25.8 34.0" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+    <svg width="27.8" height="36.0" viewBox="0 0 25.8 34.0" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
       <path d="M 10.552,31.66 A 2.344,2.344 0.0 0,1 8.207,29.315 A 2.345,2.345 0.0 0,1 10.552,26.97 L 10.552,16.418 L 7.035,16.418 A 2.345,2.345 0.0 0,1 4.69,18.763 A 2.344,2.344 0.0 0,1 2.345,16.418 A 2.344,2.344 0.0 0,1 0.0,14.073 A 2.345,2.345 0.0 0,1 2.345,11.728 A 2.345,2.345 0.0 0,1 4.69,9.383 A 2.346,2.346 0.0 0,1 7.035,11.728 L 10.552,11.728 L 10.552,7.035 A 2.344,2.344 0.0 0,1 8.207,4.69 A 2.345,2.345 0.0 0,1 10.552,2.345 A 2.345,2.345 0.0 0,1 12.897,0.0 A 2.346,2.346 0.0 0,1 15.242,2.345 A 2.346,2.346 0.0 0,1 17.587,4.69 A 2.345,2.345 0.0 0,1 15.242,7.035 L 15.242,11.725 L 18.759,11.725 A 2.345,2.345 0.0 0,1 21.104,9.38 A 2.346,2.346 0.0 0,1 23.449,11.725 A 2.346,2.346 0.0 0,1 25.794,14.07 A 2.345,2.345 0.0 0,1 23.449,16.415 A 2.345,2.345 0.0 0,1 21.104,18.76 A 2.344,2.344 0.0 0,1 18.759,16.415 L 15.242,16.415 L 15.242,26.967 A 2.346,2.346 0.0 0,1 17.585,29.315 A 2.345,2.345 0.0 0,1 15.24,31.66 A 2.345,2.345 0.0 0,1 12.895,34.005 A 2.344,2.344 0.0 0,1 10.552,31.66" fill="#262727"/>
     </svg>
   `,
-  // 불교 만자 (아트보드 – 5.svg, #de0615)
+  // 불교 만자 (아트보드 – 5.svg, #de0615) - 2px 확대
   buddhism: `
-    <svg width="24.8" height="24.8" viewBox="0 0 24.8 24.8" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+    <svg width="26.8" height="26.8" viewBox="0 0 24.8 24.8" fill="none" style="margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
       <path d="M 14.636,24.771 L 10.131,24.771 L 10.131,14.638 L 4.503,14.638 L 4.503,24.77 L 0.003,24.77 L 0.003,10.133 L 10.137,10.133 L 10.137,4.505 L 0.0,4.505 L 0.0,0.0 L 14.635,0.0 L 14.635,10.133 L 20.263,10.133 L 20.263,0.001 L 24.77,0.001 L 24.77,14.64 L 14.636,14.64 L 14.636,20.268 L 24.77,20.268 L 24.77,24.768 L 14.636,24.771 Z" fill="#de0615"/>
     </svg>
   `,
@@ -907,13 +907,13 @@ export default function RitualDetailPage() {
         /* 절취선 */
         .cutline {
           position: absolute;
-          top: -8mm; left: -8mm; right: -8mm; bottom: -8mm;
+          top: -4mm; left: -4mm; right: -4mm; bottom: -4mm;
           border: 2px dashed #ccc;
           border-radius: 4px;
         }
         .cutlabel {
           position: absolute;
-          top: -14mm; left: 50%; transform: translateX(-50%);
+          top: -9mm; left: 50%; transform: translateX(-50%);
           font-size: 9px; color: #aaa; font-family: sans-serif;
           white-space: nowrap;
         }
@@ -1479,12 +1479,12 @@ export default function RitualDetailPage() {
                         return (
                           <div key={cIdx} className={styles.jibangColumn} style={{ flex: 'none', borderRight: 'none', paddingRight: '0' }}>
                             {religion === 'christian' && (
-                              <svg width="18" height="24.8" viewBox="0 0 20.5 28.2" fill="none" style={{ marginBottom: '6px' }}>
+                              <svg width="20" height="26.8" viewBox="0 0 20.5 28.2" fill="none" style={{ marginBottom: '6px' }}>
                                 <path d="M 7.681,28.162 L 7.681,12.801 L 0.0,12.801 L 0.0,7.681 L 7.681,7.681 L 7.681,0.0 L 12.801,0.0 L 12.801,7.681 L 20.481,7.681 L 20.481,12.801 L 12.800,12.801 L 12.800,28.162 Z" fill="#de0615"/>
                               </svg>
                             )}
                             {religion === 'catholic' && (
-                              <svg width="20" height="26.4" viewBox="0 0 25.8 34.0" fill="none" style={{ marginBottom: '6px' }}>
+                              <svg width="22" height="28.4" viewBox="0 0 25.8 34.0" fill="none" style={{ marginBottom: '6px' }}>
                                 <path d="M 10.552,31.66 A 2.344,2.344 0.0 0,1 8.207,29.315 A 2.345,2.345 0.0 0,1 10.552,26.97 L 10.552,16.418 L 7.035,16.418 A 2.345,2.345 0.0 0,1 4.69,18.763 A 2.344,2.344 0.0 0,1 2.345,16.418 A 2.344,2.344 0.0 0,1 0.0,14.073 A 2.345,2.345 0.0 0,1 2.345,11.728 A 2.345,2.345 0.0 0,1 4.69,9.383 A 2.346,2.346 0.0 0,1 7.035,11.728 L 10.552,11.728 L 10.552,7.035 A 2.344,2.344 0.0 0,1 8.207,4.69 A 2.345,2.345 0.0 0,1 10.552,2.345 A 2.345,2.345 0.0 0,1 12.897,0.0 A 2.346,2.346 0.0 0,1 15.242,2.345 A 2.346,2.346 0.0 0,1 17.587,4.69 A 2.345,2.345 0.0 0,1 15.242,7.035 L 15.242,11.725 L 18.759,11.725 A 2.345,2.345 0.0 0,1 21.104,9.38 A 2.346,2.346 0.0 0,1 23.449,11.725 A 2.346,2.346 0.0 0,1 25.794,14.07 A 2.345,2.345 0.0 0,1 23.449,16.415 A 2.345,2.345 0.0 0,1 21.104,18.76 A 2.344,2.344 0.0 0,1 18.759,16.415 L 15.242,16.415 L 15.242,26.967 A 2.346,2.346 0.0 0,1 17.585,29.315 A 2.345,2.345 0.0 0,1 15.24,31.66 A 2.345,2.345 0.0 0,1 12.895,34.005 A 2.344,2.344 0.0 0,1 10.552,31.66" fill="#262727"/>
                               </svg>
                             )}
@@ -1514,7 +1514,7 @@ export default function RitualDetailPage() {
                         return (
                           <div key={cIdx} className={styles.jibangColumn} style={{ flex: 'none', borderRight: isSingleColumn ? 'none' : undefined, paddingRight: isSingleColumn ? '0' : undefined }}>
                             {religion === 'buddhism' && (
-                              <svg width="24" height="24" viewBox="0 0 24.8 24.8" fill="none" style={{ marginBottom: '6px' }}>
+                              <svg width="26" height="26" viewBox="0 0 24.8 24.8" fill="none" style={{ marginBottom: '6px' }}>
                                 <path d="M 14.636,24.771 L 10.131,24.771 L 10.131,14.638 L 4.503,14.638 L 4.503,24.77 L 0.003,24.77 L 0.003,10.133 L 10.137,10.133 L 10.137,4.505 L 0.0,4.505 L 0.0,0.0 L 14.635,0.0 L 14.635,10.133 L 20.263,10.133 L 20.263,0.001 L 24.77,0.001 L 24.77,14.64 L 14.636,14.64 L 14.636,20.268 L 24.77,20.268 L 24.77,24.768 L 14.636,24.771 Z" fill="#de0615"/>
                               </svg>
                             )}
