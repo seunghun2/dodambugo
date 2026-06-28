@@ -577,11 +577,13 @@ export default function RitualDetailPage() {
       setJibangSize('christian_catholic');
       setAffiliation('교회');
       setChristianPhrase('없음');
+      setActiveTab('wipae');
     } else if (newReligion === 'catholic') {
       setEndingWord('安息');
       setJibangSize('christian_catholic');
       setAffiliation('천주교연령회연합회');
       setChristianPhrase('전체기도');
+      setActiveTab('wipae');
     } else {
       setEndingWord('神位');
       setJibangSize('general_buddhism');
@@ -798,40 +800,29 @@ export default function RitualDetailPage() {
         <!DOCTYPE html>
         <html><head><title>축문 - 故 ${deceasedName}</title>
         <style>
-          @page { size: A4; margin: 0; }
+          @page { size: A4 portrait; margin: 20mm; }
           html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
           body { 
             font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif; 
             background: #fff;
-          }
-          .print-page {
-            width: 210mm;
-            height: 297mm;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
-            padding: 30mm;
-            margin: 0 auto;
           }
           .content { 
             display: flex;
-            width: auto;
-            max-width: 100%;
-            height: auto;
-            max-height: 100%;
-            box-sizing: border-box;
             ${isHanja ? `
               flex-direction: row-reverse;
               justify-content: center;
-              align-items: flex-start;
+              align-items: center;
               gap: 28px;
+              height: 100%;
             ` : `
               flex-direction: column;
               justify-content: center;
               align-items: center;
               gap: 16px;
-              width: 90%;
+              width: 100%;
             `}
           }
           .line { 
@@ -875,13 +866,11 @@ export default function RitualDetailPage() {
           }
         </style></head>
         <body>
-          <div class="print-page">
-            <div class="content">
-              ${isHanja
-                ? hanjaColumnsHtml
-                : activeLines.map(line => `<div class="line">${line}</div>`).join('')
-              }
-            </div>
+          <div class="content">
+            ${isHanja
+              ? hanjaColumnsHtml
+              : activeLines.map(line => `<div class="line">${line}</div>`).join('')
+            }
           </div>
           <script>window.onload = function() { window.print(); }</script>
         </body></html>
@@ -1083,16 +1072,18 @@ export default function RitualDetailPage() {
 
       {/* 탭 바 */}
       <div className={styles.tabBar}>
-
-        <button
-          className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('chukmun')}
-        >
-          축문
-        </button>
+        {religion !== 'christian' && religion !== 'catholic' && (
+          <button
+            className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('chukmun')}
+          >
+            축문
+          </button>
+        )}
         <button
           className={`${styles.tab} ${activeTab === 'wipae' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('wipae')}
+          style={religion === 'christian' || religion === 'catholic' ? { width: '100%', flex: 'none' } : {}}
         >
           위패
         </button>
