@@ -91,7 +91,7 @@ const getScallopPath = (width: number, height: number) => {
   if (width <= 25) { // honbaek print (23)
     m = 2.0;
     countX = 4;
-  } else if (width <= 65) { // honbaek preview (60)
+  } else if (width <= 65 && height > 250) { // honbaek preview (60, 320)
     m = 4.0;
     countX = 6;
   }
