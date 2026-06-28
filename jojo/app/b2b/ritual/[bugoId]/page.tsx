@@ -462,6 +462,9 @@ export default function RitualDetailPage() {
   const [bonGwan, setBonGwan] = useState('');
   const [familyName, setFamilyName] = useState('');
   
+  // 모달 팝업 상태
+  const [isDeceasedModalOpen, setIsDeceasedModalOpen] = useState(false);
+
   // 종교별 세부옵션
   const [endingWord, setEndingWord] = useState<'神位' | '靈駕' | '安息' | '없음'>('神位');
   const [christianTitle, setChristianTitle] = useState('성도');
@@ -1147,67 +1150,209 @@ export default function RitualDetailPage() {
         </div>
 
         {/* 고인 정보 섹션 */}
-        <div style={{ border: '1px solid var(--b2b-border-light)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--b2b-text-primary)', display: 'block', marginBottom: '12px' }}>
-            대상 고인 정보
-          </span>
-          {/* 고인 정보(성함, 관계, 성별)는 DB에서 연동되어 프리필되므로 입력 폼에서는 제외합니다. */}
+        <div style={{ border: '1px solid var(--b2b-border-light)', borderRadius: '8px', padding: '14px', marginBottom: '16px', backgroundColor: '#fff' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--b2b-text-primary)' }}>
+              대상 고인 정보
+            </span>
+            <button
+              onClick={() => setIsDeceasedModalOpen(true)}
+              style={{
+                background: 'none',
+                border: '1px solid var(--b2b-accent)',
+                borderRadius: '4px',
+                color: 'var(--b2b-accent)',
+                fontSize: '12px',
+                fontWeight: 600,
+                padding: '4px 8px',
+                cursor: 'pointer'
+              }}
+            >
+              수정하기
+            </button>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#555' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#888' }}>고인 성함</span>
+              <span style={{ fontWeight: 600, color: '#222' }}>{deceasedName || '-'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#888' }}>관계</span>
+              <span style={{ fontWeight: 600, color: '#222' }}>{relationship || '-'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#888' }}>성별</span>
+              <span style={{ fontWeight: 600, color: '#222' }}>{gender === 'male' ? '남성' : '여성'}</span>
+            </div>
+            {(religion === 'christian' || religion === 'catholic') && christianTitle && christianTitle !== '선택 안 함' && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#888' }}>직분</span>
+                <span style={{ fontWeight: 600, color: '#222' }}>{christianTitle}</span>
+              </div>
+            )}
+            {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#888' }}>본관</span>
+                  <span style={{ fontWeight: 600, color: '#222' }}>{bonGwan || '-'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#888' }}>성씨</span>
+                  <span style={{ fontWeight: 600, color: '#222' }}>{familyName || '-'}</span>
+                </div>
+              </>
+            )}
+          </div>
 
-          {/* 종교별 직분/세례명 필드 분기 */}
+          {/* 기독교/천주교일 경우 측면 기도 문구 선택 드롭다운은 설정 폼 아래에 계속 노출 */}
           {(religion === 'christian' || religion === 'catholic') && (
-            <>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>직분</label>
-                <select
-                  className={styles.formSelect}
-                  value={christianTitle}
-                  onChange={(e) => setChristianTitle(e.target.value)}
-                >
-                  {CHRISTIAN_TITLES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>측면 기도 문구</label>
-                <select
-                  className={styles.formSelect}
-                  value={christianPhrase}
-                  onChange={(e) => setChristianPhrase(e.target.value as typeof christianPhrase)}
-                >
-                  <option value="전체기도">기도문구 표시 ("영원한 빛을..." / "주님 그에게...")</option>
-                  <option value="없음">표시 안 함 (본체만 출력)</option>
-                </select>
-              </div>
-            </>
-          )}
-
-          {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div className={styles.formGroup} style={{ flex: 1 }}>
-                <label className={styles.formLabel}>본관 (예: 김해)</label>
-                <input
-                  className={styles.formInput}
-                  type="text"
-                  value={bonGwan}
-                  onChange={(e) => setBonGwan(e.target.value)}
-                />
-              </div>
-              <div className={styles.formGroup} style={{ flex: 1 }}>
-                <label className={styles.formLabel}>성씨 (예: 김)</label>
-                <input
-                  className={styles.formInput}
-                  type="text"
-                  value={familyName}
-                  onChange={(e) => setFamilyName(e.target.value)}
-                />
-              </div>
+            <div className={styles.formGroup} style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f0' }}>
+              <label className={styles.formLabel}>측면 기도 문구</label>
+              <select
+                className={styles.formSelect}
+                value={christianPhrase}
+                onChange={(e) => setChristianPhrase(e.target.value as typeof christianPhrase)}
+              >
+                <option value="전체기도">기도문구 표시 ("영원한 빛을..." / "주님 그에게...")</option>
+                <option value="없음">표시 안 함 (본체만 출력)</option>
+              </select>
             </div>
           )}
-
-
         </div>
+
+        {/* 고인 정보 수정 모달 팝업 */}
+        {isDeceasedModalOpen && (
+          <div style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              width: '100%',
+              maxWidth: '360px',
+              padding: '20px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+            }}>
+              <span style={{ fontSize: '16px', fontWeight: 700, color: '#111', display: 'block', marginBottom: '16px' }}>
+                대상 고인 정보 수정
+              </span>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>고인 성함</label>
+                  <input
+                    className={styles.formInput}
+                    type="text"
+                    value={deceasedName}
+                    onChange={(e) => setDeceasedName(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className={styles.formGroup} style={{ flex: 1 }}>
+                    <label className={styles.formLabel}>관계</label>
+                    <select
+                      className={styles.formSelect}
+                      value={relationship}
+                      onChange={(e) => setRelationship(e.target.value)}
+                    >
+                      <option value="아버지">아버지</option>
+                      <option value="어머니">어머니</option>
+                      <option value="할아버지">할아버지</option>
+                      <option value="할머니">할머니</option>
+                      <option value="남편">남편</option>
+                      <option value="아내">아내</option>
+                      <option value="형">형</option>
+                      <option value="동생">동생</option>
+                      <option value="아들">아들</option>
+                      <option value="딸">딸</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup} style={{ flex: 1 }}>
+                    <label className={styles.formLabel}>성별</label>
+                    <select
+                      className={styles.formSelect}
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+                    >
+                      <option value="male">남성</option>
+                      <option value="female">여성</option>
+                    </select>
+                  </div>
+                </div>
+
+                {(religion === 'christian' || religion === 'catholic') && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>직분</label>
+                    <select
+                      className={styles.formSelect}
+                      value={christianTitle}
+                      onChange={(e) => setChristianTitle(e.target.value)}
+                    >
+                      {CHRISTIAN_TITLES.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {gender === 'female' && (religion === 'general' || religion === 'buddhism') && (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className={styles.formGroup} style={{ flex: 1 }}>
+                      <label className={styles.formLabel}>본관 (예: 김해)</label>
+                      <input
+                        className={styles.formInput}
+                        type="text"
+                        value={bonGwan}
+                        onChange={(e) => setBonGwan(e.target.value)}
+                      />
+                    </div>
+                    <div className={styles.formGroup} style={{ flex: 1 }}>
+                      <label className={styles.formLabel}>성씨 (예: 김)</label>
+                      <input
+                        className={styles.formInput}
+                        type="text"
+                        value={familyName}
+                        onChange={(e) => setFamilyName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
+                <button
+                  onClick={() => setIsDeceasedModalOpen(false)}
+                  style={{
+                    flex: 1, height: '44px', border: '1px solid #ccc', borderRadius: '6px',
+                    backgroundColor: '#fff', fontSize: '14px', fontWeight: 600, color: '#666',
+                    cursor: 'pointer'
+                  }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => setIsDeceasedModalOpen(false)}
+                  style={{
+                    flex: 1, height: '44px', border: 'none', borderRadius: '6px',
+                    backgroundColor: 'var(--b2b-accent)', fontSize: '14px', fontWeight: 600, color: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 축문 설정 섹션 */}
         {activeTab === 'chukmun' && (
