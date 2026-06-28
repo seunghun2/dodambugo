@@ -52,6 +52,7 @@ const RELATION_GENDER: Record<string, 'male' | 'female'> = {
   '아내': 'female',
   '형': 'male',
   '아들': 'male',
+  '딸': 'female',
   '며느리': 'female',
 };
 
@@ -1262,7 +1263,14 @@ export default function RitualDetailPage() {
                     <select
                       className={styles.formSelect}
                       value={relationship}
-                      onChange={(e) => setRelationship(e.target.value)}
+                      onChange={(e) => {
+                        const newRel = e.target.value;
+                        setRelationship(newRel);
+                        const mapped = RELATION_GENDER[newRel];
+                        if (mapped) {
+                          setGender(mapped);
+                        }
+                      }}
                     >
                       <option value="아버지">아버지</option>
                       <option value="어머니">어머니</option>
@@ -1282,6 +1290,8 @@ export default function RitualDetailPage() {
                       className={styles.formSelect}
                       value={gender}
                       onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+                      disabled={!!RELATION_GENDER[relationship]}
+                      style={{ backgroundColor: RELATION_GENDER[relationship] ? '#f5f5f5' : '#fff' }}
                     >
                       <option value="male">남성</option>
                       <option value="female">여성</option>
