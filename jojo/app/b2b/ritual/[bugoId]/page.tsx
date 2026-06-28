@@ -1102,7 +1102,7 @@ export default function RitualDetailPage() {
                     onChange={(e) => setBorderSkin(e.target.value as typeof borderSkin)}
                   >
                     <option value="none">무늬 없음</option>
-                    <option value="scallop">물결/톱니 무늬</option>
+                    <option value="scallop">물결무늬</option>
                     <option value="double">이중선 무늬</option>
                     <option value="corner">모서리 무늬</option>
                   </select>
