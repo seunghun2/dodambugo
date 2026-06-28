@@ -1216,59 +1216,28 @@ export default function RitualDetailPage() {
               축문 설정
             </span>
             
-            {/* 아래에서 위로 올라오는 바텀시트 데이트피커 바인딩 */}
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>제사 양력 날짜</label>
-              <div style={{ position: 'relative' }} onClick={() => setIsCalendarOpen(true)}>
-                <input
-                  className={styles.formInput}
-                  type="text"
-                  readOnly
-                  value={formatDateDot(ritualDateStr)}
-                  style={{ cursor: 'pointer', paddingRight: '40px', backgroundColor: '#fff' }}
-                />
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div className={styles.formGroup} style={{ flex: 1 }}>
-                <label className={styles.formLabel}>상주 이름</label>
-                <input
-                  className={styles.formInput}
-                  type="text"
-                  value={mournerName}
-                  onChange={(e) => setMournerName(e.target.value)}
-                />
-              </div>
-              <div className={styles.formGroup} style={{ flex: 1 }}>
-                <label className={styles.formLabel}>축문 종류</label>
-                <select
-                  className={styles.formSelect}
-                  value={occasionType}
-                  onChange={(e) => setOccasionType(e.target.value as OccasionType)}
-                >
-                  <optgroup label="대표 의례 (명절/기일)">
-                    <option value="기제사">기제사 (부모님 기일)</option>
-                    <option value="설날">설날 차례</option>
-                    <option value="추석">추석 차례</option>
-                    <option value="장례(발인제)">장례 (발인제)</option>
-                  </optgroup>
-                  <optgroup label="세부 장례 제식 (3일장 과정)">
-                    <option value="초혼(招魂)">초혼 (招魂)</option>
-                    <option value="평토제(平土祭)">평토제 (平土祭)</option>
-                    <option value="성분제(成墳祭)">성분제 (成墳祭)</option>
-                    <option value="산신제(山神祭)">산신제 (山神祭 - 토지신)</option>
-                    <option value="삼우제(三虞祭)">삼우제 (三虞祭)</option>
-                    <option value="위령제(慰靈祭)">위령제 (慰靈祭)</option>
-                  </optgroup>
-                </select>
-              </div>
+              <label className={styles.formLabel}>축문 종류</label>
+              <select
+                className={styles.formSelect}
+                value={occasionType}
+                onChange={(e) => setOccasionType(e.target.value as OccasionType)}
+              >
+                <optgroup label="대표 의례 (명절/기일)">
+                  <option value="기제사">기제사 (부모님 기일)</option>
+                  <option value="설날">설날 차례</option>
+                  <option value="추석">추석 차례</option>
+                  <option value="장례(발인제)">장례 (발인제)</option>
+                </optgroup>
+                <optgroup label="세부 장례 제식 (3일장 과정)">
+                  <option value="초혼(招魂)">초혼 (招魂)</option>
+                  <option value="평토제(平土祭)">평토제 (平土祭)</option>
+                  <option value="성분제(成墳祭)">성분제 (成墳祭)</option>
+                  <option value="산신제(山神祭)">산신제 (山神祭 - 토지신)</option>
+                  <option value="삼우제(三虞祭)">삼우제 (三虞祭)</option>
+                  <option value="위령제(慰靈祭)">위령제 (慰靈祭)</option>
+                </optgroup>
+              </select>
             </div>
 
             {/* 한글 / 한자 라디오 버튼형 문자 선택 UI (종교가 기독교/천주교가 아닐 때만 렌더링) */}
