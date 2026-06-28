@@ -1079,7 +1079,7 @@ export default function RitualDetailPage() {
             value={religion}
             onChange={(e) => handleReligionChange(e.target.value as typeof religion)}
           >
-            <option value="general">일반 (유교 전통)</option>
+            <option value="general">일반</option>
             <option value="buddhism">불교</option>
             <option value="christian">기독교</option>
             <option value="catholic">천주교</option>
