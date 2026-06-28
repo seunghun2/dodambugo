@@ -883,7 +883,7 @@ export default function RitualDetailPage() {
           align-items: center;
           justify-content: center;
           gap: 2px;
-          flex: 1;
+          flex: none;
         }
         .char {
           font-size: ${jibangSize === 'honbaek' ? '24' : jibangSize === 'christian_catholic' ? '36' : isWipae ? '48' : '44'}px;
@@ -920,20 +920,20 @@ export default function RitualDetailPage() {
           <div class="cutlabel">절취선을 따라 잘라 주세요 (${isWipae ? '위패' : '지방'} 규격: ${widthCm} x ${heightCm}cm)</div>
           <div class="paper">
             ${borderSvgHtml}
-            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 0px; position: relative; z-index: 1;">
+            <div style="display: flex; width: 100%; align-items: stretch; justify-content: center; gap: 16px; position: relative; z-index: 1;">
               ${columns.map((col: any) => {
                 if (col.type === 'phrase') {
                   const isLeft = christianPhrase === '빛기도';
                   const borderStyle = isLeft ? 'border-right: 1px solid #ccc; padding-right: 8px;' : 'border-left: 1px solid #ccc; padding-left: 8px;';
                   return `
-                    <div class="column" style="${borderStyle} justify-content: center; flex: 1;">
+                    <div class="column" style="${borderStyle} justify-content: center; flex: none;">
                       ${col.chars.map((c: string) => `<div class="phrase-char">${c}</div>`).join('')}
                     </div>
                   `;
                 }
                 if (col.type === 'name') {
                   return `
-                    <div class="column" style="justify-content: center; gap: 20px; flex: 1;">
+                    <div class="column" style="justify-content: center; gap: 20px; flex: none;">
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
                         ${col.chars.map((c: string) => `<div class="name-char">${c}</div>`).join('')}
                       </div>
