@@ -339,7 +339,9 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
         dateLineHan,
         mournerLineHan,
         deceasedLineHan,
-        '靈輿旣整 往卽幽宅 載事將事 永遷終天 嗚呼哀哉 伏惟 尙饗',
+        '靈輿旣整 往卽幽宅',
+        '載事將事 永遷終天',
+        '嗚呼哀哉 伏惟 尙饗',
       ];
       koreanLines = [
         `서기 ${year}년 ${month}월 ${day}일 발인제를 맞이하여,`,
@@ -368,7 +370,9 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
         dateLineHan,
         mournerLineHan,
         deceasedLineHan,
-        '形歸幽宅 神返室堂 神主旣成 伏惟 尊靈 舍舊從新 是憑 尙饗',
+        '形歸幽宅 神返室堂',
+        '神主旣成 伏惟 尊靈',
+        '舍舊從新 是憑 尙饗',
       ];
       koreanLines = [
         `서기 ${year}년 ${month}월 ${day}일 평토제를 맞이하여,`,
@@ -384,7 +388,8 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
         dateLineHan,
         mournerLineHan,
         deceasedLineHan,
-        '墳墓旣成 體魄夙安 敢昭告于 顯考 學生 府君 嗚呼哀哉 伏惟 尙饗',
+        '墳墓旣成 體魄夙安',
+        '嗚呼哀哉 伏惟 尙饗',
       ];
       koreanLines = [
         `서기 ${year}년 ${month}월 ${day}일 성분제를 맞이하여,`,
@@ -416,7 +421,9 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
         dateLineHan,
         mournerLineHan,
         deceasedLineHan,
-        '歲序遷易 三虞薦事 追遠感時 昊天罔極 謹以 尙饗',
+        '歲序遷易 三虞薦事',
+        '追遠感時 昊天罔極',
+        '謹以 尙饗',
       ];
       koreanLines = [
         `서기 ${year}년 ${month}월 ${day}일 삼우제를 맞이하여,`,

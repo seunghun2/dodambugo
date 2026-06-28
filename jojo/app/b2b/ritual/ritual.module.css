@@ -274,6 +274,10 @@
 /* 축문 미리보기 */
 .chukmunPreview {
   padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .chukmunPaper {
