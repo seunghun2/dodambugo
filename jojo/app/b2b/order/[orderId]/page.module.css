@@ -1,0 +1,256 @@
+.orderPage {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--gray-50);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 헤더: 흰색 배경 */
+.orderHeader {
+    padding: 20px;
+    background: var(--bg-white, #FFFFFF);
+    text-align: center;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orderHeader h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+/* 바디 */
+.orderBody {
+    flex: 1;
+    padding: 20px 0;
+}
+
+.completeBody {
+    padding-bottom: 40px;
+}
+
+/* 배너 */
+.completeBanner {
+    text-align: center;
+    padding: 32px 20px;
+    background: var(--bg-white, #FFFFFF);
+    border-bottom: 8px solid var(--gray-100);
+}
+
+/* 성공 체크 원형 아이콘 (부의금용 초록 그라데이션) */
+.successIconCircle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--success, #27AE60), #2ecc71);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 16px rgba(39, 174, 96, 0.25);
+}
+
+.completeBanner h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.completeBanner p {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-top: 8px;
+}
+
+/* 상세 내역 섹션 */
+.orderSection {
+    background: var(--bg-white, #FFFFFF);
+    margin: 12px 16px;
+    padding: 20px;
+    border-radius: var(--radius-lg, 14px);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detailRow:last-child {
+    border-bottom: none;
+}
+
+.detailRow .label {
+    font-size: 14px;
+    color: var(--gray-500);
+    flex-shrink: 0;
+    width: 100px;
+}
+
+.detailRow .value {
+    font-size: 14px;
+    color: var(--gray-900);
+    text-align: right;
+    flex: 1;
+}
+
+.detailRow .subText {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 4px;
+}
+
+.detailRow.total {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-900);
+}
+
+.detailRow.total .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--success, #27AE60); /* 초록색 부고온 대표 컬러 적용 */
+}
+
+/* 영수증 버튼 */
+.receiptBtn {
+    font-size: 12px;
+    color: var(--accent, #364F6B);
+    text-decoration: underline;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+/* 안내사항 박스 */
+.infoBox {
+    margin: 20px 16px 0;
+    padding: 16px;
+    background: var(--gray-100);
+    border-radius: var(--radius-md, 10px);
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.8;
+}
+
+.infoBoxTitle {
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+/* 아코디언 */
+.infoAccordion {
+    margin: 12px 16px;
+}
+
+.accordionItem {
+    background: var(--bg-white, #FFFFFF);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md, 10px);
+    margin-bottom: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.accordionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.accordionContent {
+    padding: 16px;
+    border-top: 1px solid var(--gray-100);
+    background: var(--gray-50);
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.8;
+}
+
+.accordionContent p {
+    margin: 4px 0;
+}
+
+/* 푸터 및 버튼 */
+.orderFooter {
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    margin-top: auto;
+}
+
+/* 부고 페이지 복귀용 초록색 버튼 */
+.btnGoBack {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    background: var(--success, #27AE60);
+    color: #FFFFFF;
+    border-radius: var(--radius-lg, 12px);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color var(--transition-fast, 150ms);
+    border: none;
+    cursor: pointer;
+}
+
+.btnGoBack:hover {
+    background: #219653;
+}
+
+/* 대시보드/홈 복귀용 다크그레이 버튼 */
+.btnDashboard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    background: var(--gray-800, #333D4B);
+    color: #FFFFFF;
+    border-radius: var(--radius-lg, 12px);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color var(--transition-fast, 150ms);
+    border: none;
+    cursor: pointer;
+}
+
+.btnDashboard:hover {
+    background: var(--gray-900, #1A1A1A);
+}
+
+/* 로딩 & 에러 */
+.orderLoading {
+    text-align: center;
+    padding: 100px 20px;
+    font-size: 15px;
+    color: var(--gray-500);
+}

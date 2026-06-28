@@ -1,0 +1,91 @@
+---
+name: b2b-app-task
+description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시, B2B 다중 분할 정산 및 문자 발송 브랜드 분리 태스크 매핑 허브
+---
+
+# 📋 부고온 앱 출시 & B2B 정산/알림 브랜드 분리 태스크 매핑 허브
+
+> **이 스킬셋은 대화방 리셋(Truncation) 시 태스크가 유실되는 것을 방지하기 위해 로컬 저장소에 영구 보존하는 스킬셋입니다.**
+
+---
+
+## 1. 📱 모바일 앱 빌드 및 Native 세팅 (스플래시/푸시)
+
+### 1-1. 스플래시 화면(Splash Screen) 연동
+- **설명**: 앱 기동 시 첫 인상을 결정할 부고온 로고 디자인 기반 스플래시 연동 및 테마 설정
+- **관련 소스코드**: 
+  - `jojo/android/app/src/main/res/` (안드로이드 리소스 에셋)
+  - `jojo/ios/App/App/Assets.xcassets/` (iOS 이미지 에셋)
+- **관련 MD**: 
+  - [PROJECT_STRATEGY.md](file:///Users/el/Desktop/dodam/jojo/PROJECT_STRATEGY.md) (모바일 앱 배포 전략)
+- **인프라 셋업**: Capacitor Asset Generator 툴을 통한 플랫폼별 이미지 자동 생성
+
+### 1-2. 초기 앱 구동 로그 시스템 구축
+- **설명**: 모바일 환경에서의 비정상 종료 및 사용자 행동 추적용 앱 로그 수집기 구현
+- **관련 소스코드**: 
+  - `jojo/app/api/b2b/log/route.ts` (신규 로그 수집 API)
+  - `jojo/lib/logger.ts` (로그 전송 클라이언트 유틸)
+- **인프라 셋업**: Vercel/Supabase 실시간 로그 테이블 연동
+
+### 1-3. 실시간 푸시 알림(Push Notification) 연동
+- **설명**: 
+  - 입관 직전/24시간 전 리마인더 푸시 및 알림톡 자동 발송
+  - 실시간 입금 완료 노티 (조문객 결제 완료 시 즉시 알림)
+  - 실시간 출금 완료 노티 (정산금 이체 승인 시 즉시 알림)
+- **관련 소스코드**:
+  - `jojo/app/api/push/route.ts` (푸시 토큰 및 발송 제어 API)
+  - `jojo/lib/solapi.ts` (알림톡 발송 모듈)
+- **관련 MD**:
+  - [critical-check.md](file:///Users/el/Desktop/dodam/jojo/.agent/workflows/critical-check.md) (알림톡/슬랙 수정 체크리스트)
+- **인프라 셋업**: Firebase Cloud Messaging (FCM) API 키 및 환경변수(`FCM_SERVER_KEY`) 등록
+
+---
+
+## 2. 💸 B2B 수익 구조 및 재무 분할 정산 시스템 설계
+
+### 2-1. 다중 분할 정산(지도사/상조 본사/플랫폼) 구조 설계
+- **설명**: 조문객이 구매한 화환/답례품 대금에서 수수료 차감 후 재무 배분 로직 구현
+- **관련 소스코드**:
+  - `jojo/lib/b2b.ts` (B2B 파트너 정산 연동 로직)
+  - `jojo/app/api/b2b/settlement/route.ts` (정산 계산 및 이체 트리거 API)
+- **관련 MD**:
+  - [부의금_서비스_도입_업무체크리스트.md](file:///Users/el/Desktop/dodam/부의금_서비스_도입_업무체크리스트.md) (정산 방식 및 MID 자산 목록)
+  - [부의금_서비스_내재화_가이드.md](file:///Users/el/Desktop/dodam/부의금_서비스_내재화_가이드.md) (실시간 송금 API 가이드)
+  - [DAEDAESONSON_STRATEGY.md](file:///Users/el/Desktop/dodam/DAEDAESONSON_STRATEGY.md) (상조사 B2B 마진 정산 구조)
+- **인프라 셋업**: 이노페이 송금 API 연동 및 환경변수(`INNOPAY_LICENSE_KEY`) 등록
+
+---
+
+## 3. 🔑 부고온(B2B) 독자 브랜드 행정 및 사업자 기획
+
+### 3-1. D-U-N-S 글로벌 기업 식별 번호 및 스토어 심사 대응
+- **설명**: 홈택스 영문 사업자등록증명 보완 제출 및 D&B 재심사 승인 처리 후 구글 플레이 조직 계정 생성
+- **관련 MD**:
+  - [DUNS_INFO.md](file:///Users/el/Desktop/dodam/jojo/docs/DUNS_INFO.md) (반려 이력 및 케이스 번호 `10564868` 보완 조치 사항)
+- **인프라 셋업**: 구글 플레이 콘솔 및 App Store Connect 조직 인증 심사 정보 기입
+
+---
+
+## ✉️ 4. B2C(마음부고) vs B2B(부고온) 문자/알림톡 발송 브랜드 완전 분리
+
+### 4-1. 문자/알림톡 명의 전수 조사 및 브랜드 분기 조건 구현
+- **설명**: 
+  - B2C 웹을 통한 부고장은 `"마음부고"`로 발송되도록 강제화
+  - B2B 파트너 앱에서 생성된 부고 알림/문자는 `"부고온"` 명의 및 비즈니스 템플릿으로 발송
+- **관련 소스코드**:
+  - `jojo/lib/solapi.ts` (발송 명의 분기 로직 탑재)
+  - `jojo/app/api/bugo/notify/route.ts` (발송 주체 구분을 위한 `brand` 또는 `source` 구분값 추가)
+- **관련 MD**:
+  - [critical-check.md](file:///Users/el/Desktop/dodam/jojo/.agent/workflows/critical-check.md) (알림톡 템플릿 ID 수칙)
+
+---
+
+## 🚫 5. B2B vs B2C 상호 영향도 격리 검증
+
+### 5-1. 소스코드 침범 및 사이드 이펙트 방지
+- **설명**: 커밋 시 B2B(`app/b2b`)와 B2C(`app/view`)는 서로의 소스코드를 절대로 건드리지 않아야 함
+- **관련 소스코드**:
+  - `jojo/lib/funeral-display.ts` (공통 분기 함수)
+- **관련 MD**:
+  - [AGENTS.md](file:///Users/el/Desktop/dodam/jojo/.agents/AGENTS.md) (B2C/B2B 분리 규칙)
+  - [funeral-display/SKILL.md](file:///Users/el/Desktop/dodam/jojo/.agents/skills/funeral-display/SKILL.md) (조건부 표시 룰)

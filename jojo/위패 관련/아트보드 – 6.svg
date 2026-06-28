@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" viewBox="0 0 50 50">
+  <defs>
+    <clipPath id="clip-아트보드_6">
+      <rect width="50" height="50"/>
+    </clipPath>
+  </defs>
+  <g id="아트보드_6" data-name="아트보드 – 6" clip-path="url(#clip-아트보드_6)">
+    <rect width="50" height="50" fill="#fff"/>
+    <path id="합치기_12" data-name="합치기 12" d="M211.7-46.771V-62.132h-7.681v-5.12H211.7v-7.681h5.12v7.681H224.5v5.12h-7.681v15.361Z" transform="translate(-189.256 85.852)" fill="#de0615"/>
+  </g>
+</svg>

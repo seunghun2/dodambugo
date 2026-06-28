@@ -1,0 +1,420 @@
+/* 위패/축문/지방 — 부고온 스타일 */
+
+.page {
+  min-height: 100dvh;
+  background: var(--bg-white);
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 72px;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--b2b-border-light);
+  position: sticky;
+  top: 0;
+  background: var(--bg-white);
+  z-index: 10;
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--b2b-text-primary);
+  cursor: pointer;
+  margin-left: -8px;
+  margin-right: 4px;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* 부고장 리스트 */
+.section {
+  padding: var(--spacing-md) 20px 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--b2b-text-tertiary);
+  gap: 12px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.4;
+}
+
+.emptyText {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.bugoList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bugoCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border: 1px solid var(--b2b-border-light);
+}
+
+.bugoCard:active {
+  background: var(--b2b-border-light);
+}
+
+.bugoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bugoDeceased {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+}
+
+.bugoMeta {
+  font-size: 13px;
+  color: var(--b2b-text-secondary);
+}
+
+.bugoDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.bugoDetailItem {
+  font-size: 12px;
+  color: var(--b2b-text-tertiary);
+  font-weight: 500;
+}
+
+.bugoMourner {
+  font-size: 12px;
+  color: var(--b2b-accent);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.bugoArrow {
+  color: var(--b2b-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 탭 */
+.tabBar {
+  display: flex;
+  border-bottom: 2px solid var(--b2b-border-light);
+  margin: 0 20px;
+  gap: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 14px 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--b2b-text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+  font-family: inherit;
+}
+
+.tabActive {
+  color: var(--b2b-text-primary);
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--b2b-accent);
+}
+
+/* 미리보기 컨테이너 */
+.previewSection {
+  padding: 20px;
+}
+
+.previewCard {
+  background: var(--bg-gray);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  border: 1px solid var(--b2b-border-light);
+}
+
+/* 고인 정보 요약 */
+.infoSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--b2b-border-light);
+}
+
+.infoRow {
+  display: flex;
+  font-size: 14px;
+}
+
+.infoLabel {
+  width: 80px;
+  color: var(--b2b-text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  color: var(--b2b-text-primary);
+  font-weight: 600;
+  flex: 1;
+}
+
+/* 지방/위패 미리보기 — 세로 양식 */
+.jibangPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.jibangPaper {
+  width: 120px;
+  min-height: 360px;
+  background: #fff;
+  border: 1px solid #1a1311;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 8px;
+  gap: 2px;
+  box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 8px #1a1311, 0 4px 16px rgba(0,0,0,0.10);
+  position: relative;
+}
+
+.jibangPaperDouble {
+  width: 240px;
+  min-height: 360px;
+  background: #FFFEF5;
+  border: 1px solid #D4C9A8;
+  border-radius: 20px 20px 4px 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-evenly;
+  padding: 20px 12px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.jibangColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.jibangColumn:first-child {
+  border-right: 1px dashed #E2DCC8;
+  padding-right: 8px;
+}
+
+.jibangChar {
+  font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1311;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  writing-mode: horizontal-tb;
+}
+
+/* 축문 미리보기 */
+.chukmunPreview {
+  padding: 20px 0;
+}
+
+.chukmunPaper {
+  background: #FFFEF5;
+  border: 1px solid #D4C9A8;
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chukmunLine {
+  font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2C2C2C;
+  line-height: 2;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+/* 커스텀 수정 폼 */
+.formSection {
+  padding: 16px 20px 0;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.formSelect {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--b2b-text-primary);
+  background: var(--bg-white);
+  font-family: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.formInput {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--b2b-text-primary);
+  background: var(--bg-white);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: var(--b2b-accent);
+}
+
+/* 하단 버튼 */
+.bottomActions {
+  padding: 16px 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.btnSend {
+  flex: 1;
+  height: 48px;
+  background: var(--b2b-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.btnSend:active {
+  opacity: 0.85;
+}
+
+.btnPrint {
+  flex: 1;
+  height: 48px;
+  background: var(--bg-gray);
+  color: var(--b2b-text-primary);
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btnPrint:active {
+  background: var(--b2b-border-light);
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid rgba(58, 143, 71, 0.15);
+  border-left-color: #3A8F47;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--b2b-text-secondary);
+}

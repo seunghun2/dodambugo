@@ -185,27 +185,20 @@ function verify(scenario: typeof SCENARIOS[0], context: 'b2c' | 'b2b') {
   return { allPassed, results };
 }
 
-// ── 메인 ──────────────────────────────────────────────────────
+// ── Jest 테스트 등록 ──────────────────────────────────────────
 
-let totalPassed = 0;
-let totalFailed = 0;
-
-for (const scenario of SCENARIOS) {
-  console.log(`\n📋 ${scenario.name}`);
-  
-  for (const ctx of ['b2c', 'b2b'] as const) {
-    const { allPassed, results } = verify(scenario, ctx);
-    console.log(`  [${ctx.toUpperCase()}] ${allPassed ? '✅ PASS' : '❌ FAIL'}`);
-    results.forEach(r => console.log(r));
-    if (allPassed) totalPassed++; else totalFailed++;
-  }
-}
-
-console.log(`\n${'='.repeat(50)}`);
-console.log(`총 ${totalPassed + totalFailed}건 검증: ✅ ${totalPassed} PASS / ❌ ${totalFailed} FAIL`);
-if (totalFailed === 0) {
-  console.log('🎉 모든 시나리오 통과!');
-} else {
-  console.log('⚠️ 실패한 시나리오가 있습니다!');
-  process.exit(1);
-}
+describe('부고장 표시 로직 E2E 시뮬레이션', () => {
+  SCENARIOS.forEach(scenario => {
+    describe(scenario.name, () => {
+      (['b2c', 'b2b'] as const).forEach(ctx => {
+        test(`${ctx.toUpperCase()} 검증`, () => {
+          const { allPassed, results } = verify(scenario, ctx);
+          if (!allPassed) {
+            throw new Error(`실패 목록:\n${results.join('\n')}`);
+          }
+          expect(allPassed).toBe(true);
+        });
+      });
+    });
+  });
+});

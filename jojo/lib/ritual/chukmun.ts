@@ -1,0 +1,429 @@
+/**
+ * 축문(祝文) 생성 로직
+ *
+ * 제사 시 읽는 축문을 자동으로 생성합니다.
+ * 전통 한문 축문과 현대식 쉬운 한글 축문을 모두 지원합니다. (단설 전용)
+ * 장례 3일 동안 행해지는 세부 제식(발인, 평토, 성분, 산신 등)을 완벽히 포함합니다.
+ * 종교(일반/불교 vs 기독교/천주교) 선택에 따라 축문 및 추도문이 동적으로 변화합니다.
+ */
+
+import { getYearGanji, getMonthGanji, getDayGanji } from './ganji';
+
+// ─── 타입 ────────────────────────────────────────────────────────
+
+/** 축문 생성 입력 */
+export interface ChukmunInput {
+  /** 제사 날짜 (양력) */
+  date: Date;
+  /** 상주(제주) 이름 */
+  mournerName: string;
+  /** 제사 유형 */
+  occasionType: 
+    | '기제사' 
+    | '설날' 
+    | '추석' 
+    | '장례(발인제)'
+    | '초혼(招魂)'
+    | '평토제(平土祭)'
+    | '성분제(成墳祭)'
+    | '산신제(山神祭)'
+    | '삼우제(三虞祭)'
+    | '위령제(慰靈祭)';
+
+  /** 고인 이름 */
+  deceasedName: string;
+  /** 고인과의 관계 (아버지, 어머니 등) */
+  relationship: string;
+  /** 고인 성별 */
+  gender: 'male' | 'female';
+  /** 본관 (여성 고인용) */
+  bonGwan?: string;
+  /** 성씨 (여성 고인용) */
+  familyName?: string;
+
+  /** 종교 구분 */
+  religion?: 'general' | 'buddhism' | 'christian' | 'catholic';
+}
+
+/** 축문 생성 결과 */
+export interface ChukmunResult {
+  /** 한문 축문 전체 텍스트 */
+  fullText: string;
+  /** 한문 축문 각 줄 텍스트 배열 */
+  lines: string[];
+  /** 한글 축문 전체 텍스트 */
+  koreanFullText: string;
+  /** 한글 축문 각 줄 텍스트 배열 */
+  koreanLines: string[];
+  /** 메타 정보 */
+  meta: {
+    occasionType: string;
+    date: {
+      year: number;
+      month: number;
+      day: number;
+      yearGanji: string;
+      monthGanji: string;
+      dayGanji: string;
+    };
+  };
+}
+
+// ─── 상수 ────────────────────────────────────────────────────────
+
+/** 고인 관계별 호칭 (한문) */
+const DECEASED_TITLE_HAN: Record<string, string> = {
+  '아버지': '顯考',
+  '어머니': '顯妣',
+  '할아버지': '顯祖考',
+  '할머니': '顯祖妣',
+  '증조부': '顯曾祖考',
+  '증조모': '顯曾祖妣',
+  '남편': '亡夫',
+  '아내': '亡室',
+  '형': '顯兄',
+  '아들': '亡子',
+  '며느리': '亡婦',
+};
+
+/** 고인 관계별 호칭 (한글) */
+const DECEASED_TITLE_KOR: Record<string, string> = {
+  '아버지': '아버님',
+  '어머니': '어머님',
+  '할아버지': '할아버님',
+  '할머니': '할머님',
+  '증조부': '증조할아버님',
+  '증조모': '증조할머님',
+  '남편': '남편',
+  '아내': '아내',
+  '형': '형님',
+  '아들': '자식',
+  '며느리': '며느리',
+};
+
+/** 상주 호칭 매핑 (한문) */
+const MOURNER_TITLE_HAN: Record<string, string> = {
+  '아버지': '孝子',
+  '어머니': '孝子',
+  '할아버지': '孝孫',
+  '할머니': '孝孫',
+  '증조부': '孝曾孫',
+  '증조모': '孝曾孫',
+  '남편': '未亡人',
+  '아내': '夫',
+  '형': '弟',
+  '아들': '父',
+  '며느리': '舅',
+};
+
+/** 상주 호칭 매핑 (한글) */
+const MOURNER_TITLE_KOR: Record<string, string> = {
+  '아버지': '아들',
+  '어머니': '아들',
+  '할아버지': '손자',
+  '할머니': '손자',
+  '증조부': '증손자',
+  '증조모': '증손자',
+  '남편': '아내',
+  '아내': '남편',
+  '형': '동생',
+  '아들': '아버지',
+  '며느리': '시부모',
+};
+
+/** 월 이름 (한문) */
+const MONTH_CHINESE: readonly string[] = [
+  '', '正月', '二月', '三月', '四月', '五月', '六月',
+  '七月', '八月', '九月', '十月', '十一月', '十二月',
+];
+
+// ─── 유틸리티 ────────────────────────────────────────────────────
+
+/** 일(日)을 한문 숫자 표기로 변환 */
+export function dayToChinese(day: number): string {
+  const units = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+  if (day <= 10) {
+    if (day === 10) return '初十日';
+    return `初${units[day]}日`;
+  }
+  if (day <= 19) {
+    return `十${units[day - 10]}日`;
+  }
+  if (day === 20) return '二十日';
+  if (day <= 29) {
+    return `二十${units[day - 20]}日`;
+  }
+  if (day === 30) return '三十日';
+  return '三十一日';
+}
+
+/** 한문 고인 라인 빌더 */
+function buildDeceasedLine(item: { deceasedName: string; relationship: string; gender: 'male' | 'female'; bonGwan?: string; familyName?: string }): string {
+  const deceasedTitle = DECEASED_TITLE_HAN[item.relationship] || '顯考';
+  const pos = item.gender === 'male' ? '學生' : '孺人';
+
+  if (item.gender === 'male') {
+    return `${deceasedTitle} ${pos} ${item.deceasedName} 府君`;
+  } else {
+    if (item.bonGwan && item.familyName) {
+      return `${deceasedTitle} ${pos} ${item.bonGwan}${item.familyName}氏`;
+    } else {
+      return `${deceasedTitle} ${pos} ${item.deceasedName}`;
+    }
+  }
+}
+
+// ─── 핵심 함수 ───────────────────────────────────────────────────
+
+/**
+ * 축문(祝文)을 생성합니다. (전통 한문 및 쉬운 현대 한글 동시 반환)
+ */
+export function generateChukmun(input: ChukmunInput): ChukmunResult {
+  const { date, mournerName, occasionType, deceasedName, relationship, gender, bonGwan, familyName, religion = 'general' } = input;
+
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  // 1. 천간 지지 간지 자동 계산
+  const systemYearGanji = getYearGanji(year).hanja;
+  const systemMonthGanji = getMonthGanji(year, month).hanja;
+  const systemDayGanji = getDayGanji(year, month, day).hanja;
+
+  const monthNameHan = MONTH_CHINESE[month] || `${month}月`;
+  const dayNameHan = dayToChinese(day);
+
+  // 2. 한문 상주 호칭 및 고인 호칭
+  const mournerTitleHan = MOURNER_TITLE_HAN[relationship] || '孝子';
+  const deceasedLineHan = buildDeceasedLine({ deceasedName, relationship, gender, bonGwan, familyName });
+
+  // 3. 한문 축문 날짜/제주 구성
+  const dateLineHan = `維 歲次 ${systemYearGanji} ${monthNameHan} ${systemMonthGanji}朔 ${dayNameHan} ${systemDayGanji}`;
+  const mournerLineHan = `${mournerTitleHan} ${mournerName} 敢昭告于`;
+
+  // ── 한글 호칭 구성 ──
+  const relationKor = DECEASED_TITLE_KOR[relationship] || '고인';
+  const mournerTitleKor = MOURNER_TITLE_KOR[relationship] || '가족';
+  const deceasedKor = `${relationKor} 故 ${deceasedName}`;
+
+  // ── 기독교/천주교 전용 추도예배 축문 처리 ──
+  if (religion === 'christian' || religion === 'catholic') {
+    const chTitle = religion === 'christian' ? '기독교 추도예배' : '천주교 추도식';
+    const lines = [
+      `[ ${chTitle} 기도문 ]`,
+      `일시: 서기 ${year}년 ${month}월 ${day}일`,
+      `예배 인도자: ${mournerName}`,
+      `대상 고인: 故 ${deceasedName}`,
+      '주님, 고인의 영혼을 주님의 따뜻한 품에 안아주시고',
+      '하늘나라에서 눈물과 고통 없는 영원한 복락과 안식을 누리게 하옵소서.',
+      '이 땅에 남은 유가족들에게도 하늘의 위로와 평강을 내리어 주옵소서.',
+    ];
+    return {
+      fullText: lines.join('\n'),
+      lines,
+      koreanFullText: lines.join('\n'),
+      koreanLines: lines,
+      meta: {
+        occasionType,
+        date: { year, month, day, yearGanji: systemYearGanji, monthGanji: systemMonthGanji, dayGanji: systemDayGanji }
+      }
+    };
+  }
+
+  // ── 일반 & 불교 버전 각 유형별 라인 구성 ──
+  let lines: string[] = [];
+  let koreanLines: string[] = [];
+
+  switch (occasionType) {
+    case '기제사':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '歲序遷易 追遠感時 昊天罔極',
+        '謹以 清酌庶羞 恭修歲事 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '어느덧 해가 바뀌어 고인의 기일이 다시 돌아오니,',
+        '하늘과 같이 가이없는 은혜에 슬프고 애통한 마음을 금할 길이 없습니다.',
+        '이에 맑은 술과 정성껏 준비한 제수를 공손히 올리오니 흠향하시옵소서.',
+      ];
+      break;
+
+    case '설날':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '歲序遷易 感時追慕 昊天罔極',
+        '謹以 清酌庶羞 恭修歲薦 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 설날 차례를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '계절이 순환하여 새해 첫날을 맞이하니 고인의 그리움이 더욱 깊어갑니다.',
+        '하늘처럼 넓으신 은덕을 기리며 정성껏 차례 음식을 올리오니,',
+        '기쁘게 받아주시고 저희 가족을 돌보아 주옵소서.',
+      ];
+      break;
+
+    case '추석':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '秋露旣降 楓葉又紅 瞻掃封塋 不勝感愴',
+        '謹以 清酌庶羞 恭修時薦 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 한가위를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '가을 이슬 내리고 단풍 붉게 물든 한가위를 맞이하여 추모의 정을 올립니다.',
+        '은혜를 잊지 못해 햅쌀과 햇과일로 정성껏 수확의 제례를 모시오니,',
+        '부디 흔쾌히 흠향하시고 보살펴 주옵소서.',
+      ];
+      break;
+
+    case '장례(발인제)':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '靈輿旣整 往卽幽宅 載事將事 永遷終天 嗚呼哀哉 伏惟 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 발인제를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 머리 숙여 고하나이다.`,
+        '상여가 이미 갖추어져 고인의 안식처로 머나먼 여정을 떠나고자 합니다.',
+        '영원한 안식처로 고인을 모시게 됨을 슬퍼하며 맑은 술과 제수를 바치오니,',
+        '부디 흔쾌히 받아주시고 평안히 영면하시옵소서.',
+      ];
+      break;
+
+    case '초혼(招魂)':
+      lines = [
+        '嗚呼哀哉 尊靈返來',
+        '伏惟 尙饗',
+      ];
+      koreanLines = [
+        '슬프고 애달프도다.',
+        `고인 故 ${deceasedName}의 영혼이시여,`,
+        '부디 방황하지 마시고 이리로 돌아오시옵소서.',
+        '저희가 올리는 간절한 마음에 응답하여 머물러 주옵소서.',
+      ];
+      break;
+
+    case '평토제(平土祭)':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '形歸幽宅 神返室堂 神主旣成 伏惟 尊靈 舍舊從新 是憑 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 평토제를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '육신은 광중(무덤)에 묻히고 영혼은 집(실당)으로 돌아오시게 되었습니다.',
+        '이제 의례를 거쳐 고인의 신위가 완성되었사오니,',
+        '옛 집착을 버리시고 새 신위에 편안히 의지하여 안식하옵소서.',
+      ];
+      break;
+
+    case '성분제(成墳祭)':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '墳墓旣成 體魄夙安 敢昭告于 顯考 學生 府君 嗚呼哀哉 伏惟 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 성분제를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '이제 무덤의 봉분을 완성하여 육신이 비로소 영원한 안식에 드시게 되었습니다.',
+        '애통한 마음을 금치 못하여 맑은 술과 음식을 올리오니,',
+        '부디 편안히 누리시옵소서.',
+      ];
+      break;
+
+    case '산신제(山神祭)':
+      lines = [
+        `土地之神 ${mournerName} 敢昭告于`,
+        `玆爲 顯考 學生 府君 營建幽宅`,
+        '伏惟 神德 守護 庇佑 俾無後艱',
+        '謹以 清酌庶羞 祗薦于神 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 토지신(산신령)께 고하나이다.`,
+        `${mournerTitleKor} ${mournerName}은(는) 아버님 故 ${deceasedName}의 유택(묫자리)을 이곳에 새로 짓고자 합니다.`,
+        '바라옵건대 신령님의 자비로운 덕으로 이곳을 보호하시고 보살펴 주시어,',
+        '훗날 어떠한 재앙도 없이 가족들이 평안하도록 돌보아 주옵소서.',
+        '이에 맑은 술과 고기와 과일을 갖추어 올리오니 흠향하시옵소서.',
+      ];
+      break;
+
+    case '삼우제(三虞祭)':
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '歲序遷易 三虞薦事 追遠感時 昊天罔極 謹以 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일 삼우제를 맞이하여,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 엎드려 고하나이다.`,
+        '장례를 마치고 세 번째 제사인 삼우를 맞이하니 슬픈 마음이 가시지 않습니다.',
+        '하늘과 같은 고인의 한없는 은혜에 보답하고자,',
+        '맑은 술과 제수를 공손히 바치오니 흔쾌히 받아주옵소서.',
+      ];
+      break;
+
+    case '위령제(慰靈祭)':
+      lines = [
+        '尊靈安慰 嗚呼哀哉',
+        '伏惟 尙饗',
+      ];
+      koreanLines = [
+        `고인 故 ${deceasedName}의 영령을 위로하오니,`,
+        '이승에서의 고단했던 짐과 온갖 슬픔, 아픔을 모두 잊으시고,',
+        '부디 하늘나라의 가장 밝고 편안한 곳에 깃들어 영원히 안식하소서.',
+        '삼가 추모의 잔을 올립니다.',
+      ];
+      break;
+
+    default:
+      lines = [
+        dateLineHan,
+        mournerLineHan,
+        deceasedLineHan,
+        '歲序遷易 追遠感時 昊天罔極',
+        '謹以 清酌庶羞 恭修歲事 尙饗',
+      ];
+      koreanLines = [
+        `서기 ${year}년 ${month}월 ${day}일,`,
+        `${mournerTitleKor} ${mournerName}은(는) 삼가 ${deceasedKor}의 영전에 고하나이다.`,
+        '기일이 다시 돌아오니 은혜에 감사하며 슬픈 마음이 가득합니다.',
+        '맑은 술과 제수를 공손히 올리오니 받아주옵소서.',
+      ];
+  }
+
+  return {
+    fullText: lines.join('\n'),
+    lines,
+    koreanFullText: koreanLines.join('\n'),
+    koreanLines,
+    meta: {
+      occasionType,
+      date: {
+        year,
+        month,
+        day,
+        yearGanji: systemYearGanji,
+        monthGanji: systemMonthGanji,
+        dayGanji: systemDayGanji,
+      },
+    },
+  };
+}
