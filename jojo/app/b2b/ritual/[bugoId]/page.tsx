@@ -451,7 +451,7 @@ export default function RitualDetailPage() {
   // 3. 축문 문자 선택 상태 ('korean': 쉬운 한글, 'hanja': 전통 한문)
   const [chukmunTextType, setChukmunTextType] = useState<'korean' | 'hanja'>('korean');
   // 3-1. 위패 문자 선택 상태 ('korean': 한글, 'hanja': 漢文)
-  const [wipaeTextType, setWipaeTextType] = useState<'korean' | 'hanja'>('korean');
+  const [wipaeTextType, setWipaeTextType] = useState<'korean' | 'hanja'>('hanja');
 
   // 고인 정보 상태
   const [deceasedName, setDeceasedName] = useState('');
@@ -696,8 +696,8 @@ export default function RitualDetailPage() {
 
       const cols: any[] = [];
 
-      // Left phrase column (빛기도 또는 전체기도)
-      if (christianPhrase === '전체기도' || christianPhrase === '빛기도') {
+      // Left phrase column (전체기도일 때만 빛기도가 왼쪽으로 감)
+      if (christianPhrase === '전체기도') {
         cols.push({
           type: 'phrase' as const,
           chars: '영원한빛을그에게비추소서'.split(''),
@@ -709,11 +709,18 @@ export default function RitualDetailPage() {
       // Main column
       cols.push(mainCol);
 
-      // Right phrase column (안식기도 또는 전체기도)
+      // Right phrase column (전체기도/안식기도는 안식기도가 우측, 빛기도 단독선택 시 빛기도가 우측)
       if (christianPhrase === '전체기도' || christianPhrase === '안식기도') {
         cols.push({
           type: 'phrase' as const,
           chars: '주님그에게영원한안식을주소서'.split(''),
+          side: 'right' as const,
+          showCross: false,
+        });
+      } else if (christianPhrase === '빛기도') {
+        cols.push({
+          type: 'phrase' as const,
+          chars: '영원한빛을그에게비추소서'.split(''),
           side: 'right' as const,
           showCross: false,
         });
@@ -977,12 +984,9 @@ export default function RitualDetailPage() {
                   const isLeft = col.side === 'left';
                   const isCatholicSize = jibangSize === 'christian_catholic';
                   const offsetVal = isCatholicSize ? '5mm' : '8mm';
-                  const borderStyle = isLeft 
-                    ? 'border-right: 1px dashed #ccc; padding-right: 5px;' 
-                    : 'border-left: 1px dashed #ccc; padding-left: 5px;';
                   const positionStyle = isLeft ? `left: ${offsetVal};` : `right: ${offsetVal};`;
                   return `
-                    <div class="column" style="position: absolute; ${positionStyle} top: 12%; bottom: 12%; justify-content: center; flex: none; ${borderStyle}">
+                    <div class="column" style="position: absolute; ${positionStyle} top: 12%; bottom: 12%; justify-content: center; flex: none;">
                       ${col.chars.map((c: string) => `<div class="phrase-char">${c}</div>`).join('')}
                     </div>
                   `;
@@ -1424,8 +1428,6 @@ export default function RitualDetailPage() {
                             bottom: '12%',
                             display: 'flex', flexDirection: 'column', alignItems: 'center',
                             justifyContent: 'center',
-                            [isLeft ? 'paddingRight' : 'paddingLeft']: '5px',
-                            [isLeft ? 'borderRight' : 'borderLeft']: '1px dashed #ccc',
                             fontSize: isCatholicSize ? '9px' : '11px',
                             color: '#333', fontWeight: 500,
                             lineHeight: '1.35', gap: '0px',
