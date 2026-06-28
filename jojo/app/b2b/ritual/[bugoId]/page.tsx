@@ -577,13 +577,11 @@ export default function RitualDetailPage() {
       setJibangSize('christian_catholic');
       setAffiliation('교회');
       setChristianPhrase('없음');
-      setActiveTab('wipae');
     } else if (newReligion === 'catholic') {
       setEndingWord('安息');
       setJibangSize('christian_catholic');
       setAffiliation('천주교연령회연합회');
       setChristianPhrase('전체기도');
-      setActiveTab('wipae');
     } else {
       setEndingWord('神位');
       setJibangSize('general_buddhism');
@@ -1354,57 +1352,63 @@ export default function RitualDetailPage() {
               축문 설정
             </span>
             
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>축문 종류</label>
-              <select
-                className={styles.formSelect}
-                value={occasionType}
-                onChange={(e) => setOccasionType(e.target.value as OccasionType)}
-              >
-                <optgroup label="대표 의례 (명절/기일)">
-                  <option value="기제사">기제사 (부모님 기일)</option>
-                  <option value="설날">설날 차례</option>
-                  <option value="추석">추석 차례</option>
-                  <option value="장례(발인제)">장례 (발인제)</option>
-                </optgroup>
-                <optgroup label="세부 장례 제식 (3일장 과정)">
-                  <option value="초혼(招魂)">초혼 (招魂)</option>
-                  <option value="평토제(平土祭)">평토제 (平土祭)</option>
-                  <option value="성분제(成墳祭)">성분제 (成墳祭)</option>
-                  <option value="산신제(山神祭)">산신제 (山神祭 - 토지신)</option>
-                  <option value="삼우제(三虞祭)">삼우제 (三虞祭)</option>
-                  <option value="위령제(慰靈祭)">위령제 (慰靈祭)</option>
-                </optgroup>
-              </select>
-            </div>
-
-            {/* 한글 / 한자 라디오 버튼형 문자 선택 UI (종교가 기독교/천주교가 아닐 때만 렌더링) */}
-            {(religion !== 'christian' && religion !== 'catholic') && (
-              <div style={{ marginTop: '12px' }}>
-                <label className={styles.formLabel}>축문 표기 언어</label>
-                <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
-                    <input
-                      type="radio"
-                      name="chukmunTextType"
-                      checked={chukmunTextType === 'korean'}
-                      onChange={() => setChukmunTextType('korean')}
-                      style={{ accentColor: 'var(--b2b-accent)' }}
-                    />
-                    현대식 한글 축문
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
-                    <input
-                      type="radio"
-                      name="chukmunTextType"
-                      checked={chukmunTextType === 'hanja'}
-                      onChange={() => setChukmunTextType('hanja')}
-                      style={{ accentColor: 'var(--b2b-accent)' }}
-                    />
-                    전통 한문 축문
-                  </label>
-                </div>
+            {(religion === 'christian' || religion === 'catholic') ? (
+              <div style={{ padding: '16px', textAlign: 'center', color: '#666', fontSize: '13px', backgroundColor: '#fafafa', borderRadius: '6px', border: '1px dashed #ddd', lineHeight: '1.6' }}>
+                기독교 및 천주교 예법에는<br />전통 제례 축문을 사용하지 않습니다.
               </div>
+            ) : (
+              <>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>축문 종류</label>
+                  <select
+                    className={styles.formSelect}
+                    value={occasionType}
+                    onChange={(e) => setOccasionType(e.target.value as OccasionType)}
+                  >
+                    <optgroup label="대표 의례 (명절/기일)">
+                      <option value="기제사">기제사 (부모님 기일)</option>
+                      <option value="설날">설날 차례</option>
+                      <option value="추석">추석 차례</option>
+                      <option value="장례(발인제)">장례 (발인제)</option>
+                    </optgroup>
+                    <optgroup label="세부 장례 제식 (3일장 과정)">
+                      <option value="초혼(招魂)">초혼 (招魂)</option>
+                      <option value="평토제(平土祭)">평토제 (平土祭)</option>
+                      <option value="성분제(成墳祭)">성분제 (成墳祭)</option>
+                      <option value="산신제(山神祭)">산신제 (山神祭 - 토지신)</option>
+                      <option value="삼우제(三虞祭)">삼우제 (三虞祭)</option>
+                      <option value="위령제(慰靈祭)">위령제 (慰靈祭)</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* 한글 / 한자 라디오 버튼형 문자 선택 UI */}
+                <div style={{ marginTop: '12px' }}>
+                  <label className={styles.formLabel}>축문 표기 언어</label>
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="chukmunTextType"
+                        checked={chukmunTextType === 'korean'}
+                        onChange={() => setChukmunTextType('korean')}
+                        style={{ accentColor: 'var(--b2b-accent)' }}
+                      />
+                      현대식 한글 축문
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="chukmunTextType"
+                        checked={chukmunTextType === 'hanja'}
+                        onChange={() => setChukmunTextType('hanja')}
+                        style={{ accentColor: 'var(--b2b-accent)' }}
+                      />
+                      전통 한문 축문
+                    </label>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -1418,92 +1422,114 @@ export default function RitualDetailPage() {
           {/* 2. 축문 미리보기 */}
           {activeTab === 'chukmun' && (
             <div className={styles.chukmunPreview}>
-              <div 
-                className={styles.chukmunPaper} 
-                style={
-                  (chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? {
-                    display: 'flex',
-                    flexDirection: 'row-reverse',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start',
-                    padding: '24px 16px',
-                    width: '270px',
-                    height: '382px',
-                    boxSizing: 'border-box',
-                    gap: '12px',
-                    overflow: 'hidden',
-                    backgroundColor: '#fff',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-                  } : {
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '24px 20px',
-                    width: '270px',
-                    height: '382px',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#fff',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-                    overflow: 'hidden'
+              {(religion === 'christian' || religion === 'catholic') ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '24px',
+                  width: '270px',
+                  height: '382px',
+                  boxSizing: 'border-box',
+                  backgroundColor: '#f9f9f9',
+                  borderRadius: '12px',
+                  border: '1px dashed #ccc',
+                  textAlign: 'center',
+                  color: '#777',
+                  fontSize: '13px',
+                  lineHeight: '1.6'
+                }}>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', color: '#aaa' }}>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                  <span>기독교 및 천주교식 예법은<br />축문 인쇄를 제공하지 않습니다.</span>
+                </div>
+              ) : (
+                <div 
+                  className={styles.chukmunPaper} 
+                  style={
+                    (chukmunTextType === 'hanja') ? {
+                      display: 'flex',
+                      flexDirection: 'row-reverse',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      padding: '24px 16px',
+                      width: '270px',
+                      height: '382px',
+                      boxSizing: 'border-box',
+                      gap: '12px',
+                      overflow: 'hidden',
+                      backgroundColor: '#fff',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                    } : {
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      padding: '24px 20px',
+                      width: '270px',
+                      height: '382px',
+                      boxSizing: 'border-box',
+                      backgroundColor: '#fff',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                      overflow: 'hidden'
+                    }
                   }
-                }
-              >
-                {(chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic') ? (
-                  chukmunResult.lines.map((line, cIdx) => {
-                    const readingLine = chukmunResult.readingLines?.[cIdx] || '';
-                    const lineChars = line.split('');
-                    const readingChars = readingLine.split('');
-                    return (
-                      <div
-                        key={cIdx}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        {lineChars.map((char, chIdx) => {
-                          const readingChar = readingChars[chIdx] || '';
-                          const isSpace = char === ' ';
-                          return (
-                            <div
-                              key={chIdx}
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'row-reverse',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '4px',
-                                height: isSpace ? '12px' : 'auto',
-                                visibility: isSpace ? 'hidden' : 'visible'
-                              }}
-                            >
-                              {/* 한글 독음 (오른쪽) */}
-                              <span style={{ fontSize: '8px', lineHeight: '1.2', color: '#666' }}>
-                                {readingChar}
-                              </span>
-                              {/* 한문 (왼쪽) */}
-                              <span style={{ fontSize: '11px', lineHeight: '1.2', color: '#111', fontWeight: 'bold' }}>
-                                {char}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })
-                ) : (religion === 'christian' || religion === 'catholic') ? (
-                  chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', color: '#1a1a1a', fontWeight: 'bold', width: '100%' }}>{line}</div>
-                  ))
-                ) : (
-                  chukmunResult.koreanLines.map((line, i) => (
-                    <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', width: '100%' }}>{line}</div>
-                  ))
-                )}
-              </div>
+                >
+                  {(chukmunTextType === 'hanja') ? (
+                    chukmunResult.lines.map((line, cIdx) => {
+                      const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+                      const lineChars = line.split('');
+                      const readingChars = readingLine.split('');
+                      return (
+                        <div
+                          key={cIdx}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          {lineChars.map((char, chIdx) => {
+                            const readingChar = readingChars[chIdx] || '';
+                            const isSpace = char === ' ';
+                            return (
+                              <div
+                                key={chIdx}
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'row-reverse',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                  height: isSpace ? '12px' : 'auto',
+                                  visibility: isSpace ? 'hidden' : 'visible'
+                                }}
+                              >
+                                {/* 한글 독음 (오른쪽) */}
+                                <span style={{ fontSize: '8px', lineHeight: '1.2', color: '#666' }}>
+                                  {readingChar}
+                                </span>
+                                {/* 한문 (왼쪽) */}
+                                <span style={{ fontSize: '11px', lineHeight: '1.2', color: '#111', fontWeight: 'bold' }}>
+                                  {char}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    chukmunResult.koreanLines.map((line, i) => (
+                      <div key={i} className={styles.chukmunLine} style={{ letterSpacing: '0.04em', fontSize: '11px', lineHeight: '2.0', textAlign: 'center', width: '100%' }}>{line}</div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1675,7 +1701,17 @@ export default function RitualDetailPage() {
 
       {/* 하단 액션 버튼 */}
       <div className={styles.bottomActions}>
-        <button className={styles.btnPrint} onClick={handlePrint}>
+        <button 
+          className={styles.btnPrint} 
+          onClick={handlePrint}
+          disabled={activeTab === 'chukmun' && (religion === 'christian' || religion === 'catholic')}
+          style={activeTab === 'chukmun' && (religion === 'christian' || religion === 'catholic') ? {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            backgroundColor: '#ccc',
+            borderColor: '#ccc'
+          } : {}}
+        >
           A4 인쇄
         </button>
         <button className={styles.btnSend} onClick={handleSend}>
