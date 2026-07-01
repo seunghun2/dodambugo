@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'kr.co.bugoapp.partner',
+  appId: 'kr.co.maeumbugo.bugoon',
   appName: '부고온 파트너',
   webDir: 'out',
   server: {

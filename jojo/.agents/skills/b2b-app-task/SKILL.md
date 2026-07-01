@@ -59,10 +59,12 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 ## 3. 🔑 부고온(B2B) 독자 브랜드 행정 및 사업자 기획
 
 ### 3-1. D-U-N-S 글로벌 기업 식별 번호 및 스토어 심사 대응
-- **설명**: 홈택스 영문 사업자등록증명 보완 제출 및 D&B 재심사 승인 처리 후 구글 플레이 조직 계정 생성
+- **설명**: D-U-N-S 번호 발급 완료 (`696633660`). Apple Developer Program Individual 등록 및 승인 완료 (2026-06-29).
+- **확정 정보**: Bundle ID `kr.co.maeumbugo.bugoon`, Team ID `FTR72WNB4B`, App Store Connect 앱 생성 완료
 - **관련 MD**:
-  - [DUNS_INFO.md](file:///Users/el/Desktop/dodam/jojo/docs/DUNS_INFO.md) (반려 이력 및 케이스 번호 `10564868` 보완 조치 사항)
-- **인프라 셋업**: 구글 플레이 콘솔 및 App Store Connect 조직 인증 심사 정보 기입
+  - [APP_SUBMISSION.md](file:///Users/el/Desktop/dodam/jojo/docs/APP_SUBMISSION.md) (앱 제출 전체 진행 기록 — **이 파일을 반드시 참조**)
+  - [DUNS_INFO.md](file:///Users/el/Desktop/dodam/jojo/docs/DUNS_INFO.md) (반려 이력 및 보완 조치 기록)
+- **인프라 셋업**: App Store Connect 앱 등록 완료, Google Play Console 등록 대기 중
 
 ---
 

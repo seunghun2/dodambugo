@@ -812,7 +812,7 @@ export default function RitualDetailPage() {
             ${isHanja ? `
               flex-direction: row-reverse;
               justify-content: center;
-              align-items: center;
+              align-items: flex-start;
               gap: 28px;
               height: 100%;
             ` : `
