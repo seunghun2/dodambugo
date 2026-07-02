@@ -88,7 +88,7 @@ function LoginContent() {
                     <img 
                         src="/images/b2b-logo.png" 
                         alt="부고온 로고" 
-                        style={{ width: '220px', height: 'auto', display: 'block', margin: '0 auto' }} 
+                        style={{ width: '150px', height: 'auto', display: 'block', margin: '0 auto' }} 
                     />
                 </div>
 
