@@ -85,12 +85,11 @@ function LoginContent() {
             <div className={styles.inner}>
                 {/* 로고 */}
                 <div className={styles.logoSection}>
-                    <div className={styles.logoMark}>
-                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                            <path d="M14 3C14 3 7 7 7 14C7 18 9 22 14 26C19 22 21 18 21 14C21 7 14 3 14 3Z" fill="currentColor"/>
-                        </svg>
-                    </div>
-                    <h1 className={styles.logoText}>부고온 파트너</h1>
+                    <img 
+                        src="/images/b2b-logo.png" 
+                        alt="부고온 로고" 
+                        style={{ width: '220px', height: 'auto', display: 'block', margin: '0 auto' }} 
+                    />
                 </div>
 
                 {/* 에러 */}
