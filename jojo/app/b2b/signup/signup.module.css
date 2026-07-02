@@ -422,3 +422,153 @@ select.input {
 .submitBtn:active { opacity: 0.85; }
 .submitBtn:focus { outline: none; }
 .submitBtn:disabled { background: var(--gray-300); cursor: default; }
+
+/* 약관 동의 영역 */
+.termsArea {
+  margin-top: 24px;
+  border-top: 1px solid var(--b2b-border-light);
+  padding-top: 16px;
+  margin-bottom: 20px;
+}
+
+.termItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.termLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--b2b-text-secondary);
+}
+
+.termRequired {
+  color: var(--b2b-accent);
+  font-weight: 700;
+}
+
+.arrowBtn {
+  background: none;
+  border: none;
+  color: var(--b2b-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.allAgreeBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--b2b-border-light);
+  border: 1px solid var(--b2b-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.allAgreeBoxActive {
+  background-color: #E8F5E9;
+  border-color: var(--b2b-accent);
+}
+
+.allAgreeText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--b2b-border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.checkboxChecked {
+  border-color: var(--b2b-accent);
+  background-color: var(--b2b-accent);
+  color: #ffffff;
+}
+
+/* 약관 상세 팝업 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContainer {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--b2b-text-primary);
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--b2b-text-tertiary);
+  cursor: pointer;
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--b2b-text-secondary);
+  white-space: pre-wrap;
+  padding-bottom: 20px;
+}
+
