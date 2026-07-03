@@ -22,7 +22,7 @@ interface Props {
 }
 
 const RELIGIONS = [
-  { value: '', label: '종교' },
+  { value: '없음', label: '없음' },
   { value: '불교', label: '불교' },
   { value: '기독교', label: '기독교' },
   { value: '천주교', label: '천주교' },
@@ -41,7 +41,7 @@ function getReligiousTitlePlaceholder(religion: string): string {
 
 // 종교 표시 텍스트
 function getReligionDisplay(religion: string): string {
-  if (!religion) return '종교';
+  if (!religion || religion === '없음') return '종교';
   const found = RELIGIONS.find(r => r.value === religion);
   return found ? found.label : religion;
 }
@@ -55,7 +55,7 @@ function getGenderDisplay(gender: string, hideGender: boolean): string {
 }
 
 export default function DeceasedSection({ formData, onChange, errors }: Props) {
-  const hasReligion = formData.religion !== '' && formData.religion !== '무교';
+  const hasReligion = formData.religion !== '' && formData.religion !== '없음' && formData.religion !== '무교';
   const [showGenderSheet, setShowGenderSheet] = useState(false);
   const [showReligionSheet, setShowReligionSheet] = useState(false);
 
