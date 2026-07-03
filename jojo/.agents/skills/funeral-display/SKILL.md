@@ -51,12 +51,8 @@ description: 부고장 장례 정보(입관/발인/장지/무빈소/빈소) 표�
 
 ## 종교 호칭(직분/세례명) 표시 규칙
 
-| 항목 | B2C (마음부고) | B2B (부고온) |
-|------|---------------|-------------|
-| 종교 호칭 노출 | ❌ **절대 미노출** | ✅ `show_religious_title` true일 때만 |
-
-- B2C `app/view/[id]/ViewContent.tsx`: `{false && bugo.religious_title && ...}`로 비활성화됨
-- B2B `app/b2b/view/[id]/ViewContent.tsx`: `show_religious_title` 플래그 체크 후 노출
+- B2C: 종교 호칭 입력 필드 자체가 없음 → 데이터 없으므로 표시 안 됨
+- B2B: `show_religious_title` 플래그가 true일 때만 `app/b2b/view/[id]/ViewContent.tsx`에서 노출
 - 종교 선택: B2B 제작폼에서 **바텀시트 팝업**으로 선택 (네이티브 select 아님)
 - 기본값: `formData.religion = '없음'` → RELIGIONS 배열과 통일 필수
 
