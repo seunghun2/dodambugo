@@ -48,3 +48,19 @@ description: 부고장 장례 정보(입관/발인/장지/무빈소/빈소) 표�
 - 레거시 `view-new.js`는 ES module import가 안 되므로 동일 로직을 인라인으로 유지해야 함
 - B2B 생성 폼에 '가족장' 옵션이 없음 (Phase 2 예정)
 - B2B에서 무빈소→일반 전환 시 `no_wreath` 플래그가 복원 안 됨 (Phase 2 예정)
+
+## 종교 호칭(직분/세례명) 표시 규칙
+
+| 항목 | B2C (마음부고) | B2B (부고온) |
+|------|---------------|-------------|
+| 종교 호칭 노출 | ❌ **절대 미노출** | ✅ `show_religious_title` true일 때만 |
+
+- B2C `app/view/[id]/ViewContent.tsx`: `{false && bugo.religious_title && ...}`로 비활성화됨
+- B2B `app/b2b/view/[id]/ViewContent.tsx`: `show_religious_title` 플래그 체크 후 노출
+- 종교 선택: B2B 제작폼에서 **바텀시트 팝업**으로 선택 (네이티브 select 아님)
+- 기본값: `formData.religion = '없음'` → RELIGIONS 배열과 통일 필수
+
+## 인프라 참고
+
+- **영정사진 업로드**: Supabase Storage `bugo-photos` 버킷 사용 (Dev/Prod 모두)
+- **B2B view 캐시**: `unstable_cache` 60초, 부고 생성/수정 시 `revalidatePath()` 자동 호출
