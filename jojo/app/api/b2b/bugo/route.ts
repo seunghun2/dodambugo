@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,6 +84,8 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: '부고 수정에 실패했습니다.' }, { status: 500 });
             }
 
+            // 캐시 무효화
+            revalidatePath(`/b2b/view/${editBugoNumber}`, 'page');
             return NextResponse.json({ success: true, bugo_number: editBugoNumber });
         } else {
             // 부고 신규 생성
@@ -110,6 +113,8 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: '부고 생성에 실패했습니다.' }, { status: 500 });
             }
 
+            // 캐시 무효화
+            revalidatePath(`/b2b/view/${bugoNumber}`, 'page');
             return NextResponse.json({ success: true, bugo_number: bugoNumber });
         }
     } catch (err) {
