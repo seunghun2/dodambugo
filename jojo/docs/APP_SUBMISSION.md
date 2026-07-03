@@ -31,31 +31,49 @@
 - [x] `capacitor.config.ts` Bundle ID 업데이트
 
 ### Android
-- [ ] Google Play Console 개발자 등록 ($25 일회성)
-- [ ] Java JDK 설치
-- [ ] Android SDK 설치
-- [ ] Capacitor sync
-- [ ] 서명 키(keystore) 생성
-- [ ] AAB 빌드
-- [ ] Google Play Console 앱 등록 및 업로드
+- [x] Google Play Console 개발자 등록 ($25 일회성)
+- [x] Java JDK 설치
+- [x] Android SDK 설치
+- [x] Capacitor sync
+- [x] 서명 키(keystore) 생성
+- [x] AAB 빌드
+- [x] Google Play Console 앱 등록 및 업로드
+- [x] 개인정보처리방침 및 광고 ID 선언 완료
+- [x] 구글 플레이 심사 제출 완료 (2026-07-03)
+
+---
+
+## 💳 PG 계약 및 MID 수수료 정보
+
+B2B 정산 시스템 구현 시 적용될 가맹점 ID(MID)별 수수료율 내역입니다.
+
+| 서비스 (MID) | 상호 | 수수료율 (부가세 미포함) | 최종 차감율 (부가세 10% 포함) |
+|--------------|------|-----------------------|----------------------------|
+| `pgmaeum01m` | 마음부고 | 2.6% | 2.86% |
+| `pgjsbro01m` | (주)제이에스브라더스 (부고온) | 3.4% | 3.74% |
 
 ---
 
 ## ⏳ 남은 작업
 
-### iOS (Xcode 설치 필요)
-- [ ] Xcode 설치 (Mac App Store, 약 12GB)
-- [ ] Xcode Signing & Capabilities 설정
-- [ ] `npx cap sync ios`
-- [ ] Xcode Archive → App Store 업로드
-- [ ] 앱 심사용 스크린샷 준비 (iPhone 6.5" 등)
-- [ ] 개인정보처리방침 URL 등록
-- [ ] 앱 심사 제출
+### iOS (Xcode 및 업로드)
+- [x] Xcode에 Apple ID 로그인 및 개발자 계정 연동 완료
+- [x] 아이폰 기기(UDID) 정식 등록 완료
+- [x] Xcode Archive 배포용 빌드 성공
+- [x] App Store Connect에 빌드(Version 1.0, Build 1) 업로드 완료 (2026-07-03)
+
+### App Store Connect 웹 설정
+- [x] 앱 이름 "부고온2" → **"부고온"** 수정
+- [x] 업로드된 빌드 선택 완료
+- [x] 스크린샷(iPhone 6.5인치, iPad 13인치) 업로드 완료
+- [x] 앱 설명 및 지원 URL 등록 완료
+- [x] 개인정보처리방침 URL 등록 (`https://bugoon.maeumbugo.co.kr/b2b/privacy`)
+- [x] 애플 심사 최종 제출 완료 (2026-07-03)
 
 ### Android
-- [ ] 앱 심사용 스크린샷 준비
-- [ ] 개인정보처리방침 URL 등록
-- [ ] 앱 심사 제출
+- [x] 앱 심사용 스크린샷 준비 및 등록 완료
+- [x] 개인정보처리방침 및 광고 ID 선언 완료
+- [x] 구글 플레이 심사 최종 제출 완료 (2026-07-03)
 
 ### 공통
 - [ ] 앱 아이콘 (1024x1024) 최종 확정
