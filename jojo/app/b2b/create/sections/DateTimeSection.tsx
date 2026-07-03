@@ -112,6 +112,7 @@ function DateTimeCard({
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             className={styles.timeTextInput}
             placeholder="00:00"
             value={timeValue}

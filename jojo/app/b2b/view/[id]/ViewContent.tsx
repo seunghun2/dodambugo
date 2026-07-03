@@ -749,7 +749,7 @@ ${url}
                                 故 {bugo.deceased_name}님
                                 {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
                             </div>
-                            {bugo.religious_title && (
+                            {bugo.religious_title && bugo.show_religious_title && (
                                 <div className="header-religious-title">
                                     {bugo.religious_title}
                                 </div>
@@ -762,7 +762,7 @@ ${url}
                                 故 {bugo.deceased_name}님
                                 {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
                             </div>
-                            {bugo.religious_title && (
+                            {bugo.religious_title && bugo.show_religious_title && (
                                 <div className="header-religious-title">
                                     {bugo.religious_title}
                                 </div>

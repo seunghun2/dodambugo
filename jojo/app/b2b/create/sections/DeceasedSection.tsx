@@ -39,6 +39,13 @@ function getReligiousTitlePlaceholder(religion: string): string {
   }
 }
 
+// 종교 표시 텍스트
+function getReligionDisplay(religion: string): string {
+  if (!religion) return '종교';
+  const found = RELIGIONS.find(r => r.value === religion);
+  return found ? found.label : religion;
+}
+
 // 성별 표시 텍스트
 function getGenderDisplay(gender: string, hideGender: boolean): string {
   if (hideGender) return '미노출';
@@ -50,6 +57,7 @@ function getGenderDisplay(gender: string, hideGender: boolean): string {
 export default function DeceasedSection({ formData, onChange, errors }: Props) {
   const hasReligion = formData.religion !== '' && formData.religion !== '무교';
   const [showGenderSheet, setShowGenderSheet] = useState(false);
+  const [showReligionSheet, setShowReligionSheet] = useState(false);
 
   const handleAgeChange = (value: string) => {
     const cleaned = value.replace(/\D/g, '').slice(0, 3);
@@ -101,6 +109,7 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
             <input
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               className={styles.input}
               placeholder="고인나이"
               value={formData.age}
@@ -137,15 +146,16 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
       {/* 종교 + 직분/세례명/호칭 — 한 줄 50:50 */}
       <div className={styles.row}>
         <div className={styles.fieldFlex1}>
-          <select
-            className={styles.select}
-            value={formData.religion}
-            onChange={(e) => onChange('religion', e.target.value)}
+          <button
+            type="button"
+            className={styles.selectTrigger}
+            onClick={() => setShowReligionSheet(true)}
           >
-            {RELIGIONS.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
+            <span className={formData.religion ? styles.selectTriggerText : styles.selectTriggerPlaceholder}>
+              {getReligionDisplay(formData.religion)}
+            </span>
+            <IconChevronDown size={18} stroke={3} className={styles.selectTriggerArrow} />
+          </button>
         </div>
         <div className={styles.fieldFlex1}>
           <input
@@ -210,6 +220,33 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
               type="button"
               className={styles.bottomSheetCancel}
               onClick={() => setShowGenderSheet(false)}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 종교 바텀시트 */}
+      {showReligionSheet && (
+        <div className={styles.bottomSheetOverlay} onClick={() => setShowReligionSheet(false)}>
+          <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.bottomSheetHandle} />
+            <div className={styles.bottomSheetTitle}>종교</div>
+            {RELIGIONS.filter(r => r.value !== '').map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                className={`${styles.bottomSheetOption} ${formData.religion === r.value ? styles.bottomSheetOptionActive : ''}`}
+                onClick={() => { onChange('religion', r.value); setShowReligionSheet(false); }}
+              >
+                {r.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className={styles.bottomSheetCancel}
+              onClick={() => setShowReligionSheet(false)}
             >
               취소
             </button>

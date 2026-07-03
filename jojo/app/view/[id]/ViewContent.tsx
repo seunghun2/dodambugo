@@ -737,7 +737,8 @@ ${url}
                                 故 {bugo.deceased_name}님
                                 {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
                             </div>
-                            {bugo.religious_title && (
+                            {/* B2C에서는 종교 호칭 미노출 */}
+                            {false && bugo.religious_title && (
                                 <div className="header-religious-title">
                                     {bugo.religious_title}
                                 </div>
@@ -750,7 +751,8 @@ ${url}
                                 故 {bugo.deceased_name}님
                                 {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
                             </div>
-                            {bugo.religious_title && (
+                            {/* B2C에서는 종교 호칭 미노출 */}
+                            {false && bugo.religious_title && (
                                 <div className="header-religious-title">
                                     {bugo.religious_title}
                                 </div>

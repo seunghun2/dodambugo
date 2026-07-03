@@ -198,7 +198,7 @@ export default function B2BCompletePage() {
     <div className={styles.page}>
       {/* 상단 닫기 헤더 */}
       <header className={styles.header}>
-        <button className={styles.btnClose} onClick={() => router.push('/b2b/dashboard')}>
+        <button className={styles.btnClose} onClick={() => router.back()}>
           <IconX size={28} stroke={1.5} />
         </button>
       </header>
