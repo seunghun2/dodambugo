@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         // 새 ID 생성 또는 기존 ID 사용
         const id = draftId || crypto.randomUUID();
 
-        const draftData = {
+        const draftData: Record<string, any> = {
             id,
             template: templateId,
             deceased_name: formData.deceased_name || null,
@@ -50,9 +50,13 @@ export async function POST(request: NextRequest) {
             applicant_name: formData.applicant_name || null,
             applicant_phone: formData.applicant_phone || null,
             ip_address: ipAddress || null,
-            b2b_user_id: b2bUserId || null,
             updated_at: new Date().toISOString(),
         };
+
+        // B2B 사용자 ID가 있을 때만 포함 (스키마 캐시 이슈 방지)
+        if (b2bUserId) {
+            draftData.b2b_user_id = b2bUserId;
+        }
 
         // upsert: 있으면 업데이트, 없으면 생성
         const { data, error } = await supabase

@@ -78,9 +78,7 @@ export async function POST(request: NextRequest) {
 
         const orderNumber = `MG${Date.now()}`;
 
-        const { data, error } = await supabase
-            .from('flower_orders')
-            .insert({
+        const insertData: Record<string, any> = {
                 bugo_id: body.bugo_id,
                 product_id: body.product_id, // sort_order 값 (정수)
                 product_name: body.product_name,
@@ -96,8 +94,16 @@ export async function POST(request: NextRequest) {
                 payment_method: body.payment_method || 'card',
                 status: 'pending',
                 order_number: orderNumber,
-                partner_data: body.partner_data,
-            })
+            };
+
+        // partner_data가 있을 때만 포함 (스키마 캐시 이슈 방지)
+        if (body.partner_data) {
+            insertData.partner_data = body.partner_data;
+        }
+
+        const { data, error } = await supabase
+            .from('flower_orders')
+            .insert(insertData)
             .select()
             .single();
 

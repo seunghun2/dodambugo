@@ -1,6 +1,6 @@
 # 🚀 부고온 앱스토어 제출 진행 기록
 
-> **최종 업데이트:** 2026-07-01
+> **최종 업데이트:** 2026-07-10
 
 ---
 
@@ -19,6 +19,32 @@
 
 ---
 
+## 🏪 현재 심사 상태
+
+> **양쪽 스토어 모두 재제출 완료, 승인 대기 중** (2026-07-10)
+
+### Google Play Console
+| 항목 | 상태 |
+|------|------|
+| 등록 | ✅ 완료 |
+| 1차 심사 제출 | 2026-07-03 |
+| 1차 반려 사유 | `ClassNotFoundException` (패키지 경로 불일치) |
+| 수정 내용 | 패키지 경로 수정 |
+| 재제출 | ✅ versionCode 3으로 재제출 완료 (2026-07-10) |
+| 현재 상태 | ⏳ 심사 대기 중 |
+
+### App Store Connect
+| 항목 | 상태 |
+|------|------|
+| 등록 | ✅ 완료 |
+| 1차 심사 제출 | 2026-07-03 |
+| 1차 반려 사유 | placeholder 아이콘 사용 + 로그인 세션 유실 |
+| 수정 내용 | 앱 아이콘 Logo512.png로 교체, 쿠키 기반 인증 전환 |
+| 재제출 | ✅ Build 2로 재제출 완료 (2026-07-10) |
+| 현재 상태 | ⏳ 심사 대기 중 |
+
+---
+
 ## ✅ 완료된 작업
 
 ### Apple (iOS)
@@ -29,6 +55,19 @@
 - [x] App ID 등록 완료 (`kr.co.maeumbugo.bugoon`, Push Notifications 활성화)
 - [x] App Store Connect에서 신규 앱 생성 (부고온)
 - [x] `capacitor.config.ts` Bundle ID 업데이트
+- [x] Xcode에 Apple ID 로그인 및 개발자 계정 연동 완료
+- [x] 아이폰 기기(UDID) 정식 등록 완료
+- [x] Xcode Archive 배포용 빌드 성공
+- [x] App Store Connect에 빌드(Version 1.0, Build 1) 업로드 완료 (2026-07-03)
+- [x] 앱 이름 "부고온2" → **"부고온"** 수정
+- [x] 업로드된 빌드 선택 완료
+- [x] 스크린샷(iPhone 6.5인치, iPad 13인치) 업로드 완료
+- [x] 앱 설명 및 지원 URL 등록 완료
+- [x] 개인정보처리방침 URL 등록 (`https://bugoon.maeumbugo.co.kr/b2b/privacy`)
+- [x] 애플 심사 최초 제출 완료 (2026-07-03)
+- [x] 심사 반려 대응: 앱 아이콘 교체 (Logo512.png) + 쿠키 기반 인증 전환
+- [x] App Store Connect API Key 세팅 완료 (Key ID: `Q34SS2799R`)
+- [x] Build 2 재제출 완료 (2026-07-10)
 
 ### Android
 - [x] Google Play Console 개발자 등록 ($25 일회성)
@@ -39,7 +78,14 @@
 - [x] AAB 빌드
 - [x] Google Play Console 앱 등록 및 업로드
 - [x] 개인정보처리방침 및 광고 ID 선언 완료
-- [x] 구글 플레이 심사 제출 완료 (2026-07-03)
+- [x] 구글 플레이 심사 최초 제출 완료 (2026-07-03)
+- [x] 심사 반려 대응: 패키지 경로 수정
+- [x] versionCode 3 재제출 완료 (2026-07-10)
+
+### 공통
+- [x] 앱 아이콘 (1024x1024) 최종 확정 — Logo512.png
+- [x] 앱 설명문 작성 (한국어)
+- [x] 앱 카테고리 설정
 
 ---
 
@@ -56,29 +102,9 @@ B2B 정산 시스템 구현 시 적용될 가맹점 ID(MID)별 수수료율 내�
 
 ## ⏳ 남은 작업
 
-### iOS (Xcode 및 업로드)
-- [x] Xcode에 Apple ID 로그인 및 개발자 계정 연동 완료
-- [x] 아이폰 기기(UDID) 정식 등록 완료
-- [x] Xcode Archive 배포용 빌드 성공
-- [x] App Store Connect에 빌드(Version 1.0, Build 1) 업로드 완료 (2026-07-03)
-
-### App Store Connect 웹 설정
-- [x] 앱 이름 "부고온2" → **"부고온"** 수정
-- [x] 업로드된 빌드 선택 완료
-- [x] 스크린샷(iPhone 6.5인치, iPad 13인치) 업로드 완료
-- [x] 앱 설명 및 지원 URL 등록 완료
-- [x] 개인정보처리방침 URL 등록 (`https://bugoon.maeumbugo.co.kr/b2b/privacy`)
-- [x] 애플 심사 최종 제출 완료 (2026-07-03)
-
-### Android
-- [x] 앱 심사용 스크린샷 준비 및 등록 완료
-- [x] 개인정보처리방침 및 광고 ID 선언 완료
-- [x] 구글 플레이 심사 최종 제출 완료 (2026-07-03)
-
-### 공통
-- [ ] 앱 아이콘 (1024x1024) 최종 확정
-- [ ] 앱 설명문 작성 (한국어)
-- [ ] 앱 카테고리 설정
+- [ ] Google Play 심사 승인 확인 및 출시
+- [ ] App Store 심사 승인 확인 및 출시
+- [ ] 출시 후 푸시 알림(FCM/APNs) 연동 확인
 
 ---
 
@@ -86,9 +112,11 @@ B2B 정산 시스템 구현 시 적용될 가맹점 ID(MID)별 수수료율 내�
 
 | 서비스 | 상태 | 비고 |
 |--------|------|------|
-| Apple Developer | ✅ 활성 | Individual 등록, Team ID: FTR72WNB4B |
-| Google Play Console | ❌ 미등록 | $25 결제 필요 |
+| Apple Developer | ✅ 활성 | Individual 등록, Team ID: `FTR72WNB4B` |
+| App Store Connect API Key | ✅ 설정됨 | Key ID: `Q34SS2799R` |
+| Google Play Console | ✅ 등록 완료 | $25 결제 완료 |
 | Firebase (FCM) | ✅ 설정됨 | `GoogleService-Info.plist` 존재 |
+| D-U-N-S | ✅ 발급 완료 | `696633660` |
 
 ---
 

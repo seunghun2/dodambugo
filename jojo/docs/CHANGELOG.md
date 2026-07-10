@@ -1,5 +1,59 @@
 # 마음부고 변경 이력
 
+## 2026-07-11
+
+### FCM 푸시 알림 구현
+- **클라이언트 푸시 등록**: `lib/push-notifications.ts` 신규 생성 - Capacitor PushNotifications 플러그인을 이용한 FCM 토큰 등록/해제 유틸리티
+- **서버 푸시 발송**: `lib/fcm.ts` 신규 생성 - Firebase Admin SDK(v14)를 이용한 서버사이드 푸시 발송 유틸리티
+- **푸시 발송 API**: `app/api/b2b/send-push/route.ts` 신규 생성 - 특정 파트너에게 푸시 알림 발송 엔드포인트
+- **대시보드 푸시 등록**: `app/b2b/dashboard/page.tsx`에서 로그인 후 자동으로 FCM 토큰을 서버에 등록
+- **Supabase 테이블**: `b2b_push_tokens` 테이블 생성 (partner_id, fcm_token, platform)
+- **firebase-admin v14.1.0** 설치, `next.config.ts`에 `serverExternalPackages` 설정 추가
+
+### iOS 네이티브 설정
+- **AppDelegate.swift**: Firebase 초기화(`FirebaseApp.configure()`), APNs 토큰 FCM 연동
+- **GoogleService-Info.plist**: Bundle ID `kr.co.maeumbugo.bugoon`용 파일 교체 및 Xcode 프로젝트에 등록
+- **google-services.json**: Android용 Firebase 설정 파일 교체
+- **Package.swift**: Firebase iOS SDK(`FirebaseMessaging`) 의존성 추가
+- **Push Notifications Capability**: Xcode에서 추가 완료
+- **앱 이름 변경**: `Info.plist` CFBundleDisplayName을 "마음부고 파트너" → "부고온"으로 변경
+
+### iOS StatusBar 겹침 수정
+- **@capacitor/status-bar 플러그인** 설치 및 `B2BLayoutClient.tsx`에서 `overlaysWebView: false` 설정
+- 네이티브 레벨에서 WebView가 상태바 아래부터 시작하도록 처리 (CSS 해킹 불필요)
+
+### 로그아웃 버그 수정
+- `settings/page.tsx`의 `handleLogout`에서 localStorage + sessionStorage + 클라이언트 쿠키 + 서버 쿠키(httpOnly) 전부 삭제하도록 수정
+- 기존에는 localStorage만 삭제하여 쿠키 기반 자동 로그인이 재실행되는 버그 있었음
+
+### 로그인 화면 UI 수정
+- 비밀번호 눈 아이콘이 작은 화면에서 밀려나가는 문제 수정 (`inputWrap`에 `overflow: hidden` 추가)
+
+### Firebase/Vercel 환경 설정
+- Vercel 환경변수 `FIREBASE_SERVICE_ACCOUNT_KEY` 프로덕션에 추가
+- Firebase Console에서 APNs 인증 키(AuthKey_Q34SS2799R.p8) 업로드 완료
+
+## 2026-07-10
+
+### B2B 인증 시스템 쿠키 기반 전환 (iOS WebView localStorage 불안정 대응)
+- **B2B 로그인 쿠키 저장**: `/api/b2b/login`에서 JWT를 HTTP-only 쿠키에도 저장하도록 수정하여, iOS WebView에서 `localStorage`가 유실되더라도 인증 세션이 유지되도록 개선
+- **인증 확인 API 신규 구축**: `/api/b2b/auth` 엔드포인트를 신설하여 쿠키와 Authorization 헤더를 동시에 지원하는 듀얼 인증 확인 방식을 구현
+- **me API 쿠키 fallback**: `/api/b2b/me`에 쿠키 기반 fallback 로직을 추가하여 헤더 토큰이 없는 경우에도 쿠키에서 JWT를 추출하여 정상 응답하도록 보완
+- **클라이언트 인증 전환**: 스플래시(`/b2b`), 로그인(`/b2b/login`), 대시보드(`/b2b/dashboard`) 페이지를 `localStorage` 직접 확인 대신 `/api/b2b/auth` API 기반 인증 확인으로 전환
+
+### Android versionCode 3 재빌드 및 Google Play 재제출
+- `versionCode 3`으로 AAB 재빌드 후 Google Play Console 프로덕션 트랙에 심사 재제출 완료
+
+### iOS Build 2 아카이브 및 App Store 재제출
+- 앱 아이콘을 `Logo512.png`로 교체하고 빌드번호 2로 아카이브
+- App Store Connect에 업로드 후 버전 1.0의 빌드를 Build 1 → Build 2로 변경하여 심사 재제출 완료
+
+### App Store Connect API Key 세팅
+- Key ID `Q34SS2799R`로 App Store Connect API Key 생성 및 `~/.appstoreconnect/private_keys/`에 저장하여 터미널 자동화 준비 완료
+
+### Vercel 프로덕션 배포
+- 쿠키 인증 전환이 반영된 코드를 Vercel 프로덕션에 배포 완료
+
 ## 2026-06-25
 
 ### B2B URL 유실 오류 수정 및 미들웨어 로컬 환경 차단 우회 패치
