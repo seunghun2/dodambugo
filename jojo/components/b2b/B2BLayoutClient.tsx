@@ -1,10 +1,24 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { BottomTabBar } from './BottomTabBar';
 
 export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  // iOS/Android: 상태바가 WebView와 겹치지 않도록 설정
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+        StatusBar.setOverlaysWebView({ overlay: false });
+        StatusBar.setStyle({ style: Style.Light });
+      }).catch(() => {
+        // 플러그인 없으면 무시
+      });
+    }
+  }, []);
   
   // 하단 탭바를 보여줄 유저용 B2B 경로 정의
   const showBottomBar = pathname && 

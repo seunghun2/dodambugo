@@ -81,6 +81,7 @@
     height: 52px;
     background: var(--bg-white);
     transition: border-color var(--transition-fast);
+    overflow: hidden;
 }
 
 .inputWrap:focus-within {
