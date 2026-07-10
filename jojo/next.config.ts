@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   distDir: process.env.NODE_ENV === 'development' ? '/tmp/next-jojo-build' : undefined,
   reactCompiler: true,
+  serverExternalPackages: ['firebase-admin'],
   images: {
     remotePatterns: [
       {

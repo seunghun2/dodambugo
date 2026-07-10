@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { registerPushNotifications } from '@/lib/push-notifications';
 
 import styles from './dashboard.module.css';
 
@@ -23,8 +24,28 @@ export default function DashboardPage() {
 
   // 데이터 로딩
   const fetchData = useCallback(async () => {
-    const token = localStorage.getItem('b2b_token');
-    const userData = localStorage.getItem('b2b_user');
+    let token = localStorage.getItem('b2b_token');
+    let userData = localStorage.getItem('b2b_user');
+
+    // localStorage에 토큰이 없으면 쿠키 기반 인증 확인 (iOS WebView 대응)
+    if (!token || !userData) {
+      try {
+        const authRes = await fetch('/api/b2b/auth', { credentials: 'include' });
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          if (authData.authenticated && authData.token && authData.user) {
+            // 쿠키에서 인증 성공 → localStorage 복원
+            token = authData.token;
+            userData = JSON.stringify(authData.user);
+            localStorage.setItem('b2b_token', token!);
+            localStorage.setItem('b2b_user', userData!);
+          }
+        }
+      } catch {
+        // 쿠키 인증도 실패
+      }
+    }
+
     if (!token || !userData) {
       router.push('/b2b/login');
       return;
@@ -32,10 +53,14 @@ export default function DashboardPage() {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
+    // 푸시 알림 등록 (네이티브 앱에서만 동작)
+    registerPushNotifications(parsedUser.id);
+
     // 최신 정보 DB에서 동기화
     try {
       const res = await fetch('/api/b2b/me', {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
