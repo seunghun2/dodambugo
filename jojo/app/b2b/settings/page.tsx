@@ -205,9 +205,19 @@ export default function SettingsPage() {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         localStorage.removeItem('b2b_token');
         localStorage.removeItem('b2b_user');
+        sessionStorage.removeItem('b2b_token');
+        sessionStorage.removeItem('b2b_user');
+        // 클라이언트 쿠키 직접 만료
+        document.cookie = 'b2b_token=; path=/; max-age=0;';
+        // 서버 쿠키도 삭제 (httpOnly 쿠키 대응)
+        try {
+            await fetch('/api/b2b/auth', { method: 'DELETE', credentials: 'include' });
+        } catch {
+            // 쿠키 삭제 실패해도 로그아웃 진행
+        }
         router.push('/b2b/login');
     };
 

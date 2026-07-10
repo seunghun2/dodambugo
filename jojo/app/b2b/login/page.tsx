@@ -25,8 +25,29 @@ function LoginContent() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const token = localStorage.getItem('b2b_token');
-        if (token) router.push('/b2b/dashboard');
+        // 쿠키 기반 인증 확인 우선 (iOS WebView localStorage 불안정 대응)
+        const checkAuth = async () => {
+            try {
+                const res = await fetch('/api/b2b/auth', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.authenticated) {
+                        if (data.token) localStorage.setItem('b2b_token', data.token);
+                        if (data.user) localStorage.setItem('b2b_user', JSON.stringify(data.user));
+                        router.push('/b2b/dashboard');
+                        return;
+                    }
+                }
+            } catch {
+                // fallback: localStorage 확인
+                const token = localStorage.getItem('b2b_token');
+                if (token) {
+                    router.push('/b2b/dashboard');
+                    return;
+                }
+            }
+        };
+        checkAuth();
     }, [router]);
 
     const handleLogin = async () => {

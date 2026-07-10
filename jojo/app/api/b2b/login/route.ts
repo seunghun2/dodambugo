@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
 
         console.log(`🔑 B2B 로그인: ${user.company_name} (${cleanPhone})`);
 
-        return NextResponse.json({
+        // 쿠키에도 토큰 저장 (iOS WebView localStorage 불안정 대응)
+        const response = NextResponse.json({
             success: true,
             token,
             user: {
@@ -89,6 +90,17 @@ export async function POST(request: NextRequest) {
                 account_holder: user.account_holder || null,
             },
         });
+
+        // HTTP-only 쿠키로 JWT 설정 (30일 유효)
+        response.cookies.set('b2b_token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30, // 30일
+        });
+
+        return response;
     } catch (error) {
         console.error('로그인 오류:', error);
         return NextResponse.json(

@@ -9,12 +9,25 @@ const supabase = createClient(
 
 const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
 
-// JWT 토큰에서 userId 추출
+// JWT 토큰에서 userId 추출 (Authorization 헤더 → 쿠키 순서로 확인)
 function getUserIdFromToken(request: NextRequest): string | null {
+    let token: string | undefined;
+
+    // 1순위: Authorization 헤더
     const auth = request.headers.get('Authorization');
-    if (!auth?.startsWith('Bearer ')) return null;
+    if (auth?.startsWith('Bearer ')) {
+        token = auth.slice(7);
+    }
+
+    // 2순위: 쿠키 (iOS WebView localStorage 불안정 대응)
+    if (!token) {
+        token = request.cookies.get('b2b_token')?.value;
+    }
+
+    if (!token) return null;
+
     try {
-        const decoded = jwt.verify(auth.slice(7), JWT_SECRET) as any;
+        const decoded = jwt.verify(token, JWT_SECRET) as any;
         return decoded.userId;
     } catch {
         return null;
