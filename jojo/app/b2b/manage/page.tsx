@@ -263,7 +263,7 @@ function B2BManagePageContent() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${selectMode ? styles.pageSelectMode : ''}`}>
       {/* 검색 및 필터를 상단에 통합 고정하기 위한 컨테이너 */}
       <div className={styles.fixedHeaderContainer}>
         {/* 검색창을 포함한 초록색 헤더 */}

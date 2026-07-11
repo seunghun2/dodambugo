@@ -3,7 +3,7 @@
   margin: 0 auto;
   min-height: 100dvh;
   background: var(--bg-white);
-  padding-top: 0;
+  padding-top: calc(105px + env(safe-area-inset-top, 0px));
   box-sizing: border-box;
   font-family: var(--font-family);
   display: flex;
@@ -11,12 +11,20 @@
   align-items: stretch;
 }
 
-/* 검색창과 필터바를 상단에 고정하는 sticky 래퍼 */
+/* 선택 모드가 켜진 경우 알림바 영역만큼 상단 패딩 확대 */
+.pageSelectMode {
+  padding-top: calc(150px + env(safe-area-inset-top, 0px));
+}
+
+/* 검색창과 필터바를 상단에 고정하는 fixed 래퍼 */
 .fixedHeaderContainer {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 10;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: 480px;
+  z-index: 10;
   background: var(--bg-white);
 }
 
