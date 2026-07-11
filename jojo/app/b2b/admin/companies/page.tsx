@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconPlus, IconX, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice } from '@tabler/icons-react';
 import styles from './companies.module.css';
 
 interface Company {
@@ -20,6 +20,13 @@ export default function CompaniesPage() {
     // 등록 / 수정 모달 상태
     const [modalOpen, setModalOpen] = useState(false);
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+
+    // 정산 내역 모달 상태
+    const [settleModalOpen, setSettleModalOpen] = useState(false);
+    const [settleCompany, setSettleCompany] = useState<Company | null>(null);
+    const [settlements, setSettlements] = useState<any[]>([]);
+    const [settleSummary, setSettleSummary] = useState<any>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
+    const [settleLoading, setSettleLoading] = useState(false);
 
     // 입력 필드 상태
     const [name, setName] = useState('');
@@ -135,6 +142,62 @@ export default function CompaniesPage() {
         }
     };
 
+    // 정산 내역 모달 열기 및 데이터 조회
+    const openSettleModal = (company: Company) => {
+        setSettleCompany(company);
+        setSettleModalOpen(true);
+        fetchSettlements(company.id);
+    };
+
+    const fetchSettlements = async (companyId: string) => {
+        setSettleLoading(true);
+        try {
+            const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}`);
+            if (!res.ok) throw new Error('정산 내역을 가져오는데 실패했습니다.');
+            const data = await res.json();
+            if (data.success) {
+                setSettlements(data.settlements);
+                setSettleSummary(data.summary);
+            } else {
+                alert(data.error || '정산 로드 중 오류 발생');
+            }
+        } catch (err: any) {
+            alert(err.message || '네트워크 오류');
+        } finally {
+            setSettleLoading(false);
+        }
+    };
+
+    // 일괄 송금 처리
+    const handleCompleteSettlement = async (companyId: string) => {
+        if (!confirm('미지급된 모든 정산 수당을 일괄 송금 완료 처리하시겠습니까?\n반드시 실제 은행 송금 완료 후 실행해주세요.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/b2b/admin/companies/settlements', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ companyId })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || '송금 완료 처리에 실패했습니다.');
+            }
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`정상 처리되었습니다. (완료 건수: ${data.updated_count}건)`);
+                fetchSettlements(companyId);
+            } else {
+                alert(data.error || '오류 발생');
+            }
+        } catch (err: any) {
+            alert(err.message || '요청 실패');
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: '#64748b', fontSize: '14px' }}>
@@ -199,6 +262,10 @@ export default function CompaniesPage() {
                                         </td>
                                         <td className={styles.td}>
                                             <div className={styles.rowActions}>
+                                                <button className={styles.settleBtn} onClick={() => openSettleModal(c)}>
+                                                    <IconFileInvoice size={14} style={{ marginRight: '2px' }} />
+                                                    정산 내역
+                                                </button>
                                                 <button className={styles.editBtn} onClick={() => openModal(c)}>
                                                     <IconEdit size={14} style={{ marginRight: '2px' }} />
                                                     수정
@@ -280,6 +347,108 @@ export default function CompaniesPage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* 정산 상세 내역 모달 */}
+            {settleModalOpen && settleCompany && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalCard} style={{ maxWidth: '640px' }}>
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>
+                                [{settleCompany.name}] 정산 상세 내역
+                            </h2>
+                            <button className={styles.closeBtn} onClick={() => setSettleModalOpen(false)}>
+                                <IconX size={18} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '24px' }}>
+                            {/* 통계 요약 박스 */}
+                            <div className={styles.settleSummaryBox}>
+                                <div className={styles.settleSummaryCard}>
+                                    <div className={styles.settleSummaryLabel}>미지급 정산금</div>
+                                    <div className={styles.settleSummaryValue} style={{ color: '#d97706' }}>
+                                        {(settleSummary.pending_amount || 0).toLocaleString()}원
+                                    </div>
+                                </div>
+                                <div className={styles.settleSummaryCard}>
+                                    <div className={styles.settleSummaryLabel}>지급완료 금액</div>
+                                    <div className={styles.settleSummaryValue} style={{ color: '#059669' }}>
+                                        {(settleSummary.completed_amount || 0).toLocaleString()}원
+                                    </div>
+                                </div>
+                                <div className={styles.settleSummaryCard}>
+                                    <div className={styles.settleSummaryLabel}>총 누적 건수</div>
+                                    <div className={styles.settleSummaryValue}>
+                                        {settleSummary.total_count || 0}건
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 상세 내역 테이블 */}
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', marginBottom: '16px' }}>
+                                {settleLoading ? (
+                                    <div style={{ padding: '24px', textAlign: 'center', fontSize: '13px', color: '#64748b' }}>
+                                        정산 내역을 로드하는 중...
+                                    </div>
+                                ) : settlements.length === 0 ? (
+                                    <div style={{ padding: '24px', textAlign: 'center', fontSize: '13px', color: '#94a3b8' }}>
+                                        발생한 화환 정산 내역이 없습니다.
+                                    </div>
+                                ) : (
+                                    <table className={styles.table} style={{ fontSize: '13px' }}>
+                                        <thead>
+                                            <tr>
+                                                <th className={styles.th} style={{ padding: '8px 12px' }}>발생일시</th>
+                                                <th className={styles.th} style={{ padding: '8px 12px' }}>상품/주문자</th>
+                                                <th className={styles.th} style={{ padding: '8px 12px' }}>정산금액</th>
+                                                <th className={styles.th} style={{ padding: '8px 12px' }}>상태</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {settlements.map((s) => (
+                                                <tr key={s.id} className={styles.tr}>
+                                                    <td className={styles.td} style={{ padding: '10px 12px', fontSize: '12px' }}>
+                                                        {new Date(s.created_at).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })}
+                                                    </td>
+                                                    <td className={styles.td} style={{ padding: '10px 12px' }}>
+                                                        {s.order ? (
+                                                            <div>
+                                                                <div style={{ fontWeight: '600' }}>{s.order.product_name}</div>
+                                                                <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                                                    주문자: {s.order.sender_name} | {s.order.funeral_home}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <span style={{ color: '#94a3b8' }}>주문 정보 누락 (ID: {s.order_id})</span>
+                                                        )}
+                                                    </td>
+                                                    <td className={styles.td} style={{ padding: '10px 12px', fontWeight: '600' }}>
+                                                        {s.amount.toLocaleString()}원
+                                                    </td>
+                                                    <td className={styles.td} style={{ padding: '10px 12px' }}>
+                                                        {s.status === 'pending' ? (
+                                                            <span className={`${styles.badge} ${styles.badgePending}`}>정산대기</span>
+                                                        ) : (
+                                                            <span className={`${styles.badge} ${styles.badgeCompleted}`}>송금완료</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+
+                            {/* 송금 완료 처리 버튼 */}
+                            <button
+                                className={styles.completeAllBtn}
+                                onClick={() => handleCompleteSettlement(settleCompany.id)}
+                                disabled={settleLoading || !settleSummary.pending_amount}
+                            >
+                                미지급 정산금 일괄 송금 완료 처리
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
