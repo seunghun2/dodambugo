@@ -510,7 +510,7 @@ export default function SettingsPage() {
                         </div>
 
                         <div className={styles.gridCard} onClick={() => router.push('/b2b/wallet')}>
-                            <span className={styles.gridLabel}>장부{"\n"}관리</span>
+                            <span className={styles.gridLabel}>적립{"\n"}내역</span>
                             <div className={styles.gridIcon}>
                                 <B2BIcon name="wallet" size={20} className={styles.gridIconSvg} />
                             </div>

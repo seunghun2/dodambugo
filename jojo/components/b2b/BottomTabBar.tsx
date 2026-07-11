@@ -8,7 +8,7 @@ import { B2BIcon } from './B2BIcon';
 const tabs = [
   { id: 'home', label: '홈', href: '/b2b/dashboard' },
   { id: 'manage', label: '부고', href: '/b2b/manage' },
-  { id: 'wallet', label: '정산', href: '/b2b/wallet' },
+  { id: 'wallet', label: '적립', href: '/b2b/wallet' },
   { id: 'settings', label: '설정', href: '/b2b/settings' },
 ] as const;
 
