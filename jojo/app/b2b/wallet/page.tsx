@@ -844,14 +844,20 @@ export default function WalletPage() {
                                             style={{
                                                 width: '100%',
                                                 height: '46px',
-                                                padding: '0 12px',
+                                                padding: '0 32px 0 12px',
                                                 borderRadius: '8px',
                                                 border: '1px solid #E1E4ED',
                                                 fontSize: '14px',
                                                 backgroundColor: '#fff',
                                                 color: '#1A1F26',
-                                                appearance: 'auto',
-                                                boxSizing: 'border-box'
+                                                appearance: 'none',
+                                                WebkitAppearance: 'none',
+                                                MozAppearance: 'none',
+                                                boxSizing: 'border-box',
+                                                backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238E94A0\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'/%3e%3c/svg%3e")',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundPosition: 'right 12px center',
+                                                backgroundSize: '16px'
                                             }}
                                             value={editBankName}
                                             onChange={(e) => setEditBankName(e.target.value)}
