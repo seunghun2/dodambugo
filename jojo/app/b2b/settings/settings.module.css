@@ -9,6 +9,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
   box-sizing: border-box;
 }
 

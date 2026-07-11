@@ -10,7 +10,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(108px + env(safe-area-inset-top, 0px));
-  padding-bottom: 20px;
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
 }
 
 /* 헤더와 탭바를 고정하는 fixed 래퍼 */
