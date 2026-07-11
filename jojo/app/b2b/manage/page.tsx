@@ -264,80 +264,73 @@ function B2BManagePageContent() {
 
   return (
     <div className={styles.page}>
-      {/* 검색창을 포함한 초록색 헤더 */}
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div className={styles.searchBar}>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="상주 / 고인을 검색하세요."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <div className={styles.searchIcons}>
-            {searchTerm && (
-              <button className={styles.clearBtn} onClick={() => setSearchTerm('')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            )}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.searchIcon}>
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      {/* 검색 및 필터를 상단에 통합 고정하기 위한 컨테이너 */}
+      <div className={styles.fixedHeaderContainer}>
+        {/* 검색창을 포함한 초록색 헤더 */}
+        <header className={styles.header}>
+          <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
             </svg>
+          </button>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="상주 / 고인을 검색하세요."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className={styles.searchIcons}>
+              {searchTerm && (
+                <button className={styles.clearBtn} onClick={() => setSearchTerm('')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              )}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.searchIcon}>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {selectMode && (
-        <div style={{
-          backgroundColor: '#F2F4F6',
-          color: '#4E5968',
-          padding: '12px 16px',
-          fontSize: '14px',
-          fontWeight: 700,
-          textAlign: 'center',
-          borderBottom: '1px solid #E5E8EB',
-          letterSpacing: '-0.02em',
-          wordBreak: 'keep-all'
-        }}>
-          {selectMode === 'flower' 
-            ? '근조화환을 보낼 부고장을 선택해주세요.' 
-            : '발인 후 자동으로 답례문이 보내집니다.'}
-        </div>
-      )}
+        {selectMode && (
+          <div className={styles.selectModeNotice}>
+            {selectMode === 'flower' 
+              ? '근조화환을 보낼 부고장을 선택해주세요.' 
+              : '발인 후 자동으로 답례문이 보내집니다.'}
+          </div>
+        )}
 
-      {/* 리스트 건수 및 필터 정렬 버튼 */}
-      <div className={styles.listSummary}>
-        <span className={styles.countText}>
-          <em>{filteredList.length}</em> 건의 목록 조회
-        </span>
-        <div className={styles.filterControls}>
-          <button
-            className={styles.filterButton}
-            onClick={() => setShowStatusModal(true)}
-          >
-            {statusFilter === 'all' ? '전체' : statusFilter === 'making' ? '진행중' : '발인완료'}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-          <button
-            className={styles.filterButton}
-            onClick={() => setShowSortModal(true)}
-          >
-            {sortOrder === 'recent' ? '최근일순' : '과거순'}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
+        {/* 리스트 건수 및 필터 정렬 버튼 */}
+        <div className={styles.listSummary}>
+          <span className={styles.countText}>
+            <em>{filteredList.length}</em> 건의 목록 조회
+          </span>
+          <div className={styles.filterControls}>
+            <button
+              className={styles.filterButton}
+              onClick={() => setShowStatusModal(true)}
+            >
+              {statusFilter === 'all' ? '전체' : statusFilter === 'making' ? '진행중' : '발인완료'}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <button
+              className={styles.filterButton}
+              onClick={() => setShowSortModal(true)}
+            >
+              {sortOrder === 'recent' ? '최근일순' : '과거순'}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E94A0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
