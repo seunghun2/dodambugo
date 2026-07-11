@@ -9,16 +9,17 @@ export default function B2BTemplate({ children }: { children: React.ReactNode })
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ x: '12%', opacity: 0.9 }}
+      animate={{ x: 0, opacity: 1 }}
       transition={{ 
-        ease: 'easeInOut', 
-        duration: 0.15 
+        ease: [0.33, 1, 0.68, 1], // iOS 네이티브 감성의 cubic-bezier 곡선
+        duration: 0.24
       }}
       style={{ 
         width: '100%', 
         minHeight: '100vh',
-        position: 'relative'
+        position: 'relative',
+        overflowX: 'hidden'
       }}
     >
       {children}

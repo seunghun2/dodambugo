@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified')
+        .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event')
         .eq('id', userId)
         .single();
 
@@ -77,7 +77,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const allowed = ['company_name', 'owner_name', 'bank_name', 'account_no', 'account_holder'];
+    const allowed = [
+        'company_name', 'owner_name', 'bank_name', 'account_no', 'account_holder',
+        'alarm_all', 'alarm_deceased', 'alarm_reward', 'alarm_referral', 'alarm_order', 'alarm_deposit', 'alarm_notice', 'alarm_event'
+    ];
     const updates: Record<string, any> = {};
     for (const key of allowed) {
         if (body[key] !== undefined) updates[key] = body[key];

@@ -177,6 +177,16 @@ export default function SettingsPage() {
                 setAccountHolder(data.user.account_holder || data.user.owner_name || '');
                 setAccountVerified(!!data.user.bank_name && !!data.user.account_no);
                 
+                // 알림 토글 초기화
+                setAllAlarm(data.user.alarm_all ?? true);
+                setAlarmDeceased(data.user.alarm_deceased ?? true);
+                setAlarmReward(data.user.alarm_reward ?? true);
+                setAlarmReferral(data.user.alarm_referral ?? true);
+                setAlarmOrder(data.user.alarm_order ?? true);
+                setAlarmDeposit(data.user.alarm_deposit ?? true);
+                setAlarmNotice(data.user.alarm_notice ?? true);
+                setAlarmEvent(data.user.alarm_event ?? true);
+
                 // 로컬 스토리지 데이터 최신화
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
             }
@@ -203,6 +213,26 @@ export default function SettingsPage() {
         setView('settings_main');
         if (typeof window !== 'undefined') {
             window.history.replaceState(null, '', '/b2b/settings');
+        }
+    };
+
+    const updateAlarmConfig = async (updates: Record<string, boolean>) => {
+        const token = getToken();
+        if (!token) return;
+        try {
+            const res = await fetch('/api/b2b/me', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(updates),
+            });
+            if (res.ok) {
+                setUser((prev: any) => prev ? { ...prev, ...updates } : prev);
+            }
+        } catch (err) {
+            console.error('알림 설정 저장 오류:', err);
         }
     };
 
@@ -913,12 +943,23 @@ export default function SettingsPage() {
             setAlarmDeposit(val);
             setAlarmNotice(val);
             setAlarmEvent(val);
+            
+            updateAlarmConfig({
+                alarm_all: val,
+                alarm_deceased: val,
+                alarm_reward: val,
+                alarm_referral: val,
+                alarm_order: val,
+                alarm_deposit: val,
+                alarm_notice: val,
+                alarm_event: val
+            });
         };
 
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={handleBackToSettings}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>알림 설정</span>
@@ -943,7 +984,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>부고 신규 등록 및 정보 수정 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmDeceased} onChange={() => setAlarmDeceased(!alarmDeceased)} />
+                            <input type="checkbox" checked={alarmDeceased} onChange={() => {
+                                const val = !alarmDeceased;
+                                setAlarmDeceased(val);
+                                updateAlarmConfig({ alarm_deceased: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -954,7 +999,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>화환 판매 및 이벤트 성공으로 정산금 적립 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmReward} onChange={() => setAlarmReward(!alarmReward)} />
+                            <input type="checkbox" checked={alarmReward} onChange={() => {
+                                const val = !alarmReward;
+                                setAlarmReward(val);
+                                updateAlarmConfig({ alarm_reward: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -965,7 +1014,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>새로운 회원이 추천 코드를 사용해 가입 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmReferral} onChange={() => setAlarmReferral(!alarmReferral)} />
+                            <input type="checkbox" checked={alarmReferral} onChange={() => {
+                                const val = !alarmReferral;
+                                setAlarmReferral(val);
+                                updateAlarmConfig({ alarm_referral: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -976,7 +1029,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>부고장에 부착된 링크로 화환 주문 결제 완료 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmOrder} onChange={() => setAlarmOrder(!alarmOrder)} />
+                            <input type="checkbox" checked={alarmOrder} onChange={() => {
+                                const val = !alarmOrder;
+                                setAlarmOrder(val);
+                                updateAlarmConfig({ alarm_order: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -987,7 +1044,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>환급 출금 신청이 최종 승인 및 완료 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmDeposit} onChange={() => setAlarmDeposit(!alarmDeposit)} />
+                            <input type="checkbox" checked={alarmDeposit} onChange={() => {
+                                const val = !alarmDeposit;
+                                setAlarmDeposit(val);
+                                updateAlarmConfig({ alarm_deposit: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -998,7 +1059,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>새로운 주요 정책 변경이나 전체 공지 등록 시 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmNotice} onChange={() => setAlarmNotice(!alarmNotice)} />
+                            <input type="checkbox" checked={alarmNotice} onChange={() => {
+                                const val = !alarmNotice;
+                                setAlarmNotice(val);
+                                updateAlarmConfig({ alarm_notice: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
@@ -1010,7 +1075,11 @@ export default function SettingsPage() {
                             <span className={styles.rowDesc}>파트너 대상의 프로모션, 정산금 추가 적립 혜택 알림</span>
                         </div>
                         <label className={styles.toggleSwitch}>
-                            <input type="checkbox" checked={alarmEvent} onChange={() => setAlarmEvent(!alarmEvent)} />
+                            <input type="checkbox" checked={alarmEvent} onChange={() => {
+                                const val = !alarmEvent;
+                                setAlarmEvent(val);
+                                updateAlarmConfig({ alarm_event: val });
+                            }} />
                             <span className={styles.slider}></span>
                         </label>
                     </div>
