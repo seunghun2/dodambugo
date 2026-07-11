@@ -4,6 +4,7 @@
   min-height: 100dvh;
   background: var(--bg-white);
   padding-top: calc(105px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--b2b-bottom-bar-height, 60px) + 30px);
   box-sizing: border-box;
   font-family: var(--font-family);
   display: flex;
@@ -20,8 +21,9 @@
 .fixedHeaderContainer {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 480px;
   z-index: 10;
