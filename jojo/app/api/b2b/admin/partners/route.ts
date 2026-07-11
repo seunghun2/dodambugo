@@ -8,7 +8,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// GET: B2B 파트너 목록 조회
+// GET: B2B 파트너 목록 조회 (부고장 건수, 누적 열람수, 누적 화환 판매건수 실시간 집계 추가)
 export async function GET(request: NextRequest) {
     const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
     if (!isAdmin) {
@@ -58,25 +58,62 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        // 각 파트너별 최근 부고 생성 일시 조회 (b2b_user_id 별로 그룹화)
-        const { data: latestBugos, error: bugoError } = await supabase
+        // 3. 모든 부고장(bugo) 목록 조회 (삭제되지 않은 건)
+        const { data: bugos, error: bugoError } = await supabase
             .from('bugo')
-            .select('b2b_user_id, created_at')
+            .select('id, b2b_user_id, view_count, created_at')
             .is('deleted_at', null)
             .not('b2b_user_id', 'is', null);
 
         if (bugoError) {
-            console.error('B2B 파트너 최근 부고 조회 중 오류:', bugoError);
+            console.error('B2B 파트너 부고 조회 중 오류:', bugoError);
         }
 
-        const latestBugoMap: Record<string, string> = {};
-        if (latestBugos) {
-            latestBugos.forEach((b: any) => {
-                const userId = b.b2b_user_id;
-                if (!userId) return;
+        const bugoCountMap = new Map<string, number>();
+        const bugoViewMap = new Map<string, number>();
+        const bugoToUserMap = new Map<string, string>(); // bugo_id -> b2b_user_id 매핑용
+        const latestBugoMap = new Map<string, string>(); // b2b_user_id -> 최근부고일시
+
+        if (bugos) {
+            bugos.forEach((b: any) => {
+                const userId = String(b.b2b_user_id);
+                const bugoId = String(b.id);
+
+                // 부고장 개수 누적
+                bugoCountMap.set(userId, (bugoCountMap.get(userId) || 0) + 1);
+                // 누적 조회수 합산
+                bugoViewMap.set(userId, (bugoViewMap.get(userId) || 0) + (b.view_count || 0));
+                
+                // 매핑 정보 보관
+                bugoToUserMap.set(bugoId, userId);
+
+                // 최근 부고 개설일 갱신
                 const date = b.created_at;
-                if (!latestBugoMap[userId] || new Date(date) > new Date(latestBugoMap[userId])) {
-                    latestBugoMap[userId] = date;
+                const prevDate = latestBugoMap.get(userId);
+                if (!prevDate || new Date(date) > new Date(prevDate)) {
+                    latestBugoMap.set(userId, date);
+                }
+            });
+        }
+
+        // 4. 승인된 화환 주문(flower_orders) 조회
+        const { data: flowerOrders, error: flowerError } = await supabase
+            .from('flower_orders')
+            .select('id, bugo_id')
+            .eq('status', 'approved');
+
+        if (flowerError) {
+            console.error('B2B 파트너 화환 판매 내역 조회 오류:', flowerError);
+        }
+
+        const flowerSoldCountMap = new Map<string, number>();
+        if (flowerOrders) {
+            flowerOrders.forEach((o: any) => {
+                if (o.bugo_id) {
+                    const userId = bugoToUserMap.get(String(o.bugo_id));
+                    if (userId) {
+                        flowerSoldCountMap.set(userId, (flowerSoldCountMap.get(userId) || 0) + 1);
+                    }
                 }
             });
         }
@@ -94,7 +131,10 @@ export async function GET(request: NextRequest) {
             status: p.status,
             created_at: p.created_at,
             balance: balanceMap.get(String(p.id)) || 0,
-            last_bugo_at: latestBugoMap[p.id] || null,
+            last_bugo_at: latestBugoMap.get(String(p.id)) || null,
+            bugo_count: bugoCountMap.get(String(p.id)) || 0,
+            total_views: bugoViewMap.get(String(p.id)) || 0,
+            flower_sold_count: flowerSoldCountMap.get(String(p.id)) || 0,
             alarm_all: p.alarm_all,
             alarm_deposit: p.alarm_deposit,
             alarm_deceased: p.alarm_deceased,
@@ -158,15 +198,15 @@ export async function PATCH(request: NextRequest) {
             try {
                 const partnerPhone = data.phone.replace(/-/g, '');
                 const msg = `[부고온] 파트너 가입 승인 완료 안내
-
+ 
 안녕하세요, ${data.company_name} ${data.owner_name} 파트너님.
 부고온 파트너 가입 승인이 완료되었습니다.
-
+ 
 이제 파트너 앱에 로그인하여 모바일 부고장 개설 및 수당 적립 혜택을 이용하실 수 있습니다.
-
+ 
 ■ 파트너 로그인: https://bugoon.co.kr/b2b/login
 ■ 추천 코드: ${data.my_referral_code}
-
+ 
 이용해주셔서 감사합니다.`;
                 
                 await sendLMS(partnerPhone, '[부고온] 파트너 승인 완료', msg);
@@ -209,18 +249,18 @@ export async function POST(request: NextRequest) {
         }
 
         const defaultPassword = '00000000';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(defaultPassword, salt);
 
         const { error } = await supabase
             .from('b2b_users')
-            .update({ password_hash: hashedPassword })
+            .update({ password_hash: passwordHash })
             .eq('id', partnerId);
 
         if (error) throw error;
 
-        console.log(`🔑 B2B 파트너 비밀번호 초기화: ID=${partnerId}`);
-
-        return NextResponse.json({ success: true, tempPassword: defaultPassword });
+        console.log(`✅ B2B 파트너 비밀번호 초기화 성공: ID=${partnerId}`);
+        return NextResponse.json({ success: true, message: '비밀번호가 00000000으로 초기화되었습니다.' });
     } catch (error: any) {
         console.error('B2B 파트너 비밀번호 초기화 API 오류:', error);
         return NextResponse.json({ error: '비밀번호 초기화에 실패했습니다.' }, { status: 500 });

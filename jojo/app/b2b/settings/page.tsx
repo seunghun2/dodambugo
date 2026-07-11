@@ -57,6 +57,7 @@ interface User {
     account_holder?: string;
     my_referral_code: string;
     avatar_url?: string;
+    company_id?: string;
 }
 
 export default function SettingsPage() {
@@ -1856,7 +1857,7 @@ export default function SettingsPage() {
                                         <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>{hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}</td>
                                         <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>확인일자</td>
                                         <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>
-                                            {hasPending ? '확정 대기 중' : formatDate(settleDetails[0]?.payment_date)}
+                                            {hasPending || !settleDetails[0]?.payment_date ? '확정 대기 중' : new Date(settleDetails[0].payment_date).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
                                         </td>
                                         <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>합계 금액</td>
                                         <td style={{ border: '1px solid #000000', padding: '6px', fontWeight: 'bold', color: '#000000' }}>

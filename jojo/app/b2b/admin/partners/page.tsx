@@ -31,6 +31,9 @@ interface Partner {
     alarm_deceased?: boolean;
     alarm_notice?: boolean;
     company_id?: string | null;
+    bugo_count?: number;
+    total_views?: number;
+    flower_sold_count?: number;
 }
 
 export default function PartnersPage() {
@@ -269,7 +272,7 @@ export default function PartnersPage() {
             return;
         }
 
-        const headers = ['가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', '예치금 잔고', '나의 추천인 코드', '가입상태', '최근 들어온 일시'];
+        const headers = ['가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', '예치금 잔고', '나의 추천인 코드', '가입상태', '부고장 제작 건수', '부고장 누적 열람수', '누적 화환 판매건수', '최근 들어온 일시'];
         const rows = partners.map(p => [
             formatDate(p.created_at),
             p.company_name,
@@ -281,6 +284,9 @@ export default function PartnersPage() {
             String(p.balance),
             p.my_referral_code,
             p.status === 'pending' ? '승인대기' : p.status === 'approved' ? '승인완료' : p.status === 'rejected' ? '가입반려' : '계정차단',
+            String(p.bugo_count || 0),
+            String(p.total_views || 0),
+            String(p.flower_sold_count || 0),
             p.last_bugo_at ? formatDate(p.last_bugo_at) : '-'
         ]);
 
@@ -376,6 +382,9 @@ export default function PartnersPage() {
                                     <th>추천인 코드</th>
                                     <th>알림 동의 설정</th>
                                     <th>상태</th>
+                                    <th>부고 제작</th>
+                                    <th>부고 열람</th>
+                                    <th>화환 판매</th>
                                     <th>최근 들어온 일시</th>
                                     <th>액션</th>
                                 </tr>
@@ -439,6 +448,15 @@ export default function PartnersPage() {
                                             </div>
                                         </td>
                                         <td>{getStatusBadge(partner.status)}</td>
+                                        <td style={{ fontWeight: '500', color: '#334155', textAlign: 'center' }}>
+                                            {partner.bugo_count || 0}건
+                                        </td>
+                                        <td style={{ color: '#475569', textAlign: 'center' }}>
+                                            {(partner.total_views || 0).toLocaleString()}회
+                                        </td>
+                                        <td style={{ fontWeight: '600', color: '#0f172a', textAlign: 'center' }}>
+                                            {partner.flower_sold_count || 0}건
+                                        </td>
                                         <td style={{ fontSize: '13px', color: '#64748b' }}>
                                             {partner.last_bugo_at ? formatDate(partner.last_bugo_at) : '-'}
                                         </td>
