@@ -88,8 +88,13 @@ export default function B2BNotificationsPage() {
 
   // 알림 클릭 시 해당 페이지로 이동 + 읽음 처리
   const handleNotificationClick = async (item: NotificationItem) => {
-    // 읽음 처리 (비동기, 에러 무시)
+    // 1. 화면 상의 상태 즉시 비활성화(회색) 처리
     if (!item.is_read) {
+      setNotifications(prev =>
+        prev.map(n => n.id === item.id ? { ...n, is_read: true } : n)
+      );
+
+      // 서버에 비동기로 읽음 처리 전송
       const token = localStorage.getItem('b2b_token');
       fetch(`/api/b2b/notifications/${item.id}/read`, {
         method: 'PATCH',
@@ -97,10 +102,39 @@ export default function B2BNotificationsPage() {
       }).catch(() => {});
     }
 
-    // data.url이 있으면 해당 페이지로 이동
-    const url = item.data?.url;
-    if (url) {
-      router.push(url);
+    // 2. 알림 타입별 이동 처리 (1순위: data.url, 2순위: 수동 맵핑)
+    let targetUrl = item.data?.url;
+
+    if (!targetUrl) {
+      switch (item.type) {
+        case 'condolence_earned':
+        case 'flower_commission':
+        case 'flower_order':
+        case 'flower_delivery_completed':
+          targetUrl = '/b2b/wallet'; // 수당 및 정산(지갑) 페이지로 이동
+          break;
+        case 'notice':
+          targetUrl = '/b2b/notice'; // 공지사항 상세 목록
+          break;
+        case 'referral_signup':
+          targetUrl = '/b2b/settings'; // 추천인 조회가 가능한 마이페이지/설정
+          break;
+        case 'funeral_reminder':
+          const alarmData = item.data as any;
+          const bugoId = alarmData?.bugo_id || alarmData?.id;
+          targetUrl = bugoId ? `/view/${bugoId}` : '/b2b/dashboard'; // 고인 부고장으로 이동
+          break;
+        case 'signup_approved':
+        case 'new_funeral':
+        default:
+          targetUrl = undefined; // 가입 승인 및 신규 부고 알림은 이동 없이 꺼지기(비활성화)만 함
+          break;
+      }
+    }
+
+    // 3. 페이지 위치 이동
+    if (targetUrl) {
+      router.push(targetUrl);
     }
   };
 
@@ -147,7 +181,7 @@ export default function B2BNotificationsPage() {
           <div className={styles.noticeList}>
             {notifications.map((item) => {
               const typeInfo = getTypeIconAndClass(item.type);
-              const hasLink = !!item.data?.url;
+              const hasLink = !!item.data?.url || !['signup_approved', 'new_funeral'].includes(item.type || '');
 
               // 인라인 스타일을 배제하고 className 조합
               const itemClassName = [
