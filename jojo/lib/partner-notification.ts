@@ -121,7 +121,7 @@ export async function sendPartnerNotification(
     // 3. 파트너 알림 설정 조회
     const { data: partner } = await supabase
       .from('b2b_users')
-      .select('alarm_all, alarm_deposit, alarm_deceased, alarm_notice, phone')
+      .select('alarm_all, alarm_deposit, alarm_deceased, alarm_notice, alarm_referral, alarm_reward, alarm_order, alarm_event, phone')
       .eq('id', partnerId)
       .single();
 
@@ -136,8 +136,10 @@ export async function sendPartnerNotification(
       'settlement': 'alarm_deposit',
       'new_funeral': 'alarm_deceased',
       'delivery_complete': 'alarm_deceased',
+      'funeral_reminder': 'alarm_deceased',
       'notice': 'alarm_notice',
-      'signup_approved': 'alarm_notice', // 가입 승인은 항상 보냄
+      'signup_approved': 'alarm_notice',
+      'referral_signup': 'alarm_referral',
     };
 
     const alarmField = alarmMap[eventType];
