@@ -6,6 +6,47 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
 
+const BANKS = [
+    { code: '004', name: '국민은행', prefix: ['9'], fmt: [6, 2, 6] },
+    { code: '088', name: '신한은행', prefix: ['110', '140'], fmt: [3, 3, 6] },
+    { code: '020', name: '우리은행', prefix: ['1002', '1005'], fmt: [4, 3, 6] },
+    { code: '081', name: '하나은행', prefix: ['910'], fmt: [3, 6, 5] },
+    { code: '011', name: 'NH농협은행', prefix: ['351', '302'], fmt: [3, 4, 4, 2] },
+    { code: '003', name: 'IBK기업은행', prefix: ['01', '02'], fmt: [3, 6, 2, 3] },
+    { code: '023', name: 'SC제일은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '027', name: '씨티은행', prefix: [], fmt: [3, 6, 3] },
+    { code: '039', name: '경남은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '034', name: '광주은행', prefix: [], fmt: [3, 3, 6] },
+    { code: '031', name: '대구은행', prefix: [], fmt: [3, 2, 6, 1] },
+    { code: '032', name: '부산은행', prefix: [], fmt: [3, 4, 4, 2] },
+    { code: '037', name: '전북은행', prefix: [], fmt: [3, 2, 6] },
+    { code: '035', name: '제주은행', prefix: [], fmt: [2, 2, 6] },
+    { code: '090', name: '카카오뱅크', prefix: ['3333'], fmt: [4, 2, 7] },
+    { code: '092', name: '토스뱅크', prefix: ['1000'], fmt: [4, 4, 4] },
+    { code: '089', name: '케이뱅크', prefix: ['100'], fmt: [3, 3, 6] },
+];
+
+function formatAccountNo(raw: string, bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank || !raw) return raw;
+    const digits = raw.replace(/[^0-9]/g, '');
+    const parts: string[] = [];
+    let idx = 0;
+    for (const len of bank.fmt) {
+        if (idx >= digits.length) break;
+        parts.push(digits.slice(idx, idx + len));
+        idx += len;
+    }
+    if (idx < digits.length) parts.push(digits.slice(idx));
+    return parts.join('-');
+}
+
+function getPlaceholder(bankName: string): string {
+    const bank = BANKS.find((b) => b.name === bankName);
+    if (!bank) return '계좌번호 입력';
+    return bank.fmt.map((n) => '0'.repeat(n)).join('-');
+}
+
 interface Transaction {
     id: string;
     amount: number;
@@ -31,6 +72,11 @@ export default function WalletPage() {
     const [accountNo, setAccountNo] = useState<string | null>(null);
     const [accountHolder, setAccountHolder] = useState<string | null>(null);
     const [showAccountModal, setShowAccountModal] = useState(false);
+    const [editBankName, setEditBankName] = useState('');
+    const [editAccountNo, setEditAccountNo] = useState('');
+    const [editAccountHolder, setEditAccountHolder] = useState('');
+    const [isEditingAccount, setIsEditingAccount] = useState(false);
+    const [accountVerifyLoading, setAccountVerifyLoading] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -127,6 +173,65 @@ export default function WalletPage() {
             setError('환급 신청 중 오류가 발생했습니다.');
         } finally {
             setWithdrawing(false);
+        }
+    };
+
+    const verifyAndSaveAccount = async () => {
+        if (!editBankName || !editAccountNo || !editAccountHolder) {
+            alert('은행, 계좌번호, 예금주를 모두 입력해 주세요.');
+            return;
+        }
+        setAccountVerifyLoading(true);
+
+        try {
+            const bank = BANKS.find((b) => b.name === editBankName);
+            if (!bank) {
+                alert('올바른 은행을 선택해 주세요.');
+                return;
+            }
+            // 1. 계좌 실명 확인
+            const verifyRes = await fetch('/api/verify-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bankCd: bank.code,
+                    accountNo: editAccountNo.replace(/[^0-9]/g, ''),
+                    holderName: editAccountHolder,
+                }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (!verifyData.success) {
+                alert(verifyData.message || '계좌 실명 확인에 실패했습니다. 정보를 다시 확인해 주세요.');
+                return;
+            }
+
+            // 2. 인증 성공 시 즉시 DB 업데이트
+            const token = getToken();
+            const res = await fetch('/api/b2b/me', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    bank_name: editBankName,
+                    account_no: editAccountNo,
+                    account_holder: editAccountHolder
+                })
+            });
+
+            if (res.ok) {
+                alert('정산 계좌 정보가 안전하게 변경되었습니다.');
+                setIsEditingAccount(false);
+                fetchWallet();
+            } else {
+                alert('계좌 정보 수정에 실패했습니다.');
+            }
+        } catch {
+            alert('오류가 발생했습니다. 다시 시도해 주세요.');
+        } finally {
+            setAccountVerifyLoading(false);
         }
     };
 
@@ -649,7 +754,10 @@ export default function WalletPage() {
                                             }}
                                             onClick={() => {
                                                 setShowAccountModal(false);
-                                                router.push('/b2b/wallet/verify');
+                                                setEditBankName(bankName || '');
+                                                setEditAccountNo(accountNo || '');
+                                                setEditAccountHolder(accountHolder || '');
+                                                setIsEditingAccount(true);
                                             }}
                                         >
                                             계좌 정보 변경하기
@@ -675,7 +783,10 @@ export default function WalletPage() {
                                             }}
                                             onClick={() => {
                                                 setShowAccountModal(false);
-                                                router.push('/b2b/wallet/verify');
+                                                setEditBankName('');
+                                                setEditAccountNo('');
+                                                setEditAccountHolder('');
+                                                setIsEditingAccount(true);
                                             }}
                                         >
                                             정산계좌 등록하러 가기
@@ -686,6 +797,143 @@ export default function WalletPage() {
 
                             <button className={styles.bottomSheetCancel} onClick={() => setShowAccountModal(false)}>
                                 닫기
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 정산계좌 변경/등록 모달 */}
+            <AnimatePresence>
+                {isEditingAccount && (
+                    <motion.div 
+                        className={styles.bottomSheetOverlay} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsEditingAccount(false)}
+                    >
+                        <motion.div 
+                            className={styles.bottomSheetContainer}
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                            drag="y"
+                            dragConstraints={{ top: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(event, info) => {
+                                if (info.offset.y > 100) {
+                                    setIsEditingAccount(false);
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={styles.dragHandle} />
+                            <div className={styles.bottomSheetHeader}>
+                                <h3 className={styles.bottomSheetTitle}>정산 계좌 정보 설정</h3>
+                            </div>
+                            
+                            <div style={{ textAlign: 'left', width: '100%', boxSizing: 'border-box' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
+                                    
+                                    {/* 은행 선택 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+                                        <span style={{ fontSize: '13px', color: '#8E94A0', fontWeight: 600 }}>은행</span>
+                                        <select
+                                            style={{
+                                                width: '100%',
+                                                height: '46px',
+                                                padding: '0 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #E1E4ED',
+                                                fontSize: '14px',
+                                                backgroundColor: '#fff',
+                                                color: '#1A1F26',
+                                                appearance: 'auto',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            value={editBankName}
+                                            onChange={(e) => setEditBankName(e.target.value)}
+                                        >
+                                            <option value="">은행을 선택해 주세요</option>
+                                            {BANKS.map((b) => (
+                                                <option key={b.code} value={b.name}>
+                                                    {b.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* 계좌번호 입력 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+                                        <span style={{ fontSize: '13px', color: '#8E94A0', fontWeight: 600 }}>계좌번호</span>
+                                        <input 
+                                            type="text" 
+                                            style={{
+                                                width: '100%',
+                                                height: '46px',
+                                                padding: '0 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #E1E4ED',
+                                                fontSize: '14px',
+                                                color: '#1A1F26',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            placeholder={editBankName ? getPlaceholder(editBankName) : '계좌번호 입력'} 
+                                            value={editBankName ? formatAccountNo(editAccountNo, editBankName) : editAccountNo}
+                                            onChange={(e) => setEditAccountNo(e.target.value.replace(/[^0-9]/g, ''))}
+                                        />
+                                    </div>
+
+                                    {/* 예금주 입력 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+                                        <span style={{ fontSize: '13px', color: '#8E94A0', fontWeight: 600 }}>예금주</span>
+                                        <input 
+                                            type="text" 
+                                            style={{
+                                                width: '100%',
+                                                height: '46px',
+                                                padding: '0 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #E1E4ED',
+                                                fontSize: '14px',
+                                                color: '#1A1F26',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            placeholder="예금주 성명" 
+                                            value={editAccountHolder}
+                                            onChange={(e) => setEditAccountHolder(e.target.value)}
+                                        />
+                                    </div>
+
+                                    {/* 저장 버튼 */}
+                                    <button
+                                        style={{
+                                            width: '100%',
+                                            height: '48px',
+                                            backgroundColor: (!editBankName || !editAccountNo || !editAccountHolder || accountVerifyLoading) ? '#E1E4ED' : '#3A8F47',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            color: (!editBankName || !editAccountNo || !editAccountHolder || accountVerifyLoading) ? '#8E94A0' : '#ffffff',
+                                            fontWeight: 600,
+                                            fontSize: '15px',
+                                            marginTop: '16px',
+                                            cursor: 'pointer',
+                                            boxSizing: 'border-box',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        onClick={verifyAndSaveAccount}
+                                        disabled={accountVerifyLoading || !editBankName || !editAccountNo || !editAccountHolder}
+                                    >
+                                        {accountVerifyLoading ? '실명 확인 중...' : '실명 확인 후 저장하기'}
+                                    </button>
+
+                                </div>
+                            </div>
+
+                            <button className={styles.bottomSheetCancel} onClick={() => setIsEditingAccount(false)}>
+                                취소
                             </button>
                         </motion.div>
                     </motion.div>
