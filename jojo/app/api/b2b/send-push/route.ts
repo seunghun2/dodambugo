@@ -66,7 +66,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 푸시 알림 발송
+    // 1. b2b_notifications 테이블에 알림 수신함 내역 실시간 insert 적재
+    const { error: insertError } = await supabase
+      .from('b2b_notifications')
+      .insert({
+        partner_id,
+        title,
+        content: pushBody,
+        is_read: false
+      });
+
+    if (insertError) {
+      console.error('B2B 알림 수신함 기록 실패:', insertError);
+    }
+
+    // 2. FCM 실제 기기 푸시 알림 발송 (FCM 토큰 대상)
     const result = await sendPushToPartner(partner_id, title, pushBody, data);
 
     return NextResponse.json({
