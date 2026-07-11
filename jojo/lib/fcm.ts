@@ -28,7 +28,18 @@ function initFirebaseAdmin(): void {
   }
 
   // Vercel 환경 변수 등록 시 생기는 줄바꿈(\\n) 이스케이프 이중 변환 처리
-  const formattedKey = serviceAccountKey.replace(/\\n/g, '\n');
+  let formattedKey = serviceAccountKey.replace(/\\n/g, '\n');
+
+  // JSON 문자열 리터럴 내부의 실제 개행 문자(0x0A)가 파싱 에러를 내지 않도록 \\n 으로 이스케이프 처리
+  try {
+    JSON.parse(formattedKey);
+  } catch (err) {
+    formattedKey = formattedKey.replace(/"private_key"\s*:\s*"([^"]+)"/g, (match, p1) => {
+      const escapedPrivateKey = p1.replace(/\n/g, '\\n');
+      return `"private_key": "${escapedPrivateKey}"`;
+    });
+  }
+
   const serviceAccount: ServiceAccount = JSON.parse(formattedKey);
   initializeApp({
     credential: cert(serviceAccount),
