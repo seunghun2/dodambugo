@@ -172,15 +172,18 @@ export default function DashboardPage() {
               right: '2px',
               backgroundColor: '#ef4444',
               color: '#ffffff',
-              borderRadius: '50%',
-              width: '16px',
+              borderRadius: '10px',
+              minWidth: '16px',
               height: '16px',
+              padding: '0 4px',
+              width: 'auto',
               fontSize: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 'bold',
-              border: '2px solid #ffffff'
+              border: '2px solid #ffffff',
+              boxSizing: 'border-box'
             }}>
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>

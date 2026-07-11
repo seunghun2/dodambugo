@@ -6,7 +6,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(52px + env(safe-area-inset-top, 47px));
-  padding-bottom: 72px;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 16px));
 }
 
 /* 헤더 */
