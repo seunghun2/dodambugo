@@ -13,6 +13,18 @@ export async function POST(request: NextRequest) {
         // 전화번호 정리 (하이픈 제거)
         const cleanPhone = phone.replace(/-/g, '');
 
+        // 해외 번호(11자리가 아님)이거나 특정 테스트/데모 번호의 경우 인증 우회 처리
+        const isTestOrForeign = cleanPhone.length !== 11 || cleanPhone === '01012345678' || cleanPhone === '01064262393' || cleanPhone === '01088889999';
+
+        if (isTestOrForeign) {
+            verificationCodes.set(cleanPhone, {
+                code: '123456',
+                expires: Date.now() + 30 * 60 * 1000, // 30분 유효
+            });
+            console.log(`📱 [TEST MOCK] 해외 또는 데모 번호 인증코드 강제 세팅: ${cleanPhone} → 123456`);
+            return NextResponse.json({ success: true, message: '인증번호가 발송되었습니다' });
+        }
+
         if (cleanPhone.length !== 11) {
             return NextResponse.json({ error: '올바른 전화번호를 입력해주세요' }, { status: 400 });
         }
@@ -31,16 +43,6 @@ export async function POST(request: NextRequest) {
         const host = request.headers.get('host') || '';
         const isB2B = host.includes('bugoon') || host.includes('partner') || host.includes('b2b') || referer.includes('/b2b');
         const brand = isB2B ? '부고온' : '마음부고';
-
-        // 테스트 번호(01088889999) 예외 처리
-        if (cleanPhone === '01088889999') {
-            verificationCodes.set(cleanPhone, {
-                code: '123456',
-                expires: Date.now() + 30 * 60 * 1000, // 30분 유효
-            });
-            console.log(`📱 [TEST MOCK] 인증번호 강제 세팅: ${cleanPhone} → 123456`);
-            return NextResponse.json({ success: true, message: '인증번호가 발송되었습니다' });
-        }
 
         // SMS 발송
         await sendSMS(cleanPhone, `[${brand}] 인증번호 [${code}]를 입력해주세요.`);
