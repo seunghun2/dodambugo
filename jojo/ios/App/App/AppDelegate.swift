@@ -21,13 +21,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // APNs 토큰 수신 시 FCM에 전달
+    // APNs 토큰 수신 시 FCM 및 Capacitor에 전달
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
+        
+        // 1. Capacitor 플러그인에 등록 통지 전달
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+        
+        // 2. FCM 실물 토큰을 구해 웹뷰에 직접 강제 주입
+        Messaging.messaging().token { token, error in
+            if let token = token {
+                print("FCM 토큰 획득 성공: \(token)")
+                DispatchQueue.main.async {
+                    if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
+                        bridge.webView?.evaluateJavaScript("window.__fcmToken = '\(token)'", completionHandler: nil)
+                    }
+                }
+            } else if let error = error {
+                print("FCM 토큰 획득 실패: \(error.localizedDescription)")
+            }
+        }
     }
 
-    // 원격 알림 등록 실패 시 에러 로그
+    // 원격 알림 등록 실패 시 에러 로그 및 Capacitor 통지
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
         print("푸시 알림 등록 실패: \(error.localizedDescription)")
     }
 

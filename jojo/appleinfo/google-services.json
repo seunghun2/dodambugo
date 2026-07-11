@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "748504812767",
+    "project_id": "bugoapp-23680",
+    "storage_bucket": "bugoapp-23680.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748504812767:android:f0d70b17b564e444fd2d6a",
+        "android_client_info": {
+          "package_name": "kr.co.bugoapp.partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ucwPvsHK6JZbQB5sKVwk4sWt9uZCZrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748504812767:android:f416f97a1cdefcccfd2d6a",
+        "android_client_info": {
+          "package_name": "kr.co.maeumbugo.bugoon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ucwPvsHK6JZbQB5sKVwk4sWt9uZCZrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

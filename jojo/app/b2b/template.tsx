@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export default function B2BTemplate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+  const [direction, setDirection] = useState<'forward' | 'backward' | 'instant'>('instant');
   const [prevPath, setPrevPath] = useState<string>('');
 
   useEffect(() => {
@@ -22,22 +22,18 @@ export default function B2BTemplate({ children }: { children: React.ReactNode })
     const prevTabIdx = TAB_ROUTES.indexOf(prevPath);
     const currTabIdx = TAB_ROUTES.indexOf(pathname);
 
-    // 1. 둘 다 하단 탭 메뉴 영역인 경우: 배치 순서(인덱스) 크기로 슬라이딩 방향 결정
+    // 1. 둘 다 하단 탭바 영역 간의 전환인 경우: 복잡한 좌우 슬라이드 배제 (즉시 전환)
     if (prevTabIdx !== -1 && currTabIdx !== -1) {
-      if (currTabIdx < prevTabIdx) {
-        setDirection('backward');
-      } else {
-        setDirection('forward');
-      }
+      setDirection('instant');
     } else {
-      // 2. 서브 페이지가 끼어 있는 일반 라우팅의 경우: 브라우저 히스토리 스택 추적
+      // 2. 서브 페이지가 낀 진입/이탈 라우팅의 경우: 슬라이드 애니메이션 작동
       const historyStr = sessionStorage.getItem('b2b_route_history');
       let history: string[] = historyStr ? JSON.parse(historyStr) : [];
 
       if (history.length === 0) {
         history.push(pathname);
         sessionStorage.setItem('b2b_route_history', JSON.stringify(history));
-        setDirection('forward');
+        setDirection('instant');
         setPrevPath(pathname);
         return;
       }
@@ -65,17 +61,19 @@ export default function B2BTemplate({ children }: { children: React.ReactNode })
     setPrevPath(pathname);
   }, [pathname, prevPath]);
 
-  // 네이티브 앱 조작감: 앞으로 갈 때는 오른쪽(30%)에서, 뒤로 갈 때는 왼쪽(-30%)에서 등장
-  const startX = direction === 'forward' ? '30%' : '-30%';
+  // instant 일 때는 x축 밀림 없이 즉각 100% 투명도로 노출
+  const startX = direction === 'instant' ? 0 : (direction === 'forward' ? '100%' : '-100%');
+  const duration = direction === 'instant' ? 0 : 0.28;
+  const initialOpacity = direction === 'instant' ? 1.0 : 0.95;
 
   return (
     <motion.div
       key={pathname}
-      initial={{ x: startX, opacity: 0.95 }}
+      initial={{ x: startX, opacity: initialOpacity }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ 
         ease: [0.33, 1, 0.68, 1], // iOS 네이티브 스프링 감성의 속도 곡선
-        duration: 0.28
+        duration: duration
       }}
       style={{ 
         width: '100%', 

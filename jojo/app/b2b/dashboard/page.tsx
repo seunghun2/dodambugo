@@ -238,6 +238,32 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* 수동 알림 연동 테스트 도구 */}
+      <section className={styles.section}>
+        <div className={styles.referralRow} style={{ background: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: '8px' }}>
+          <div>
+            <span className={styles.referralLabel} style={{ color: '#495057' }}>알림이 오지 않을 때</span>
+            <span className={styles.referralCode} style={{ fontSize: '13px', color: '#868e96', fontWeight: 'normal' }}>기기 알림 설정을 새로고침합니다.</span>
+          </div>
+          <button 
+            className={styles.copyBtn} 
+            onClick={async () => {
+              if (user) {
+                try {
+                  await registerPushNotifications(user.id);
+                  alert('알림 연동을 새로고침했습니다! 이제 푸시 전송을 다시 요청해 주십시오.');
+                } catch (e: any) {
+                  alert('에러: ' + e.message);
+                }
+              }
+            }}
+            style={{ backgroundColor: '#2b2b2b', color: '#fff' }}
+          >
+            수동 연동
+          </button>
+        </div>
+      </section>
+
       {/* 추천 코드 */}
       <section className={styles.section}>
         <div className={styles.referralRow}>

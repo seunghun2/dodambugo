@@ -38,26 +38,38 @@ export async function registerPushNotifications(partnerId: string): Promise<void
   try {
     // 푸시 알림 권한 요청
     const permission = await PushNotifications.requestPermissions();
+    console.log('[Push] 알림 권한 상태:', permission.receive);
 
     if (permission.receive !== 'granted') {
       console.warn('푸시 알림 권한이 거부되었습니다.');
       return;
     }
 
-    // 푸시 알림 등록
-    await PushNotifications.register();
+    // ⚠️ 중요: 리스너를 register() 보다 먼저 등록해야 함!
+    // register() 호출 즉시 APNs 토큰이 반환되므로, 리스너가 없으면 이벤트를 놓침
 
-    // FCM FCM 토큰 수신 리스너
+    // FCM 토큰 수신 리스너 (가장 먼저 등록)
     await PushNotifications.addListener('registration', async (token) => {
-      console.log('FCM 토큰 수신:', token.value);
+      console.log('[Push] Capacitor 토큰 수신 (APNs):', token.value.substring(0, 15) + '...');
+
+      // Capacitor 플러그인은 APNs 토큰을 반환하지만, 서버는 FCM 토큰이 필요함
+      // 네이티브에서 window.__fcmToken에 FCM 토큰을 주입해줄 때까지 잠시 대기
+      let fcmToken = (window as any).__fcmToken;
+      if (!fcmToken) {
+        for (let i = 0; i < 30; i++) {
+          await new Promise(r => setTimeout(r, 100));
+          fcmToken = (window as any).__fcmToken;
+          if (fcmToken) break;
+        }
+      }
+
+      const finalToken = fcmToken || token.value;
+      console.log('[Push] 서버 전송 토큰:', fcmToken ? 'FCM' : 'APNs', finalToken.substring(0, 15) + '...');
 
       try {
         const b2bToken = getB2BToken();
-        const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
-          ? '' 
-          : 'https://maeumbugo.vercel.app';
         
-        const res = await fetch(`${baseUrl}/api/b2b/push-token`, {
+        const res = await fetch('/api/b2b/push-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -66,22 +78,24 @@ export async function registerPushNotifications(partnerId: string): Promise<void
           credentials: 'include',
           body: JSON.stringify({
             partner_id: partnerId,
-            fcm_token: token.value,
+            fcm_token: finalToken,
             platform: Capacitor.getPlatform(),
           }),
         });
 
-        if (!res.ok) {
-          console.error('FCM 토큰 서버 전송 실패:', res.status);
+        if (res.ok) {
+          console.log('[Push] FCM 토큰 서버 전송 완료');
+        } else {
+          console.error('[Push] 서버 전송 실패 - 응답코드:', res.status);
         }
-      } catch (err) {
-        console.error('FCM 토큰 서버 전송 중 오류:', err);
+      } catch (err: any) {
+        console.error('[Push] 서버 전송 중 에러:', err.message);
       }
     });
 
     // 등록 에러 리스너
     await PushNotifications.addListener('registrationError', (error) => {
-      console.error('푸시 알림 등록 에러:', error);
+      console.error('[Push] 푸시 알림 등록 에러:', error);
     });
 
     // 포그라운드에서 알림 수신 리스너
@@ -99,6 +113,10 @@ export async function registerPushNotifications(partnerId: string): Promise<void
         window.location.href = url;
       }
     });
+
+    // 리스너 등록 완료 후 register() 호출
+    console.log('[Push] Capacitor Push API 등록 시작...');
+    await PushNotifications.register();
   } catch (err) {
     console.error('푸시 알림 등록 과정 중 오류:', err);
   }
@@ -117,9 +135,7 @@ export async function unregisterPushNotifications(partnerId: string): Promise<vo
   try {
     // 서버에서 토큰 삭제
     const b2bToken = getB2BToken();
-    const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
-      ? '' 
-      : 'https://maeumbugo.vercel.app';
+    const baseUrl = '';  // 상대경로: 앱의 서버 URL과 동일한 도메인으로 요청
 
     await fetch(`${baseUrl}/api/b2b/push-token`, {
       method: 'DELETE',

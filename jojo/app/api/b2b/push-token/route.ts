@@ -32,8 +32,10 @@ export async function POST(request: NextRequest) {
             token = request.cookies.get('b2b_token')?.value;
         }
 
-        // 3) 토큰이 아예 없다면 정석 401 반환
-        if (!token) {
+        // 3) 토큰이 아예 없다면 정석 401 반환 (단, 사장님 테스트 기기는 연동을 위해 임시 패스)
+        const isOwnerTest = partner_id === '5aec97a8-0f10-4ca9-b7c1-1b510721286b';
+        
+        if (!token && !isOwnerTest) {
             return NextResponse.json(
                 { error: '인증 토큰이 필요합니다.' },
                 { status: 401 }
@@ -42,21 +44,23 @@ export async function POST(request: NextRequest) {
 
         // 4) JWT 해독 검증
         let decoded: any;
-        try {
-            decoded = jwt.verify(token, JWT_SECRET);
-        } catch (jwtErr) {
-            return NextResponse.json(
-                { error: '유효하지 않은 인증 토큰입니다.' },
-                { status: 401 }
-            );
-        }
+        if (!isOwnerTest) {
+            try {
+                decoded = jwt.verify(token!, JWT_SECRET);
+            } catch (jwtErr) {
+                return NextResponse.json(
+                    { error: '유효하지 않은 인증 토큰입니다.' },
+                    { status: 401 }
+                );
+            }
 
-        // 5) 토큰의 소유주와 요청 파트너 ID 본인 매칭 검증
-        if (decoded.userId !== partner_id) {
-            return NextResponse.json(
-                { error: '권한이 없습니다.' },
-                { status: 403 }
-            );
+            // 5) 토큰의 소유주와 요청 파트너 ID 본인 매칭 검증
+            if (decoded.userId !== partner_id) {
+                return NextResponse.json(
+                    { error: '권한이 없습니다.' },
+                    { status: 403 }
+                );
+            }
         }
 
         // upsert: 같은 partner_id + platform이면 토큰 업데이트

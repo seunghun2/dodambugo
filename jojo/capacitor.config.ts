@@ -16,7 +16,8 @@ const config: any = {
   },
   ios: {
     scheme: 'MaeumbugoPartner',
-    backButtonGestures: true,
+    allowsBackForwardNavigationGestures: true,
+    backgroundColor: '#ffffff',
   },
   android: {
     buildOptions: {
