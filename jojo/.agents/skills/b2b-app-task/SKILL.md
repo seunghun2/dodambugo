@@ -91,3 +91,19 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **관련 MD**:
   - [AGENTS.md](file:///Users/el/Desktop/dodam/jojo/.agents/AGENTS.md) (B2C/B2B 분리 규칙)
   - [funeral-display/SKILL.md](file:///Users/el/Desktop/dodam/jojo/.agents/skills/funeral-display/SKILL.md) (조건부 표시 룰)
+
+---
+
+## ⚙️ 6. 📱 모바일 앱 전용 고도화 및 세부 에러 해결 (추가 요건)
+
+### 6-1. 마음부고 & 도담부고 B2B 주소 링크 점검
+- **설명**: B2B 파트너 웹/앱 내에서 B2C 웹 연결 시 마음부고(`maeumbugo.co.kr`) 및 도담부고(`dodambugo.com`) 주소 링크가 정상 맵핑되도록 점검.
+
+### 6-2. 설정 내 프로필 이미지 등록 오류 수정
+- **설명**: B2B 파트너 설정 화면에서 프로필 이미지가 등록 및 업로드 완료되지 않는 현상 긴급 디버깅 및 보정.
+
+### 6-3. 간편비밀번호 기능 구축
+- **설명**: 결제/출금 신청 및 2차 검증을 빠르게 통과하기 위한 6자리 간편비밀번호 등록 및 인증 인터페이스 개발.
+
+### 6-4. 얼굴인증 (Face ID) 등록 기능 연동
+- **설명**: 생체 인증 API 및 플러그인을 활용하여 Face ID를 통한 빠른 로그인/승인 기능 설계 및 구현.
