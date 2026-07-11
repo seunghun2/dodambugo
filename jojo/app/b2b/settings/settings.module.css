@@ -9,7 +9,6 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(56px + env(safe-area-inset-top, 47px));
-  padding-bottom: var(--b2b-bottom-bar-height); /* BottomTabBar */
   box-sizing: border-box;
 }
 

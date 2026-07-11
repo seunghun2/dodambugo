@@ -4,7 +4,6 @@
   min-height: 100dvh;
   background: var(--bg-white);
   padding-top: calc(60px + env(safe-area-inset-top, 47px));
-  padding-bottom: var(--b2b-bottom-bar-height);
   box-sizing: border-box;
   font-family: var(--font-family);
   display: flex;

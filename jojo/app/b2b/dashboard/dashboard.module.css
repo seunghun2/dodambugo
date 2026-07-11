@@ -5,8 +5,6 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
-  padding-top: calc(52px + env(safe-area-inset-top, 47px));
-  padding-bottom: var(--b2b-bottom-bar-height);
 }
 
 /* 헤더 */
@@ -18,12 +16,9 @@
   padding: 0 20px var(--spacing-xs, 8px) 20px; /* 아래쪽 패딩 조정 */
   padding-top: env(safe-area-inset-top, 47px);
   border-bottom: 1px solid var(--b2b-border-light);
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
-  max-width: 480px;
   background: var(--bg-white);
   z-index: 10;
 }
