@@ -1,166 +1,137 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import styles from './notice.module.css';
 
-interface NotificationItem {
+interface B2BNotice {
   id: string;
   title: string;
-  body: string;
-  content?: string; // 레거시 호환
-  type?: string;
-  data?: { url?: string } | null;
-  is_read?: boolean;
+  content: string;
+  is_fixed: boolean;
   created_at: string;
+  updated_at: string;
 }
 
-// 알림 타입별 아이콘 매핑
-const TYPE_ICONS: Record<string, { icon: string; color: string }> = {
-  signup_approved: { icon: '🤝', color: '#f0fdf4' },
-  new_funeral: { icon: '📋', color: '#eff6ff' },
-  referral_signup: { icon: '🎉', color: '#fefce8' },
-  flower_order: { icon: '🌸', color: '#fdf2f8' },
-  flower_refund: { icon: '↩️', color: '#fef2f2' },
-  flower_commission: { icon: '💰', color: '#fffbeb' },
-  settlement: { icon: '💳', color: '#f0fdf4' },
-  notice: { icon: '📢', color: '#eff6ff' },
-  funeral_reminder: { icon: '⏰', color: '#fefce8' },
-};
-
-export default function B2BNoticePage() {
+function B2BNoticePageContent() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const targetId = searchParams ? searchParams.get('id') : null;
 
-  const fetchNotifications = useCallback(async () => {
+  const [notices, setNotices] = useState<B2BNotice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+
+  // 공지사항 가져오기
+  const fetchNotices = useCallback(async () => {
     try {
-      const token = localStorage.getItem('b2b_token');
-      const res = await fetch('/api/b2b/notifications', {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      });
+      const res = await fetch('/api/b2b/notices');
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.notifications) {
-          setNotifications(data.notifications);
+        if (data.success && data.notices) {
+          setNotices(data.notices);
         }
       }
     } catch (err) {
-      console.error('알림 목록 로드 오류:', err);
+      console.error('공지사항 로드 오류:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    fetchNotices();
+  }, [fetchNotices]);
 
-  // 알림 클릭 시 해당 페이지로 이동 + 읽음 처리
-  const handleNotificationClick = async (item: NotificationItem) => {
-    // 읽음 처리 (비동기, 에러 무시)
-    if (!item.is_read) {
-      const token = localStorage.getItem('b2b_token');
-      fetch(`/api/b2b/notifications/${item.id}/read`, {
-        method: 'PATCH',
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      }).catch(() => {});
+  // 대시보드 등에서 특정 공지를 선택해 들어온 경우 자동 오픈 및 스크롤 포커스
+  useEffect(() => {
+    if (targetId && notices.length > 0) {
+      setOpenIds(new Set([targetId]));
+      setTimeout(() => {
+        const el = document.getElementById(`notice-${targetId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
     }
+  }, [targetId, notices]);
 
-    // data.url이 있으면 해당 페이지로 이동
-    const url = item.data?.url;
-    if (url) {
-      router.push(url);
-    }
+  // 아코디언 토글
+  const toggleNotice = (id: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      const now = new Date();
-      const diff = now.getTime() - date.getTime();
-      const minutes = Math.floor(diff / 60000);
-      const hours = Math.floor(diff / 3600000);
-
-      if (minutes < 1) return '방금';
-      if (minutes < 60) return `${minutes}분 전`;
-      if (hours < 24) return `${hours}시간 전`;
-
-      const year = String(date.getFullYear()).slice(-2);
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}.${month}.${day}`;
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}.${m}.${d}`;
     } catch {
       return dateStr;
     }
   };
 
-  const getTypeInfo = (type?: string) => {
-    return TYPE_ICONS[type || ''] || { icon: '🔔', color: '#f8fafc' };
-  };
-
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
-          <B2BIcon name="chevron-left" size={24} />
-        </button>
-        <span className={styles.headerTitle}>알림</span>
-        <div className={styles.headerRightPlaceholder} />
-      </header>
+      {/* 상단 통합 고정 헤더 */}
+      <div className={styles.fixedHeaderContainer}>
+        <header className={styles.header}>
+          <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+            <B2BIcon name="chevron-left" size={24} />
+          </button>
+          <span className={styles.headerTitle}>공지사항</span>
+          <div className={styles.headerRightPlaceholder} />
+        </header>
+      </div>
 
       <div className={styles.container}>
         {loading ? (
           <div className={styles.loadingContainer}>
             <div className={styles.spinner} />
-            <p className={styles.loadingText}>알림 목록을 불러오는 중입니다...</p>
+            <p className={styles.loadingText}>공지사항 목록을 불러오는 중입니다...</p>
           </div>
-        ) : notifications.length === 0 ? (
-          <div className={styles.emptyState}>수신된 알림 내역이 없습니다.</div>
+        ) : notices.length === 0 ? (
+          <div className={styles.emptyState}>등록된 공지사항이 없습니다.</div>
         ) : (
           <div className={styles.noticeList}>
-            {notifications.map((item) => {
-              const typeInfo = getTypeInfo(item.type);
-              const hasLink = !!item.data?.url;
+            {notices.map((item) => {
+              const isOpen = openIds.has(item.id);
 
               return (
-                <div
-                  key={item.id}
-                  className={styles.noticeItem}
-                  onClick={() => handleNotificationClick(item)}
-                  style={{
-                    cursor: hasLink ? 'pointer' : 'default',
-                    opacity: item.is_read ? 0.7 : 1,
-                    backgroundColor: item.is_read ? '#fafafa' : '#ffffff',
-                  }}
-                >
-                  {/* 타입별 아이콘 */}
+                <div key={item.id} id={`notice-${item.id}`} className={styles.noticeWrapper}>
+                  {/* 클릭 가능한 헤더 행 */}
                   <div
-                    className={styles.bellIconWrapper}
-                    style={{ backgroundColor: typeInfo.color }}
+                    className={styles.noticeItemHeader}
+                    onClick={() => toggleNotice(item.id)}
                   >
-                    <span style={{ fontSize: '16px' }}>{typeInfo.icon}</span>
+                    <div className={styles.noticeMain}>
+                      <div className={styles.titleRow}>
+                        {item.is_fixed && <span className={styles.fixedBadge}>공지</span>}
+                        <span className={styles.noticeTitle}>{item.title}</span>
+                      </div>
+                      <span className={styles.noticeDate}>{formatDate(item.created_at)}</span>
+                    </div>
+                    <span className={`${styles.arrowIcon} ${isOpen ? styles.arrowIconActive : ''}`}>
+                      <B2BIcon name="chevron-right" size={20} />
+                    </span>
                   </div>
 
-                  {/* 텍스트 */}
-                  <div className={styles.noticeMain}>
-                    <span className={styles.noticeTitle} style={{ fontWeight: item.is_read ? '500' : '700' }}>
-                      {item.title}
-                    </span>
-                    <span className={styles.noticeDesc}>
-                      {item.body || item.content}
-                    </span>
-                  </div>
-
-                  {/* 날짜 + 이동 표시 */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
-                    <span className={styles.noticeDate}>{formatDate(item.created_at)}</span>
-                    {hasLink && (
-                      <span style={{ color: '#94a3b8', fontSize: '14px' }}>›</span>
-                    )}
+                  {/* 아코디언 본문 패널 */}
+                  <div className={`${styles.noticeContentPanel} ${isOpen ? styles.noticeContentPanelActive : ''}`}>
+                    <div className={styles.noticeContent}>
+                      {item.content}
+                    </div>
                   </div>
                 </div>
               );
@@ -169,5 +140,27 @@ export default function B2BNoticePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function B2BNoticePage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.page}>
+        <div className={styles.fixedHeaderContainer}>
+          <header className={styles.header}>
+            <div className={styles.backBtn} />
+            <span className={styles.headerTitle}>공지사항</span>
+            <div className={styles.headerRightPlaceholder} />
+          </header>
+        </div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner} />
+          <p className={styles.loadingText}>공지사항 목록을 불러오는 중입니다...</p>
+        </div>
+      </div>
+    }>
+      <B2BNoticePageContent />
+    </Suspense>
   );
 }

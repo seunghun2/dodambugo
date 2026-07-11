@@ -877,7 +877,7 @@ export default function SettingsPage() {
 
                     {/* 고객지원 그룹 */}
                     <div className={styles.groupTitle}>고객지원</div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('notice')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => router.push('/b2b/notice')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>공지사항</span>
                         </div>
@@ -1539,83 +1539,7 @@ export default function SettingsPage() {
         );
     }
 
-    // ==========================================
-    // 10. 공지사항 뷰 ('notice')
-    // ==========================================
-    if (view === 'notice') {
-        const toggleNotice = (id: string) => {
-            setOpenNoticeIds(prev =>
-                prev.includes(id)
-                    ? prev.filter(item => item !== id)
-                    : [...prev, id]
-            );
-        };
 
-        return (
-            <div className={styles.container}>
-                <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={handleBackToSettings}>
-                        <B2BIcon name="chevron-left" size={24} />
-                    </button>
-                    <span className={styles.headerTitle}>공지사항</span>
-                    <div className={styles.headerRightPlaceholder} />
-                </header>
-
-                <div className={styles.noticeList}>
-                    {noticesLoading ? (
-                        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                            로딩 중...
-                        </div>
-                    ) : notices.length === 0 ? (
-                        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                            등록된 공지사항이 없습니다.
-                        </div>
-                    ) : (
-                        notices.map((item) => {
-                            const isOpen = openNoticeIds.includes(item.id);
-                            const noticeDate = item.created_at
-                                ? new Date(item.created_at).toLocaleDateString('ko-KR', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                  }).replace(/\. /g, '-').replace(/\./, '')
-                                : '';
-
-                            return (
-                                <div
-                                    key={item.id}
-                                    className={`${styles.noticeWrapper} ${isOpen ? styles.noticeItemActive : ''}`}
-                                    style={{ borderBottom: '1px solid #f1f3f5' }}
-                                >
-                                    <div
-                                        className={styles.noticeItem}
-                                        onClick={() => toggleNotice(item.id)}
-                                        style={{ borderBottom: 'none' }}
-                                    >
-                                        <div className={styles.noticeMain}>
-                                            <div className={styles.titleRow}>
-                                                {item.is_fixed && <span className={styles.noticeBadge}>공지</span>}
-                                                <span className={styles.noticeTitle}>{item.title}</span>
-                                            </div>
-                                            <span className={styles.noticeDate}>{noticeDate}</span>
-                                        </div>
-                                        <span className={`${styles.arrowIcon} ${isOpen ? styles.arrowIconActive : ''}`}>
-                                            <B2BIcon name="chevron-right" size={20} />
-                                        </span>
-                                    </div>
-                                    <div className={`${styles.noticeContentPanel} ${isOpen ? styles.noticeContentPanelActive : ''}`}>
-                                        <div className={styles.noticeContent}>
-                                            {item.content}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-        );
-    }
 
     return null;
 }
@@ -1668,60 +1592,4 @@ const b2bFaqData: FAQItem[] = [
   },
 ];
 
-interface NoticeItem {
-  id: number;
-  title: string;
-  date: string;
-  isFixed: boolean;
-}
 
-const noticeData: NoticeItem[] = [
-  {
-    id: 1,
-    title: '[공지] 등급별 포인트 지급 누락 관련 안내',
-    date: '2025/10/31',
-    isFixed: true,
-  },
-  {
-    id: 2,
-    title: '화환 판매금액 설정 기능 추가 안내',
-    date: '2025/05/22',
-    isFixed: true,
-  },
-  {
-    id: 3,
-    title: '부고온 화환 수수료 안내',
-    date: '2025/05/16',
-    isFixed: true,
-  },
-  {
-    id: 4,
-    title: '[공지] 부고온 등급별 혜택 변경',
-    date: '2025/06/17',
-    isFixed: true,
-  },
-  {
-    id: 5,
-    title: '[공지] 빈소현황판 AI 분석 기능 안내',
-    date: '2025/03/18',
-    isFixed: true,
-  },
-  {
-    id: 6,
-    title: '[공지] PC버전 로그인 계정 생성 방법 안내',
-    date: '2025/02/04',
-    isFixed: true,
-  },
-  {
-    id: 7,
-    title: '[공지] 답례글 관련 안내',
-    date: '2024/09/26',
-    isFixed: false,
-  },
-  {
-    id: 8,
-    title: '[공지] 실시간 환급금 자동이체 시행 안내',
-    date: '2024/11/20',
-    isFixed: false,
-  },
-];

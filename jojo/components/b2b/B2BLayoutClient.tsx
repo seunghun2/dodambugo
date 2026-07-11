@@ -42,10 +42,17 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     !pathname.includes('/create') &&        
     !pathname.includes('/order');           
 
+  const isAdmin = pathname && pathname.startsWith('/b2b/admin');
+
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isAdmin ? '#f8fafc' : '#f8f9fa' }}>
       {/* 메인 콘텐츠 뷰 */}
-      <div id="b2b-page-container" style={{
+      <div id="b2b-page-container" style={isAdmin ? {
+        position: 'relative',
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc',
+      } : {
         position: 'relative',
         width: '100%',
         maxWidth: '480px',
