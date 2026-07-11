@@ -8,7 +8,8 @@ import {
     IconBan, 
     IconUserCheck,
     IconRefresh,
-    IconDownload
+    IconDownload,
+    IconSend
 } from '@tabler/icons-react';
 import styles from './partners.module.css';
 
@@ -25,6 +26,10 @@ interface Partner {
     created_at: string;
     balance: number;
     last_bugo_at?: string | null;
+    alarm_all?: boolean;
+    alarm_deposit?: boolean;
+    alarm_deceased?: boolean;
+    alarm_notice?: boolean;
 }
 
 export default function PartnersPage() {
@@ -36,6 +41,61 @@ export default function PartnersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // 개별 푸시 모달용 상태
+    const [activePushPartner, setActivePushPartner] = useState<Partner | null>(null);
+    const [pushTitle, setPushTitle] = useState('');
+    const [pushBody, setPushBody] = useState('');
+    const [pushLink, setPushLink] = useState('');
+    const [sendingPush, setSendingPush] = useState(false);
+
+    // 개별 푸시 발송 처리
+    const handleSendPushSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!activePushPartner) return;
+        if (!pushTitle.trim() || !pushBody.trim()) {
+            alert('제목과 내용을 모두 입력해 주세요.');
+            return;
+        }
+
+        setSendingPush(true);
+        try {
+            const token = localStorage.getItem('b2b_token');
+            if (!token) {
+                alert('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
+                return;
+            }
+
+            const res = await fetch('/api/b2b/send-push', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    partner_id: activePushPartner.id,
+                    title: pushTitle,
+                    body: pushBody,
+                    data: pushLink ? { url: pushLink } : undefined
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`[${activePushPartner.company_name}] 파트너에게 푸시 발송 성공!`);
+                setActivePushPartner(null);
+                setPushTitle('');
+                setPushBody('');
+                setPushLink('');
+            } else {
+                alert(data.error || '푸시 발송 중 오류가 발생했습니다.');
+            }
+        } catch (err: any) {
+            alert(err.message || '네트워크 오류가 발생했습니다.');
+        } finally {
+            setSendingPush(false);
+        }
+    };
 
     const fetchPartners = async () => {
         setLoading(true);
@@ -269,6 +329,7 @@ export default function PartnersPage() {
                                     <th>정산 계좌 정보</th>
                                     <th>예치금 잔고</th>
                                     <th>추천인 코드</th>
+                                    <th>알림 동의 설정</th>
                                     <th>상태</th>
                                     <th>최근 들어온 일시</th>
                                     <th>액션</th>
@@ -295,6 +356,19 @@ export default function PartnersPage() {
                                         </td>
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
                                             {partner.my_referral_code}
+                                        </td>
+                                        <td>
+                                            <div className={styles.alarmBadgeContainer}>
+                                                {partner.alarm_all ? (
+                                                    <span className={`${styles.alarmMiniBadge} ${styles.alarmBadgeActive}`}>전체</span>
+                                                ) : (
+                                                    <>
+                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_deposit ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>정산</span>
+                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_deceased ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>부고</span>
+                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_notice ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>공지</span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </td>
                                         <td>{getStatusBadge(partner.status)}</td>
                                         <td style={{ fontSize: '13px', color: '#64748b' }}>
@@ -356,6 +430,16 @@ export default function PartnersPage() {
                                                         <span>비번 초기화</span>
                                                     </div>
                                                 </button>
+                                                <button 
+                                                    className={`${styles.actionBtn} ${styles.pushBtn}`}
+                                                    onClick={() => setActivePushPartner(partner)}
+                                                    title="개별 푸시 발송"
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <IconSend stroke={1.5} size={14} />
+                                                        <span>푸시 발송</span>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -365,6 +449,81 @@ export default function PartnersPage() {
                     )}
                 </div>
             </div>
+
+            {/* 개별 푸시 발송 모달 */}
+            {activePushPartner && (
+                <div className={styles.modalOverlay} onClick={() => setActivePushPartner(null)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h3 className={styles.modalTitle}>개별 푸시 알림 발송</h3>
+                            <button className={styles.modalClose} onClick={() => setActivePushPartner(null)}>
+                                <IconX size={18} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSendPushSubmit} className={styles.modalForm}>
+                            <div className={styles.modalBody}>
+                                <div style={{ marginBottom: '16px', fontSize: '14px', color: '#475569' }}>
+                                    수신처: <strong>{activePushPartner.company_name}</strong> ({activePushPartner.owner_name} 대표님)
+                                </div>
+                                
+                                <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
+                                    <label htmlFor="push_title">푸시 제목</label>
+                                    <input
+                                        type="text"
+                                        id="push_title"
+                                        className={styles.formInput}
+                                        placeholder="예: [안내] 예치금 정산 완료 알림"
+                                        value={pushTitle}
+                                        onChange={(e) => setPushTitle(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
+                                    <label htmlFor="push_body">푸시 본문 내용</label>
+                                    <textarea
+                                        id="push_body"
+                                        className={styles.formTextarea}
+                                        placeholder="예: 오늘자 정산 금액 350,000원이 예치금 잔액에 정상 반영되었습니다."
+                                        value={pushBody}
+                                        onChange={(e) => setPushBody(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="push_link">이동 경로 URL (선택)</label>
+                                    <input
+                                        type="text"
+                                        id="push_link"
+                                        className={styles.formInput}
+                                        placeholder="예: /b2b/wallet (미입력 시 홈으로 이동)"
+                                        value={pushLink}
+                                        onChange={(e) => setPushLink(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.modalFooter}>
+                                <button 
+                                    type="button" 
+                                    className={styles.btnSecondary} 
+                                    onClick={() => setActivePushPartner(null)}
+                                    disabled={sendingPush}
+                                >
+                                    취소
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className={styles.btnPrimary}
+                                    disabled={sendingPush}
+                                >
+                                    {sendingPush ? '발송 중...' : '푸시 발송하기'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

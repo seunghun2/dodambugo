@@ -94,7 +94,11 @@ export async function GET(request: NextRequest) {
             status: p.status,
             created_at: p.created_at,
             balance: balanceMap.get(String(p.id)) || 0,
-            last_bugo_at: latestBugoMap[p.id] || null
+            last_bugo_at: latestBugoMap[p.id] || null,
+            alarm_all: p.alarm_all,
+            alarm_deposit: p.alarm_deposit,
+            alarm_deceased: p.alarm_deceased,
+            alarm_notice: p.alarm_notice
         })) || [];
 
         return NextResponse.json({ success: true, partners: formattedPartners });

@@ -223,6 +223,208 @@
     font-size: 14px;
 }
 
+/* 알림 설정 미니 뱃지 */
+.alarmBadgeContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.alarmMiniBadge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.alarmBadgeActive {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.alarmBadgeInactive {
+    background-color: #f8fafc;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+.pushBtn {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #16a34a;
+}
+
+.pushBtn:hover {
+    background-color: #dcfce7;
+    border-color: #86efac;
+}
+
+/* 모달 스타일 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modalHeader {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.modalClose {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modalClose:hover {
+    color: #475569;
+    background-color: #f1f5f9;
+}
+
+.modalBody {
+    padding: 24px;
+}
+
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formGroup label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.formInput {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    color: #0f172a;
+}
+
+.formInput:focus {
+    border-color: #d4a84b;
+}
+
+.formTextarea {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    color: #0f172a;
+    resize: none;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.formTextarea:focus {
+    border-color: #d4a84b;
+}
+
+.modalFooter {
+    padding: 16px 24px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btnPrimary {
+    padding: 10px 18px;
+    background-color: #d4a84b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnPrimary:hover {
+    background-color: #c5973b;
+}
+
+.btnPrimary:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.btnSecondary {
+    padding: 10px 18px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnSecondary:hover {
+    background-color: #f1f5f9;
+}
+
 @media (max-width: 768px) {
     .filterBar {
         flex-direction: column;
