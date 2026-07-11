@@ -50,7 +50,6 @@ export async function registerPushNotifications(partnerId: string): Promise<void
     // FCM FCM 토큰 수신 리스너
     await PushNotifications.addListener('registration', async (token) => {
       console.log('FCM 토큰 수신:', token.value);
-      localStorage.setItem('my_fcm_token', token.value); // 로컬스토리지에 기기 토큰 백업 저장
 
       try {
         const b2bToken = getB2BToken();

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import { unregisterPushNotifications } from '@/lib/push-notifications';
-import { Capacitor } from '@capacitor/core';
 import styles from './settings.module.css';
 
 const BANKS = [
@@ -271,16 +270,6 @@ export default function SettingsPage() {
             // 쿠키 삭제 실패해도 로그아웃 진행
         }
         router.push('/b2b/login');
-    };
-
-    const copyFcmToken = () => {
-        const fcm = localStorage.getItem('my_fcm_token');
-        if (fcm) {
-            navigator.clipboard.writeText(fcm);
-            alert(`FCM 기기 토큰이 복사되었습니다!\n\n${fcm}\n\n에이전트 채팅창에 바로 붙여넣어 주세요.`);
-        } else {
-            alert('FCM 토큰이 아직 기기에 발급되지 않았습니다.\n\n앱을 멀티태스킹 창에서 완전히 종료했다가 다시 실행하여 대시보드 화면을 본 뒤, 다시 시도해 주세요.');
-        }
     };
 
     const handleUpdatePassword = async () => {
@@ -941,26 +930,9 @@ export default function SettingsPage() {
                     </div>
 
                     {/* 로그아웃 버튼 */}
-                    <div className={styles.logoutBtnArea} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ textAlign: 'center', fontSize: '11.5px', color: '#8b95a1', marginBottom: '4px', fontWeight: 500 }}>
-                            현재 접속 환경: {Capacitor.isNativePlatform() ? '📱 실물 네이티브 앱 (수신 가능)' : '🌐 모바일 웹 브라우저 (푸시 불가)'}
-                        </div>
+                    <div className={styles.logoutBtnArea}>
                         <button className={styles.logoutBtn} onClick={handleLogout}>
                             로그아웃
-                        </button>
-                        <button 
-                            onClick={copyFcmToken}
-                            style={{
-                                fontSize: '11px',
-                                color: '#8b95a1',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                textDecoration: 'underline',
-                                padding: '6px 0',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            (디버그) 내 기기 푸시 토큰 복사
                         </button>
                     </div>
                 </div>
