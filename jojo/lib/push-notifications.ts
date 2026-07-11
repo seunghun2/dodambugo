@@ -7,6 +7,24 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 /**
+ * 쿠키와 로컬스토리지 양쪽에서 B2B 인증 토큰을 정석적으로 추출하는 헬퍼 함수
+ * iOS WKWebView의 localStorage 초기화/유실 버그를 완벽히 우회 대응합니다.
+ */
+function getB2BToken(): string | null {
+  // 1. 로컬스토리지 우선 확인
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('b2b_token');
+    if (local) return local;
+  }
+  // 2. 쿠키 확인 및 파싱 (iOS 웹뷰 인증 유지 표준)
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/(^| )b2b_token=([^;]+)/);
+    if (match) return match[2];
+  }
+  return null;
+}
+
+/**
  * 푸시 알림 등록
  * 권한 요청 → 등록 → FCM 토큰을 서버에 전송
  * 웹 환경에서는 자동 skip됩니다.
@@ -35,7 +53,7 @@ export async function registerPushNotifications(partnerId: string): Promise<void
       localStorage.setItem('my_fcm_token', token.value); // 로컬스토리지에 기기 토큰 백업 저장
 
       try {
-        const b2bToken = localStorage.getItem('b2b_token');
+        const b2bToken = getB2BToken();
         const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
           ? '' 
           : 'https://maeumbugo.vercel.app';
@@ -99,7 +117,7 @@ export async function unregisterPushNotifications(partnerId: string): Promise<vo
 
   try {
     // 서버에서 토큰 삭제
-    const b2bToken = localStorage.getItem('b2b_token');
+    const b2bToken = getB2BToken();
     const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
       ? '' 
       : 'https://maeumbugo.vercel.app';

@@ -20,18 +20,43 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 인증 헤더 검증 (보안용 로깅 처리하되, 실패하더라도 partner_id 매핑 등록은 안전하게 허용하여 푸시 유실 복구)
+        // 1) 헤더에서 Bearer 토큰 추출
+        let token: string | undefined;
         const authHeader = request.headers.get('Authorization');
-        let decodedUserId = partner_id; // 기본적으로 바디의 ID 신뢰
-        
         if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.replace('Bearer ', '');
-            try {
-                const decoded: any = jwt.verify(token, JWT_SECRET);
-                decodedUserId = decoded.userId;
-            } catch (jwtErr) {
-                console.warn('JWT 토큰 검증은 실패했으나, 실물 토큰 복구를 위해 partner_id로 우회 진행합니다.');
-            }
+            token = authHeader.replace('Bearer ', '');
+        }
+
+        // 2) 헤더에 없을 경우 쿠키 스토어(b2b_token)에서 추출
+        if (!token) {
+            token = request.cookies.get('b2b_token')?.value;
+        }
+
+        // 3) 토큰이 아예 없다면 정석 401 반환
+        if (!token) {
+            return NextResponse.json(
+                { error: '인증 토큰이 필요합니다.' },
+                { status: 401 }
+            );
+        }
+
+        // 4) JWT 해독 검증
+        let decoded: any;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (jwtErr) {
+            return NextResponse.json(
+                { error: '유효하지 않은 인증 토큰입니다.' },
+                { status: 401 }
+            );
+        }
+
+        // 5) 토큰의 소유주와 요청 파트너 ID 본인 매칭 검증
+        if (decoded.userId !== partner_id) {
+            return NextResponse.json(
+                { error: '권한이 없습니다.' },
+                { status: 403 }
+            );
         }
 
         // upsert: 같은 partner_id + platform이면 토큰 업데이트
