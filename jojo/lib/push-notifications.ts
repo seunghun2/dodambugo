@@ -36,7 +36,11 @@ export async function registerPushNotifications(partnerId: string): Promise<void
 
       try {
         const b2bToken = localStorage.getItem('b2b_token');
-        const res = await fetch('/api/b2b/push-token', {
+        const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
+          ? '' 
+          : 'https://maeumbugo.vercel.app';
+        
+        const res = await fetch(`${baseUrl}/api/b2b/push-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,7 +100,11 @@ export async function unregisterPushNotifications(partnerId: string): Promise<vo
   try {
     // 서버에서 토큰 삭제
     const b2bToken = localStorage.getItem('b2b_token');
-    await fetch('/api/b2b/push-token', {
+    const baseUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost') && !Capacitor.isNativePlatform()
+      ? '' 
+      : 'https://maeumbugo.vercel.app';
+
+    await fetch(`${baseUrl}/api/b2b/push-token`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
