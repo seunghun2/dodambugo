@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [balanceVisible, setBalanceVisible] = useState(false);
   const [notices, setNotices] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 데이터 로딩
   const fetchData = useCallback(async () => {

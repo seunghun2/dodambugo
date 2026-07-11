@@ -171,6 +171,16 @@ export async function POST(request: NextRequest) {
             } catch (err) {
                 console.error('❌ B2B 수당 회수 처리 중 에러:', err);
             }
+
+            // 인앱 알람: 화환 환불 알림 (비동기)
+            import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                insertInAppAlarm(
+                    partnerId!, 'flower_refund',
+                    '화환 주문이 취소되었습니다',
+                    `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''} | 사유: ${cancelReason || '고객 요청'}`,
+                    '/b2b/wallet', 'alarm_order'
+                );
+            });
         }
 
         // 5. 알림톡 발송 (고객에게)

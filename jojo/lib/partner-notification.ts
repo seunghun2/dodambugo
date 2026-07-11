@@ -243,3 +243,41 @@ export async function sendNoticeToAllPartners(
 
   return { sent, failed };
 }
+
+/**
+ * 인앱 알림함에만 적재합니다 (푸시 없이).
+ * 파트너의 알림 설정을 체크하여 OFF이면 적재하지 않습니다.
+ */
+export async function insertInAppAlarm(
+  partnerId: string,
+  type: string,
+  title: string,
+  body: string,
+  url?: string,
+  alarmField?: string,
+): Promise<void> {
+  try {
+    // 알림 설정 체크
+    if (alarmField) {
+      const { data: partner } = await supabase
+        .from('b2b_users')
+        .select('*')
+        .eq('id', partnerId)
+        .single();
+      
+      if (!partner?.alarm_all || !(partner as any)[alarmField]) {
+        return; // 알림 OFF
+      }
+    }
+
+    await supabase.from('b2b_notifications').insert({
+      partner_id: partnerId,
+      title,
+      body,
+      type,
+      data: url ? { url } : null,
+    });
+  } catch (err) {
+    console.error(`[InAppAlarm] ${type} 적재 실패:`, err);
+  }
+}

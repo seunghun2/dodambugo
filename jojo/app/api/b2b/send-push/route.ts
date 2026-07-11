@@ -102,6 +102,9 @@ export async function POST(request: NextRequest) {
         partner_id,
         title,
         content: pushBody,
+        body: pushBody,
+        type: data?.type || 'notice',
+        data: { url: '/b2b/settings', ...(data || {}) },
         is_read: false
       });
 

@@ -455,6 +455,24 @@ export async function POST(request: NextRequest) {
 
                     console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
 
+                    // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
+                    import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                        // 화환 주문 알람
+                        insertInAppAlarm(
+                            partnerId, 'flower_order',
+                            '화환 주문이 접수되었습니다',
+                            `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
+                            '/b2b/wallet', 'alarm_order'
+                        );
+                        // 화환 수당 적립 알람
+                        insertInAppAlarm(
+                            partnerId, 'flower_commission',
+                            '화환 판매 수당이 적립되었습니다',
+                            `${(rewardAmount || 0).toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
+                            '/b2b/wallet', 'alarm_reward'
+                        );
+                    });
+
                     // 5. 추천인 보너스 적립
                     const { data: partnerInfo } = await supabase
                         .from('b2b_users')
