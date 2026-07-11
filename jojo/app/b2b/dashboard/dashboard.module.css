@@ -6,7 +6,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(52px + env(safe-area-inset-top, 47px));
-  padding-bottom: calc(90px + env(safe-area-inset-bottom, 16px));
+  padding-bottom: var(--b2b-bottom-bar-height);
 }
 
 /* 헤더 */

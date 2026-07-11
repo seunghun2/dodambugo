@@ -47,6 +47,8 @@
   --b2b-primary-hover: #FCC419;
   --b2b-success: #20C997;
   --b2b-error: #FF6B6B;
+  /* 하단 탭바 높이 통합 토큰 */
+  --b2b-bottom-bar-height: calc(82px + env(safe-area-inset-bottom, 16px));
 }
 
 /* ===== 기본 타이포그래피 ===== */
