@@ -166,12 +166,11 @@ function SettlementsContent() {
         }
 
         const [year, month] = selectedYearMonth.split('-');
-        const headers = ['거래일시', '주문번호', '부고장ID', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
+        const headers = ['거래일시', '주문번호', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
         
         const rows = settlements.map(s => [
             new Date(s.created_at).toLocaleString(),
             s.order?.order_number || '-',
-            s.order?.bugo_id || '-',
             s.order?.partner_name || '-',
             s.order?.deceased_name || '-',
             s.order?.product_name || '-',
@@ -399,7 +398,6 @@ function SettlementsContent() {
                                     <th>주문 번호</th>
                                     <th>장례지도사명</th>
                                     <th>고인명 (상가)</th>
-                                    <th>부고 ID</th>
                                     <th>화환 상품명 (주문자)</th>
                                     <th style={{ textAlign: 'right' }}>정산 금액</th>
                                     <th>상태</th>
@@ -408,13 +406,13 @@ function SettlementsContent() {
                             <tbody>
                                 {detailLoading ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
+                                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
                                             상세 정산 내역을 조회하는 중...
                                         </td>
                                     </tr>
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
+                                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
                                             정산할 판매 건이 존재하지 않습니다.
                                         </td>
                                     </tr>
@@ -432,9 +430,6 @@ function SettlementsContent() {
                                             </td>
                                             <td style={{ fontWeight: '600' }}>
                                                 {s.order?.deceased_name || '미등록'}
-                                            </td>
-                                            <td style={{ fontFamily: 'monospace', fontSize: '10px' }}>
-                                                {s.order?.bugo_id ? (String(s.order.bugo_id).length > 8 ? String(s.order.bugo_id).slice(0, 8) + '...' : String(s.order.bugo_id)) : '-'}
                                             </td>
                                             <td>
                                                 <div>
