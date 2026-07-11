@@ -916,10 +916,11 @@ export default function MournerSection({ mourners, onMournersChange, errors }: P
                         <div className={styles.mnFieldContact}>
                           <input
                             type="tel"
-                            className={styles.mnInputCompact}
-                            placeholder="연락처"
+                            className={`${styles.mnInputCompact} ${isFirst && errors?.mourner_contact ? styles.inputError : ''}`}
+                            placeholder={isFirst ? "연락처 *" : "연락처"}
                             value={item.mourner.contact}
                             onChange={(e) => handleFieldChange(realIndex, 'contact', e.target.value)}
+                            data-error={isFirst && errors?.mourner_contact ? 'true' : undefined}
                           />
                         </div>
                       </div>
@@ -935,9 +936,9 @@ export default function MournerSection({ mourners, onMournersChange, errors }: P
                       </button>
                     </div>
 
-                    {isFirst && (errors?.mourner_name || errors?.mourner_relationship) && (
+                    {isFirst && (errors?.mourner_name || errors?.mourner_relationship || errors?.mourner_contact) && (
                       <p className={styles.fieldError} style={{ marginTop: '8px', marginBottom: '4px' }}>
-                        {errors.mourner_name || errors.mourner_relationship}
+                        {errors.mourner_name || errors.mourner_relationship || errors.mourner_contact}
                       </p>
                     )}
 

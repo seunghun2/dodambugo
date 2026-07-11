@@ -294,6 +294,7 @@ export default function B2BCreatePage() {
     // 대표상주 확인
     if (!mourners[0]?.name?.trim()) newErrors.mourner_name = '대표상주 성함을 입력해주세요';
     if (!mourners[0]?.relationship) newErrors.mourner_relationship = '대표상주 관계를 선택해주세요';
+    if (!mourners[0]?.contact?.trim()) newErrors.mourner_contact = '대표상주 연락처를 입력해주세요';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0 ? null : newErrors;
