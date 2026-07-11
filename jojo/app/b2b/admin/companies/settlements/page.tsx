@@ -397,9 +397,9 @@ function SettlementsContent() {
                                     <td className={styles.infoValue}>
                                         {hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
                                     </td>
-                                    <td className={styles.infoLabel}>정산 확인 일자</td>
+                                    <td className={styles.infoLabel}>지급일자</td>
                                     <td className={styles.infoValue}>
-                                        {hasPending ? '미확인 (정산 대기)' : formatDate(settlements[0]?.payment_date)}
+                                        {hasPending ? '지급 대기' : formatDate(settlements[0]?.payment_date)}
                                     </td>
                                     <td className={styles.infoLabel}>합계 정산금액</td>
                                     <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>

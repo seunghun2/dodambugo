@@ -369,9 +369,9 @@ export default function CompanyDashboardPage() {
                                                 <td className={styles.summaryTd} style={{ fontWeight: 'bold', color: hasPending ? '#ef4444' : '#0f172a' }}>
                                                     {hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
                                                 </td>
-                                                <td className={styles.summaryTh}>확인일자</td>
+                                                <td className={styles.summaryTh}>지급일자</td>
                                                 <td className={styles.summaryTd}>
-                                                    {hasPending || !latestPaymentDate ? '확정 대기 중' : new Date(latestPaymentDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                                                    {hasPending || !latestPaymentDate ? '지급 대기' : new Date(latestPaymentDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
                                                 </td>
                                                 <td className={styles.summaryTh}>합계 금액</td>
                                                 <td className={styles.summaryTd} style={{ fontWeight: 'bold' }}>{totalAmount.toLocaleString()}원</td>
