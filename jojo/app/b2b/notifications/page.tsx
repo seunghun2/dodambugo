@@ -28,31 +28,9 @@ interface NotificationItem {
   created_at: string;
 }
 
-// 알림 타입별 아이콘 및 스타일 클래스 매핑 함수
 const getTypeIconAndClass = (type?: string) => {
-  switch (type) {
-    case 'signup_approved':
-      return { icon: <IconUserCheck size={16} />, className: styles.iconSignup };
-    case 'new_funeral':
-      return { icon: <IconFileText size={16} />, className: styles.iconFuneral };
-    case 'referral_signup':
-      return { icon: <IconGift size={16} />, className: styles.iconReferral };
-    case 'flower_order':
-    case 'flower_delivery_completed':
-      return { icon: <IconFlower size={16} />, className: styles.iconFlower };
-    case 'flower_refund':
-      return { icon: <IconArrowBackUp size={16} />, className: styles.iconRefund };
-    case 'flower_commission':
-      return { icon: <IconCoin size={16} />, className: styles.iconCommission };
-    case 'settlement':
-      return { icon: <IconCreditCard size={16} />, className: styles.iconSettlement };
-    case 'notice':
-      return { icon: <IconVolume2 size={16} />, className: styles.iconNotice };
-    case 'funeral_reminder':
-      return { icon: <IconClock size={16} />, className: styles.iconReminder };
-    default:
-      return { icon: <IconBell size={16} />, className: styles.iconDefault };
-  }
+  // 알록달록한 다색상 아이콘을 배제하고 차분한 파란색 종(Bell) 아이콘 하나로 일괄 통일하여 세련되게 정돈
+  return { icon: <IconBell size={16} />, className: styles.iconNotice };
 };
 
 
