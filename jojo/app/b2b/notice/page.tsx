@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import styles from './notice.module.css';
 
@@ -14,14 +14,23 @@ interface B2BNotice {
   updated_at: string;
 }
 
-function B2BNoticePageContent() {
+export default function B2BNoticePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const targetId = searchParams ? searchParams.get('id') : null;
-
   const [notices, setNotices] = useState<B2BNotice[]>([]);
   const [loading, setLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [targetId, setTargetId] = useState<string | null>(null);
+
+  // 클라이언트 마운트 후 URL 파라미터 파싱 (Next.js Hydration 락 차단)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const idParam = params.get('id');
+      if (idParam) {
+        setTargetId(idParam);
+      }
+    }
+  }, []);
 
   // 공지사항 가져오기
   const fetchNotices = useCallback(async () => {
@@ -44,16 +53,10 @@ function B2BNoticePageContent() {
     fetchNotices();
   }, [fetchNotices]);
 
-  // 대시보드 등에서 특정 공지를 선택해 들어온 경우 자동 오픈 및 스크롤 포커스
+  // 대시보드 등에서 특정 공지를 선택해 들어온 경우 자동 오픈
   useEffect(() => {
     if (targetId && notices.length > 0) {
       setOpenIds(new Set([targetId]));
-      setTimeout(() => {
-        const el = document.getElementById(`notice-${targetId}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 300);
     }
   }, [targetId, notices]);
 
@@ -92,7 +95,8 @@ function B2BNoticePageContent() {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/\n/g, '<br />');
+        .replace(/\\n/g, '<br />') // 문자열 역슬래시 n 대응
+        .replace(/\n/g, '<br />'); // 실제 개행 문자 대응
       return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
     }
 
@@ -100,6 +104,44 @@ function B2BNoticePageContent() {
     return <div dangerouslySetInnerHTML={{ __html: content }} />;
   };
 
+  // 특정 공지 ID를 타고 상세로 온 경우 (단독 상세 뷰 렌더링)
+  if (targetId && !loading) {
+    const activeNotice = notices.find(item => item.id === targetId);
+
+    return (
+      <div className={styles.page}>
+        <div className={styles.fixedHeaderContainer}>
+          <header className={styles.header}>
+            <button className={styles.backBtn} onClick={() => router.back()}>
+              <B2BIcon name="chevron-left" size={24} />
+            </button>
+            <span className={styles.headerTitle}>공지사항 상세</span>
+            <div className={styles.headerRightPlaceholder} />
+          </header>
+        </div>
+
+        <div className={styles.container}>
+          {activeNotice ? (
+            <div className={styles.detailContainer}>
+              <div className={styles.detailTitleRow}>
+                {activeNotice.is_fixed && <span className={styles.fixedBadge} style={{ width: 'fit-content' }}>공지</span>}
+                <h2 className={styles.detailTitle}>{activeNotice.title}</h2>
+                <span className={styles.detailDate}>{formatDate(activeNotice.created_at)}</span>
+              </div>
+              <hr className={styles.detailDivider} />
+              <div className={styles.detailContent}>
+                {renderNoticeContent(activeNotice.content)}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.emptyState}>해당 공지사항을 찾을 수 없습니다.</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 쿼리 파라미터 id 가 없을 경우 (전체 아코디언 목록 뷰 렌더링)
   return (
     <div className={styles.page}>
       {/* 상단 통합 고정 헤더 */}
@@ -158,27 +200,5 @@ function B2BNoticePageContent() {
         )}
       </div>
     </div>
-  );
-}
-
-export default function B2BNoticePage() {
-  return (
-    <Suspense fallback={
-      <div className={styles.page}>
-        <div className={styles.fixedHeaderContainer}>
-          <header className={styles.header}>
-            <div className={styles.backBtn} />
-            <span className={styles.headerTitle}>공지사항</span>
-            <div className={styles.headerRightPlaceholder} />
-          </header>
-        </div>
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner} />
-          <p className={styles.loadingText}>공지사항 목록을 불러오는 중입니다...</p>
-        </div>
-      </div>
-    }>
-      <B2BNoticePageContent />
-    </Suspense>
   );
 }

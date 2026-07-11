@@ -197,3 +197,49 @@
   color: #8e94a0;
   font-size: 14px;
 }
+
+/* 단독 상세 뷰 스타일 */
+.detailContainer {
+  padding: 24px 16px;
+  background-color: #ffffff;
+}
+
+.detailTitleRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.detailTitle {
+  font-size: 19px;
+  font-weight: 700;
+  color: #191f28;
+  line-height: 1.4;
+}
+
+.detailDate {
+  font-size: 13px;
+  color: #8b95a1;
+}
+
+.detailDivider {
+  border: 0;
+  border-top: 1px solid #f2f4f6;
+  margin: 16px 0;
+}
+
+.detailContent {
+  font-size: 15px;
+  color: #333d4b;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.detailContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: block;
+}
