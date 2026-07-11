@@ -30,10 +30,12 @@ interface Partner {
     alarm_deposit?: boolean;
     alarm_deceased?: boolean;
     alarm_notice?: boolean;
+    company_id?: string | null;
 }
 
 export default function PartnersPage() {
     const [partners, setPartners] = useState<Partner[]>([]);
+    const [companies, setCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     
@@ -122,9 +124,51 @@ export default function PartnersPage() {
         }
     };
 
+    const fetchCompanies = async () => {
+        try {
+            const res = await fetch('/api/b2b/admin/companies');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    setCompanies(data.companies);
+                }
+            }
+        } catch (err) {
+            console.error('상조회사 로드 실패:', err);
+        }
+    };
+
     useEffect(() => {
         fetchPartners();
+        fetchCompanies();
     }, [searchQuery, statusFilter]);
+
+    const handleCompanyChange = async (partnerId: string, companyId: string) => {
+        try {
+            const res = await fetch('/api/b2b/admin/partners', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    partnerId,
+                    companyId: companyId || null
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error('소속 상조회사 변경에 실패했습니다.');
+            }
+
+            const data = await res.json();
+            if (data.success) {
+                alert('소속 상조회사가 변경되었습니다.');
+                fetchPartners();
+            } else {
+                alert(data.error || '오류 발생');
+            }
+        } catch (err: any) {
+            alert(err.message || '네트워크 오류');
+        }
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -324,6 +368,7 @@ export default function PartnersPage() {
                                 <tr>
                                     <th>가입일시</th>
                                     <th>회사명</th>
+                                    <th>소속 상조회사</th>
                                     <th>대표자</th>
                                     <th>연락처</th>
                                     <th>정산 계좌 정보</th>
@@ -342,6 +387,29 @@ export default function PartnersPage() {
                                             {formatDate(partner.created_at)}
                                         </td>
                                         <td style={{ fontWeight: '600' }}>{partner.company_name}</td>
+                                        <td>
+                                            <select
+                                                value={partner.company_id || ''}
+                                                onChange={(e) => handleCompanyChange(partner.id, e.target.value)}
+                                                className={styles.companySelect}
+                                                style={{
+                                                    padding: '6px 8px',
+                                                    borderRadius: '6px',
+                                                    border: '1px solid #cbd5e1',
+                                                    fontSize: '13px',
+                                                    color: '#334155',
+                                                    outline: 'none',
+                                                    backgroundColor: '#ffffff'
+                                                }}
+                                            >
+                                                <option value="">소속 없음</option>
+                                                {companies.map((c) => (
+                                                    <option key={c.id} value={c.id}>
+                                                        {c.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
                                         <td>{partner.owner_name}</td>
                                         <td>{formatPhone(partner.phone)}</td>
                                         <td style={{ fontSize: '13px', color: '#475569' }}>

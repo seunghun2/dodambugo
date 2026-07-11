@@ -126,6 +126,38 @@ export async function POST(request: NextRequest) {
 
                             console.log(`✅ [B2B-Webhook] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
 
+                            // 4-2. 상조회사 본사 수수료 정산 내역 추가
+                            try {
+                                const { data: partnerUser } = await supabase
+                                    .from('b2b_users')
+                                    .select('company_id')
+                                    .eq('id', partnerId)
+                                    .single();
+
+                                if (partnerUser?.company_id) {
+                                    const { data: companyRecord } = await supabase
+                                        .from('b2b_companies')
+                                        .select('wreath_commission_amount')
+                                        .eq('id', partnerUser.company_id)
+                                        .single();
+
+                                    const companyCommission = companyRecord?.wreath_commission_amount !== undefined 
+                                        ? companyRecord.wreath_commission_amount 
+                                        : 5000;
+
+                                    await supabase.from('b2b_company_settlements').insert({
+                                        company_id: partnerUser.company_id,
+                                        order_id: String(orderData.id || moid),
+                                        amount: companyCommission,
+                                        status: 'pending'
+                                    });
+
+                                    console.log(`✅ [B2B-Webhook] 상조회사 본사 ${partnerUser.company_id}에 ${companyCommission}원 정산 내역 추가 완료`);
+                                }
+                            } catch (companyErr) {
+                                console.error('❌ [B2B-Webhook] 상조회사 본사 정산 적재 중 오류:', companyErr);
+                            }
+
                             // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
                             import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
                                 // 화환 주문 알람

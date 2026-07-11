@@ -98,7 +98,8 @@ export async function GET(request: NextRequest) {
             alarm_all: p.alarm_all,
             alarm_deposit: p.alarm_deposit,
             alarm_deceased: p.alarm_deceased,
-            alarm_notice: p.alarm_notice
+            alarm_notice: p.alarm_notice,
+            company_id: p.company_id
         })) || [];
 
         return NextResponse.json({ success: true, partners: formattedPartners });
@@ -117,21 +118,33 @@ export async function PATCH(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { partnerId, status } = body;
+        const { partnerId, status, companyId } = body;
 
-        if (!partnerId || !status) {
-            return NextResponse.json({ error: '필수 정보를 입력해주세요.' }, { status: 400 });
+        if (!partnerId) {
+            return NextResponse.json({ error: '파트너 ID가 필요합니다.' }, { status: 400 });
         }
 
-        const validStatuses = ['approved', 'rejected', 'blocked', 'pending'];
-        if (!validStatuses.includes(status)) {
-            return NextResponse.json({ error: '올바르지 않은 상태값입니다.' }, { status: 400 });
+        const updateData: any = {};
+        if (status) {
+            const validStatuses = ['approved', 'rejected', 'blocked', 'pending'];
+            if (!validStatuses.includes(status)) {
+                return NextResponse.json({ error: '올바르지 않은 상태값입니다.' }, { status: 400 });
+            }
+            updateData.status = status;
         }
 
-        // 상태 업데이트
+        if (companyId !== undefined) {
+            updateData.company_id = companyId;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return NextResponse.json({ error: '업데이트할 항목이 없습니다.' }, { status: 400 });
+        }
+
+        // 상태 및 소속 업데이트
         const { data, error } = await supabase
             .from('b2b_users')
-            .update({ status })
+            .update(updateData)
             .eq('id', partnerId)
             .select()
             .single();

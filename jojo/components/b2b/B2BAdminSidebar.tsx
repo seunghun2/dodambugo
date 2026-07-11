@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { 
     IconLayoutDashboard, 
     IconUsers, 
+    IconBuilding,
     IconCreditCard, 
     IconSettings,
     IconLogout,
@@ -40,6 +41,11 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             href: '/b2b/admin/partners',
             label: '파트너 관리',
             icon: <IconUsers stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/companies',
+            label: '상조회사 관리',
+            icon: <IconBuilding stroke={1.5} size={22} />
         },
         {
             href: '/b2b/admin/bugo',
