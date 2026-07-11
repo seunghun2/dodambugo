@@ -67,8 +67,16 @@ export default function SettingsPage() {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'
-    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'>('main');
+    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice' | 'settlements'
+    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice' | 'settlements'>('main');
+
+    // 상조 담당자용 정산서 조회 관련 상태
+    const [settleSummary, setSettleSummary] = useState<any>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
+    const [settleMonthlyList, setSettleMonthlyList] = useState<any[]>([]);
+    const [settleDetails, setSettleDetails] = useState<any[]>([]);
+    const [settleSelectedMonth, setSettleSelectedMonth] = useState<string | null>(null);
+    const [settleLoading, setSettleLoading] = useState(false);
+    const [settleDetailLoading, setSettleDetailLoading] = useState(false);
 
     // FAQ 다중 오픈 상태
     const [openFaqIndexes, setOpenFaqIndexes] = useState<number[]>([]);
@@ -100,6 +108,60 @@ export default function SettingsPage() {
             fetchNotices();
         }
     }, [view, fetchNotices]);
+
+    // 상조 담당자용 정산 내역 fetch 로직
+    const fetchSettleMonthlyDetail = useCallback(async (yearMonth: string) => {
+        if (!user || !user.company_id) return;
+        setSettleDetailLoading(true);
+        setSettleSelectedMonth(yearMonth);
+        try {
+            const token = localStorage.getItem('b2b_token');
+            const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${user.company_id}&yearMonth=${yearMonth}`, {
+                headers: { Authorization: token ? `Bearer ${token}` : '' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    setSettleDetails(data.settlements || []);
+                }
+            }
+        } catch (err) {
+            console.error('상세 정산 내역 로드 오류:', err);
+        } finally {
+            setSettleDetailLoading(false);
+        }
+    }, [user]);
+
+    const fetchSettleMonthlyList = useCallback(async () => {
+        if (!user || !user.company_id) return;
+        setSettleLoading(true);
+        try {
+            const token = localStorage.getItem('b2b_token');
+            const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${user.company_id}`, {
+                headers: { Authorization: token ? `Bearer ${token}` : '' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    setSettleSummary(data.summary);
+                    setSettleMonthlyList(data.monthlyList || []);
+                    if (data.monthlyList && data.monthlyList.length > 0) {
+                        fetchSettleMonthlyDetail(data.monthlyList[0].month);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('월별 정산 장부 로드 오류:', err);
+        } finally {
+            setSettleLoading(false);
+        }
+    }, [user, fetchSettleMonthlyDetail]);
+
+    useEffect(() => {
+        if (view === 'settlements') {
+            fetchSettleMonthlyList();
+        }
+    }, [view, fetchSettleMonthlyList]);
 
     // 모달 활성화 상태
     const [showInfoModal, setShowInfoModal] = useState(false);
@@ -609,6 +671,14 @@ export default function SettingsPage() {
                                 <B2BIcon name="chevron-right" size={18} />
                             </span>
                         </div>
+                        {user.company_id && (
+                            <div className={styles.listItem} onClick={() => setView('settlements')}>
+                                <span className={styles.listLabel} style={{ fontWeight: 'bold' }}>본사 정산서 조회</span>
+                                <span className={styles.listArrow}>
+                                    <B2BIcon name="chevron-right" size={18} />
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -1613,7 +1683,230 @@ export default function SettingsPage() {
         );
     }
 
+    // ==========================================
+    // 10. 상조회사용 본사 정산서 조회 뷰 ('settlements')
+    // ==========================================
+    if (view === 'settlements') {
+        const handlePrint = () => {
+            window.print();
+        };
 
+        const handleDownloadCSV = () => {
+            if (!settleSelectedMonth || settleDetails.length === 0) {
+                alert('다운로드할 정산 내역이 없습니다.');
+                return;
+            }
+
+            const [year, month] = settleSelectedMonth.split('-');
+            const headers = ['거래일시', '주문번호', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
+            
+            const rows = settleDetails.map(s => [
+                new Date(s.created_at).toLocaleString(),
+                s.order?.order_number || '-',
+                s.order?.partner_name || '-',
+                s.order?.deceased_name || '-',
+                s.order?.product_name || '-',
+                s.order?.sender_name || '-',
+                s.amount,
+                s.status === 'pending' ? '정산대기' : '정산완료'
+            ]);
+
+            const csvContent = 
+                '\ufeff' + 
+                [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `본사정산서_${user.company_name || '상조본사'}_${year}년_${month}월.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        const currentMonthData = settleMonthlyList.find(m => m.month === settleSelectedMonth);
+        const hasPending = currentMonthData ? currentMonthData.pending_amount > 0 : false;
+
+        return (
+            <div className={styles.container}>
+                {/* 헤더 */}
+                <header className={`${styles.header} no-print`}>
+                    <button className={styles.backBtn} onClick={() => setView('main')}>
+                        <B2BIcon name="chevron-left" size={24} />
+                    </button>
+                    <span className={styles.headerTitle}>본사 정산서 조회</span>
+                    <div style={{ display: 'flex', gap: '8px', marginRight: '16px' }}>
+                        <button 
+                            onClick={handlePrint}
+                            style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: '#000000' }}
+                        >
+                            인쇄
+                        </button>
+                        <button 
+                            onClick={handleDownloadCSV}
+                            disabled={settleDetails.length === 0}
+                            style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: '#000000' }}
+                        >
+                            엑셀
+                        </button>
+                    </div>
+                </header>
+
+                <div style={{ padding: '16px' }}>
+                    {/* 상단 요약 박스 (모바일) */}
+                    <div className="no-print" style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                        <div style={{ flex: 1, padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+                            <div style={{ fontSize: '11px', color: '#475569', marginBottom: '2px' }}>미정산 총액</div>
+                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#000000' }}>{(settleSummary.pending_amount || 0).toLocaleString()}원</div>
+                        </div>
+                        <div style={{ flex: 1, padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+                            <div style={{ fontSize: '11px', color: '#475569', marginBottom: '2px' }}>정산 완료 총액</div>
+                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#000000' }}>{(settleSummary.completed_amount || 0).toLocaleString()}원</div>
+                        </div>
+                    </div>
+
+                    {/* 월별 요약 테이블 */}
+                    <div className="no-print" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', marginBottom: '20px' }}>
+                        <div style={{ padding: '12px', fontWeight: 'bold', fontSize: '13px', background: '#f8fafc', borderBottom: '1px solid #cbd5e1', color: '#000000' }}>월별 정산 장부</div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                            <thead>
+                                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #cbd5e1' }}>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#000000' }}>정산월</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>미정산</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>정산완료</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'center', color: '#000000' }}>조회</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {settleLoading ? (
+                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>정산 정보 로딩 중...</td></tr>
+                                ) : settleMonthlyList.length === 0 ? (
+                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>정산 정보가 없습니다.</td></tr>
+                                ) : (
+                                    settleMonthlyList.map(m => (
+                                        <tr key={m.month} style={{ borderBottom: '1px solid #e2e8f0', background: settleSelectedMonth === m.month ? '#f8fafc' : 'transparent' }}>
+                                            <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#000000' }}>{m.month.split('-')[0]}년 {m.month.split('-')[1]}월</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>{m.pending_amount.toLocaleString()}원</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>{m.completed_amount.toLocaleString()}원</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                                <button 
+                                                    onClick={() => fetchSettleMonthlyDetail(m.month)}
+                                                    style={{ border: '1px solid #cbd5e1', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', background: '#ffffff', cursor: 'pointer', color: '#000000' }}
+                                                >
+                                                    선택
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* 정식 정산 명세서 (A4 서식 흑백 양식 모바일&인쇄용) */}
+                    {settleSelectedMonth && (
+                        <div style={{ background: '#ffffff', border: '2px solid #000000', padding: '20px', fontSize: '12px', color: '#000000' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <h2 style={{ fontSize: '24px', letterSpacing: '8px', margin: '0 0 4px 0', color: '#000000' }}>정 산 서</h2>
+                                <span style={{ fontSize: '11px', color: '#475569' }}>귀사 소속의 화환 거래 정산 명세서입니다.</span>
+                            </div>
+
+                            {/* 공급자 & 공급받는자 명세 */}
+                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급받는자 (상조회사)</div>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <tbody>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>상호명</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{user.company_name || '상조회사'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>대상월</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{settleSelectedMonth.split('-')[0]}년 {settleSelectedMonth.split('-')[1]}월분</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급자 (발행처)</div>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <tbody>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>상호명</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>부고온 (마음부고온)</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>등록번호</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>685-86-02759</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* 간이 정산 상태 표시 */}
+                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '16px' }}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>정산 상태</td>
+                                        <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>{hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}</td>
+                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>확인일자</td>
+                                        <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>
+                                            {hasPending ? '확정 대기 중' : formatDate(settleDetails[0]?.payment_date)}
+                                        </td>
+                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>합계 금액</td>
+                                        <td style={{ border: '1px solid #000000', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                                            {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            {/* 세부 목록 */}
+                            <div style={{ overflowX: 'auto', marginBottom: '10px' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', color: '#000000' }}>
+                                    <thead>
+                                        <tr style={{ background: '#f1f5f9' }}>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>결제 일시</th>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>주문 번호</th>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>장례지도사</th>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>고인명(상가)</th>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>화환 상품명 (주문자)</th>
+                                            <th style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>정산 수당</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {settleDetailLoading ? (
+                                            <tr><td colSpan={6} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>상세 내역 로드 중...</td></tr>
+                                        ) : settleDetails.length === 0 ? (
+                                            <tr><td colSpan={6} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>거래 내역이 없습니다.</td></tr>
+                                        ) : (
+                                            settleDetails.map(s => (
+                                                <tr key={s.id}>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>
+                                                        {new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                                    </td>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', fontFamily: 'monospace', color: '#000000' }}>{s.order?.order_number || '-'}</td>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>{s.order?.partner_name || '-'}</td>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', fontWeight: 'bold', color: '#000000' }}>{s.order?.deceased_name || '-'}</td>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>{s.order?.product_name} ({s.order?.sender_name})</td>
+                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>{s.amount.toLocaleString()}원</td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return null;
 }

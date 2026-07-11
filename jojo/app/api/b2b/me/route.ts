@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
         const { data: user, error: userError } = await supabase
             .from('b2b_users')
-            .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event, avatar_url')
+            .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event, avatar_url, company_id')
             .eq('id', userId)
             .single();
 
