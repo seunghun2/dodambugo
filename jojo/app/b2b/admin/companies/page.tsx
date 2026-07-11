@@ -11,6 +11,10 @@ interface Company {
     business_no?: string;
     wreath_commission_amount: number;
     created_at: string;
+    owner_name?: string;
+    address?: string;
+    business_type?: string;
+    business_item?: string;
 }
 
 export default function CompaniesPage() {
@@ -27,6 +31,10 @@ export default function CompaniesPage() {
     const [name, setName] = useState('');
     const [businessNo, setBusinessNo] = useState('');
     const [wreathCommission, setWreathCommission] = useState('5000');
+    const [ownerName, setOwnerName] = useState('');
+    const [address, setAddress] = useState('');
+    const [businessType, setBusinessType] = useState('');
+    const [businessItem, setBusinessItem] = useState('');
 
     // 목록 조회
     const fetchCompanies = async () => {
@@ -57,10 +65,18 @@ export default function CompaniesPage() {
             setName(company.name);
             setBusinessNo(company.business_no || '');
             setWreathCommission(String(company.wreath_commission_amount));
+            setOwnerName(company.owner_name || '');
+            setAddress(company.address || '');
+            setBusinessType(company.business_type || '');
+            setBusinessItem(company.business_item || '');
         } else {
             setName('');
             setBusinessNo('');
             setWreathCommission('5000');
+            setOwnerName('');
+            setAddress('');
+            setBusinessType('');
+            setBusinessItem('');
         }
         setModalOpen(true);
     };
@@ -89,7 +105,11 @@ export default function CompaniesPage() {
                     id: editingCompany?.id,
                     name,
                     business_no: businessNo,
-                    wreath_commission_amount: amount
+                    wreath_commission_amount: amount,
+                    owner_name: ownerName,
+                    address,
+                    business_type: businessType,
+                    business_item: businessItem
                 })
             });
 
@@ -177,6 +197,8 @@ export default function CompaniesPage() {
                             <tr>
                                 <th className={styles.th}>상조회사명</th>
                                 <th className={styles.th}>사업자 번호</th>
+                                <th className={styles.th}>대표자명</th>
+                                <th className={styles.th}>업태 / 종목</th>
                                 <th className={styles.th}>화환 판매 본사 수수료</th>
                                 <th className={styles.th}>등록일</th>
                                 <th className={styles.th} style={{ width: '150px' }}>관리</th>
@@ -185,7 +207,7 @@ export default function CompaniesPage() {
                         <tbody>
                             {companies.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className={styles.emptyState}>
+                                    <td colSpan={7} className={styles.emptyState}>
                                         등록된 상조회사가 존재하지 않습니다. 상조회사를 등록해 주세요.
                                     </td>
                                 </tr>
@@ -197,6 +219,12 @@ export default function CompaniesPage() {
                                         </td>
                                         <td className={styles.td}>
                                             {c.business_no || '-'}
+                                        </td>
+                                        <td className={styles.td}>
+                                            {c.owner_name || '-'}
+                                        </td>
+                                        <td className={styles.td} style={{ fontSize: '12px' }}>
+                                            {c.business_type || c.business_item ? `${c.business_type || '-' } / ${c.business_item || '-'}` : '-'}
                                         </td>
                                         <td className={styles.td} style={{ color: '#2563eb', fontWeight: '500' }}>
                                             {(c.wreath_commission_amount || 0).toLocaleString()}원
@@ -262,6 +290,51 @@ export default function CompaniesPage() {
                                     onChange={(e) => setBusinessNo(e.target.value)}
                                     placeholder="예: 120-00-00000"
                                 />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>대표자명</label>
+                                <input
+                                    type="text"
+                                    className={styles.input}
+                                    value={ownerName}
+                                    onChange={(e) => setOwnerName(e.target.value)}
+                                    placeholder="예: 홍길동"
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>소재지 주소</label>
+                                <input
+                                    type="text"
+                                    className={styles.input}
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    placeholder="예: 서울특별시 마포구 백범로 31"
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>업태</label>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        value={businessType}
+                                        onChange={(e) => setBusinessType(e.target.value)}
+                                        placeholder="예: 서비스업"
+                                    />
+                                </div>
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>종목</label>
+                                    <input
+                                        type="text"
+                                        className={styles.input}
+                                        value={businessItem}
+                                        onChange={(e) => setBusinessItem(e.target.value)}
+                                        placeholder="예: 상조업, 장례식장"
+                                    />
+                                </div>
                             </div>
 
                             <div className={styles.formGroup}>

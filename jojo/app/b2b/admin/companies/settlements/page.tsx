@@ -40,6 +40,10 @@ interface CompanyInfo {
     id: string;
     name: string;
     business_no?: string;
+    owner_name?: string;
+    address?: string;
+    business_type?: string;
+    business_item?: string;
 }
 
 function SettlementsContent() {
@@ -327,39 +331,57 @@ function SettlementsContent() {
                     {/* 공급자 & 공급받는자 정식 사업자 명세 정보 테이블 (정산서 정석 포맷) */}
                     <div className={styles.businessSection}>
                         <div className={styles.businessCard}>
-                            <div className={styles.businessTitle}>■ 공급받는자 (상조회사)</div>
+                            <div className={styles.businessTitle}>■ 공급받는자</div>
                             <table className={styles.businessTable}>
                                 <tbody>
-                                    <tr>
-                                        <td className={styles.businessLabel}>상호(회사명)</td>
-                                        <td className={styles.businessValue}>{companyName}</td>
-                                    </tr>
                                     <tr>
                                         <td className={styles.businessLabel}>등록 번호</td>
                                         <td className={styles.businessValue}>{companyInfo?.business_no || '미등록'}</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>정산 대상 월</td>
-                                        <td className={styles.businessValue}>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월분</td>
+                                        <td className={styles.businessLabel}>상호 (법인명)</td>
+                                        <td className={styles.businessValue}>{companyInfo?.name || companyName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>성명 (대표자)</td>
+                                        <td className={styles.businessValue}>{companyInfo?.owner_name || '-'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>사업장 주소</td>
+                                        <td className={styles.businessValue}>{companyInfo?.address || '미등록'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>업태 / 종목</td>
+                                        <td className={styles.businessValue}>
+                                            {companyInfo?.business_type || '-'} / {companyInfo?.business_item || '-'}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div className={styles.businessCard}>
-                            <div className={styles.businessTitle}>■ 공급자 (발행처)</div>
+                            <div className={styles.businessTitle}>■ 공급자</div>
                             <table className={styles.businessTable}>
                                 <tbody>
                                     <tr>
-                                        <td className={styles.businessLabel}>상호 (서비스)</td>
-                                        <td className={styles.businessValue}>부고온 (마음부고온)</td>
+                                        <td className={styles.businessLabel}>등록 번호</td>
+                                        <td className={styles.businessValue}>408-22-68851</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>사업자 등록번호</td>
-                                        <td className={styles.businessValue}>685-86-02759</td>
+                                        <td className={styles.businessLabel}>상호 (법인명)</td>
+                                        <td className={styles.businessValue}>마음부고</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>주소 및 문의</td>
-                                        <td className={styles.businessValue}>서울특별시 마포구 마포대로 109, 10층</td>
+                                        <td className={styles.businessLabel}>성명 (대표자)</td>
+                                        <td className={styles.businessValue}>김미연</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>사업장 주소</td>
+                                        <td className={styles.businessValue}>서울특별시 강남구 압구정로 306</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>업태 / 종목</td>
+                                        <td className={styles.businessValue}>서비스업 / 정보통신업, 모바일 플랫폼</td>
                                     </tr>
                                 </tbody>
                             </table>

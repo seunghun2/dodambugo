@@ -24,11 +24,11 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST: 신규 상조회사 등록
+// POST: 신규 상조회사 등록 (표준 사업자 정보 필드 추가)
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, business_no, wreath_commission_amount } = body;
+        const { name, business_no, wreath_commission_amount, owner_name, address, business_type, business_item } = body;
 
         if (!name) {
             return NextResponse.json({ error: '상조회사명을 입력해주세요.' }, { status: 400 });
@@ -39,7 +39,11 @@ export async function POST(request: NextRequest) {
             .insert({
                 name,
                 business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000
+                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000,
+                owner_name: owner_name || '',
+                address: address || '',
+                business_type: business_type || '',
+                business_item: business_item || ''
             })
             .select()
             .single();
@@ -54,11 +58,11 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// PUT: 상조회사 정보 및 수당 수정
+// PUT: 상조회사 정보 및 수당 수정 (표준 사업자 정보 필드 추가)
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        const { id, name, business_no, wreath_commission_amount } = body;
+        const { id, name, business_no, wreath_commission_amount, owner_name, address, business_type, business_item } = body;
 
         if (!id || !name) {
             return NextResponse.json({ error: 'ID와 상조회사명은 필수 항목입니다.' }, { status: 400 });
@@ -69,7 +73,11 @@ export async function PUT(request: NextRequest) {
             .update({
                 name,
                 business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000
+                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000,
+                owner_name: owner_name || '',
+                address: address || '',
+                business_type: business_type || '',
+                business_item: business_item || ''
             })
             .eq('id', id)
             .select()

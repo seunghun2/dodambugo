@@ -78,6 +78,7 @@ export default function SettingsPage() {
     const [settleSelectedMonth, setSettleSelectedMonth] = useState<string | null>(null);
     const [settleLoading, setSettleLoading] = useState(false);
     const [settleDetailLoading, setSettleDetailLoading] = useState(false);
+    const [companyInfo, setCompanyInfo] = useState<any>(null);
 
     // FAQ 다중 오픈 상태
     const [openFaqIndexes, setOpenFaqIndexes] = useState<number[]>([]);
@@ -124,6 +125,9 @@ export default function SettingsPage() {
                 const data = await res.json();
                 if (data.success) {
                     setSettleDetails(data.settlements || []);
+                    if (data.company) {
+                        setCompanyInfo(data.company);
+                    }
                 }
             }
         } catch (err) {
@@ -146,6 +150,9 @@ export default function SettingsPage() {
                 if (data.success) {
                     setSettleSummary(data.summary);
                     setSettleMonthlyList(data.monthlyList || []);
+                    if (data.company) {
+                        setCompanyInfo(data.company);
+                    }
                     if (data.monthlyList && data.monthlyList.length > 0) {
                         fetchSettleMonthlyDetail(data.monthlyList[0].month);
                     }
@@ -1818,31 +1825,57 @@ export default function SettingsPage() {
                             {/* 공급자 & 공급받는자 명세 */}
                             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급받는자 (상조회사)</div>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급받는자</div>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
                                         <tbody>
                                             <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>상호명</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{user.company_name || '상조회사'}</td>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>등록번호</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.business_no || '미등록'}</td>
                                             </tr>
                                             <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>대상월</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{settleSelectedMonth.split('-')[0]}년 {settleSelectedMonth.split('-')[1]}월분</td>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>상호 (법인명)</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.name || user.company_name || '상조회사'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>성명 (대표자)</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.owner_name || '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>사업장 주소</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.address || '미등록'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>업태 / 종목</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>
+                                                    {companyInfo?.business_type || '-'} / {companyInfo?.business_item || '-'}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급자 (발행처)</div>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급자</div>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
                                         <tbody>
                                             <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>상호명</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>부고온 (마음부고온)</td>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>등록번호</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>408-22-68851</td>
                                             </tr>
                                             <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>등록번호</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>685-86-02759</td>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>상호 (법인명)</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>마음부고</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>성명 (대표자)</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>김미연</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>사업장 주소</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>서울특별시 강남구 압구정로 306</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>업태 / 종목</td>
+                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>서비스업 / 정보통신업, 모바일 플랫폼</td>
                                             </tr>
                                         </tbody>
                                     </table>

@@ -1,31 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+
 // GET: 특정 상조회사의 월별 대금 정산 요약 목록 또는 특정 월의 상세 내역 조회 (지도사명, 고인명, 부고ID 조인 추가)
 export async function GET(request: NextRequest) {
     const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
-    if (!isAdmin) {
+    let isCompanyUser = false;
+    const { searchParams } = new URL(request.url);
+    const companyId = searchParams.get('companyId');
+    const yearMonth = searchParams.get('yearMonth'); // YYYY-MM 형식 (선택 사항)
+
+    if (!isAdmin && companyId) {
+        const auth = request.headers.get('Authorization');
+        let token: string | undefined;
+        if (auth?.startsWith('Bearer ')) {
+            token = auth.slice(7);
+        } else {
+            token = request.cookies.get('b2b_token')?.value;
+        }
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET) as any;
+                const { data: user } = await supabase
+                    .from('b2b_users')
+                    .select('company_id')
+                    .eq('id', decoded.userId)
+                    .single();
+                
+                if (user && user.company_id && user.company_id === companyId) {
+                    isCompanyUser = true;
+                }
+            } catch {
+                // 패스
+            }
+        }
+    }
+
+    if (!isAdmin && !isCompanyUser) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
 
     try {
-        const { searchParams } = new URL(request.url);
-        const companyId = searchParams.get('companyId');
-        const yearMonth = searchParams.get('yearMonth'); // YYYY-MM 형식 (선택 사항)
-
         if (!companyId) {
             return NextResponse.json({ error: '상조회사 ID가 필요합니다.' }, { status: 400 });
         }
 
-        // 상조회사 기본 정보 단독 조회 (사업자번호 확보용)
+        // 상조회사 기본 정보 단독 조회 (사업자번호 확보용 + 대표, 주소, 업태, 종목 추가)
         const { data: companyData } = await supabase
             .from('b2b_companies')
-            .select('id, name, business_no, wreath_commission_amount')
+            .select('id, name, business_no, wreath_commission_amount, owner_name, address, business_type, business_item')
             .eq('id', companyId)
             .single();
 

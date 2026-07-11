@@ -19,6 +19,7 @@ export default function CompanyDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     // 정산 데이터 상태
+    const [companyInfo, setCompanyInfo] = useState<any>(null);
     const [settleSummary, setSettleSummary] = useState<any>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
     const [settleMonthlyList, setSettleMonthlyList] = useState<any[]>([]);
     const [settleDetails, setSettleDetails] = useState<any[]>([]);
@@ -64,6 +65,9 @@ export default function CompanyDashboardPage() {
                 const data = await res.json();
                 if (data.success) {
                     setSettleDetails(data.settlements || []);
+                    if (data.company) {
+                        setCompanyInfo(data.company);
+                    }
                 }
             }
         } catch (err) {
@@ -86,6 +90,9 @@ export default function CompanyDashboardPage() {
                 if (data.success) {
                     setSettleSummary(data.summary);
                     setSettleMonthlyList(data.monthlyList || []);
+                    if (data.company) {
+                        setCompanyInfo(data.company);
+                    }
                     if (data.monthlyList && data.monthlyList.length > 0) {
                         fetchSettleMonthlyDetail(data.monthlyList[0].month, companyId);
                     }
@@ -293,35 +300,61 @@ export default function CompanyDashboardPage() {
                                         <span className={styles.invoiceSubTitle}>정산 대상월 : {settleSelectedMonth.split('-')[0]}년 {settleSelectedMonth.split('-')[1]}월분</span>
                                     </div>
 
-                                    {/* 공급자 & 공급받는자 영수 명세 */}
+                                    {/* 공급자 & 공급받는자 영수 명세 (정석 사업자 정보 5개 연동) */}
                                     <div className={styles.partiesBlock}>
                                         <div className={styles.partyBox}>
-                                            <span className={styles.partyLabel}>■ 공급받는자 (상조회사)</span>
+                                            <span className={styles.partyLabel}>■ 공급받는자</span>
                                             <table className={styles.miniTable}>
                                                 <tbody>
                                                     <tr>
-                                                        <td className={styles.miniTh}>상호명</td>
-                                                        <td className={styles.miniTd}>{user.company_name}</td>
+                                                        <td className={styles.miniTh}>등록번호</td>
+                                                        <td className={styles.miniTd}>{companyInfo?.business_no || '미등록'}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td className={styles.miniTh}>대표자명</td>
-                                                        <td className={styles.miniTd}>{user.owner_name}</td>
+                                                        <td className={styles.miniTh}>상호(법인명)</td>
+                                                        <td className={styles.miniTd}>{companyInfo?.name || user.company_name}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>성명(대표자)</td>
+                                                        <td className={styles.miniTd}>{companyInfo?.owner_name || '-'}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>사업장 주소</td>
+                                                        <td className={styles.miniTd}>{companyInfo?.address || '미등록'}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>업태 / 종목</td>
+                                                        <td className={styles.miniTd}>
+                                                            {companyInfo?.business_type || '-'} / {companyInfo?.business_item || '-'}
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
 
                                         <div className={styles.partyBox}>
-                                            <span className={styles.partyLabel}>■ 공급자 (발행처)</span>
+                                            <span className={styles.partyLabel}>■ 공급자</span>
                                             <table className={styles.miniTable}>
                                                 <tbody>
                                                     <tr>
-                                                        <td className={styles.miniTh}>상호명</td>
-                                                        <td className={styles.miniTd}>부고온 (마음부고온)</td>
+                                                        <td className={styles.miniTh}>등록번호</td>
+                                                        <td className={styles.miniTd}>408-22-68851</td>
                                                     </tr>
                                                     <tr>
-                                                        <td className={styles.miniTh}>등록번호</td>
-                                                        <td className={styles.miniTd}>685-86-02759</td>
+                                                        <td className={styles.miniTh}>상호(법인명)</td>
+                                                        <td className={styles.miniTd}>마음부고</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>성명(대표자)</td>
+                                                        <td className={styles.miniTd}>김미연</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>사업장 주소</td>
+                                                        <td className={styles.miniTd}>서울특별시 강남구 압구정로 306</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className={styles.miniTh}>업태 / 종목</td>
+                                                        <td className={styles.miniTd}>서비스업 / 정보통신업, 모바일 플랫폼</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
