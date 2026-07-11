@@ -54,11 +54,11 @@ export async function GET(request: NextRequest) {
             .range(offset, offset + limit - 1);
         if (txError) console.error('[DEBUG] txError:', txError);
 
-        console.log('[DEBUG] Fetching identity_verified and partner_type for user:', userId);
-        // 본인인증 여부 및 파트너 유형 조회
+        console.log('[DEBUG] Fetching identity_verified, partner_type and bank account info for user:', userId);
+        // 본인인증 여부, 파트너 유형 및 정산계좌 정보 조회
         const { data: user, error: userError } = await supabase
             .from('b2b_users')
-            .select('identity_verified, partner_type')
+            .select('identity_verified, partner_type, bank_name, account_no, account_holder')
             .eq('id', userId)
             .single();
         if (userError) console.error('[DEBUG] userError:', userError);
@@ -99,6 +99,9 @@ export async function GET(request: NextRequest) {
             limit,
             identity_verified: user?.identity_verified || false,
             partner_type: user?.partner_type || 'individual',
+            bank_name: user?.bank_name || null,
+            account_no: user?.account_no || null,
+            account_holder: user?.account_holder || null,
         });
     } catch (err) {
         console.error('[DEBUG] Unexpected error in GET /api/b2b/wallet:', err);
