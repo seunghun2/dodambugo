@@ -18,10 +18,11 @@
   max-width: 480px;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  height: 56px;
-  padding: 0 var(--spacing-md);
+  height: calc(56px + env(safe-area-inset-top, 47px));
+  padding: 0 var(--spacing-md) 10px var(--spacing-md);
+  padding-top: env(safe-area-inset-top, 47px);
   background: var(--bg-white);
   border-bottom: 1px solid var(--b2b-border);
 }
@@ -68,7 +69,7 @@
 /* 콘텐츠 */
 .content {
   padding: 24px 20px;
-  margin-top: 56px;
+  margin-top: calc(56px + env(safe-area-inset-top, 47px));
 }
 
 /* 미리보기 모달 오버레이 */

@@ -9,13 +9,15 @@
 
 /* 헤더: 흰색 배경 */
 .orderHeader {
-    padding: 20px;
     background: var(--bg-white, #FFFFFF);
-    text-align: center;
     border-bottom: 1px solid var(--gray-200);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
+    height: calc(52px + env(safe-area-inset-top, 47px));
+    padding: 0 20px 10px 20px;
+    padding-top: env(safe-area-inset-top, 47px);
+    box-sizing: border-box;
 }
 
 .orderHeader h1 {

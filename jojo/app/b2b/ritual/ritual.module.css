@@ -5,16 +5,17 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
-  padding-top: 52px;
+  padding-top: calc(52px + env(safe-area-inset-top, 47px));
   padding-bottom: 72px;
 }
 
 /* 헤더 */
 .header {
   display: flex;
-  align-items: center;
-  height: 52px;
-  padding: 0 20px;
+  align-items: flex-end;
+  height: calc(52px + env(safe-area-inset-top, 47px));
+  padding: 0 20px 10px 20px;
+  padding-top: env(safe-area-inset-top, 47px);
   border-bottom: 1px solid var(--b2b-border-light);
   position: fixed;
   top: 0;

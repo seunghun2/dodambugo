@@ -9,10 +9,11 @@
 
 .header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    height: 52px;
-    padding: 0 var(--spacing-md);
+    height: calc(52px + env(safe-area-inset-top, 47px));
+    padding: 0 var(--spacing-md) 10px var(--spacing-md);
+    padding-top: env(safe-area-inset-top, 47px);
     border-bottom: 1px solid var(--b2b-border);
 }
 

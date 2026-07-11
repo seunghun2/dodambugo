@@ -3,6 +3,7 @@
   margin: 0 auto;
   min-height: 100dvh;
   background: #F8F9FA;
+  padding-top: calc(52px + env(safe-area-inset-top, 47px));
   padding-bottom: 90px;
   box-sizing: border-box;
   font-family: sans-serif;
@@ -13,14 +14,19 @@
 /* 헤더 */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  height: 52px;
-  padding: 0 16px;
+  height: calc(52px + env(safe-area-inset-top, 47px));
+  padding: 0 16px 10px 16px;
+  padding-top: env(safe-area-inset-top, 47px);
   border-bottom: 1px solid #F2F4F6;
   background: #ffffff;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   z-index: 10;
 }
 
