@@ -43,6 +43,13 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+        // 비동기로 전체 파트너에게 공지사항 알림/푸시 전송 (API 응답 지연 방지)
+        import('@/lib/partner-notification').then(({ sendNoticeToAllPartners }) => {
+            sendNoticeToAllPartners(title.trim(), content.trim(), { url: '/b2b/notice' })
+                .catch(err => console.error('[Notification] 공지 전송 오류:', err));
+        });
+
         return NextResponse.json({ success: true, notice: data });
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });

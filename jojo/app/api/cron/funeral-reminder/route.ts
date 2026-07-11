@@ -75,11 +75,25 @@ export async function GET() {
             // 3시간 후 범위 안에 있는지 확인
             if (funeralDateTime >= rangeStart && funeralDateTime <= rangeEnd) {
                 try {
+                    // 중복 발송 방지 체크
+                    const { data: alreadySent } = await supabase
+                        .from('b2b_notifications')
+                        .select('id')
+                        .eq('partner_id', bugo.b2b_user_id)
+                        .eq('type', 'funeral_reminder')
+                        .contains('data', { bugo_number: bugo.bugo_number })
+                        .limit(1);
+
+                    if (alreadySent && alreadySent.length > 0) {
+                        console.log(`[FuneralReminder] ⏭️ 이미 리마인더 발송 완료된 부고: ${bugo.bugo_number}`);
+                        continue;
+                    }
+
                     await sendPartnerNotification(bugo.b2b_user_id, 'funeral_reminder', {
                         고인명: bugo.deceased_name || '',
                         장례식장: bugo.funeral_home || '',
                         발인일시: `${bugo.funeral_date} ${bugo.funeral_time || ''}`.trim(),
-                    }, { url: '/b2b/manage' });
+                    }, { url: '/b2b/manage', bugo_number: bugo.bugo_number });
                     sent++;
                     console.log(`[FuneralReminder] ✅ 발인 리마인더 발송: 故 ${bugo.deceased_name} → 파트너 ${bugo.b2b_user_id}`);
                 } catch (err) {

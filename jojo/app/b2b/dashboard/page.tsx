@@ -98,10 +98,27 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // 안읽은 알림 카운트 로드
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('b2b_token');
+      const res = await fetch('/api/b2b/notifications/unread-count', {
+        headers: { Authorization: token ? `Bearer ${token}` : '' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.count || 0);
+      }
+    } catch (err) {
+      console.error('안읽은 알림 카운트 로드 실패:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
     fetchNotices();
-  }, [fetchData, fetchNotices]);
+    fetchUnreadCount();
+  }, [fetchData, fetchNotices, fetchUnreadCount]);
 
   const copyCode = () => {
     if (user) {
@@ -143,11 +160,31 @@ export default function DashboardPage() {
       {/* 헤더 */}
       <header className={styles.header}>
         <img src="/images/splash/logo.png" alt="부고온 파트너" className={styles.headerLogo} />
-        <button className={styles.headerBtn} onClick={() => router.push('/b2b/notice')}>
+        <button className={styles.headerBtn} onClick={() => router.push('/b2b/notice')} style={{ position: 'relative' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '2px',
+              right: '2px',
+              backgroundColor: '#ef4444',
+              color: '#ffffff',
+              borderRadius: '50%',
+              width: '16px',
+              height: '16px',
+              fontSize: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              border: '2px solid #ffffff'
+            }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
       </header>
 
