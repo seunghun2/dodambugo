@@ -44,3 +44,5 @@ ios/
 android/
 /tmp
 tmp/
+# Firebase service account keys (절대 커밋 금지)
+appleinfo/bugoapp-23680-firebase-adminsdk-*.json
