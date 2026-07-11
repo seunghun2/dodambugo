@@ -48,8 +48,11 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
       <div id="b2b-page-container" style={{
         position: 'relative',
         width: '100%',
+        maxWidth: '480px',
+        margin: '0 auto',
         minHeight: '100vh',
         backgroundColor: '#fff',
+        boxShadow: '0 0 20px rgba(0, 0, 0, 0.03)',
         paddingBottom: showBottomBar ? 'calc(var(--b2b-bottom-bar-height) + 20px)' : '0px',
       }}>
         {children}
