@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconEdit, IconX, IconCheck, IconInfoCircle, IconVariable } from '@tabler/icons-react';
+import { IconEdit, IconX, IconInfoCircle, IconVariable } from '@tabler/icons-react';
 import styles from '../partners/partners.module.css'; // 디자인 톤앤매너 완벽 공유
 
 interface NotificationTemplate {

@@ -146,6 +146,21 @@ export async function POST(request: NextRequest) {
     if (shouldSendPush) {
       try {
         result = await sendPushToPartner(partner_id, title, pushBody, data);
+        
+        // FCM 결과 객체 판정 (failed 수치 검사)
+        if (result && typeof result === 'object') {
+          const resObj = result as any;
+          if (resObj.failed > 0 && resObj.success === 0) {
+            isSuccess = 'fail';
+            fcmError = resObj.errorDetails?.join(', ') || 'FCM 전송 실패';
+          } else if (resObj.success === 0 && resObj.failed === 0) {
+            isSuccess = 'fail';
+            fcmError = 'FCM 발송 실패 (등록된 기기 토큰 없음)';
+          } else if (resObj.failed > 0 && resObj.success > 0) {
+            isSuccess = 'success'; // 일부 전송 성공 시 일단 성공으로 취급하되 에러 내용 병기
+            fcmError = `일부 기기 전송 실패: ${resObj.errorDetails?.join(', ')}`;
+          }
+        }
       } catch (fcmErr: any) {
         console.warn('실물 기기 FCM 푸시 전송 실패:', fcmErr?.message || fcmErr);
         fcmError = fcmErr?.message || String(fcmErr);

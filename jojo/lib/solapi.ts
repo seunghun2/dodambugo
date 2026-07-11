@@ -219,7 +219,7 @@ export async function sendAlimtalk(
         try {
             await supabase.from('b2b_notification_logs').insert({
                 recipient_phone: to,
-                recipient_name: variables.name || variables.deceased || '고객',
+                recipient_name: variables?.name || variables?.deceased || '고객',
                 type: 'alimtalk',
                 title: `알림톡 (${templateId})`,
                 content: contentText,
