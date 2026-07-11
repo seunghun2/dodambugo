@@ -5,7 +5,7 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
-  padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  padding-top: calc(52px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
 }
 
@@ -30,7 +30,13 @@
   padding: 0 20px 10px 20px;
   padding-top: env(safe-area-inset-top, 0px);
   border-bottom: 1px solid var(--b2b-border-light);
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-width: 480px;
+  background-color: #ffffff;
   width: 100%;
   z-index: 10;
 }
