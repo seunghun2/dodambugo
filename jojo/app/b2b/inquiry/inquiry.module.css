@@ -3,6 +3,7 @@
   margin: 0 auto;
   min-height: 100dvh;
   background: var(--bg-white, #ffffff);
+  padding-top: 52px;
   padding-bottom: 72px;
   box-sizing: border-box;
   font-family: var(--font-family, sans-serif);
@@ -19,8 +20,12 @@
   padding: 0 16px;
   border-bottom: 1px solid var(--b2b-border-light, #F2F4F6);
   background: #ffffff;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   z-index: 10;
 }
 

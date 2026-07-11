@@ -5,19 +5,25 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
+  padding-top: calc(52px + env(safe-area-inset-top, 0px));
   padding-bottom: 72px;
 }
 
 /* 헤더 */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* safe-area 추가로 인해 아래쪽 정렬 */
   justify-content: space-between;
-  height: 52px;
-  padding: 0 20px;
+  height: calc(52px + env(safe-area-inset-top, 0px));
+  padding: 0 20px var(--spacing-xs, 8px) 20px; /* 아래쪽 패딩 조정 */
+  padding-top: env(safe-area-inset-top, 0px);
   border-bottom: 1px solid var(--b2b-border-light);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   background: var(--bg-white);
   z-index: 10;
 }

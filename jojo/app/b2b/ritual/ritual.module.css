@@ -5,6 +5,7 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
+  padding-top: 52px;
   padding-bottom: 72px;
 }
 
@@ -15,8 +16,12 @@
   height: 52px;
   padding: 0 20px;
   border-bottom: 1px solid var(--b2b-border-light);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   background: var(--bg-white);
   z-index: 10;
 }
