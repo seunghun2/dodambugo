@@ -9,10 +9,12 @@
 
 /* 헤더 */
 .header {
-    height: 52px;
+    height: calc(52px + env(safe-area-inset-top, 47px));
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+    padding-top: env(safe-area-inset-top, 47px);
+    padding-bottom: 10px;
 }
 
 .headerTitle {

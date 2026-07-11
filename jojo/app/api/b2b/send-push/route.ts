@@ -40,6 +40,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 관리자(is_admin) 권한 검증
+    const { data: b2bUser, error: dbError } = await supabase
+      .from('b2b_users')
+      .select('is_admin')
+      .eq('id', decoded.userId)
+      .single();
+
+    if (dbError || !b2bUser || !b2bUser.is_admin) {
+      return NextResponse.json(
+        { success: false, error: '관리자 권한이 필요합니다.' },
+        { status: 403 }
+      );
+    }
+
     // 요청 body 파싱
     const body = await request.json();
     const { partner_id, title, body: pushBody, data } = body;

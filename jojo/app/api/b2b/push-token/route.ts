@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,12 +12,39 @@ const supabase = createClient(
 // FCM 토큰 등록
 export async function POST(request: NextRequest) {
     try {
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: '인증 토큰이 필요합니다.' },
+                { status: 401 }
+            );
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        let decoded: any;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (jwtErr) {
+            return NextResponse.json(
+                { error: '유효하지 않은 인증 토큰입니다.' },
+                { status: 401 }
+            );
+        }
+
         const { partner_id, fcm_token, platform } = await request.json();
 
         if (!partner_id || !fcm_token) {
             return NextResponse.json(
                 { error: 'partner_id와 fcm_token이 필요합니다.' },
                 { status: 400 }
+            );
+        }
+
+        // 토큰 소유자 본인 매핑 검증
+        if (decoded.userId !== partner_id) {
+            return NextResponse.json(
+                { error: '권한이 없습니다.' },
+                { status: 403 }
             );
         }
 
@@ -52,12 +82,39 @@ export async function POST(request: NextRequest) {
 // FCM 토큰 삭제 (로그아웃 시)
 export async function DELETE(request: NextRequest) {
     try {
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: '인증 토큰이 필요합니다.' },
+                { status: 401 }
+            );
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        let decoded: any;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (jwtErr) {
+            return NextResponse.json(
+                { error: '유효하지 않은 인증 토큰입니다.' },
+                { status: 401 }
+            );
+        }
+
         const { partner_id, platform } = await request.json();
 
         if (!partner_id) {
             return NextResponse.json(
                 { error: 'partner_id가 필요합니다.' },
                 { status: 400 }
+            );
+        }
+
+        // 토큰 소유자 본인 매핑 검증
+        if (decoded.userId !== partner_id) {
+            return NextResponse.json(
+                { error: '권한이 없습니다.' },
+                { status: 403 }
             );
         }
 
