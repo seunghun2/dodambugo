@@ -1,0 +1,473 @@
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { IconPrinter, IconDownload, IconArrowLeft, IconCheck } from '@tabler/icons-react';
+import styles from './settlements.module.css';
+
+interface SettlementDetail {
+    id: string;
+    order_id: string;
+    amount: number;
+    status: 'pending' | 'completed';
+    payment_date: string | null;
+    created_at: string;
+    order: {
+        order_number: string;
+        product_name: string;
+        sender_name: string;
+        deceased_name: string;
+        partner_name: string;
+        partner_company: string;
+        bugo_id: string;
+    } | null;
+}
+
+interface SettleSummary {
+    pending_amount: number;
+    completed_amount: number;
+    total_count: number;
+}
+
+interface MonthlySummary {
+    month: string;
+    pending_amount: number;
+    completed_amount: number;
+    total_count: number;
+}
+
+function SettlementsContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const companyId = searchParams.get('companyId') || '';
+    const companyName = searchParams.get('name') || '상조회사';
+
+    const [monthlyList, setMonthlyList] = useState<MonthlySummary[]>([]);
+    const [settlements, setSettlements] = useState<SettlementDetail[]>([]);
+    const [selectedYearMonth, setSelectedYearMonth] = useState<string | null>(null);
+    const [summary, setSummary] = useState<SettleSummary>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
+    const [loading, setLoading] = useState(true);
+    const [detailLoading, setDetailLoading] = useState(false);
+
+    // 1. 월별 정산 현황 조회
+    const fetchMonthlySummary = async () => {
+        if (!companyId) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}`);
+            if (!res.ok) throw new Error('정산 내역을 로드하지 못했습니다.');
+            const data = await res.json();
+            if (data.success) {
+                setMonthlyList(data.monthlyList || []);
+                setSummary(data.summary);
+                
+                // 만약 월별 내역이 있다면 가장 최근 월을 자동으로 조회
+                if (data.monthlyList && data.monthlyList.length > 0) {
+                    fetchMonthlyDetail(data.monthlyList[0].month);
+                }
+            }
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 2. 특정 월의 상세 정산서 조회
+    const fetchMonthlyDetail = async (yearMonth: string) => {
+        setDetailLoading(true);
+        setSelectedYearMonth(yearMonth);
+        try {
+            const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}&yearMonth=${yearMonth}`);
+            if (!res.ok) throw new Error('상세 정산서를 로드하지 못했습니다.');
+            const data = await res.json();
+            if (data.success) {
+                setSettlements(data.settlements || []);
+            }
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
+    // 3. 월 단위 정산 완료 처리
+    const handleCompleteSettlement = async (yearMonth: string) => {
+        const [year, month] = yearMonth.split('-');
+        if (!confirm(`[${year}년 ${month}월] 정산서를 완료(송금 완료) 마감 처리하시겠습니까?\n실제 회사 통장으로 계좌 이체를 처리한 후 확인해주셔야 합니다.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/b2b/admin/companies/settlements', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ companyId, yearMonth })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || '정산 처리에 실패했습니다.');
+            }
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`[${year}년 ${month}월] 정산서가 성공적으로 마감되었습니다. (정산 건수: ${data.updated_count}건)`);
+                // 장부 새로고침
+                const summaryRes = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}`);
+                const summaryData = await summaryRes.json();
+                if (summaryData.success) {
+                    setMonthlyList(summaryData.monthlyList || []);
+                    setSummary(summaryData.summary);
+                }
+                fetchMonthlyDetail(yearMonth);
+            }
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    // 4. 인쇄 (Print) 처리
+    const handlePrint = () => {
+        window.print();
+    };
+
+    // 5. 엑셀 다운로드 (CSV 내보내기)
+    const handleDownloadCSV = () => {
+        if (!selectedYearMonth || settlements.length === 0) {
+            alert('다운로드할 정산 내역이 없습니다.');
+            return;
+        }
+
+        const [year, month] = selectedYearMonth.split('-');
+        const headers = ['거래일시', '주문번호', '부고장ID', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
+        
+        const rows = settlements.map(s => [
+            new Date(s.created_at).toLocaleString(),
+            s.order?.order_number || '-',
+            s.order?.bugo_id || '-',
+            s.order?.partner_name || '-',
+            s.order?.deceased_name || '-',
+            s.order?.product_name || '-',
+            s.order?.sender_name || '-',
+            s.amount,
+            s.status === 'pending' ? '정산대기' : '정산완료'
+        ]);
+
+        const csvContent = 
+            '\ufeff' + // UTF-8 BOM
+            [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `정산서_${companyName}_${year}년_${month}월.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    useEffect(() => {
+        fetchMonthlySummary();
+    }, [companyId]);
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontSize: '14px', color: '#64748b' }}>
+                상조회사 정산서 장부를 불러오는 중...
+            </div>
+        );
+    }
+
+    const currentMonthData = monthlyList.find(m => m.month === selectedYearMonth);
+    const hasPending = currentMonthData ? currentMonthData.pending_amount > 0 : false;
+
+    return (
+        <div className={styles.container}>
+            {/* 뒤로가기 및 타이틀 (인쇄 시 숨김 처리) */}
+            <div className={`${styles.headerArea} no-print`}>
+                <button className={styles.backBtn} onClick={() => router.push('/b2b/admin/companies')}>
+                    <IconArrowLeft size={16} />
+                    <span>상조회사 목록으로</span>
+                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button className={styles.actionBtn} onClick={handlePrint}>
+                        <IconPrinter size={16} />
+                        <span>인쇄하기</span>
+                    </button>
+                    <button className={styles.actionBtn} onClick={handleDownloadCSV} disabled={settlements.length === 0}>
+                        <IconDownload size={16} />
+                        <span>엑셀 다운로드</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* 정산 요약 리포트 카드 (인쇄 시 숨김 처리) */}
+            <div className={`${styles.summaryBox} no-print`}>
+                <div className={styles.summaryCard}>
+                    <div className={styles.summaryLabel}>미정산 총액</div>
+                    <div className={styles.summaryValue} style={{ color: '#d97706' }}>
+                        {(summary.pending_amount || 0).toLocaleString()}원
+                    </div>
+                </div>
+                <div className={styles.summaryCard}>
+                    <div className={styles.summaryLabel}>정산 완료 총액</div>
+                    <div className={styles.summaryValue} style={{ color: '#059669' }}>
+                        {(summary.completed_amount || 0).toLocaleString()}원
+                    </div>
+                </div>
+                <div className={styles.summaryCard}>
+                    <div className={styles.summaryLabel}>전체 누적 건수</div>
+                    <div className={styles.summaryValue}>
+                        {summary.total_count || 0}건
+                    </div>
+                </div>
+            </div>
+
+            {/* 월별 요약 장부 목록 (인쇄 시 숨김 처리) */}
+            <div className={`${styles.section} no-print`} style={{ marginBottom: '24px' }}>
+                <h3 className={styles.sectionTitle}>월별 정산 장부 목록</h3>
+                <div className={styles.tableCard}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>정산월</th>
+                                <th>정산 대기 금액</th>
+                                <th>정산 완료 금액</th>
+                                <th>건수</th>
+                                <th>상태</th>
+                                <th>상세 조회</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {monthlyList.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: '#94a3b8' }}>
+                                        기록된 정산 내역이 없습니다.
+                                    </td>
+                                </tr>
+                            ) : (
+                                monthlyList.map((m) => {
+                                    const [year, month] = m.month.split('-');
+                                    const isSelected = selectedYearMonth === m.month;
+                                    return (
+                                        <tr key={m.month} className={isSelected ? styles.selectedRow : ''}>
+                                            <td style={{ fontWeight: '600' }}>{year}년 {month}월</td>
+                                            <td style={{ color: m.pending_amount > 0 ? '#d97706' : '#64748b' }}>
+                                                {m.pending_amount.toLocaleString()}원
+                                            </td>
+                                            <td style={{ color: '#059669' }}>
+                                                {m.completed_amount.toLocaleString()}원
+                                            </td>
+                                            <td>{m.total_count}건</td>
+                                            <td>
+                                                {m.pending_amount > 0 ? (
+                                                    <span className={`${styles.badge} ${styles.badgePending}`}>정산 대기</span>
+                                                ) : (
+                                                    <span className={`${styles.badge} ${styles.badgeCompleted}`}>정산 완료</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <button 
+                                                    className={styles.viewDetailBtn} 
+                                                    onClick={() => fetchMonthlyDetail(m.month)}
+                                                >
+                                                    정산서 확인
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* 📄 실제 일반 회사용 정규 정산서 디자인 (인쇄 출력 시 메인 레이아웃으로 출력) */}
+            {selectedYearMonth && (
+                <div className={styles.invoiceSheet}>
+                    <div className={styles.invoiceHeader}>
+                        <div className={styles.invoiceTitleContainer}>
+                            <h1 className={styles.invoiceMainTitle}>정 산 서</h1>
+                            <div className={styles.invoiceSubText}>
+                                귀사와의 거래에 따른 화환 판매 정산 내역을 아래와 같이 명세하여 송부합니다.
+                            </div>
+                        </div>
+                        {/* 정산 승인 확인 도장 도화란 */}
+                        <table className={styles.stampTable}>
+                            <tbody>
+                                <tr>
+                                    <td rowSpan={2} style={{ width: '20px', fontSize: '11px', background: '#f8fafc', fontWeight: 'bold' }}>결<br/>재</td>
+                                    <td>담당</td>
+                                    <td>검토</td>
+                                    <td>승인</td>
+                                </tr>
+                                <tr style={{ height: '45px' }}>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* 공급자 정보 */}
+                    <div className={styles.invoiceInfoSection}>
+                        <div style={{ flex: 1 }}>
+                            <table className={styles.infoTable}>
+                               <tbody>
+                                    <tr>
+                                        <td className={styles.infoLabel}>정산 대상</td>
+                                        <td className={styles.infoValue} style={{ fontWeight: 'bold', fontSize: '15px' }}>{companyName} 본사 귀하</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.infoLabel}>정산 월</td>
+                                        <td className={styles.infoValue}>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월분</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.infoLabel}>합계 금액</td>
+                                        <td className={styles.infoValue} style={{ fontWeight: 'bold', color: '#1e293b' }}>
+                                            {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
+                                        </td>
+                                    </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <table className={styles.infoTable}>
+                               <tbody>
+                                    <tr>
+                                        <td className={styles.infoLabel}>발행인</td>
+                                        <td className={styles.infoValue}>부고온 (마음부고온 관리자)</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.infoLabel}>정산 상태</td>
+                                        <td className={styles.infoValue}>
+                                            {hasPending ? (
+                                                <span style={{ color: '#d97706', fontWeight: 'bold' }}>정산 대기 (미지급)</span>
+                                            ) : (
+                                                <span style={{ color: '#059669', fontWeight: 'bold' }}>정산 완료 (지급완료)</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.infoLabel}>확인 일자</td>
+                                        <td className={styles.infoValue}>
+                                            {hasPending ? '정산 보류 중' : '정산 완료 완료'}
+                                        </td>
+                                    </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* 상세 내역 테이블 */}
+                    <div className={styles.invoiceBody}>
+                        <h3 className={styles.invoiceTableTitle}>■ 화환 판매 정산 세부 내역</h3>
+                        <table className={styles.invoiceTable}>
+                            <thead>
+                                <tr>
+                                    <th>결제 일시</th>
+                                    <th>주문 번호</th>
+                                    <th>장례지도사명</th>
+                                    <th>고인명 (상가)</th>
+                                    <th>부고 ID</th>
+                                    <th>화환 상품명 (주문자)</th>
+                                    <th style={{ textAlign: 'right' }}>정산 금액</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailLoading ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            상세 정산 내역을 조회하는 중...
+                                        </td>
+                                    </tr>
+                                ) : settlements.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
+                                            정산할 판매 건이 존재하지 않습니다.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    settlements.map((s) => (
+                                        <tr key={s.id}>
+                                            <td style={{ fontSize: '11px', color: '#475569' }}>
+                                                {new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                                                {s.order?.order_number || '-'}
+                                            </td>
+                                            <td style={{ fontWeight: '500' }}>
+                                                {s.order?.partner_name || '-'}
+                                            </td>
+                                            <td style={{ fontWeight: '600', color: '#1e293b' }}>
+                                                {s.order?.deceased_name || '미등록'}
+                                            </td>
+                                            <td style={{ fontFamily: 'monospace', fontSize: '10px', color: '#64748b' }}>
+                                                {s.order?.bugo_id ? s.order.bugo_id.slice(0, 8) + '...' : '-'}
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span>{s.order?.product_name || '-'}</span>
+                                                    <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '4px' }}>
+                                                        ({s.order?.sender_name || ''})
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                                {s.amount.toLocaleString()}원
+                                            </td>
+                                            <td>
+                                                {s.status === 'pending' ? (
+                                                    <span style={{ color: '#d97706', fontSize: '12px' }}>대기</span>
+                                                ) : (
+                                                    <span style={{ color: '#059669', fontSize: '12px' }}>완료</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* 하단 서명란 및 정산 처리 버튼 */}
+                    <div className={styles.invoiceFooter}>
+                        <div className={styles.invoiceTotalBlock}>
+                            <span>미정산 대기 합계 : <strong style={{ color: '#d97706' }}>{(currentMonthData?.pending_amount || 0).toLocaleString()}원</strong></span>
+                            <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong style={{ color: '#059669' }}>{(currentMonthData?.completed_amount || 0).toLocaleString()}원</strong></span>
+                        </div>
+
+                        {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}
+                        {hasPending && (
+                            <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                                <button 
+                                    className={styles.completeBtn}
+                                    onClick={() => handleCompleteSettlement(selectedYearMonth)}
+                                >
+                                    <IconCheck size={18} style={{ marginRight: '6px' }} />
+                                    <span>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월 정산 완료 처리</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default function SettlementsPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '24px', textAlign: 'center' }}>로딩 중...</div>}>
+            <SettlementsContent />
+        </Suspense>
+    );
+}

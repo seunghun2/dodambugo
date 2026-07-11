@@ -6,7 +6,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// GET: 특정 상조회사의 월별 대금 정산 요약 목록 또는 특정 월의 상세 내역 조회
+// GET: 특정 상조회사의 월별 대금 정산 요약 목록 또는 특정 월의 상세 내역 조회 (지도사명, 고인명, 부고ID 조인 추가)
 export async function GET(request: NextRequest) {
     const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
     if (!isAdmin) {
@@ -43,35 +43,76 @@ export async function GET(request: NextRequest) {
             }
 
             const orderIds = settlements.map(s => s.order_id).filter(Boolean);
+            
+            // 맵 및 캐시 셋업
             let orderMap = new Map<string, any>();
+            let bugoMap = new Map<string, any>();
+            let partnerMap = new Map<string, any>();
 
             if (orderIds.length > 0) {
                 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                 const validOrderIds = orderIds.filter(id => uuidPattern.test(id));
 
                 if (validOrderIds.length > 0) {
-                    const { data: orders, error: orderError } = await supabase
+                    // 1. 화환 주문들 조회 (bugo_id 포함)
+                    const { data: orders } = await supabase
                         .from('flower_orders')
-                        .select('id, order_number, product_name, product_price, sender_name, funeral_home, room, status, created_at')
+                        .select('id, order_number, product_name, sender_name, bugo_id')
                         .in('id', validOrderIds);
 
-                    if (orderError) {
-                        console.error('주문 정보 로드 실패:', orderError);
-                    } else if (orders) {
+                    if (orders) {
                         orders.forEach(o => orderMap.set(o.id, o));
+                        
+                        // 2. 부고 정보 조회 (deceased_name, b2b_user_id 포함)
+                        const bugoIds = orders.map(o => o.bugo_id).filter(Boolean);
+                        if (bugoIds.length > 0) {
+                            const { data: bugos } = await supabase
+                                .from('bugo')
+                                .select('id, deceased_name, b2b_user_id')
+                                .in('id', bugoIds);
+
+                            if (bugos) {
+                                bugos.forEach(b => bugoMap.set(b.id, b));
+                                
+                                // 3. 장례지도사명(b2b_users.owner_name) 조회
+                                const b2bUserIds = bugos.map(b => b.b2b_user_id).filter(Boolean);
+                                if (b2bUserIds.length > 0) {
+                                    const { data: b2bUsers } = await supabase
+                                        .from('b2b_users')
+                                        .select('id, owner_name, company_name')
+                                        .in('id', b2bUserIds);
+                                    
+                                    if (b2bUsers) {
+                                        b2bUsers.forEach(u => partnerMap.set(u.id, u));
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            const detailedList = settlements.map(s => ({
-                id: s.id,
-                order_id: s.order_id,
-                amount: s.amount,
-                status: s.status,
-                payment_date: s.payment_date,
-                created_at: s.created_at,
-                order: orderMap.get(s.order_id) || null
-            }));
+            const detailedList = settlements.map(s => {
+                const orderInfo = orderMap.get(s.order_id) || null;
+                const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
+                const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
+
+                return {
+                    id: s.id,
+                    order_id: s.order_id,
+                    amount: s.amount,
+                    status: s.status,
+                    payment_date: s.payment_date,
+                    created_at: s.created_at,
+                    order: orderInfo ? {
+                        ...orderInfo,
+                        deceased_name: bugoInfo?.deceased_name || '미등록',
+                        partner_name: partnerInfo?.owner_name || '미등록',
+                        partner_company: partnerInfo?.company_name || '미등록',
+                        bugo_id: orderInfo.bugo_id
+                    } : null
+                };
+            });
 
             return NextResponse.json({
                 success: true,
