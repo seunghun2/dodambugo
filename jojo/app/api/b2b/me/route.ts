@@ -36,37 +36,45 @@ function getUserIdFromToken(request: NextRequest): string | null {
 
 // GET: 내 정보 + 잔액 조회
 export async function GET(request: NextRequest) {
-    const userId = getUserIdFromToken(request);
-    if (!userId) {
-        return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+    try {
+        const userId = getUserIdFromToken(request);
+        if (!userId) {
+            return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+        }
+
+        const { data: user, error: userError } = await supabase
+            .from('b2b_users')
+            .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event')
+            .eq('id', userId)
+            .single();
+
+        if (userError) {
+            return NextResponse.json({ error: `Supabase 쿼리 오류: ${userError.message}` }, { status: 500 });
+        }
+
+        if (!user) {
+            return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 404 });
+        }
+
+        const { data: deposit } = await supabase
+            .from('deposits')
+            .select('balance')
+            .eq('user_id', userId)
+            .single();
+
+        // 추천한 회원 수
+        const { count: referralCount } = await supabase
+            .from('b2b_users')
+            .select('id', { count: 'exact', head: true })
+            .eq('recommender_id', userId);
+
+        return NextResponse.json({
+            user: { ...user, balance: deposit?.balance || 0 },
+            referralCount: referralCount || 0,
+        });
+    } catch (err: any) {
+        return NextResponse.json({ error: `서버 예외 발생: ${err?.message || err}` }, { status: 500 });
     }
-
-    const { data: user } = await supabase
-        .from('b2b_users')
-        .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event')
-        .eq('id', userId)
-        .single();
-
-    if (!user) {
-        return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 404 });
-    }
-
-    const { data: deposit } = await supabase
-        .from('deposits')
-        .select('balance')
-        .eq('user_id', userId)
-        .single();
-
-    // 추천한 회원 수
-    const { count: referralCount } = await supabase
-        .from('b2b_users')
-        .select('id', { count: 'exact', head: true })
-        .eq('recommender_id', userId);
-
-    return NextResponse.json({
-        user: { ...user, balance: deposit?.balance || 0 },
-        referralCount: referralCount || 0,
-    });
 }
 
 // PATCH: 내 정보 수정

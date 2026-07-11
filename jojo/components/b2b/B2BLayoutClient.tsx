@@ -21,40 +21,84 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // iOS 네이티브 쓸어넘기기(Swipe Back) 제스처 직접 구현 (히스토리 뒤로가기 100% 보장)
+  // iOS 네이티브 쓸어넘기기(Swipe Back) 물리 제스처 직접 구현 (화면 드래그 밀림 연동)
   useEffect(() => {
-    let touchStartX = 0;
-    let touchStartY = 0;
+    let startX = 0;
+    let startY = 0;
+    let isSwiping = false;
+    const body = document.body;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // 화면 왼쪽 가장자리(50px 이내)에서 터치 시작 시에만 감지
-      if (e.touches.length > 0) {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+      // 화면 왼쪽 가장자리(45px 이내)에서 1점 터치 시작 시에만 감지
+      if (e.touches.length === 1 && e.touches[0].clientX < 45) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isSwiping = true;
+        
+        // 터치 즉각 반응을 위해 과도기 트랜지션 해제
+        body.style.transition = 'none';
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isSwiping) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - startX;
+      const diffY = currentY - startY;
+
+      // 세로 스크롤 왜곡이 훨씬 크면 제스처 무효화
+      if (Math.abs(diffY) > Math.abs(diffX) && diffX < 20) {
+        isSwiping = false;
+        body.style.transform = 'none';
+        return;
+      }
+
+      if (diffX > 0) {
+        // 손가락 드래그 거리만큼 전체 화면을 오른쪽으로 밀어줌 (iOS 네이티브 감각)
+        body.style.transform = `translateX(${diffX}px)`;
       }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (e.changedTouches.length > 0) {
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
+      if (!isSwiping) return;
+      isSwiping = false;
 
-        const diffX = touchEndX - touchStartX;
-        const diffY = touchEndY - touchStartY;
+      const endX = e.changedTouches[0].clientX;
+      const diffX = endX - startX;
 
-        // 왼쪽 가장자리에서 시작했고, 오른쪽으로 80px 이상 쓸어넘겼으며, 상하 스크롤 왜곡은 40px 미만인 경우
-        if (touchStartX < 50 && diffX > 80 && Math.abs(diffY) < 40) {
+      // 제자리 복귀 또는 이탈용 트랜지션 곡선 주입
+      body.style.transition = 'transform 0.25s cubic-bezier(0.33, 1, 0.68, 1)';
+
+      if (diffX > 120) {
+        // 임계값 초과 시 화면을 끝까지 100% 밀어낸 뒤 뒤로가기 실행
+        body.style.transform = 'translateX(100%)';
+        setTimeout(() => {
           router.back();
-        }
+          // 라우터 복귀 후 원래대로 위치 원복
+          body.style.transition = 'none';
+          body.style.transform = 'none';
+        }, 250);
+      } else {
+        // 임계값 미만 시 0px로 튕겨서 복원
+        body.style.transform = 'none';
+        setTimeout(() => {
+          body.style.transition = 'none';
+        }, 250);
       }
     };
 
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      body.style.transform = 'none';
+      body.style.transition = 'none';
     };
   }, [router]);
   

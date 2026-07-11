@@ -167,6 +167,10 @@ export default function SettingsPage() {
                 router.push('/b2b/login');
                 return;
             }
+            if (!res.ok) {
+                alert(`API 오류 (코드: ${res.status}, 텍스트: ${res.statusText})`);
+                return;
+            }
             const data = await res.json();
             if (data.user) {
                 setUser(data.user);
@@ -190,8 +194,9 @@ export default function SettingsPage() {
                 // 로컬 스토리지 데이터 최신화
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('사용자 정보 로드 실패:', err);
+            alert(`사용자 정보 로드 실패 예외: ${err?.message || err}`);
         } finally {
             setLoading(false);
         }

@@ -134,7 +134,7 @@ export default function DashboardPage() {
       {/* 헤더 */}
       <header className={styles.header}>
         <img src="/images/splash/logo.png" alt="부고온 파트너" className={styles.headerLogo} />
-        <button className={styles.headerBtn} onClick={() => router.push('/b2b/settings?view=notice')}>
+        <button className={styles.headerBtn} onClick={() => router.push('/b2b/notice')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>공지사항</h3>
-          <button className={styles.moreBtn} onClick={() => router.push('/b2b/settings?view=notice')}>
+          <button className={styles.moreBtn} onClick={() => router.push('/b2b/notice')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
                 <div 
                   key={notice.id} 
                   className={styles.noticeItem}
-                  onClick={() => router.push('/b2b/settings?view=notice')}
+                  onClick={() => router.push('/b2b/notice')}
                   style={{ cursor: 'pointer' }}
                 >
                   <span className={styles.noticeBadge}>공지</span>
