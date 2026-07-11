@@ -10,7 +10,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(56px + env(safe-area-inset-top, 47px));
-  padding-bottom: 72px; /* BottomTabBar 공간 */
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 16px)); /* BottomTabBar 공간 */
 }
 
 /* 헤더 */
