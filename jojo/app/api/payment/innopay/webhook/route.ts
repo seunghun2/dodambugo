@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
                                 .select('value')
                                 .eq('key', 'wreath_reward_amount')
                                 .single();
-                            const rewardAmount = parseInt(rewardSetting?.value || '10000');
+                            const rewardAmount = parseInt(rewardSetting?.value || '20000');
 
                             // 3. 파트너 예치금 적립 (직접 잔액 업데이트)
                             const { data: currentDeposit } = await supabase
