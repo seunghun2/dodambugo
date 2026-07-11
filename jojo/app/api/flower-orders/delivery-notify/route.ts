@@ -126,18 +126,6 @@ export async function POST(request: Request) {
                         await sendLMS(partnerPhone, '[부고온] 화환 배송 완료', partnerMsg);
                         console.log(`📱 [B2B] 파트너 화환 배송 완료 문자 발송 완료: ${partnerPhone}`);
                     }
-
-                    // 자동 푸시 알림: 화환 배송 완료 (비동기)
-                    import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
-                        sendPartnerNotification(bugoData.b2b_user_id, 'delivery_complete', {
-                            고인명: deceasedName || '',
-                            상품명: order.product_name || '',
-                            장례식장: order.funeral_home || '',
-                            주문자: order.sender_name || '',
-                        }, { url: '/b2b/dashboard' }).catch(err =>
-                            console.error('[PartnerNotification] 화환배송 푸시 실패:', err)
-                        );
-                    });
                 }
             } catch (partnerErr) {
                 console.error('❌ [B2B] 파트너 화환 배송 완료 알림 발송 실패:', partnerErr);

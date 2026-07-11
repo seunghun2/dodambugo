@@ -799,19 +799,6 @@ export async function POST(request: NextRequest) {
                                     }
                                 }
 
-                                // 자동 푸시 알림: 조의금 수당 적립 (비동기)
-                                if (bugoData?.b2b_user_id) {
-                                    import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
-                                        sendPartnerNotification(bugoData.b2b_user_id, 'condolence_earned', {
-                                            조문객명: buyerInfo.name || '조문객',
-                                            고인명: bugoData.deceased_name || '',
-                                            금액: (selectedAmount || 0).toLocaleString(),
-                                            수당금액: (fee || 0).toLocaleString(),
-                                        }, { url: '/b2b/wallet' }).catch(err =>
-                                            console.error('[PartnerNotification] 조의금 푸시 실패:', err)
-                                        );
-                                    });
-                                }
 
                                 // 📱 상주에게 "부의금 전달 완료" 알림톡 발송
                                 try {

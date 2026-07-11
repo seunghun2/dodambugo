@@ -151,6 +151,17 @@ export async function POST(request: NextRequest) {
             { expiresIn: '30d' }
         );
 
+        // 추천인이 있으면 추천인에게 푸시 알림 발송
+        if (recommender_id) {
+            import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
+                sendPartnerNotification(recommender_id!, 'referral_signup', {
+                    신규파트너명: company_name || owner_name,
+                }, { url: '/b2b/dashboard' }).catch(err =>
+                    console.error('[PartnerNotification] 추천인 가입 푸시 실패:', err)
+                );
+            });
+        }
+
         console.log(`✅ B2B 회원가입 완료: ${company_name} (${cleanPhone}) / 추천코드: ${my_referral_code}`);
 
         return NextResponse.json({

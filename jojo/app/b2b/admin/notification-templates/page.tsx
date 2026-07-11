@@ -136,6 +136,16 @@ export default function NotificationTemplatesPage() {
                 timing: '관리자가 공지사항을 작성하면 전체 파트너에게 발송됩니다.',
                 icon: '📢',
             },
+            referral_signup: {
+                name: '추천인 가입 알림',
+                timing: '내 추천 코드로 새 파트너가 가입하면 자동 발송됩니다.',
+                icon: '🎉',
+            },
+            funeral_reminder: {
+                name: '발인 임박 리마인더',
+                timing: '발인 3시간 전에 파트너에게 자동 발송됩니다. (매시간 크론)',
+                icon: '⏰',
+            },
         };
         return guides[eventType] || { name: eventType, timing: '시스템 이벤트 발생 시 발송', icon: '🔔' };
     };

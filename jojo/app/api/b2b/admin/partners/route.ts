@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendLMS } from '@/lib/solapi';
-import { sendPartnerNotification } from '@/lib/partner-notification';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -163,13 +162,15 @@ export async function PATCH(request: NextRequest) {
                 console.error('❌ [B2B] 파트너 승인 안내 문자 발송 오류:', smsErr);
             }
 
-            // 자동 푸시 알림 발송 (비동기, 실패해도 승인 처리에 영향 없음)
-            sendPartnerNotification(data.id, 'signup_approved', {
-                파트너명: data.company_name || data.owner_name,
-                추천코드: data.my_referral_code || '',
-            }, { url: '/b2b/dashboard' }).catch(err => 
-                console.error('[PartnerNotification] 가입승인 푸시 실패:', err)
-            );
+            // 인앱 알림함에 적재 (푸시 없이 알람만)
+            Promise.resolve(supabase.from('b2b_notifications').insert({
+                partner_id: data.id,
+                title: '[부고온] 가입 승인 완료',
+                body: `${data.company_name || data.owner_name}님, 파트너 가입이 승인되었습니다. 앱에 로그인하여 서비스를 시작하세요!`,
+                type: 'signup_approved',
+                data: { url: '/b2b/dashboard' },
+            })).then(() => console.log('[알림함] 가입승인 알림 적재'))
+              .catch(err => console.error('[알림함] 가입승인 적재 실패:', err));
         }
 
         return NextResponse.json({ success: true, partner: data });

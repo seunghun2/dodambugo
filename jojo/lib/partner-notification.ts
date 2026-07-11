@@ -20,7 +20,9 @@ export type NotificationEventType =
   | 'condolence_earned'
   | 'delivery_complete'
   | 'settlement'
-  | 'notice';
+  | 'notice'
+  | 'referral_signup'
+  | 'funeral_reminder';
 
 interface NotificationTemplate {
   id: string;
