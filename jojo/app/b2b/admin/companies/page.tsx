@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice } from '@tabler/icons-react';
+import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice, IconUser } from '@tabler/icons-react';
 import styles from './companies.module.css';
 
 interface Company {
@@ -35,6 +35,17 @@ export default function CompaniesPage() {
     const [address, setAddress] = useState('');
     const [businessType, setBusinessType] = useState('');
     const [businessItem, setBusinessItem] = useState('');
+
+    // 계정 관리 모달 상태
+    const [accountModalOpen, setAccountModalOpen] = useState(false);
+    const [selectedCompanyForAccount, setSelectedCompanyForAccount] = useState<Company | null>(null);
+    const [companyUsers, setCompanyUsers] = useState<any[]>([]);
+    
+    // 신규 본사 계정 발급용 폼 상태
+    const [newAccName, setNewAccName] = useState('');
+    const [newAccPhone, setNewAccPhone] = useState('');
+    const [newAccPassword, setNewAccPassword] = useState('');
+    const [newAccError, setNewAccError] = useState('');
 
     // 목록 조회
     const fetchCompanies = async () => {
@@ -162,6 +173,113 @@ export default function CompaniesPage() {
         router.push(`/b2b/admin/companies/settlements?companyId=${company.id}&name=${encodeURIComponent(company.name)}`);
     };
 
+    // 계정 관리 로직 추가
+    const fetchCompanyUsers = async (companyId: string) => {
+        try {
+            const res = await fetch(`/api/b2b/admin/companies/accounts?companyId=${companyId}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    setCompanyUsers(data.users || []);
+                }
+            }
+        } catch (err) {
+            console.error('본사 계정 목록 로드 실패:', err);
+        }
+    };
+
+    const openAccountModal = (company: Company) => {
+        setSelectedCompanyForAccount(company);
+        setNewAccName('');
+        setNewAccPhone('');
+        setNewAccPassword('');
+        setNewAccError('');
+        setCompanyUsers([]);
+        fetchCompanyUsers(company.id);
+        setAccountModalOpen(true);
+    };
+
+    const handleCreateAccount = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setNewAccError('');
+
+        if (!newAccName.trim() || !newAccPhone.trim() || !newAccPassword.trim()) {
+            setNewAccError('모든 항목을 입력해 주세요.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/b2b/admin/companies/accounts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    companyId: selectedCompanyForAccount?.id,
+                    companyName: selectedCompanyForAccount?.name,
+                    ownerName: newAccName,
+                    phone: newAccPhone,
+                    password: newAccPassword
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setNewAccName('');
+                setNewAccPhone('');
+                setNewAccPassword('');
+                fetchCompanyUsers(selectedCompanyForAccount!.id);
+                alert('본사 담당자 계정이 정상적으로 추가 발급되었습니다.');
+            } else {
+                setNewAccError(data.error || '계정 발급 실패');
+            }
+        } catch {
+            setNewAccError('서버 연결 실패');
+        }
+    };
+
+    const handleResetPassword = async (userId: string, ownerName: string) => {
+        const newPw = prompt(`[${ownerName}] 님의 새로운 비밀번호를 입력해 주세요:`, '00000000');
+        if (!newPw) return;
+
+        try {
+            const res = await fetch('/api/b2b/admin/companies/accounts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, password: newPw })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert('비밀번호가 성공적으로 변경되었습니다.');
+            } else {
+                alert(data.error || '비밀번호 변경 실패');
+            }
+        } catch {
+            alert('서버 연결 실패');
+        }
+    };
+
+    const handleRemoveMapping = async (userId: string, ownerName: string) => {
+        if (!confirm(`[${ownerName}] 님의 본사 관리자 소속 매핑을 해제하시겠습니까?\n해제 시 해당 상조 본사 화면으로 로그인할 수 없게 됩니다.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/b2b/admin/companies/accounts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, companyId: null })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                fetchCompanyUsers(selectedCompanyForAccount!.id);
+                alert('본사 소속 매핑이 성공적으로 해제되었습니다.');
+            } else {
+                alert(data.error || '매핑 해제 실패');
+            }
+        } catch {
+            alert('서버 연결 실패');
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: '#64748b', fontSize: '14px' }}>
@@ -201,7 +319,7 @@ export default function CompaniesPage() {
                                 <th className={styles.th}>업태 / 종목</th>
                                 <th className={styles.th}>화환 판매 본사 수수료</th>
                                 <th className={styles.th}>등록일</th>
-                                <th className={styles.th} style={{ width: '150px' }}>관리</th>
+                                <th className={styles.th} style={{ width: '220px' }}>관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -236,7 +354,11 @@ export default function CompaniesPage() {
                                             <div className={styles.rowActions}>
                                                 <button className={styles.settleBtn} onClick={() => openSettleModal(c)}>
                                                     <IconFileInvoice size={14} style={{ marginRight: '2px' }} />
-                                                    정산 내역
+                                                    정산
+                                                </button>
+                                                <button className={styles.settleBtn} style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff' }} onClick={() => openAccountModal(c)}>
+                                                    <IconUser size={14} style={{ marginRight: '2px' }} />
+                                                    계정
                                                 </button>
                                                 <button className={styles.editBtn} onClick={() => openModal(c)}>
                                                     <IconEdit size={14} style={{ marginRight: '2px' }} />
@@ -364,6 +486,125 @@ export default function CompaniesPage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* 본사 계정(담당자) 관리 모달 */}
+            {accountModalOpen && selectedCompanyForAccount && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalCard} style={{ maxWidth: '640px' }}>
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>
+                                [{selectedCompanyForAccount.name}] 본사 담당자 계정 관리
+                            </h2>
+                            <button className={styles.closeBtn} onClick={() => setAccountModalOpen(false)}>
+                                <IconX size={18} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            {/* 1. 신규 본사 담당자 로그인 계정 생성/발급 */}
+                            <form onSubmit={handleCreateAccount} style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0f172a' }}>🔑 본사 어드민 담당자 계정 신규 발급</h3>
+                                
+                                {newAccError && (
+                                    <div style={{ color: '#ef4444', fontSize: '12px', marginBottom: '8px' }}>{newAccError}</div>
+                                )}
+
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '11px', color: '#475569', display: 'block', marginBottom: '4px' }}>담당자명</label>
+                                        <input
+                                            type="text"
+                                            className={styles.input}
+                                            style={{ height: '36px', fontSize: '12px' }}
+                                            value={newAccName}
+                                            onChange={(e) => setNewAccName(e.target.value)}
+                                            placeholder="예: 백승훈"
+                                            required
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1.2 }}>
+                                        <label style={{ fontSize: '11px', color: '#475569', display: 'block', marginBottom: '4px' }}>휴대폰 번호 (로그인 ID)</label>
+                                        <input
+                                            type="tel"
+                                            className={styles.input}
+                                            style={{ height: '36px', fontSize: '12px' }}
+                                            value={newAccPhone}
+                                            onChange={(e) => setNewAccPhone(e.target.value)}
+                                            placeholder="예: 01012345678"
+                                            required
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '11px', color: '#475569', display: 'block', marginBottom: '4px' }}>초기 비밀번호</label>
+                                        <input
+                                            type="text"
+                                            className={styles.input}
+                                            style={{ height: '36px', fontSize: '12px' }}
+                                            value={newAccPassword}
+                                            onChange={(e) => setNewAccPassword(e.target.value)}
+                                            placeholder="비밀번호 설정"
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit" className={styles.submitBtn} style={{ height: '36px', padding: '0 16px', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                                        계정 발급
+                                    </button>
+                                </div>
+                            </form>
+
+                            {/* 2. 등록된 본사 관리자 계정 목록 */}
+                            <div>
+                                <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#0f172a' }}>📋 소속 담당자 로그인 계정 목록</h3>
+                                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <table className={styles.table} style={{ fontSize: '12px' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f8fafc' }}>
+                                                <th style={{ padding: '10px', textAlign: 'left' }}>담당자명</th>
+                                                <th style={{ padding: '10px', textAlign: 'left' }}>로그인 휴대폰 ID</th>
+                                                <th style={{ padding: '10px', textAlign: 'center' }}>가입일</th>
+                                                <th style={{ padding: '10px', textAlign: 'center', width: '160px' }}>관리</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {companyUsers.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                                                        등록된 본사 담당자 계정이 없습니다. 위의 폼으로 계정을 생성해 주세요.
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                companyUsers.map((u) => (
+                                                    <tr key={u.id}>
+                                                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{u.owner_name}</td>
+                                                        <td style={{ padding: '10px' }}>{u.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}</td>
+                                                        <td style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                        <td style={{ padding: '10px', textAlign: 'center' }}>
+                                                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                                                <button 
+                                                                    onClick={() => handleResetPassword(u.id, u.owner_name)}
+                                                                    style={{ border: '1px solid #cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', background: '#ffffff', cursor: 'pointer', color: '#0f172a' }}
+                                                                >
+                                                                    비번 변경
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleRemoveMapping(u.id, u.owner_name)}
+                                                                    style={{ border: '1px solid #ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', background: '#ef4444', cursor: 'pointer', color: '#ffffff' }}
+                                                                >
+                                                                    해제
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
