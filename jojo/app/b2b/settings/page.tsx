@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import { unregisterPushNotifications } from '@/lib/push-notifications';
+import { Capacitor } from '@capacitor/core';
 import styles from './settings.module.css';
 
 const BANKS = [
@@ -941,6 +942,9 @@ export default function SettingsPage() {
 
                     {/* 로그아웃 버튼 */}
                     <div className={styles.logoutBtnArea} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ textAlign: 'center', fontSize: '11.5px', color: '#8b95a1', marginBottom: '4px', fontWeight: 500 }}>
+                            현재 접속 환경: {Capacitor.isNativePlatform() ? '📱 실물 네이티브 앱 (수신 가능)' : '🌐 모바일 웹 브라우저 (푸시 불가)'}
+                        </div>
                         <button className={styles.logoutBtn} onClick={handleLogout}>
                             로그아웃
                         </button>
