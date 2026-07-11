@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
 import { unregisterPushNotifications } from '@/lib/push-notifications';
@@ -56,6 +56,7 @@ interface User {
     account_no?: string;
     account_holder?: string;
     my_referral_code: string;
+    avatar_url?: string;
 }
 
 export default function SettingsPage() {
@@ -63,6 +64,8 @@ export default function SettingsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [referralCount, setReferralCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
     // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'
     const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'>('main');
@@ -147,6 +150,66 @@ export default function SettingsPage() {
 
     // 추천인 공유 토스트/복사 알림 상태
     const [shareCopied, setShareCopied] = useState(false);
+
+    const handleAvatarClick = () => {
+        if (uploadingAvatar) return;
+        fileInputRef.current?.click();
+    };
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAvatar(true);
+        const token = getToken();
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const uploadRes = await fetch('/api/b2b/profile/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : '',
+                },
+                body: formData,
+            });
+
+            if (!uploadRes.ok) {
+                const errData = await uploadRes.json();
+                throw new Error(errData.error || '이미지 업로드에 실패했습니다.');
+            }
+
+            const { url: avatarUrl } = await uploadRes.json();
+
+            const updateRes = await fetch('/api/b2b/me', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token ? `Bearer ${token}` : '',
+                },
+                body: JSON.stringify({ avatar_url: avatarUrl }),
+            });
+
+            if (!updateRes.ok) {
+                const errData = await updateRes.json();
+                throw new Error(errData.error || '프로필 정보 갱신에 실패했습니다.');
+            }
+
+            if (user) {
+                const updatedUser = { ...user, avatar_url: avatarUrl };
+                setUser(updatedUser);
+                localStorage.setItem('b2b_user', JSON.stringify(updatedUser));
+            }
+            alert('프로필 사진이 성공적으로 변경되었습니다.');
+        } catch (err: any) {
+            console.error('프로필 사진 변경 실패:', err);
+            alert(err.message || '사진 변경 중 오류가 발생했습니다.');
+        } finally {
+            setUploadingAvatar(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     const getToken = () => localStorage.getItem('b2b_token');
 
@@ -1316,11 +1379,22 @@ export default function SettingsPage() {
                 <div className={styles.profileDetailSection}>
                     <div className={styles.avatarWrapper}>
                         <div className={styles.avatarCircle}>
-                            <B2BIcon name="user" size={48} color="#adb5bd" />
+                            {user.avatar_url ? (
+                                <img src={user.avatar_url} className={styles.avatarImage} alt="profile" />
+                            ) : (
+                                <B2BIcon name="user" size={48} color="#adb5bd" />
+                            )}
                         </div>
-                        <button className={styles.avatarCameraBtn} onClick={() => alert('프로필 사진 변경 기능이 곧 지원됩니다.')}>
+                        <button className={styles.avatarCameraBtn} onClick={handleAvatarClick} disabled={uploadingAvatar}>
                             <B2BIcon name="camera" size={14} color="#ffffff" strokeWidth={2} />
                         </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleAvatarChange}
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                        />
                     </div>
                     <div className={styles.profileDetailMeta}>
                         <h4 className={styles.profileDetailName}>{user.owner_name}</h4>
