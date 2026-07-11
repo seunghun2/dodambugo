@@ -551,7 +551,7 @@ export async function POST(request: NextRequest) {
                     const isNumeric = /^\d+$/.test(condBugoId);
                     const { data, error: bugoError } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, funeral_home, phone_password, applicant_phone, mourners')
+                        .select('bugo_number, deceased_name, mourner_name, funeral_home, phone_password, applicant_phone, mourners, b2b_user_id')
                         .eq(isNumeric ? 'bugo_number' : 'id', condBugoId)
                         .is('deleted_at', null)
                         .single();
@@ -797,6 +797,20 @@ export async function POST(request: NextRequest) {
                                     } catch (partnerSmsErr) {
                                         console.error('❌ [B2B] 파트너 조의금 알림 발송 실패:', partnerSmsErr);
                                     }
+                                }
+
+                                // 자동 푸시 알림: 조의금 수당 적립 (비동기)
+                                if (bugoData?.b2b_user_id) {
+                                    import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
+                                        sendPartnerNotification(bugoData.b2b_user_id, 'condolence_earned', {
+                                            조문객명: buyerInfo.name || '조문객',
+                                            고인명: bugoData.deceased_name || '',
+                                            금액: (selectedAmount || 0).toLocaleString(),
+                                            수당금액: (fee || 0).toLocaleString(),
+                                        }, { url: '/b2b/wallet' }).catch(err =>
+                                            console.error('[PartnerNotification] 조의금 푸시 실패:', err)
+                                        );
+                                    });
                                 }
 
                                 // 📱 상주에게 "부의금 전달 완료" 알림톡 발송

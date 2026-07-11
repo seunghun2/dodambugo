@@ -28,6 +28,23 @@ export async function POST(request: NextRequest) {
                 funeral_date,
                 funeral_time,
             });
+
+            // 자동 푸시 알림: 신규 부고 등록 (비동기)
+            const supabaseForPush = getSupabase();
+            supabaseForPush.from('bugo').select('b2b_user_id').eq('bugo_number', bugo_number).single()
+                .then(({ data: bugoRow }) => {
+                    if (bugoRow?.b2b_user_id) {
+                        import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
+                            sendPartnerNotification(bugoRow.b2b_user_id, 'new_funeral', {
+                                고인명: deceased_name || '',
+                                장례식장: funeral_home || '',
+                                발인일시: `${funeral_date || ''} ${funeral_time || ''}`.trim(),
+                            }, { url: '/b2b/manage' }).catch(err =>
+                                console.error('[PartnerNotification] 신규부고 푸시 실패:', err)
+                            );
+                        });
+                    }
+                });
         }
 
         // 📱 신규 생성 또는 수정 시 연락처 변경 → 알림톡 발송

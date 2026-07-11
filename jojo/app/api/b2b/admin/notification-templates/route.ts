@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// PUT: 알림 템플릿 수정
+// PUT: 알림 템플릿 수정 (제목, 본문, 채널, 활성 상태)
 export async function PUT(request: NextRequest) {
     const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
     if (!isAdmin) {
@@ -36,20 +36,32 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-        const body = await request.json();
-        const { event_type, title, content } = body;
+        const reqBody = await request.json();
+        const { event_type, title, body, channels, is_active } = reqBody;
 
-        if (!event_type || !title || !content) {
+        if (!event_type || !title || !body) {
             return NextResponse.json({ error: '필수 정보를 입력해주세요.' }, { status: 400 });
+        }
+
+        const updateData: any = { 
+            title, 
+            body,
+            updated_at: new Date().toISOString()
+        };
+        
+        // 채널 변경 시 반영
+        if (channels && Array.isArray(channels)) {
+            updateData.channels = channels;
+        }
+        
+        // 활성/비활성 변경 시 반영
+        if (typeof is_active === 'boolean') {
+            updateData.is_active = is_active;
         }
 
         const { data, error } = await supabase
             .from('b2b_notification_templates')
-            .update({ 
-                title, 
-                content,
-                updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('event_type', event_type)
             .select()
             .single();

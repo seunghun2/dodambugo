@@ -175,6 +175,16 @@ export async function GET(request: NextRequest) {
                             request_id: req.id,
                         });
 
+                        // 자동 푸시 알림: 정산 완료 (비동기)
+                        import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
+                            sendPartnerNotification(req.user_id, 'settlement', {
+                                월: new Date().toLocaleDateString('ko-KR', { month: 'long' }),
+                                금액: (req.amount || 0).toLocaleString(),
+                            }, { url: '/b2b/wallet' }).catch(err =>
+                                console.error('[PartnerNotification] 정산 푸시 실패:', err)
+                            );
+                        });
+
                         // auto_approve_at을 null로 지워 깔끔하게 처리 (이미 completed가 되었으므로 status 검사에서 걸러지긴 함)
                         await supabase
                             .from('withdrawal_requests')

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendLMS } from '@/lib/solapi';
+import { sendPartnerNotification } from '@/lib/partner-notification';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -161,6 +162,14 @@ export async function PATCH(request: NextRequest) {
             } catch (smsErr) {
                 console.error('❌ [B2B] 파트너 승인 안내 문자 발송 오류:', smsErr);
             }
+
+            // 자동 푸시 알림 발송 (비동기, 실패해도 승인 처리에 영향 없음)
+            sendPartnerNotification(data.id, 'signup_approved', {
+                파트너명: data.company_name || data.owner_name,
+                추천코드: data.my_referral_code || '',
+            }, { url: '/b2b/dashboard' }).catch(err => 
+                console.error('[PartnerNotification] 가입승인 푸시 실패:', err)
+            );
         }
 
         return NextResponse.json({ success: true, partner: data });

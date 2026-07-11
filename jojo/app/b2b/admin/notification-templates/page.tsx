@@ -1,16 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconEdit, IconX, IconInfoCircle, IconVariable } from '@tabler/icons-react';
-import styles from '../partners/partners.module.css'; // 디자인 톤앤매너 완벽 공유
+import { IconEdit, IconX, IconInfoCircle, IconVariable, IconBell, IconBellOff } from '@tabler/icons-react';
+import styles from '../partners/partners.module.css';
 
 interface NotificationTemplate {
     id: string;
     event_type: string;
     title: string;
-    content: string;
+    body: string;
+    channels: string[];
+    is_active: boolean;
+    variables: string[];
     updated_at: string;
 }
+
+const CHANNEL_LABELS: Record<string, string> = {
+    push: '📱 앱 푸시',
+    lms: '💬 LMS 문자',
+    sms: '💬 SMS',
+    alimtalk: '💛 알림톡',
+};
 
 export default function NotificationTemplatesPage() {
     const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
@@ -20,7 +30,9 @@ export default function NotificationTemplatesPage() {
     // 수정 모달용 상태
     const [activeEditTemplate, setActiveEditTemplate] = useState<NotificationTemplate | null>(null);
     const [editTitle, setEditTitle] = useState('');
-    const [editContent, setEditContent] = useState('');
+    const [editBody, setEditBody] = useState('');
+    const [editChannels, setEditChannels] = useState<string[]>([]);
+    const [editActive, setEditActive] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const fetchTemplates = async () => {
@@ -28,9 +40,7 @@ export default function NotificationTemplatesPage() {
         setError('');
         try {
             const res = await fetch('/api/b2b/admin/notification-templates');
-            if (!res.ok) {
-                throw new Error('템플릿 데이터를 가져오는데 실패했습니다.');
-            }
+            if (!res.ok) throw new Error('템플릿 데이터를 가져오는데 실패했습니다.');
             const data = await res.json();
             if (data.success) {
                 setTemplates(data.templates);
@@ -44,14 +54,20 @@ export default function NotificationTemplatesPage() {
         }
     };
 
-    useEffect(() => {
-        fetchTemplates();
-    }, []);
+    useEffect(() => { fetchTemplates(); }, []);
 
     const handleEditClick = (template: NotificationTemplate) => {
         setActiveEditTemplate(template);
         setEditTitle(template.title);
-        setEditContent(template.content);
+        setEditBody(template.body);
+        setEditChannels(template.channels || ['push']);
+        setEditActive(template.is_active);
+    };
+
+    const toggleChannel = (ch: string) => {
+        setEditChannels(prev =>
+            prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]
+        );
     };
 
     const handleUpdateSubmit = async (e: React.FormEvent) => {
@@ -66,13 +82,15 @@ export default function NotificationTemplatesPage() {
                 body: JSON.stringify({
                     event_type: activeEditTemplate.event_type,
                     title: editTitle,
-                    content: editContent
+                    body: editBody,
+                    channels: editChannels,
+                    is_active: editActive,
                 })
             });
 
             const data = await res.json();
             if (data.success) {
-                alert('알림 문구 템플릿이 성공적으로 저장되었습니다!');
+                alert('알림 템플릿이 저장되었습니다!');
                 setActiveEditTemplate(null);
                 fetchTemplates();
             } else {
@@ -85,45 +103,41 @@ export default function NotificationTemplatesPage() {
         }
     };
 
-    // 이벤트별 발송 시점 및 가이드 텍스트 매핑
+    // 이벤트별 가이드
     const getEventGuide = (eventType: string) => {
-        switch (eventType) {
-            case 'deposit_alert':
-                return {
-                    name: '예치금 정산 완료 알림',
-                    timing: 'B2B 파트너 정산 신청에 대해 대금 정산 완료 처리가 승인되었을 때 즉시 전송됩니다.',
-                    channels: '앱 푸시(FCM) + 카카오 알림톡',
-                    vars: ['#{name} (회사명/대표자명)', '#{amount} (정산 이체 대금)']
-                };
-            case 'deceased_alert':
-                return {
-                    name: '신규 부고 생성 알림',
-                    timing: '파트너 화면을 통해 새로운 모바일 부고장 작성이 완료되었을 때 확인용으로 발송됩니다.',
-                    channels: '앱 푸시(FCM) 전용',
-                    vars: ['#{name} (회사명)', '#{deceased} (고인 이름)']
-                };
-            case 'notice_alert':
-                return {
-                    name: '신규 전체 공지 안내',
-                    timing: '어드민에서 새로운 중요 파트너 공지사항을 등록하고 [푸시 공지 알림]을 실행할 때 발송됩니다.',
-                    channels: '앱 푸시(FCM) + 카카오 알림톡',
-                    vars: ['#{title} (공지사항 제목)']
-                };
-            case 'signup_approved':
-                return {
-                    name: '파트너 가입 승인 완료',
-                    timing: '회원가입한 장례지도사 파트너에 대해 관리자가 최종 [가입 승인] 처리를 완료했을 때 발송됩니다.',
-                    channels: '카카오 알림톡 + LMS 장문 문자',
-                    vars: ['#{name} (회사명/대표자명)']
-                };
-            default:
-                return {
-                    name: eventType,
-                    timing: '시스템 이벤트 발생 시 발송됩니다.',
-                    channels: '자동 전송',
-                    vars: []
-                };
-        }
+        const guides: Record<string, { name: string; timing: string; icon: string }> = {
+            signup_approved: {
+                name: '파트너 가입 승인 완료',
+                timing: '관리자가 파트너 가입을 승인하면 자동 발송됩니다.',
+                icon: '🤝',
+            },
+            new_funeral: {
+                name: '신규 부고 등록 알림',
+                timing: '파트너의 고객이 새 부고장을 생성하면 자동 발송됩니다.',
+                icon: '📋',
+            },
+            condolence_earned: {
+                name: '조의금 수당 적립 알림',
+                timing: '조문객이 부의금을 결제하면 파트너 수당과 함께 자동 발송됩니다.',
+                icon: '💰',
+            },
+            delivery_complete: {
+                name: '화환 배송 완료 알림',
+                timing: '화환 배송이 완료되면 자동 발송됩니다.',
+                icon: '🌸',
+            },
+            settlement: {
+                name: '정산 완료 안내',
+                timing: '월별 정산금이 계좌로 입금되면 자동 발송됩니다.',
+                icon: '💳',
+            },
+            notice: {
+                name: '공지사항 안내',
+                timing: '관리자가 공지사항을 작성하면 전체 파트너에게 발송됩니다.',
+                icon: '📢',
+            },
+        };
+        return guides[eventType] || { name: eventType, timing: '시스템 이벤트 발생 시 발송', icon: '🔔' };
     };
 
     const formatDate = (dateStr: string) => {
@@ -134,8 +148,8 @@ export default function NotificationTemplatesPage() {
     return (
         <div>
             <div className={styles.titleArea}>
-                <h1 className={styles.title}>자동 알림/푸시 문구 설정</h1>
-                <p className={styles.subtitle}>부고 생성, 예치금 정산, 공지사항 등록 등 특정 이벤트 발생 시 자동으로 발송되는 기본 문구를 정밀 커스텀 관리합니다.</p>
+                <h1 className={styles.title}>자동 알림/푸시 설정</h1>
+                <p className={styles.subtitle}>이벤트 발생 시 파트너에게 자동으로 발송되는 알림의 문구, 발송 채널, ON/OFF를 관리합니다.</p>
             </div>
 
             {error && (
@@ -149,73 +163,99 @@ export default function NotificationTemplatesPage() {
                     템플릿 설정 불러오는 중...
                 </div>
             ) : templates.length === 0 ? (
-                <div className={styles.emptyState}>조회할 템플릿 설정이 없습니다. (schema.sql을 DB에 먼저 인서트해 주세요.)</div>
+                <div className={styles.emptyState}>조회할 템플릿 설정이 없습니다.</div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '20px', marginBottom: '32px' }}>
                     {templates.map((tpl) => {
                         const guide = getEventGuide(tpl.event_type);
                         return (
-                            <div key={tpl.id} style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div key={tpl.id} style={{
+                                backgroundColor: tpl.is_active ? '#ffffff' : '#f8fafc',
+                                borderRadius: '12px',
+                                border: `1px solid ${tpl.is_active ? '#e2e8f0' : '#f1f5f9'}`,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                boxShadow: tpl.is_active ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+                                opacity: tpl.is_active ? 1 : 0.6,
+                            }}>
                                 {/* 카드 헤더 */}
-                                <div style={{ padding: '16px 20px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>{guide.name}</h3>
-                                        <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>{tpl.event_type}</span>
+                                <div style={{ padding: '14px 18px', backgroundColor: tpl.is_active ? '#f8fafc' : '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '20px' }}>{guide.icon}</span>
+                                        <div>
+                                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{guide.name}</h3>
+                                            <span style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'monospace' }}>{tpl.event_type}</span>
+                                        </div>
                                     </div>
-                                    <button 
-                                        onClick={() => handleEditClick(tpl)} 
-                                        className={styles.actionBtn}
-                                        style={{ color: '#d4a84b', borderColor: '#d4a84b', backgroundColor: '#fffbeb', display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '13px' }}
-                                    >
-                                        <IconEdit size={14} />
-                                        <span>문구 수정</span>
-                                    </button>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {tpl.is_active ? (
+                                            <span style={{ fontSize: '11px', color: '#16a34a', backgroundColor: '#f0fdf4', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>활성</span>
+                                        ) : (
+                                            <span style={{ fontSize: '11px', color: '#94a3b8', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>비활성</span>
+                                        )}
+                                        <button
+                                            onClick={() => handleEditClick(tpl)}
+                                            className={styles.actionBtn}
+                                            style={{ color: '#d4a84b', borderColor: '#d4a84b', backgroundColor: '#fffbeb', display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', fontSize: '12px' }}
+                                        >
+                                            <IconEdit size={13} />
+                                            <span>수정</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* 카드 바디 */}
-                                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    {/* 발송 채널 뱃지 */}
-                                    <div style={{ fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                        <span style={{ fontWeight: '600', color: '#475569' }}>발송 수단:</span>
-                                        <span style={{ backgroundColor: '#eff6ff', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>{guide.channels}</span>
+                                <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {/* 채널 뱃지 */}
+                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                        {(tpl.channels || ['push']).map(ch => (
+                                            <span key={ch} style={{
+                                                backgroundColor: ch === 'push' ? '#eff6ff' : ch === 'lms' || ch === 'sms' ? '#f0fdf4' : '#fefce8',
+                                                color: ch === 'push' ? '#1e40af' : ch === 'lms' || ch === 'sms' ? '#166534' : '#a16207',
+                                                padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600',
+                                            }}>
+                                                {CHANNEL_LABELS[ch] || ch}
+                                            </span>
+                                        ))}
                                     </div>
 
-                                    {/* 발송 타이밍 가이드 */}
-                                    <div style={{ padding: '12px', backgroundColor: '#f1f5f9', borderRadius: '8px', fontSize: '13px', color: '#475569', display: 'flex', gap: '8px', alignItems: 'flex-start', lineHeight: '1.4' }}>
-                                        <IconInfoCircle size={18} style={{ color: '#0284c7', flexShrink: 0, marginTop: '2px' }} />
-                                        <div>
-                                            <strong style={{ color: '#334155' }}>발송 시점: </strong>
-                                            {guide.timing}
+                                    {/* 발송 시점 */}
+                                    <div style={{ padding: '10px', backgroundColor: '#f1f5f9', borderRadius: '8px', fontSize: '12px', color: '#475569', display: 'flex', gap: '8px', alignItems: 'flex-start', lineHeight: '1.4' }}>
+                                        <IconInfoCircle size={16} style={{ color: '#0284c7', flexShrink: 0, marginTop: '1px' }} />
+                                        <span>{guide.timing}</span>
+                                    </div>
+
+                                    {/* 문구 미리보기 */}
+                                    <div style={{ border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '12px', backgroundColor: '#fafafa', minHeight: '70px' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#64748b', marginBottom: '6px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+                                            📌 {tpl.title}
+                                        </div>
+                                        <div style={{ fontSize: '13px', color: '#0f172a', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                                            {tpl.body}
                                         </div>
                                     </div>
 
-                                    {/* 현재 설정된 문구 내용 */}
-                                    <div style={{ border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', minHeight: '100px' }}>
-                                        <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#64748b', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>
-                                            제목: {tpl.title}
-                                        </div>
-                                        <div style={{ fontSize: '14px', color: '#0f172a', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                                            {tpl.content}
-                                        </div>
-                                    </div>
-
-                                    {/* 치환 변수 목록 안내 */}
-                                    {guide.vars.length > 0 && (
-                                        <div style={{ fontSize: '12px', color: '#64748b' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
-                                                <IconVariable size={14} style={{ color: '#d4a84b' }} />
-                                                <span>사용 가능한 대치(치환) 문자 목록:</span>
+                                    {/* 변수 목록 */}
+                                    {tpl.variables && tpl.variables.length > 0 && (
+                                        <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                                                <IconVariable size={13} style={{ color: '#d4a84b' }} />
+                                                <span>치환 변수:</span>
                                             </div>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                                {guide.vars.map((v) => (
-                                                    <span key={v} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>{v}</span>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                {tpl.variables.map((v) => (
+                                                    <span key={v} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '11px' }}>
+                                                        {'{{' + v + '}}'}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
                                 </div>
-                                <div style={{ padding: '12px 20px', borderTop: '1px solid #f1f5f9', fontSize: '12px', color: '#94a3b8', textAlign: 'right' }}>
-                                    최종 수정일: {formatDate(tpl.updated_at)}
+
+                                <div style={{ padding: '10px 18px', borderTop: '1px solid #f1f5f9', fontSize: '11px', color: '#94a3b8', textAlign: 'right' }}>
+                                    수정일: {formatDate(tpl.updated_at)}
                                 </div>
                             </div>
                         );
@@ -223,12 +263,14 @@ export default function NotificationTemplatesPage() {
                 </div>
             )}
 
-            {/* 문구 수정 모달 팝업 */}
+            {/* 수정 모달 */}
             {activeEditTemplate && (
                 <div className={styles.modalOverlay} onClick={() => setActiveEditTemplate(null)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>자동 발송 알림 문구 수정</h3>
+                            <h3 className={styles.modalTitle}>
+                                {getEventGuide(activeEditTemplate.event_type).icon} 알림 설정 수정
+                            </h3>
                             <button className={styles.modalClose} onClick={() => setActiveEditTemplate(null)}>
                                 <IconX size={18} />
                             </button>
@@ -236,11 +278,54 @@ export default function NotificationTemplatesPage() {
                         <form onSubmit={handleUpdateSubmit} className={styles.modalForm}>
                             <div className={styles.modalBody}>
                                 <div style={{ marginBottom: '16px', fontSize: '14px', color: '#475569' }}>
-                                    대상 유형: <strong>{getEventGuide(activeEditTemplate.event_type).name}</strong> ({activeEditTemplate.event_type})
+                                    대상: <strong>{getEventGuide(activeEditTemplate.event_type).name}</strong>
                                 </div>
-                                
+
+                                {/* ON/OFF 토글 */}
+                                <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#334155' }}>자동 발송:</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditActive(!editActive)}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            padding: '6px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer',
+                                            backgroundColor: editActive ? '#f0fdf4' : '#fef2f2',
+                                            color: editActive ? '#16a34a' : '#ef4444',
+                                            fontWeight: '600', fontSize: '13px',
+                                        }}
+                                    >
+                                        {editActive ? <><IconBell size={14} /> ON</> : <><IconBellOff size={14} /> OFF</>}
+                                    </button>
+                                </div>
+
+                                {/* 채널 선택 */}
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#334155' }}>발송 채널</label>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {Object.entries(CHANNEL_LABELS).map(([key, label]) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => toggleChannel(key)}
+                                                style={{
+                                                    padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '500',
+                                                    border: '1px solid',
+                                                    cursor: 'pointer',
+                                                    backgroundColor: editChannels.includes(key) ? '#eff6ff' : '#ffffff',
+                                                    borderColor: editChannels.includes(key) ? '#3b82f6' : '#e2e8f0',
+                                                    color: editChannels.includes(key) ? '#1e40af' : '#94a3b8',
+                                                }}
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 제목 */}
                                 <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
-                                    <label htmlFor="edit_title">기본 제목 (알림톡/문자/푸시 제목)</label>
+                                    <label htmlFor="edit_title">알림 제목</label>
                                     <input
                                         type="text"
                                         id="edit_title"
@@ -251,37 +336,44 @@ export default function NotificationTemplatesPage() {
                                     />
                                 </div>
 
+                                {/* 본문 */}
                                 <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
-                                    <label htmlFor="edit_content">발송 문구 본문</label>
+                                    <label htmlFor="edit_body">알림 본문</label>
                                     <textarea
-                                        id="edit_content"
+                                        id="edit_body"
                                         className={styles.formTextarea}
-                                        style={{ minHeight: '150px', fontFamily: 'monospace' }}
-                                        value={editContent}
-                                        onChange={(e) => setEditContent(e.target.value)}
+                                        style={{ minHeight: '120px', fontFamily: 'monospace', fontSize: '13px' }}
+                                        value={editBody}
+                                        onChange={(e) => setEditBody(e.target.value)}
                                         required
                                     />
                                 </div>
 
-                                <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', fontSize: '12px', color: '#b45309', lineHeight: '1.5' }}>
-                                    <strong>⚠️ 주의사항:</strong> 대치 문자(예: <code>{"#{name}"}</code>)의 중괄호 및 철자가 틀릴 경우 수신인 정보가 치환되지 않고 그대로 발송되오니 형태에 맞춰 오타 없이 수정해 주세요.
-                                </div>
+                                {/* 변수 안내 */}
+                                {activeEditTemplate.variables && activeEditTemplate.variables.length > 0 && (
+                                    <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', fontSize: '12px', color: '#b45309', lineHeight: '1.5' }}>
+                                        <strong>💡 사용 가능한 변수:</strong>{' '}
+                                        {activeEditTemplate.variables.map(v => `{{${v}}}`).join(', ')}
+                                        <br />
+                                        <span style={{ color: '#92400e' }}>본문에 위 변수를 넣으면 발송 시 실제 값으로 자동 치환됩니다.</span>
+                                    </div>
+                                )}
                             </div>
                             <div className={styles.modalFooter}>
-                                <button 
-                                    type="button" 
-                                    className={styles.btnSecondary} 
+                                <button
+                                    type="button"
+                                    className={styles.btnSecondary}
                                     onClick={() => setActiveEditTemplate(null)}
                                     disabled={saving}
                                 >
                                     취소
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className={styles.btnPrimary}
                                     disabled={saving}
                                 >
-                                    {saving ? '저장 중...' : '변경사항 저장'}
+                                    {saving ? '저장 중...' : '저장'}
                                 </button>
                             </div>
                         </form>
