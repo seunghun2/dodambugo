@@ -434,7 +434,7 @@ function SettlementsContent() {
                                             <td>
                                                 <div>
                                                     <span>{s.order?.product_name || '-'}</span>
-                                                    <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '4px' }}>
+                                                    <span style={{ fontSize: '11px', color: '#000000', marginLeft: '4px' }}>
                                                         ({s.order?.sender_name || ''})
                                                     </span>
                                                 </div>
