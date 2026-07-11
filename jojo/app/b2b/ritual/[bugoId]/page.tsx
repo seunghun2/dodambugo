@@ -1058,30 +1058,33 @@ export default function RitualDetailPage() {
 
   return (
     <div className={styles.page}>
-      {/* 헤더 */}
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <span className={styles.headerTitle}>故 {deceasedName} 의례 문서</span>
-      </header>
+      {/* 상단 헤더와 탭 영역을 통합 고정하기 위한 컨테이너 */}
+      <div className={styles.fixedHeaderContainer}>
+        {/* 헤더 */}
+        <header className={styles.header}>
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span className={styles.headerTitle}>故 {deceasedName} 의례 문서</span>
+        </header>
 
-      {/* 탭 바 */}
-      <div className={styles.tabBar}>
-        <button
-          className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('chukmun')}
-        >
-          축문
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'wipae' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('wipae')}
-        >
-          위패
-        </button>
+        {/* 탭 바 */}
+        <div className={styles.tabBar}>
+          <button
+            className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('chukmun')}
+          >
+            축문
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'wipae' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('wipae')}
+          >
+            위패
+          </button>
+        </div>
       </div>
 
       {/* 커스텀 수정 폼 */}

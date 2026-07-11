@@ -3,6 +3,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
+import {
+  IconUserCheck,
+  IconFileText,
+  IconGift,
+  IconFlower,
+  IconArrowBackUp,
+  IconCoin,
+  IconCreditCard,
+  IconVolume2,
+  IconClock,
+  IconBell,
+} from '@tabler/icons-react';
 import styles from './notifications.module.css';
 
 interface NotificationItem {
@@ -16,18 +28,33 @@ interface NotificationItem {
   created_at: string;
 }
 
-// 알림 타입별 아이콘 매핑
-const TYPE_ICONS: Record<string, { icon: string; color: string }> = {
-  signup_approved: { icon: '🤝', color: '#f0fdf4' },
-  new_funeral: { icon: '📋', color: '#eff6ff' },
-  referral_signup: { icon: '🎉', color: '#fefce8' },
-  flower_order: { icon: '🌸', color: '#fdf2f8' },
-  flower_refund: { icon: '↩️', color: '#fef2f2' },
-  flower_commission: { icon: '💰', color: '#fffbeb' },
-  settlement: { icon: '💳', color: '#f0fdf4' },
-  notice: { icon: '📢', color: '#eff6ff' },
-  funeral_reminder: { icon: '⏰', color: '#fefce8' },
+// 알림 타입별 아이콘 및 스타일 클래스 매핑 함수
+const getTypeIconAndClass = (type?: string) => {
+  switch (type) {
+    case 'signup_approved':
+      return { icon: <IconUserCheck size={16} />, className: styles.iconSignup };
+    case 'new_funeral':
+      return { icon: <IconFileText size={16} />, className: styles.iconFuneral };
+    case 'referral_signup':
+      return { icon: <IconGift size={16} />, className: styles.iconReferral };
+    case 'flower_order':
+    case 'flower_delivery_completed':
+      return { icon: <IconFlower size={16} />, className: styles.iconFlower };
+    case 'flower_refund':
+      return { icon: <IconArrowBackUp size={16} />, className: styles.iconRefund };
+    case 'flower_commission':
+      return { icon: <IconCoin size={16} />, className: styles.iconCommission };
+    case 'settlement':
+      return { icon: <IconCreditCard size={16} />, className: styles.iconSettlement };
+    case 'notice':
+      return { icon: <IconVolume2 size={16} />, className: styles.iconNotice };
+    case 'funeral_reminder':
+      return { icon: <IconClock size={16} />, className: styles.iconReminder };
+    default:
+      return { icon: <IconBell size={16} />, className: styles.iconDefault };
+  }
 };
+
 
 export default function B2BNotificationsPage() {
   const router = useRouter();
@@ -98,10 +125,6 @@ export default function B2BNotificationsPage() {
     }
   };
 
-  const getTypeInfo = (type?: string) => {
-    return TYPE_ICONS[type || ''] || { icon: '🔔', color: '#f8fafc' };
-  };
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -123,35 +146,39 @@ export default function B2BNotificationsPage() {
         ) : (
           <div className={styles.noticeList}>
             {notifications.map((item) => {
-              const typeInfo = getTypeInfo(item.type);
+              const typeInfo = getTypeIconAndClass(item.type);
               const hasLink = !!item.data?.url;
+
+              // 인라인 스타일을 배제하고 className 조합
+              const itemClassName = [
+                styles.noticeItem,
+                hasLink ? styles.noticeItemClickable : '',
+                item.is_read ? styles.noticeItemRead : ''
+              ].filter(Boolean).join(' ');
+
+              const titleClassName = [
+                styles.noticeTitle,
+                item.is_read ? styles.noticeTitleRead : styles.noticeTitleUnread
+              ].filter(Boolean).join(' ');
 
               return (
                 <div
                   key={item.id}
-                  className={styles.noticeItem}
+                  className={itemClassName}
                   onClick={() => handleNotificationClick(item)}
-                  style={{
-                    cursor: hasLink ? 'pointer' : 'default',
-                    opacity: item.is_read ? 0.7 : 1,
-                    backgroundColor: item.is_read ? '#fafafa' : '#ffffff',
-                  }}
                 >
                   {/* 타입별 아이콘 */}
-                  <div
-                    className={styles.bellIconWrapper}
-                    style={{ backgroundColor: typeInfo.color }}
-                  >
-                    <span style={{ fontSize: '16px' }}>{typeInfo.icon}</span>
+                  <div className={`${styles.bellIconWrapper} ${typeInfo.className}`}>
+                    {typeInfo.icon}
                   </div>
 
                   {/* 텍스트 */}
                   <div className={styles.noticeMain}>
-                    <span className={styles.noticeTitle} style={{ fontWeight: item.is_read ? '500' : '700' }}>
+                    <span className={titleClassName}>
                       {item.title}
                     </span>
                     <span className={styles.noticeDesc}>
-                      {item.body}
+                      {item.body || item.content}
                     </span>
                   </div>
 
@@ -166,3 +193,4 @@ export default function B2BNotificationsPage() {
     </div>
   );
 }
+

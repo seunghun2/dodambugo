@@ -4,7 +4,7 @@
   min-height: 100dvh;
   background: #F8F9FA;
   padding-top: 52px;
-  padding-bottom: 80px;
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
   box-sizing: border-box;
   font-family: sans-serif;
   display: flex;
@@ -22,8 +22,9 @@
   background: #ffffff;
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 480px;
   z-index: 10;

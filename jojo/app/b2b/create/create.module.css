@@ -5,6 +5,7 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
   padding-bottom: 40px;
 }
 
@@ -12,17 +13,18 @@
 .header {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 480px;
   z-index: 100;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  height: calc(56px + env(safe-area-inset-top, 47px));
+  height: calc(56px + env(safe-area-inset-top, 0px));
   padding: 0 var(--spacing-md) 10px var(--spacing-md);
-  padding-top: env(safe-area-inset-top, 47px);
+  padding-top: env(safe-area-inset-top, 0px);
   background: var(--bg-white);
   border-bottom: 1px solid var(--b2b-border);
 }

@@ -90,7 +90,7 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.notices) {
-          setNotices(data.notices.slice(0, 2));
+          setNotices(data.notices.slice(0, 4));
         }
       }
     } catch (err) {

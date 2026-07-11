@@ -3,11 +3,12 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #ffffff;
-  color: #1A1F26;
+  color: #191f28;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   max-width: 480px;
   margin: 0 auto;
-  padding-top: calc(56px + env(safe-area-inset-top, 47px));
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
 }
@@ -15,17 +16,18 @@
 .header {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 480px;
   z-index: 100;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  height: calc(56px + env(safe-area-inset-top, 47px));
+  height: calc(56px + env(safe-area-inset-top, 0px));
   padding: 0 16px 10px 16px;
-  padding-top: env(safe-area-inset-top, 47px);
+  padding-top: env(safe-area-inset-top, 0px);
   background-color: #ffffff;
   border-bottom: 1px solid #f1f3f5;
 }

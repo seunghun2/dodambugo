@@ -74,19 +74,6 @@
   background-color: #ffffff;
 }
 
-.bellIconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
-  color: #8b95a1;
-  opacity: 0.45;
-  flex-shrink: 0;
-  padding-top: 1px;
-}
-
 .noticeMain {
   display: flex;
   flex-direction: column;
@@ -96,9 +83,16 @@
 
 .noticeTitle {
   font-size: 14.5px;
-  font-weight: 600;
   color: #333d4b;
   line-height: 1.4;
+}
+
+.noticeTitleRead {
+  font-weight: 500;
+}
+
+.noticeTitleUnread {
+  font-weight: 700;
 }
 
 .noticeDesc {
@@ -115,6 +109,70 @@
   flex-shrink: 0;
   white-space: nowrap;
   padding-top: 2px;
+}
+
+.bellIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+/* 읽음 상태 대응 */
+.noticeItemRead {
+  opacity: 0.7;
+  background-color: #fafafa !important;
+}
+
+/* 마우스 커서 상태 대응 */
+.noticeItemClickable {
+  cursor: pointer;
+}
+
+/* 타입별 아이콘 배경색 및 전경색 클래스 */
+.iconSignup {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+.iconFuneral {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+.iconReferral {
+  background-color: #fefce8;
+  color: #ca8a04;
+}
+.iconFlower {
+  background-color: #fdf2f8;
+  color: #db2777;
+}
+.iconRefund {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+.iconCommission {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+.iconSettlement {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+.iconNotice {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+.iconReminder {
+  background-color: #fefce8;
+  color: #ca8a04;
+}
+.iconDefault {
+  background-color: #f8fafc;
+  color: #64748b;
 }
 
 /* 로딩 & 비어있음 */
@@ -152,3 +210,4 @@
   color: #8e94a0;
   font-size: 14px;
 }
+

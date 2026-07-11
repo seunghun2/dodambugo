@@ -171,31 +171,34 @@ export default function B2BInquiryPage() {
 
   return (
     <div className={styles.page}>
-      {/* 헤더 */}
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <span className={styles.headerTitle}>1:1 문의</span>
-        <div className={styles.headerRightPlaceholder} />
-      </header>
+      {/* 상단 헤더와 탭 영역을 통합 고정하기 위한 컨테이너 */}
+      <div className={styles.fixedHeaderContainer}>
+        {/* 헤더 */}
+        <header className={styles.header}>
+          <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span className={styles.headerTitle}>1:1 문의</span>
+          <div className={styles.headerRightPlaceholder} />
+        </header>
 
-      {/* 탭 헤더 */}
-      <div className={styles.tabContainer}>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'create' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('create')}
-        >
-          문의하기
-        </button>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'list' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('list')}
-        >
-          문의내역
-        </button>
+        {/* 탭 헤더 */}
+        <div className={styles.tabContainer}>
+          <button
+            className={`${styles.tabBtn} ${activeTab === 'create' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('create')}
+          >
+            문의하기
+          </button>
+          <button
+            className={`${styles.tabBtn} ${activeTab === 'list' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('list')}
+          >
+            문의내역
+          </button>
+        </div>
       </div>
 
       {/* 탭 컨텐츠 */}
