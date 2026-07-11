@@ -125,6 +125,37 @@ export default function DashboardPage() {
     }
   };
 
+  const triggerTestAlarm = async () => {
+    if (!user) return;
+    const token = localStorage.getItem('b2b_token');
+    if (!token) return;
+    
+    try {
+      const res = await fetch('/api/b2b/send-push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          partner_id: user.id,
+          title: '실시간 알림 테스트 🔔',
+          body: '대시보드에서 사장님이 직접 쏘아 보내신 실시간 알림입니다. 수신함에 정상 적재되었습니다!',
+          data: { url: '/b2b/notice' }
+        })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert('알림이 발송되었습니다!\n우측 상단의 종 아이콘(알림함)에서 확인해 보세요.');
+      } else {
+        alert(`발송 실패: ${data.error}`);
+      }
+    } catch (err: any) {
+      alert(`에러 발생: ${err?.message || err}`);
+    }
+  };
+
   const fmt = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
 
   if (!user) return null;
@@ -134,12 +165,29 @@ export default function DashboardPage() {
       {/* 헤더 */}
       <header className={styles.header}>
         <img src="/images/splash/logo.png" alt="부고온 파트너" className={styles.headerLogo} />
-        <button className={styles.headerBtn} onClick={() => router.push('/b2b/notice')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button 
+            onClick={triggerTestAlarm}
+            style={{ 
+              fontSize: '12px', 
+              fontWeight: 600, 
+              color: '#3A8F47', 
+              border: '1px solid #3A8F47', 
+              borderRadius: '6px', 
+              padding: '4px 8px',
+              backgroundColor: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            알림 테스트 발송
+          </button>
+          <button className={styles.headerBtn} onClick={() => router.push('/b2b/notice')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* CTA 배너 — 부고장 만들기 */}
