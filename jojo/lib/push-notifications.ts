@@ -36,6 +36,36 @@ export async function registerPushNotifications(partnerId: string, router?: any)
   }
 
   try {
+    // 💡 [이중 백업 안전장치]
+    // 네이티브 앱이 켜져 전역 객체에 FCM 토큰이 이미 로드되어 있는 상태라면,
+    // Capacitor 리스너(registration) 이벤트 누락 여부와 상관없이 즉시 서버 DB에 토큰을 갱신 등록합니다.
+    const instantFcmToken = typeof window !== 'undefined' ? (window as any).__fcmToken : null;
+    if (instantFcmToken) {
+      console.log('[Push] 전역 객체에서 FCM 토큰 즉시 검출. 백업 갱신을 수행합니다:', instantFcmToken.substring(0, 15) + '...');
+      try {
+        const b2bToken = getB2BToken();
+        fetch('/api/b2b/push-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(b2bToken ? { Authorization: `Bearer ${b2bToken}` } : {}),
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            partner_id: partnerId,
+            fcm_token: instantFcmToken,
+            platform: Capacitor.getPlatform(),
+          }),
+        }).then(res => {
+          if (res.ok) console.log('[Push] 백업 강제 갱신 완료');
+        }).catch(err => {
+          console.error('[Push] 백업 갱신 API 응답 에러:', err.message);
+        });
+      } catch (err: any) {
+        console.error('[Push] 백업 갱신 전송 중 오류:', err.message);
+      }
+    }
+
     // 푸시 알림 권한 요청
     const permission = await PushNotifications.requestPermissions();
     console.log('[Push] 알림 권한 상태:', permission.receive);
