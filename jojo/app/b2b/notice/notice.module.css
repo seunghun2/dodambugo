@@ -132,4 +132,66 @@
   align-items: center;
   justify-content: center;
   color: #b0b8c1;
+  transition: transform 0.2s ease;
 }
+
+.arrowIconRotate {
+  transform: rotate(90deg);
+}
+
+.noticeWrapper {
+  border-bottom: 1px solid #f1f3f5;
+  background-color: #ffffff;
+}
+
+.noticeItemOpen {
+  background-color: #f8f9fa;
+}
+
+.noticeContent {
+  padding: 20px 16px;
+  background-color: #fafbfc;
+  color: #4e5968;
+  font-size: 13.5px;
+  line-height: 1.6;
+  border-top: 1px solid #f1f3f5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 로딩 & 비어있음 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #eef0f3;
+  border-top-color: #3A8F47;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #8e94a0;
+  margin: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 20px;
+  color: #8e94a0;
+  font-size: 14px;
+}
+

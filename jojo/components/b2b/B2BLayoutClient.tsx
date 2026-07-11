@@ -21,43 +21,53 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // iOS 네이티브 쓸어넘기기(Swipe Back) 물리 제스처 직접 구현 (화면 드래그 밀림 연동)
+  // iOS 네이티브 쓸어넘기기(Swipe Back) 물리 제스처 직접 구현 (페이지 컨테이너 레이어 밀림 연동)
   useEffect(() => {
     let startX = 0;
     let startY = 0;
     let isSwiping = false;
-    const body = document.body;
 
     const handleTouchStart = (e: TouchEvent) => {
+      const container = document.getElementById('b2b-page-container');
+      const overlay = document.getElementById('swipe-overlay');
+
       // 화면 왼쪽 가장자리(45px 이내)에서 1점 터치 시작 시에만 감지
-      if (e.touches.length === 1 && e.touches[0].clientX < 45) {
+      if (e.touches.length === 1 && e.touches[0].clientX < 45 && container && overlay) {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         isSwiping = true;
         
-        // 터치 즉각 반응을 위해 과도기 트랜지션 해제
-        body.style.transition = 'none';
+        container.style.transition = 'none';
+        overlay.style.transition = 'none';
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isSwiping) return;
 
+      const container = document.getElementById('b2b-page-container');
+      const overlay = document.getElementById('swipe-overlay');
+      if (!container || !overlay) return;
+
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
       const diffX = currentX - startX;
       const diffY = currentY - startY;
 
-      // 세로 스크롤 왜곡이 훨씬 크면 제스처 무효화
+      // 세로 스크롤 의도가 훨씬 크면 무효화
       if (Math.abs(diffY) > Math.abs(diffX) && diffX < 20) {
         isSwiping = false;
-        body.style.transform = 'none';
+        container.style.transform = 'none';
+        overlay.style.opacity = '0';
         return;
       }
 
       if (diffX > 0) {
-        // 손가락 드래그 거리만큼 전체 화면을 오른쪽으로 밀어줌 (iOS 네이티브 감각)
-        body.style.transform = `translateX(${diffX}px)`;
+        // 현재 페이지만 오른쪽으로 밀어줌
+        container.style.transform = `translateX(${diffX}px)`;
+        // 밀린 정도에 따라 뒷배경 오버레이 불투명도 조절 (점차 투명해짐)
+        const opacityRatio = Math.max(0, 0.3 - (diffX / 600));
+        overlay.style.opacity = String(opacityRatio);
       }
     };
 
@@ -65,27 +75,34 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
       if (!isSwiping) return;
       isSwiping = false;
 
+      const container = document.getElementById('b2b-page-container');
+      const overlay = document.getElementById('swipe-overlay');
+      if (!container || !overlay) return;
+
       const endX = e.changedTouches[0].clientX;
       const diffX = endX - startX;
 
-      // 제자리 복귀 또는 이탈용 트랜지션 곡선 주입
-      body.style.transition = 'transform 0.25s cubic-bezier(0.33, 1, 0.68, 1)';
+      container.style.transition = 'transform 0.24s cubic-bezier(0.33, 1, 0.68, 1)';
+      overlay.style.transition = 'opacity 0.24s cubic-bezier(0.33, 1, 0.68, 1)';
 
-      if (diffX > 120) {
-        // 임계값 초과 시 화면을 끝까지 100% 밀어낸 뒤 뒤로가기 실행
-        body.style.transform = 'translateX(100%)';
+      if (diffX > 110) {
+        // 뒤로가기 실행: 100% 밀어내고 router.back()
+        container.style.transform = 'translateX(100%)';
+        overlay.style.opacity = '0';
         setTimeout(() => {
           router.back();
-          // 라우터 복귀 후 원래대로 위치 원복
-          body.style.transition = 'none';
-          body.style.transform = 'none';
-        }, 250);
+          // 라우팅 완료 후 원복
+          container.style.transition = 'none';
+          container.style.transform = 'none';
+        }, 240);
       } else {
-        // 임계값 미만 시 0px로 튕겨서 복원
-        body.style.transform = 'none';
+        // 복원: 제자리 복구
+        container.style.transform = 'none';
+        overlay.style.opacity = '0';
         setTimeout(() => {
-          body.style.transition = 'none';
-        }, 250);
+          container.style.transition = 'none';
+          overlay.style.transition = 'none';
+        }, 240);
       }
     };
 
@@ -97,8 +114,6 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
-      body.style.transform = 'none';
-      body.style.transition = 'none';
     };
   }, [router]);
   
@@ -121,9 +136,32 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     !pathname.includes('/order');           // 추가: rewrite 전 /order 경로 대응
 
   return (
-    <>
-      {children}
+    <div style={{ position: 'relative', width: '100%', overflow: 'hidden', minHeight: '100vh', backgroundColor: '#000' }}>
+      {/* 뒤로가기 시 뒷면에 생기는 어두운 배경 막 */}
+      <div id="swipe-overlay" style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#000',
+        zIndex: 1,
+        opacity: 0,
+        pointerEvents: 'none'
+      }} />
+
+      {/* 오른쪽으로 물리 슬라이드되는 최상위 페이지 레이어 */}
+      <div id="b2b-page-container" style={{
+        position: 'relative',
+        width: '100%',
+        minHeight: '100vh',
+        zIndex: 2,
+        backgroundColor: '#fff',
+        boxShadow: '-4px 0 16px rgba(0, 0, 0, 0.15)'
+      }}>
+        {children}
+      </div>
       {showBottomBar && <BottomTabBar />}
-    </>
+    </div>
   );
 }

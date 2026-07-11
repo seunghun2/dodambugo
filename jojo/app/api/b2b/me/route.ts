@@ -56,11 +56,15 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 404 });
         }
 
-        const { data: deposit } = await supabase
+        const { data: deposit, error: depositError } = await supabase
             .from('deposits')
             .select('balance')
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
+
+        if (depositError) {
+            console.error('Deposits 조회 오류:', depositError);
+        }
 
         // 추천한 회원 수
         const { count: referralCount } = await supabase

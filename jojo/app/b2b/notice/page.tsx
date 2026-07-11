@@ -65,7 +65,7 @@ export default function B2BNoticePage() {
         <button className={styles.backBtn} onClick={() => router.back()}>
           <B2BIcon name="chevron-left" size={24} />
         </button>
-        <span className={styles.headerTitle}>공지사항 (알림)</span>
+        <span className={styles.headerTitle}>알림</span>
         <div className={styles.headerRightPlaceholder} />
       </header>
 
@@ -73,10 +73,10 @@ export default function B2BNoticePage() {
         {loading ? (
           <div className={styles.loadingContainer}>
             <div className={styles.spinner} />
-            <p className={styles.loadingText}>공지사항을 불러오는 중입니다...</p>
+            <p className={styles.loadingText}>알림 목록을 불러오는 중입니다...</p>
           </div>
         ) : notices.length === 0 ? (
-          <div className={styles.emptyState}>등록된 공지사항이 없습니다.</div>
+          <div className={styles.emptyState}>수신된 알림 내역이 없습니다.</div>
         ) : (
           <div className={styles.noticeList}>
             {notices.map((item) => {
@@ -89,7 +89,7 @@ export default function B2BNoticePage() {
                   >
                     <div className={styles.noticeMain}>
                       <div className={styles.titleRow}>
-                        <span className={styles.noticeBadge}>공지</span>
+                        <span className={styles.noticeBadge}>알림</span>
                         <span className={styles.noticeTitle}>{item.title}</span>
                       </div>
                       <span className={styles.noticeDate}>{formatDate(item.created_at)}</span>

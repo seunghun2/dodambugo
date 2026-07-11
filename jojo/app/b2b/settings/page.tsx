@@ -168,7 +168,13 @@ export default function SettingsPage() {
                 return;
             }
             if (!res.ok) {
-                alert(`API 오류 (코드: ${res.status}, 텍스트: ${res.statusText})`);
+                try {
+                    const errData = await res.json();
+                    alert(`API 오류 (코드: ${res.status})\n메시지: ${errData.error || res.statusText}`);
+                } catch {
+                    alert(`API 오류 (코드: ${res.status}, 텍스트: ${res.statusText})`);
+                }
+                setLoading(false);
                 return;
             }
             const data = await res.json();
