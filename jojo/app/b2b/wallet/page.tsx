@@ -210,31 +210,34 @@ export default function WalletPage() {
 
     return (
         <div className={styles.page}>
-            {/* 헤더 */}
-            <header className={styles.header}>
-                <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                </button>
-                <span className={styles.headerTitle}>{activeTab === 'reward' ? '적립내역' : '환급내역'}</span>
-                <div className={styles.headerRightPlaceholder} />
-            </header>
+            {/* 상단 헤더와 탭 영역을 통합 고정하기 위한 컨테이너 */}
+            <div className={styles.fixedHeaderContainer}>
+                {/* 헤더 */}
+                <header className={styles.header}>
+                    <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                    <span className={styles.headerTitle}>{activeTab === 'reward' ? '적립내역' : '환급내역'}</span>
+                    <div className={styles.headerRightPlaceholder} />
+                </header>
 
-            {/* 탭 컨테이너 */}
-            <div className={styles.tabContainer}>
-                <button
-                    className={`${styles.tabBtn} ${activeTab === 'reward' ? styles.tabActive : ''}`}
-                    onClick={() => setActiveTab('reward')}
-                >
-                    적립내역
-                </button>
-                <button
-                    className={`${styles.tabBtn} ${activeTab === 'withdraw' ? styles.tabActive : ''}`}
-                    onClick={() => setActiveTab('withdraw')}
-                >
-                    환급내역
-                </button>
+                {/* 탭 컨테이너 */}
+                <div className={styles.tabContainer}>
+                    <button
+                        className={`${styles.tabBtn} ${activeTab === 'reward' ? styles.tabActive : ''}`}
+                        onClick={() => setActiveTab('reward')}
+                    >
+                        적립내역
+                    </button>
+                    <button
+                        className={`${styles.tabBtn} ${activeTab === 'withdraw' ? styles.tabActive : ''}`}
+                        onClick={() => setActiveTab('withdraw')}
+                    >
+                        환급내역
+                    </button>
+                </div>
             </div>
 
             {/* 메인 콘텐츠 영역 */}
