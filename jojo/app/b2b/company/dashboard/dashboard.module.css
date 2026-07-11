@@ -1,0 +1,482 @@
+.appContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+    width: 280px;
+    background-color: #0f172a;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    box-sizing: border-box;
+    border-right: 1px solid #1e293b;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
+
+.sidebarBrand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1e293b;
+}
+
+.brandIcon {
+    color: #38bdf8;
+}
+
+.sidebarTitle {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+}
+
+.sidebarSubtitle {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.navItem:hover {
+    color: #ffffff;
+    background-color: #1e293b;
+}
+
+.navItemActive {
+    color: #ffffff;
+    background-color: #1e293b;
+    border-left: 4px solid #38bdf8;
+    border-radius: 0 8px 8px 0;
+    padding-left: 12px;
+}
+
+.sidebarFooter {
+    border-top: 1px solid #1e293b;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.userName {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.userPhone {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.logoutBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    background-color: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+/* 메인 영역 스타일 */
+.mainContent {
+    flex: 1;
+    margin-left: 280px;
+    padding: 40px;
+    box-sizing: border-box;
+    max-width: 1400px;
+}
+
+.mainHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.headerTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.headerSubtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    gap: 12px;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.actionBtnPrimary {
+    background-color: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.actionBtnPrimary:hover {
+    background-color: #1e293b;
+}
+
+.actionBtnPrimary:disabled {
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* 대시보드 레이아웃 */
+.summaryRow {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summaryCard {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.iconPending {
+    color: #ef4444;
+}
+
+.iconCompleted {
+    color: #10b981;
+}
+
+.cardVal {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.contentLayout {
+    display: flex;
+    gap: 24px;
+}
+
+/* 월별 테이블 카드 */
+.tableCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.monthlyCard {
+    width: 440px;
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table th {
+    background-color: #f8fafc;
+    padding: 12px 14px;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #000000;
+}
+
+.activeRow {
+    background-color: #f1f5f9;
+}
+
+.selectBtn {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selectBtn:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* 정식 명세서 장부 카드 */
+.sheetCard {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    min-width: 0;
+}
+
+.emptyDetail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* 영수 장부 양식 (인쇄 가능) */
+.invoiceSheet {
+    color: #000000;
+}
+
+.invoiceTitleBlock {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.invoiceMainTitle {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 12px;
+    margin: 0 0 8px 0;
+    text-indent: 12px;
+}
+
+.invoiceSubTitle {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 600;
+}
+
+.partiesBlock {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.partyBox {
+    flex: 1;
+}
+
+.partyLabel {
+    display: block;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.miniTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.miniTh {
+    background-color: #f1f5f9;
+    border: 1px solid #000000;
+    padding: 8px 12px;
+    font-weight: 700;
+    width: 90px;
+    box-sizing: border-box;
+}
+
+.miniTd {
+    border: 1px solid #000000;
+    padding: 8px 12px;
+}
+
+.summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-bottom: 24px;
+}
+
+.summaryTh {
+    background-color: #f1f5f9;
+    border: 1px solid #000000;
+    padding: 10px;
+    font-weight: 700;
+    width: 100px;
+    text-align: center;
+}
+
+.summaryTd {
+    border: 1px solid #000000;
+    padding: 10px 14px;
+    text-align: left;
+}
+
+.detailTableWrapper {
+    overflow-x: auto;
+    border: 1px solid #000000;
+}
+
+.detailTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.detailTable th {
+    background-color: #f1f5f9;
+    border-bottom: 1px solid #000000;
+    border-right: 1px solid #000000;
+    padding: 10px 12px;
+    font-weight: 700;
+}
+
+.detailTable th:last-child {
+    border-right: none;
+}
+
+.detailTable td {
+    border-bottom: 1px solid #cbd5e1;
+    border-right: 1px solid #cbd5e1;
+    padding: 10px 12px;
+}
+
+.detailTable tr:last-child td {
+    border-bottom: none;
+}
+
+.detailTable td:last-child {
+    border-right: none;
+}
+
+/* 인쇄용 미디어 쿼리 */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .sidebar {
+        display: none !important;
+    }
+    
+    .mainContent {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    .sheetCard {
+        border: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    body {
+        background-color: #ffffff !important;
+    }
+}

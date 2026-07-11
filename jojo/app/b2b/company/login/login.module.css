@@ -1,0 +1,135 @@
+.page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #0f172a; /* 슬레이트 다크 그레이 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 20px;
+}
+
+.loginCard {
+    width: 100%;
+    max-width: 440px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.logoSection {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.brandTitle {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.brandSubtitle {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.errorBox {
+    background-color: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #ef4444;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+}
+
+.input {
+    width: 100%;
+    height: 48px;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 16px 0 46px;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    border-color: #0f172a;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
+}
+
+.pwToggle {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.pwToggle:hover {
+    color: #64748b;
+}
+
+.loginBtn {
+    height: 48px;
+    background-color: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 8px;
+}
+
+.loginBtn:hover {
+    background-color: #1e293b;
+}
+
+.loginBtn:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.footerSection {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 11px;
+    color: #94a3b8;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
