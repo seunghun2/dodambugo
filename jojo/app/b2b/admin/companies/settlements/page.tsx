@@ -36,6 +36,12 @@ interface MonthlySummary {
     total_count: number;
 }
 
+interface CompanyInfo {
+    id: string;
+    name: string;
+    business_no?: string;
+}
+
 function SettlementsContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -43,12 +49,27 @@ function SettlementsContent() {
     const companyId = searchParams.get('companyId') || '';
     const companyName = searchParams.get('name') || '상조회사';
 
+    const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
     const [monthlyList, setMonthlyList] = useState<MonthlySummary[]>([]);
     const [settlements, setSettlements] = useState<SettlementDetail[]>([]);
     const [selectedYearMonth, setSelectedYearMonth] = useState<string | null>(null);
     const [summary, setSummary] = useState<SettleSummary>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
     const [loading, setLoading] = useState(true);
     const [detailLoading, setDetailLoading] = useState(false);
+
+    // 날짜 포맷 함수 (YYYY년 MM월 DD일)
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return '정산 대기';
+        try {
+            const d = new Date(dateStr);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}년 ${mm}월 ${dd}일`;
+        } catch {
+            return dateStr;
+        }
+    };
 
     // 1. 월별 정산 현황 조회
     const fetchMonthlySummary = async () => {
@@ -59,6 +80,7 @@ function SettlementsContent() {
             if (!res.ok) throw new Error('정산 내역을 로드하지 못했습니다.');
             const data = await res.json();
             if (data.success) {
+                setCompanyInfo(data.company || null);
                 setMonthlyList(data.monthlyList || []);
                 setSummary(data.summary);
                 
@@ -84,6 +106,9 @@ function SettlementsContent() {
             const data = await res.json();
             if (data.success) {
                 setSettlements(data.settlements || []);
+                if (data.company) {
+                    setCompanyInfo(data.company);
+                }
             }
         } catch (err: any) {
             alert(err.message);
@@ -210,13 +235,13 @@ function SettlementsContent() {
             <div className={`${styles.summaryBox} no-print`}>
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryLabel}>미정산 총액</div>
-                    <div className={styles.summaryValue} style={{ color: '#d97706' }}>
+                    <div className={styles.summaryValue} style={{ color: '#000000' }}>
                         {(summary.pending_amount || 0).toLocaleString()}원
                     </div>
                 </div>
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryLabel}>정산 완료 총액</div>
-                    <div className={styles.summaryValue} style={{ color: '#059669' }}>
+                    <div className={styles.summaryValue} style={{ color: '#000000' }}>
                         {(summary.completed_amount || 0).toLocaleString()}원
                     </div>
                 </div>
@@ -240,7 +265,7 @@ function SettlementsContent() {
                                 <th>정산 완료 금액</th>
                                 <th>건수</th>
                                 <th>상태</th>
-                                <th>상세 조회</th>
+                                <th>조회</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -257,10 +282,10 @@ function SettlementsContent() {
                                     return (
                                         <tr key={m.month} className={isSelected ? styles.selectedRow : ''}>
                                             <td style={{ fontWeight: '600' }}>{year}년 {month}월</td>
-                                            <td style={{ color: m.pending_amount > 0 ? '#d97706' : '#64748b' }}>
+                                            <td style={{ color: '#000000' }}>
                                                 {m.pending_amount.toLocaleString()}원
                                             </td>
-                                            <td style={{ color: '#059669' }}>
+                                            <td style={{ color: '#000000' }}>
                                                 {m.completed_amount.toLocaleString()}원
                                             </td>
                                             <td>{m.total_count}건</td>
@@ -298,77 +323,75 @@ function SettlementsContent() {
                                 귀사와의 거래에 따른 화환 판매 정산 내역을 아래와 같이 명세하여 송부합니다.
                             </div>
                         </div>
-                        {/* 정산 승인 확인 도장 도화란 */}
-                        <table className={styles.stampTable}>
-                            <tbody>
-                                <tr>
-                                    <td rowSpan={2} style={{ width: '20px', fontSize: '11px', background: '#f8fafc', fontWeight: 'bold' }}>결<br/>재</td>
-                                    <td>담당</td>
-                                    <td>검토</td>
-                                    <td>승인</td>
-                                </tr>
-                                <tr style={{ height: '45px' }}>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
 
-                    {/* 공급자 정보 */}
+                    {/* 공급자 & 공급받는자 정식 사업자 명세 정보 테이블 (정산서 정석 포맷) */}
+                    <div className={styles.businessSection}>
+                        <div className={styles.businessCard}>
+                            <div className={styles.businessTitle}>■ 공급받는자 (상조회사)</div>
+                            <table className={styles.businessTable}>
+                                <tbody>
+                                    <tr>
+                                        <td className={styles.businessLabel}>상호(회사명)</td>
+                                        <td className={styles.businessValue}>{companyName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>등록 번호</td>
+                                        <td className={styles.businessValue}>{companyInfo?.business_no || '미등록'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>정산 대상 월</td>
+                                        <td className={styles.businessValue}>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월분</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className={styles.businessCard}>
+                            <div className={styles.businessTitle}>■ 공급자 (발행처)</div>
+                            <table className={styles.businessTable}>
+                                <tbody>
+                                    <tr>
+                                        <td className={styles.businessLabel}>상호 (서비스)</td>
+                                        <td className={styles.businessValue}>부고온 (마음부고온)</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>사업자 등록번호</td>
+                                        <td className={styles.businessValue}>685-86-02759</td>
+                                    </tr>
+                                    <tr>
+                                        <td className={styles.businessLabel}>주소 및 문의</td>
+                                        <td className={styles.businessValue}>서울특별시 마포구 마포대로 109, 10층</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* 정산 정보 간이 요약 */}
                     <div className={styles.invoiceInfoSection}>
-                        <div style={{ flex: 1 }}>
-                            <table className={styles.infoTable}>
-                               <tbody>
-                                    <tr>
-                                        <td className={styles.infoLabel}>정산 대상</td>
-                                        <td className={styles.infoValue} style={{ fontWeight: 'bold', fontSize: '15px' }}>{companyName} 본사 귀하</td>
-                                    </tr>
-                                    <tr>
-                                        <td className={styles.infoLabel}>정산 월</td>
-                                        <td className={styles.infoValue}>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월분</td>
-                                    </tr>
-                                    <tr>
-                                        <td className={styles.infoLabel}>합계 금액</td>
-                                        <td className={styles.infoValue} style={{ fontWeight: 'bold', color: '#1e293b' }}>
-                                            {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
-                                        </td>
-                                    </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <table className={styles.infoTable}>
-                               <tbody>
-                                    <tr>
-                                        <td className={styles.infoLabel}>발행인</td>
-                                        <td className={styles.infoValue}>부고온 (마음부고온 관리자)</td>
-                                    </tr>
-                                    <tr>
-                                        <td className={styles.infoLabel}>정산 상태</td>
-                                        <td className={styles.infoValue}>
-                                            {hasPending ? (
-                                                <span style={{ color: '#d97706', fontWeight: 'bold' }}>정산 대기 (미지급)</span>
-                                            ) : (
-                                                <span style={{ color: '#059669', fontWeight: 'bold' }}>정산 완료 (지급완료)</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className={styles.infoLabel}>확인 일자</td>
-                                        <td className={styles.infoValue}>
-                                            {hasPending ? '정산 보류 중' : '정산 완료 완료'}
-                                        </td>
-                                    </tr>
-                               </tbody>
-                            </table>
-                        </div>
+                        <table className={styles.infoTable}>
+                           <tbody>
+                                <tr>
+                                    <td className={styles.infoLabel}>정산 상태</td>
+                                    <td className={styles.infoValue}>
+                                        {hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
+                                    </td>
+                                    <td className={styles.infoLabel}>정산 확인 일자</td>
+                                    <td className={styles.infoValue}>
+                                        {hasPending ? '미확인 (정산 대기)' : formatDate(settlements[0]?.payment_date)}
+                                    </td>
+                                    <td className={styles.infoLabel}>합계 정산금액</td>
+                                    <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
+                                        {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
+                                    </td>
+                                </tr>
+                           </tbody>
+                        </table>
                     </div>
 
                     {/* 상세 내역 테이블 */}
                     <div className={styles.invoiceBody}>
-                        <h3 className={styles.invoiceTableTitle}>■ 화환 판매 정산 세부 내역</h3>
+                        <h3 className={styles.invoiceTableTitle}>■ 화환 판매 정산 세부 내역 명세</h3>
                         <table className={styles.invoiceTable}>
                             <thead>
                                 <tr>
@@ -385,20 +408,20 @@ function SettlementsContent() {
                             <tbody>
                                 {detailLoading ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
                                             상세 정산 내역을 조회하는 중...
                                         </td>
                                     </tr>
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
                                             정산할 판매 건이 존재하지 않습니다.
                                         </td>
                                     </tr>
                                 ) : (
                                     settlements.map((s) => (
                                         <tr key={s.id}>
-                                            <td style={{ fontSize: '11px', color: '#475569' }}>
+                                            <td style={{ fontSize: '11px' }}>
                                                 {new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                             </td>
                                             <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>
@@ -407,11 +430,11 @@ function SettlementsContent() {
                                             <td style={{ fontWeight: '500' }}>
                                                 {s.order?.partner_name || '-'}
                                             </td>
-                                            <td style={{ fontWeight: '600', color: '#1e293b' }}>
+                                            <td style={{ fontWeight: '600' }}>
                                                 {s.order?.deceased_name || '미등록'}
                                             </td>
-                                            <td style={{ fontFamily: 'monospace', fontSize: '10px', color: '#64748b' }}>
-                                                {s.order?.bugo_id ? s.order.bugo_id.slice(0, 8) + '...' : '-'}
+                                            <td style={{ fontFamily: 'monospace', fontSize: '10px' }}>
+                                                {s.order?.bugo_id ? (String(s.order.bugo_id).length > 8 ? String(s.order.bugo_id).slice(0, 8) + '...' : String(s.order.bugo_id)) : '-'}
                                             </td>
                                             <td>
                                                 <div>
@@ -425,11 +448,7 @@ function SettlementsContent() {
                                                 {s.amount.toLocaleString()}원
                                             </td>
                                             <td>
-                                                {s.status === 'pending' ? (
-                                                    <span style={{ color: '#d97706', fontSize: '12px' }}>대기</span>
-                                                ) : (
-                                                    <span style={{ color: '#059669', fontSize: '12px' }}>완료</span>
-                                                )}
+                                                {s.status === 'pending' ? '대기' : '완료'}
                                             </td>
                                         </tr>
                                     ))
@@ -441,8 +460,8 @@ function SettlementsContent() {
                     {/* 하단 서명란 및 정산 처리 버튼 */}
                     <div className={styles.invoiceFooter}>
                         <div className={styles.invoiceTotalBlock}>
-                            <span>미정산 대기 합계 : <strong style={{ color: '#d97706' }}>{(currentMonthData?.pending_amount || 0).toLocaleString()}원</strong></span>
-                            <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong style={{ color: '#059669' }}>{(currentMonthData?.completed_amount || 0).toLocaleString()}원</strong></span>
+                            <span>정산 대기 합계 : <strong>{(currentMonthData?.pending_amount || 0).toLocaleString()}원</strong></span>
+                            <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong>{(currentMonthData?.completed_amount || 0).toLocaleString()}원</strong></span>
                         </div>
 
                         {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}

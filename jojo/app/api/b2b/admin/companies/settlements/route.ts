@@ -22,6 +22,13 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: '상조회사 ID가 필요합니다.' }, { status: 400 });
         }
 
+        // 상조회사 기본 정보 단독 조회 (사업자번호 확보용)
+        const { data: companyData } = await supabase
+            .from('b2b_companies')
+            .select('id, name, business_no, wreath_commission_amount')
+            .eq('id', companyId)
+            .single();
+
         if (yearMonth) {
             // 특정 월의 상세 화환 정산서 내역 조회
             const startOfMonth = `${yearMonth}-01T00:00:00.000Z`;
@@ -116,6 +123,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
+                company: companyData || null,
                 settlements: detailedList
             });
         } else {
@@ -167,6 +175,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
+                company: companyData || null,
                 summary: {
                     pending_amount: pendingTotal,
                     completed_amount: completedTotal,
