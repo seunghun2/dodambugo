@@ -8,12 +8,12 @@ import { BottomTabBar } from './BottomTabBar';
 export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // iOS/Android: 상태바가 WebView와 겹치지 않도록 설정
+  // iOS/Android: 상태바가 WebView 영역 위로 얹어지게(오버레이) 설정하여 검은 띠 제거
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
-        StatusBar.setOverlaysWebView({ overlay: false });
-        StatusBar.setStyle({ style: Style.Light });
+        StatusBar.setOverlaysWebView({ overlay: true });
+        StatusBar.setStyle({ style: Style.Dark });
       }).catch(() => {
         // 플러그인 없으면 무시
       });

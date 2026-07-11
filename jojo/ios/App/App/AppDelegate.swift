@@ -12,6 +12,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Firebase 초기화
         FirebaseApp.configure()
 
+        // 상태바 뒤 배경색을 흰색으로 설정 (검은색 방지)
+        window?.backgroundColor = .white
+
         // 원격 푸시 알림 등록
         application.registerForRemoteNotifications()
 

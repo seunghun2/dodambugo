@@ -27,7 +27,9 @@ function initFirebaseAdmin(): void {
     throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY 환경변수가 설정되지 않았습니다.');
   }
 
-  const serviceAccount: ServiceAccount = JSON.parse(serviceAccountKey);
+  // Vercel 환경 변수 등록 시 생기는 줄바꿈(\\n) 이스케이프 이중 변환 처리
+  const formattedKey = serviceAccountKey.replace(/\\n/g, '\n');
+  const serviceAccount: ServiceAccount = JSON.parse(formattedKey);
   initializeApp({
     credential: cert(serviceAccount),
   });
@@ -76,46 +78,48 @@ export async function sendPushToPartner(
   // FCM 메시징 인스턴스
   const messaging = getMessaging();
 
-  // 각 토큰에 알림 발송
-  for (const tokenRecord of tokens) {
-    try {
-      await messaging.send({
-        token: tokenRecord.fcm_token,
-        notification: { title, body },
-        data: data || {},
-        // iOS에서 알림음 및 배지 설정
-        apns: {
-          payload: {
-            aps: {
-              sound: 'default',
-              badge: 1,
+  // 각 토큰에 알림 병렬 발송
+  await Promise.all(
+    tokens.map(async (tokenRecord) => {
+      try {
+        await messaging.send({
+          token: tokenRecord.fcm_token,
+          notification: { title, body },
+          data: data || {},
+          // iOS에서 알림음 및 배지 설정
+          apns: {
+            payload: {
+              aps: {
+                sound: 'default',
+                badge: 1,
+              },
             },
           },
-        },
-        // Android 알림 채널 설정
-        android: {
-          notification: {
-            sound: 'default',
-            channelId: 'default',
+          // Android 알림 채널 설정
+          android: {
+            notification: {
+              sound: 'default',
+              channelId: 'default',
+            },
           },
-        },
-      });
-      success++;
-    } catch (err: any) {
-      console.error(`FCM 발송 실패 (토큰 ID: ${tokenRecord.id}):`, err?.message);
-      failed++;
+        });
+        success++;
+      } catch (err: any) {
+        console.error(`FCM 발송 실패 (토큰 ID: ${tokenRecord.id}):`, err?.message);
+        failed++;
 
-      // 만료되거나 유효하지 않은 토큰은 삭제 대상에 추가
-      const errorCode = err?.code || err?.errorInfo?.code || '';
-      if (
-        errorCode === 'messaging/registration-token-not-registered' ||
-        errorCode === 'messaging/invalid-registration-token' ||
-        errorCode === 'messaging/invalid-argument'
-      ) {
-        expiredTokenIds.push(tokenRecord.id);
+        // 만료되거나 유효하지 않은 토큰은 삭제 대상에 추가
+        const errorCode = err?.code || err?.errorInfo?.code || '';
+        if (
+          errorCode === 'messaging/registration-token-not-registered' ||
+          errorCode === 'messaging/invalid-registration-token' ||
+          errorCode === 'messaging/invalid-argument'
+        ) {
+          expiredTokenIds.push(tokenRecord.id);
+        }
       }
-    }
-  }
+    })
+  );
 
   // 만료된 토큰 삭제
   if (expiredTokenIds.length > 0) {

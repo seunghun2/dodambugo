@@ -1,6 +1,6 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-const config: CapacitorConfig = {
+const config: any = {
   appId: 'kr.co.maeumbugo.bugoon',
   appName: '부고온 파트너',
   webDir: 'out',
@@ -16,6 +16,7 @@ const config: CapacitorConfig = {
   },
   ios: {
     scheme: 'MaeumbugoPartner',
+    backButtonGestures: true,
   },
   android: {
     buildOptions: {

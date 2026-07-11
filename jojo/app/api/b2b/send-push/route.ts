@@ -6,6 +6,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendPushToPartner } from '@/lib/fcm';
 
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+
 // JWT 검증용 Supabase 클라이언트
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,9 +29,11 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '');
 
-    // JWT 토큰 검증
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
+    // JWT 토큰 검증 (B2B 커스텀 JWT 대응)
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
       return NextResponse.json(
         { success: false, error: '유효하지 않은 인증 토큰입니다.' },
         { status: 401 }

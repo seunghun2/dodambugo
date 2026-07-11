@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { B2BIcon } from '@/components/b2b/B2BIcon';
+import { unregisterPushNotifications } from '@/lib/push-notifications';
 import styles from './settings.module.css';
 
 const BANKS = [
@@ -206,6 +207,15 @@ export default function SettingsPage() {
     };
 
     const handleLogout = async () => {
+        // 1. 인증 정보가 사라지기 전에 푸시 알림 등록 해제 진행
+        if (user && user.id) {
+            try {
+                await unregisterPushNotifications(user.id);
+            } catch (err) {
+                console.error('푸시 등록 해제 중 에러:', err);
+            }
+        }
+
         localStorage.removeItem('b2b_token');
         localStorage.removeItem('b2b_user');
         sessionStorage.removeItem('b2b_token');
