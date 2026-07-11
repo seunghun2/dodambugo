@@ -53,8 +53,16 @@ export default function DashboardPage() {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
-    // 푸시 알림 등록 (네이티브 앱에서만 동작)
-    registerPushNotifications(parsedUser.id);
+    // 푸시 알림 등록 (네이티브 앱에서만 동작, Next.js 라우터 주입)
+    registerPushNotifications(parsedUser.id, router);
+
+    // 앱 기동 시(Cold Start) 대기 중이던 푸시 클릭 라우팅 처리
+    if (typeof window !== 'undefined' && (window as any).__pendingPushUrl) {
+      const pendingUrl = (window as any).__pendingPushUrl;
+      (window as any).__pendingPushUrl = null; // 처리 완료 후 비우기
+      console.log('[Push] 펜딩되었던 푸시 라우팅 실행:', pendingUrl);
+      router.push(pendingUrl);
+    }
 
     // 최신 정보 DB에서 동기화
     try {

@@ -113,18 +113,22 @@ export async function POST(request: NextRequest) {
     let result = { success: 0, failed: 0 };
     let fcmError = null;
 
-    // 수신자 파트너의 알림 설정 동의 상태 추가 조회
+    // 수신자 파트너의 알림 설정 동의 상태 및 기본 정보 조회
     const { data: recipientUser, error: recipientError } = await supabase
       .from('b2b_users')
-      .select('alarm_all, alarm_deposit, alarm_deceased, alarm_notice')
+      .select('phone, company_name, alarm_all, alarm_deposit, alarm_deceased, alarm_notice')
       .eq('id', partner_id)
       .single();
 
     let shouldSendPush = true; // 기본값은 발송
+    let recipientPhone = '010-0000-0000';
+    let recipientName = '파트너';
 
     if (recipientError || !recipientUser) {
       console.warn(`[Push Filter] 수신자 파트너(${partner_id})의 설정을 조회할 수 없어 기본 발송 처리합니다.`, recipientError?.message);
     } else {
+      recipientPhone = recipientUser.phone || recipientPhone;
+      recipientName = recipientUser.company_name || recipientName;
       shouldSendPush = recipientUser.alarm_all; // 전체 알림이 켜져 있어야 함
       if (shouldSendPush) {
         const type = data?.type || '';
@@ -138,23 +142,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    let isSuccess = 'success';
     if (shouldSendPush) {
       try {
         result = await sendPushToPartner(partner_id, title, pushBody, data);
       } catch (fcmErr: any) {
         console.warn('실물 기기 FCM 푸시 전송 실패:', fcmErr?.message || fcmErr);
         fcmError = fcmErr?.message || String(fcmErr);
+        isSuccess = 'fail';
       }
     } else {
       console.log(`[Push Filter] 수신자(${partner_id})의 세부 알림 설정이 꺼져 있어 실제 폰 푸시는 건너뛰었습니다 (수신함에는 정상 적재).`);
       fcmError = '수신자 파트너가 해당 유형의 푸시 알림을 거부한 상태입니다 (수신함에는 정상 적재 완료)';
     }
 
+    // 3. b2b_notification_logs 테이블에 발송 로그 최종 적재
+    try {
+      await supabase.from('b2b_notification_logs').insert({
+        recipient_phone: recipientPhone,
+        recipient_name: recipientName,
+        type: 'push',
+        title,
+        content: pushBody,
+        status: isSuccess,
+        error_message: fcmError || null
+      });
+    } catch (dbErr) {
+      console.error('푸시 로그 DB 적재 실패:', dbErr);
+    }
+
     return NextResponse.json({
       success: true,
       result,
       fcmError,
-      message: 'B2B 알림 수신함에 적재 완료되었습니다.'
+      message: 'B2B 알림 수신함 및 통합 발송 로그에 적재 완료되었습니다.'
     });
   } catch (err) {
     console.error('푸시 발송 API 오류:', err);

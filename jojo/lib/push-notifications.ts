@@ -29,7 +29,7 @@ function getB2BToken(): string | null {
  * 권한 요청 → 등록 → FCM 토큰을 서버에 전송
  * 웹 환경에서는 자동 skip됩니다.
  */
-export async function registerPushNotifications(partnerId: string): Promise<void> {
+export async function registerPushNotifications(partnerId: string, router?: any): Promise<void> {
   // 네이티브 플랫폼(iOS/Android)에서만 실행
   if (!Capacitor.isNativePlatform()) {
     return;
@@ -108,9 +108,34 @@ export async function registerPushNotifications(partnerId: string): Promise<void
       console.log('푸시 알림 탭:', action);
 
       // data.url이 있으면 해당 URL로 이동
-      const url = action.notification?.data?.url;
-      if (url && typeof url === 'string') {
-        window.location.href = url;
+      const rawUrl = action.notification?.data?.url;
+      if (rawUrl && typeof rawUrl === 'string') {
+        // 절대 경로 도메인이 포함된 경우 상대 경로로 파싱 가공
+        let targetUrl = rawUrl;
+        if (targetUrl.startsWith('http')) {
+          try {
+            const parsed = new URL(targetUrl);
+            targetUrl = parsed.pathname + parsed.search + parsed.hash;
+          } catch (e) {
+            console.error('[Push] URL 파싱 에러:', e);
+          }
+        }
+
+        console.log('[Push] 라우팅 타깃 경로:', targetUrl);
+
+        if (router) {
+          // Next.js 라우터가 준비된 상태라면 바로 라우팅
+          router.push(targetUrl);
+        } else {
+          // Cold Start 등으로 라우터 로딩 전이라면 전역 버퍼에 임시 적재
+          (window as any).__pendingPushUrl = targetUrl;
+          // 최후의 보루로 리액트 라이프사이클이 아닐 경우 강제 이동
+          setTimeout(() => {
+            if ((window as any).__pendingPushUrl === targetUrl) {
+              window.location.href = targetUrl;
+            }
+          }, 1500);
+        }
       }
     });
 

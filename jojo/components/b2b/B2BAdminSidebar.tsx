@@ -17,7 +17,9 @@ import {
     IconBan,
     IconCash,
     IconPackage,
-    IconAdjustments
+    IconAdjustments,
+    IconMailOpened,
+    IconHistory
 } from '@tabler/icons-react';
 import styles from './B2BAdminSidebar.module.css';
 
@@ -63,6 +65,16 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             href: '/b2b/admin/condolence-settings',
             label: '조의금 설정',
             icon: <IconAdjustments stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/notification-templates',
+            label: '알림 문구 설정',
+            icon: <IconMailOpened stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/notification-logs',
+            label: '알림 발송 로그',
+            icon: <IconHistory stroke={1.5} size={22} />
         },
         {
             href: '/b2b/admin/burial-reviews',
