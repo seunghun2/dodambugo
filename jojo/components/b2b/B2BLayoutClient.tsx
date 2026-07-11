@@ -33,6 +33,7 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     pathname !== '/b2b/login/' && 
     !pathname.startsWith('/b2b/signup') && 
     !pathname.startsWith('/b2b/admin') &&
+    !pathname.startsWith('/b2b/company') && 
     !pathname.startsWith('/b2b/flower') && 
     !pathname.startsWith('/b2b/view') &&   
     !pathname.startsWith('/b2b/create') && 
@@ -42,7 +43,7 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     !pathname.includes('/create') &&        
     !pathname.includes('/order');           
 
-  const isAdmin = pathname && pathname.startsWith('/b2b/admin');
+  const isAdmin = pathname && (pathname.startsWith('/b2b/admin') || pathname.startsWith('/b2b/company'));
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isAdmin ? '#f8fafc' : '#f8f9fa' }}>
