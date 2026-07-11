@@ -20,7 +20,7 @@ function getUserIdFromToken(request: NextRequest): string | null {
     }
 }
 
-// GET: 예치금 내역 조회
+// GET: 예치금 내역 조회 (24시간 보류 잠금 잔액 계산 추가)
 export async function GET(request: NextRequest) {
     console.log('[DEBUG] GET /api/b2b/wallet started');
     const userId = getUserIdFromToken(request);
@@ -43,6 +43,18 @@ export async function GET(request: NextRequest) {
             .eq('user_id', userId)
             .single();
         if (depError) console.error('[DEBUG] depError:', depError);
+
+        // 🛡️ 24시간 이내 적립된 수당 보류(Lock) 금액 계산
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data: recentRewards } = await supabase
+            .from('deposit_transactions')
+            .select('amount')
+            .eq('user_id', userId)
+            .gt('amount', 0)
+            .gte('created_at', oneDayAgo);
+
+        const lockedAmount = (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0);
+        const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);
 
         console.log('[DEBUG] Fetching transactions for user:', userId);
         // 거래 내역 조회
@@ -93,6 +105,8 @@ export async function GET(request: NextRequest) {
         console.log('[DEBUG] Returning wallet data successfully');
         return NextResponse.json({
             balance: deposit?.balance || 0,
+            withdrawable_balance: withdrawableBalance,
+            locked_balance: lockedAmount,
             transactions: enrichedTransactions,
             total: count || 0,
             page,
@@ -137,15 +151,32 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // 잔액 확인
+    // 잔액 및 24시간 보류(Lock) 잠금 잔액 확인
     const { data: deposit } = await supabase
         .from('deposits')
         .select('balance')
         .eq('user_id', userId)
         .single();
 
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentRewards } = await supabase
+        .from('deposit_transactions')
+        .select('amount')
+        .eq('user_id', userId)
+        .gt('amount', 0)
+        .gte('created_at', oneDayAgo);
+
+    const lockedAmount = (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0);
+    const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);
+
     if (!deposit || deposit.balance < amount) {
         return NextResponse.json({ error: '잔액이 부족합니다.' }, { status: 400 });
+    }
+
+    if (amount > withdrawableBalance) {
+        return NextResponse.json({ 
+            error: `출금 가능 잔액을 초과했습니다. 결제 완료 후 24시간이 경과하지 않은 보류 수당(${lockedAmount.toLocaleString()}원)은 출금할 수 없습니다.` 
+        }, { status: 400 });
     }
 
     // 회원 정보 (출금 계좌 & 본인인증 여부 및 파트너 유형)

@@ -58,6 +58,8 @@ interface Transaction {
 export default function WalletPage() {
     const router = useRouter();
     const [balance, setBalance] = useState(0);
+    const [withdrawableBalance, setWithdrawableBalance] = useState(0);
+    const [lockedBalance, setLockedBalance] = useState(0);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [withdrawing, setWithdrawing] = useState(false);
@@ -118,6 +120,8 @@ export default function WalletPage() {
             const data = await res.json();
             console.log('[CLIENT DEBUG] Wallet data received:', data);
             setBalance(data.balance || 0);
+            setWithdrawableBalance(data.withdrawable_balance || 0);
+            setLockedBalance(data.locked_balance || 0);
             setTransactions(data.transactions || []);
             setIdentityVerified(data.identity_verified || false);
             setPartnerType(data.partner_type || 'individual');
@@ -143,8 +147,8 @@ export default function WalletPage() {
             setError('금액을 입력해 주세요.');
             return;
         }
-        if (amount > balance) {
-            setError('환급 가능 금액을 초과하여 신청할 수 없습니다.');
+        if (amount > withdrawableBalance) {
+            setError(`출금 가능 금액을 초과하여 신청할 수 없습니다. (최근 24시간 보류 수당: ${formatCurrency(lockedBalance)}원)`);
             return;
         }
         setError('');
@@ -371,7 +375,13 @@ export default function WalletPage() {
                                     정산계좌
                                 </button>
                             </div>
-                            <h2 className={styles.amountDisplay}>{formatCurrency(balance)}원</h2>
+                            <h2 className={styles.amountDisplay}>{formatCurrency(withdrawableBalance)}원</h2>
+                            {lockedBalance > 0 && (
+                                <div style={{ fontSize: '12px', color: '#E53E3E', fontWeight: '600', marginTop: '-8px', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>🔒 결제 후 24시간 보류 금액:</span>
+                                    <span>{formatCurrency(lockedBalance)}원</span>
+                                </div>
+                            )}
                             <button
                                 className={styles.actionBtn}
                                 onClick={() => {
@@ -539,7 +549,7 @@ export default function WalletPage() {
                                     value={withdrawAmount}
                                     onChange={(e) => setWithdrawAmount(e.target.value)}
                                 />
-                                <p className={styles.amountHint}>환급 가능: {formatCurrency(balance)}원</p>
+                                <p className={styles.amountHint}>환급 가능: {formatCurrency(withdrawableBalance)}원</p>
                                 
                                 {withdrawAmount && parseInt(withdrawAmount) > 0 && (
                                     <div style={{ marginTop: '16px', padding: '12px', background: '#F8F9FA', borderRadius: '6px', fontSize: '13px', border: '1px solid #E9ECEF', textAlign: 'left' }}>
