@@ -50,6 +50,7 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
         width: '100%',
         minHeight: '100vh',
         backgroundColor: '#fff',
+        paddingBottom: showBottomBar ? 'calc(75px + env(safe-area-inset-bottom))' : '0px',
       }}>
         {children}
       </div>
