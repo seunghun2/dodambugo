@@ -3,12 +3,25 @@
   margin: 0 auto;
   min-height: 100dvh;
   background: var(--bg-white, #ffffff);
-  padding-top: 52px;
-  padding-bottom: 72px;
+  padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
   box-sizing: border-box;
   font-family: var(--font-family, sans-serif);
   display: flex;
   flex-direction: column;
+}
+
+/* 헤더와 탭바를 고정하는 fixed 래퍼 */
+.fixedHeaderContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+  z-index: 100;
+  background-color: #ffffff;
 }
 
 /* 헤더 */
@@ -20,12 +33,8 @@
   padding: 0 16px;
   border-bottom: 1px solid var(--b2b-border-light, #F2F4F6);
   background: #ffffff;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   width: 100%;
-  max-width: 480px;
   z-index: 10;
 }
 

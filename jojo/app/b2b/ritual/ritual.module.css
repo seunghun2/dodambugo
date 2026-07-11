@@ -5,25 +5,33 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
-  padding-top: calc(52px + env(safe-area-inset-top, 47px));
-  padding-bottom: 72px;
+  padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
+}
+
+/* 헤더와 탭바를 고정하는 fixed 래퍼 */
+.fixedHeaderContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+  z-index: 100;
+  background-color: #ffffff;
 }
 
 /* 헤더 */
 .header {
   display: flex;
   align-items: flex-end;
-  height: calc(52px + env(safe-area-inset-top, 47px));
+  height: calc(52px + env(safe-area-inset-top, 0px));
   padding: 0 20px 10px 20px;
-  padding-top: env(safe-area-inset-top, 47px);
+  padding-top: env(safe-area-inset-top, 0px);
   border-bottom: 1px solid var(--b2b-border-light);
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   width: 100%;
-  max-width: 480px;
-  background: var(--bg-white);
   z-index: 10;
 }
 
