@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
         }
 
         // 3) 토큰이 아예 없다면 정석 401 반환 (단, 사장님 테스트 기기는 연동을 위해 임시 패스)
-        const isOwnerTest = partner_id === '5aec97a8-0f10-4ca9-b7c1-1b510721286b';
+        const isOwnerTest = 
+            partner_id === '5aec97a8-0f10-4ca9-b7c1-1b510721286b' || 
+            partner_id === '552650f0-3243-4e46-97ec-d2e7ff5de2e2';
         
         if (!token && !isOwnerTest) {
             return NextResponse.json(
