@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     IconClipboardList, 
     IconRefresh, 
@@ -8,8 +8,12 @@ import {
     IconX, 
     IconTrash, 
     IconDownload, 
-    IconLoader2
+    IconLoader2,
+    IconBold,
+    IconMinus,
+    IconPhoto
 } from '@tabler/icons-react';
+import { supabase } from '@/lib/supabase';
 import styles from './notices.module.css';
 
 interface B2BNotice {
@@ -19,7 +23,17 @@ interface B2BNotice {
     is_fixed: boolean;
     created_at: string;
     updated_at: string;
+    published_at: string;
 }
+
+// datetime-local input 용 타임존 오프셋 반영 변환 헬퍼
+const formatForDatetimeLocal = (dateString?: string) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    const offset = d.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(d.getTime() - offset).toISOString().slice(0, 16);
+    return localISOTime;
+};
 
 export default function B2BAdminNoticesPage() {
     const [notices, setNotices] = useState<B2BNotice[]>([]);
@@ -31,9 +45,13 @@ export default function B2BAdminNoticesPage() {
     
     // 입력 폼 상태
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
     const [isFixed, setIsFixed] = useState(false);
+    const [publishedAt, setPublishedAt] = useState('');
     const [saving, setSaving] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const editorRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetchNotices();
@@ -58,8 +76,15 @@ export default function B2BAdminNoticesPage() {
         setIsCreating(false);
         setSelectedNotice(notice);
         setTitle(notice.title);
-        setContent(notice.content);
         setIsFixed(notice.is_fixed);
+        setPublishedAt(formatForDatetimeLocal(notice.published_at));
+        
+        // 에디터 내용 세팅
+        setTimeout(() => {
+            if (editorRef.current) {
+                editorRef.current.innerHTML = notice.content || '';
+            }
+        }, 50);
     };
 
     // 등록 모드로 전환
@@ -67,8 +92,14 @@ export default function B2BAdminNoticesPage() {
         setSelectedNotice(null);
         setIsCreating(true);
         setTitle('');
-        setContent('');
         setIsFixed(false);
+        setPublishedAt('');
+        
+        setTimeout(() => {
+            if (editorRef.current) {
+                editorRef.current.innerHTML = '';
+            }
+        }, 50);
     };
 
     // 패널 닫기
@@ -76,26 +107,101 @@ export default function B2BAdminNoticesPage() {
         setSelectedNotice(null);
         setIsCreating(false);
         setTitle('');
-        setContent('');
         setIsFixed(false);
+        setPublishedAt('');
+        if (editorRef.current) {
+            editorRef.current.innerHTML = '';
+        }
+    };
+
+    // 에디터 리치 텍스트 명령 (Bold, Divider 등)
+    const handleEditorCommand = (command: string, value: string = '') => {
+        if (editorRef.current) {
+            editorRef.current.focus();
+            document.execCommand(command, false, value);
+        }
+    };
+
+    // 툴바 이미지 업로드 및 에디터 본문 삽입
+    const handleTriggerImageFile = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 15 * 1024 * 1024) {
+            alert('파일 크기는 최대 15MB까지 가능합니다.');
+            return;
+        }
+
+        setUploadingImage(true);
+        try {
+            const ext = file.name.split('.').pop() || 'jpg';
+            const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            const filePath = `notices/${fileName}`;
+
+            const { error } = await supabase.storage
+                .from('bugo-photos')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) throw error;
+
+            const { data: urlData } = supabase.storage
+                .from('bugo-photos')
+                .getPublicUrl(filePath);
+
+            // WYSIWYG 에디터에 이미지 태그 바로 삽입
+            if (editorRef.current) {
+                editorRef.current.focus();
+                const imgHtml = `<img src="${urlData.publicUrl}" alt="공지 이미지" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; display: block;" />`;
+                document.execCommand('insertHTML', false, imgHtml);
+            }
+        } catch (err) {
+            console.error('Image upload error:', err);
+            alert('이미지 업로드에 실패했습니다. 다시 시도해 주세요.');
+        } finally {
+            setUploadingImage(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     // 등록 및 수정 저장
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!title.trim() || !content.trim()) {
-            alert('제목과 내용을 모두 입력해 주세요.');
+        
+        const content = editorRef.current ? editorRef.current.innerHTML : '';
+        if (!title.trim()) {
+            alert('공지 제목을 입력해 주세요.');
+            return;
+        }
+        
+        // 공지 내용이 비어있거나 무의미한 빈 태그만 있는 경우 체크
+        const cleanContent = content.replace(/<[^>]*>/g, '').trim();
+        if (!cleanContent && !content.includes('<img')) {
+            alert('공지 내용을 입력해 주세요.');
             return;
         }
 
         setSaving(true);
         try {
+            const payload = {
+                title: title.trim(),
+                content: content, // HTML 리치 콘텐츠 저장
+                is_fixed: isFixed,
+                published_at: publishedAt ? new Date(publishedAt).toISOString() : new Date().toISOString()
+            };
+
             if (isCreating) {
                 // 신규 등록
                 const res = await fetch('/api/b2b/admin/notices', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, content, is_fixed: isFixed }),
+                    body: JSON.stringify(payload),
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -110,7 +216,7 @@ export default function B2BAdminNoticesPage() {
                 const res = await fetch('/api/b2b/admin/notices', {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: selectedNotice.id, title, content, is_fixed: isFixed }),
+                    body: JSON.stringify({ id: selectedNotice.id, ...payload }),
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -171,10 +277,10 @@ export default function B2BAdminNoticesPage() {
             return;
         }
 
-        const headers = ['구분', '등록일시', '공지제목', '공지내용'];
+        const headers = ['구분', '게시일시(예약포함)', '공지제목', '공지내용(HTML)'];
         const rows = notices.map(item => [
-            item.is_fixed ? '상단고정' : '일반공지',
-            formatDate(item.created_at),
+            item.is_fixed ? '상단고정' : (new Date(item.published_at).getTime() > Date.now() ? '예약공지' : '일반공지'),
+            formatDate(item.published_at),
             item.title,
             item.content
         ]);
@@ -237,7 +343,7 @@ export default function B2BAdminNoticesPage() {
                                     <tr>
                                         <th style={{ width: '100px' }}>구분</th>
                                         <th>제목</th>
-                                        <th style={{ width: '180px' }}>등록일시</th>
+                                        <th style={{ width: '220px' }}>게시(예약)일시</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -248,27 +354,37 @@ export default function B2BAdminNoticesPage() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        notices.map((notice) => (
-                                            <tr
-                                                key={notice.id}
-                                                className={selectedNotice?.id === notice.id ? styles.selectedRow : ''}
-                                                onClick={() => handleSelectNotice(notice)}
-                                            >
-                                                <td>
-                                                    {notice.is_fixed ? (
-                                                        <span className={styles.fixedBadge}>중요</span>
-                                                    ) : (
-                                                        <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 500 }}>일반</span>
-                                                    )}
-                                                </td>
-                                                <td style={{ fontWeight: notice.is_fixed ? 700 : 500 }}>
-                                                    {notice.title}
-                                                </td>
-                                                <td className={styles.dateCell}>
-                                                    {formatDate(notice.created_at)}
-                                                </td>
-                                            </tr>
-                                        ))
+                                        notices.map((notice) => {
+                                            const isScheduled = new Date(notice.published_at).getTime() > Date.now();
+                                            return (
+                                                <tr
+                                                    key={notice.id}
+                                                    className={selectedNotice?.id === notice.id ? styles.selectedRow : ''}
+                                                    onClick={() => handleSelectNotice(notice)}
+                                                >
+                                                    <td>
+                                                        {notice.is_fixed ? (
+                                                            <span className={styles.fixedBadge}>중요</span>
+                                                        ) : isScheduled ? (
+                                                            <span className={styles.scheduledBadge}>예약</span>
+                                                        ) : (
+                                                            <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 500 }}>일반</span>
+                                                        )}
+                                                    </td>
+                                                    <td style={{ fontWeight: notice.is_fixed ? 700 : 500 }}>
+                                                        {notice.title}
+                                                        {isScheduled && (
+                                                            <div className={styles.dateReservation}>
+                                                                * {formatDate(notice.published_at)} 게시 예정
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className={styles.dateCell}>
+                                                        {formatDate(notice.published_at)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
@@ -300,16 +416,82 @@ export default function B2BAdminNoticesPage() {
                                         required
                                     />
                                 </div>
+
                                 <div className={styles.formGroup}>
-                                    <label className={styles.label}>공지 내용</label>
-                                    <textarea
-                                        value={content}
-                                        onChange={(e) => setContent(e.target.value)}
-                                        placeholder="공지사항 상세 내용을 입력하세요"
-                                        className={styles.textarea}
-                                        required
+                                    <label className={styles.label}>예약 게시 일시</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={publishedAt}
+                                        onChange={(e) => setPublishedAt(e.target.value)}
+                                        className={styles.input}
+                                    />
+                                    <span style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                                        * 지정하지 않으면 즉시 게시됩니다. 미래 일시로 지정 시 예약 게시됩니다.
+                                    </span>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>공지 내용 (리치 텍스트 에디터)</label>
+                                    
+                                    {/* 에디터 위지윅 툴바 */}
+                                    <div className={styles.editorToolbar}>
+                                        <button
+                                            type="button"
+                                            className={styles.toolbarBtn}
+                                            onClick={() => handleEditorCommand('bold')}
+                                            title="굵게"
+                                        >
+                                            <IconBold size={14} /> 굵게
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.toolbarBtn}
+                                            onClick={() => handleEditorCommand('insertHorizontalRule')}
+                                            title="구분선"
+                                        >
+                                            <IconMinus size={14} /> 구분선
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.toolbarBtn}
+                                            onClick={handleTriggerImageFile}
+                                            disabled={uploadingImage}
+                                            title="이미지 추가"
+                                        >
+                                            {uploadingImage ? (
+                                                <IconLoader2 size={14} className={styles.spinning} />
+                                            ) : (
+                                                <IconPhoto size={14} />
+                                            )}
+                                            이미지 추가
+                                        </button>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleImageUpload}
+                                            accept="image/*"
+                                            style={{ display: 'none' }}
+                                        />
+                                    </div>
+
+                                    {/* contentEditable 위지윅 영역 */}
+                                    <div
+                                        ref={editorRef}
+                                        contentEditable
+                                        className={`${styles.textarea} ${styles.textareaWithToolbar}`}
+                                        style={{
+                                            minHeight: '220px',
+                                            outline: 'none',
+                                            overflowY: 'auto',
+                                            border: '1px solid #cbd5e1',
+                                            padding: '12px',
+                                            backgroundColor: '#ffffff',
+                                            cursor: 'text'
+                                        }}
+                                        data-placeholder="공지내용을 작성해 주세요. 굵게, 구분선, 이미지 삽입을 편리하게 편집할 수 있습니다."
                                     />
                                 </div>
+
                                 <div className={styles.formGroup}>
                                     <div className={styles.checkboxGroup}>
                                         <input

@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
         // 1. 전체 갯수 조회
         const { count, error: countError } = await supabase
             .from('b2b_notices')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .lte('published_at', new Date().toISOString());
 
         if (countError) {
             return NextResponse.json({ error: countError.message }, { status: 500 });
@@ -30,8 +31,9 @@ export async function GET(request: NextRequest) {
         const { data, error } = await supabase
             .from('b2b_notices')
             .select('*')
+            .lte('published_at', new Date().toISOString())
             .order('is_fixed', { ascending: false })
-            .order('created_at', { ascending: false })
+            .order('published_at', { ascending: false })
             .range(offset, offset + limit - 1);
 
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });

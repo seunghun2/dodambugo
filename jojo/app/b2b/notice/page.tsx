@@ -82,6 +82,24 @@ function B2BNoticePageContent() {
     }
   };
 
+  // 하이브리드 공지사항 렌더러 (위지윅 HTML & 레거시 일반 텍스트 대응)
+  const renderNoticeContent = (content: string) => {
+    if (!content) return null;
+    
+    // HTML 태그가 아예 없는 일반 텍스트인 경우 (레거시 대응)
+    if (!/<[a-z][\s\S]*>/i.test(content)) {
+      const sanitized = content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br />');
+      return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
+    }
+
+    // 위지윅 HTML 리치 텍스트 데이터 렌더링
+    return <div dangerouslySetInnerHTML={{ __html: content }} />;
+  };
+
   return (
     <div className={styles.page}>
       {/* 상단 통합 고정 헤더 */}
@@ -130,7 +148,7 @@ function B2BNoticePageContent() {
                   {/* 아코디언 본문 패널 */}
                   <div className={`${styles.noticeContentPanel} ${isOpen ? styles.noticeContentPanelActive : ''}`}>
                     <div className={styles.noticeContent}>
-                      {item.content}
+                      {renderNoticeContent(item.content)}
                     </div>
                   </div>
                 </div>
