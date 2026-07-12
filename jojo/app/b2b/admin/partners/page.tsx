@@ -610,12 +610,12 @@ export default function PartnersPage() {
                                     <span style={{ color: '#64748b' }}>본인인증 상태</span>
                                     <span>
                                         {activeVerifyPartner.identity_verified ? (
-                                            <span style={{ color: '#10b981', fontWeight: 'bold' }}>✅ 인증완료</span>
+                                            <span style={{ color: '#10b981', fontWeight: 'bold' }}>인증완료</span>
                                         ) : (
                                             activeVerifyPartner.verification_status === 'failed' ? (
-                                                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>❌ 인증실패</span>
+                                                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>인증실패</span>
                                             ) : (
-                                                <span style={{ color: '#64748b', fontWeight: 'bold' }}>⌛ 미인증</span>
+                                                <span style={{ color: '#64748b', fontWeight: 'bold' }}>미인증</span>
                                             )
                                         )}
                                     </span>
