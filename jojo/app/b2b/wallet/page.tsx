@@ -526,6 +526,7 @@ export default function WalletPage() {
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
                             onClick={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />
                             <div className={styles.bottomSheetHeader}>
@@ -591,15 +592,8 @@ export default function WalletPage() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={(event, info) => {
-                                if (info.offset.y > 100) {
-                                    setShowRewardFilterModal(false);
-                                }
-                            }}
                             onClick={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />
                             <div className={styles.bottomSheetHeader}>
@@ -655,15 +649,8 @@ export default function WalletPage() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={(event, info) => {
-                                if (info.offset.y > 100) {
-                                    setShowWithdrawSortModal(false);
-                                }
-                            }}
                             onClick={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />
                             <div className={styles.bottomSheetHeader}>
