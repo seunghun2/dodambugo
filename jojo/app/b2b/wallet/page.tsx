@@ -148,7 +148,7 @@ export default function WalletPage() {
             return;
         }
         if (amount > withdrawableBalance) {
-            setError(`출금 가능 금액을 초과하여 신청할 수 없습니다. (최근 24시간 보류 수당: ${formatCurrency(lockedBalance)}원)`);
+            setError(`출금 가능 금액을 초과했습니다. (정산 확정 대기 중인 수당: ${formatCurrency(lockedBalance)}원)`);
             return;
         }
         setError('');
@@ -377,9 +377,9 @@ export default function WalletPage() {
                             </div>
                             <h2 className={styles.amountDisplay}>{formatCurrency(withdrawableBalance)}원</h2>
                             {lockedBalance > 0 && (
-                                <div style={{ fontSize: '12px', color: '#E53E3E', fontWeight: '600', marginTop: '-8px', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span>🔒 결제 후 24시간 보류 금액:</span>
-                                    <span>{formatCurrency(lockedBalance)}원</span>
+                                <div style={{ fontSize: '12px', color: '#8E94A0', fontWeight: '600', marginTop: '-8px', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>정산 대기 금액:</span>
+                                    <span style={{ color: '#10B981', fontWeight: '700' }}>{formatCurrency(lockedBalance)}원</span>
                                 </div>
                             )}
                             <button
@@ -525,15 +525,6 @@ export default function WalletPage() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={(event, info) => {
-                                if (info.offset.y > 100) {
-                                    setShowWithdraw(false);
-                                    setError('');
-                                }
-                            }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />
@@ -716,14 +707,6 @@ export default function WalletPage() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={(event, info) => {
-                                if (info.offset.y > 100) {
-                                    setShowAccountModal(false);
-                                }
-                            }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />
@@ -829,14 +812,6 @@ export default function WalletPage() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={(event, info) => {
-                                if (info.offset.y > 100) {
-                                    setIsEditingAccount(false);
-                                }
-                            }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className={styles.dragHandle} />

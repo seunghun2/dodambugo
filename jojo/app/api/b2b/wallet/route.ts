@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
 
     if (amount > withdrawableBalance) {
         return NextResponse.json({ 
-            error: `출금 가능 잔액을 초과했습니다. 결제 완료 후 24시간이 경과하지 않은 보류 수당(${lockedAmount.toLocaleString()}원)은 출금할 수 없습니다.` 
+            error: `출금 가능 잔액을 초과했습니다. (정산 확정 대기 중인 수당: ${lockedAmount.toLocaleString()}원)` 
         }, { status: 400 });
     }
 
