@@ -54,26 +54,29 @@ export default function VerifyFormPage() {
         const userId = user.id;
 
         try {
-            const fileExt = file.name.split('.').pop();
-            const folder = partnerType === 'business' ? 'business_licenses' : 'id_cards';
-            const filePath = `${folder}/${userId}/${Date.now()}.${fileExt}`;
-            
             setIdCardUploadProgress(30);
-            
-            const { data, error: uploadError } = await supabase.storage
-                .from('b2b-id-cards')
-                .upload(filePath, file);
 
-            if (uploadError) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn('Storage upload error bypassed in development mode:', uploadError);
-                } else {
-                    throw uploadError;
-                }
+            const token = localStorage.getItem('b2b_token');
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/b2b/verify/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || '업로드 오류');
             }
 
+            const resData = await response.json();
+            
             setIdCardUploadProgress(70);
-            setIdCardUrl(filePath);
+            setIdCardUrl(resData.filePath);
             setIdCardUploadProgress(100);
         } catch (err: any) {
             console.error('파일 업로드 오류:', err);

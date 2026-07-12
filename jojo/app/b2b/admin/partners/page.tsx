@@ -268,6 +268,13 @@ export default function PartnersPage() {
         }
     };
 
+    const getFullImageUrl = (url?: string) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://seunghun2.supabase.co';
+        return `${supabaseUrl}/storage/v1/object/public/b2b-id-cards/${url}`;
+    };
+
     const getVerifyBadge = (p: Partner) => {
         if (p.identity_verified) {
             return <span className={`${styles.badge} ${styles.badgeApproved}`} style={{ cursor: 'pointer' }} onClick={() => setActiveVerifyPartner(p)}>인증성공</span>;
@@ -328,7 +335,7 @@ export default function PartnersPage() {
             p.identity_type || '-',
             p.identity_type === '주민등록증' ? (p.id_issue_date || '-') : (p.driver_license_no || '-'),
             p.identity_phone ? formatPhone(p.identity_phone) : '-',
-            p.id_card_url || '-'
+            p.id_card_url ? getFullImageUrl(p.id_card_url) : '-'
         ]);
 
         const csvContent = 
@@ -414,20 +421,13 @@ export default function PartnersPage() {
                             <thead>
                                 <tr>
                                     <th>가입일시</th>
-                                    <th>회사명</th>
-                                    <th>소속 상조회사</th>
-                                    <th>대표자</th>
-                                    <th>연락처</th>
+                                    <th>회사 / 소속</th>
+                                    <th>대표자 정보</th>
                                     <th>본인인증</th>
-                                    <th>정산 계좌 정보</th>
-                                    <th>예치금 잔고</th>
-                                    <th>추천인 코드</th>
-                                    <th>알림 동의 설정</th>
+                                    <th>정산 / 예치금 잔고</th>
+                                    <th>추천코드 / 알림</th>
                                     <th>상태</th>
-                                    <th>부고 제작</th>
-                                    <th>부고 열람</th>
-                                    <th>화환 판매</th>
-                                    <th>최근 들어온 일시</th>
+                                    <th>활동 통계</th>
                                     <th>액션</th>
                                 </tr>
                             </thead>
@@ -437,71 +437,82 @@ export default function PartnersPage() {
                                         <td style={{ fontSize: '13px', color: '#64748b' }}>
                                             {formatDate(partner.created_at)}
                                         </td>
-                                        <td style={{ fontWeight: '600' }}>{partner.company_name}</td>
                                         <td>
-                                            <select
-                                                value={partner.company_id || ''}
-                                                onChange={(e) => handleCompanyChange(partner.id, e.target.value)}
-                                                className={styles.companySelect}
-                                                style={{
-                                                    padding: '6px 8px',
-                                                    borderRadius: '6px',
-                                                    border: '1px solid #cbd5e1',
-                                                    fontSize: '13px',
-                                                    color: '#334155',
-                                                    outline: 'none',
-                                                    backgroundColor: '#ffffff'
-                                                }}
-                                            >
-                                                <option value="">소속 없음</option>
-                                                {companies.map((c) => (
-                                                    <option key={c.id} value={c.id}>
-                                                        {c.name}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <span style={{ fontWeight: '600', color: '#0f172a' }}>{partner.company_name}</span>
+                                                <select
+                                                    value={partner.company_id || ''}
+                                                    onChange={(e) => handleCompanyChange(partner.id, e.target.value)}
+                                                    className={styles.companySelect}
+                                                    style={{
+                                                        padding: '4px 6px',
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #cbd5e1',
+                                                        fontSize: '12px',
+                                                        color: '#334155',
+                                                        outline: 'none',
+                                                        backgroundColor: '#ffffff',
+                                                        maxWidth: '140px'
+                                                    }}
+                                                >
+                                                    <option value="">소속 없음</option>
+                                                    {companies.map((c) => (
+                                                        <option key={c.id} value={c.id}>
+                                                            {c.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </td>
-                                        <td>{partner.owner_name}</td>
-                                        <td>{formatPhone(partner.phone)}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                <span style={{ fontWeight: '500' }}>{partner.owner_name}</span>
+                                                <span style={{ fontSize: '12px', color: '#64748b' }}>{formatPhone(partner.phone)}</span>
+                                            </div>
+                                        </td>
                                         <td>{getVerifyBadge(partner)}</td>
-                                        <td style={{ fontSize: '13px', color: '#475569' }}>
-                                            {partner.bank_name ? (
-                                                `${partner.bank_name} ${partner.account_no} (${partner.account_holder})`
-                                            ) : (
-                                                <span style={{ color: '#94a3b8' }}>미등록</span>
-                                            )}
-                                        </td>
-                                        <td style={{ fontWeight: '600', color: '#0f172a' }}>
-                                            {formatCurrency(partner.balance)}원
-                                        </td>
-                                        <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                            {partner.my_referral_code}
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>
+                                                    {formatCurrency(partner.balance)}원
+                                                </span>
+                                                <span style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'normal', maxWidth: '200px' }}>
+                                                    {partner.bank_name ? (
+                                                        `${partner.bank_name} ${partner.account_no} (${partner.account_holder})`
+                                                    ) : (
+                                                        <span style={{ color: '#cbd5e1' }}>계좌 미등록</span>
+                                                    )}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td>
-                                            <div className={styles.alarmBadgeContainer}>
-                                                {partner.alarm_all ? (
-                                                    <span className={`${styles.alarmMiniBadge} ${styles.alarmBadgeActive}`}>전체</span>
-                                                ) : (
-                                                    <>
-                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_deposit ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>정산</span>
-                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_deceased ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>부고</span>
-                                                        <span className={`${styles.alarmMiniBadge} ${partner.alarm_notice ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>공지</span>
-                                                    </>
-                                                )}
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '13px', color: '#334155' }}>
+                                                    {partner.my_referral_code}
+                                                </span>
+                                                <div className={styles.alarmBadgeContainer}>
+                                                    {partner.alarm_all ? (
+                                                        <span className={`${styles.alarmMiniBadge} ${styles.alarmBadgeActive}`}>전체</span>
+                                                    ) : (
+                                                        <>
+                                                            <span className={`${styles.alarmMiniBadge} ${partner.alarm_deposit ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>정산</span>
+                                                            <span className={`${styles.alarmMiniBadge} ${partner.alarm_deceased ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>부고</span>
+                                                            <span className={`${styles.alarmMiniBadge} ${partner.alarm_notice ? styles.alarmBadgeActive : styles.alarmBadgeInactive}`}>공지</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
                                         <td>{getStatusBadge(partner.status)}</td>
-                                        <td style={{ fontWeight: '500', color: '#334155', textAlign: 'center' }}>
-                                            {partner.bugo_count || 0}건
-                                        </td>
-                                        <td style={{ color: '#475569', textAlign: 'center' }}>
-                                            {(partner.total_views || 0).toLocaleString()}회
-                                        </td>
-                                        <td style={{ fontWeight: '600', color: '#0f172a', textAlign: 'center' }}>
-                                            {partner.flower_sold_count || 0}건
-                                        </td>
-                                        <td style={{ fontSize: '13px', color: '#64748b' }}>
-                                            {partner.last_bugo_at ? formatDate(partner.last_bugo_at) : '-'}
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '12px', color: '#475569', minWidth: '130px' }}>
+                                                <div>개설: <span style={{ fontWeight: '600', color: '#0f172a' }}>{partner.bugo_count || 0}건</span></div>
+                                                <div>열람: <span style={{ fontWeight: '600', color: '#0f172a' }}>{(partner.total_views || 0).toLocaleString()}회</span></div>
+                                                <div>화환: <span style={{ fontWeight: '600', color: '#0f172a' }}>{partner.flower_sold_count || 0}건</span></div>
+                                                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                                                    최근: {partner.last_bugo_at ? formatDate(partner.last_bugo_at).split(' ')[0] : '-'}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <div className={styles.btnGroup}>
@@ -649,7 +660,7 @@ export default function PartnersPage() {
                                     {activeVerifyPartner.id_card_url ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <a 
-                                                href={activeVerifyPartner.id_card_url} 
+                                                href={getFullImageUrl(activeVerifyPartner.id_card_url)} 
                                                 target="_blank" 
                                                 rel="noreferrer" 
                                                 style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'underline', fontSize: '13px' }}
@@ -657,7 +668,7 @@ export default function PartnersPage() {
                                                 새창에서 신분증 원본 보기 ↗
                                             </a>
                                             <img 
-                                                src={activeVerifyPartner.id_card_url} 
+                                                src={getFullImageUrl(activeVerifyPartner.id_card_url)} 
                                                 alt="신분증 원본" 
                                                 style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f8fafc', padding: '4px' }}
                                             />

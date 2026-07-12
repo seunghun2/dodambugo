@@ -155,6 +155,8 @@
 .btnGroup {
     display: flex;
     gap: 6px;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .actionBtn {
@@ -165,6 +167,8 @@
     cursor: pointer;
     border: 1px solid transparent;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .approveBtn {
@@ -453,4 +457,10 @@
 
 .excelBtn:hover {
     background-color: #23582b;
+}
+
+.table th:last-child,
+.table td:last-child {
+    min-width: 320px;
+    white-space: nowrap;
 }
