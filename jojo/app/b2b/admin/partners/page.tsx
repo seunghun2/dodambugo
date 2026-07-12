@@ -9,7 +9,8 @@ import {
     IconUserCheck,
     IconRefresh,
     IconDownload,
-    IconSend
+    IconSend,
+    IconId
 } from '@tabler/icons-react';
 import styles from './partners.module.css';
 
@@ -34,6 +35,18 @@ interface Partner {
     bugo_count?: number;
     total_views?: number;
     flower_sold_count?: number;
+    
+    // 본인인증 관련 추가 컬럼들
+    identity_verified?: boolean;
+    identity_name?: string;
+    rrn_front?: string;
+    rrn_back?: string;
+    identity_type?: string;
+    id_issue_date?: string | null;
+    driver_license_no?: string | null;
+    identity_phone?: string;
+    id_card_url?: string;
+    verification_status?: 'pending' | 'verified' | 'failed' | null;
 }
 
 export default function PartnersPage() {
@@ -53,6 +66,9 @@ export default function PartnersPage() {
     const [pushBody, setPushBody] = useState('');
     const [pushLink, setPushLink] = useState('');
     const [sendingPush, setSendingPush] = useState(false);
+
+    // 본인인증(실명/세무용 주민번호) 상세 조회 모달 상태
+    const [activeVerifyPartner, setActiveVerifyPartner] = useState<Partner | null>(null);
 
     // 개별 푸시 발송 처리
     const handleSendPushSubmit = async (e: React.FormEvent) => {
@@ -228,7 +244,7 @@ export default function PartnersPage() {
 
             const data = await res.json();
             if (data.success) {
-                alert(`비밀번호가 성공적으로 초기화되었습니다.\n초기화된 비밀번호: ${data.tempPassword}`);
+                alert(`비밀번호가 성공적으로 초기화되었습니다.\n초기화된 비밀번호: 00000000`);
             } else {
                 alert(data.error || '오류가 발생했습니다.');
             }
@@ -252,6 +268,16 @@ export default function PartnersPage() {
         }
     };
 
+    const getVerifyBadge = (p: Partner) => {
+        if (p.identity_verified) {
+            return <span className={`${styles.badge} ${styles.badgeApproved}`} style={{ cursor: 'pointer' }} onClick={() => setActiveVerifyPartner(p)}>인증성공</span>;
+        }
+        if (p.verification_status === 'failed') {
+            return <span className={`${styles.badge} ${styles.badgeRejected}`} style={{ cursor: 'pointer' }} onClick={() => setActiveVerifyPartner(p)}>인증실패</span>;
+        }
+        return <span className={`${styles.badge} ${styles.badgePending}`} style={{ backgroundColor: '#e2e8f0', color: '#64748b', cursor: 'pointer' }} onClick={() => setActiveVerifyPartner(p)}>미인증</span>;
+    };
+
     const formatCurrency = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
     const formatPhone = (p: string) => {
         const clean = p.replace(/[^0-9]/g, '');
@@ -265,14 +291,21 @@ export default function PartnersPage() {
         return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     };
 
-    // CSV/Excel 다운로드 기능 (UTF-8 BOM 헤더 포함)
+    // CSV/Excel 다운로드 기능 (세무 신고용 실명/주민번호/신분증 이미지 컬럼 대거 연동)
     const handleDownloadExcel = () => {
         if (partners.length === 0) {
             alert('다운로드할 데이터가 없습니다.');
             return;
         }
 
-        const headers = ['가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', '예치금 잔고', '나의 추천인 코드', '가입상태', '부고장 제작 건수', '부고장 누적 열람수', '누적 화환 판매건수', '최근 들어온 일시'];
+        const headers = [
+            '가입일시', '회사명', '대표자명', '연락처', '은행', '계좌번호', '예금주', 
+            '예치금 잔고', '추천인 코드', '가입상태', '부고장 제작 건수', '부고장 누적 열람수', 
+            '누적 화환 판매건수', '최근 들어온 일시',
+            '본인인증 상태', '인증 실명', '주민등록번호(앞자리)', '주민등록번호(뒷자리)', 
+            '인증 수단', '인증 상세 정보(발급일자/면허번호)', '인증용 연락처', '신분증 이미지 주소'
+        ];
+        
         const rows = partners.map(p => [
             formatDate(p.created_at),
             p.company_name,
@@ -287,7 +320,15 @@ export default function PartnersPage() {
             String(p.bugo_count || 0),
             String(p.total_views || 0),
             String(p.flower_sold_count || 0),
-            p.last_bugo_at ? formatDate(p.last_bugo_at) : '-'
+            p.last_bugo_at ? formatDate(p.last_bugo_at) : '-',
+            p.identity_verified ? '인증성공' : (p.verification_status === 'failed' ? '인증실패' : '미인증'),
+            p.identity_name || '-',
+            p.rrn_front || '-',
+            p.rrn_back || '-',
+            p.identity_type || '-',
+            p.identity_type === '주민등록증' ? (p.id_issue_date || '-') : (p.driver_license_no || '-'),
+            p.identity_phone ? formatPhone(p.identity_phone) : '-',
+            p.id_card_url || '-'
         ]);
 
         const csvContent = 
@@ -302,7 +343,7 @@ export default function PartnersPage() {
         const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
         
         link.setAttribute('href', url);
-        link.setAttribute('download', `b2b_partners_list_${dateStr}.csv`);
+        link.setAttribute('download', `b2b_partners_tax_list_${dateStr}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -349,7 +390,7 @@ export default function PartnersPage() {
                 <button onClick={handleDownloadExcel} className={styles.excelBtn}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <IconDownload stroke={1.5} size={16} />
-                        <span>엑셀 다운로드</span>
+                        <span>세무용 개인정보 일괄 다운로드</span>
                     </div>
                 </button>
             </div>
@@ -377,6 +418,7 @@ export default function PartnersPage() {
                                     <th>소속 상조회사</th>
                                     <th>대표자</th>
                                     <th>연락처</th>
+                                    <th>본인인증</th>
                                     <th>정산 계좌 정보</th>
                                     <th>예치금 잔고</th>
                                     <th>추천인 코드</th>
@@ -421,6 +463,7 @@ export default function PartnersPage() {
                                         </td>
                                         <td>{partner.owner_name}</td>
                                         <td>{formatPhone(partner.phone)}</td>
+                                        <td>{getVerifyBadge(partner)}</td>
                                         <td style={{ fontSize: '13px', color: '#475569' }}>
                                             {partner.bank_name ? (
                                                 `${partner.bank_name} ${partner.account_no} (${partner.account_holder})`
@@ -462,6 +505,17 @@ export default function PartnersPage() {
                                         </td>
                                         <td>
                                             <div className={styles.btnGroup}>
+                                                <button 
+                                                    className={`${styles.actionBtn} ${styles.approveBtn}`}
+                                                    style={{ backgroundColor: '#2563eb', borderColor: '#2563eb' }}
+                                                    onClick={() => setActiveVerifyPartner(partner)}
+                                                    title="본인인증 상세 정보 조회"
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <IconId stroke={1.5} size={14} />
+                                                        <span>인증 정보</span>
+                                                    </div>
+                                                </button>
                                                 {partner.status === 'pending' && (
                                                     <>
                                                         <button 
@@ -469,8 +523,8 @@ export default function PartnersPage() {
                                                             onClick={() => updatePartnerStatus(partner.id, 'approved')}
                                                         >
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <IconCheck stroke={1.5} size={14} />
-                                                                <span>승인</span>
+                                                                 <IconCheck stroke={1.5} size={14} />
+                                                                 <span>승인</span>
                                                             </div>
                                                         </button>
                                                         <button 
@@ -478,8 +532,8 @@ export default function PartnersPage() {
                                                             onClick={() => updatePartnerStatus(partner.id, 'rejected')}
                                                         >
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <IconX stroke={1.5} size={14} />
-                                                                <span>반려</span>
+                                                                 <IconX stroke={1.5} size={14} />
+                                                                 <span>반려</span>
                                                             </div>
                                                         </button>
                                                     </>
@@ -535,6 +589,93 @@ export default function PartnersPage() {
                     )}
                 </div>
             </div>
+
+            {/* 본인인증 상세 정보 조회 모달 */}
+            {activeVerifyPartner && (
+                <div className={styles.modalOverlay} onClick={() => setActiveVerifyPartner(null)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <div className={styles.modalHeader}>
+                            <h3 className={styles.modalTitle}>B2B 파트너 본인인증 상세정보</h3>
+                            <button className={styles.modalClose} onClick={() => setActiveVerifyPartner(null)}>
+                                <IconX size={18} />
+                            </button>
+                        </div>
+                        <div className={styles.modalBody} style={{ fontSize: '14px', lineHeight: '1.6', color: '#1e293b' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>회사명</span>
+                                    <span style={{ fontWeight: '600' }}>{activeVerifyPartner.company_name}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>본인인증 상태</span>
+                                    <span>
+                                        {activeVerifyPartner.identity_verified ? (
+                                            <span style={{ color: '#10b981', fontWeight: 'bold' }}>✅ 인증완료</span>
+                                        ) : (
+                                            activeVerifyPartner.verification_status === 'failed' ? (
+                                                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>❌ 인증실패</span>
+                                            ) : (
+                                                <span style={{ color: '#64748b', fontWeight: 'bold' }}>⌛ 미인증</span>
+                                            )
+                                        )}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>인증성명 (실명)</span>
+                                    <span style={{ fontWeight: '600' }}>{activeVerifyPartner.identity_name || '-'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>주민등록번호</span>
+                                    <span style={{ fontWeight: '600', fontFamily: 'monospace' }}>
+                                        {activeVerifyPartner.rrn_front ? `${activeVerifyPartner.rrn_front}-${activeVerifyPartner.rrn_back || '*******'}` : '-'}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>인증 수단</span>
+                                    <span style={{ fontWeight: '600' }}>{activeVerifyPartner.identity_type || '-'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>발급일자 / 면허번호</span>
+                                    <span style={{ fontWeight: '600' }}>
+                                        {activeVerifyPartner.identity_type === '주민등록증' ? (activeVerifyPartner.id_issue_date || '-') : (activeVerifyPartner.driver_license_no || '-')}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
+                                    <span style={{ color: '#64748b' }}>본인 휴대폰 번호</span>
+                                    <span style={{ fontWeight: '600' }}>{activeVerifyPartner.identity_phone ? formatPhone(activeVerifyPartner.identity_phone) : '-'}</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px 0' }}>
+                                    <span style={{ color: '#64748b' }}>제출한 신분증 이미지</span>
+                                    {activeVerifyPartner.id_card_url ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <a 
+                                                href={activeVerifyPartner.id_card_url} 
+                                                target="_blank" 
+                                                rel="noreferrer" 
+                                                style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'underline', fontSize: '13px' }}
+                                            >
+                                                새창에서 신분증 원본 보기 ↗
+                                            </a>
+                                            <img 
+                                                src={activeVerifyPartner.id_card_url} 
+                                                alt="신분증 원본" 
+                                                style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f8fafc', padding: '4px' }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <span style={{ color: '#94a3b8' }}>업로드된 신분증 이미지 없음</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <button className={styles.btnSecondary} onClick={() => setActiveVerifyPartner(null)}>
+                                닫기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 개별 푸시 발송 모달 */}
             {activePushPartner && (

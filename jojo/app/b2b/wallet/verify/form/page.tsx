@@ -398,7 +398,7 @@ export default function VerifyFormPage() {
 
                     {/* 휴대폰 번호 */}
                     <div className={styles.formGroup}>
-                        <label className={styles.label}>담당자 휴대폰 번호</label>
+                        <label className={styles.label}>본인 휴대폰 번호</label>
                         <div className={styles.phoneRow}>
                             <input
                                 type="tel"
