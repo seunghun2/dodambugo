@@ -229,3 +229,36 @@
     font-size: 12px;
     color: var(--gray-300);
 }
+
+/* 푸터 영역 */
+.footer {
+    width: 100%;
+    margin-top: 40px;
+    padding: 24px 20px 40px;
+    background-color: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+
+.footerInner {
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footerBrand {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--b2b-text-primary);
+}
+
+.footerInfo {
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--b2b-text-tertiary);
+}
+
+.footerInfo p {
+    margin: 0;
+}
