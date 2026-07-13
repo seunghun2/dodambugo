@@ -248,9 +248,9 @@
 }
 
 .footerBrand {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--b2b-text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--b2b-text-tertiary);
 }
 
 .footerInfo {

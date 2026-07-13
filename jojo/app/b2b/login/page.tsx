@@ -181,12 +181,10 @@ function LoginContent() {
             {/* 사업자 정보 푸터 영역 (카카오 비즈니스 소명 및 웹 표준 정보 준수) */}
             <footer className={styles.footer}>
                 <div className={styles.footerInner}>
-                    <div className={styles.footerBrand}>서비스명: 부고온 (BUGOON)</div>
                     <div className={styles.footerInfo}>
-                        <p>상호: 마음부고 | 대표: 김미연 | 대표번호: 010-4837-5076</p>
-                        <p>사업자등록번호: 408-22-68851 | 통신판매업신고: 2026-서울강남-00502</p>
-                        <p>주소: 서울특별시 강남구 압구정로 306</p>
-                        <p>Copyright maeumbugo Corp. All rights reserved.</p>
+                        <p>(주)마음부고 대표이사 김미연 | 사업자등록번호: 408-22-68851</p>
+                        <p>통신판매업신고: 2026-서울강남-00502 | 주소: 서울특별시 강남구 압구정로 306</p>
+                        <p>Copyright © maeumbugo Corp. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
