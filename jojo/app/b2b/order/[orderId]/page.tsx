@@ -141,7 +141,7 @@ export default function B2BOrderDetailPage() {
 
     if (loading) {
         return (
-            <div className="order-page">
+            <div className="order-page b2b-theme" style={{ maxWidth: '100%', boxShadow: 'none', background: '#FFFFFF' }}>
                 <div className="order-loading">주문 정보를 불러오는 중...</div>
             </div>
         );
@@ -149,13 +149,13 @@ export default function B2BOrderDetailPage() {
 
     if (error || (!order && !condolenceOrder)) {
         return (
-            <div className="order-page">
-                <div className="order-body" style={{ textAlign: 'center', paddingTop: '100px' }}>
+            <div className="order-page b2b-theme" style={{ maxWidth: '100%', boxShadow: 'none', background: '#FFFFFF' }}>
+                <div className="order-body" style={{ textAlign: 'center', paddingTop: '120px', paddingLeft: '24px', paddingRight: '24px', background: '#FFFFFF', minHeight: '100vh' }}>
                     <span style={{ fontSize: '64px' }}>😔</span>
-                    <h2 style={{ marginTop: '20px' }}>주문을 찾을 수 없습니다</h2>
-                    <p style={{ color: '#888', marginTop: '10px' }}>{error}</p>
-                    <Link href="/" className="btn-payment" style={{ marginTop: '30px', display: 'inline-block', textDecoration: 'none' }}>
-                        홈으로
+                    <h2 style={{ marginTop: '24px', fontSize: '20px', fontWeight: '700', color: '#1A1A1A' }}>주문을 찾을 수 없습니다</h2>
+                    <p style={{ color: '#888', marginTop: '10px', fontSize: '14px', lineHeight: '1.5' }}>{error || '주문 정보가 존재하지 않거나 만료되었습니다.'}</p>
+                    <Link href="/b2b/dashboard" className="btn-payment" style={{ marginTop: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', background: '#3A8F47', color: '#FFFFFF', fontWeight: '600', height: '52px', borderRadius: '12px' }}>
+                        대시보드로
                     </Link>
                 </div>
             </div>
@@ -165,7 +165,7 @@ export default function B2BOrderDetailPage() {
     // ===== 부의금 완료 화면 =====
     if (isCondolence && condolenceOrder) {
         return (
-            <div className="order-page">
+            <div className="order-page b2b-theme" style={{ maxWidth: '100%', boxShadow: 'none', background: '#FFFFFF' }}>
                 <header className="order-header" style={{ justifyContent: 'center' }}>
                     <h1>결제 완료</h1>
                 </header>
@@ -274,7 +274,7 @@ export default function B2BOrderDetailPage() {
 
     // ===== 화환 완료 화면 =====
     return (
-        <div className="order-page">
+        <div className="order-page b2b-theme" style={{ maxWidth: '100%', boxShadow: 'none', background: '#FFFFFF' }}>
             <header className="order-header" style={{ justifyContent: 'center' }}>
                 <h1>주문완료</h1>
             </header>

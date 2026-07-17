@@ -113,7 +113,7 @@ async function B2BBugoContentLoader({ id }: { id: string }) {
                     <Image src="/images/mourning-ribbon.png" alt="추모" className="error-ribbon" width={80} height={100} />
                     <h2>부고장을 찾을 수 없습니다</h2>
                     <p>요청하신 부고장이 존재하지 않거나 삭제되었습니다.</p>
-                    <Link href="/" className="btn-home">홈으로</Link>
+                    <Link href="/b2b/dashboard" className="btn-home">대시보드로</Link>
                 </div>
             </div>
         );
