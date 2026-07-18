@@ -91,9 +91,11 @@ export async function sendFlowerOrderNotification(order: {
     payment_method?: string;
     chief_mourner_name?: string;
     chief_mourner_phone?: string;
-}): Promise<boolean> {
+}, isB2B?: boolean): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL;
     const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
+    const brand = isB2B ? '부고온' : '마음부고';
+    const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
 
     // 수신자 표시: 연락처 있으면 포함
     const recipientDisplay = order.recipient_name
@@ -109,7 +111,7 @@ export async function sendFlowerOrderNotification(order: {
             : order.chief_mourner_name
         : '-';
 
-    const text = `[마음부고] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
+    const text = `[${brand}] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
 - 상품명: ${order.product_name}
 - 금액: ${priceFormatted}원
 - 빈소: ${order.funeral_hall || '미입력'} ${order.room || ''}
@@ -119,7 +121,8 @@ export async function sendFlowerOrderNotification(order: {
 - 수신자: ${recipientDisplay}
 - 주문자: ${order.sender_name}(${order.sender_phone})
 - 대표상주: ${chiefMournerDisplay}
-- 결제수단: ${order.payment_method || '미정'}`;
+- 결제수단: ${order.payment_method || '미정'}
+- 부고장: https://${domain}/view/${order.bugo_number || ''}`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
@@ -149,14 +152,16 @@ export async function sendCondolenceNotification(payment: {
     funeral_home?: string;
     bank_name?: string;
     account_no?: string;
-}): Promise<boolean> {
+}, isB2B?: boolean): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_BUGO;
+    const brand = isB2B ? '부고온' : '마음부고';
+    const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
 
     const amountFormatted = new Intl.NumberFormat('ko-KR').format(payment.amount);
     const feeFormatted = new Intl.NumberFormat('ko-KR').format(payment.fee);
     const totalFormatted = new Intl.NumberFormat('ko-KR').format(payment.total_amount);
 
-    const text = `[마음부고]
+    const text = `[${brand}]
 부의금 결제가 완료되었습니다.
 (주문번호: ${payment.order_number})
   - 구매자: ${payment.buyer_name}
@@ -174,7 +179,7 @@ export async function sendCondolenceNotification(payment: {
   - 예금주: ${payment.recipient_name || '-'}
   - 계좌번호: ${payment.account_no || '-'}
 
-  - 부고장: https://maeumbugo.co.kr/view/${payment.bugo_number}`;
+  - 부고장: https://${domain}/view/${payment.bugo_number}`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
@@ -325,4 +330,82 @@ export async function sendB2BAutoWithdrawalFailureNotification(info: {
 
     return sendToWebhook(webhookUrl!, { text });
 }
+
+/**
+ * B2B 출금 신청 알림 전송
+ */
+export async function sendB2BWithdrawalRequestNotification(info: {
+    company_name: string;
+    owner_name: string;
+    amount: number;
+    net_amount: number;
+    bank_name: string;
+    account_no: string;
+    account_holder: string;
+    partner_type: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const amountFormatted = info.amount.toLocaleString();
+    const netAmountFormatted = info.net_amount.toLocaleString();
+    const partnerTypeDisplay = info.partner_type === 'business' ? '사업자' : '개인';
+
+    const text = `💸 [부고온 B2B] 신규 출금 신청이 접수되었습니다. (승인 대기)
+- 파트너사: ${info.company_name} (대표자: ${info.owner_name} / ${partnerTypeDisplay})
+- 출금신청액: ${amountFormatted}원
+- 세후실수령액: ${netAmountFormatted}원
+- 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
+ * B2B 출금 승인 성공 알림 전송
+ */
+export async function sendB2BWithdrawalApproveNotification(info: {
+    company_name: string;
+    owner_name: string;
+    amount: number;
+    net_amount: number;
+    bank_name: string;
+    account_no: string;
+    account_holder: string;
+    request_id: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const amountFormatted = info.amount.toLocaleString();
+    const netAmountFormatted = info.net_amount.toLocaleString();
+
+    const text = `✅ [부고온 B2B] 출금 승인 및 실이체 성공
+- 파트너사: ${info.company_name} (대표자: ${info.owner_name})
+- 이체금액: ${netAmountFormatted}원 (세전 ${amountFormatted}원)
+- 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
+- 신청 ID: ${info.request_id}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
+ * B2B 출금 신청 반려 알림 전송
+ */
+export async function sendB2BWithdrawalRejectNotification(info: {
+    company_name: string;
+    owner_name: string;
+    amount: number;
+    bank_name: string;
+    account_no: string;
+    account_holder: string;
+    request_id: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const amountFormatted = info.amount.toLocaleString();
+
+    const text = `❌ [부고온 B2B] 출금 신청 반려 (예치금 환원 완료)
+- 파트너사: ${info.company_name} (대표자: ${info.owner_name})
+- 반려액: ${amountFormatted}원
+- 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
+- 신청 ID: ${info.request_id}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
 

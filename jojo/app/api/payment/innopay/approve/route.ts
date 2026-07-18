@@ -347,8 +347,8 @@ export async function POST(request: NextRequest) {
 
         if (orderData?.sender_phone) {
             const phoneNumber = orderData.sender_phone.replace(/-/g, '');
+            const isB2B = !!orderData?.bugo?.b2b_user_id;
             try {
-                const isB2B = !!orderData?.bugo?.b2b_user_id;
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
@@ -371,6 +371,7 @@ export async function POST(request: NextRequest) {
 
         // 🔔 슬랙 알림 발송
         if (orderData) {
+            const isB2B = !!orderData?.bugo?.b2b_user_id;
             try {
                 await sendFlowerOrderNotification({
                     id: orderData.order_number || moid,
@@ -390,7 +391,7 @@ export async function POST(request: NextRequest) {
                     payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
                     chief_mourner_name: orderData.bugo?.mourner_name || '',
                     chief_mourner_phone: orderData.bugo?.phone_password || '',
-                });
+                }, isB2B);
                 console.log('✅ 슬랙 알림 발송 완료');
             } catch (err) {
                 console.error('❌ 슬랙 알림 실패:', err);
@@ -718,7 +719,7 @@ export async function POST(request: NextRequest) {
                         funeral_home: bugoData?.funeral_home || '',
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',
-                    });
+                    }, !!bugoData?.b2b_user_id);
                     console.log('✅ 부의금 슬랙 알림 발송 완료');
                 } catch (slackErr) {
                     console.error('❌ 부의금 슬랙 알림 실패:', slackErr);

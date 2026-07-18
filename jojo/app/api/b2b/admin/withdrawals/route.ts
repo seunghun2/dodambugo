@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendB2BWithdrawalApproveNotification, sendB2BWithdrawalRejectNotification } from '@/lib/slack';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -113,6 +114,13 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: '이미 처리된 출금 신청입니다.' }, { status: 400 });
             }
 
+            // 파트너(b2b_users) 정보 조회 (슬랙 알림용)
+            const { data: userData } = await supabase
+                .from('b2b_users')
+                .select('company_name, owner_name')
+                .eq('id', requestData.user_id)
+                .single();
+
             // 2. 은행 코드 변환
             const bankCode = getBankCode(requestData.bank_name);
             if (!bankCode) {
@@ -194,6 +202,21 @@ export async function POST(request: NextRequest) {
             }
 
             console.log(`✅ B2B 출금 승인 및 실이체 완료: RequestID=${requestId}`);
+
+            // 슬랙 알림 전송 (비동기)
+            if (userData) {
+                sendB2BWithdrawalApproveNotification({
+                    company_name: userData.company_name || '미등록',
+                    owner_name: userData.owner_name || '미등록',
+                    amount: requestData.amount,
+                    net_amount: requestData.net_amount || requestData.amount,
+                    bank_name: requestData.bank_name,
+                    account_no: requestData.account_no,
+                    account_holder: requestData.account_holder,
+                    request_id: requestId,
+                }).catch(err => console.error('❌ 출금 승인 슬랙 알림 실패:', err));
+            }
+
             return NextResponse.json({ success: true, message: '출금 이체가 정상적으로 완료되었으며 승인 처리되었습니다.' });
         } else if (action === 'reject') {
             // 출금 반려 RPC 호출
@@ -207,6 +230,34 @@ export async function POST(request: NextRequest) {
             }
 
             console.log(`❌ B2B 출금 반려 및 예치금 환원 완료: RequestID=${requestId}`);
+
+            // 슬랙 알림 전송을 위해 출금 신청 내역 및 파트너 정보 조회
+            const { data: rejectRequestData } = await supabase
+                .from('withdrawal_requests')
+                .select('user_id, amount, bank_name, account_no, account_holder')
+                .eq('id', requestId)
+                .single();
+
+            if (rejectRequestData) {
+                const { data: rejectUserData } = await supabase
+                    .from('b2b_users')
+                    .select('company_name, owner_name')
+                    .eq('id', rejectRequestData.user_id)
+                    .single();
+
+                if (rejectUserData) {
+                    sendB2BWithdrawalRejectNotification({
+                        company_name: rejectUserData.company_name || '미등록',
+                        owner_name: rejectUserData.owner_name || '미등록',
+                        amount: rejectRequestData.amount,
+                        bank_name: rejectRequestData.bank_name,
+                        account_no: rejectRequestData.account_no,
+                        account_holder: rejectRequestData.account_holder,
+                        request_id: requestId,
+                    }).catch(err => console.error('❌ 출금 반려 슬랙 알림 실패:', err));
+                }
+            }
+
             return NextResponse.json({ success: true, message: '출금 신청이 반려되었으며 예치금이 안전하게 환원되었습니다.' });
         } else {
             return NextResponse.json({ error: '올바르지 않은 액션입니다.' }, { status: 400 });

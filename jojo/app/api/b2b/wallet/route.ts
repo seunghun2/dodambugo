@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
+import { sendB2BWithdrawalRequestNotification } from '@/lib/slack';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -182,7 +183,7 @@ export async function POST(request: NextRequest) {
     // 회원 정보 (출금 계좌 & 본인인증 여부 및 파트너 유형)
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('bank_name, account_no, account_holder, identity_verified, partner_type')
+        .select('bank_name, account_no, account_holder, identity_verified, partner_type, company_name, owner_name')
         .eq('id', userId)
         .single();
 
@@ -235,6 +236,20 @@ export async function POST(request: NextRequest) {
 
     if (withdrawError) {
         return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
+    }
+
+    // 슬랙 알림 전송 (비동기 호출 후 로그 남김)
+    if (user) {
+        sendB2BWithdrawalRequestNotification({
+            company_name: user.company_name || '미등록',
+            owner_name: user.owner_name || '미등록',
+            amount,
+            net_amount,
+            bank_name: user.bank_name,
+            account_no: user.account_no,
+            account_holder: user.account_holder,
+            partner_type: user.partner_type || 'individual',
+        }).catch(err => console.error('❌ 출금 신청 슬랙 알림 실패:', err));
     }
 
     // 예치금 차감

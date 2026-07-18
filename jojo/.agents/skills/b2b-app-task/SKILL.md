@@ -197,3 +197,30 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - MID: `bumaeum02m`, 출금계좌: `66400001397152` (부고온정산)
   - [withdrawals/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/admin/withdrawals/route.ts) (출금 승인 + 이노페이 송금 API 호출)
 
+---
+
+## 📑 12. B2B 슬랙 알림 연동 — 코드 구현 완료, 추후 활성화 예정 (2026-07-18)
+
+> ⚠️ **슬랙 채널이 아직 생성되지 않았으므로 실발송은 불가합니다. 채널 생성 + 웹훅 URL 등록 후 활성화 예정.**
+
+### 12-1. 구현 완료 내역 (코드만 심어둠, 실동작 X)
+- **`jojo/lib/slack.ts`**: B2B 출금 3종 알림 함수 추가 + 화환/부의금 함수에 `isB2B` 분기 지원
+  - `sendB2BWithdrawalRequestNotification` — 출금 신청 시 알림
+  - `sendB2BWithdrawalApproveNotification` — 출금 승인 시 알림
+  - `sendB2BWithdrawalRejectNotification` — 출금 반려 시 알림
+  - `sendFlowerOrderNotification(data, isB2B)` — B2B일 때 `[부고온]` 접두사
+  - `sendCondolenceNotification(data, isB2B)` — B2B일 때 `[부고온]` 접두사
+
+### 12-2. API 호출부 연동 완료 파일 목록
+| 파일 | 연동 내용 |
+|------|-----------|
+| [wallet/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/wallet/route.ts) | 출금 신청 성공 시 `sendB2BWithdrawalRequestNotification` 호출 |
+| [admin/withdrawals/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/admin/withdrawals/route.ts) | 승인/반려 시 각각 슬랙 알림 호출 |
+| [approve/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/payment/innopay/approve/route.ts) | 화환·부의금 결제 시 `isB2B` 인자 전달 |
+| [webhook/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/payment/innopay/webhook/route.ts) | 가상계좌 입금 시 `isB2B` 인자 전달 |
+
+### 12-3. 추후 해야 할 일 (채널 생성 후)
+- [ ] 슬랙 워크스페이스에 `#부고온-알림` 채널 생성
+- [ ] 슬랙 앱 → Incoming Webhooks → 웹훅 URL 발급
+- [ ] Vercel 환경변수에 `SLACK_B2B_WEBHOOK_URL` 등록
+- [ ] 실발송 테스트 (출금 신청 → 승인 → 슬랙 메시지 수신 확인)

@@ -303,7 +303,7 @@ export async function POST(request: NextRequest) {
                 payment_method: 'vbank',
                 chief_mourner_name: bugoData?.mourner_name || '',
                 chief_mourner_phone: bugoData?.phone_password || '',
-            }).catch(err => console.error('❌ 슬랙 알림 실패:', err));
+            }, !!bugoData?.b2b_user_id).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
         return NextResponse.json({ success: true, message: '입금 처리 완료' });
