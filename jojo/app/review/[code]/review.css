@@ -501,3 +501,33 @@
 .review-done {
     position: relative;
 }
+
+/* ==========================================
+   B2B Theme (부고온 Green) Overrides
+   ========================================== */
+.review-container.b2b-theme .step-dot.active {
+    background: #3A8F47;
+}
+.review-container.b2b-theme .place-option.selected {
+    border-color: #3A8F47;
+}
+.review-container.b2b-theme .place-option.selected .place-radio {
+    border-color: #3A8F47;
+}
+.review-container.b2b-theme .place-option.selected .place-radio::after {
+    background: #3A8F47;
+}
+.review-container.b2b-theme .review-place-tag {
+    background: #3A8F47;
+}
+.review-container.b2b-theme .review-textarea:focus {
+    border-color: #3A8F47;
+}
+.review-container.b2b-theme .review-submit {
+    background: #3A8F47;
+    color: #FFFFFF;
+}
+.review-container.b2b-theme .consent-modal-btn {
+    background: #3A8F47;
+    color: #FFFFFF;
+}

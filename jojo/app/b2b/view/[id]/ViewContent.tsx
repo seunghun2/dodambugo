@@ -713,7 +713,7 @@ ${url}
                                 </div>
                             </a>
                         </div>
-                        <p className="memorial-cta-powered">{bugo.b2b_user_id ? '부고온' : '마음부고'}</p>
+                        <p className="memorial-cta-powered">부고온</p>
                     </div>
                 </div>
             )}

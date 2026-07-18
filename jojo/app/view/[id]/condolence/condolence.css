@@ -687,3 +687,11 @@
 .condolence-page.b2b-theme .confirm-modal-btn:hover {
     background: #2D6E37 !important;
 }
+
+/* B2B 레이아웃 오버라이드 - 360px 여백 제거, 전체 폭 채움 */
+@media (min-width: 481px) {
+    .condolence-page.b2b-theme {
+        max-width: 100%;
+        box-shadow: none;
+    }
+}

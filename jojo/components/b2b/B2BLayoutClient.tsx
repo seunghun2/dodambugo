@@ -45,14 +45,26 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
 
   const isAdmin = pathname && (pathname.startsWith('/b2b/admin') || pathname.startsWith('/b2b/company'));
 
+  // 조문객 대상 페이지 (부고장, 주문, 리뷰 등)는 래퍼 스타일 최소화
+  const isViewerPage = pathname && (
+    pathname.startsWith('/b2b/view') ||
+    pathname.startsWith('/b2b/order') ||
+    pathname.startsWith('/b2b/review')
+  );
+
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isAdmin ? '#f8fafc' : '#f8f9fa' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isViewerPage ? 'transparent' : (isAdmin ? '#f8fafc' : '#f8f9fa') }}>
       {/* 메인 콘텐츠 뷰 */}
       <div id="b2b-page-container" style={isAdmin ? {
         position: 'relative',
         width: '100%',
         minHeight: '100vh',
         backgroundColor: '#f8fafc',
+      } : isViewerPage ? {
+        position: 'relative',
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: 'transparent',
       } : {
         position: 'relative',
         width: '100%',

@@ -923,3 +923,11 @@ html.fonts-loaded .order-page .material-symbols-outlined {
 .order-page.b2b-theme .btn-change-recipient:hover {
     background: #EDF7ED !important;
 }
+
+/* B2B 레이아웃 오버라이드 - 360px 여백 제거, 전체 폭 채움 */
+@media (min-width: 481px) {
+    .order-page.b2b-theme {
+        max-width: 100%;
+        box-shadow: none;
+    }
+}

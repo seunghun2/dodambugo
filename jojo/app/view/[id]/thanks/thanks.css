@@ -573,3 +573,9 @@
 .thanks-page.b2b-theme .card-cta-btn:active {
     background: #2D6E37 !important;
 }
+
+/* B2B 레이아웃 오버라이드 - 여백 제거, 전체 폭 채움 */
+.thanks-page.b2b-theme {
+    max-width: 100%;
+    background: #F5F5F5;
+}
