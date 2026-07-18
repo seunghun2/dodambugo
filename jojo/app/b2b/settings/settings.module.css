@@ -816,6 +816,28 @@ input:checked + .slider:before {
   padding: 0;
 }
 
+.avatarDeleteBtn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #E53E3E;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease;
+}
+
+.avatarDeleteBtn:hover {
+  background-color: #C53030;
+}
+
+
 .profileDetailMeta {
   text-align: center;
 }
