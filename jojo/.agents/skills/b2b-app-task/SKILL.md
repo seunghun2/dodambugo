@@ -169,3 +169,31 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **테스트 및 검증**:
   - [test-b2b-alimtalk.ts](file:///Users/el/Desktop/dodam/jojo/scripts/test-b2b-alimtalk.ts)를 작성하여 10개 템플릿의 전수 발송 실테스트를 돌려 10건 모두 솔라피 게이트웨이에 정상 접수(`statusCode: 2000`)됨을 확인.
   - `npm run build`를 구동하여 컴파일 오류 및 Next.js 정적 빌드가 에러 없이 완료됨을 전수 QA 완료.
+
+---
+
+## 📑 10. B2B 공유 URL 전수 수정 및 알림톡 링크 실테스트 완료 (2026-07-18)
+
+### 10-1. 공유 URL `/b2b/view/` → `/view/` 전수 수정
+- **설명**: B2B에서 카카오/SMS/밴드/링크복사로 공유할 때 URL이 `bugoon.maeumbugo.co.kr/view/{번호}` 형태로 나가도록 4곳 전수 수정
+- **수정된 파일**:
+  - [ViewContent.tsx](file:///Users/el/Desktop/dodam/jojo/app/b2b/view/%5Bid%5D/ViewContent.tsx) (`getCleanShareUrl()` 함수 + SMS 공유)
+  - [create/complete/page.tsx](file:///Users/el/Desktop/dodam/jojo/app/b2b/create/complete/%5BbugoNumber%5D/page.tsx) (부고 생성 완료 링크 복사)
+  - [send-mourner-notify/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/send-mourner-notify/route.ts) (상주 SMS/알림톡 URL)
+
+### 10-2. 알림톡 버튼 링크 실테스트 완료
+- **설명**: 실제 부고 7799(백승훈)로 알림톡 발송 후 버튼 클릭 → `bugoon.maeumbugo.co.kr/view/7799` 정상 접속 확인
+- **테스트 스크립트**: [test-b2b-alimtalk-real.ts](file:///Users/el/Desktop/dodam/jojo/scripts/test-b2b-alimtalk-real.ts)
+
+---
+
+## 📑 11. 이노페이 자동 출금 이체 실검증 완료 (2026-07-18)
+
+### 11-1. 이노페이 실이체 테스트 성공
+- **설명**: B2B 자동 출금 시스템의 이노페이 송금 API가 정상 작동하는지 실계좌로 실이체 검증
+- **결과**: 백승훈 국민은행 계좌로 1,000원 실이체 성공 (TID: `bumaeum02m2607188b82611b`)
+- **확인 사항**:
+  - 3.3% 원천징수 (소득세 3% + 지방소득세 0.3%) 자동 차감 로직 정상
+  - MID: `bumaeum02m`, 출금계좌: `66400001397152` (부고온정산)
+  - [withdrawals/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/b2b/admin/withdrawals/route.ts) (출금 승인 + 이노페이 송금 API 호출)
+
