@@ -55,8 +55,6 @@
 	<string>사진첩에 이미지를 저장하기 위해 사진첩 쓰기 권한이 필요합니다. (Photo library add permission is required to save photos.)</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
-		<string>push-to-talk</string>
 		<string>remote-notification</string>
 	</array>
 </dict>
