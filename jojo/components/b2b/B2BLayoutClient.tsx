@@ -38,6 +38,7 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     !pathname.startsWith('/b2b/view') &&   
     !pathname.startsWith('/b2b/create') && 
     !pathname.startsWith('/b2b/order') &&  
+    !pathname.startsWith('/b2b/review') &&  
     !pathname.includes('/view') &&          
     !pathname.includes('/flower') &&        
     !pathname.includes('/create') &&        
