@@ -149,3 +149,23 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 부의금 수수료: 실부의금 x 1.086 = PG 결제액 (8.6% 플랫폼 수수료)
   - 테스트 건(test/테스트/홍길동/조문객테스트/피추천인) 반드시 제외
   - 취소건은 원거래 + 마이너스 쌍으로 존재하여 자동 상쇄
+
+---
+
+## 📑 9. 부고온플러스 알림톡 B2B/B2C 브랜드 분리 연동 완료 (2026-07-17)
+
+### 9-1. 알림톡 브랜드 분기 및 전수 수정 완료
+- **설명**: `b2b_user_id`의 존재 여부를 판별하여 발신 프로필 키(pfId)를 마음부고(`B2C`)와 부고온플러스(`B2B`)로 자동 분기하도록 조치 완료. B2B 10개 템플릿의 일대일 매핑 테이블 `B2B_TEMPLATE_MAP`을 작성하여 실발송에 적용함.
+- **수정된 API 및 파일**:
+  - [solapi.ts](file:///Users/el/Desktop/dodam/jojo/lib/solapi.ts) (템플릿 맵 탑재 및 발송 분기 구현)
+  - [bugo-notify/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/bugo-notify/route.ts) (B2B/B2C 분기 전송)
+  - [bugo-notify-additional/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/bugo-notify-additional/route.ts) (추가상주 분기 전송)
+  - [approve/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/payment/innopay/approve/route.ts) (결제승인 및 이체 완료)
+  - [webhook/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/payment/innopay/webhook/route.ts) (가상계좌 입금 통지)
+  - [delivery-notify/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/flower-orders/delivery-notify/route.ts) (배송안내 및 배송완료)
+  - [cancel/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/flower-orders/cancel/route.ts) (화환 주문취소)
+  - [thanks-notify/route.ts](file:///Users/el/Desktop/dodam/jojo/app/api/thanks-notify/route.ts) (수동 감사장 발송)
+  - [Cron Jobs](file:///Users/el/Desktop/dodam/jojo/app/api/cron/) (thanks-notify, reminders, burial-review-notify, draft-reminder, share-reminder)
+- **테스트 및 검증**:
+  - [test-b2b-alimtalk.ts](file:///Users/el/Desktop/dodam/jojo/scripts/test-b2b-alimtalk.ts)를 작성하여 10개 템플릿의 전수 발송 실테스트를 돌려 10건 모두 솔라피 게이트웨이에 정상 접수(`statusCode: 2000`)됨을 확인.
+  - `npm run build`를 구동하여 컴파일 오류 및 Next.js 정적 빌드가 에러 없이 완료됨을 전수 QA 완료.

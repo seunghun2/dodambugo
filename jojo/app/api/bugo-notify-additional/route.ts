@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase();
         const { data: bugo } = await supabase
             .from('bugo')
-            .select('deceased_name, funeral_home, room_number, funeral_date, funeral_time, funeral_type, owner_token, ilpo_date, ilpo_time, mourner_name')
+            .select('deceased_name, funeral_home, room_number, funeral_date, funeral_time, funeral_type, owner_token, ilpo_date, ilpo_time, mourner_name, b2b_user_id')
             .eq('bugo_number', parent_bugo_number)
             .single();
 
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { sendAlimtalk } = await import('@/lib/solapi');
+        const isB2B = !!bugo?.b2b_user_id;
 
         // 장례식장 정보 조합
         const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
@@ -95,7 +96,8 @@ export async function POST(request: NextRequest) {
                         '부고번호': parent_bugo_number,
                         'owner_token': bugo.owner_token || '',
                     },
-                    scheduledDate  // 야간이면 예약, 아니면 즉시
+                    scheduledDate,  // 야간이면 예약, 아니면 즉시
+                    isB2B
                 );
                 const status = scheduledDate ? 'scheduled' : 'sent';
                 console.log(`✅ 추가 상주 알림톡 ${scheduledDate ? '예약' : '발송'} 완료: ${mourner.name} (${phoneNumber})`);

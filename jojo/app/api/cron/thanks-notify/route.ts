@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         // funeral_date가 어제인 부고 + 아직 감사장 알림톡 안 보낸 것
         const { data: bugos, error } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, mourner_name, phone_password, thanks_sent')
+            .select('bugo_number, deceased_name, mourner_name, phone_password, thanks_sent, b2b_user_id')
             .eq('funeral_date', yesterdayStr)
             .or('thanks_sent.is.null,thanks_sent.eq.false');
 
@@ -83,6 +83,7 @@ export async function GET(request: NextRequest) {
 
             try {
                 // 감사장 알림톡 발송
+                const isB2B = !!bugo.b2b_user_id;
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2 - 께서 제거)
@@ -90,7 +91,9 @@ export async function GET(request: NextRequest) {
                         '상주명': bugo.mourner_name || '',
                         '고인명': bugo.deceased_name || '',
                         '부고ID': bugo.bugo_number,
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
 
                 // thanks_sent 플래그 업데이트

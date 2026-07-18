@@ -77,6 +77,10 @@ export async function POST(request: NextRequest) {
                             .eq('id', orderData.bugo_id)
                             .single();
 
+                        if (bugoRecord) {
+                            orderData.bugo = bugoRecord;
+                        }
+
                         if (bugoRecord?.b2b_user_id) {
                             const partnerId = bugoRecord.b2b_user_id;
 
@@ -241,6 +245,7 @@ export async function POST(request: NextRequest) {
         // 📱 알림톡 발송 (입금 완료)
         if (orderData?.sender_phone) {
             const phoneNumber = orderData.sender_phone.replace(/-/g, '');
+            const isB2B = !!orderData?.bugo?.b2b_user_id;
             sendAlimtalk(
                 phoneNumber,
                 'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
@@ -250,7 +255,9 @@ export async function POST(request: NextRequest) {
                     '주문번호': orderData.order_number || moid,
                     '받는분': orderData.recipient_name || '',
                     '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
-                }
+                },
+                undefined,
+                isB2B
             ).then(() => {
                 console.log('✅ 가상계좌 입금완료 알림톡 발송:', phoneNumber);
             }).catch(err => console.error('❌ 가상계좌 입금완료 알림톡 실패:', err));

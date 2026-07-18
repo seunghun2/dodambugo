@@ -317,7 +317,7 @@ export async function POST(request: NextRequest) {
                 if (orderData.bugo_id) {
                     const { data: bugoData } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address')
+                        .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address, b2b_user_id')
                         .eq('id', orderData.bugo_id)
                         .single();
 
@@ -348,6 +348,7 @@ export async function POST(request: NextRequest) {
         if (orderData?.sender_phone) {
             const phoneNumber = orderData.sender_phone.replace(/-/g, '');
             try {
+                const isB2B = !!orderData?.bugo?.b2b_user_id;
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
@@ -358,7 +359,9 @@ export async function POST(request: NextRequest) {
                         '받는분': orderData.recipient_name || '',
                         '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
                         '부고번호': orderData.bugo?.bugo_number || orderData.bugo_id || '',
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
                 console.log('✅ 화환 결제완료 알림톡 발송:', phoneNumber);
             } catch (err) {
@@ -725,6 +728,7 @@ export async function POST(request: NextRequest) {
                 if (buyerInfo.tel) {
                     try {
                         const buyerPhone = (buyerInfo.tel || '').replace(/-/g, '');
+                        const isB2B = !!bugoData?.b2b_user_id;
                         await sendAlimtalk(
                             buyerPhone,
                             'KA01TP260213055510356BnS8IHlKvWB',  // 부의금 결제완료 템플릿
@@ -733,7 +737,9 @@ export async function POST(request: NextRequest) {
                                 '결제금액': (totalAmount || 0).toLocaleString(),
                                 '상주명': condolenceInfo.accountHolder || bugoData?.mourner_name || '',
                                 '주문번호': condolenceOrderNumber || moid,
-                            }
+                            },
+                            undefined,
+                            isB2B
                         );
                         console.log('✅ 부의금 결제완료 알림톡 발송:', buyerPhone);
                     } catch (alimErr) {
@@ -872,6 +878,7 @@ export async function POST(request: NextRequest) {
 
                                     if (mournerPhone) {
                                         const cleanPhone = mournerPhone.replace(/-/g, '');
+                                        const isB2B = !!bugoData?.b2b_user_id;
                                         await sendAlimtalk(
                                             cleanPhone,
                                             'KA01TP260213060236557haj4AEvPgIn',  // 부의금 전달 완료 (상주용)
@@ -881,7 +888,9 @@ export async function POST(request: NextRequest) {
                                                 '부의금액': (selectedAmount || 0).toLocaleString(),
                                                 '은행명': condolenceInfo.bankName || '',
                                                 '계좌번호': condolenceInfo.accountNo || '',
-                                            }
+                                            },
+                                            undefined,
+                                            isB2B
                                         );
                                         console.log('✅ 상주 부의금 입금 알림톡 발송:', cleanPhone);
                                     } else {

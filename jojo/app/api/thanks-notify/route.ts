@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         // 부고 정보 조회 (bugo_number로 검색)
         const { data: bugo, error } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, mourner_name, phone_password')
+            .select('bugo_number, deceased_name, mourner_name, phone_password, b2b_user_id')
             .eq('bugo_number', bugo_id)
             .single();
 
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
         const phoneNumber = bugo.phone_password.replace(/-/g, '');
 
         // 감사장 알림톡 발송
+        const isB2B = !!bugo.b2b_user_id;
         await sendAlimtalk(
             phoneNumber,
             'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2)
@@ -46,7 +47,9 @@ export async function POST(request: NextRequest) {
                 '상주명': bugo.mourner_name || '',
                 '고인명': bugo.deceased_name || '',
                 '부고ID': bugo.bugo_number,
-            }
+            },
+            undefined,
+            isB2B
         );
 
         console.log('✅ 감사장 알림톡 발송 완료:', phoneNumber);

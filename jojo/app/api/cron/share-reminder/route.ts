@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         // 조건: 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송 + 연락처 있음
         const { data: bugos, error } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent')
+            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
             .or('share_count.is.null,share_count.eq.0')
@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
             const phone = bugo.phone_password.replace(/-/g, '');
 
             try {
+                const isB2B = !!bugo.b2b_user_id;
                 await sendAlimtalk(
                     phone,
                     SHARE_REMINDER_TEMPLATE_ID,
@@ -93,7 +94,9 @@ export async function GET(request: NextRequest) {
                         '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
                         '부고번호': bugo.bugo_number,
                         'owner_token': bugo.owner_token || '',
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
 
                 // share_reminder_sent 플래그 업데이트

@@ -122,7 +122,7 @@ ${continueUrl}
         // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송
         const { data: bugos } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent')
+            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
             .or('share_count.is.null,share_count.lt.4')
@@ -156,6 +156,7 @@ ${continueUrl}
 
             for (const [phone, bugo] of targets) {
                 try {
+                    const isB2B = !!bugo.b2b_user_id;
                     await sendAlimtalk(
                         phone,
                         SHARE_REMINDER_TEMPLATE_ID,
@@ -163,7 +164,9 @@ ${continueUrl}
                             '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
                             '부고번호': bugo.bugo_number,
                             'owner_token': bugo.owner_token || '',
-                        }
+                        },
+                        undefined,
+                        isB2B
                     );
                     await supabase
                         .from('bugo')

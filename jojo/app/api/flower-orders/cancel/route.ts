@@ -195,6 +195,7 @@ export async function POST(request: NextRequest) {
                     'virtual': '가상계좌',
                 };
 
+                const isB2B = !!partnerId;
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP260128002330965AMneEQhHRIM',  // 화환 구매 취소 템플릿
@@ -202,7 +203,9 @@ export async function POST(request: NextRequest) {
                         '주문자명': order.sender_name || '',
                         '환불금액': order.product_price?.toLocaleString() || '',
                         '결제수단': paymentMethodText[order.payment_method] || order.payment_method || '',
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
                 console.log('📱 취소 알림톡 발송 완료:', phoneNumber);
             } catch (err) {

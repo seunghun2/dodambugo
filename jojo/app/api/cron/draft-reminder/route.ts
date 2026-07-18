@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         // 조건: 연락처 있고, 1시간 이상 경과, 리마인더 미발송, 고인명 있는 것
         const { data: drafts, error } = await supabase
             .from('drafts')
-            .select('id, template, deceased_name, applicant_name, applicant_phone')
+            .select('id, template, deceased_name, applicant_name, applicant_phone, b2b_user_id')
             .not('applicant_phone', 'is', null)
             .not('applicant_phone', 'eq', '')
             .not('deceased_name', 'is', null)
@@ -106,6 +106,7 @@ export async function GET(request: NextRequest) {
 
                 const templateId = draft.template || 'basic';
                 const continueUrl = `https://maeumbugo.co.kr/create/${templateId}?draft=${draft.id}`;
+                const isB2B = !!draft.b2b_user_id;
 
                 await sendAlimtalk(
                     phone,
@@ -115,7 +116,9 @@ export async function GET(request: NextRequest) {
                         '신청자명': draft.applicant_name || '',
                         '드래프트ID': draft.id,
                         '템플릿': templateId,
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
 
                 // reminder_sent 플래그 업데이트

@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         // 2일 전 발인한 부고 중 장지가 있고, 후기 알림 아직 안 보낸 것
         const { data: bugos, error } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, mourner_name, phone_password, burial_place, review_notify_sent')
+            .select('bugo_number, deceased_name, mourner_name, phone_password, burial_place, review_notify_sent, b2b_user_id')
             .eq('funeral_date', twoDaysAgoStr)
             .not('burial_place', 'is', null)
             .is('deleted_at', null)
@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
         for (const [phone, bugo] of targets) {
             try {
                 const reviewCode = generateReviewCode(String(bugo.bugo_number));
+                const isB2B = !!bugo.b2b_user_id;
 
                 await sendAlimtalk(
                     phone,
@@ -86,7 +87,9 @@ export async function GET(request: NextRequest) {
                         '고인명': bugo.deceased_name || '',
                         '장지명': bugo.burial_place || '',
                         '리뷰링크': reviewCode,
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
 
                 // 해당 전화번호의 모든 부고에 대해 review_notify_sent 플래그 업데이트

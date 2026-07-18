@@ -31,15 +31,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '주문을 찾을 수 없습니다' }, { status: 404 });
         }
 
-        // 부고에서 고인명 별도 조회
+        // 부고에서 고인명 및 B2B 여부 별도 조회
         let deceasedName = '';
+        let isB2B = false;
         if (order.bugo_id) {
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('deceased_name')
+                .select('deceased_name, b2b_user_id')
                 .eq('id', order.bugo_id)
                 .single();
             deceasedName = bugo?.deceased_name || '';
+            isB2B = !!bugo?.b2b_user_id;
         }
 
         const phone = order.sender_phone?.replace(/-/g, '');
@@ -80,7 +82,9 @@ export async function POST(request: Request) {
         const result = await sendAlimtalk(
             phone,
             templateId,
-            variables
+            variables,
+            undefined,
+            isB2B
         );
 
         console.log('알림톡 발송 API 결과:', JSON.stringify(result, null, 2));

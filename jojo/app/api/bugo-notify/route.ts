@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
             const supabase = getSupabase();
             const { data: bugo } = await supabase
                 .from('bugo')
-                .select('phone_password, applicant_name, ilpo_date, ilpo_time, owner_token')
+                .select('phone_password, applicant_name, ilpo_date, ilpo_time, owner_token, b2b_user_id')
                 .eq('bugo_number', bugo_number)
                 .single();
 
@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
 
                 // 알림톡 발송 (토큰 포함 새 템플릿)
                 const { sendAlimtalk } = await import('@/lib/solapi');
+                const isB2B = !!bugo?.b2b_user_id;
+
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP2602070138097871zexjvolnSU',  // 부고장 생성 완료 템플릿 (2/9 검수완료)
@@ -91,7 +93,9 @@ export async function POST(request: NextRequest) {
                         '발인일시': dateTimeInfo,
                         '부고번호': bugo_number,
                         'owner_token': bugo.owner_token || '',
-                    }
+                    },
+                    undefined,
+                    isB2B
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
 
@@ -113,7 +117,8 @@ export async function POST(request: NextRequest) {
                                 '고인명': deceased_name || '',
                                 '부고ID': bugo_number,
                             },
-                            scheduledKST  // 예약 발송!
+                            scheduledKST,  // 예약 발송!
+                            isB2B
                         );
                         console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', scheduledKST);
                     } catch (thanksErr) {
