@@ -38,10 +38,14 @@ export default function B2BCompletePage() {
   const [sending, setSending] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // 현재 브라우저 도메인 주소 추출
+  // 조문객에게 공유할 URL: bugoon.maeumbugo.co.kr/view/{번호} (b2b 경로 제외)
   const bugoUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
-    return `${window.location.origin}/b2b/view/${params.bugoNumber}`;
+    const hostname = window.location.hostname;
+    const domain = hostname.includes('maeumbugo.co.kr')
+      ? 'https://bugoon.maeumbugo.co.kr'
+      : window.location.origin;
+    return `${domain}/view/${params.bugoNumber}`;
   }, [params.bugoNumber]);
 
   // DB에서 생성된 부고 데이터 및 상주 목록 조회

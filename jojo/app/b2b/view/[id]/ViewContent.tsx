@@ -386,12 +386,15 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
     };
 
-    // 공유용 URL: owner 파라미터 제거 + 프로덕션 도메인 강제 + UTM 파라미터
+    // 공유용 URL: B2B는 bugoon.maeumbugo.co.kr 도메인 사용 + /b2b/view/ → /view/ 변환
     const getCleanShareUrl = (utmMedium?: string) => {
-        const pathname = window.location.pathname;
-        const baseUrl = window.location.hostname.includes('maeumbugo.co.kr')
-            ? `https://maeumbugo.co.kr${pathname}`
-            : `${window.location.origin}${pathname}`;
+        // /b2b/view/7799 → /view/7799 로 변환 (조문객은 /view/ 경로로 접근)
+        const pathname = window.location.pathname.replace(/^\/b2b\/view\//, '/view/');
+        const baseUrl = window.location.hostname.includes('bugoon.maeumbugo.co.kr')
+            ? `https://bugoon.maeumbugo.co.kr${pathname}`
+            : window.location.hostname.includes('maeumbugo.co.kr')
+                ? `https://bugoon.maeumbugo.co.kr${pathname}`
+                : `${window.location.origin}${pathname}`;
         if (utmMedium) {
             return `${baseUrl}?utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
         }
@@ -482,7 +485,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     };
 
     const shareViaSMS = () => {
-        const url = window.location.href;
+        const url = getCleanShareUrl('sms');
 
         // 날짜/시간 포맷
         const formatDateTime = (dateStr?: string, timeStr?: string) => {
