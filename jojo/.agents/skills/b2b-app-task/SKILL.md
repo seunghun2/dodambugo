@@ -27,17 +27,33 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - `jojo/lib/logger.ts` (로그 전송 클라이언트 유틸)
 - **인프라 셋업**: Vercel/Supabase 실시간 로그 테이블 연동
 
-### 1-3. 실시간 푸시 알림(Push Notification) 연동
+### 1-3. 실시간 푸시 알림(Push Notification) 연동 ✅ 완료
 - **설명**: 
   - 입관 직전/24시간 전 리마인더 푸시 및 알림톡 자동 발송
   - 실시간 입금 완료 노티 (조문객 결제 완료 시 즉시 알림)
   - 실시간 출금 완료 노티 (정산금 이체 승인 시 즉시 알림)
-- **관련 소스코드**:
-  - `jojo/app/api/push/route.ts` (푸시 토큰 및 발송 제어 API)
-  - `jojo/lib/solapi.ts` (알림톡 발송 모듈)
-- **관련 MD**:
-  - [critical-check.md](file:///Users/el/Desktop/dodam/jojo/.agent/workflows/critical-check.md) (알림톡/슬랙 수정 체크리스트)
-- **인프라 셋업**: Firebase Cloud Messaging (FCM) API 키 및 환경변수(`FCM_SERVER_KEY`) 등록
+- **구현 완료 내역**:
+  - `jojo/lib/push-notifications.ts` — Capacitor 기반 FCM 토큰 등록/해제 (클라이언트)
+  - `jojo/lib/push.ts` — 푸시 초기화 유틸
+  - `jojo/lib/fcm.ts` — Firebase Admin SDK v14 서버사이드 발송
+  - `jojo/lib/partner-notification.ts` — 이벤트 타입별 템플릿 기반 알림 발송 (푸시 + 앱 수신함 + 알림톡)
+  - `jojo/app/api/b2b/push-token/route.ts` — FCM 토큰 등록/삭제 API
+  - `jojo/app/api/b2b/send-push/route.ts` — 관리자 푸시 발송 API
+  - `jojo/app/api/cron/funeral-reminder/route.ts` — 발인 3시간 전 자동 리마인더 크론
+- **인프라 완료**:
+  - Firebase 프로젝트 `bugoapp-23680` 설정 완료
+  - `GoogleService-Info.plist` (iOS) / `google-services.json` (Android) 배치 완료
+  - APNs 인증 키 (`AuthKey_Q34SS2799R.p8`) Firebase Console 업로드 완료
+  - Vercel 환경변수 `FIREBASE_SERVICE_ACCOUNT_KEY` 프로덕션 등록 완료
+  - Supabase `b2b_push_tokens` 테이블 생성 완료
+  - Supabase `b2b_notification_templates` 이벤트별 템플릿 테이블 운용 중
+- **실기기 검증**: 2026-07-15 발인 임박 리마인더 실수신 확인, 2026-07-18 전수 테스트 완료
+- **⚠️ 운영 핵심 메모 (AI 에이전트 필독)**:
+  - `FIREBASE_SERVICE_ACCOUNT_KEY`는 **Vercel 프로덕션에만** 존재. `vercel env pull`로도 `[SENSITIVE]` 마스킹되어 로컬에서 가져올 수 없음
+  - **로컬에서 FCM 푸시 테스트 불가** → 반드시 프로덕션 배포 후 API 호출로 테스트해야 함
+  - `fcm.ts`는 **firebase-admin 라이브러리를 사용하지 않음** → Google OAuth JWT + FCM REST API 직접 호출 방식 (`getFcmAccessToken` → `fetch fcm.googleapis.com`)
+  - firebase-admin은 Vercel 서버리스 환경에서 `third-party-auth-error` 호환성 버그가 있어 직접 API 방식으로 전환한 것임
+  - 테스트 방법: 임시 API 배포(`/api/test-push`) → 프로덕션 호출 → 결과 확인 → 임시 API 삭제
 
 ---
 
