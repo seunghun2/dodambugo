@@ -474,7 +474,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
                     description: bugo?.funeral_home
                         ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
                         : '',
-                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                    imageUrl: 'https://bugoon.maeumbugo.co.kr/og-bugoon.png',
                     link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
                 buttons: [{ title: '부고 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
