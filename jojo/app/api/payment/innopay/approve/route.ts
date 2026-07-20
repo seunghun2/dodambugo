@@ -141,50 +141,34 @@ export async function POST(request: NextRequest) {
         let httpStatus = 200;
 
         if (paymentToken === 'MOCK_TOKEN') {
-            console.log('⚠️ [MOCK] Bypassing INNOPAY API call for testing');
-            approveResult = {
-                success: true,
-                resultCode: '0000',
-                data: {
-                    tid: tid || 'MOCK_TID',
-                    payMethod: payMethod || 'CARD',
-                    receiptUrl: 'https://mock-receipt-url.com',
-                    card: {
-                        fnName: '비씨카드',
-                        fnCd: '01'
-                    },
-                    etc: {
-                        mallReserved: JSON.stringify({
-                            orderId: orderId || moid,
-                            bugoId: body.bugoNumber || ''
-                        })
-                    }
-                }
-            };
-        } else {
-            // INNOPAY 승인 API 호출
-            console.log('📤 INNOPAY API 호출 시작...');
-            const approveResponse = await fetch('https://api.innopay.co.kr/v1/transactions/pay', {
-                method: 'POST',
-                headers: {
-                    'Payment-Token': paymentToken,
-                    'Merchant-Key': process.env.INNOPAY_LICENSE_KEY || '',
-                    'Content-Type': 'application/json; charset=utf-8',
-                },
-                body: JSON.stringify({
-                    tid,
-                    mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
-                    amt,
-                    taxFreeAmt: taxFreeAmt || '0',
-                    moid,
-                }),
-            });
-
-            isHttpOk = approveResponse.ok;
-            httpStatus = approveResponse.status;
-            approveResult = await approveResponse.json();
-            console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
+            return NextResponse.json(
+                { success: false, error: '유효하지 않은 결제 토큰입니다.' },
+                { status: 400 }
+            );
         }
+
+        // INNOPAY 승인 API 호출
+        console.log('📤 INNOPAY API 호출 시작...');
+        const approveResponse = await fetch('https://api.innopay.co.kr/v1/transactions/pay', {
+            method: 'POST',
+            headers: {
+                'Payment-Token': paymentToken,
+                'Merchant-Key': process.env.INNOPAY_LICENSE_KEY || '',
+                'Content-Type': 'application/json; charset=utf-8',
+            },
+            body: JSON.stringify({
+                tid,
+                mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
+                amt,
+                taxFreeAmt: taxFreeAmt || '0',
+                moid,
+            }),
+        });
+
+        isHttpOk = approveResponse.ok;
+        httpStatus = approveResponse.status;
+        approveResult = await approveResponse.json();
+        console.log('📥 INNOPAY 승인 결과:', JSON.stringify(approveResult));
 
         // 상세 결제정보 필드 로깅 (카드사/간편결제 종류 확인용)
         if (approveResult.data) {
