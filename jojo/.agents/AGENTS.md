@@ -45,3 +45,15 @@ cd /Users/el/Desktop/dodam/jojo
 npx jest                                    # 전체 테스트
 npx jest __tests__/funeral-display.test.ts  # 장례 표시 테스트
 ```
+
+### 7. Mock 데이터 금지 (중요!)
+API 라우트(`app/api/`)에 **절대 하드코딩 mock 데이터를 넣지 말 것.**
+- 테스트용 데이터가 필요하면 `scripts/` 폴더에 별도 스크립트로 작성
+- API는 항상 Supabase DB를 조회해야 함
+- `홍길동`, `mock-id`, `010-1234-5678` 같은 더미 데이터가 API 라우트에 있으면 **즉시 제거**
+
+### 8. Git 커밋 규칙
+- `git add -A` 절대 금지 → **`git add jojo/수정한파일`** 으로 필요한 파일만 추가
+- 커밋 전 `git diff --cached --stat`으로 포함된 파일 확인
+- `.gitignore`에 대용량 파일(*.psd, *.pdf 등)과 시크릿 파일 등록 확인
+

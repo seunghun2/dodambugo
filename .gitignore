@@ -4,6 +4,15 @@
 # Environment variables
 .env
 .env.local
+.env.production.local
+.env.vercel.*
+
+# Vercel
+.vercel/
+.next/
+
+# Node
+node_modules/
 
 # Logs
 *.log
@@ -12,5 +21,25 @@
 *.tmp
 *.swp
 
-# Design files
+# Design files (대용량 — 절대 git에 올리지 말 것)
 *.xd
+*.psd
+*.ai
+*.sketch
+
+# 문서/미디어 (대용량)
+*.pdf
+*.pptx
+*.xlsx
+*.mp4
+*.mov
+*.zip
+
+# 서비스 계정 키 (시크릿)
+service_account.json
+*_credentials.json
+
+# 백업 폴더
+app_backup/
+components_backup/
+scripts_backup/
