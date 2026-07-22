@@ -1065,6 +1065,9 @@ export default function WriteFormPage() {
         const newErrors: Record<string, string> = {};
 
         if (!formData.applicant_name) newErrors.applicant_name = '신청자 성함을 입력해주세요';
+        if (formData.applicant_name && formData.deceased_name && formData.applicant_name.trim() === formData.deceased_name.trim()) {
+            newErrors.applicant_name = '고인 성함과 신청자 성함은 같을 수 없습니다';
+        }
         if (!formData.applicant_phone || formData.applicant_phone.replace(/-/g, '').length !== 11) newErrors.applicant_phone = '휴대번호를 정확히 입력해주세요';
         else if (!phoneVerified && !editBugoNumber) newErrors.applicant_phone = '휴대폰 인증을 완료해주세요';
         else if (editBugoNumber && originalPhone && formData.applicant_phone !== originalPhone && !phoneVerified) newErrors.applicant_phone = '변경된 번호는 인증이 필요합니다';
@@ -1125,10 +1128,6 @@ export default function WriteFormPage() {
         if (Object.keys(newErrors).length > 0) {
             // GA: 유효성 실패 트래킹 (어떤 필드에서 막히는지)
             gaEvents.formValidationFail(Object.keys(newErrors).join(','));
-
-            // 에러 메시지 알림 (모바일에서 에러 필드 못 볼 수 있음)
-            const firstErrorMessage = Object.values(newErrors)[0];
-            alert(firstErrorMessage);
 
             // 첫 번째 에러 필드로 스크롤
             setTimeout(() => {

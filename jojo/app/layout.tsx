@@ -162,6 +162,82 @@ export default function RootLayout({
         <GoogleAnalytics />
         <MicrosoftClarity />
         <KakaoInit />
+        {/* 🔒 개발자 도구 방지 및 F12 차단 검은 화면 오버레이 */}
+        <Script
+          id="devtools-blocker"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window === 'undefined') return;
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+
+                function triggerBlackScreen() {
+                  let overlay = document.getElementById('devtools-lock-overlay');
+                  if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'devtools-lock-overlay';
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100vw';
+                    overlay.style.height = '100vh';
+                    overlay.style.backgroundColor = '#000000';
+                    overlay.style.zIndex = '9999999';
+                    overlay.style.display = 'flex';
+                    overlay.style.flexDirection = 'column';
+                    overlay.style.alignItems = 'center';
+                    overlay.style.justifyContent = 'center';
+                    overlay.style.color = '#ffffff';
+                    overlay.style.fontFamily = 'sans-serif';
+                    overlay.innerHTML = '<div style="text-align:center; padding: 24px;"><h1 style="font-size:20px;margin-bottom:8px;font-weight:700;">비정상적인 접근이 감지되었습니다.</h1><p style="font-size:14px;color:#888;">보안 정책에 의해 개발자 도구 사용이 제한됩니다.</p></div>';
+                    document.body.appendChild(overlay);
+                  }
+                }
+
+                // 1. 단축키 방지 (F12, Ctrl+Shift+I 등)
+                window.addEventListener('keydown', function(e) {
+                  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                  const isControl = isMac ? e.metaKey : e.ctrlKey;
+                  const isShift = e.shiftKey;
+                  const isAlt = e.altKey;
+
+                  let isBlocked = false;
+
+                  if (e.keyCode === 123) { // F12
+                    isBlocked = true;
+                  } else if (isControl && isShift && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) { // Ctrl+Shift+I/J/C
+                    isBlocked = true;
+                  } else if (isControl && isAlt && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) { // Cmd+Alt+I/J/C
+                    isBlocked = true;
+                  } else if (isControl && e.keyCode === 85) { // Ctrl+U (소스보기)
+                    isBlocked = true;
+                  }
+
+                  if (isBlocked) {
+                    e.preventDefault();
+                    triggerBlackScreen();
+                  }
+                });
+
+                // 2. 우클릭 방지
+                window.addEventListener('contextmenu', function(e) {
+                  e.preventDefault();
+                });
+
+                // 3. 개발자 도구 창 활성화 감지 (창 크기 차이 비교)
+                const threshold = 160;
+                setInterval(function() {
+                  const widthDev = window.outerWidth - window.innerWidth > threshold;
+                  const heightDev = window.outerHeight - window.innerHeight > threshold;
+                  if (widthDev || heightDev) {
+                    triggerBlackScreen();
+                  }
+                }, 1000);
+              })();
+            `,
+          }}
+        />
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
             <Notifications position="top-center" zIndex={10000} />
