@@ -162,7 +162,11 @@ export default function RootLayout({
         <GoogleAnalytics />
         <MicrosoftClarity />
         <KakaoInit />
-        {/* 🔒 개발자 도구 방지 및 F12 차단 (about:blank 강제 리다이렉트) */}
+        {/* 🔒 개발자 도구 방지 및 F12 차단 (disable-devtool 라이브러리 연동) */}
+        <Script
+          src="https://cdn.jsdelivr.net/npm/disable-devtool@latest"
+          strategy="beforeInteractive"
+        />
         <Script
           id="devtools-blocker"
           strategy="afterInteractive"
@@ -172,54 +176,26 @@ export default function RootLayout({
                 if (typeof window === 'undefined') return;
                 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
-                function preventAccess() {
-                  window.location.replace('about:blank');
+                function initBlocker() {
+                  if (typeof DisableDevtool !== 'undefined') {
+                    DisableDevtool({
+                      url: 'about:blank',
+                      disableMenu: false, // 우클릭 허용 (복사/붙여넣기 가능)
+                      clearLog: true,
+                    });
+                  }
                 }
 
-                // 1. 단축키 방지 (F12, Ctrl+Shift+I 등)
-                window.addEventListener('keydown', function(e) {
-                  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-                  const isControl = isMac ? e.metaKey : e.ctrlKey;
-                  const isShift = e.shiftKey;
-                  const isAlt = e.altKey;
-
-                  let isBlocked = false;
-
-                  if (e.keyCode === 123) { // F12
-                    isBlocked = true;
-                  } else if (isControl && isShift && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) { // Ctrl+Shift+I/J/C
-                    isBlocked = true;
-                  } else if (isControl && isAlt && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) { // Cmd+Alt+I/J/C
-                    isBlocked = true;
-                  } else if (isControl && e.keyCode === 85) { // Ctrl+U (소스보기)
-                    isBlocked = true;
-                  }
-
-                  if (isBlocked) {
-                    e.preventDefault();
-                    preventAccess();
-                  }
-                });
-                // 2. 콘솔 감지 (우클릭 -> 검사 등 마우스로 개발자 도구를 여는 경우 차단)
-                const element = new Image();
-                Object.defineProperty(element, 'id', {
-                  get: function() {
-                    preventAccess();
-                  }
-                });
-                setInterval(function() {
-                  console.log(element);
-                }, 1000);
-
-                // 3. 개발자 도구 창 활성화 감지 (창 크기 차이 비교)
-                const threshold = 160;
-                setInterval(function() {
-                  const widthDev = window.outerWidth - window.innerWidth > threshold;
-                  const heightDev = window.outerHeight - window.innerHeight > threshold;
-                  if (widthDev || heightDev) {
-                    preventAccess();
-                  }
-                }, 1000);
+                if (typeof DisableDevtool !== 'undefined') {
+                  initBlocker();
+                } else {
+                  var interval = setInterval(function() {
+                    if (typeof DisableDevtool !== 'undefined') {
+                      initBlocker();
+                      clearInterval(interval);
+                    }
+                  }, 100);
+                }
               })();
             `,
           }}
