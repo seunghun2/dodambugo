@@ -200,6 +200,16 @@ export default function RootLayout({
                     preventAccess();
                   }
                 });
+                // 2. 콘솔 감지 (우클릭 -> 검사 등 마우스로 개발자 도구를 여는 경우 차단)
+                const element = new Image();
+                Object.defineProperty(element, 'id', {
+                  get: function() {
+                    preventAccess();
+                  }
+                });
+                setInterval(function() {
+                  console.log(element);
+                }, 1000);
 
                 // 3. 개발자 도구 창 활성화 감지 (창 크기 차이 비교)
                 const threshold = 160;
