@@ -245,8 +245,8 @@ export default function FlowerOrdersPage() {
             String(o.price),
             o.payment_method,
             getStatusLabel(o.status),
-            String(o.reward_amount),
-            String(o.bonus_amount)
+            String(o.status === 'cancelled' ? 0 : o.reward_amount),
+            String(o.status === 'cancelled' ? 0 : o.bonus_amount)
         ]);
 
         const csvContent = 
@@ -391,11 +391,19 @@ export default function FlowerOrdersPage() {
                                                             {getStatusLabel(order.status)}
                                                         </span>
                                                     </td>
-                                                    <td style={{ fontWeight: '600', color: '#16a34a' }}>
-                                                        +{formatCurrency(order.reward_amount)}원
+                                                    <td style={{ 
+                                                        fontWeight: '600', 
+                                                        color: order.status === 'cancelled' ? '#94a3b8' : '#16a34a',
+                                                        textDecoration: order.status === 'cancelled' ? 'line-through' : 'none'
+                                                    }}>
+                                                        {order.status === 'cancelled' ? '취소' : `+${formatCurrency(order.reward_amount)}원`}
                                                     </td>
-                                                    <td style={{ fontWeight: '600', color: '#d4a84b' }}>
-                                                        +{formatCurrency(order.bonus_amount)}원
+                                                    <td style={{ 
+                                                        fontWeight: '600', 
+                                                        color: order.status === 'cancelled' ? '#94a3b8' : '#d4a84b',
+                                                        textDecoration: order.status === 'cancelled' ? 'line-through' : 'none'
+                                                    }}>
+                                                        {order.status === 'cancelled' ? '취소' : `+${formatCurrency(order.bonus_amount)}원`}
                                                     </td>
                                                     <td style={{ fontSize: '12px', color: '#64748b' }}>
                                                         {order.payment_method}
