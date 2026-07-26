@@ -242,10 +242,11 @@ export default function WalletPage() {
     const formatCurrency = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
 
     // 누적 적립금 계산 (amount > 0 인 입금 트랜잭션의 총합)
+    // 누적적립금: 양수 적립 + 취소 차감(reward_cancel) 합산 = 순적립금
     const cumulativeReward = useMemo(() => {
-        return transactions
-            .filter(tx => tx.amount > 0)
-            .reduce((sum, tx) => sum + tx.amount, 0);
+        return Math.max(0, transactions
+            .filter(tx => tx.amount > 0 || tx.type === 'reward_cancel')
+            .reduce((sum, tx) => sum + tx.amount, 0));
     }, [transactions]);
 
     // 누적 환급금 계산 (amount < 0 인 출금 트랜잭션 절대값의 총합)
