@@ -11,7 +11,7 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 
 ## 1. 📱 모바일 앱 빌드 및 Native 세팅 (스플래시/푸시)
 
-### 1-1. 스플래시 화면(Splash Screen) 연동
+### 1-1. 스플래시 화면(Splash Screen) 연동 ✅ 완료
 - **설명**: 앱 기동 시 첫 인상을 결정할 부고온 로고 디자인 기반 스플래시 연동 및 테마 설정
 - **관련 소스코드**: 
   - `jojo/android/app/src/main/res/` (안드로이드 리소스 에셋)
@@ -20,8 +20,9 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - [PROJECT_STRATEGY.md](file:///Users/el/Desktop/dodam/jojo/PROJECT_STRATEGY.md) (모바일 앱 배포 전략)
 - **인프라 셋업**: Capacitor Asset Generator 툴을 통한 플랫폼별 이미지 자동 생성
 
-### 1-2. 초기 앱 구동 로그 시스템 구축
+### 1-2. 초기 앱 구동 로그 시스템 구축 ⏳ 우선순위 낮음
 - **설명**: 모바일 환경에서의 비정상 종료 및 사용자 행동 추적용 앱 로그 수집기 구현
+- **보류 사유**: 현재 사용자 수가 적어 Vercel 서버 로그로 충분. 사용자 증가 시 도입 예정
 - **관련 소스코드**: 
   - `jojo/app/api/b2b/log/route.ts` (신규 로그 수집 API)
   - `jojo/lib/logger.ts` (로그 전송 클라이언트 유틸)
@@ -59,8 +60,15 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 
 ## 2. 💸 B2B 수익 구조 및 재무 분할 정산 시스템 설계
 
-### 2-1. 다중 분할 정산(지도사/상조 본사/플랫폼) 구조 설계
+### 2-1. 다중 분할 정산(지도사/상조 본사/플랫폼) 구조 설계 ✅ 완료
 - **설명**: 조문객이 구매한 화환/답례품 대금에서 수수료 차감 후 재무 배분 로직 구현
+- **구현 완료 내역**:
+  - 화환 판매 → 파트너 예치금 자동 적립 (approve/route.ts)
+  - 조의금 결제 → 파트너 수당 자동 적립 (approve/route.ts)
+  - 추천인 보너스 자동 적립 (approve/route.ts)
+  - 상조회사 대금 정산 테이블 `b2b_company_settlements` 및 어드민 API
+  - 3.3% 원천징수(소득세 3% + 지방소득세 0.3%) 자동 차감 (wallet/route.ts)
+  - 이노페이 실이체 검증 완료 (1,000원 실테스트 성공, TID: bumaeum02m2607188b82611b)
 - **관련 소스코드**:
   - `jojo/lib/b2b.ts` (B2B 파트너 정산 연동 로직)
   - `jojo/app/api/b2b/settlement/route.ts` (정산 계산 및 이체 트리거 API)

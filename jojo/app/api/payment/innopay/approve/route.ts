@@ -458,9 +458,10 @@ export async function POST(request: NextRequest) {
                                 .eq('id', partnerUser.company_id)
                                 .single();
 
+                            // TODO: 상조회사 수수료 금액 최종 확정 필요 (현재 기본값 20,000원)
                             const companyCommission = companyRecord?.wreath_commission_amount !== undefined 
                                 ? companyRecord.wreath_commission_amount 
-                                : 5000;
+                                : 20000;
 
                             await supabase.from('b2b_company_settlements').insert({
                                 company_id: partnerUser.company_id,
@@ -493,20 +494,23 @@ export async function POST(request: NextRequest) {
                         );
                     });
 
-                    // 5. 추천인 보너스 적립
+                    // 5. 추천인 보너스 적립 (상조회사 소속이 아닌 개인 파트너만)
+                    // 상조회사 소속이면 회사가 추천 채널이므로 추천인 보너스 중복 지급 방지
+                    const hasCompany = !!partnerUser?.company_id;
                     const { data: partnerInfo } = await supabase
                         .from('b2b_users')
                         .select('recommender_id')
                         .eq('id', partnerId)
                         .single();
 
-                    if (partnerInfo?.recommender_id) {
+                    if (!hasCompany && partnerInfo?.recommender_id) {
                         const { data: bonusSetting } = await supabase
                             .from('b2b_settings')
                             .select('value')
                             .eq('key', 'referral_bonus_amount')
                             .single();
-                        const bonusAmount = parseInt(bonusSetting?.value || '2000');
+                        // TODO: 추천인 보너스 금액 최종 확정 필요 (현재 기본값 2,500원)
+                        const bonusAmount = parseInt(bonusSetting?.value || '2500');
 
                         // 추천인 잔액 업데이트
                         const { data: refDeposit } = await supabase
