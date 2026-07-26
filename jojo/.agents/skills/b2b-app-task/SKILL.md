@@ -65,10 +65,19 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **구현 완료 내역**:
   - 화환 판매 → 파트너 예치금 자동 적립 (approve/route.ts)
   - 조의금 결제 → 파트너 수당 자동 적립 (approve/route.ts)
-  - 추천인 보너스 자동 적립 (approve/route.ts)
+  - 추천인 보너스 자동 적립 — **상조 소속이면 스킵** (approve/route.ts)
   - 상조회사 대금 정산 테이블 `b2b_company_settlements` 및 어드민 API
   - 3.3% 원천징수(소득세 3% + 지방소득세 0.3%) 자동 차감 (wallet/route.ts)
   - 이노페이 실이체 검증 완료 (1,000원 실테스트 성공, TID: bumaeum02m2607188b82611b)
+  - **추천인 보너스 실테스트 완료** (2026-07-26): 파트너 수당 +20,000원, 추천인 보너스 +2,000원 적립 확인
+- **현재 기본 금액 (TODO: 최종 확정 필요)**:
+  - 파트너 수당: 20,000원 (`b2b_settings.wreath_reward_amount`)
+  - 추천인 보너스: 2,500원 (`b2b_settings.referral_bonus_amount`)
+  - 상조회사 수수료: 20,000원 (`b2b_companies.wreath_commission_amount`)
+- **2026-07-26 버그 수정**:
+  - 추천인 보너스 변수 스코프 버그 (partnerUser try 블록 밖 참조)
+  - 정산 대기/누적적립금: 취소(reward_cancel) 미반영 → 반영으로 수정
+  - 어드민 취소 주문: 수당/보너스 '취소' 표시 + CSV 0원 출력
 - **관련 소스코드**:
   - `jojo/lib/b2b.ts` (B2B 파트너 정산 연동 로직)
   - `jojo/app/api/b2b/settlement/route.ts` (정산 계산 및 이체 트리거 API)
