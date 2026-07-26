@@ -443,14 +443,33 @@ export async function POST(request: NextRequest) {
 
                     console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
 
-                    // 4-2. 상조회사 본사 수수료 정산 내역 추가
+                    // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
+                    import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                        // 화환 주문 알람
+                        insertInAppAlarm(
+                            partnerId, 'flower_order',
+                            '화환 주문이 접수되었습니다',
+                            `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
+                            '/b2b/wallet', 'alarm_order'
+                        );
+                        // 화환 수당 적립 알람
+                        insertInAppAlarm(
+                            partnerId, 'flower_commission',
+                            '화환 판매 수당이 적립되었습니다',
+                            `${(rewardAmount || 0).toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
+                            '/b2b/wallet', 'alarm_reward'
+                        );
+                    });
+
+                    // 4-2. 상조회사 본사 수수료 정산 + 5. 추천인 보너스 적립
                     try {
                         const { data: partnerUser } = await supabase
                             .from('b2b_users')
-                            .select('company_id')
+                            .select('company_id, recommender_id')
                             .eq('id', partnerId)
                             .single();
 
+                        // 4-2. 상조회사 소속이면 본사 수수료 정산
                         if (partnerUser?.company_id) {
                             const { data: companyRecord } = await supabase
                                 .from('b2b_companies')
@@ -472,83 +491,58 @@ export async function POST(request: NextRequest) {
 
                             console.log(`✅ [B2B] 상조회사 본사 ${partnerUser.company_id}에 ${companyCommission}원 정산 내역 추가 완료`);
                         }
-                    } catch (companyErr) {
-                        console.error('❌ [B2B] 상조회사 본사 정산 적재 중 오류:', companyErr);
-                    }
 
-                    // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
-                    import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
-                        // 화환 주문 알람
-                        insertInAppAlarm(
-                            partnerId, 'flower_order',
-                            '화환 주문이 접수되었습니다',
-                            `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
-                            '/b2b/wallet', 'alarm_order'
-                        );
-                        // 화환 수당 적립 알람
-                        insertInAppAlarm(
-                            partnerId, 'flower_commission',
-                            '화환 판매 수당이 적립되었습니다',
-                            `${(rewardAmount || 0).toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
-                            '/b2b/wallet', 'alarm_reward'
-                        );
-                    });
+                        // 5. 추천인 보너스 적립 (상조회사 소속이 아닌 개인 파트너만)
+                        // 상조회사 소속이면 회사가 추천 채널이므로 추천인 보너스 중복 지급 방지
+                        if (!partnerUser?.company_id && partnerUser?.recommender_id) {
+                            const { data: bonusSetting } = await supabase
+                                .from('b2b_settings')
+                                .select('value')
+                                .eq('key', 'referral_bonus_amount')
+                                .single();
+                            // TODO: 추천인 보너스 금액 최종 확정 필요 (현재 기본값 2,500원)
+                            const bonusAmount = parseInt(bonusSetting?.value || '2500');
 
-                    // 5. 추천인 보너스 적립 (상조회사 소속이 아닌 개인 파트너만)
-                    // 상조회사 소속이면 회사가 추천 채널이므로 추천인 보너스 중복 지급 방지
-                    const hasCompany = !!partnerUser?.company_id;
-                    const { data: partnerInfo } = await supabase
-                        .from('b2b_users')
-                        .select('recommender_id')
-                        .eq('id', partnerId)
-                        .single();
-
-                    if (!hasCompany && partnerInfo?.recommender_id) {
-                        const { data: bonusSetting } = await supabase
-                            .from('b2b_settings')
-                            .select('value')
-                            .eq('key', 'referral_bonus_amount')
-                            .single();
-                        // TODO: 추천인 보너스 금액 최종 확정 필요 (현재 기본값 2,500원)
-                        const bonusAmount = parseInt(bonusSetting?.value || '2500');
-
-                        // 추천인 잔액 업데이트
-                        const { data: refDeposit } = await supabase
-                            .from('deposits')
-                            .select('balance')
-                            .eq('user_id', partnerInfo.recommender_id)
-                            .single();
-
-                        if (refDeposit) {
-                            await supabase
+                            // 추천인 잔액 업데이트
+                            const { data: refDeposit } = await supabase
                                 .from('deposits')
-                                .update({
-                                    balance: (refDeposit.balance || 0) + bonusAmount,
-                                    updated_at: new Date().toISOString(),
-                                })
-                                .eq('user_id', partnerInfo.recommender_id);
-                        } else {
+                                .select('balance')
+                                .eq('user_id', partnerUser.recommender_id)
+                                .single();
+
+                            if (refDeposit) {
+                                await supabase
+                                    .from('deposits')
+                                    .update({
+                                        balance: (refDeposit.balance || 0) + bonusAmount,
+                                        updated_at: new Date().toISOString(),
+                                    })
+                                    .eq('user_id', partnerUser.recommender_id);
+                            } else {
+                                await supabase
+                                    .from('deposits')
+                                    .insert({
+                                        user_id: partnerUser.recommender_id,
+                                        balance: bonusAmount,
+                                        updated_at: new Date().toISOString(),
+                                    });
+                            }
+
+                            // 추천인 내역 기록
                             await supabase
-                                .from('deposits')
+                                .from('deposit_transactions')
                                 .insert({
-                                    user_id: partnerInfo.recommender_id,
-                                    balance: bonusAmount,
-                                    updated_at: new Date().toISOString(),
+                                    user_id: partnerUser.recommender_id,
+                                    amount: bonusAmount,
+                                    type: 'referral_bonus',
+                                    description: `추천 수당 (추천한 파트너의 화환 판매)`,
+                                    related_order_id: actualOrderId || moid,
                                 });
+
+                            console.log(`✅ [B2B] 추천인 ${partnerUser.recommender_id}에게 ${bonusAmount}원 보너스 적립`);
                         }
-
-                        // 추천인 내역 기록
-                        await supabase
-                            .from('deposit_transactions')
-                            .insert({
-                                user_id: partnerInfo.recommender_id,
-                                amount: bonusAmount,
-                                type: 'referral_bonus',
-                                description: `추천 수당 (추천한 파트너의 화환 판매)`,
-                                related_order_id: actualOrderId || moid,
-                            });
-
-                        console.log(`✅ [B2B] 추천인 ${partnerInfo.recommender_id}에게 ${bonusAmount}원 보너스 적립`);
+                    } catch (companyErr) {
+                        console.error('❌ [B2B] 상조회사 정산/추천인 보너스 오류:', companyErr);
                     }
                 }
             } catch (b2bError) {
