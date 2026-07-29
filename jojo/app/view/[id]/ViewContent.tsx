@@ -540,6 +540,7 @@ ${url}
     // 열람 기한 연장 예외 (고객 요청: 부고번호 → 만료일)
     const expiryExceptions: Record<string, string> = {
         '4286': '2026-07-05',  // 금동회/금무수 - 고객 요청으로 7/5까지 연장
+        '3577': '2026-08-01',  // 조광자/조진태 - 고객 요청으로 8/1까지 연장
     };
 
     // 1달 이상 지난 부고는 비공개 처리
@@ -599,7 +600,7 @@ ${url}
     }
 
     // 특정 부고는 오버레이 예외 처리 (고객 요청)
-    const overlayExceptions = ['1818', '4286'];
+    const overlayExceptions = ['1818', '4286', '3577'];
     const showMemorialOverlay = mounted && isFuneralEnded() && !overlayExceptions.includes(String(bugo.bugo_number));
 
     // 오버레이 노출 이벤트 추적
