@@ -169,7 +169,7 @@ function autoBlockIP(ip: string, reason: string) {
       'Content-Type': 'application/json',
       'Prefer': 'resolution=ignore-duplicates',
     },
-    body: JSON.stringify({ ip_address: ip, reason, is_active: true }),
+    body: JSON.stringify({ ip_address: ip, reason: encodeURIComponent(reason), is_active: true }),
   }).catch(() => { });
 }
 
@@ -197,8 +197,8 @@ export async function middleware(request: NextRequest) {
 
   // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
   const isB2BSubdomain =
-    // 로컬 환경에서는 포트 3001번만 B2B로 인정하고, 3000번은 B2C로 판별
-    (isLocal ? hostLower.includes(':3001') : false) ||
+    // 로컬 환경에서는 포트 3001번, 3009번만 B2B로 인정하고, 3000번은 B2C로 판별
+    (isLocal ? (hostLower.includes(':3001') || hostLower.includes(':3009')) : false) ||
     hostLower.startsWith('partner.') ||
     hostLower.startsWith('b2b.') ||
     hostLower.startsWith('bugoon.') ||
@@ -324,7 +324,7 @@ export async function middleware(request: NextRequest) {
               'Authorization': `Bearer ${SUPABASE_KEY}`,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ is_active: false, reason: '[자동 해제] 부고 생성 완료 - 실제 고객' }),
+            body: JSON.stringify({ is_active: false, reason: encodeURIComponent('[자동 해제] 부고 생성 완료 - 실제 고객') }),
           }).catch(() => { });
         }
         visitCounter.delete(ip);

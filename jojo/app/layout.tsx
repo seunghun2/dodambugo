@@ -5,7 +5,7 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import './globals.css';
 
-import { MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { MantineProvider, mantineHtmlProps, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
 import { dodamTheme } from '@/lib/theme';
@@ -30,18 +30,18 @@ export const metadata = {
     apple: '/apple-icon.png',
   },
   openGraph: {
-    title: '마음부고 - 품격있는 무료 모바일 부고장',
-    description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 완전 무료, 광고 없음.',
+    title: '마음부고 - 무료 모바일 부고장 만들기',
+    description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료',
     type: 'website',
     url: 'https://maeumbugo.co.kr',
     siteName: '마음부고',
     locale: 'ko_KR',
     images: [
       {
-        url: 'https://maeumbugo.co.kr/og-maeumbugo.png',
+        url: 'https://maeumbugo.co.kr/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: '마음부고 - 품격있는 무료 모바일 부고장',
+        alt: '마음부고 - 무료 모바일 부고장 만들기',
       },
     ],
   },
@@ -68,7 +68,7 @@ export const metadata = {
   verification: {
     google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',
     other: {
-      'naver-site-verification': '4f09b03be58e139284a268de39527d36c7439898',
+      'naver-site-verification': '8541a7d656fb18d451eebcb9bb7f10b77626fc8f',
     },
   },
 };
@@ -90,12 +90,7 @@ export default function RootLayout({
     <html lang="ko" {...mantineHtmlProps} suppressHydrationWarning>
       <head>
         <meta name="format-detection" content="telephone=no, address=no, email=no" />
-        <script
-          data-mantine-color-scheme
-          dangerouslySetInnerHTML={{
-            __html: `try { var colorScheme = localStorage.getItem('mantine-color-scheme') || 'light'; document.documentElement.setAttribute('data-mantine-color-scheme', colorScheme); } catch (e) {}`
-          }}
-        />
+        <ColorSchemeScript defaultColorScheme="light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />

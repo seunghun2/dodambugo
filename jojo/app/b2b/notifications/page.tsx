@@ -116,6 +116,26 @@ export default function B2BNotificationsPage() {
     }
   };
 
+  // 모두 읽음 처리
+  const handleReadAll = async () => {
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+    if (unreadCount === 0) return;
+
+    // 1. 화면상 상태 즉시 모두 읽음 처리
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+
+    // 2. 서버에 비동기 모두 읽음 요청
+    try {
+      const token = localStorage.getItem('b2b_token');
+      await fetch('/api/b2b/notifications/read-all', {
+        method: 'PATCH',
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      });
+    } catch (err) {
+      console.error('모두 읽음 요청 오류:', err);
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
@@ -137,6 +157,8 @@ export default function B2BNotificationsPage() {
     }
   };
 
+  const hasUnread = notifications.some(n => !n.is_read);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -144,7 +166,13 @@ export default function B2BNotificationsPage() {
           <B2BIcon name="chevron-left" size={24} />
         </button>
         <span className={styles.headerTitle}>알림</span>
-        <div className={styles.headerRightPlaceholder} />
+        <button
+          className={styles.headerReadAllBtn}
+          onClick={handleReadAll}
+          disabled={!hasUnread}
+        >
+          모두 읽음
+        </button>
       </header>
 
       <div className={styles.container}>
