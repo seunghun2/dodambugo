@@ -84,15 +84,30 @@ export async function GET(request: NextRequest) {
             console.error('Deposits 조회 오류:', depositError);
         }
 
-        // 추천한 회원 수
-        const { count: referralCount } = await supabase
+        // 추천한 회원 수 및 상세 목록
+        let query = supabase
             .from('b2b_users')
-            .select('id', { count: 'exact', head: true })
-            .eq('recommender_id', userId);
+            .select('id, owner_name, company_name, created_at');
+
+        if (user.my_referral_code) {
+            query = query.or(`recommender_id.eq.${userId},referral_code.eq.${user.my_referral_code}`);
+        } else {
+            query = query.eq('recommender_id', userId);
+        }
+
+        const { data: rawReferralList } = await query.order('created_at', { ascending: false });
+
+        const referralList = (rawReferralList || []).map((refUser: any) => ({
+            id: refUser.id,
+            owner_name: refUser.owner_name,
+            company_name: refUser.company_name && refUser.company_name !== '부고온 파트너 상조' ? refUser.company_name : '개인 장례지도사',
+            created_at: refUser.created_at,
+        }));
 
         return NextResponse.json({
             user: { ...user, balance: deposit?.balance || 0 },
-            referralCount: referralCount || 0,
+            referralCount: referralList.length,
+            referralList,
         });
     } catch (err: any) {
         return NextResponse.json({ error: `서버 예외 발생: ${err?.message || err}` }, { status: 500 });

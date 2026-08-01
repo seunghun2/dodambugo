@@ -64,6 +64,7 @@ export default function SettingsPage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [referralCount, setReferralCount] = useState(0);
+    const [referralList, setReferralList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -353,6 +354,7 @@ export default function SettingsPage() {
             if (data.user) {
                 setUser(data.user);
                 setReferralCount(data.referralCount || 0);
+                setReferralList(data.referralList || []);
                 // 계좌 인풋 초기값 셋팅
                 setBankName(data.user.bank_name || '');
                 setAccountNo(data.user.account_no || '');
@@ -631,8 +633,8 @@ export default function SettingsPage() {
                 {/* 내정보 카드 */}
                 <div className={styles.profileCard}>
                     <div className={styles.profileInfo}>
-                        <span className={styles.profileName}>{user.owner_name} 지도사님</span>
-                        <span className={styles.profileCompany}>{user.company_name}</span>
+                        <span className={styles.profileName}>{user.owner_name} 장례지도사</span>
+                        <span className={styles.profileCompany}>{(!user.company_name || user.company_name === '부고온 파트너 상조' || user.company_name === '개인') ? '개인 장례지도사' : user.company_name}</span>
                     </div>
                     <button className={styles.infoEditBtn} onClick={() => setView('info')}>
                         내정보
@@ -840,23 +842,24 @@ export default function SettingsPage() {
                                     <span>내가 추천한 파트너 수</span>
                                     <span className={styles.referralCount}>{referralCount}명</span>
                                 </div>
-                                
-                                {referralCount > 0 ? (
+                                {referralList && referralList.length > 0 ? (
                                     <div className={styles.referralList}>
-                                        <div className={styles.referralItem}>
-                                            <div>
-                                                <span className={styles.refName}>이*우</span>
-                                                <span className={styles.refCompany}>도담상조</span>
-                                            </div>
-                                            <span className={styles.refDate}>2026.06.18</span>
-                                        </div>
-                                        <div className={styles.referralItem}>
-                                            <div>
-                                                <span className={styles.refName}>김*수</span>
-                                                <span className={styles.refCompany}>한마음상조</span>
-                                            </div>
-                                            <span className={styles.refDate}>2026.06.12</span>
-                                        </div>
+                                        {referralList.map((refItem: any) => {
+                                            const rawName = refItem.owner_name || '파트너';
+                                            const masked = rawName.length <= 2 ? rawName[0] + '*' : rawName[0] + '*'.repeat(rawName.length - 2) + rawName[rawName.length - 1];
+                                            const dt = refItem.created_at ? new Date(refItem.created_at) : new Date();
+                                            const formattedDate = `${dt.getFullYear()}.${String(dt.getMonth() + 1).padStart(2, '0')}.${String(dt.getDate()).padStart(2, '0')}`;
+
+                                            return (
+                                                <div key={refItem.id} className={styles.referralItem}>
+                                                    <div>
+                                                        <span className={styles.refName}>{masked}</span>
+                                                        <span className={styles.refCompany}>{refItem.company_name}</span>
+                                                    </div>
+                                                    <span className={styles.refDate}>{formattedDate}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className={styles.emptyState}>아직 추천한 파트너 회원이 없습니다.</div>
@@ -1646,7 +1649,7 @@ export default function SettingsPage() {
                     </div>
                     <div className={styles.profileDetailMeta}>
                         <h4 className={styles.profileDetailName}>{user.owner_name}</h4>
-                        <p className={styles.profileDetailCompany}>{user.company_name}</p>
+                        <p className={styles.profileDetailCompany}>{(!user.company_name || user.company_name === '부고온 파트너 상조' || user.company_name === '개인') ? '개인 장례지도사' : user.company_name}</p>
                     </div>
                 </div>
 

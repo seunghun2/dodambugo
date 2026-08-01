@@ -40,7 +40,18 @@ interface NotificationTemplate {
  */
 function replaceVariables(template: string, variables: Record<string, string>): string {
   let result = template;
-  for (const [key, value] of Object.entries(variables)) {
+
+  const fallbackPartnerName = variables['파트너명'] || variables['수신자명'] || '파트너';
+  const fallbackJoiningName = variables['가입파트너명'] || variables['신규파트너명'] || variables['가입자명'] || '신규 파트너';
+
+  const mergedVars: Record<string, string> = {
+    ...variables,
+    '파트너명': fallbackPartnerName,
+    '가입파트너명': fallbackJoiningName,
+    '신규파트너명': fallbackJoiningName,
+  };
+
+  for (const [key, value] of Object.entries(mergedVars)) {
     result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value || '');
   }
   return result;

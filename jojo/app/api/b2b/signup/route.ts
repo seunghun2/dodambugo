@@ -151,15 +151,27 @@ export async function POST(request: NextRequest) {
             { expiresIn: '30d' }
         );
 
-        // 추천인이 있으면 추천인에게 푸시 알림 발송
+        // 추천인이 있으면 추천인에게 푸시/인앱 알림 발송
         if (recommender_id) {
-            import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
-                sendPartnerNotification(recommender_id!, 'referral_signup', {
-                    신규파트너명: company_name || owner_name,
-                }, { url: '/b2b/dashboard' }).catch(err =>
-                    console.error('[PartnerNotification] 추천인 가입 푸시 실패:', err)
-                );
-            });
+            supabase
+                .from('b2b_users')
+                .select('owner_name, company_name')
+                .eq('id', recommender_id)
+                .single()
+                .then(({ data: recommenderUser }) => {
+                    const partnerName = recommenderUser?.owner_name || recommenderUser?.company_name || '파트너';
+                    const joiningPartnerName = owner_name || company_name || '신규 파트너';
+
+                    import('@/lib/partner-notification').then(({ sendPartnerNotification }) => {
+                        sendPartnerNotification(recommender_id!, 'referral_signup', {
+                            파트너명: partnerName,
+                            가입파트너명: joiningPartnerName,
+                            신규파트너명: joiningPartnerName,
+                        }, { url: '/b2b/settings' }).catch(err =>
+                            console.error('[PartnerNotification] 추천인 가입 푸시 실패:', err)
+                        );
+                    });
+                });
         }
 
         console.log(`✅ B2B 회원가입 완료: ${company_name} (${cleanPhone}) / 추천코드: ${my_referral_code}`);
