@@ -581,14 +581,17 @@ function SignupInner() {
                     <p className={styles.stepDesc}>정산 및 파트너 관리에 필요한 정보입니다.</p>
 
                     <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>회사명</label>
+                        <label className={styles.inputLabel}>상호명 (소속 또는 회사명)</label>
                         <input
                             type="text"
                             className={styles.input}
-                            placeholder="회사명 또는 소속 상조회사"
+                            placeholder="회사명, 장례식장명, 또는 '개인' 입력"
                             value={form.companyName}
                             onChange={(e) => setForm({ ...form, companyName: e.target.value })}
                         />
+                        <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', lineHeight: '1.4' }}>
+                            ※ 프리랜서/개인 지도사님은 '개인' 또는 성함을 입력해 주세요.
+                        </p>
                     </div>
                     <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>이름 (본인명)</label>

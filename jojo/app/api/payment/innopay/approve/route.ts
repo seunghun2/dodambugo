@@ -465,7 +465,7 @@ export async function POST(request: NextRequest) {
                     try {
                         const { data: partnerUser } = await supabase
                             .from('b2b_users')
-                            .select('company_id, recommender_id')
+                            .select('company_id, company_name, recommender_id')
                             .eq('id', partnerId)
                             .single();
 
@@ -492,9 +492,9 @@ export async function POST(request: NextRequest) {
                             console.log(`✅ [B2B] 상조회사 본사 ${partnerUser.company_id}에 ${companyCommission}원 정산 내역 추가 완료`);
                         }
 
-                        // 5. 추천인 보너스 적립 (상조회사 소속이 아닌 개인 파트너만)
-                        // 상조회사 소속이면 회사가 추천 채널이므로 추천인 보너스 중복 지급 방지
-                        if (!partnerUser?.company_id && partnerUser?.recommender_id) {
+                        // 5. 추천인 보너스 적립 (개인/프리랜서 파트너만, 더좋은라이프 등 상조회사 소속은 추천수당 제외)
+                        const isSangjoCorporate = partnerUser?.company_id || (partnerUser?.company_name && partnerUser.company_name.includes('더좋은라이프'));
+                        if (!isSangjoCorporate && partnerUser?.recommender_id) {
                             const { data: bonusSetting } = await supabase
                                 .from('b2b_settings')
                                 .select('value')
