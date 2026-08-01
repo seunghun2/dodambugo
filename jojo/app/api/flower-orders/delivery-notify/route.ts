@@ -53,26 +53,28 @@ export async function POST(request: Request) {
         let variables: Record<string, string> = {};
 
         if (type === 'delivering') {
-            // 05-화환 배송 안내
-            templateId = 'KA01TP260128002838240ioiYHpImLDY';
+            // 05-화환 배송 출발/안내
+            templateId = 'KA01TP2601280031066633sWAZnmaLjB';
             variables = {
-                '#{상품명}': order.product_name,
-                '#{주문자명}': order.sender_name,
-                '#{주소}': order.funeral_home
+                '#{상품명}': order.product_name || '화환',
+                '#{받는분}': order.recipient_name || (deceasedName ? `故 ${deceasedName}` : '상주님'),
+                '#{장례식장}': order.funeral_home
                     ? `${order.funeral_home}${order.room ? ' ' + order.room : ''}`
-                    : order.address || '장례식장'
+                    : order.address || '장례식장',
+                '#{주문번호}': order.order_number || String(order.id),
+                '#{고인명}': deceasedName || ''
             };
         } else if (type === 'delivered') {
             // 06-화환 배송 완료
             templateId = 'KA01TP260127010157157MBMxvZX3qUI';
             variables = {
-                '#{상품명}': order.product_name || '',
-                '#{받는분}': order.recipient_name || '',
+                '#{상품명}': order.product_name || '화환',
+                '#{받는분}': order.recipient_name || (deceasedName ? `故 ${deceasedName}` : '상주님'),
                 '#{장례식장}': order.funeral_home
                     ? `${order.funeral_home}${order.room ? ' ' + order.room : ''}`
-                    : '',
-                '#{주문번호}': order.order_number || '',
-                '#{고인명}': deceasedName
+                    : order.address || '장례식장',
+                '#{주문번호}': order.order_number || String(order.id),
+                '#{고인명}': deceasedName || ''
             };
         } else {
             return NextResponse.json({ error: '잘못된 type입니다' }, { status: 400 });
