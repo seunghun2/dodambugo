@@ -18,7 +18,7 @@ export async function GET() {
         .from('b2b_notices')
         .select('*')
         .order('is_fixed', { ascending: false })
-        .order('published_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, notices: data });
@@ -27,7 +27,7 @@ export async function GET() {
 // POST: 공지사항 등록
 export async function POST(request: NextRequest) {
     try {
-        const { title, content, is_fixed, published_at } = await request.json();
+        const { title, content, is_fixed } = await request.json();
         if (!title || !content) {
             return NextResponse.json({ error: '제목과 내용을 모두 입력해 주세요.' }, { status: 400 });
         }
@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
                 is_fixed: !!is_fixed,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                published_at: published_at ? new Date(published_at).toISOString() : new Date().toISOString(),
             })
             .select()
             .single();
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
 // PATCH: 공지사항 수정
 export async function PATCH(request: NextRequest) {
     try {
-        const { id, title, content, is_fixed, published_at } = await request.json();
+        const { id, title, content, is_fixed } = await request.json();
         if (!id) {
             return NextResponse.json({ error: '공지사항 ID가 필요합니다.' }, { status: 400 });
         }
@@ -75,9 +74,6 @@ export async function PATCH(request: NextRequest) {
         if (title !== undefined) updateData.title = title.trim();
         if (content !== undefined) updateData.content = content.trim();
         if (is_fixed !== undefined) updateData.is_fixed = !!is_fixed;
-        if (published_at !== undefined) {
-            updateData.published_at = published_at ? new Date(published_at).toISOString() : new Date().toISOString();
-        }
 
         const { data, error } = await supabase
             .from('b2b_notices')

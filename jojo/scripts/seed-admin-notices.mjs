@@ -45,7 +45,7 @@ const officialNotices = [
 ];
 
 async function seedNotices() {
-  console.log('published_at 필수 지정 포함 공지 5종 DB 시딩 구동...');
+  console.log('created_at 스키마 기준 공지 5종 DB 시딩 구동...');
 
   await supabase.from('b2b_notices').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
@@ -58,7 +58,6 @@ async function seedNotices() {
       is_fixed: n.is_fixed,
       created_at: targetDate.toISOString(),
       updated_at: targetDate.toISOString(),
-      published_at: targetDate.toISOString(), // 필수 지정!
     };
   });
 
@@ -70,7 +69,7 @@ async function seedNotices() {
   if (error) {
     console.error('공지사항 시딩 실패:', error);
   } else {
-    console.log(`🎉 성공적으로 published_at 지정 공지사항 ${data.length}건이 DB에 깔끔하게 수록되었습니다!`);
+    console.log(`🎉 성공적으로 created_at 지정 공지사항 ${data.length}건이 DB에 깔끔하게 수록되었습니다!`);
   }
 }
 
