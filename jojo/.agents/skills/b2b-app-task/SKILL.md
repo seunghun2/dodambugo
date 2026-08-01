@@ -313,4 +313,5 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **상세 내용**:
   - 알림 수신함 조회 시 최근 `60일 이내` 알림만 조회(`created_at >= 60일 전`)하여 무거운 데이터 누적 및 조회 지연 방지.
   - 프론트엔드/백엔드 페이징(`page`, `limit=30`, `range`) 연동으로 최초 30개 노출 후 스크롤 하단 도달 시 30개씩 스르륵 추가 로딩되는 무한 스크롤 연동.
+  - 무한 스크롤 로딩 시 중복 데이터 ID 필터링 및 React 고유 Key 조합(`${item.id}-${index}`)으로 중복 Key 오버레이 경고 에러 수정.
 - **관련 소스코드**: `jojo/app/api/b2b/notifications/route.ts`, `jojo/app/b2b/notifications/page.tsx`

@@ -82,7 +82,11 @@ export default function B2BNotificationsPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.notifications) {
-          setNotifications(prev => [...prev, ...data.notifications]);
+          setNotifications(prev => {
+            const existingIds = new Set(prev.map(n => n.id));
+            const uniqueNewItems = data.notifications.filter((n: any) => !existingIds.has(n.id));
+            return [...prev, ...uniqueNewItems];
+          });
           setHasMore(data.hasMore ?? false);
           setPage(nextPage);
         }
@@ -231,7 +235,7 @@ export default function B2BNotificationsPage() {
           <div className={styles.emptyState}>수신된 알림 내역이 없습니다.</div>
         ) : (
           <div className={styles.noticeList}>
-            {notifications.map((item) => {
+            {notifications.map((item, index) => {
               const typeInfo = getTypeIconAndClass(item.type);
               const hasLink = !!item.data?.url || !['signup_approved', 'new_funeral'].includes(item.type || '');
 
@@ -249,7 +253,7 @@ export default function B2BNotificationsPage() {
 
               return (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${index}`}
                   className={itemClassName}
                   onClick={() => handleNotificationClick(item)}
                 >
