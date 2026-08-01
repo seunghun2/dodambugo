@@ -83,6 +83,11 @@ export default function WalletPage() {
     const [success, setSuccess] = useState('');
     const [identityVerified, setIdentityVerified] = useState(false);
     const [partnerType, setPartnerType] = useState<'individual' | 'business'>('individual');
+    const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string }>({
+        isOpen: false,
+        title: '',
+        message: ''
+    });
     const [mounted, setMounted] = useState(false);
     const [bankName, setBankName] = useState<string | null>(null);
     const [accountNo, setAccountNo] = useState<string | null>(null);
@@ -415,11 +420,19 @@ export default function WalletPage() {
                                             } : undefined}
                                             onClick={() => {
                                                 if (isBankMaintenance) {
-                                                    alert('매일 23:30 ~ 00:30은 금융기관 및 펌뱅킹 점검 시간으로 환급 신청이 일시 제한됩니다.');
+                                                    setAlertModal({
+                                                        isOpen: true,
+                                                        title: '은행 점검 시간 안내',
+                                                        message: '매일 23:30 ~ 00:30은 금융기관 및 펌뱅킹 점검 시간으로 환급 신청이 일시 제한됩니다.'
+                                                    });
                                                     return;
                                                 }
                                                 if (isInsufficientBalance || isRefundDisabled) {
-                                                    alert('최소 환급 신청 가능 금액은 5,000원 이상입니다.');
+                                                    setAlertModal({
+                                                        isOpen: true,
+                                                        title: '환급 신청 제한',
+                                                        message: '최소 환급 신청 가능 금액은 5,000원 이상입니다.'
+                                                    });
                                                     return;
                                                 }
                                                 if (!identityVerified) {
@@ -970,6 +983,70 @@ export default function WalletPage() {
 
                             <button className={styles.bottomSheetCancel} onClick={() => setIsEditingAccount(false)}>
                                 취소
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 세련된 B2B 네이티브 팝업 모달 */}
+            <AnimatePresence>
+                {alertModal.isOpen && (
+                    <motion.div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 10000,
+                            padding: '20px'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setAlertModal({ ...alertModal, isOpen: false })}
+                    >
+                        <motion.div
+                            style={{
+                                backgroundColor: '#FFFFFF',
+                                borderRadius: '14px',
+                                width: '100%',
+                                maxWidth: '320px',
+                                padding: '24px 20px 20px 20px',
+                                textAlign: 'center',
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
+                            }}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#1E293B', marginBottom: '8px' }}>
+                                {alertModal.title}
+                            </h4>
+                            <p style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.5', marginBottom: '20px', wordBreak: 'keep-all' }}>
+                                {alertModal.message}
+                            </p>
+                            <button
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 0',
+                                    backgroundColor: '#2D7A4C',
+                                    color: '#FFFFFF',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '15px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => setAlertModal({ ...alertModal, isOpen: false })}
+                            >
+                                확인
                             </button>
                         </motion.div>
                     </motion.div>
