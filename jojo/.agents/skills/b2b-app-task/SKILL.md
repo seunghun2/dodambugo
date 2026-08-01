@@ -343,3 +343,11 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   2. **터미널 샌드박스 네트워크 아웃바운드 차단**: 샌드박스 내부 터미널 실행 시 Node.js의 외부 DB(`mnlyqhrjnpbkleenmszm.supabase.co`) HTTP 통신이 억제되어 `TypeError: fetch failed` 500 발생. ➡️ Next.js dev 서버 실행 시 Unsandboxed(BypassSandbox: true) 옵션으로 0.01초 통과 세팅.
   3. **로컬 DB 공지사항 시딩**: `scripts/seed-admin-notices.mjs` 스크립트를 통해 로컬 DB에도 실서버 정통 공지사항 5건 시딩 연동 완수.
 - **관련 소스코드/스크립트**: `jojo/scripts/seed-admin-notices.mjs`, `jojo/scripts/test-db-connection.mjs`
+
+### 13-14. 추천 코드 공유 링크 도메인 정정 및 가입 시 추천인 코드 자동 대입 연동
+- **상세 내용**:
+  - 기존 레거시 미확인 도메인(`https://bugoon.co.kr/download/partner`) 전면 제거.
+  - 정식 파트너 회원가입 링크(`https://bugoon.maeumbugo.co.kr/b2b/signup?ref=추천코드`)로 도메인 정정 및 공유 문구 전면 개편.
+  - 신규 파트너가 공유받은 링크 클릭 시 회원가입 페이지(`app/b2b/signup/page.tsx`)에서 쿼리 파라미터(`?ref=XXXX`)를 자동으로 인식하여 추천 코드가 폼에 쏙 입력되고 추천인 성명/회사명이 즉시 노출되도록 `useSearchParams` & `Suspense` 자동 연동 완비.
+- **관련 소스코드**: `jojo/app/b2b/dashboard/page.tsx`, `jojo/app/b2b/settings/page.tsx`, `jojo/app/b2b/signup/page.tsx`
+
