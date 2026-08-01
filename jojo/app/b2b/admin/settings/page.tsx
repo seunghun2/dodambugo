@@ -127,7 +127,7 @@ export default function SettingsPage() {
                             />
                             <span className={styles.unit}>원</span>
                         </div>
-                        <p className={styles.description}>파트너 지도사가 모바일 부고장을 생성하여 화환 주문이 발생했을 때 건당 지급되는 기본 수당입니다.</p>
+                        <p className={styles.description}>소속 상조회사가 없는 개인/프리랜서 장례지도사님이 화환을 판매했을 때 지급되는 기본 수당입니다.</p>
                     </div>
 
                     {/* 추천 보너스 수당 */}
