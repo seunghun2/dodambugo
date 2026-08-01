@@ -39,7 +39,7 @@ const officialNotices = [
   },
   {
     title: '[공지] 파트너 추천인 코드 혜택 안내',
-    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>파트너 회원 간 추천인 코드 혜택을 안내해 드립니다.</p><p>1. 추천인 코드 확인<br />- 메인 화면 및 내 정보에서 본인의 4자리 추천 코드를 확인하실 수 있습니다.</p><p>2. 추천 혜택<br />- 신규 파트너가 가입 시 추천 코드를 입력하면 추천인과 피추천인 모두에게 2,500원 적립금이 부여됩니다.</p><p>파트너 여러분의 많은 이용 바랍니다.</p><p>감사합니다.</p>`,
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>파트너 회원 간 추천인 코드 혜택 및 적용 기준을 안내해 드립니다.</p><p>1. 추천인 코드 확인<br />- 메인 화면 및 내 정보에서 본인의 4자리 추천 코드를 확인하실 수 있습니다.</p><p>2. 추천 혜택 적용 기준<br />- 신규 개인 파트너 가입 시 추천 코드를 입력하면 추천인과 피추천인 모두에게 2,500원 적립금이 부여됩니다.<br />- 단, 동일 상조회사 소속 파트너 간 추천의 경우 상조회사 본사 정산 정책에 따르므로 개인 추천 적립금 지급 대상에서 제외됩니다.</p><p>파트너 여러분의 많은 이용 바랍니다.</p><p>감사합니다.</p>`,
     is_fixed: false,
   },
   {
@@ -50,19 +50,11 @@ const officialNotices = [
 ];
 
 async function seedNotices() {
-  console.log('기존 공지사항 확인 및 정통 공지사항 6종 시딩 시작...');
+  console.log('공지사항 DB 리셋 및 동일 상조 예외 조항 포함 6종 재생성 시작...');
 
-  // b2b_notices 테이블 확인
-  const { data: existing, error: fetchErr } = await supabase
-    .from('b2b_notices')
-    .select('id');
+  // 기존 시딩 데이터 삭제 후 깨끗하게 업데이트
+  await supabase.from('b2b_notices').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-  if (fetchErr) {
-    console.error('b2b_notices 테이블 조회 실패:', fetchErr);
-    return;
-  }
-
-  // 등록 시작
   const now = new Date();
   const noticesToInsert = officialNotices.map((n, idx) => ({
     title: n.title,
@@ -79,7 +71,7 @@ async function seedNotices() {
   if (error) {
     console.error('공지사항 시딩 실패:', error);
   } else {
-    console.log(`🎉 성공적으로 어드민 공지사항 ${data.length}건이 DB에 깔끔하게 등록되었습니다!`);
+    console.log(`🎉 성공적으로 [동일 상조 예외 조항 포함] 공지사항 ${data.length}건이 DB에 업데이트되었습니다!`);
   }
 }
 
