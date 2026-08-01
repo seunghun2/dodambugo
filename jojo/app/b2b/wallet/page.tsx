@@ -917,7 +917,9 @@ export default function WalletPage() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
                                         <span style={{ fontSize: '13px', color: '#8E94A0', fontWeight: 600 }}>계좌번호</span>
                                         <input 
-                                            type="text" 
+                                            type="tel" 
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
                                             style={{
                                                 width: '100%',
                                                 height: '46px',

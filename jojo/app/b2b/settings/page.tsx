@@ -792,7 +792,9 @@ export default function SettingsPage() {
                                     <div className={styles.inputField}>
                                         <span className={styles.inputLabel}>계좌번호</span>
                                         <input 
-                                            type="text" 
+                                            type="tel" 
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
                                             className={styles.textInput} 
                                             placeholder={bankName ? getPlaceholder(bankName) : '계좌번호 입력'} 
                                             value={bankName ? formatAccountNo(accountNo, bankName) : accountNo}

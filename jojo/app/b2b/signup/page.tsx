@@ -620,10 +620,8 @@ function SignupInner() {
             {/* Step 4: 정산 계좌 */}
             {step === 4 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>
-                        정산 계좌<span className={styles.stepTitleSub}>를 등록해 주세요</span>
-                    </h2>
-                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다.</p>
+                    <h2 className={styles.stepTitle}>정산 계좌 등록</h2>
+                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌를 등록해 주세요.</p>
 
                     <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>은행</label>
@@ -646,7 +644,9 @@ function SignupInner() {
                     <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>계좌번호</label>
                         <input
-                            type="text"
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             className={styles.input}
                             placeholder={form.bankName ? getPlaceholder(form.bankName) : '계좌번호 입력'}
                             value={form.bankName ? formatAccountNo(form.accountNo, form.bankName) : form.accountNo}
