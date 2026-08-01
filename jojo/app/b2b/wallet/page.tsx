@@ -400,17 +400,17 @@ export default function WalletPage() {
                             {(() => {
                                 const isBankMaintenance = isBankMaintenanceWindow();
                                 const isInsufficientBalance = withdrawableBalance < 5000;
-                                const isRefundDisabled = isBankMaintenance || isInsufficientBalance;
+                                // 대표님 테스트 확인용: 강제 비활성화 세팅 (실제 작동시 isBankMaintenance || isInsufficientBalance)
+                                const isRefundDisabled = true;
 
                                 return (
                                     <>
                                         <button
                                             className={styles.actionBtn}
-                                            disabled={isRefundDisabled}
                                             style={isRefundDisabled ? {
                                                 backgroundColor: '#CBD5E1',
                                                 color: '#64748B',
-                                                cursor: 'not-allowed',
+                                                cursor: 'pointer',
                                                 boxShadow: 'none'
                                             } : undefined}
                                             onClick={() => {
@@ -418,7 +418,7 @@ export default function WalletPage() {
                                                     alert('매일 23:30 ~ 00:30은 금융기관 및 펌뱅킹 점검 시간으로 환급 신청이 일시 제한됩니다.');
                                                     return;
                                                 }
-                                                if (isInsufficientBalance) {
+                                                if (isInsufficientBalance || isRefundDisabled) {
                                                     alert('최소 환급 신청 가능 금액은 5,000원 이상입니다.');
                                                     return;
                                                 }
@@ -432,19 +432,15 @@ export default function WalletPage() {
                                             환급신청
                                         </button>
 
-                                        {/* 환급 관련 B2B 정돈된 안내 박스 */}
+                                        {/* 환급 관련 간결한 안내 영역 (네모 박스 테두리/배경 제거) */}
                                         <div style={{
                                             marginTop: '16px',
-                                            padding: '12px 14px',
-                                            backgroundColor: '#F8FAFC',
-                                            borderRadius: '8px',
-                                            border: '1px solid #E2E8F0',
                                             fontSize: '12px',
-                                            color: '#64748B',
+                                            color: '#8E94A0',
                                             lineHeight: '1.6',
                                             textAlign: 'left'
                                         }}>
-                                            <div style={{ fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                                            <div style={{ fontWeight: 600, color: '#475569', marginBottom: '4px' }}>
                                                 [환급 신청 안내]
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
