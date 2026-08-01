@@ -73,39 +73,22 @@ function CompleteContent() {
                     </p>
                 </div>
 
-                {/* 시작하기 및 모바일 앱 다운로드 버튼 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                    <button className={styles.startBtn} onClick={() => router.push('/b2b/dashboard')}>
-                        파트너 서비스 시작하기
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
-                            const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
-                            if (isIOS) {
-                                window.location.href = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
-                            } else {
-                                alert('안드로이드(Android) 파트너 앱은 구글 플레이스토어 정식 출시 준비 중입니다.\n현재는 모바일 웹 브라우저에서 동일하게 모든 기능을 편리하게 이용하실 수 있습니다!');
-                            }
-                        }}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '14px 0',
-                            backgroundColor: '#1E293B',
-                            color: '#FFFFFF',
-                            borderRadius: '10px',
-                            fontSize: '15px',
-                            fontWeight: 600,
-                            textAlign: 'center',
-                            border: 'none',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        부고온 파트너 앱 다운로드
-                    </button>
-                </div>
+                {/* 모바일 앱 다운로드 단일 메인 초록색 버튼 */}
+                <button
+                    type="button"
+                    className={styles.startBtn}
+                    onClick={() => {
+                        const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
+                        const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+                        if (isIOS) {
+                            window.location.href = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
+                        } else {
+                            alert('안드로이드(Android) 파트너 앱은 구글 플레이스토어 정식 출시 준비 중입니다.\n현재는 모바일 웹 브라우저에서 동일하게 모든 기능을 편리하게 이용하실 수 있습니다!');
+                        }
+                    }}
+                >
+                    부고온 파트너 앱 다운로드
+                </button>
             </div>
         </div>
     );
