@@ -73,15 +73,22 @@ function CompleteContent() {
                     </p>
                 </div>
 
-                {/* 시작하기 및 앱 다운로드 버튼 */}
+                {/* 시작하기 및 모바일 앱 다운로드 버튼 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                     <button className={styles.startBtn} onClick={() => router.push('/b2b/dashboard')}>
                         파트너 서비스 시작하기
                     </button>
-                    <a
-                        href="https://bugoon.maeumbugo.co.kr"
-                        target="_blank"
-                        rel="noreferrer"
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
+                            const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+                            if (isIOS) {
+                                window.location.href = 'https://apps.apple.com/kr/app/id6786073225';
+                            } else {
+                                window.location.href = 'https://apps.apple.com/kr/app/id6786073225';
+                            }
+                        }}
                         style={{
                             display: 'block',
                             width: '100%',
@@ -92,11 +99,12 @@ function CompleteContent() {
                             fontSize: '15px',
                             fontWeight: 600,
                             textAlign: 'center',
-                            textDecoration: 'none'
+                            border: 'none',
+                            cursor: 'pointer'
                         }}
                     >
                         부고온 파트너 앱 다운로드
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
