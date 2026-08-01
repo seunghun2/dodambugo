@@ -541,21 +541,25 @@ export default function B2BCreatePage() {
             
             <div className={styles.previewBody}>
               {/* 장례식장 정보 */}
-              {formData.funeral_type !== '무빈소장례' && formData.funeral_home && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>장례식장</span>
-                  <span className={styles.previewValue}>
-                    {formData.address && <>{formData.address}<br /></>}
-                    {formData.funeral_home} {formData.room_number}
-                  </span>
-                </div>
-              )}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>장례식장정보</span>
+                <span className={styles.previewValue}>
+                  {formData.funeral_home ? (
+                    <>
+                      {formData.address && <>{formData.address}<br /></>}
+                      {formData.funeral_home} {formData.room_number || ''}
+                    </>
+                  ) : (
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
+                  )}
+                </span>
+              </div>
 
               {/* 고인 정보 */}
               <div className={styles.previewInfoRow}>
-                <span className={styles.previewLabel}>고인정보</span>
+                <span className={styles.previewLabel}>고인 정보</span>
                 <span className={styles.previewValue}>
-                  {formData.deceased_name}
+                  故 {formData.deceased_name}
                   {formData.religion && formData.religion !== '없음' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}` : ''}
                   {formData.age ? ` / ${formData.age}세` : ''}
                   {formData.hide_gender ? '' : formData.gender ? ` / ${formData.gender === '남' ? '남성' : '여성'}` : ''}
@@ -563,80 +567,79 @@ export default function B2BCreatePage() {
               </div>
 
               {/* 별세일 */}
-              {formData.death_date && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>별세일</span>
-                  <span className={styles.previewValue}>
-                    {formData.death_date}{formData.death_time ? ` / ${formData.death_time}` : ''}
-                  </span>
-                </div>
-              )}
-
-              {/* 입관일 */}
-              {formData.encoffin_date && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>입관일</span>
-                  <span className={styles.previewValue}>
-                    {formData.encoffin_date}{formData.encoffin_time ? ` / ${formData.encoffin_time}` : ''}
-                  </span>
-                </div>
-              )}
-
-              {/* 발인일 */}
-              {formData.funeral_date && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>발인일</span>
-                  <span className={styles.previewValue}>
-                    {formData.funeral_date}{formData.funeral_time ? ` / ${formData.funeral_time}` : ''}
-                  </span>
-                </div>
-              )}
-
-              {/* 일포일시 */}
-              {formData.ilpo_date && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>일포일시</span>
-                  <span className={styles.previewValue}>
-                    {formData.ilpo_date}{formData.ilpo_time ? ` / ${formData.ilpo_time}` : ''}
-                  </span>
-                </div>
-              )}
-
-              {/* 장지 */}
-              {(formData.burial_place || formData.burial_place2) && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>장지</span>
-                  <span className={styles.previewValue}>
-                    {formData.burial_place}
-                    {formData.burial_place2 && ` / ${formData.burial_place2}`}
-                  </span>
-                </div>
-              )}
-
-              {/* 상주 정보 */}
               <div className={styles.previewInfoRow}>
-                <span className={styles.previewLabel}>상주</span>
-                <div className={styles.previewValue}>
-                  {mourners.filter(m => m.name).map((m, i) => (
-                    <div key={i} className={styles.previewMournerItem}>
-                      [{m.relationship || '상주'}] {m.name} {m.contact ? `(${m.contact})` : ''}
-                      {m.bank && m.accountNumber && (
-                        <div style={{ fontSize: '12px', color: '#666', fontWeight: 'normal', marginTop: '2px' }}>
-                          {m.bank} {m.accountNumber} {m.accountHolder ? `(예금주: ${m.accountHolder})` : ''}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <span className={styles.previewLabel}>별세일</span>
+                <span className={styles.previewValue}>
+                  {formData.death_date ? (
+                    `${formData.death_date}${formData.death_time ? ` / ${formData.death_time}` : ''}`
+                  ) : (
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
+                  )}
+                </span>
               </div>
 
-              {/* 안내사항 */}
-              {formData.show_message && formData.message && (
-                <div className={styles.previewInfoRow}>
-                  <span className={styles.previewLabel}>안내사항</span>
-                  <span className={styles.previewValue}>{formData.message}</span>
+              {/* 입관일 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>입관일</span>
+                <span className={styles.previewValue}>
+                  {formData.encoffin_date ? (
+                    `${formData.encoffin_date}${formData.encoffin_time ? ` / ${formData.encoffin_time}` : ''}`
+                  ) : (
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
+                  )}
+                </span>
+              </div>
+
+              {/* 발인일 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>발인일</span>
+                <span className={styles.previewValue}>
+                  {formData.funeral_date ? (
+                    `${formData.funeral_date}${formData.funeral_time ? ` / ${formData.funeral_time}` : ''}`
+                  ) : (
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
+                  )}
+                </span>
+              </div>
+
+              {/* 1차장지 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>1차장지</span>
+                <span className={styles.previewValue}>
+                  {formData.burial_place ? (
+                    `${formData.burial_place}${formData.burial_place2 ? ` / ${formData.burial_place2}` : ''}`
+                  ) : (
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
+                  )}
+                </span>
+              </div>
+
+              {/* 상주 정보 */}
+              {mourners.filter(m => m.name).map((m, i) => (
+                <div key={i} className={styles.previewInfoRow}>
+                  <span className={styles.previewLabel}>{i === 0 ? '대표상주' : '상주'}</span>
+                  <div className={styles.previewValue}>
+                    <div>
+                      [{m.relationship || '상주'}] {m.name} {m.contact ? `(${m.contact})` : ''}
+                    </div>
+                    {m.bank && m.accountNumber && (
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 'normal', marginTop: '2px' }}>
+                        {m.bank} {m.accountNumber} {m.accountHolder ? `(예금주: ${m.accountHolder})` : ''}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ))}
+
+              {/* 알림 메세지 */}
+              <div className={styles.previewInfoRow}>
+                <span className={styles.previewLabel}>알림 메세지</span>
+                <span className={styles.previewValue}>
+                  {formData.show_message && formData.message
+                    ? formData.message
+                    : '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.'}
+                </span>
+              </div>
             </div>
 
             <div className={styles.previewFooter}>

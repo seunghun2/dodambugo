@@ -287,4 +287,18 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **상세 내용**: 
   - 클라이언트 direct insert 시 RLS 보안 차단 및 컬럼 불일치로 발생하던 복제 실패 오류 해결.
   - Supabase `SERVICE_ROLE_KEY`를 사용하는 전용 백엔드 API `/api/b2b/bugo/duplicate` 신규 구축 및 연동.
+  - 부고 복제 시 고인 성함 뒤 `(복제)` 접미사가 붙지 않고 원본 그대로 정중하게 복제되도록 보완.
 - **관련 소스코드**: `jojo/app/api/b2b/bugo/duplicate/route.ts`, `jojo/app/b2b/manage/page.tsx`
+
+### 13-6. B2B 부고장 상세 확인 및 미리보기 모달 UX 고도화
+- **상세 내용**:
+  - 부고장 상세 확인 모달(`styles.modalTable`)에서 B2B 단일 테마 정책에 맞게 불필요한 `부고장테마` 항목 제거.
+  - 미입력 데이터 경고 아이콘(`!`)을 제거하고 톤다운된 슬레이트 쿨그레이(`#94a3b8`) 색상으로 정돈.
+  - 부고장 완성/발송 화면(`app/b2b/create/complete/[bugoNumber]`)의 `[부고장 미리보기]` 클릭 시 외부 탭 대신 **아래에서 위로 올라오는 94vh 바텀시트 슬라이드 모달(`slideUp`)**로 화면 내부 렌더링.
+  - 상단 헤더 버튼을 `< 수정하기` 버튼으로 명시하고 클릭 시 해당 부고 수정 화면으로 연동, 하단 버튼은 `[홈으로]` 대시보드 이동으로 정돈.
+- **관련 소스코드**: `jojo/app/b2b/manage/page.tsx`, `jojo/app/b2b/create/page.tsx`, `jojo/app/b2b/create/complete/[bugoNumber]/page.tsx`, `complete.module.css`
+
+### 13-7. 부고 발송 대상 연락처 존재하는 상주 자동 필터링
+- **상세 내용**:
+  - 부고장 발송 설정 테이블에서 연락처(`contact`)가 실제로 입력된 상주만 발송 대상 목록에 선택/노출되도록 세팅.
+- **관련 소스코드**: `jojo/app/b2b/create/complete/[bugoNumber]/page.tsx`

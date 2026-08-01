@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { IconX } from '@tabler/icons-react';
+import { IconChevronLeft } from '@tabler/icons-react';
 import Image from 'next/image';
 import styles from './complete.module.css';
 
@@ -37,6 +37,7 @@ export default function B2BCompletePage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   // 조문객에게 공유할 URL: bugoon.maeumbugo.co.kr/view/{번호} (b2b 경로 제외)
   const bugoUrl = useMemo(() => {
@@ -68,7 +69,9 @@ export default function B2BCompletePage() {
             : data.mourners;
 
           if (Array.isArray(parsedMourners)) {
-            const mapped = parsedMourners.map((m: any) => ({
+            // 연락처(contact)가 등록되어 있는 상주만 발송 목록 대상에 포함
+            const validMourners = parsedMourners.filter((m: any) => m.name && m.contact && m.contact.trim() !== '');
+            const mapped = validMourners.map((m: any) => ({
               relationship: m.relationship || '',
               name: m.name || '',
               contact: m.contact || '',
@@ -174,9 +177,9 @@ export default function B2BCompletePage() {
     }
   };
 
-  // 부고장 미리보기 오픈
+  // 부고장 미리보기 오픈 (화면 내부 팝업 모달)
   const handlePreview = () => {
-    window.open(bugoUrl, '_blank');
+    setShowViewModal(true);
   };
 
   if (loading) {
@@ -200,10 +203,11 @@ export default function B2BCompletePage() {
 
   return (
     <div className={styles.page}>
-      {/* 상단 닫기 헤더 */}
+      {/* 상단 닫기 헤더 (수정 페이지로 이동) */}
       <header className={styles.header}>
-        <button className={styles.btnClose} onClick={() => router.back()}>
-          <IconX size={28} stroke={1.5} />
+        <button className={styles.btnClose} onClick={() => router.push(`/b2b/create?edit=${params.bugoNumber}`)} title="수정하기">
+          <IconChevronLeft size={24} stroke={2} />
+          <span>수정하기</span>
         </button>
       </header>
 
@@ -270,10 +274,10 @@ export default function B2BCompletePage() {
         </button>
       </div>
 
-      {/* 최하단 목록으로 이동 버튼 */}
+      {/* 최하단 홈으로 이동 버튼 */}
       <div className={styles.footerArea}>
         <button className={styles.btnList} onClick={() => router.push('/b2b/dashboard')}>
-          목록으로
+          홈으로
         </button>
       </div>
 
@@ -281,6 +285,27 @@ export default function B2BCompletePage() {
       {toastMessage && (
         <div className={styles.toast}>
           {toastMessage}
+        </div>
+      )}
+
+      {/* 화면 내부 부고장 미리보기 모달 */}
+      {showViewModal && (
+        <div className={styles.viewModalOverlay} onClick={() => setShowViewModal(false)}>
+          <div className={styles.viewModalContainer} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.viewModalHeader}>
+              <span className={styles.viewModalTitle}>부고장 미리보기</span>
+              <button className={styles.viewModalCloseBtn} onClick={() => setShowViewModal(false)}>
+                ×
+              </button>
+            </div>
+            <div className={styles.viewModalBody}>
+              <iframe
+                src={`/view/${params.bugoNumber}`}
+                className={styles.viewIframe}
+                title="부고장 미리보기"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

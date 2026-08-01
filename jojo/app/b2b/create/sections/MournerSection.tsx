@@ -541,11 +541,20 @@ export default function MournerSection({ mourners, onMournersChange, errors }: P
       })
     : groupedMourners;
 
+  // --- 휴대폰 번호 하이픈 자동 포맷팅 ---
+  const formatPhoneInput = (val: string): string => {
+    const digits = val.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  };
+
   // --- 상주 필드 변경 ---
   const handleFieldChange = useCallback(
     (index: number, field: keyof Mourner, value: string) => {
       const updated = [...mourners];
-      updated[index] = { ...updated[index], [field]: value };
+      const finalValue = field === 'contact' ? formatPhoneInput(value) : value;
+      updated[index] = { ...updated[index], [field]: finalValue };
       onMournersChange(updated);
     },
     [mourners, onMournersChange],
@@ -916,6 +925,8 @@ export default function MournerSection({ mourners, onMournersChange, errors }: P
                         <div className={styles.mnFieldContact}>
                           <input
                             type="tel"
+                            inputMode="numeric"
+                            maxLength={13}
                             className={`${styles.mnInputCompact} ${isFirst && errors?.mourner_contact ? styles.inputError : ''}`}
                             placeholder={isFirst ? "연락처 *" : "연락처"}
                             value={item.mourner.contact}

@@ -211,3 +211,28 @@
   opacity: 0.9;
 }
 
+.btnConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.noInfo {
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.noInfoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #FF4D5B;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}

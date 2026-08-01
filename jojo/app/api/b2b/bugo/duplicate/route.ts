@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
             bugo_number: newBugoNumber,
             owner_token: newOwnerToken,
             b2b_user_id: userId,
-            deceased_name: `${originalBugo.deceased_name} (복제)`,
+            deceased_name: originalBugo.deceased_name,
             created_at: new Date().toISOString(),
         };
 

@@ -397,11 +397,6 @@ function B2BManagePageContent() {
             
             <div className={styles.modalTable}>
               <div className={styles.modalRow}>
-                <span className={styles.modalLabel}>부고장테마</span>
-                <span className={styles.modalValue}>기본 부고장 테마</span>
-              </div>
-              
-              <div className={styles.modalRow}>
                 <span className={styles.modalLabel}>장례식장정보</span>
                 <span className={styles.modalValue}>
                   {selectedBugo.funeral_home ? (
@@ -410,7 +405,7 @@ function B2BManagePageContent() {
                       {selectedBugo.funeral_home} {selectedBugo.room_number || ''}
                     </>
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
@@ -431,7 +426,7 @@ function B2BManagePageContent() {
                   {selectedBugo.death_date ? (
                     `${selectedBugo.death_date}${selectedBugo.death_time ? ` / ${selectedBugo.death_time}` : ''}`
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
@@ -442,7 +437,7 @@ function B2BManagePageContent() {
                   {selectedBugo.encoffin_date ? (
                     `${selectedBugo.encoffin_date}${selectedBugo.encoffin_time ? ` / ${selectedBugo.encoffin_time}` : ''}`
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
@@ -453,7 +448,7 @@ function B2BManagePageContent() {
                   {selectedBugo.funeral_date ? (
                     `${selectedBugo.funeral_date}${selectedBugo.funeral_time ? ` / ${selectedBugo.funeral_time}` : ''}`
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
@@ -464,7 +459,7 @@ function B2BManagePageContent() {
                   {selectedBugo.burial_place ? (
                     `${selectedBugo.burial_place}${selectedBugo.burial_place2 ? ` / ${selectedBugo.burial_place2}` : ''}`
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
@@ -486,7 +481,7 @@ function B2BManagePageContent() {
                       })()}
                     </>
                   ) : (
-                    <span className={styles.noInfo}><span className={styles.noInfoIcon}>!</span>해당 정보가 없습니다</span>
+                    <span className={styles.noInfo}>해당 정보가 없습니다</span>
                   )}
                 </span>
               </div>
