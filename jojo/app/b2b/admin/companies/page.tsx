@@ -30,7 +30,7 @@ export default function CompaniesPage() {
     // 입력 필드 상태
     const [name, setName] = useState('');
     const [businessNo, setBusinessNo] = useState('');
-    const [wreathCommission, setWreathCommission] = useState('5000');
+    const [wreathCommission, setWreathCommission] = useState('20000');
     const [ownerName, setOwnerName] = useState('');
     const [address, setAddress] = useState('');
     const [businessType, setBusinessType] = useState('');
