@@ -1849,11 +1849,29 @@ export default function SettingsPage() {
     // 6. 회원탈퇴 상세 뷰 ('withdraw')
     // ==========================================
     if (view === 'withdraw') {
-        const handleWithdrawSubmit = () => {
+        const handleWithdrawSubmit = async () => {
             if (!isWithdrawAgree) return;
-            if (confirm('부고온 파트너 서비스를 정말로 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
-                alert('회원 탈퇴가 최종 완료되었습니다. 그동안 부고온 파트너 서비스를 이용해주셔서 대단히 감사합니다.');
-                handleLogout();
+            if (!confirm('부고온 파트너 서비스를 정말로 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+
+            try {
+                const token = localStorage.getItem('b2b_token');
+                const res = await fetch('/api/b2b/withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    alert('회원 탈퇴가 최종 완료되었습니다. 그동안 부고온 파트너 서비스를 이용해 주셔서 대단히 감사합니다.');
+                    handleLogout();
+                } else {
+                    alert(data.error || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+                }
+            } catch {
+                alert('회원 탈퇴 처리 중 시스템 오류가 발생했습니다.');
             }
         };
 
