@@ -1507,7 +1507,7 @@ export default function SettingsPage() {
 
         const handleResignCompany = async () => {
             if (!user) return;
-            if (confirm(`현재 소속 정보(${user.company_name})를 정말로 해제하시겠습니까?\n해제 후 다른 상조회사 소속으로 재가입/변경하실 수 있습니다.`)) {
+            if (confirm(`현재 소속 정보(${user.company_name || '개인'})를 해제하시겠습니까?\n해제 후 개인 파트너(프리랜서 장례지도사) 상태로 전환되며, 필요 시 새로운 소속 회사를 등록하실 수 있습니다.`)) {
                 try {
                     const token = getToken();
                     const res = await fetch('/api/b2b/me', {
@@ -1517,12 +1517,12 @@ export default function SettingsPage() {
                             Authorization: `Bearer ${token}`,
                         },
                         body: JSON.stringify({
-                            company_name: '부고온 파트너 상조',
+                            company_name: '개인',
                             company_id: null,
                         }),
                     });
                     if (res.ok) {
-                        alert('소속 상조회사가 해제되었습니다. 새 상조회사로 등록해 주세요.');
+                        alert('소속 회사가 해제되어 개인 파트너 상태로 전환되었습니다.');
                         fetchUser();
                     } else {
                         alert('소속 해제 처리에 실패했습니다.');
@@ -1671,10 +1671,20 @@ export default function SettingsPage() {
                     <div className={styles.detailRow}>
                         <span className={styles.detailLabel}>소속</span>
                         <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>{user.company_name || '부고온 파트너 상조'}</span>
-                            <button className={styles.detailActionBtn} onClick={handleResignCompany}>
-                                탈퇴하기
-                            </button>
+                            <span className={styles.detailValueText}>
+                                {user.company_name && user.company_name !== '개인' && user.company_name !== '부고온 파트너 상조'
+                                    ? user.company_name 
+                                    : '소속 없음 (개인 장례지도사)'}
+                            </span>
+                            {user.company_name && user.company_name !== '개인' && user.company_name !== '부고온 파트너 상조' ? (
+                                <button className={styles.detailActionBtn} onClick={handleResignCompany}>
+                                    소속 해제
+                                </button>
+                            ) : (
+                                <button className={styles.detailActionBtn} onClick={handleOpenCompanyModal}>
+                                    소속 등록
+                                </button>
+                            )}
                         </div>
                     </div>
                     <div className={styles.detailRow}>
