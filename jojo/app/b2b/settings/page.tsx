@@ -1859,8 +1859,12 @@ export default function SettingsPage() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({
+                        userId: user?.id,
+                        phone: user?.phone
+                    })
                 });
                 const data = await res.json();
 
