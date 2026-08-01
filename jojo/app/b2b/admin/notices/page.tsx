@@ -486,6 +486,9 @@ export default function B2BAdminNoticesPage() {
                                             border: '1px solid #cbd5e1',
                                             padding: '12px',
                                             backgroundColor: '#ffffff',
+                                            color: '#0f172a',
+                                            fontSize: '15px',
+                                            lineHeight: '1.6',
                                             cursor: 'text'
                                         }}
                                         data-placeholder="공지내용을 작성해 주세요. 굵게, 구분선, 이미지 삽입을 편리하게 편집할 수 있습니다."

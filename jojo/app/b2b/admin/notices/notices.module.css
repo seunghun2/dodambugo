@@ -397,6 +397,9 @@
 .textareaWithToolbar {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
+    color: #0f172a !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
 }
 
 /* 예약 관련 */
@@ -420,7 +423,7 @@
 
 div[contenteditable]:empty::before {
     content: attr(data-placeholder);
-    color: #94a3b8;
+    color: #64748b;
     font-size: 14px;
     pointer-events: none;
     display: block;

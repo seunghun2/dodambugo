@@ -1,0 +1,86 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase 환경 변수가 설정되지 않았습니다.');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const officialNotices = [
+  {
+    title: '[공지] 부고온 B2B 파트너 서비스 이용 안내',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>장례지도사 파트너분들의 신속한 부고장 제작과 정산 관리를 위한 부고온 B2B 파트너 서비스가 운영 중입니다.</p><p>주요 제공 기능은 다음과 같습니다.</p><p>1. 모바일 부고장 간편 제작 및 발송<br />2. 상주별 계좌 노출 및 알림톡/문자 발송<br />3. 조문객 근조화환 연계 및 수수료 적립</p><p>이용 중 문의 사항은 앱 내 [1:1 문의하기]를 통해 접수해 주시면 확인 후 안내해 드리겠습니다.</p><p>감사합니다.</p>`,
+    is_fixed: true,
+  },
+  {
+    title: '[공지] 파트너 정산금 지급 및 3.3% 원천징수 안내',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>파트너 수수료 정산 및 출금 신청에 관한 안내입니다.</p><p>1. 출금 신청 기준<br />- 보유 적립금 10,000원 이상 시 신청 가능합니다.</p><p>2. 정산금 지급 일정<br />- 매주 신청된 정산금은 익주 화요일에 등록하신 정산 계좌로 이체됩니다.</p><p>3. 세무 처리 및 3.3% 원천징수<br />- 개인 파트너의 경우 관련 법령(소득세법 제127조)에 따라 사업소득세 3% 및 지방소득세 0.3%(총 3.3%) 원천징수 공제 후 실령액이 지급됩니다.<br />- 국세청 지급명세서 제출을 위해 최초 출금 시 주민등록번호 입력이 필요합니다.</p><p>감사합니다.</p>`,
+    is_fixed: true,
+  },
+  {
+    title: '[공지] 은행 점검 시간 내 정산금 출금 신청 일시 제한 안내',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>금융기관 및 펌뱅킹 점검 시간에 따른 출금 신청 일시 제한을 안내해 드립니다.</p><p>1. 은행 점검 시간대<br />- 매일 23:30 ~ 00:30 (약 1시간 동안)</p><p>2. 유의사항<br />- 해당 시간대에는 금융결제원 및 주요 은행 시스템 점검으로 인해 정산금 출금 신청 및 이체 작업이 일시 제한됩니다.<br />- 점검 시간 종료 후 00:30 이후부터 정상적으로 출금 신청을 이용하실 수 있습니다.</p><p>파트너 여러분의 양해 부탁드립니다.</p><p>감사합니다.</p>`,
+    is_fixed: true,
+  },
+  {
+    title: '[공지] 모바일 부고장 작성 시 유의사항',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>모바일 부고장 작성 시 정확한 정보 전달을 위해 아래 사항을 확인해 주시기 바랍니다.</p><p>1. 고인 정보<br />- 고인 성함을 정확하게 입력해 주시기 바랍니다.</p><p>2. 장례식장 및 발인 일시<br />- 검색을 통해 장례식장 주소 및 빈소를 확인 후 입력해 주시기 바랍니다.</p><p>3. 상주 정보 및 계좌<br />- 연락처 및 계좌 정보 입력 후 최종 생성 전 미리보기 팝업을 통해 다시 한번 확인해 주시기 바랍니다.</p><p>감사합니다.</p>`,
+    is_fixed: false,
+  },
+  {
+    title: '[공지] 파트너 추천인 코드 혜택 안내',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>파트너 회원 간 추천인 코드 혜택을 안내해 드립니다.</p><p>1. 추천인 코드 확인<br />- 메인 화면 및 내 정보에서 본인의 4자리 추천 코드를 확인하실 수 있습니다.</p><p>2. 추천 혜택<br />- 신규 파트너가 가입 시 추천 코드를 입력하면 추천인과 피추천인 모두에게 2,500원 적립금이 부여됩니다.</p><p>파트너 여러분의 많은 이용 바랍니다.</p><p>감사합니다.</p>`,
+    is_fixed: false,
+  },
+  {
+    title: '[공지] 부정 이용 및 명의 도용 관련 안내',
+    content: `<p>안녕하세요. 부고온 파트너입니다.</p><p>올바른 서비스 이용 환경 조성을 위해 아래 행위를 금지합니다.</p><p>1. 허위 부고장 작성 및 허위 화환 주문<br />2. 타인의 명의 및 자격 도용<br />3. 기타 부정한 방법을 통한 수수료 수급</p><p>부정한 방법으로 서비스를 이용할 경우 계정 정지 및 적립금 회수 조치가 취해질 수 있습니다.</p><p>감사합니다.</p>`,
+    is_fixed: false,
+  }
+];
+
+async function seedNotices() {
+  console.log('기존 공지사항 확인 및 정통 공지사항 6종 시딩 시작...');
+
+  // b2b_notices 테이블 확인
+  const { data: existing, error: fetchErr } = await supabase
+    .from('b2b_notices')
+    .select('id');
+
+  if (fetchErr) {
+    console.error('b2b_notices 테이블 조회 실패:', fetchErr);
+    return;
+  }
+
+  // 등록 시작
+  const now = new Date();
+  const noticesToInsert = officialNotices.map((n, idx) => ({
+    title: n.title,
+    content: n.content,
+    is_fixed: n.is_fixed,
+    created_at: new Date(now.getTime() - (idx * 1000 * 60 * 60)).toISOString(),
+  }));
+
+  const { data, error } = await supabase
+    .from('b2b_notices')
+    .insert(noticesToInsert)
+    .select();
+
+  if (error) {
+    console.error('공지사항 시딩 실패:', error);
+  } else {
+    console.log(`🎉 성공적으로 어드민 공지사항 ${data.length}건이 DB에 깔끔하게 등록되었습니다!`);
+  }
+}
+
+seedNotices();

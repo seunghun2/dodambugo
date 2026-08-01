@@ -315,3 +315,9 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 프론트엔드/백엔드 페이징(`page`, `limit=30`, `range`) 연동으로 최초 30개 노출 후 스크롤 하단 도달 시 30개씩 스르륵 추가 로딩되는 무한 스크롤 연동.
   - 무한 스크롤 로딩 시 중복 데이터 ID 필터링 및 React 고유 Key 조합(`${item.id}-${index}`)으로 중복 Key 오버레이 경고 에러 수정.
 - **관련 소스코드**: `jojo/app/api/b2b/notifications/route.ts`, `jojo/app/b2b/notifications/page.tsx`
+
+### 13-10. 어드민 공지사항 에디터 글자색 보완 & 공식 공지사항 6종 DB 자동 등록
+- **상세 내용**:
+  - 어드민 공지사항 리치 텍스트 에디터(`contenteditable`) 글자색이 흐릿했던 문제 수정 (`color: #0f172a`, `fontSize: 15px`).
+  - 정통 공지사항 양식 6종(3.3% 원천징수 안내, 은행 점검 시간 출금 제한 안내 등 포함)을 DB에 자동 시딩 등록.
+- **관련 소스코드**: `jojo/app/b2b/admin/notices/page.tsx`, `notices.module.css`, `jojo/scripts/seed-admin-notices.mjs`
