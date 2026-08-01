@@ -31,7 +31,7 @@ function getUserIdFromToken(request: NextRequest): string | null {
     }
 }
 
-// GET: 파트너의 알림 수신함 조회
+// GET: 파트너의 알림 수신함 조회 (60일 이내 + 페이징/무한스크롤 지원)
 export async function GET(request: NextRequest) {
     try {
         const userId = getUserIdFromToken(request);
@@ -39,18 +39,40 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
         }
 
-        const { data: notifications, error } = await supabase
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const limit = parseInt(searchParams.get('limit') || '30', 10);
+        const offset = (page - 1) * limit;
+
+        // 60일 전 날짜 계산
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        const sixtyDaysAgoISO = sixtyDaysAgo.toISOString();
+
+        const { data: notifications, count, error } = await supabase
             .from('b2b_notifications')
-            .select('*')
+            .select('*', { count: 'exact' })
             .eq('partner_id', userId)
-            .order('created_at', { ascending: false });
+            .gte('created_at', sixtyDaysAgoISO)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (error) {
             console.error('알림 조회 오류:', error);
             return NextResponse.json({ error: '알림 목록 조회 중 오류가 발생했습니다.' }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, notifications });
+        const totalCount = count || 0;
+        const hasMore = offset + (notifications?.length || 0) < totalCount;
+
+        return NextResponse.json({
+            success: true,
+            notifications: notifications || [],
+            hasMore,
+            totalCount,
+            page,
+            limit
+        });
     } catch (err: any) {
         console.error('알림 라우트 예외:', err);
         return NextResponse.json({ error: '서버 내부 에러가 발생했습니다.' }, { status: 500 });

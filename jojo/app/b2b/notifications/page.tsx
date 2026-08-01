@@ -39,11 +39,15 @@ export default function B2BNotificationsPage() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
+  // 최초 1페이지 알림 로드 (30개)
   const fetchNotifications = useCallback(async () => {
     try {
       const token = localStorage.getItem('b2b_token');
-      const res = await fetch('/api/b2b/notifications', {
+      const res = await fetch('/api/b2b/notifications?page=1&limit=30', {
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
         },
@@ -52,6 +56,8 @@ export default function B2BNotificationsPage() {
         const data = await res.json();
         if (data.success && data.notifications) {
           setNotifications(data.notifications);
+          setHasMore(data.hasMore ?? false);
+          setPage(1);
         }
       }
     } catch (err) {
@@ -61,10 +67,48 @@ export default function B2BNotificationsPage() {
     }
   }, []);
 
+  // 무한 스크롤: 스크롤 감지 시 다음 페이지 (30개씩) 추가 로드
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const token = localStorage.getItem('b2b_token');
+      const res = await fetch(`/api/b2b/notifications?page=${nextPage}&limit=30`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.notifications) {
+          setNotifications(prev => [...prev, ...data.notifications]);
+          setHasMore(data.hasMore ?? false);
+          setPage(nextPage);
+        }
+      }
+    } catch (err) {
+      console.error('추가 알림 로드 오류:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, page]);
+
   useEffect(() => {
     fetchNotifications();
     clearAppBadge();
   }, [fetchNotifications]);
+
+  // 스크롤 바닥 100px 근처 감지 시 무한 스크롤 자동 실행
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
+        loadMore();
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadMore]);
 
   // 알림 클릭 시 해당 페이지로 이동 + 읽음 처리
   const handleNotificationClick = async (item: NotificationItem) => {
@@ -229,6 +273,12 @@ export default function B2BNotificationsPage() {
                 </div>
               );
             })}
+            {/* 무한 스크롤 추가 로딩 인디케이터 */}
+            {loadingMore && (
+              <div style={{ textAlign: 'center', padding: '16px 0', color: '#94a3b8', fontSize: '13px', fontWeight: 500 }}>
+                알림 불러오는 중...
+              </div>
+            )}
           </div>
         )}
       </div>

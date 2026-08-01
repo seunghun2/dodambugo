@@ -308,3 +308,9 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 푸시 알림 수신 후 홈 화면 앱 아이콘에 남아있던 빨간 뱃지 카운터(`PushNotification Delivered Badge`)를 앱 기동 및 알림/대시보드 진입 시 자동 `0`으로 클리어(`clearAppBadge()`)되도록 처리.
   - iOS Native 수준(`ios/App/App/AppDelegate.swift`)에서 `applicationDidBecomeActive` 및 `applicationWillEnterForeground` 수명주기 진입 시 `UIApplication.shared.applicationIconBadgeNumber = 0` 및 `UNUserNotificationCenter.current().removeAllDeliveredNotifications()` 강제 실행.
 - **관련 소스코드**: `jojo/ios/App/App/AppDelegate.swift`, `jojo/lib/push-notifications.ts`, `jojo/app/b2b/dashboard/page.tsx`, `jojo/app/b2b/notifications/page.tsx`
+
+### 13-9. B2B 알림 60일 보존 & 최초 30개 무한 스크롤(Infinite Scroll) 연동
+- **상세 내용**:
+  - 알림 수신함 조회 시 최근 `60일 이내` 알림만 조회(`created_at >= 60일 전`)하여 무거운 데이터 누적 및 조회 지연 방지.
+  - 프론트엔드/백엔드 페이징(`page`, `limit=30`, `range`) 연동으로 최초 30개 노출 후 스크롤 하단 도달 시 30개씩 스르륵 추가 로딩되는 무한 스크롤 연동.
+- **관련 소스코드**: `jojo/app/api/b2b/notifications/route.ts`, `jojo/app/b2b/notifications/page.tsx`
