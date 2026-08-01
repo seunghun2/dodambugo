@@ -300,7 +300,7 @@ function SignupInner() {
             if (res.ok && data.success) {
                 localStorage.setItem('b2b_token', data.token);
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
-                router.push(`/b2b/signup/complete?code=${data.user.my_referral_code}`);
+                router.push(`/b2b/signup/complete?code=${data.user.my_referral_code}&t=${Date.now()}`);
             } else {
                 setError(data.error || '회원가입에 실패했습니다.');
             }
