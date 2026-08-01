@@ -408,4 +408,24 @@ export async function sendB2BWithdrawalRejectNotification(info: {
     return sendToWebhook(webhookUrl!, { text });
 }
 
+/**
+ * B2B 신규 파트너 회원가입 알림 전송
+ */
+export async function sendB2BSignupNotification(info: {
+    owner_name: string;
+    company_name: string;
+    phone: string;
+    recommender_name?: string;
+    company_type?: string;
+}): Promise<boolean> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
+    const text = `🎉 [부고온 B2B] 신규 파트너 회원가입
+- 대표자명: ${info.owner_name}
+- 상호/소속: ${info.company_name} (${info.company_type || '개인'})
+- 연락처: ${info.phone}
+- 추천인: ${info.recommender_name || '없음(직접가입)'}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
 

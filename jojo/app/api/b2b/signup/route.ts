@@ -176,6 +176,16 @@ export async function POST(request: NextRequest) {
 
         console.log(`✅ B2B 회원가입 완료: ${company_name} (${cleanPhone}) / 추천코드: ${my_referral_code}`);
 
+        // 📱 B2B 슬랙 채널 신규 회원가입 알림 전송 (비동기)
+        import('@/lib/slack').then(({ sendB2BSignupNotification }) => {
+            sendB2BSignupNotification({
+                owner_name: owner_name || '파트너',
+                company_name: company_name || '개인',
+                phone: cleanPhone,
+                company_type: company_name === '개인' ? 'individual' : 'business'
+            }).catch(err => console.error('슬랙 신규가입 알림 전송 실패:', err));
+        });
+
         return NextResponse.json({
             success: true,
             token,
