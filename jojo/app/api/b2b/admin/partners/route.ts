@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
 
         if (status !== 'all') {
             query = query.eq('status', status);
+        } else {
+            // 기본 목록에서 탈퇴 회원 제외
+            query = query.neq('status', 'withdrawn');
         }
 
         if (search) {

@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
         }
 
         // 상태 확인
+        if (user.status === 'withdrawn') {
+            return NextResponse.json(
+                { error: '탈퇴한 계정입니다. 새로 가입해 주세요.' },
+                { status: 403 }
+            );
+        }
+
         if (user.status === 'suspended') {
             return NextResponse.json(
                 { error: '이용이 정지된 계정입니다. 고객센터로 문의해주세요.' },
