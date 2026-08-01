@@ -418,7 +418,7 @@ export async function sendB2BSignupNotification(info: {
     recommender_name?: string;
     company_type?: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
+    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
     const text = `🎉 [부고온 B2B] 신규 파트너 회원가입
 - 대표자명: ${info.owner_name}
 - 상호/소속: ${info.company_name} (${info.company_type || '개인'})
