@@ -6,6 +6,15 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
 
+function isBankMaintenanceWindow(): boolean {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMinutes = hours * 60 + minutes;
+    // 매일 23:30 (1410분) ~ 24:00 (1440분) OR 00:00 (0분) ~ 00:30 (30분)
+    return totalMinutes >= 1410 || totalMinutes < 30;
+}
+
 const BANKS = [
     { code: '004', name: '국민은행', prefix: ['9'], fmt: [6, 2, 6] },
     { code: '088', name: '신한은행', prefix: ['110', '140'], fmt: [3, 3, 6] },
@@ -383,18 +392,64 @@ export default function WalletPage() {
                                     <span style={{ color: '#10B981', fontWeight: '700' }}>{formatCurrency(lockedBalance)}원</span>
                                 </div>
                             )}
-                            <button
-                                className={styles.actionBtn}
-                                onClick={() => {
-                                    if (!identityVerified) {
-                                        router.push('/b2b/wallet/verify');
-                                    } else {
-                                        setShowWithdraw(true);
-                                    }
-                                }}
-                            >
-                                환급신청
-                            </button>
+                            {(() => {
+                                const isBankMaintenance = isBankMaintenanceWindow();
+                                const isInsufficientBalance = withdrawableBalance < 10000;
+                                const isRefundDisabled = isBankMaintenance || isInsufficientBalance;
+
+                                return (
+                                    <>
+                                        <button
+                                            className={styles.actionBtn}
+                                            style={isRefundDisabled ? {
+                                                backgroundColor: '#CBD5E1',
+                                                color: '#64748B',
+                                                cursor: 'not-allowed',
+                                                boxShadow: 'none'
+                                            } : undefined}
+                                            onClick={() => {
+                                                if (isBankMaintenance) {
+                                                    alert('매일 23:30 ~ 00:30은 금융기관 및 펌뱅킹 점검 시간으로 환급 신청이 일시 제한됩니다.');
+                                                    return;
+                                                }
+                                                if (isInsufficientBalance) {
+                                                    alert('최소 환급 신청 가능 금액은 10,000원 이상입니다.');
+                                                    return;
+                                                }
+                                                if (!identityVerified) {
+                                                    router.push('/b2b/wallet/verify');
+                                                } else {
+                                                    setShowWithdraw(true);
+                                                }
+                                            }}
+                                        >
+                                            환급신청
+                                        </button>
+
+                                        {/* 환급 관련 정돈된 안내 박스 */}
+                                        <div style={{
+                                            marginTop: '16px',
+                                            padding: '12px 14px',
+                                            backgroundColor: '#F8FAFC',
+                                            borderRadius: '10px',
+                                            border: '1px solid #E2E8F0',
+                                            fontSize: '12px',
+                                            color: '#64748B',
+                                            lineHeight: '1.6',
+                                            textAlign: 'left'
+                                        }}>
+                                            <div style={{ fontWeight: 700, color: '#334155', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span>💡 환급 신청 안내</span>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                <span>• 최소 환급 신청 가능 금액은 <strong>10,000원</strong>부터입니다.</span>
+                                                <span>• 매일 <strong>23:30 ~ 00:30</strong>은 금융기관 점검 시간으로 환급이 제한됩니다.</span>
+                                                <span>• 개인 파트너 정산 시 <strong>3.3% 원천징수 공제</strong> 후 계좌로 입금됩니다.</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                );
+                            })()}
                         </div>
 
                         {/* 필터 및 목록 헤더 영역 */}
