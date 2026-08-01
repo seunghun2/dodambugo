@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             .insert({
                 name,
                 business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000,
+                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 20000,
                 owner_name: owner_name || '',
                 address: address || '',
                 business_type: business_type || '',
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
             .update({
                 name,
                 business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 5000,
+                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 20000,
                 owner_name: owner_name || '',
                 address: address || '',
                 business_type: business_type || '',
