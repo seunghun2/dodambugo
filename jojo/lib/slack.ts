@@ -11,13 +11,14 @@ interface SlackMessage {
  * 슬랙으로 메시지 전송 (특정 webhook URL로)
  */
 async function sendToWebhook(webhookUrl: string, message: SlackMessage): Promise<boolean> {
-    if (!webhookUrl) {
+    const targetUrl = webhookUrl || process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
+    if (!targetUrl) {
         console.error('❌ Webhook URL이 설정되지 않았습니다.');
         return false;
     }
 
     try {
-        const response = await fetch(webhookUrl, {
+        const response = await fetch(targetUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -349,7 +350,7 @@ export async function sendB2BWithdrawalRequestNotification(info: {
     const netAmountFormatted = info.net_amount.toLocaleString();
     const partnerTypeDisplay = info.partner_type === 'business' ? '사업자' : '개인';
 
-    const text = `💸 [부고온 B2B] 신규 출금 신청이 접수되었습니다. (승인 대기)
+    const text = `[부고온 B2B] 신규 출금 신청이 접수되었습니다. (승인 대기)
 - 파트너사: ${info.company_name} (대표자: ${info.owner_name} / ${partnerTypeDisplay})
 - 출금신청액: ${amountFormatted}원
 - 세후실수령액: ${netAmountFormatted}원
@@ -375,7 +376,7 @@ export async function sendB2BWithdrawalApproveNotification(info: {
     const amountFormatted = info.amount.toLocaleString();
     const netAmountFormatted = info.net_amount.toLocaleString();
 
-    const text = `✅ [부고온 B2B] 출금 승인 및 실이체 성공
+    const text = `[부고온 B2B] 출금 승인 및 실이체 성공
 - 파트너사: ${info.company_name} (대표자: ${info.owner_name})
 - 이체금액: ${netAmountFormatted}원 (세전 ${amountFormatted}원)
 - 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
@@ -399,7 +400,7 @@ export async function sendB2BWithdrawalRejectNotification(info: {
     const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
     const amountFormatted = info.amount.toLocaleString();
 
-    const text = `❌ [부고온 B2B] 출금 신청 반려 (예치금 환원 완료)
+    const text = `[부고온 B2B] 출금 신청 반려 (예치금 환원 완료)
 - 파트너사: ${info.company_name} (대표자: ${info.owner_name})
 - 반려액: ${amountFormatted}원
 - 송금계좌: ${info.bank_name} ${info.account_no} (예금주: ${info.account_holder})
@@ -419,7 +420,7 @@ export async function sendB2BSignupNotification(info: {
     company_type?: string;
 }): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
-    const text = `🎉 [부고온 B2B] 신규 파트너 회원가입
+    const text = `[부고온 B2B] 신규 파트너 회원가입
 - 대표자명: ${info.owner_name}
 - 상호/소속: ${info.company_name} (${info.company_type || '개인'})
 - 연락처: ${info.phone}

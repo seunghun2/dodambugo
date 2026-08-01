@@ -140,6 +140,16 @@ export async function POST(request: NextRequest) {
             balance: 0,
         });
 
+        // 🔔 신규 가입 파트너 본인 앱 내 알림함(인앱 알림) 웰컴 생성
+        await supabase.from('b2b_in_app_alarms').insert({
+            user_id: newUser.id,
+            title: '부고온 파트너 가입을 환영합니다!',
+            message: `${owner_name || company_name || '파트너'}님, 부고온 파트너 회원가입이 완료되었습니다. 모바일 부고장을 작성하고 화환 수익을 창출해 보세요!`,
+            type: 'signup_welcome',
+            link_url: '/b2b/dashboard',
+            is_read: false
+        });
+
         // JWT 토큰 생성
         const jwt = await import('jsonwebtoken');
         const token = jwt.default.sign(
