@@ -130,6 +130,7 @@ export async function POST(request: NextRequest) {
     if (!userId) {
         return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
+    const { amount } = await request.json();
 
     // 한국 표준시 (KST, Asia/Seoul) 기준 은행 점검 시간 (23:30 ~ 00:30) 출금 신청 차단 이중 안전장치
     const now = new Date();
