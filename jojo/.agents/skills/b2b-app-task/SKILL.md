@@ -314,10 +314,18 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 알림 수신함 조회 시 최근 `60일 이내` 알림만 조회(`created_at >= 60일 전`)하여 무거운 데이터 누적 및 조회 지연 방지.
   - 프론트엔드/백엔드 페이징(`page`, `limit=30`, `range`) 연동으로 최초 30개 노출 후 스크롤 하단 도달 시 30개씩 스르륵 추가 로딩되는 무한 스크롤 연동.
   - 무한 스크롤 로딩 시 중복 데이터 ID 필터링 및 React 고유 Key 조합(`${item.id}-${index}`)으로 중복 Key 오버레이 경고 에러 수정.
-- **관련 소스코드**: `jojo/app/api/b2b/notifications/route.ts`, `jojo/app/b2b/notifications/page.tsx`
+  - DB 시딩 스크립트(`scripts/seed-notifications.mjs`)를 통한 백승훈 대표님 및 전체 파트너 계정 100개 알림 시딩 연동.
+- **관련 소스코드**: `jojo/app/api/b2b/notifications/route.ts`, `jojo/app/b2b/notifications/page.tsx`, `jojo/scripts/seed-notifications.mjs`
 
-### 13-10. 어드민 공지사항 에디터 글자색 보완 & 공식 공지사항 6종 DB 자동 등록
+### 13-10. 어드민 공지사항 에디터 글자색 가시성 명확화
 - **상세 내용**:
-  - 어드민 공지사항 리치 텍스트 에디터(`contenteditable`) 글자색이 흐릿했던 문제 수정 (`color: #0f172a`, `fontSize: 15px`).
-  - 정통 공지사항 양식 6종(3.3% 원천징수 안내, 은행 점검 시간 출금 제한 안내 등 포함)을 DB에 자동 시딩 등록.
-- **관련 소스코드**: `jojo/app/b2b/admin/notices/page.tsx`, `notices.module.css`, `jojo/scripts/seed-admin-notices.mjs`
+  - 어드민 공지사항 리치 텍스트 에디터(`contenteditable`) 글자색이 흐릿했던 문제 수정 (`color: #0f172a !important`, `fontSize: 15px`, `lineHeight: 1.6`).
+  - 타이핑 시 눈이 편안하고 가시성이 뛰어난 선명한 슬레이트 블랙 톤 적용.
+- **관련 소스코드**: `jojo/app/b2b/admin/notices/page.tsx`, `jojo/app/b2b/admin/notices/notices.module.css`
+
+### 13-11. 정통 공지사항 5종 실서버 DB 직접 연동 및 쿼리 스키마 보완
+- **상세 내용**:
+  - 실서버 DB 스키마(`created_at`) 기준 쿼리 보완 및 캐싱 무효화(`export const dynamic = 'force-dynamic'`, `export const revalidate = 0`) 적용.
+  - 실서버 API 스크립트(`scripts/post-to-production-notices.mjs`)를 통해 실서버(`bugoon.maeumbugo.co.kr`)에 공식 공지 5종 정식 등록 완수.
+  - 파트너 추천인 공지 문구 정돈: **"상조회사 소속으로 회원가입을 하시는 경우에는 상조 본사의 정산 방침이 우선 적용되며, 이에 따라 개인 추천 적립금은 별도로 중복 지급되지 않는 점 너른 양해 부탁드립니다."** 정중 어조 반영.
+- **관련 소스코드**: `jojo/app/api/b2b/admin/notices/route.ts`, `jojo/app/api/b2b/notices/route.ts`, `jojo/scripts/post-to-production-notices.mjs`, `jojo/scripts/seed-admin-notices.mjs`
