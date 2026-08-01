@@ -19,14 +19,14 @@
 }
 
 .backBtn {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: none;
     border: none;
-    font-size: 18px;
+    font-size: 24px;
     color: var(--b2b-text-primary);
     cursor: pointer;
     outline: none;
