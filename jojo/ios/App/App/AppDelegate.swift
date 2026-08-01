@@ -2,11 +2,19 @@ import UIKit
 import Capacitor
 import FirebaseCore
 import FirebaseMessaging
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+
+    private func clearBadge() {
+        DispatchQueue.main.async {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        }
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Firebase 초기화
@@ -17,6 +25,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // 원격 푸시 알림 등록
         application.registerForRemoteNotifications()
+
+        // 앱 기동 시 iOS Native 뱃지 및 전달된 알림 클리어
+        clearBadge()
 
         return true
     }
@@ -60,11 +71,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+        clearBadge()
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        clearBadge()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
