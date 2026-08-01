@@ -102,36 +102,77 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 회원 INSERT
-        const { data: newUser, error: insertError } = await supabase
+        // 탈퇴 회원 재가입: 기존 withdrawn 레코드가 있으면 UPDATE로 덮어쓰기
+        const { data: withdrawnUser } = await supabase
             .from('b2b_users')
-            .insert({
-                phone: cleanPhone,
-                password_hash,
-                company_name,
-                owner_name,
-                bank_name: bank_name || null,
-                account_no: account_no || null,
-                account_holder: account_holder || null,
-                recommender_id,
-                my_referral_code,
-                status: 'approved',
-            })
-            .select('id, my_referral_code')
-            .single();
+            .select('id')
+            .eq('phone', cleanPhone)
+            .eq('status', 'withdrawn')
+            .maybeSingle();
 
-        if (insertError) {
-            console.error('회원가입 INSERT 오류:', insertError);
-            if (insertError.code === '23505') {
+        let newUser: { id: string; my_referral_code: string } | null = null;
+
+        if (withdrawnUser) {
+            // 탈퇴 회원 재가입: UPDATE
+            const { data: updatedUser, error: updateError } = await supabase
+                .from('b2b_users')
+                .update({
+                    password_hash,
+                    company_name,
+                    owner_name,
+                    bank_name: bank_name || null,
+                    account_no: account_no || null,
+                    account_holder: account_holder || null,
+                    recommender_id,
+                    my_referral_code,
+                    status: 'approved',
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', withdrawnUser.id)
+                .select('id, my_referral_code')
+                .single();
+
+            if (updateError) {
+                console.error('재가입 UPDATE 오류:', updateError);
                 return NextResponse.json(
-                    { error: '이미 가입된 휴대폰 번호입니다. 로그인해 주세요.' },
-                    { status: 409 }
+                    { error: '재가입 처리 중 오류가 발생했습니다.' },
+                    { status: 500 }
                 );
             }
-            return NextResponse.json(
-                { error: '회원가입 중 오류가 발생했습니다: ' + (insertError.message || '') },
-                { status: 500 }
-            );
+            newUser = updatedUser;
+        } else {
+            // 신규 가입: INSERT
+            const { data: insertedUser, error: insertError } = await supabase
+                .from('b2b_users')
+                .insert({
+                    phone: cleanPhone,
+                    password_hash,
+                    company_name,
+                    owner_name,
+                    bank_name: bank_name || null,
+                    account_no: account_no || null,
+                    account_holder: account_holder || null,
+                    recommender_id,
+                    my_referral_code,
+                    status: 'approved',
+                })
+                .select('id, my_referral_code')
+                .single();
+
+            if (insertError) {
+                console.error('회원가입 INSERT 오류:', insertError);
+                if (insertError.code === '23505') {
+                    return NextResponse.json(
+                        { error: '이미 가입된 휴대폰 번호입니다. 로그인해 주세요.' },
+                        { status: 409 }
+                    );
+                }
+                return NextResponse.json(
+                    { error: '회원가입 중 오류가 발생했습니다: ' + (insertError.message || '') },
+                    { status: 500 }
+                );
+            }
+            newUser = insertedUser;
         }
 
         // 예치금 잔고 테이블 생성 (초기 잔액 0)
