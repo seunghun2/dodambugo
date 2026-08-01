@@ -79,17 +79,9 @@ export async function POST(request: NextRequest) {
 
         // 3. 슬랙 채널 알림 전송 (이모지 없이 텍스트 포맷)
         try {
-            const { sendToWebhook } = await import('@/lib/slack');
-            const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
-            if (webhookUrl) {
-                // @ts-ignore
-                const text = `[부고온 B2B] 파트너 회원 탈퇴 처리\n- 대표자명: ${user.owner_name}\n- 상호/소속: ${user.company_name}\n- 연락처: ${user.phone}`;
-                await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
-                }).catch(err => console.error('탈퇴 슬랙 알림 실패:', err));
-            }
+            const { sendSimpleNotification } = await import('@/lib/slack');
+            const text = `[부고온 B2B] 파트너 회원 탈퇴 처리\n- 대표자명: ${user.owner_name}\n- 상호/소속: ${user.company_name}\n- 연락처: ${user.phone}`;
+            await sendSimpleNotification(text).catch(err => console.error('탈퇴 슬랙 알림 실패:', err));
         } catch (sErr) {
             console.error('탈퇴 슬랙 연동 에러:', sErr);
         }
