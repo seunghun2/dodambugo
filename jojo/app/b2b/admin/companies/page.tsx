@@ -10,6 +10,7 @@ interface Company {
     name: string;
     business_no?: string;
     wreath_commission_amount: number;
+    wreath_member_commission_amount?: number;
     created_at: string;
     owner_name?: string;
     address?: string;
@@ -30,7 +31,8 @@ export default function CompaniesPage() {
     // 입력 필드 상태
     const [name, setName] = useState('');
     const [businessNo, setBusinessNo] = useState('');
-    const [wreathCommission, setWreathCommission] = useState('20000');
+    const [wreathCommission, setWreathCommission] = useState('10000');
+    const [wreathMemberCommission, setWreathMemberCommission] = useState('10000');
     const [ownerName, setOwnerName] = useState('');
     const [address, setAddress] = useState('');
     const [businessType, setBusinessType] = useState('');
@@ -75,7 +77,8 @@ export default function CompaniesPage() {
         if (company) {
             setName(company.name);
             setBusinessNo(company.business_no || '');
-            setWreathCommission(String(company.wreath_commission_amount));
+            setWreathCommission(String(company.wreath_commission_amount ?? 10000));
+            setWreathMemberCommission(String(company.wreath_member_commission_amount ?? 10000));
             setOwnerName(company.owner_name || '');
             setAddress(company.address || '');
             setBusinessType(company.business_type || '');
@@ -83,7 +86,8 @@ export default function CompaniesPage() {
         } else {
             setName('');
             setBusinessNo('');
-            setWreathCommission('5000');
+            setWreathCommission('10000');
+            setWreathMemberCommission('10000');
             setOwnerName('');
             setAddress('');
             setBusinessType('');
@@ -98,11 +102,13 @@ export default function CompaniesPage() {
         setError('');
 
         const amount = parseInt(wreathCommission);
+        const memberAmount = parseInt(wreathMemberCommission);
+
         if (!name.trim()) {
             setError('상조회사명을 입력해주세요.');
             return;
         }
-        if (isNaN(amount) || amount < 0) {
+        if (isNaN(amount) || amount < 0 || isNaN(memberAmount) || memberAmount < 0) {
             setError('정산 수당은 0원 이상의 정수로 입력해주세요.');
             return;
         }
@@ -117,6 +123,7 @@ export default function CompaniesPage() {
                     name,
                     business_no: businessNo,
                     wreath_commission_amount: amount,
+                    wreath_member_commission_amount: memberAmount,
                     owner_name: ownerName,
                     address,
                     business_type: businessType,
@@ -317,7 +324,7 @@ export default function CompaniesPage() {
                                 <th className={styles.th}>사업자 번호</th>
                                 <th className={styles.th}>대표자명</th>
                                 <th className={styles.th}>업태 / 종목</th>
-                                <th className={styles.th}>화환 판매 본사 수수료</th>
+                                <th className={styles.th}>화환 수당 (본사 / 지도사)</th>
                                 <th className={styles.th}>등록일</th>
                                 <th className={styles.th} style={{ width: '220px' }}>관리</th>
                             </tr>
@@ -344,8 +351,10 @@ export default function CompaniesPage() {
                                         <td className={styles.td} style={{ fontSize: '12px' }}>
                                             {c.business_type || c.business_item ? `${c.business_type || '-' } / ${c.business_item || '-'}` : '-'}
                                         </td>
-                                        <td className={styles.td} style={{ color: '#2563eb', fontWeight: '500' }}>
-                                            {(c.wreath_commission_amount || 0).toLocaleString()}원
+                                        <td className={styles.td} style={{ fontSize: '12px' }}>
+                                            <span style={{ color: '#2563eb', fontWeight: '600' }}>본사: {(c.wreath_commission_amount || 0).toLocaleString()}원</span>
+                                            <br />
+                                            <span style={{ color: '#16a34a', fontWeight: '500' }}>팀원: {(c.wreath_member_commission_amount ?? 10000).toLocaleString()}원</span>
                                         </td>
                                         <td className={styles.td}>
                                             {new Date(c.created_at).toLocaleDateString()}
@@ -459,22 +468,42 @@ export default function CompaniesPage() {
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>화환 판매 본사 분배 수당 *</label>
-                                <div className={styles.inputWrapper}>
-                                    <input
-                                        type="number"
-                                        className={`${styles.input} ${styles.inputWithUnit}`}
-                                        value={wreathCommission}
-                                        onChange={(e) => setWreathCommission(e.target.value)}
-                                        placeholder="예: 5000"
-                                        required
-                                    />
-                                    <span className={styles.unit}>원</span>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>화환 판매 본사 분배 수당 *</label>
+                                    <div className={styles.inputWrapper}>
+                                        <input
+                                            type="number"
+                                            className={`${styles.input} ${styles.inputWithUnit}`}
+                                            value={wreathCommission}
+                                            onChange={(e) => setWreathCommission(e.target.value)}
+                                            placeholder="예: 10000"
+                                            required
+                                        />
+                                        <span className={styles.unit}>원</span>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                        소속 파트너 화환 판매 시 상조 본사에 적립할 수당
+                                    </p>
                                 </div>
-                                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', margin: '6px 0 0 0' }}>
-                                    소속 파트너가 화환을 판매했을 때 상조 본사에 자동으로 적립해 줄 수당 금액입니다.
-                                </p>
+
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>소속 지도사(팀원) 분배 수당 *</label>
+                                    <div className={styles.inputWrapper}>
+                                        <input
+                                            type="number"
+                                            className={`${styles.input} ${styles.inputWithUnit}`}
+                                            value={wreathMemberCommission}
+                                            onChange={(e) => setWreathMemberCommission(e.target.value)}
+                                            placeholder="예: 10000"
+                                            required
+                                        />
+                                        <span className={styles.unit}>원</span>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                        화환을 직접 판매한 소속 지도사 지갑에 적립할 수당
+                                    </p>
+                                </div>
                             </div>
 
                             <div className={styles.formActions}>

@@ -397,91 +397,101 @@ export async function POST(request: NextRequest) {
                 if (bugoRecord?.b2b_user_id) {
                     const partnerId = bugoRecord.b2b_user_id;
 
-                    // 2. 적립금액 설정 조회
-                    const { data: rewardSetting } = await supabase
-                        .from('b2b_settings')
-                        .select('value')
-                        .eq('key', 'wreath_reward_amount')
-                        .single();
-                    const rewardAmount = parseInt(rewardSetting?.value || '20000');
-
-                    // 3. 파트너 예치금 적립 (직접 잔액 업데이트)
-                    const { data: currentDeposit } = await supabase
-                        .from('deposits')
-                        .select('balance')
-                        .eq('user_id', partnerId)
+                    // 2. 파트너 정보 및 소속 상조회사 수당 분배 구조 조회
+                    const { data: partnerUser } = await supabase
+                        .from('b2b_users')
+                        .select('company_id, company_name, recommender_id')
+                        .eq('id', partnerId)
                         .single();
 
-                    if (currentDeposit) {
-                        await supabase
-                            .from('deposits')
-                            .update({
-                                balance: (currentDeposit.balance || 0) + rewardAmount,
-                                updated_at: new Date().toISOString(),
-                            })
-                            .eq('user_id', partnerId);
+                    let rewardAmount = 20000;
+                    let companyCommission = 0;
+
+                    if (partnerUser?.company_id) {
+                        const { data: companyRecord } = await supabase
+                            .from('b2b_companies')
+                            .select('wreath_commission_amount, wreath_member_commission_amount')
+                            .eq('id', partnerUser.company_id)
+                            .single();
+
+                        // 상조회사 소속 파트너: 본사 수당 & 소속 지도사(팀원) 수당 2원화 분할
+                        companyCommission = companyRecord?.wreath_commission_amount !== undefined 
+                            ? companyRecord.wreath_commission_amount 
+                            : 10000;
+                        rewardAmount = companyRecord?.wreath_member_commission_amount !== undefined 
+                            ? companyRecord.wreath_member_commission_amount 
+                            : 10000;
                     } else {
-                        await supabase
-                            .from('deposits')
-                            .insert({
-                                user_id: partnerId,
-                                balance: rewardAmount,
-                                updated_at: new Date().toISOString(),
-                            });
+                        // 개인/프리랜서 파트너: 기본 지도사 수당 (20,000원) 100% 지급
+                        const { data: rewardSetting } = await supabase
+                            .from('b2b_settings')
+                            .select('value')
+                            .eq('key', 'wreath_reward_amount')
+                            .single();
+                        rewardAmount = parseInt(rewardSetting?.value || '20000');
                     }
 
-                    // 4. 적립 내역 기록
-                    await supabase
-                        .from('deposit_transactions')
-                        .insert({
-                            user_id: partnerId,
-                            amount: rewardAmount,
-                            type: 'wreath_reward',
-                            description: `화환 판매 적립 (${orderData.product_name || '화환'})`,
-                            related_order_id: actualOrderId || moid,
-                        });
+                    // 3. 파트너 예치금 적립
+                    if (rewardAmount > 0) {
+                        const { data: currentDeposit } = await supabase
+                            .from('deposits')
+                            .select('balance')
+                            .eq('user_id', partnerId)
+                            .single();
 
-                    console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
+                        if (currentDeposit) {
+                            await supabase
+                                .from('deposits')
+                                .update({
+                                    balance: (currentDeposit.balance || 0) + rewardAmount,
+                                    updated_at: new Date().toISOString(),
+                                })
+                                .eq('user_id', partnerId);
+                        } else {
+                            await supabase
+                                .from('deposits')
+                                .insert({
+                                    user_id: partnerId,
+                                    balance: rewardAmount,
+                                    updated_at: new Date().toISOString(),
+                                });
+                        }
+
+                        // 4. 적립 내역 기록
+                        await supabase
+                            .from('deposit_transactions')
+                            .insert({
+                                user_id: partnerId,
+                                amount: rewardAmount,
+                                type: 'wreath_reward',
+                                description: `화환 판매 적립 (${orderData.product_name || '화환'})`,
+                                related_order_id: actualOrderId || moid,
+                            });
+
+                        console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
+                    }
 
                     // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
                     import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
-                        // 화환 주문 알람
                         insertInAppAlarm(
                             partnerId, 'flower_order',
                             '화환 주문이 접수되었습니다',
                             `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
                             '/b2b/wallet', 'alarm_order'
                         );
-                        // 화환 수당 적립 알람
-                        insertInAppAlarm(
-                            partnerId, 'flower_commission',
-                            '화환 판매 수당이 적립되었습니다',
-                            `${(rewardAmount || 0).toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
-                            '/b2b/wallet', 'alarm_reward'
-                        );
+                        if (rewardAmount > 0) {
+                            insertInAppAlarm(
+                                partnerId, 'flower_commission',
+                                '화환 판매 수당이 적립되었습니다',
+                                `${rewardAmount.toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
+                                '/b2b/wallet', 'alarm_reward'
+                            );
+                        }
                     });
 
-                    // 4-2. 상조회사 본사 수수료 정산 + 5. 추천인 보너스 적립
+                    // 4-2. 상조회사 소속인 경우 본사 수수료 정산
                     try {
-                        const { data: partnerUser } = await supabase
-                            .from('b2b_users')
-                            .select('company_id, company_name, recommender_id')
-                            .eq('id', partnerId)
-                            .single();
-
-                        // 4-2. 상조회사 소속이면 본사 수수료 정산
-                        if (partnerUser?.company_id) {
-                            const { data: companyRecord } = await supabase
-                                .from('b2b_companies')
-                                .select('wreath_commission_amount')
-                                .eq('id', partnerUser.company_id)
-                                .single();
-
-                            // TODO: 상조회사 수수료 금액 최종 확정 필요 (현재 기본값 20,000원)
-                            const companyCommission = companyRecord?.wreath_commission_amount !== undefined 
-                                ? companyRecord.wreath_commission_amount 
-                                : 20000;
-
+                        if (partnerUser?.company_id && companyCommission > 0) {
                             await supabase.from('b2b_company_settlements').insert({
                                 company_id: partnerUser.company_id,
                                 order_id: actualOrderId || moid,
