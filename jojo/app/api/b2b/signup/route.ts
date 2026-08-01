@@ -37,11 +37,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 중복 가입 체크
+        // 중복 가입 체크 (탈퇴한 회원 neq('status', 'withdrawn') 제외 -> 재가입 허용)
         const { data: existing } = await supabase
             .from('b2b_users')
             .select('id')
             .eq('phone', cleanPhone)
+            .neq('status', 'withdrawn')
             .maybeSingle();
 
         if (existing) {
