@@ -7,11 +7,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
 
 function isBankMaintenanceWindow(): boolean {
+    // 100% 한국 표준시 (KST, Asia/Seoul) 기준 현재 시각을 계산합니다.
     const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
+    const kstString = now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+    const kstDate = new Date(kstString);
+    
+    const hours = kstDate.getHours();
+    const minutes = kstDate.getMinutes();
     const totalMinutes = hours * 60 + minutes;
-    // 매일 23:30 (1410분) ~ 24:00 (1440분) OR 00:00 (0분) ~ 00:30 (30분)
+    
+    // 매일 한국시간 23:30 (1410분) ~ 24:00 (1440분) OR 00:00 (0분) ~ 00:30 (30분)
     return totalMinutes >= 1410 || totalMinutes < 30;
 }
 

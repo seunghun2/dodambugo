@@ -131,7 +131,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    const { amount } = await request.json();
+    // 한국 표준시 (KST, Asia/Seoul) 기준 은행 점검 시간 (23:30 ~ 00:30) 출금 신청 차단 이중 안전장치
+    const now = new Date();
+    const kstString = now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+    const kstDate = new Date(kstString);
+    const totalMinutes = kstDate.getHours() * 60 + kstDate.getMinutes();
+    if (totalMinutes >= 1410 || totalMinutes < 30) {
+        return NextResponse.json(
+            { error: '매일 23:30 ~ 00:30은 금융기관 및 펌뱅킹 점검 시간으로 출금 신청이 일시 제한됩니다.' },
+            { status: 400 }
+        );
+    }
 
     if (!amount || amount <= 0) {
         return NextResponse.json({ error: '올바른 금액을 입력해주세요.' }, { status: 400 });
