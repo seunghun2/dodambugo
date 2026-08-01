@@ -278,12 +278,15 @@ export default function B2BAdminNoticesPage() {
         }
 
         const headers = ['구분', '게시일시(예약포함)', '공지제목', '공지내용(HTML)'];
-        const rows = notices.map(item => [
-            item.is_fixed ? '상단고정' : (new Date(item.published_at).getTime() > Date.now() ? '예약공지' : '일반공지'),
-            formatDate(item.published_at),
-            item.title,
-            item.content
-        ]);
+        const rows = notices.map(item => {
+            const pubDate = item.published_at || item.created_at;
+            return [
+                item.is_fixed ? '상단고정' : (pubDate && new Date(pubDate).getTime() > Date.now() ? '예약공지' : '일반공지'),
+                formatDate(pubDate),
+                item.title,
+                item.content
+            ];
+        });
 
         const csvContent = 
             '\ufeff' + // UTF-8 BOM 추가
@@ -355,7 +358,8 @@ export default function B2BAdminNoticesPage() {
                                         </tr>
                                     ) : (
                                         notices.map((notice) => {
-                                            const isScheduled = new Date(notice.published_at).getTime() > Date.now();
+                                            const pubDate = notice.published_at || notice.created_at;
+                                            const isScheduled = pubDate ? new Date(pubDate).getTime() > Date.now() : false;
                                             return (
                                                 <tr
                                                     key={notice.id}
@@ -375,7 +379,7 @@ export default function B2BAdminNoticesPage() {
                                                         {notice.title}
                                                         {isScheduled && (
                                                             <div className={styles.dateReservation}>
-                                                                * {formatDate(notice.published_at)} 게시 예정
+                                                                * {formatDate(pubDate)} 게시 예정
                                                             </div>
                                                         )}
                                                     </td>
