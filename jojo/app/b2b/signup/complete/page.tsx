@@ -84,9 +84,9 @@ function CompleteContent() {
                             const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
                             const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
                             if (isIOS) {
-                                window.location.href = 'https://apps.apple.com/kr/app/id6786073225';
+                                window.location.href = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
                             } else {
-                                window.location.href = 'https://apps.apple.com/kr/app/id6786073225';
+                                window.location.href = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
                             }
                         }}
                         style={{
