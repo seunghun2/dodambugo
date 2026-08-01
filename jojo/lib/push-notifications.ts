@@ -172,8 +172,35 @@ export async function registerPushNotifications(partnerId: string, router?: any)
     // 리스너 등록 완료 후 register() 호출
     console.log('[Push] Capacitor Push API 등록 시작...');
     await PushNotifications.register();
+    
+    // 앱 등록 시 뱃지 클리어
+    await clearAppBadge();
   } catch (err) {
     console.error('푸시 알림 등록 과정 중 오류:', err);
+  }
+}
+
+/**
+ * 앱 아이콘 뱃지(빨간색 1) 및 전달된 푸시 알림 클리어
+ */
+export async function clearAppBadge(): Promise<void> {
+  if (typeof window !== 'undefined' && 'clearAppBadge' in navigator) {
+    try {
+      (navigator as any).clearAppBadge().catch(() => {});
+    } catch {}
+  } else if (typeof window !== 'undefined' && 'setAppBadge' in navigator) {
+    try {
+      (navigator as any).setAppBadge(0).catch(() => {});
+    } catch {}
+  }
+
+  if (!Capacitor.isNativePlatform()) return;
+
+  try {
+    await PushNotifications.removeAllDeliveredNotifications();
+    console.log('[Push] 앱 아이콘 뱃지 및 수신 알림 클리어 완료');
+  } catch (err) {
+    console.error('[Push] 뱃지 클리어 중 오류:', err);
   }
 }
 
@@ -207,6 +234,7 @@ export async function unregisterPushNotifications(partnerId: string): Promise<vo
 
     // 모든 리스너 해제
     await PushNotifications.removeAllListeners();
+    await clearAppBadge();
     console.log('푸시 알림 등록 해제 완료');
   } catch (err) {
     console.error('푸시 알림 등록 해제 중 오류:', err);

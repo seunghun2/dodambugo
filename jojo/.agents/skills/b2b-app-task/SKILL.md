@@ -302,3 +302,8 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **상세 내용**:
   - 부고장 발송 설정 테이블에서 연락처(`contact`)가 실제로 입력된 상주만 발송 대상 목록에 선택/노출되도록 세팅.
 - **관련 소스코드**: `jojo/app/b2b/create/complete/[bugoNumber]/page.tsx`
+
+### 13-8. 앱 아이콘 푸시 뱃지(빨간 🔴 1) 자동 클리어 처리
+- **상세 내용**:
+  - 푸시 알림 수신 후 홈 화면 앱 아이콘에 남아있던 빨간 뱃지 카운터(`PushNotification Delivered Badge`)를 앱 기동 및 알림/대시보드 진입 시 자동 `0`으로 클리어(`clearAppBadge()`)되도록 처리.
+- **관련 소스코드**: `jojo/lib/push-notifications.ts`, `jojo/app/b2b/dashboard/page.tsx`, `jojo/app/b2b/notifications/page.tsx`

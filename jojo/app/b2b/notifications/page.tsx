@@ -16,6 +16,7 @@ import {
   IconBell,
 } from '@tabler/icons-react';
 import styles from './notifications.module.css';
+import { clearAppBadge } from '@/lib/push-notifications';
 
 interface NotificationItem {
   id: string;
@@ -62,6 +63,7 @@ export default function B2BNotificationsPage() {
 
   useEffect(() => {
     fetchNotifications();
+    clearAppBadge();
   }, [fetchNotifications]);
 
   // 알림 클릭 시 해당 페이지로 이동 + 읽음 처리

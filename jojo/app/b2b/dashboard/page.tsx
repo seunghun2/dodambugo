@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerPushNotifications } from '@/lib/push-notifications';
+import { registerPushNotifications, clearAppBadge } from '@/lib/push-notifications';
 
 import styles from './dashboard.module.css';
 
@@ -54,8 +54,9 @@ export default function DashboardPage() {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
-    // 푸시 알림 등록 (네이티브 앱에서만 동작, Next.js 라우터 주입)
+    // 푸시 알림 등록 및 앱 아이콘 뱃지(빨간 1) 클리어
     registerPushNotifications(parsedUser.id, router);
+    clearAppBadge();
 
     // 앱 기동 시(Cold Start) 대기 중이던 푸시 클릭 라우팅 처리
     if (typeof window !== 'undefined' && (window as any).__pendingPushUrl) {
