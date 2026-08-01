@@ -330,11 +330,11 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 파트너 추천인 공지 문구 정돈: **"상조회사 소속으로 회원가입을 하시는 경우에는 상조 본사의 정산 방침이 우선 적용되며, 이에 따라 개인 추천 적립금은 별도로 중복 지급되지 않는 점 너른 양해 부탁드립니다."** 정중 어조 반영.
 - **관련 소스코드**: `jojo/app/api/b2b/admin/notices/route.ts`, `jojo/app/api/b2b/notices/route.ts`, `jojo/scripts/post-to-production-notices.mjs`, `jojo/scripts/seed-admin-notices.mjs`
 
-### 13-12. 지갑/적립내역 환급 버튼 점검시간 비활성화 & KST 100% 보장 타임존 연산
+### 13-12. 지갑/적립내역 환급 버튼 점검시간 비활성화 & 5,000원 기준 및 디자인 정돈
 - **상세 내용**:
-  - 프론트엔드(`app/b2b/wallet/page.tsx`) 및 백엔드 API(`app/api/b2b/wallet/route.ts`) 모두 **`Asia/Seoul` (한국 표준시 KST UTC+9)** 타임존 연산을 100% 보장 적용.
-  - Vercel 서버의 해외 UTC 타임존 환경이나 사용자의 접속 위치와 무관하게 **한국 시각 기준 매일 23:30 ~ 00:30**에 `[환급신청]` 버튼 비활성화(회색 쿨그레이 `#CBD5E1` & `not-allowed`) 및 팝업/API 이중 차단 연동.
-  - 환급 카드 하단에 10,000원 최소 금액, 한국시간 기준 점검시간, 3.3% 원천징수 공제 안내 박스 렌더링.
+  - 최소 환급 신청 가능 금액을 **5,000원**으로 세팅 (5,000원 미만 또는 매일 한국시간 23:30~00:30 시 버튼 비활성화).
+  - 브랜드 수칙에 따라 **이모지(💡) 전면 제거** 및 B2B 정통 슬레이트 톤앤매너(`[환급 신청 안내]`) 디자인 완비.
+  - 프론트엔드(`app/b2b/wallet/page.tsx`) 및 백엔드 API(`app/api/b2b/wallet/route.ts`) 모두 **`Asia/Seoul` (한국 표준시 KST UTC+9)** 타임존 연산 및 5,000원 이중 검증 보장.
 - **관련 소스코드**: `jojo/app/b2b/wallet/page.tsx`, `jojo/app/api/b2b/wallet/route.ts`
 
 ### 13-13. 로컬 환경 500 TypeError: fetch failed 트러블슈팅 및 Supabase 호스트/네트워크 가이드

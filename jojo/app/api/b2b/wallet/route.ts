@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
         .eq('key', 'min_withdrawal_amount')
         .single();
 
-    const minAmount = parseInt(minSetting?.value || '10000');
+    const minAmount = parseInt(minSetting?.value || '5000');
     if (amount < minAmount) {
         return NextResponse.json(
             { error: `최소 출금 금액은 ${minAmount.toLocaleString()}원입니다.` },
