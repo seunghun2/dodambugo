@@ -405,8 +405,7 @@ export default function WalletPage() {
                             {(() => {
                                 const isBankMaintenance = isBankMaintenanceWindow();
                                 const isInsufficientBalance = withdrawableBalance < 5000;
-                                // 대표님 테스트 확인용: 강제 비활성화 세팅 (실제 작동시 isBankMaintenance || isInsufficientBalance)
-                                const isRefundDisabled = true;
+                                const isRefundDisabled = isBankMaintenance || isInsufficientBalance;
 
                                 return (
                                     <>
@@ -427,7 +426,7 @@ export default function WalletPage() {
                                                     });
                                                     return;
                                                 }
-                                                if (isInsufficientBalance || isRefundDisabled) {
+                                                if (isInsufficientBalance) {
                                                     setAlertModal({
                                                         isOpen: true,
                                                         title: '환급 신청 제한',
