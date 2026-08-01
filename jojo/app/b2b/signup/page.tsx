@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEye, IconEyeOff, IconCheck } from '@tabler/icons-react';
 import styles from './signup.module.css';
 
@@ -81,7 +81,7 @@ const PW_RULES = [
     { key: 'special', label: '특수문자 포함', test: (pw: string) => /[!@#$%^&*()_+\-=[\]{};':"|,.<>/?]/.test(pw) },
 ];
 
-export default function SignupPage() {
+function SignupInner() {
     const router = useRouter();
     const [step, setStep] = useState<Step>(1);
     const [loading, setLoading] = useState(false);
@@ -266,6 +266,14 @@ export default function SignupPage() {
             setForm({ ...form, referralCode: code, referralInfo: null });
         }
     };
+
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        const urlRef = searchParams.get('ref') || searchParams.get('code');
+        if (urlRef && urlRef.trim().length >= 4) {
+            checkReferral(urlRef.trim());
+        }
+    }, [searchParams]);
 
     // 최종 회원가입 제출
     const handleSubmit = async () => {
@@ -846,5 +854,17 @@ export default function SignupPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function SignupPage() {
+    return (
+        <Suspense fallback={
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#F8FAFC', color: '#64748B' }}>
+                로딩 중...
+            </div>
+        }>
+            <SignupInner />
+        </Suspense>
     );
 }

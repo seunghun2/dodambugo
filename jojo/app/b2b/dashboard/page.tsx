@@ -131,7 +131,8 @@ export default function DashboardPage() {
 
   const shareCode = async () => {
     if (!user) return;
-    const text = `[부고온 파트너] ${user.owner_name}님이 추천 코드를 보냈습니다.\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n파트너 앱 다운로드: https://bugoon.co.kr/download/partner`;
+    const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/signup?ref=${user.my_referral_code}`;
+    const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력하시거나 아래 링크를 눌러 바로 가입하세요.\n\n▶ 파트너 회원가입 바로가기:\n${shareUrl}`;
     
     if (navigator.share) {
       try {
