@@ -16,6 +16,7 @@ function formatPhone(val: string): string {
 export default function ForgotPasswordPage() {
     const router = useRouter();
     const [step, setStep] = useState<1 | 2 | 3>(1);
+    const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [verifyCode, setVerifyCode] = useState('');
     const [codeSent, setCodeSent] = useState(false);
@@ -50,8 +51,12 @@ export default function ForgotPasswordPage() {
         && /[!@#$%^&*()_+\-=[\]{};':"|,.<>/?]/.test(newPassword);
     const pwMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
-    // Step 1: 인증번호 발송
+    // Step 1: 이름 + 휴대폰 번호 매칭 검증 및 인증번호 발송
     const sendCode = async () => {
+        if (!name.trim()) {
+            setError('이름(본인명)을 입력해 주세요.');
+            return;
+        }
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         if (cleanPhone.length !== 11) {
             setError('올바른 휴대폰 번호를 입력해 주세요.');
@@ -60,6 +65,21 @@ export default function ForgotPasswordPage() {
         setError('');
         setLoading(true);
         try {
+            // 1. 이름 & 휴대폰 번호 동시 일치 검증
+            const verifyRes = await fetch('/api/b2b/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'verify', phone: cleanPhone, name: name.trim() }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (!verifyRes.ok || !verifyData.success) {
+                setError(verifyData.error || '입력하신 이름과 휴대폰 번호 정보가 일치하지 않습니다.');
+                setLoading(false);
+                return;
+            }
+
+            // 2. 인증번호 SMS 발송
             const res = await fetch('/api/phone-verify/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -156,16 +176,27 @@ export default function ForgotPasswordPage() {
                 {step === 1 && (
                     <>
                         <h2 className={styles.title}>
-                            가입한 휴대폰 번호<span className={styles.titleSub}>로 인증해 주세요</span>
+                            이름과 휴대폰 번호<span className={styles.titleSub}>로 인증해 주세요</span>
                         </h2>
-                        <p className={styles.desc}>가입 시 등록한 번호를 입력하시면 인증번호를 보내드립니다.</p>
+                        <p className={styles.desc}>가입 시 등록한 성명과 휴대폰 번호를 입력해 주세요.</p>
+
+                        <div className={styles.inputGroup} style={{ marginBottom: '12px' }}>
+                            <input
+                                type="text"
+                                className={styles.input}
+                                placeholder="이름 (본인명)"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                disabled={verified}
+                            />
+                        </div>
 
                         <div className={styles.inputGroup}>
                             <input
                                 type="tel"
                                 inputMode="numeric"
                                 className={styles.input}
-                                placeholder="010-0000-0000"
+                                placeholder="가입한 휴대폰 번호 (010-0000-0000)"
                                 value={formatPhone(phone)}
                                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 11))}
                                 disabled={verified}
@@ -173,8 +204,12 @@ export default function ForgotPasswordPage() {
                         </div>
 
                         {!codeSent && (
-                            <button className={styles.subBtn} onClick={sendCode} disabled={loading || phone.replace(/[^0-9]/g, '').length !== 11}>
-                                {loading ? '발송 중...' : '인증번호 받기'}
+                            <button 
+                                className={styles.subBtn} 
+                                onClick={sendCode} 
+                                disabled={loading || !name.trim() || phone.replace(/[^0-9]/g, '').length !== 11}
+                            >
+                                {loading ? '인증 확인 중...' : '인증번호 받기'}
                             </button>
                         )}
 
@@ -198,6 +233,14 @@ export default function ForgotPasswordPage() {
                                     {timer > 0 && <span className={styles.timer}>{formatTimer(timer)}</span>}
                                 </div>
                                 {loading && <p className={styles.hint}>인증 확인 중...</p>}
+                                <button
+                                    className={styles.subBtn}
+                                    style={{ marginTop: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' }}
+                                    onClick={sendCode}
+                                    disabled={loading}
+                                >
+                                    {loading ? '발송 중...' : '인증번호 재전송'}
+                                </button>
                             </>
                         )}
                     </>

@@ -56,6 +56,24 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 404 });
         }
 
+        // 기존 8자리 영문 혼용 추천코드를 숫자 4자리로 자동 갱신
+        if (!user.my_referral_code || !/^\d{4}$/.test(user.my_referral_code)) {
+            let newCode = String(Math.floor(1000 + Math.random() * 9000));
+            const { data: existing } = await supabase
+                .from('b2b_users')
+                .select('id')
+                .eq('my_referral_code', newCode)
+                .maybeSingle();
+
+            if (!existing) {
+                await supabase
+                    .from('b2b_users')
+                    .update({ my_referral_code: newCode })
+                    .eq('id', user.id);
+                user.my_referral_code = newCode;
+            }
+        }
+
         const { data: deposit, error: depositError } = await supabase
             .from('deposits')
             .select('balance')

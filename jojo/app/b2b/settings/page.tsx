@@ -68,8 +68,8 @@ export default function SettingsPage() {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice' | 'settlements'
-    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice' | 'settlements'>('main');
+    // 뷰 전환 상태: 'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'
+    const [view, setView] = useState<'main' | 'settings_main' | 'alarm' | 'price' | 'info' | 'withdraw' | 'terms' | 'privacy' | 'faq' | 'notice'>('main');
 
     // 상조 담당자용 정산서 조회 관련 상태
     const [settleSummary, setSettleSummary] = useState<any>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
@@ -165,11 +165,6 @@ export default function SettingsPage() {
         }
     }, [user, fetchSettleMonthlyDetail]);
 
-    useEffect(() => {
-        if (view === 'settlements') {
-            fetchSettleMonthlyList();
-        }
-    }, [view, fetchSettleMonthlyList]);
 
     // 모달 활성화 상태
     const [showInfoModal, setShowInfoModal] = useState(false);
@@ -178,9 +173,17 @@ export default function SettingsPage() {
 
     // 비밀번호 변경 모달 상태
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
     const [passwordError, setPasswordError] = useState('');
+
+    // 소속 상조회사 변경 모달 상태
+    const [showCompanyModal, setShowCompanyModal] = useState(false);
+    const [companyList, setCompanyList] = useState<any[]>([]);
+    const [selectedCompanyId, setSelectedCompanyId] = useState('');
+    const [customCompanyName, setCustomCompanyName] = useState('');
+    const [companyLoading, setCompanyLoading] = useState(false);
 
     // 계좌 변경 폼 입력값
     const [bankName, setBankName] = useState('');
@@ -442,18 +445,23 @@ export default function SettingsPage() {
     };
 
     const handleUpdatePassword = async () => {
+        if (!currentPassword) {
+            setPasswordError('기존 비밀번호를 입력해주세요.');
+            return;
+        }
+
         if (!newPassword || !newPasswordConfirm) {
-            setPasswordError('비밀번호를 입력해주세요.');
+            setPasswordError('새 비밀번호를 입력해주세요.');
             return;
         }
 
         if (newPassword !== newPasswordConfirm) {
-            setPasswordError('비밀번호가 일치하지 않습니다.');
+            setPasswordError('새 비밀번호가 일치하지 않습니다.');
             return;
         }
 
         if (newPassword.length < 8) {
-            setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+            setPasswordError('새 비밀번호는 8자 이상이어야 합니다.');
             return;
         }
 
@@ -469,6 +477,7 @@ export default function SettingsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     phone: user.phone,
+                    currentPassword: currentPassword,
                     newPassword: newPassword
                 })
             });
@@ -476,6 +485,7 @@ export default function SettingsPage() {
             if (res.ok && data.success) {
                 alert('비밀번호가 성공적으로 변경되었습니다.');
                 setShowPasswordModal(false);
+                setCurrentPassword('');
                 setNewPassword('');
                 setNewPasswordConfirm('');
             } else {
@@ -630,7 +640,7 @@ export default function SettingsPage() {
                 {/* 계좌 정보 카드 */}
                 <div className={styles.accountCard}>
                     <div>
-                        <span className={styles.accountLabel}>연결된 정산 계좌</span>
+                        <span className={styles.accountLabel}>수당 입금 계좌</span>
                         <span className={styles.accountInfo}>
                             {user.bank_name ? `${user.bank_name} ${maskAccountNo(user.account_no)}` : '등록된 계좌 없음'}
                         </span>
@@ -715,14 +725,6 @@ export default function SettingsPage() {
                                 <B2BIcon name="chevron-right" size={18} />
                             </span>
                         </div>
-                        {user.company_id && (
-                            <div className={styles.listItem} onClick={() => setView('settlements')}>
-                                <span className={styles.listLabel} style={{ fontWeight: 'bold' }}>본사 정산서 조회</span>
-                                <span className={styles.listArrow}>
-                                    <B2BIcon name="chevron-right" size={18} />
-                                </span>
-                            </div>
-                        )}
                     </div>
                 </section>
 
@@ -902,6 +904,24 @@ export default function SettingsPage() {
                             <div className={styles.modalBody}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>기존 비밀번호</label>
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            placeholder="기존 비밀번호 입력"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         <label style={{ fontSize: '13px', color: '#666' }}>새 비밀번호</label>
                                         <input
                                             type="password"
@@ -920,12 +940,12 @@ export default function SettingsPage() {
                                         />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <label style={{ fontSize: '13px', color: '#666' }}>비밀번호 확인</label>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>새 비밀번호 확인</label>
                                         <input
                                             type="password"
                                             value={newPasswordConfirm}
                                             onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                                            placeholder="비밀번호 재입력"
+                                            placeholder="새 비밀번호 재입력"
                                             style={{
                                                 width: '100%',
                                                 padding: '10px',
@@ -1471,9 +1491,103 @@ export default function SettingsPage() {
     // 5. 내정보 상세 뷰 ('info')
     // ==========================================
     if (view === 'info') {
-        const handleResignCompany = () => {
-            if (confirm('소속 상조회사 정보를 정말로 해제하시겠습니까?\n해제 시 파트너 혜택 및 정산율 설정이 일반 등급으로 재조정될 수 있습니다.')) {
-                alert('소속 회사 해제 신청이 접수되었습니다.');
+        const fetchCompanies = async () => {
+            try {
+                const res = await fetch('/api/b2b/companies');
+                const data = await res.json();
+                if (data.success && data.companies) {
+                    setCompanyList(data.companies);
+                }
+            } catch (err) {
+                console.error('상조회사 목록 조회 오류:', err);
+            }
+        };
+
+        const handleResignCompany = async () => {
+            if (!user) return;
+            if (confirm(`현재 소속 정보(${user.company_name})를 정말로 해제하시겠습니까?\n해제 후 다른 상조회사 소속으로 재가입/변경하실 수 있습니다.`)) {
+                try {
+                    const token = getToken();
+                    const res = await fetch('/api/b2b/me', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            company_name: '부고온 파트너 상조',
+                            company_id: null,
+                        }),
+                    });
+                    if (res.ok) {
+                        alert('소속 상조회사가 해제되었습니다. 새 상조회사로 등록해 주세요.');
+                        fetchUser();
+                    } else {
+                        alert('소속 해제 처리에 실패했습니다.');
+                    }
+                } catch {
+                    alert('서버 통신 중 오류가 발생했습니다.');
+                }
+            }
+        };
+
+        const handleOpenCompanyModal = () => {
+            fetchCompanies();
+            setSelectedCompanyId('');
+            setCustomCompanyName('');
+            setShowCompanyModal(true);
+        };
+
+        const handleSaveCompany = async () => {
+            if (!selectedCompanyId) {
+                alert('소속 상조회사를 선택해 주세요.');
+                return;
+            }
+
+            let targetCompanyName = '';
+            let targetCompanyId: string | null = null;
+
+            if (selectedCompanyId === 'custom') {
+                if (!customCompanyName.trim()) {
+                    alert('상조회사명을 입력해 주세요.');
+                    return;
+                }
+                targetCompanyName = customCompanyName.trim();
+            } else {
+                const found = companyList.find(c => String(c.id) === String(selectedCompanyId));
+                if (found) {
+                    targetCompanyName = found.name;
+                    targetCompanyId = found.id;
+                } else {
+                    targetCompanyName = selectedCompanyId;
+                }
+            }
+
+            try {
+                setCompanyLoading(true);
+                const token = getToken();
+                const res = await fetch('/api/b2b/me', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        company_name: targetCompanyName,
+                        company_id: targetCompanyId,
+                    }),
+                });
+                if (res.ok) {
+                    alert(`소속 상조회사가 [${targetCompanyName}](으)로 성공적으로 변경되었습니다!`);
+                    setShowCompanyModal(false);
+                    fetchUser();
+                } else {
+                    alert('소속 변경 처리에 실패했습니다.');
+                }
+            } catch {
+                alert('서버 통신 중 오류가 발생했습니다.');
+            } finally {
+                setCompanyLoading(false);
             }
         };
 
@@ -1499,12 +1613,25 @@ export default function SettingsPage() {
                                 <B2BIcon name="user" size={48} color="#adb5bd" />
                             )}
                         </div>
-                        <button className={styles.avatarCameraBtn} onClick={handleAvatarClick} disabled={uploadingAvatar}>
-                            <B2BIcon name="camera" size={14} color="#ffffff" strokeWidth={2} />
-                        </button>
-                        {user.avatar_url && (
-                            <button className={styles.avatarDeleteBtn} onClick={handleDeleteAvatar} disabled={uploadingAvatar}>
-                                <B2BIcon name="close" size={14} color="#ffffff" strokeWidth={2} />
+                        {user.avatar_url ? (
+                            /* 사진이 등록되어 있을 때는 X (삭제) 버튼 */
+                            <button 
+                                className={styles.avatarActionBtn} 
+                                onClick={handleDeleteAvatar} 
+                                title="프로필 사진 삭제" 
+                                disabled={uploadingAvatar}
+                            >
+                                <B2BIcon name="close" size={14} color="#ffffff" strokeWidth={2.5} />
+                            </button>
+                        ) : (
+                            /* 사진이 없을 때는 카메라 (등록) 버튼 */
+                            <button 
+                                className={styles.avatarActionBtn} 
+                                onClick={handleAvatarClick} 
+                                title="프로필 사진 등록" 
+                                disabled={uploadingAvatar}
+                            >
+                                <B2BIcon name="camera" size={14} color="#ffffff" strokeWidth={2} />
                             </button>
                         )}
                         <input
@@ -1534,9 +1661,15 @@ export default function SettingsPage() {
                         </div>
                     </div>
                     <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>연락처</span>
+                        <div className={styles.detailValueRow}>
+                            <span className={styles.detailValueText}>{formatPhone(user.phone)}</span>
+                        </div>
+                    </div>
+                    <div className={styles.detailRow}>
                         <span className={styles.detailLabel}>소속</span>
                         <div className={styles.detailValueRow}>
-                            <span className={styles.detailValueText}>{user.company_name}</span>
+                            <span className={styles.detailValueText}>{user.company_name || '부고온 파트너 상조'}</span>
                             <button className={styles.detailActionBtn} onClick={handleResignCompany}>
                                 탈퇴하기
                             </button>
@@ -1552,6 +1685,145 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* 비밀번호 변경 모달 */}
+                {showPasswordModal && (
+                    <div className={styles.bottomSheetOverlay} onClick={() => setShowPasswordModal(false)}>
+                        <div className={styles.bottomSheetContent} onClick={(e) => e.stopPropagation()}>
+                            <div className={styles.modalHeader}>
+                                <h3 className={styles.modalTitle}>비밀번호 변경</h3>
+                                <button className={styles.closeBtn} onClick={() => setShowPasswordModal(false)}>×</button>
+                            </div>
+                            <div className={styles.modalBody}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>기존 비밀번호</label>
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            placeholder="기존 비밀번호 입력"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>새 비밀번호</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="8자 이상의 새 비밀번호"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#666' }}>새 비밀번호 확인</label>
+                                        <input
+                                            type="password"
+                                            value={newPasswordConfirm}
+                                            onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                                            placeholder="새 비밀번호 재입력"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
+                                    </div>
+                                    {passwordError && (
+                                        <p style={{ color: '#E74C3C', fontSize: '12px', margin: 0 }}>
+                                            {passwordError}
+                                        </p>
+                                    )}
+                                </div>
+                                <button 
+                                    className={styles.confirmBtn} 
+                                    style={{ backgroundColor: '#2E7238', color: '#ffffff' }}
+                                    onClick={handleUpdatePassword}
+                                >
+                                    변경하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 상조회사 소속 변경/등록 모달 */}
+                {showCompanyModal && (
+                    <div className={styles.bottomSheetOverlay} onClick={() => setShowCompanyModal(false)}>
+                        <div className={styles.bottomSheetContent} onClick={(e) => e.stopPropagation()}>
+                            <div className={styles.modalHeader}>
+                                <h3 className={styles.modalTitle}>소속 상조회사 선택</h3>
+                                <button className={styles.closeBtn} onClick={() => setShowCompanyModal(false)}>×</button>
+                            </div>
+                            <div className={styles.modalBody}>
+                                <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
+                                    새로 소속된 상조회사를 선택하시면 파트너 정보가 재설정됩니다.
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>상조회사 선택</label>
+                                        <select
+                                            className={styles.textInput}
+                                            value={selectedCompanyId}
+                                            onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                            style={{ backgroundColor: '#fff', appearance: 'auto', padding: '10px', fontSize: '14px' }}
+                                        >
+                                            <option value="">상조회사를 선택해 주세요</option>
+                                            {companyList.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                            <option value="custom">기타 (직접 입력)</option>
+                                        </select>
+                                    </div>
+                                    {selectedCompanyId === 'custom' && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <label style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>회사명 입력</label>
+                                            <input
+                                                type="text"
+                                                className={styles.textInput}
+                                                placeholder="상조회사명을 입력해 주세요"
+                                                value={customCompanyName}
+                                                onChange={(e) => setCustomCompanyName(e.target.value)}
+                                                style={{ padding: '10px', fontSize: '14px' }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                <button 
+                                    className={styles.confirmBtn} 
+                                    style={{ backgroundColor: '#2E7238', color: '#ffffff' }}
+                                    onClick={handleSaveCompany}
+                                    disabled={companyLoading || !selectedCompanyId}
+                                >
+                                    {companyLoading ? '저장 중...' : '소속 변경 완료'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -1727,257 +1999,6 @@ export default function SettingsPage() {
                             </div>
                         );
                     })}
-                </div>
-            </div>
-        );
-    }
-
-    // ==========================================
-    // 10. 상조회사용 본사 정산서 조회 뷰 ('settlements')
-    // ==========================================
-    if (view === 'settlements') {
-        const handlePrint = () => {
-            window.print();
-        };
-
-        const handleDownloadCSV = () => {
-            if (!settleSelectedMonth || settleDetails.length === 0) {
-                alert('다운로드할 정산 내역이 없습니다.');
-                return;
-            }
-
-            const [year, month] = settleSelectedMonth.split('-');
-            const headers = ['거래일시', '주문번호', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
-            
-            const rows = settleDetails.map(s => [
-                new Date(s.created_at).toLocaleString(),
-                s.order?.order_number || '-',
-                s.order?.partner_name || '-',
-                s.order?.deceased_name || '-',
-                s.order?.product_name || '-',
-                s.order?.sender_name || '-',
-                s.amount,
-                s.status === 'pending' ? '정산대기' : '정산완료'
-            ]);
-
-            const csvContent = 
-                '\ufeff' + 
-                [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `본사정산서_${user.company_name || '상조본사'}_${year}년_${month}월.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        const currentMonthData = settleMonthlyList.find(m => m.month === settleSelectedMonth);
-        const hasPending = currentMonthData ? currentMonthData.pending_amount > 0 : false;
-
-        return (
-            <div className={styles.container}>
-                {/* 헤더 */}
-                <header className={`${styles.header} no-print`}>
-                    <button className={styles.backBtn} onClick={() => setView('main')}>
-                        <B2BIcon name="chevron-left" size={24} />
-                    </button>
-                    <span className={styles.headerTitle}>본사 정산서 조회</span>
-                    <div style={{ display: 'flex', gap: '8px', marginRight: '16px' }}>
-                        <button 
-                            onClick={handlePrint}
-                            style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: '#000000' }}
-                        >
-                            인쇄
-                        </button>
-                        <button 
-                            onClick={handleDownloadCSV}
-                            disabled={settleDetails.length === 0}
-                            style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: '#000000' }}
-                        >
-                            엑셀
-                        </button>
-                    </div>
-                </header>
-
-                <div style={{ padding: '16px' }}>
-                    {/* 상단 요약 박스 (모바일) */}
-                    <div className="no-print" style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-                        <div style={{ flex: 1, padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
-                            <div style={{ fontSize: '11px', color: '#475569', marginBottom: '2px' }}>미정산 총액</div>
-                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#000000' }}>{(settleSummary.pending_amount || 0).toLocaleString()}원</div>
-                        </div>
-                        <div style={{ flex: 1, padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
-                            <div style={{ fontSize: '11px', color: '#475569', marginBottom: '2px' }}>정산 완료 총액</div>
-                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#000000' }}>{(settleSummary.completed_amount || 0).toLocaleString()}원</div>
-                        </div>
-                    </div>
-
-                    {/* 월별 요약 테이블 */}
-                    <div className="no-print" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', marginBottom: '20px' }}>
-                        <div style={{ padding: '12px', fontWeight: 'bold', fontSize: '13px', background: '#f8fafc', borderBottom: '1px solid #cbd5e1', color: '#000000' }}>월별 정산 장부</div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                            <thead>
-                                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #cbd5e1' }}>
-                                    <th style={{ padding: '8px 10px', textAlign: 'left', color: '#000000' }}>정산월</th>
-                                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>미정산</th>
-                                    <th style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>정산완료</th>
-                                    <th style={{ padding: '8px 10px', textAlign: 'center', color: '#000000' }}>조회</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {settleLoading ? (
-                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>정산 정보 로딩 중...</td></tr>
-                                ) : settleMonthlyList.length === 0 ? (
-                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>정산 정보가 없습니다.</td></tr>
-                                ) : (
-                                    settleMonthlyList.map(m => (
-                                        <tr key={m.month} style={{ borderBottom: '1px solid #e2e8f0', background: settleSelectedMonth === m.month ? '#f8fafc' : 'transparent' }}>
-                                            <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#000000' }}>{m.month.split('-')[0]}년 {m.month.split('-')[1]}월</td>
-                                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>{m.pending_amount.toLocaleString()}원</td>
-                                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#000000' }}>{m.completed_amount.toLocaleString()}원</td>
-                                            <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                                <button 
-                                                    onClick={() => fetchSettleMonthlyDetail(m.month)}
-                                                    style={{ border: '1px solid #cbd5e1', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', background: '#ffffff', cursor: 'pointer', color: '#000000' }}
-                                                >
-                                                    선택
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* 정식 정산 명세서 (A4 서식 흑백 양식 모바일&인쇄용) */}
-                    {settleSelectedMonth && (
-                        <div style={{ background: '#ffffff', border: '2px solid #000000', padding: '20px', fontSize: '12px', color: '#000000' }}>
-                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ fontSize: '24px', letterSpacing: '8px', margin: '0 0 4px 0', color: '#000000' }}>정 산 서</h2>
-                                <span style={{ fontSize: '11px', color: '#475569' }}>귀사 소속의 화환 거래 정산 명세서입니다.</span>
-                            </div>
-
-                            {/* 공급자 & 공급받는자 명세 */}
-                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급받는자</div>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>등록번호</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.business_no || '미등록'}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>상호 (법인명)</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.name || user.company_name || '상조회사'}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>성명 (대표자)</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.owner_name || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>사업장 주소</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>{companyInfo?.address || '미등록'}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>업태 / 종목</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>
-                                                    {companyInfo?.business_type || '-'} / {companyInfo?.business_item || '-'}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#000000' }}>■ 공급자</div>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', width: '80px', color: '#000000' }}>등록번호</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>408-22-68851</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>상호 (법인명)</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>마음부고</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>성명 (대표자)</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>김미연</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>사업장 주소</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>서울특별시 강남구 압구정로 306</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '4px 8px', fontWeight: 'bold', color: '#000000' }}>업태 / 종목</td>
-                                                <td style={{ border: '1px solid #000000', padding: '4px 8px', color: '#000000' }}>서비스업 / 정보통신업, 모바일 플랫폼</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            {/* 간이 정산 상태 표시 */}
-                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '16px' }}>
-                                <tbody>
-                                    <tr>
-                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>정산 상태</td>
-                                        <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>{hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}</td>
-                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>지급일자</td>
-                                        <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>
-                                            {hasPending || !settleDetails[0]?.payment_date ? '지급 대기' : new Date(settleDetails[0].payment_date).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-                                        </td>
-                                        <td style={{ border: '1px solid #000000', background: '#f1f5f9', padding: '6px', fontWeight: 'bold', width: '80px', textAlign: 'center', color: '#000000' }}>합계 금액</td>
-                                        <td style={{ border: '1px solid #000000', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
-                                            {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            {/* 세부 목록 */}
-                            <div style={{ overflowX: 'auto', marginBottom: '10px' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', color: '#000000' }}>
-                                    <thead>
-                                        <tr style={{ background: '#f1f5f9' }}>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>결제 일시</th>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>주문 번호</th>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>장례지도사</th>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>고인명(상가)</th>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>화환 상품명 (주문자)</th>
-                                            <th style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>정산 수당</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {settleDetailLoading ? (
-                                            <tr><td colSpan={6} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>상세 내역 로드 중...</td></tr>
-                                        ) : settleDetails.length === 0 ? (
-                                            <tr><td colSpan={6} style={{ textAlign: 'center', padding: '16px', color: '#000000' }}>거래 내역이 없습니다.</td></tr>
-                                        ) : (
-                                            settleDetails.map(s => (
-                                                <tr key={s.id}>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>
-                                                        {new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                                                    </td>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', fontFamily: 'monospace', color: '#000000' }}>{s.order?.order_number || '-'}</td>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>{s.order?.partner_name || '-'}</td>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', fontWeight: 'bold', color: '#000000' }}>{s.order?.deceased_name || '-'}</td>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>{s.order?.product_name} ({s.order?.sender_name})</td>
-                                                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', fontWeight: 'bold', color: '#000000' }}>{s.amount.toLocaleString()}원</td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         );

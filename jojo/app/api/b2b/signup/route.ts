@@ -7,14 +7,10 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// 추천 코드 생성 (영문 대문자 + 숫자 8자리)
+// 추천 코드 생성 (숫자 4자리)
 function generateReferralCode(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 혼동 방지: I,O,0,1 제외
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
+    const num = Math.floor(1000 + Math.random() * 9000);
+    return String(num);
 }
 
 export async function POST(request: NextRequest) {
@@ -29,29 +25,14 @@ export async function POST(request: NextRequest) {
             account_no,
             account_holder,
             referral_code, // 추천인 코드 (선택)
+            checkOnly,
         } = body;
 
-        // 필수값 검증
-        if (!phone || !password || !company_name || !owner_name) {
-            return NextResponse.json(
-                { error: '필수 정보를 모두 입력해주세요.' },
-                { status: 400 }
-            );
-        }
-
         // 전화번호 정리
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
         if (cleanPhone.length !== 11 || !cleanPhone.startsWith('010')) {
             return NextResponse.json(
                 { error: '올바른 휴대폰 번호를 입력해주세요.' },
-                { status: 400 }
-            );
-        }
-
-        // 비밀번호 길이 검증
-        if (password.length < 6) {
-            return NextResponse.json(
-                { error: '비밀번호는 6자리 이상이어야 합니다.' },
                 { status: 400 }
             );
         }
@@ -61,12 +42,25 @@ export async function POST(request: NextRequest) {
             .from('b2b_users')
             .select('id')
             .eq('phone', cleanPhone)
-            .single();
+            .maybeSingle();
 
         if (existing) {
             return NextResponse.json(
                 { error: '이미 가입된 번호입니다. 로그인해주세요.' },
                 { status: 409 }
+            );
+        }
+
+        // checkOnly 모드인 경우 중복 체크 성공으로 종료
+        if (checkOnly) {
+            return NextResponse.json({ success: true, message: '가입 가능한 번호입니다.' });
+        }
+
+        // 필수값 검증 (최종 가입 시)
+        if (!password || !company_name || !owner_name) {
+            return NextResponse.json(
+                { error: '필수 정보를 모두 입력해주세요.' },
+                { status: 400 }
             );
         }
 
@@ -127,8 +121,14 @@ export async function POST(request: NextRequest) {
 
         if (insertError) {
             console.error('회원가입 INSERT 오류:', insertError);
+            if (insertError.code === '23505') {
+                return NextResponse.json(
+                    { error: '이미 가입된 휴대폰 번호입니다. 로그인해 주세요.' },
+                    { status: 409 }
+                );
+            }
             return NextResponse.json(
-                { error: '회원가입 중 오류가 발생했습니다.' },
+                { error: '회원가입 중 오류가 발생했습니다: ' + (insertError.message || '') },
                 { status: 500 }
             );
         }

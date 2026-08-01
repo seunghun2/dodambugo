@@ -125,48 +125,35 @@ function B2BManagePageContent() {
   const handleDuplicateBugo = async (item: BugoItem) => {
     if (!confirm('동일한 내용으로 부고장을 복제하시겠습니까?')) return;
     try {
-      const generateBugoNumber = async (): Promise<string> => {
-        for (let i = 0; i < 20; i++) {
-          const num = Math.floor(1000 + Math.random() * 9000).toString();
-          const { data } = await supabase
-            .from('bugo')
-            .select('bugo_number')
-            .eq('bugo_number', num)
-            .single();
-          if (!data) return num;
+      setLoading(true);
+      const token = localStorage.getItem('b2b_token');
+      const res = await fetch('/api/b2b/bugo/duplicate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bugo_number: item.bugo_number,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        alert(`부고장이 성공적으로 복제되었습니다. (신규 부고번호: #${data.bugo_number})`);
+        setShowModal(false);
+        if (user?.id) {
+          fetchBugoList(user.id);
         }
-        return Math.floor(10000 + Math.random() * 90000).toString();
-      };
-
-      const newBugoNum = await generateBugoNumber();
-      const newOwnerToken = 'xxxxxxxxxxxx'.replace(/x/g, () =>
-        Math.floor(Math.random() * 16).toString(16)
-      );
-
-      const duplicateData = {
-        ...item,
-        bugo_number: newBugoNum,
-        owner_token: newOwnerToken,
-        created_at: new Date().toISOString(),
-        deceased_name: `${item.deceased_name} (복제)`,
-      };
-
-      // primary key id는 Supabase가 자동 생성하도록 삭제
-      delete (duplicateData as any).id;
-
-      const { error } = await supabase.from('bugo').insert([duplicateData]);
-      if (error) throw error;
-
-      alert(`부고장이 성공적으로 복제되었습니다. (신규 부고번호: #${newBugoNum})`);
-      setShowModal(false);
-      
-      if (user?.id) {
-        setLoading(true);
-        fetchBugoList(user.id);
+      } else {
+        alert(data.error || '부고 복제에 실패했습니다.');
+        setLoading(false);
       }
     } catch (err) {
       console.error('복제 실패:', err);
-      alert('복제에 실패했습니다. 다시 시도해 주세요.');
+      alert('복제 처리 중 통신 오류가 발생했습니다.');
+      setLoading(false);
     }
   };
 

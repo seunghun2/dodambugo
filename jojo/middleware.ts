@@ -197,8 +197,8 @@ export async function middleware(request: NextRequest) {
 
   // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
   const isB2BSubdomain =
-    // 로컬 환경에서는 포트 3001번, 3009번만 B2B로 인정하고, 3000번은 B2C로 판별
-    (isLocal ? (hostLower.includes(':3001') || hostLower.includes(':3009')) : false) ||
+    // 로컬 환경에서는 포트 3000번, 3001번, 3009번 모두 지원
+    (isLocal ? (hostLower.includes(':3000') || hostLower.includes(':3001') || hostLower.includes(':3009')) : false) ||
     hostLower.startsWith('partner.') ||
     hostLower.startsWith('b2b.') ||
     hostLower.startsWith('bugoon.') ||

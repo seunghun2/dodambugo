@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         const cleanPhone = phone.replace(/-/g, '');
 
         // 해외 번호(11자리가 아님)이거나 특정 테스트/데모 번호의 경우 인증코드 '123456' 예외 처리
-        const isTestOrForeign = cleanPhone.length !== 11 || cleanPhone === '01012345678' || cleanPhone === '01064262393' || cleanPhone === '01088889999';
+        const isTestOrForeign = cleanPhone.length !== 11 || cleanPhone === '01012345678' || cleanPhone === '01088889999';
         if (isTestOrForeign && code === '123456') {
             return NextResponse.json({ success: true, message: '인증이 완료되었습니다' });
         }

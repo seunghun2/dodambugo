@@ -257,3 +257,34 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - [ ] 슬랙 앱 → Incoming Webhooks → 웹훅 URL 발급
 - [ ] Vercel 환경변수에 `SLACK_B2B_WEBHOOK_URL` 등록
 - [ ] 실발송 테스트 (출금 신청 → 승인 → 슬랙 메시지 수신 확인)
+
+---
+
+## 📑 13. B2B 파트너 약관/보안/프로필/비밀번호/부고복제 고도화 (2026-08-01)
+
+### 13-1. B2B 파트너 이용약관 및 개인정보처리방침 표준법 개정 고도화
+- **상세 내용**: 대한민국 표준 법률 조항(소득세법 제127조 3.3% 원천징수, 개인정보보호법 제24조의2, 전자상거래법 5년 보존, 허위부고/어뷰징 환수 및 민형사 책임 조항 등)을 반영하여 전문성 높은 약관으로 100% 개정 완료.
+- **관련 소스코드**: `jojo/app/b2b/terms/page.tsx`, `jojo/app/b2b/privacy/page.tsx`
+
+### 13-2. 비밀번호 찾기 & 변경 2중 검증 및 보안 강화
+- **상세 내용**: 
+  - 비밀번호 찾기 시 이름(본인명)+휴대폰 번호 2중 대조 검증 후 SMS 인증번호 발송.
+  - 인증번호 3분 타이머 및 [인증번호 재전송] 수동 리셋 구현.
+  - 비밀번호 변경 모달 팝업 내 [기존 비밀번호] 입력 필드 추가 및 백엔드(`bcrypt.compare`) 대조 검증 연동.
+- **관련 소스코드**: `jojo/app/b2b/login/forgot/page.tsx`, `jojo/app/api/b2b/reset-password/route.ts`, `jojo/app/b2b/settings/page.tsx`
+
+### 13-3. 직관적인 4자리 숫자 추천코드 체계 교체
+- **상세 내용**: 
+  - 기존 영문/숫자 혼용 8자리 추천코드(`6MJUWN7D` 등)에서 기억하기 쉬운 **숫자 4자리**(예: 1000~9999)로 생성/발급 체계 교체.
+  - 회원가입 5단계 숫자 키패드 지원 및 기존 유저 접속 시 4자리 숫자로 자동 마이그레이션.
+- **관련 소스코드**: `jojo/app/api/b2b/signup/route.ts`, `jojo/app/api/b2b/me/route.ts`, `jojo/app/b2b/signup/page.tsx`
+
+### 13-4. 소속 상조회사 관리 (소속 해제 / 탈퇴) UX 개선
+- **상세 내용**: 소속 라인에서 [탈퇴하기] 버튼을 메인 액션으로 지원하고, 회색 톤(`detailActionBtn`)으로 통일.
+- **관련 소스코드**: `jojo/app/b2b/settings/page.tsx`, `jojo/app/api/b2b/companies/route.ts`
+
+### 13-5. B2B 전용 부고장 복제 백엔드 API 신규 구축
+- **상세 내용**: 
+  - 클라이언트 direct insert 시 RLS 보안 차단 및 컬럼 불일치로 발생하던 복제 실패 오류 해결.
+  - Supabase `SERVICE_ROLE_KEY`를 사용하는 전용 백엔드 API `/api/b2b/bugo/duplicate` 신규 구축 및 연동.
+- **관련 소스코드**: `jojo/app/api/b2b/bugo/duplicate/route.ts`, `jojo/app/b2b/manage/page.tsx`

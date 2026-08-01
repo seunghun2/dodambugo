@@ -113,9 +113,6 @@ function LoginContent() {
                     />
                 </div>
 
-                {/* 에러 */}
-                {error && <p className={styles.error}>{error}</p>}
-
                 {/* 폼 */}
                 <div className={styles.form}>
                     <div className={styles.inputWrap}>
@@ -150,16 +147,21 @@ function LoginContent() {
                         </button>
                     </div>
 
-                    {/* 자동로그인 */}
-                    <label className={styles.autoLogin}>
-                        <span
-                            className={`${styles.checkbox} ${autoLogin ? styles.checkboxActive : ''}`}
-                            onClick={() => setAutoLogin(!autoLogin)}
-                        >
-                            {autoLogin && <IconCheck size={12} stroke={3} />}
-                        </span>
-                        <span className={styles.autoLoginText}>자동로그인</span>
-                    </label>
+                    {/* 에러 메시지(좌측) & 자동로그인(우측) 동일선상 배치 */}
+                    <div className={styles.subRow}>
+                        <div className={styles.errorContainer}>
+                            {error && <span className={styles.errorText}>{error}</span>}
+                        </div>
+                        <label className={styles.autoLogin}>
+                            <span
+                                className={`${styles.checkbox} ${autoLogin ? styles.checkboxActive : ''}`}
+                                onClick={() => setAutoLogin(!autoLogin)}
+                            >
+                                {autoLogin && <IconCheck size={12} stroke={3} />}
+                            </span>
+                            <span className={styles.autoLoginText}>자동로그인</span>
+                        </label>
+                    </div>
 
                     <button
                         className={styles.loginBtn}
