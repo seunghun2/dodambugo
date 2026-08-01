@@ -335,3 +335,10 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 은행/펌뱅킹 점검시간(**매일 23:30 ~ 00:30**) 및 최소 환급 금액(10,000원 미만) 시 `[환급신청]` 버튼 비활성화(회색 쿨그레이 `#CBD5E1` & `not-allowed`) 및 안내 팝업 알림 연동.
   - 환급 카드 하단에 10,000원 최소 금액, 은행 점검시간, 3.3% 원천징수 공제 안내 박스 렌더링.
 - **관련 소스코드**: `jojo/app/b2b/wallet/page.tsx`
+
+### 13-13. 로컬 환경 500 TypeError: fetch failed 트러블슈팅 및 Supabase 호스트/네트워크 가이드
+- **상세 원인 및 해결 노하우**:
+  1. **구 Supabase 도메인 캐시 오염**: Next.js 개발 캐시(`.next/`)에 과거 DB 호스트(`tbteghoppechzotdojna.supabase.co`) 찌꺼기가 남아 `ENOTFOUND` 500 에러 원인 제공. ➡️ `.next` 캐시 삭제 후 Clean 부팅.
+  2. **터미널 샌드박스 네트워크 아웃바운드 차단**: 샌드박스 내부 터미널 실행 시 Node.js의 외부 DB(`mnlyqhrjnpbkleenmszm.supabase.co`) HTTP 통신이 억제되어 `TypeError: fetch failed` 500 발생. ➡️ Next.js dev 서버 실행 시 Unsandboxed(BypassSandbox: true) 옵션으로 0.01초 통과 세팅.
+  3. **로컬 DB 공지사항 시딩**: `scripts/seed-admin-notices.mjs` 스크립트를 통해 로컬 DB에도 실서버 정통 공지사항 5건 시딩 연동 완수.
+- **관련 소스코드/스크립트**: `jojo/scripts/seed-admin-notices.mjs`, `jojo/scripts/test-db-connection.mjs`
