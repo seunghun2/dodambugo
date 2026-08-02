@@ -445,7 +445,7 @@ function SettlementsContent() {
                                              <td style={{ fontSize: '11px' }}>
                                                  <div>{new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
                                                  {s.status === 'cancelled' && (
-                                                     <div style={{ fontSize: '10px', color: '#e53e3e', marginTop: '2px', fontWeight: '500' }}>
+                                                     <div style={{ fontSize: '10px', color: '#333333', marginTop: '2px', fontWeight: '500' }}>
                                                          취소: {new Date(s.updated_at || s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                                      </div>
                                                  )}
