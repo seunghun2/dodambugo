@@ -130,11 +130,13 @@ export async function GET(request: NextRequest) {
                     isB2B
                 );
 
-                // share_reminder_sent 플래그 업데이트
-                await supabase
-                    .from('bugo')
-                    .update({ share_reminder_sent: true })
-                    .eq('bugo_number', bugo.bugo_number);
+                // testBugoNumber가 아닐 때만 share_reminder_sent 플래그 업데이트
+                if (!testBugoNumber) {
+                    await supabase
+                        .from('bugo')
+                        .update({ share_reminder_sent: true })
+                        .eq('bugo_number', bugo.bugo_number);
+                }
 
                 console.log(`✅ 공유 리마인더 발송 완료: ${bugo.bugo_number} → ${phone}`);
                 sentCount++;
