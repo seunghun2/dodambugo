@@ -458,7 +458,7 @@ export default function WalletPage() {
                                                 [환급 신청 안내]
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                <span>• 최소 환급 신청 가능 금액은 <strong>5,000원</strong>부터입니다.</span>
+                                                <span>• 최소 환급 신청 가능 금액은 <strong>{minWithdrawAmount.toLocaleString()}원</strong>부터입니다.</span>
                                                 <span>• 매일 <strong>23:30 ~ 00:30</strong>은 금융기관 점검 시간으로 환급이 제한됩니다.</span>
                                                 <span>• 개인 파트너 정산 시 <strong>3.3% 원천징수 공제</strong> 후 계좌로 입금됩니다.</span>
                                             </div>
