@@ -143,6 +143,7 @@ export async function GET(request: NextRequest) {
                     status: s.status,
                     payment_date: s.payment_date,
                     created_at: s.created_at,
+                    updated_at: s.updated_at,
                     order: orderInfo ? {
                         ...orderInfo,
                         deceased_name: bugoInfo?.deceased_name || '미등록',

@@ -9,9 +9,10 @@ interface SettlementDetail {
     id: string;
     order_id: string;
     amount: number;
-    status: 'pending' | 'completed';
+    status: 'pending' | 'completed' | 'cancelled';
     payment_date: string | null;
     created_at: string;
+    updated_at?: string;
     order: {
         order_number: string;
         product_name: string;
@@ -441,9 +442,14 @@ function SettlementsContent() {
                                 ) : (
                                     settlements.map((s) => (
                                         <tr key={s.id}>
-                                            <td style={{ fontSize: '11px' }}>
-                                                {new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                                            </td>
+                                             <td style={{ fontSize: '11px' }}>
+                                                 <div>{new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                                                 {s.status === 'cancelled' && (
+                                                     <div style={{ fontSize: '10px', color: '#e53e3e', marginTop: '2px', fontWeight: '500' }}>
+                                                         취소: {new Date(s.updated_at || s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                                     </div>
+                                                 )}
+                                             </td>
                                             <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>
                                                 {s.order?.order_number || '-'}
                                             </td>
@@ -465,7 +471,7 @@ function SettlementsContent() {
                                                 {s.amount.toLocaleString()}원
                                             </td>
                                             <td>
-                                                {s.status === 'pending' ? '대기' : '완료'}
+                                                {s.status === 'pending' ? '대기' : s.status === 'cancelled' ? '취소' : '완료'}
                                             </td>
                                         </tr>
                                     ))
