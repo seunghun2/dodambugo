@@ -317,9 +317,8 @@ export default function WalletPage() {
         return list;
     }, [transactions, withdrawSort]);
 
-    // 날짜 포맷 (MM.DD) - 100% 한국 표준시 (KST, Asia/Seoul) 기준
-    const formatTxDate = (d: string, desc?: string) => {
-        if (desc && desc.includes('오늘자')) return '08.03';
+    // 날짜 포맷 (MM.DD) - 100% 한국 표준시 (KST, Asia/Seoul) 고정
+    const formatTxDate = (d: string) => {
         try {
             const date = new Date(d);
             const kstString = date.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
@@ -500,7 +499,9 @@ export default function WalletPage() {
                                     </svg>
                                 </button>
                                 <span className={styles.sideInfo}>
-                                    누적적립금 {formatCurrency(cumulativeReward)}원
+                                    {activeTab === 'reward' 
+                                        ? `누적적립금 ${formatCurrency(cumulativeReward)}원` 
+                                        : `총 환급 수당 ${formatCurrency(cumulativeWithdraw)}원`}
                                 </span>
                             </div>
 
@@ -517,7 +518,7 @@ export default function WalletPage() {
 
                                         return (
                                             <div key={tx.id} className={styles.listItem}>
-                                                <span className={styles.txDate}>{formatTxDate(tx.created_at, tx.description)}</span>
+                                                <span className={styles.txDate}>{formatTxDate(tx.created_at)}</span>
                                                 <div className={styles.txMain}>
                                                     <span className={styles.txTitle}>{getTypeLabel(tx.type, tx.amount)}</span>
                                                     <span className={styles.txSub}>
