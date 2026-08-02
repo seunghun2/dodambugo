@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { insertInAppAlarm } from '@/lib/partner-notification';
 import { sendAlimtalk } from '@/lib/solapi';
 import { sendFlowerOrderNotification, sendCondolenceNotification } from '@/lib/slack';
 
@@ -471,23 +472,21 @@ export async function POST(request: NextRequest) {
                         console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
                     }
 
-                    // 인앱 알람: 화환 주문 + 수당 적립 (비동기)
-                    import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
-                        insertInAppAlarm(
-                            partnerId, 'flower_order',
-                            '화환 주문이 접수되었습니다',
-                            `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
-                            '/b2b/wallet', 'alarm_order'
+                    // 인앱 알람: 화환 주문 + 수당 적립
+                    await insertInAppAlarm(
+                        partnerId, 'flower_order',
+                        '화환 주문이 접수되었습니다',
+                        `${orderData.product_name || '화환'} | 주문자: ${orderData.sender_name || ''}`,
+                        '/b2b/wallet', 'alarm_order'
+                    );
+                    if (rewardAmount > 0) {
+                        await insertInAppAlarm(
+                            partnerId, 'flower_commission',
+                            '화환 판매 수당이 적립되었습니다',
+                            `${rewardAmount.toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
+                            '/b2b/wallet', 'alarm_reward'
                         );
-                        if (rewardAmount > 0) {
-                            insertInAppAlarm(
-                                partnerId, 'flower_commission',
-                                '화환 판매 수당이 적립되었습니다',
-                                `${rewardAmount.toLocaleString()}원 적립 (${orderData.product_name || '화환'})`,
-                                '/b2b/wallet', 'alarm_reward'
-                            );
-                        }
-                    });
+                    }
 
                     // 4-2. 상조회사 소속인 경우 본사 수수료 정산
                     try {
@@ -549,6 +548,14 @@ export async function POST(request: NextRequest) {
                                     description: `추천 수당 (${sellerTitle}의 화환 판매)`,
                                     related_order_id: actualOrderId || moid,
                                 });
+
+                            // 추천인 인앱 알람 발송
+                            await insertInAppAlarm(
+                                partnerUser.recommender_id, 'referral_bonus',
+                                '추천 수당이 적립되었습니다',
+                                `추천 수당 ${bonusAmount.toLocaleString()}원 적립 (${sellerTitle}의 화환 판매)`,
+                                '/b2b/wallet', 'alarm_reward'
+                            );
 
                             console.log(`✅ [B2B] 추천인 ${partnerUser.recommender_id}에게 ${bonusAmount}원 보너스 적립`);
                         }

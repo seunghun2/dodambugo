@@ -84,18 +84,12 @@ export async function GET(request: NextRequest) {
             console.error('Deposits 조회 오류:', depositError);
         }
 
-        // 추천한 회원 수 및 상세 목록
-        let query = supabase
+        // 추천한 회원 수 및 상세 목록 (recommender_id 기준)
+        const { data: rawReferralList } = await supabase
             .from('b2b_users')
-            .select('id, owner_name, company_name, created_at');
-
-        if (user.my_referral_code) {
-            query = query.or(`recommender_id.eq.${userId},referral_code.eq.${user.my_referral_code}`);
-        } else {
-            query = query.eq('recommender_id', userId);
-        }
-
-        const { data: rawReferralList } = await query.order('created_at', { ascending: false });
+            .select('id, owner_name, company_name, created_at')
+            .eq('recommender_id', userId)
+            .order('created_at', { ascending: false });
 
         const referralList = (rawReferralList || []).map((refUser: any) => ({
             id: refUser.id,
