@@ -87,14 +87,28 @@ export async function GET(request: NextRequest) {
 
             try {
                 const isB2B = !!bugo.b2b_user_id;
+                // B2B 부고장 공유 리마인더일 경우 B2B bugoon 템플릿 및 B2B 파라미터 적용
+                const templateId = isB2B 
+                    ? 'KA01TP260714223554397jpnpiNrrFt2'  // B2B 전용 부고온 템플릿
+                    : SHARE_REMINDER_TEMPLATE_ID;
+
+                const alimtalkVars: Record<string, string> = isB2B ? {
+                    '대표상주명': bugo.deceased_name ? `故 ${bugo.deceased_name} 상주` : '',
+                    '고인명': bugo.deceased_name || '',
+                    '장례식장': '부고장 공유 안내',
+                    '발인일시': '지인분들에게 간편하게 전하세요',
+                    '부고번호': bugo.bugo_number,
+                    'owner_token': bugo.owner_token || '',
+                } : {
+                    '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                    '부고번호': bugo.bugo_number,
+                    'owner_token': bugo.owner_token || '',
+                };
+
                 await sendAlimtalk(
                     phone,
-                    SHARE_REMINDER_TEMPLATE_ID,
-                    {
-                        '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
-                        '부고번호': bugo.bugo_number,
-                        'owner_token': bugo.owner_token || '',
-                    },
+                    templateId,
+                    alimtalkVars,
                     undefined,
                     isB2B
                 );
