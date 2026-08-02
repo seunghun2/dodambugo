@@ -1,8 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { useState, useEffect } from 'react';
 import { 
     IconSearch, 
@@ -63,14 +60,14 @@ export default function FlowerOrdersPage() {
         setLoading(true);
         setError('');
         try {
-            const params = new URLSearchParams();
-            if (searchQuery) params.append('search', searchQuery);
-
-            const res = await fetch(`/api/b2b/admin/flower-orders?${params.toString()}`);
-            if (!res.ok) {
+            const queryParams = new URLSearchParams();
+            if (searchQuery) queryParams.set('search', searchQuery);
+            
+            const response = await fetch(`/api/b2b/admin/flower-orders?${queryParams.toString()}`, { cache: 'no-store' });
+            if (!response.ok) {
                 throw new Error('주문 데이터를 가져오는데 실패했습니다.');
             }
-            const data = await res.json();
+            const data = await response.json();
             if (data.success) {
                 setOrders(data.orders);
                 // 선택된 주문도 업데이트

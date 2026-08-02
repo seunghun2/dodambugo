@@ -1,8 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice, IconUser } from '@tabler/icons-react';
@@ -55,7 +52,7 @@ export default function CompaniesPage() {
     // 목록 조회
     const fetchCompanies = async () => {
         try {
-            const res = await fetch('/api/b2b/admin/companies');
+            const res = await fetch('/api/b2b/admin/companies', { cache: 'no-store' });
             if (!res.ok) throw new Error('상조회사 정보를 가져오는데 실패했습니다.');
             const data = await res.json();
             if (data.success) {
