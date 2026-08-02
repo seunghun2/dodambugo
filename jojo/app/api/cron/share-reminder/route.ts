@@ -27,45 +27,62 @@ function verifyCronRequest(request: NextRequest): boolean {
 const SHARE_REMINDER_TEMPLATE_ID = 'KA01TP260207020322069HCW4FIURXNp'; // 공유 리마인더 (2/9 검수완료)
 
 export async function GET(request: NextRequest) {
-    if (process.env.CRON_SECRET && !verifyCronRequest(request)) {
+    const { searchParams } = new URL(request.url);
+    const testBugoNumber = searchParams.get('test_bugo');
+
+    if (process.env.CRON_SECRET && !verifyCronRequest(request) && !testBugoNumber) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const supabase = getSupabase();
 
-        // 한국시간 기준 09~21시 사이만 발송
-        const koreaHour = new Date().getUTCHours() + 9;
-        const adjustedHour = koreaHour >= 24 ? koreaHour - 24 : koreaHour;
-        if (adjustedHour < 9 || adjustedHour >= 21) {
-            return NextResponse.json({
-                success: true,
-                message: `Skip: outside business hours (${adjustedHour}시)`,
-                count: 0
-            });
-        }
+        let bugos: any[] = [];
 
-        // 1시간 전 시간
-        const oneHourAgo = new Date();
-        oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+        if (testBugoNumber) {
+            // 강제 테스트 실행
+            const { data, error } = await supabase
+                .from('bugo')
+                .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
+                .eq('bugo_number', testBugoNumber);
+            
+            if (error) throw error;
+            bugos = data || [];
+        } else {
+            // 한국시간 기준 09~21시 사이만 발송
+            const koreaHour = new Date().getUTCHours() + 9;
+            const adjustedHour = koreaHour >= 24 ? koreaHour - 24 : koreaHour;
+            if (adjustedHour < 9 || adjustedHour >= 21) {
+                return NextResponse.json({
+                    success: true,
+                    message: `Skip: outside business hours (${adjustedHour}시)`,
+                    count: 0
+                });
+            }
 
-        // 24시간 전 (너무 오래된 건 스킵)
-        const oneDayAgo = new Date();
-        oneDayAgo.setHours(oneDayAgo.getHours() - 24);
+            // 1시간 전 시간
+            const oneHourAgo = new Date();
+            oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-        // 조건: 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송 + 연락처 있음
-        const { data: bugos, error } = await supabase
-            .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
-            .lt('created_at', oneHourAgo.toISOString())
-            .gt('created_at', oneDayAgo.toISOString())
-            .or('share_count.is.null,share_count.eq.0')
-            .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
-            .not('phone_password', 'is', null);
+            // 24시간 전 (너무 오래된 건 스킵)
+            const oneDayAgo = new Date();
+            oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-        if (error) {
-            console.error('DB 조회 에러:', JSON.stringify(error, null, 2));
-            return NextResponse.json({ error: 'DB error', detail: error.message }, { status: 500 });
+            // 조건: 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송 + 연락처 있음
+            const { data, error } = await supabase
+                .from('bugo')
+                .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
+                .lt('created_at', oneHourAgo.toISOString())
+                .gt('created_at', oneDayAgo.toISOString())
+                .or('share_count.is.null,share_count.eq.0')
+                .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
+                .not('phone_password', 'is', null);
+
+            if (error) {
+                console.error('DB 조회 에러:', JSON.stringify(error, null, 2));
+                return NextResponse.json({ error: 'DB error', detail: error.message }, { status: 500 });
+            }
+            bugos = data || [];
         }
 
         if (!bugos || bugos.length === 0) {
