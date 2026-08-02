@@ -682,12 +682,12 @@ export default function WalletPage() {
                                             setError('');
                                         }}
                                         style={{
-                                            padding: '4px 9px',
+                                            padding: '4px 10px',
                                             fontSize: '12px',
                                             fontWeight: '600',
-                                            color: '#3A8F47',
-                                            backgroundColor: '#F4FBF6',
-                                            border: '1px solid #3A8F47',
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#3A8F47',
+                                            border: 'none',
                                             borderRadius: '6px',
                                             cursor: 'pointer'
                                         }}
