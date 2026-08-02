@@ -6,6 +6,38 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function packCompanyData(comp: any) {
+    if (!comp) return comp;
+    let owner_name = comp.owner_name || '';
+    let address = comp.address || '';
+    let business_type = comp.business_type || '';
+    let business_item = comp.business_item || '';
+    let wreath_member_commission_amount = comp.wreath_member_commission_amount;
+    let real_business_no = comp.business_no || '';
+
+    if (comp.business_no && comp.business_no.includes('::')) {
+        const parts = comp.business_no.split('::');
+        real_business_no = parts[0] || '';
+        owner_name = owner_name || parts[1] || '';
+        address = address || parts[2] || '';
+        business_type = business_type || parts[3] || '';
+        business_item = business_item || parts[4] || '';
+        if (wreath_member_commission_amount === undefined && parts[5]) {
+            wreath_member_commission_amount = parseInt(parts[5]);
+        }
+    }
+
+    return {
+        ...comp,
+        business_no: real_business_no,
+        owner_name,
+        address,
+        business_type,
+        business_item,
+        wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000,
+    };
+}
+
 // GET: 상조회사 목록 조회
 export async function GET(request: NextRequest) {
     try {
@@ -18,7 +50,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, companies });
+        const packedCompanies = (companies || []).map(packCompanyData);
+
+        return NextResponse.json({ success: true, companies: packedCompanies });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
@@ -51,59 +85,29 @@ export async function POST(request: NextRequest) {
             .select()
             .single();
 
-        // 1차 폴백: 확장 칼럼만 제거하고 수당 칼럼 유지
+        // 칼럼 누락 에러 발생 시 스마트 인코딩 폴백 실행
         if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 1차 폴백:', error.message);
-            const fb1 = await supabase
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 스마트 인코딩 폴백 실행:', error.message);
+            const encodedBizNo = `${business_no || ''}::${owner_name || ''}::${address || ''}::${business_type || ''}::${business_item || ''}::${wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000}`;
+            
+            const fbRes = await supabase
                 .from('b2b_companies')
                 .insert({
                     name,
-                    business_no: business_no || '',
-                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-                    wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
-                })
-                .select()
-                .single();
-            newCompany = fb1.data;
-            error = fb1.error;
-        }
-
-        // 2차 폴백: wreath_member_commission_amount 등 추가 수당 칼럼도 누락된 경우 최소 안전 칼럼으로 insert
-        if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 2차 폴백:', error.message);
-            const fb2 = await supabase
-                .from('b2b_companies')
-                .insert({
-                    name,
-                    business_no: business_no || '',
+                    business_no: encodedBizNo,
                     wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
                 })
                 .select()
                 .single();
-            newCompany = fb2.data;
-            error = fb2.error;
-        }
-
-        // 3차 최종 폴백: name, business_no 최원초 필드로 insert
-        if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 3차 최종 폴백:', error.message);
-            const fb3 = await supabase
-                .from('b2b_companies')
-                .insert({
-                    name,
-                    business_no: business_no || '',
-                })
-                .select()
-                .single();
-            newCompany = fb3.data;
-            error = fb3.error;
+            newCompany = fbRes.data;
+            error = fbRes.error;
         }
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, company: newCompany });
+        return NextResponse.json({ success: true, company: packCompanyData(newCompany) });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
@@ -137,59 +141,30 @@ export async function PUT(request: NextRequest) {
             .select()
             .single();
 
-        // 1차 폴백
+        // 칼럼 누락 에러 시 스마트 인코딩 폴백 실행
         if (error && error.message.includes('Could not find')) {
-            const fb1 = await supabase
-                .from('b2b_companies')
-                .update({
-                    name,
-                    business_no: business_no || '',
-                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-                    wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
-                })
-                .eq('id', id)
-                .select()
-                .single();
-            updatedCompany = fb1.data;
-            error = fb1.error;
-        }
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 스마트 인코딩 폴백 실행 (PUT):', error.message);
+            const encodedBizNo = `${business_no || ''}::${owner_name || ''}::${address || ''}::${business_type || ''}::${business_item || ''}::${wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000}`;
 
-        // 2차 폴백
-        if (error && error.message.includes('Could not find')) {
-            const fb2 = await supabase
+            const fbRes = await supabase
                 .from('b2b_companies')
                 .update({
                     name,
-                    business_no: business_no || '',
+                    business_no: encodedBizNo,
                     wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
                 })
                 .eq('id', id)
                 .select()
                 .single();
-            updatedCompany = fb2.data;
-            error = fb2.error;
-        }
-
-        // 3차 폴백
-        if (error && error.message.includes('Could not find')) {
-            const fb3 = await supabase
-                .from('b2b_companies')
-                .update({
-                    name,
-                    business_no: business_no || '',
-                })
-                .eq('id', id)
-                .select()
-                .single();
-            updatedCompany = fb3.data;
-            error = fb3.error;
+            updatedCompany = fbRes.data;
+            error = fbRes.error;
         }
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, company: updatedCompany });
+        return NextResponse.json({ success: true, company: packCompanyData(updatedCompany) });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
