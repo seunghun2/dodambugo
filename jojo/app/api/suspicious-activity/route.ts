@@ -103,17 +103,17 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 3. 슬랙 알림 (일반 의심활동)
-        const slackUrl = process.env.SLACK_WEBHOOK_URL;
-        if (slackUrl) {
-            await fetch(slackUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: `🚨 *의심 활동 감지*\n• IP: \`${ip}\`\n• 유형: ${type}\n• 상세: ${detail}`
-                })
-            }).catch(() => { });
-        }
+        // 3. 슬랙 알림 비활성화 (기존에 사용하지 않던 기능)
+        // const slackUrl = process.env.SLACK_WEBHOOK_URL;
+        // if (slackUrl) {
+        //     await fetch(slackUrl, {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify({
+        //             text: `🚨 *의심 활동 감지*\n• IP: \`${ip}\`\n• 유형: ${type}\n• 상세: ${detail}`
+        //         })
+        //     }).catch(() => { });
+        // }
 
         return NextResponse.json({ received: true });
     } catch {
