@@ -17,7 +17,7 @@ export const metadata = {
     locale: 'ko_KR',
     images: [
       {
-        url: '/b2b-og.png',
+        url: 'https://bugoon.maeumbugo.co.kr/og-bugoon.png',
         width: 1200,
         height: 630,
         alt: '부고온 B2B 파트너',
@@ -28,6 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: '부고온 파트너 - B2B 파트너 서비스',
     description: '부고온 B2B 파트너 전용 서비스',
+    images: ['https://bugoon.maeumbugo.co.kr/og-bugoon.png'],
   },
 };
 
