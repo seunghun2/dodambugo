@@ -175,13 +175,17 @@ export async function POST(request: NextRequest) {
             newUser = insertedUser;
         }
 
+        // 재가입 시 기존 데이터 정리 (중복 방지)
+        await supabase.from('deposits').delete().eq('user_id', newUser.id);
+        await supabase.from('b2b_notifications').delete().eq('partner_id', newUser.id).eq('type', 'signup_welcome');
+
         // 예치금 잔고 테이블 생성 (초기 잔액 0)
         await supabase.from('deposits').insert({
             user_id: newUser.id,
             balance: 0,
         });
 
-        // 🔔 신규 가입 파트너 본인 앱 내 알림함(b2b_notifications) 웰컴 적재
+        // 신규 가입 파트너 본인 앱 내 알림함(b2b_notifications) 웰컴 적재
         await supabase.from('b2b_notifications').insert({
             partner_id: newUser.id,
             title: '부고온 파트너 가입을 환영합니다!',
