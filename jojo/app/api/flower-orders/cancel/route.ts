@@ -128,8 +128,20 @@ export async function POST(request: NextRequest) {
         }
 
         // B2B 수당 회수 로직 추가
+        let recommenderIdToNotify: string | null = null;
+        let bonusAmountToNotify = 0;
+        let partnerUserOwnerName = '';
+
         if (partnerId) {
             try {
+                // 0. 파트너 성함 조회
+                const { data: partnerUser } = await supabase
+                    .from('b2b_users')
+                    .select('owner_name')
+                    .eq('id', partnerId)
+                    .single();
+                partnerUserOwnerName = partnerUser?.owner_name || '';
+
                 // 1. 수당 적립금 설정값 조회
                 const { data: rewardSetting } = await supabase
                     .from('b2b_settings')
@@ -180,6 +192,8 @@ export async function POST(request: NextRequest) {
                 if (refTx && refTx.user_id && refTx.amount > 0) {
                     const recommenderId = refTx.user_id;
                     const bonusAmount = refTx.amount;
+                    recommenderIdToNotify = recommenderId;
+                    bonusAmountToNotify = bonusAmount;
 
                     const { data: refDeposit } = await supabase
                         .from('deposits')
@@ -215,12 +229,24 @@ export async function POST(request: NextRequest) {
 
             // 인앱 알람: 화환 환불 알림 (비동기)
             import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                // 1. 화환 수주 파트너(김미연) 알림
                 insertInAppAlarm(
                     partnerId!, 'flower_refund',
                     '화환 주문이 취소되었습니다',
                     `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''}`,
                     '/b2b/wallet', 'alarm_order'
                 );
+
+                // 2. 상위 추천인 파트너(백승훈) 알림
+                if (recommenderIdToNotify && bonusAmountToNotify > 0) {
+                    const sellerTitle = partnerUserOwnerName ? `${partnerUserOwnerName} 장례지도사님` : '추천 파트너';
+                    insertInAppAlarm(
+                        recommenderIdToNotify, 'flower_refund',
+                        '추천 수당 회수 안내',
+                        `추천 수당 ${bonusAmountToNotify.toLocaleString()}원이 회수되었습니다 (${sellerTitle}의 화환 주문 취소)`,
+                        '/b2b/wallet', 'alarm_reward'
+                    );
+                }
             });
         }
 

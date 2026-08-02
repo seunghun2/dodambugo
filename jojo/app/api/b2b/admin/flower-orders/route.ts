@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
                 bugo!inner (
                     id,
                     deceased_name,
+                    mourners,
                     b2b_user_id,
                     b2b_users ( company_name, owner_name )
                 )
@@ -95,6 +96,21 @@ export async function GET(request: NextRequest) {
             const bugo = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;
             const b2bUser = bugo ? (Array.isArray(bugo.b2b_users) ? bugo.b2b_users[0] : bugo.b2b_users) : null;
 
+            // 상주 정보에서 대표 상주 성함 파싱
+            let primaryMournerName = '';
+            try {
+                const mournersArr = bugo?.mourners 
+                    ? (typeof bugo.mourners === 'string' ? JSON.parse(bugo.mourners) : bugo.mourners) 
+                    : [];
+                if (Array.isArray(mournersArr) && mournersArr.length > 0) {
+                    primaryMournerName = mournersArr[0]?.name || '';
+                }
+            } catch (e) {
+                console.error('상주 정보 파싱 에러:', e);
+            }
+
+            const recipientName = o.recipient_name || primaryMournerName || '-';
+
             return {
                 id: o.id,
                 order_number: o.order_number,
@@ -103,7 +119,7 @@ export async function GET(request: NextRequest) {
                 payment_method: o.payment_method || 'CARD',
                 status: o.status,
                 created_at: o.created_at,
-                recipient_name: o.recipient_name,
+                recipient_name: recipientName,
                 funeral_home: o.funeral_home,
                 room: o.room,
                 address: o.address || '',
