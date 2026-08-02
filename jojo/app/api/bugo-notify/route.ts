@@ -17,6 +17,15 @@ export async function POST(request: NextRequest) {
 
         // 신규 생성일 때만 슬랙 알림
         if (created_new) {
+            const supabaseForCheck = getSupabase();
+            const { data: bugoCheck } = await supabaseForCheck
+                .from('bugo')
+                .select('b2b_user_id')
+                .eq('bugo_number', bugo_number)
+                .single();
+
+            const isB2B = !!bugoCheck?.b2b_user_id;
+
             // 슬랙 알림 전송
             await sendBugoNotification({
                 bugo_number,
@@ -27,25 +36,21 @@ export async function POST(request: NextRequest) {
                 room_number,
                 funeral_date,
                 funeral_time,
-            });
+            }, isB2B);
 
             // 인앱 알람: 부고 생성 알림 (비동기)
-            const supabaseForAlarm = getSupabase();
-            supabaseForAlarm.from('bugo').select('b2b_user_id').eq('bugo_number', bugo_number).single()
-                .then(({ data: bugoRow }) => {
-                    if (bugoRow?.b2b_user_id) {
-                        import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
-                            insertInAppAlarm(
-                                bugoRow.b2b_user_id,
-                                'new_funeral',
-                                '새 부고장이 등록되었습니다',
-                                `故 ${deceased_name || ''}님 | ${funeral_home || ''} ${room_number || ''}`,
-                                '/b2b/manage',
-                                'alarm_deceased'
-                            );
-                        });
-                    }
+            if (isB2B && bugoCheck?.b2b_user_id) {
+                import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                    insertInAppAlarm(
+                        bugoCheck.b2b_user_id,
+                        'new_funeral',
+                        '새 부고장이 등록되었습니다',
+                        `故 ${deceased_name || ''}님 | ${funeral_home || ''} ${room_number || ''}`,
+                        '/b2b/manage',
+                        'alarm_deceased'
+                    );
                 });
+            }
         }
 
         // 📱 신규 생성 또는 수정 시 연락처 변경 → 알림톡 발송

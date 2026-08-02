@@ -52,20 +52,25 @@ export async function sendBugoNotification(bugo: {
     room_number?: string;
     funeral_date?: string;
     funeral_time?: string;
-}): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_B2C_BUGO || process.env.SLACK_WEBHOOK_BUGO;
+}, isB2B?: boolean): Promise<boolean> {
+    const webhookUrl = isB2B
+        ? (process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL)
+        : (process.env.SLACK_WEBHOOK_B2C_BUGO || process.env.SLACK_WEBHOOK_BUGO);
+
+    const brand = isB2B ? '부고온 B2B' : '마음부고';
+    const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
 
     const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
         ? bugo.funeral_type
         : `${bugo.funeral_home || '미입력'} ${bugo.room_number || ''}`;
 
-    const text = `[마음부고] 부고장이 등록되었습니다. (부고번호: ${bugo.bugo_number})
+    const text = `[${brand}] 부고장이 등록되었습니다. (부고번호: ${bugo.bugo_number})
 - 장례 종류: ${bugo.funeral_type || '일반 장례'}
 - 고인: ${bugo.deceased_name || '미입력'}
 - 상주: ${bugo.mourner_name || '미입력'}
 - 장례식장: ${funeralLocation}
 - 발인일시: ${bugo.funeral_date || '미정'} ${bugo.funeral_time || ''}
-- 부고장: https://maeumbugo.co.kr/view/${bugo.bugo_number}`;
+- 부고장: https://${domain}/view/${bugo.bugo_number}`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
