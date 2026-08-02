@@ -926,11 +926,15 @@ export default function MournerSection({ mourners, onMournersChange, errors }: P
                           <input
                             type="tel"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             maxLength={13}
                             className={`${styles.mnInputCompact} ${isFirst && errors?.mourner_contact ? styles.inputError : ''}`}
-                            placeholder={isFirst ? "연락처 *" : "연락처"}
+                            placeholder={isFirst ? "연락처 * (-없이 입력)" : "연락처 (-없이 입력)"}
                             value={item.mourner.contact}
-                            onChange={(e) => handleFieldChange(realIndex, 'contact', e.target.value)}
+                            onChange={(e) => {
+                              const formatted = formatPhoneInput(e.target.value);
+                              handleFieldChange(realIndex, 'contact', formatted);
+                            }}
                             data-error={isFirst && errors?.mourner_contact ? 'true' : undefined}
                           />
                         </div>

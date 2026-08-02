@@ -192,6 +192,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                     display: 'flex',
                     alignItems: 'center',
                     padding: '16px',
+                    paddingTop: 'max(16px, calc(12px + env(safe-area-inset-top, 0px)))',
                     borderBottom: '1px solid #eee',
                     gap: '12px'
                 }}>

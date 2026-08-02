@@ -400,7 +400,7 @@ export async function POST(request: NextRequest) {
                     // 2. 파트너 정보 및 소속 상조회사 수당 분배 구조 조회
                     const { data: partnerUser } = await supabase
                         .from('b2b_users')
-                        .select('company_id, company_name, recommender_id')
+                        .select('company_id, company_name, recommender_id, owner_name')
                         .eq('id', partnerId)
                         .single();
 
@@ -538,6 +538,7 @@ export async function POST(request: NextRequest) {
                                     });
                             }
 
+                            const sellerTitle = partnerUser.owner_name ? `${partnerUser.owner_name} 장례지도사님` : '추천 파트너';
                             // 추천인 내역 기록
                             await supabase
                                 .from('deposit_transactions')
@@ -545,7 +546,7 @@ export async function POST(request: NextRequest) {
                                     user_id: partnerUser.recommender_id,
                                     amount: bonusAmount,
                                     type: 'referral_bonus',
-                                    description: `추천 수당 (추천한 파트너의 화환 판매)`,
+                                    description: `추천 수당 (${sellerTitle}의 화환 판매)`,
                                     related_order_id: actualOrderId || moid,
                                 });
 

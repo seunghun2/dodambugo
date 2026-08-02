@@ -34,20 +34,39 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '상조회사명을 입력해주세요.' }, { status: 400 });
         }
 
-        const { data: newCompany, error } = await supabase
+        const insertPayload: Record<string, any> = {
+            name,
+            business_no: business_no || '',
+            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+        };
+        if (owner_name) insertPayload.owner_name = owner_name;
+        if (address) insertPayload.address = address;
+        if (business_type) insertPayload.business_type = business_type;
+        if (business_item) insertPayload.business_item = business_item;
+
+        let { data: newCompany, error } = await supabase
             .from('b2b_companies')
-            .insert({
-                name,
-                business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-                wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
-                owner_name: owner_name || '',
-                address: address || '',
-                business_type: business_type || '',
-                business_item: business_item || ''
-            })
+            .insert(insertPayload)
             .select()
             .single();
+
+        // 칼럼 누락으로 에러 발생 시 필수 기본 필드만으로 시도
+        if (error && error.message.includes('Could not find')) {
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 방어 조치 실행:', error.message);
+            const fallbackRes = await supabase
+                .from('b2b_companies')
+                .insert({
+                    name,
+                    business_no: business_no || '',
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                    wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+                })
+                .select()
+                .single();
+            newCompany = fallbackRes.data;
+            error = fallbackRes.error;
+        }
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
@@ -69,21 +88,40 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'ID와 상조회사명은 필수 항목입니다.' }, { status: 400 });
         }
 
-        const { data: updatedCompany, error } = await supabase
+        const updatePayload: Record<string, any> = {
+            name,
+            business_no: business_no || '',
+            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+        };
+        if (owner_name !== undefined) updatePayload.owner_name = owner_name;
+        if (address !== undefined) updatePayload.address = address;
+        if (business_type !== undefined) updatePayload.business_type = business_type;
+        if (business_item !== undefined) updatePayload.business_item = business_item;
+
+        let { data: updatedCompany, error } = await supabase
             .from('b2b_companies')
-            .update({
-                name,
-                business_no: business_no || '',
-                wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-                wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
-                owner_name: owner_name || '',
-                address: address || '',
-                business_type: business_type || '',
-                business_item: business_item || ''
-            })
+            .update(updatePayload)
             .eq('id', id)
             .select()
             .single();
+
+        // 칼럼 누락 방어
+        if (error && error.message.includes('Could not find')) {
+            const fallbackRes = await supabase
+                .from('b2b_companies')
+                .update({
+                    name,
+                    business_no: business_no || '',
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                    wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+                })
+                .eq('id', id)
+                .select()
+                .single();
+            updatedCompany = fallbackRes.data;
+            error = fallbackRes.error;
+        }
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

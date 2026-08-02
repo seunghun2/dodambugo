@@ -643,14 +643,27 @@ export default function B2BCreatePage() {
             </div>
 
             <div className={styles.previewFooter}>
-              <button className={styles.btnCancel} onClick={() => setShowPreview(false)}>
+              <button className={styles.btnCancel} onClick={() => setShowPreview(false)} disabled={submitting}>
                 수정하기
               </button>
               <button className={styles.btnConfirm} onClick={handleConfirmSubmit} disabled={submitting}>
-                {submitting ? '생성 중...' : '최종 생성하기'}
+                {submitting ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={styles.spinner} style={{ width: '18px', height: '18px', borderWidth: '2px' }} />
+                    생성 중...
+                  </span>
+                ) : '최종 생성하기'}
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 최종 제출 중 뱅글뱅글 로딩 오버레이 */}
+      {submitting && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.spinner} />
+          <div className={styles.loadingText}>모바일 부고장을 생성하고 있습니다...</div>
         </div>
       )}
     </div>

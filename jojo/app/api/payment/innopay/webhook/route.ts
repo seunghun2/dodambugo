@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
                             // 5. 추천인 보너스 적립 (개인/프리랜서 파트너만, 더좋은라이프 등 상조회사 소속은 추천수당 제외)
                             const { data: partnerInfo } = await supabase
                                 .from('b2b_users')
-                                .select('recommender_id, company_id, company_name')
+                                .select('recommender_id, company_id, company_name, owner_name')
                                 .eq('id', partnerId)
                                 .single();
 
@@ -234,13 +234,14 @@ export async function POST(request: NextRequest) {
                                 }
 
                                 // 추천인 적립 내역 기록
+                                const sellerTitle = partnerInfo.owner_name ? `${partnerInfo.owner_name} 장례지도사님` : '추천 파트너';
                                 await supabase
                                     .from('deposit_transactions')
                                     .insert({
                                         user_id: partnerInfo.recommender_id,
                                         amount: bonusAmount,
                                         type: 'referral_bonus',
-                                        description: `추천 수당 (추천한 파트너의 가상계좌 화환 판매)`,
+                                        description: `추천 수당 (${sellerTitle}의 화환 판매)`,
                                         related_order_id: String(orderData.id || moid),
                                     });
 
