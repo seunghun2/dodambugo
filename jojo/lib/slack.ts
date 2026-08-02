@@ -139,7 +139,7 @@ export async function sendFlowerOrderNotification(order: {
  * 간단한 텍스트 알림 전송 (기본 webhook)
  */
 export async function sendSimpleNotification(text: string): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     return sendToWebhook(webhookUrl!, { text });
 }
 
@@ -275,7 +275,7 @@ export async function sendB2BVerificationFailureNotification(info: {
     id_card_url: string;
     reason: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
 
     const text = `⚠️ [부고온 B2B] 신분증 자동 검증 실패 (수동 확인 필요)
 - 파트너사: ${info.company_name} (대표자: ${info.partner_name})
@@ -301,7 +301,7 @@ export async function sendB2BAutoWithdrawalSuccessNotification(info: {
     account_holder: string;
     request_id: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     const amountFormatted = info.amount.toLocaleString();
 
     const text = `✅ [부고온 B2B] 신분증 인증 회원 첫 출금 자동 이체 성공
@@ -326,7 +326,7 @@ export async function sendB2BAutoWithdrawalFailureNotification(info: {
     request_id: string;
     reason: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     const amountFormatted = info.amount.toLocaleString();
 
     const text = `🚨 [부고온 B2B] 신분증 인증 회원 첫 출금 자동 이체 실패 (수동 처리 필요)
@@ -352,7 +352,7 @@ export async function sendB2BWithdrawalRequestNotification(info: {
     account_holder: string;
     partner_type: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     const amountFormatted = info.amount.toLocaleString();
     const netAmountFormatted = info.net_amount.toLocaleString();
     const partnerTypeDisplay = info.partner_type === 'business' ? '사업자' : '개인';
@@ -379,7 +379,7 @@ export async function sendB2BWithdrawalApproveNotification(info: {
     account_holder: string;
     request_id: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     const amountFormatted = info.amount.toLocaleString();
     const netAmountFormatted = info.net_amount.toLocaleString();
 
@@ -404,7 +404,7 @@ export async function sendB2BWithdrawalRejectNotification(info: {
     account_holder: string;
     request_id: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_BUGO;
     const amountFormatted = info.amount.toLocaleString();
 
     const text = `[부고온 B2B] 출금 신청 반려 (예치금 환원 완료)

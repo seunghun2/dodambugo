@@ -215,13 +215,17 @@ export async function POST(request: NextRequest) {
 
         // 6. 슬랙 알림
         try {
-            const slackWebhookUrl = process.env.SLACK_WEBHOOK_FLOWER;
+            const isB2BOrder = !!partnerId;
+            const slackWebhookUrl = isB2BOrder
+                ? (process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_FLOWER)
+                : process.env.SLACK_WEBHOOK_FLOWER;
+            const brand = isB2BOrder ? '부고온' : '마음부고';
             if (slackWebhookUrl) {
                 await fetch(slackWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text: `[마음부고] 화환 주문이 취소되었습니다. (부고장번호: ${bugoNumber || '-'} / 주문번호: ${order.order_number || '-'})\n- 상품명: ${order.product_name || '-'}\n- 배송지: ${order.funeral_home || ''}${order.room ? ' ' + order.room : ''}${order.address ? ' ' + order.address : ''}\n- 주문자: ${order.sender_name || ''}(${order.sender_phone || ''})\n- 결제수단: ${order.payment_method === 'card' ? '신용카드' : order.payment_method || '-'}`,
+                        text: `[${brand}] 화환 주문이 취소되었습니다. (부고장번호: ${bugoNumber || '-'} / 주문번호: ${order.order_number || '-'})\n- 상품명: ${order.product_name || '-'}\n- 배송지: ${order.funeral_home || ''}${order.room ? ' ' + order.room : ''}${order.address ? ' ' + order.address : ''}\n- 주문자: ${order.sender_name || ''}(${order.sender_phone || ''})\n- 결제수단: ${order.payment_method === 'card' ? '신용카드' : order.payment_method || '-'}`,
                     }),
                 });
                 console.log('📢 취소 슬랙 알림 발송 완료');
