@@ -93,7 +93,9 @@ export async function sendFlowerOrderNotification(order: {
     chief_mourner_name?: string;
     chief_mourner_phone?: string;
 }, isB2B?: boolean): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL)
+        : (process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL);
     const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
     const brand = isB2B ? '부고온' : '마음부고';
     const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
@@ -419,7 +421,7 @@ export async function sendB2BSignupNotification(info: {
     recommender_name?: string;
     company_type?: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO || process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_URL;
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_BUGO;
     const text = `[부고온 B2B] 신규 파트너 회원가입
 - 대표자명: ${info.owner_name}
 - 상호/소속: ${info.company_name} (${info.company_type || '개인'})

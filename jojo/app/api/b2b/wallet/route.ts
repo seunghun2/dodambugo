@@ -103,11 +103,19 @@ export async function GET(request: NextRequest) {
             return tx;
         });
 
+        // 최소 출금 금액 설정 조회
+        const { data: minSetting } = await supabase
+            .from('b2b_settings')
+            .select('value')
+            .eq('key', 'min_withdrawal_amount')
+            .single();
+
         console.log('[DEBUG] Returning wallet data successfully');
         return NextResponse.json({
             balance: deposit?.balance || 0,
             withdrawable_balance: withdrawableBalance,
             locked_balance: lockedAmount,
+            min_withdrawal_amount: parseInt(minSetting?.value || '5000'),
             transactions: enrichedTransactions,
             total: count || 0,
             page,

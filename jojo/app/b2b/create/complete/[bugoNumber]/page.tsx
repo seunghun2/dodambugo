@@ -165,7 +165,7 @@ export default function B2BCompletePage() {
 
       const resData = await res.json();
       if (resData.success) {
-        showToast(type === 'sms' ? '문자가 성공적으로 발송되었습니다.' : '카카오 알림톡이 성공적으로 발송되었습니다.');
+        showToast(type === 'sms' ? '문자가 발송되었습니다.' : '알림톡이 발송되었습니다.');
       } else {
         throw new Error(resData.error || '발송 API 오류');
       }

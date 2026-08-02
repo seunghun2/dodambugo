@@ -97,7 +97,7 @@ ${customUrl}
                 try {
                     await sendAlimtalk(
                         phone,
-                        'KA01TP2602121532276099rVDeNpBxvE',
+                        'KA01TP260714223554397jpnpiNrrFt2', // B2B 부고장 알림톡 템플릿 (bugoon 프로필)
                         {
                             '대표상주명': bugo.mourner_name || '',
                             '고인명': bugo.deceased_name || '',

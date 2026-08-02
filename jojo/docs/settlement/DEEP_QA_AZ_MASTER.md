@@ -33,6 +33,42 @@
   - [ ] 복사된 링크의 URL이 `https://bugoon.maeumbugo.co.kr/b2b/signup?ref=1234` 형태인가?
 * **AI 실시간 모니터링**: 백엔드 API `/api/b2b/me` 응답값 및 추천 링크 파라미터 무결성 점검.
 
+### 13-14. 추천 코드 공유 링크 도메인 정정 및 가입 시 추천인 코드 자동 대입 연동
+- **상세 내용**:
+  - 기존 레거시 미확인 도메인(`https://bugoon.co.kr/download/partner`) 전면 제거.
+  - 정식 파트너 회원가입 링크(`https://bugoon.maeumbugo.co.kr/b2b/signup?ref=추천코드`)로 도메인 정정 및 공유 문구 전면 개편.
+  - 신규 파트너가 공유받은 링크 클릭 시 회원가입 페이지(`app/b2b/signup/page.tsx`)에서 쿼리 파라미터(`?ref=XXXX`)를 자동으로 인식하여 추천 코드가 폼에 쏙 입력되고 추천인 성명/회사명이 즉시 노출되도록 `useSearchParams` & `Suspense` 자동 연동 완비.
+- **관련 소스코드**: `jojo/app/b2b/dashboard/page.tsx`, `jojo/app/b2b/settings/page.tsx`, `jojo/app/b2b/signup/page.tsx`
+
+### 13-15. 슬랙 알림 이모지 100% 전면 제거 & B2B/BUGO 슬랙 채널 완전 분리 (2026-08-02)
+- **상세 내용**:
+  - B2B 디자인 수칙에 따라 모든 슬랙 알림 메시지 텍스트에서 이모지(`🎉`, `💸`, `✅`, `❌` 등)를 100% 전면 제거하고 정통 슬레이트 텍스트 포맷(`[부고온 B2B] ...`)으로 전면 교체.
+  - B2B 슬랙 채널을 2종으로 명확히 분리 및 Vercel/로컬 환경변수 매핑 완수:
+    - **`SLACK_WEBHOOK_BUGO`**: B2B 모바일 부고장 작성/발송 알림 전용 채널
+    - **`SLACK_WEBHOOK_URL`**: B2B 회원가입, 화환 수당, 출금 신청/승인 알림 전용 채널
+- **관련 소스코드 & 문서**: `jojo/lib/slack.ts`, `jojo/app/api/b2b/signup/route.ts`, `jojo/docs/slack/SLACK_CHANNELS_GUIDE.md`
+
+### 13-16. 파트너 앱 알림함(b2b_notifications) 웰컴 알림 100% 정상 연동 및 중복 방지 (2026-08-02)
+- **상세 내용**:
+  - 회원가입 시 파트너 앱 상단 오른쪽 알림종 🔔(알림함)이 바라보는 실제 DB 테이블인 `b2b_notifications` 에 **`부고온 파트너 가입을 환영합니다!`** 웰컴 알림이 100% 쏭 수급되도록 정밀 수술.
+  - 동일 번호 재가입 시 기존 웰컴 알림 및 예치금을 자동 정돈 후 1개만 깔끔히 재생성하도록 처리하여 알림 중복 쌓임 현상 완전 해결.
+- **관련 소스코드**: `jojo/app/api/b2b/signup/route.ts`, `jojo/app/api/b2b/notifications/route.ts`
+
+### 13-17. 파트너 회원 탈퇴 백엔드 API 구현 & Soft Delete(withdrawn) 법정 보존 적용 (2026-08-02)
+- **상세 내용**:
+  - 마이페이지/설정의 [회원 탈퇴] 버튼을 백엔드 API(`/api/b2b/withdraw`)와 실시간 연동.
+  - 국세청 3.3% 원천세 세무 보관 규정(소득세법 제127조) 및 과거 부고장 연동 보존을 위해 DB `status = 'withdrawn'` 으로 변환하고 로그인을 차단하는 소프트 디리트(Soft Delete) 표준 수칙 준수.
+  - 탈퇴 시 B2B 슬랙 채널로 `[부고온 B2B] 파트너 회원 탈퇴 처리` 실시간 알림 팝업 전송.
+  - 어드민 파트너 관리 목록에서 탈퇴 회원은 기본 제외(`query.neq('status', 'withdrawn')`) 되도록 정돈.
+  - 탈퇴 회원 동일 번호 재가입 시 UNIQUE 제약조건 충돌 없이 UPDATE 덮어쓰기 방식으로 100% 산뜻하게 재가입 100% 허용.
+- **관련 소스코드**: `jojo/app/api/b2b/withdraw/route.ts`, `jojo/app/api/b2b/signup/route.ts`, `jojo/app/api/b2b/login/route.ts`, `jojo/app/api/b2b/admin/partners/route.ts`
+
+### 13-18. 공유 토스트 팝업 1줄 정돈 & B2B 상주 알림톡 템플릿 규격 검증 (2026-08-02)
+- **상세 내용**:
+  - 알림톡/문자 발송 토스트 팝업 문구를 `'알림톡이 발송되었습니다.'` / `'문자가 발송되었습니다.'` 한 줄로 단축하고 CSS(`white-space: nowrap;`) 속성 부여로 모바일 2줄 꺾임 현상 완전 정돈.
+  - B2B 부고온 카카오 알림톡 웹링크 버튼 URL 규격 **`https://bugoon.maeumbugo.co.kr/view/#{부고번호}`** 및 상주별 맞춤 계좌 노출(`?m=0`) 동작 방식 100% 정밀 검증.
+- **관련 소스코드**: `jojo/app/b2b/create/complete/[bugoNumber]/page.tsx`, `complete.module.css`, `jojo/app/api/b2b/send-mourner-notify/route.ts`
+
 ### 1-2. 김미연 파트너 회원가입 5단계 진행
 * **실행 동작**: 김미연 휴대폰으로 공유 링크 진입 ➡️ 5단계 가입 폼 작성 (상호명 '개인', 이름 '김미연', 휴대폰, 비밀번호, 계좌) ➡️ 가입 완료.
 * **기술 검증 항목**:

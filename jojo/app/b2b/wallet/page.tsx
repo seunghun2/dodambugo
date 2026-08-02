@@ -83,6 +83,7 @@ export default function WalletPage() {
     const [success, setSuccess] = useState('');
     const [identityVerified, setIdentityVerified] = useState(false);
     const [partnerType, setPartnerType] = useState<'individual' | 'business'>('individual');
+    const [minWithdrawAmount, setMinWithdrawAmount] = useState(5000);
     const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string }>({
         isOpen: false,
         title: '',
@@ -144,6 +145,7 @@ export default function WalletPage() {
             setTransactions(data.transactions || []);
             setIdentityVerified(data.identity_verified || false);
             setPartnerType(data.partner_type || 'individual');
+            if (data.min_withdrawal_amount) setMinWithdrawAmount(data.min_withdrawal_amount);
             setBankName(data.bank_name || null);
             setAccountNo(data.account_no || null);
             setAccountHolder(data.account_holder || null);
@@ -404,7 +406,7 @@ export default function WalletPage() {
                             )}
                             {(() => {
                                 const isBankMaintenance = isBankMaintenanceWindow();
-                                const isInsufficientBalance = withdrawableBalance < 5000;
+                                const isInsufficientBalance = withdrawableBalance < minWithdrawAmount;
                                 const isRefundDisabled = isBankMaintenance || isInsufficientBalance;
 
                                 return (
@@ -430,7 +432,7 @@ export default function WalletPage() {
                                                     setAlertModal({
                                                         isOpen: true,
                                                         title: '환급 신청 제한',
-                                                        message: '최소 환급 신청 가능 금액은 5,000원 이상입니다.'
+                                                        message: `최소 환급 신청 가능 금액은 ${minWithdrawAmount.toLocaleString()}원 이상입니다.`
                                                     });
                                                     return;
                                                 }
