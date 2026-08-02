@@ -53,7 +53,7 @@ export async function sendBugoNotification(bugo: {
     funeral_date?: string;
     funeral_time?: string;
 }): Promise<boolean> {
-    const webhookUrl = process.env.SLACK_WEBHOOK_BUGO;
+    const webhookUrl = process.env.SLACK_WEBHOOK_B2C_BUGO || process.env.SLACK_WEBHOOK_BUGO;
 
     const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
         ? bugo.funeral_type
