@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
                 b2b_user_id,
                 funeral_type,
                 view_count,
-                flower_orders ( id ),
+                flower_orders ( id, status ),
                 ip_address,
                 deleted_at,
                 template_id,
@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
         // 결과 가공
         const formattedBugoList = bugoData?.map((b: any) => {
             const b2bUser = Array.isArray(b.b2b_users) ? b.b2b_users[0] : b.b2b_users;
+            const validFlowerOrders = (b.flower_orders || []).filter((fo: any) => fo.status === 'paid' || fo.status === 'completed' || fo.status === 'approved' || !fo.status);
             return {
                 id: b.id,
                 bugo_number: b.bugo_number,
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
                 phone: b2bUser?.phone || '',
                 funeral_type: b.funeral_type,
                 view_count: b.view_count || 0,
-                flower_count: b.flower_orders?.length || 0,
+                flower_count: validFlowerOrders.length,
                 ip_address: b.ip_address || '',
                 deleted_at: b.deleted_at,
                 template_id: b.template_id,

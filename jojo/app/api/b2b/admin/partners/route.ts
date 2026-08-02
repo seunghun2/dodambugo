@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         const { data: flowerOrders, error: flowerError } = await supabase
             .from('flower_orders')
             .select('id, bugo_id')
-            .eq('status', 'approved');
+            .in('status', ['paid', 'completed', 'approved']);
 
         if (flowerError) {
             console.error('B2B 파트너 화환 판매 내역 조회 오류:', flowerError);
