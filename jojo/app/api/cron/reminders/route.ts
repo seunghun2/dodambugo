@@ -119,12 +119,13 @@ ${continueUrl}
         const oneDayAgo = new Date();
         oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-        // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송
+        // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송 + B2C 일반 부고만 (B2B 부고온은 공유 리마인더 미발송)
         const { data: bugos } = await supabase
             .from('bugo')
             .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id, funeral_home, room_number, funeral_date, funeral_time, funeral_type')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
+            .is('b2b_user_id', null)
             .or('share_count.is.null,share_count.lt.4')
             .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
             .not('phone_password', 'is', null);

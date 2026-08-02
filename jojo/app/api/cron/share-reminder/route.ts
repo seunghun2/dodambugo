@@ -68,12 +68,13 @@ export async function GET(request: NextRequest) {
             const oneDayAgo = new Date();
             oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-            // 조건: 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송 + 연락처 있음
+            // 조건: 1~24시간 전 생성 + 공유 0회 + 리마인더 미발송 + 연락처 있음 + B2C 일반 부고만 (B2B 부고온 제외)
             const { data, error } = await supabase
                 .from('bugo')
-                .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
+                .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id, funeral_home, room_number, funeral_date, funeral_time, funeral_type')
                 .lt('created_at', oneHourAgo.toISOString())
                 .gt('created_at', oneDayAgo.toISOString())
+                .is('b2b_user_id', null)
                 .or('share_count.is.null,share_count.eq.0')
                 .or('share_reminder_sent.is.null,share_reminder_sent.eq.false')
                 .not('phone_password', 'is', null);
@@ -104,19 +105,29 @@ export async function GET(request: NextRequest) {
 
             try {
                 const isB2B = !!bugo.b2b_user_id;
+
+                // 장례식장 위치 포맷
+                const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
+                    ? bugo.funeral_type
+                    : `${bugo.funeral_home || ''} ${bugo.room_number || ''}`.trim();
+
+                const funeralDateTime = `${bugo.funeral_date || ''} ${bugo.funeral_time || ''}`.trim();
+
                 if (isB2B) {
-                    // B2B 부고장의 공유 리마인더: B2B 부고온 전용 LMS 문자로 깔끔하게 전송 (생성완료 템플릿 오남용 방지)
-                    const { sendLMS } = await import('@/lib/solapi');
-                    const b2bShareMsg = `[부고온] 상주님, 아직 부고장을 지인분들께 공유하지 않으셨습니다.
-
-■ 고인: 故 ${bugo.deceased_name || ''}님
-
-아래 링크를 눌러 지인분들에게 간편하게 부고장을 전달해 주세요.
-
-■ 부고장 확인 및 공유하기:
-https://bugoon.maeumbugo.co.kr/view/${bugo.bugo_number}?token=${bugo.owner_token || ''}&share=true`;
-
-                    await sendLMS(phone, `[부고온] 부고장 공유 안내`, b2bShareMsg);
+                    // B2B 부고장: 부고온 B2B 카카오 알림톡으로 정상 전송 (PF-491176 부고온 프로필)
+                    await sendAlimtalk(
+                        phone,
+                        'KA01TP2602070138097871zexjvolnSU', // B2B_TEMPLATE_MAP에 의해 B2B 알림톡(KA01TP260714223554397jpnpiNrrFt2)으로 치환됨
+                        {
+                            '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                            '장례식장': funeralLocation || '장례식장',
+                            '발인일시': funeralDateTime || '미정',
+                            '부고번호': bugo.bugo_number,
+                            'owner_token': bugo.owner_token || '',
+                        },
+                        undefined,
+                        true
+                    );
                 } else {
                     // B2C 부고장의 공유 리마인더: B2C 알림톡 발송
                     await sendAlimtalk(
