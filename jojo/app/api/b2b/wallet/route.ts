@@ -53,10 +53,8 @@ export async function GET(request: NextRequest) {
             .eq('user_id', userId)
             .gte('created_at', oneDayAgo);
 
-        const lockedAmount = (recentRewards || [])
-            .filter(tx => (tx.amount || 0) > 0)
-            .reduce((sum, tx) => sum + tx.amount, 0);
-            
+        // 24시간 이내의 순 적립 수당 합계 (취소건 차감 감안)
+        const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
         const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);
 
         console.log('[DEBUG] Fetching transactions for user:', userId);
@@ -116,7 +114,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             balance: deposit?.balance || 0,
             withdrawable_balance: withdrawableBalance,
+            withdrawableBalance: withdrawableBalance,
             locked_balance: lockedAmount,
+            lockedBalance: lockedAmount,
+            lockedAmount: lockedAmount,
             min_withdrawal_amount: parseInt(minSetting?.value || '5000'),
             transactions: enrichedTransactions,
             total: count || 0,

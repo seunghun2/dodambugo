@@ -140,8 +140,8 @@ export default function WalletPage() {
             const data = await res.json();
             console.log('[CLIENT DEBUG] Wallet data received:', data);
             setBalance(data.balance || 0);
-            setWithdrawableBalance(data.withdrawable_balance || 0);
-            setLockedBalance(data.locked_balance || 0);
+            setWithdrawableBalance(data.withdrawable_balance ?? data.withdrawableBalance ?? 0);
+            setLockedBalance(data.locked_balance ?? data.lockedBalance ?? data.lockedAmount ?? 0);
             setTransactions(data.transactions || []);
             setIdentityVerified(data.identity_verified || false);
             setPartnerType(data.partner_type || 'individual');
