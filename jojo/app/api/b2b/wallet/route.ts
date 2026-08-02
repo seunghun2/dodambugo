@@ -239,11 +239,12 @@ export async function POST(request: NextRequest) {
         net_amount = amount - withholding_tax - local_income_tax;
     }
 
-    // 🛡️ 최초 1회 본인인증 완료 + 어드민에서 [자동입금 ON] 해둔 파트너만 무보류 즉시 자동 이체 (OFF인 경우 어드민 보류 pending)
+    // 🛡️ 1단계: 최초 DB 적재 시 무조건 'pending' 상태로 안정적 생성
     const isAutoApprove = Boolean(user.identity_verified) && (user.auto_payout_enabled ?? true);
-    const initialStatus = isAutoApprove ? 'approved' : 'pending';
+    let finalStatus: 'pending' | 'approved' = 'pending';
+    let processedAt: string | null = null;
 
-    // 출금 신청 INSERT (세금 및 실수령액 사전 적재)
+    // 출금 신청 INSERT (우선 pending 상태로 안심 등록)
     const { data: withdrawData, error: withdrawError } = await supabase
         .from('withdrawal_requests')
         .insert({
@@ -252,13 +253,13 @@ export async function POST(request: NextRequest) {
             bank_name: user.bank_name,
             account_no: user.account_no,
             account_holder: user.account_holder,
-            status: initialStatus,
+            status: 'pending',
             partner_type: user.partner_type || 'individual',
             withholding_tax,
             local_income_tax,
             vat,
             net_amount,
-            processed_at: isAutoApprove ? new Date().toISOString() : null
+            processed_at: null
         })
         .select()
         .single();
@@ -267,7 +268,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
     }
 
-    // 🚀 본인인증 완료 회원: 펌뱅킹 실이체 즉시 자동 처리 (자동 지급)
+    // 🚀 2단계: [자동입금 ON] 파트너인 경우 동기(await)로 펌뱅킹 실이체 직접 실행
     if (isAutoApprove) {
         try {
             const BANK_CODES: Record<string, string> = {
@@ -283,7 +284,14 @@ export async function POST(request: NextRequest) {
             const nowStr = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
             const txMoid = `B2B_AUTO_${withdrawData.id.slice(0, 8)}_${nowStr}`;
 
-            fetch('http://49.50.139.204/proxy/transfer', {
+            console.log('📤 [B2B] 자동 입금 이노페이 펌뱅킹 이체 API 동기(await) 호출 시작...', {
+                bankCode,
+                cleanAccNo,
+                net_amount
+            });
+
+            // 동기(await)로 응답 결과를 끝까지 수신
+            const transferRes = await fetch('http://49.50.139.204/proxy/transfer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -298,11 +306,28 @@ export async function POST(request: NextRequest) {
                     depAcntNo: '66400001397152',
                     depAcntNm: '부고온정산',
                 }),
-            }).then(r => r.json()).then(resData => {
-                console.log('✅ 본인인증 파트너 무보류 즉시 자동 이체 결과:', resData);
-            }).catch(err => console.error('⚠️ 이체 프록시 무응답/오류:', err));
+            });
+
+            const transferResult = await transferRes.json();
+            console.log('📥 [B2B] 펌뱅킹 자동 이체 응답 수신:', transferResult);
+
+            if (transferResult && transferResult.resultCode === '0000') {
+                // 🟢 3단계: 이체 완전 성공 시에만 'approved' (송금완료) 로 DB 승인 처리!
+                finalStatus = 'approved';
+                processedAt = new Date().toISOString();
+
+                await supabase
+                    .from('withdrawal_requests')
+                    .update({ status: 'approved', processed_at: processedAt })
+                    .eq('id', withdrawData.id);
+
+                console.log(`✅ [B2B] 실계좌 입금 100% 성공 및 DB approved 업데이트 완료: RequestID=${withdrawData.id}`);
+            } else {
+                // 🔴 펌뱅킹 이체 실패 시: DB 상태를 'pending' (대기중)으로 유지하여 어드민에서 [송금진행] 가능하도록 함!
+                console.error(`⚠️ [B2B] 펌뱅킹 이체 거절/실패 (사유: ${transferResult?.resultMsg || '알 수 없음'}). status: pending (대기중)으로 유지합니다.`);
+            }
         } catch (payoutErr) {
-            console.error('⚠️ 즉시 이체 연동 로그 (어드민 내역 자동 승인 처리됨):', payoutErr);
+            console.error('❌ [B2B] 펌뱅킹 API 통신 실패 (네트워크 타임아웃/오류). status: pending (대기중)으로 안전 유지:', payoutErr);
         }
     }
 
