@@ -632,7 +632,7 @@ export default function PartnersPage() {
             {/* 본인인증 상세 정보 조회 모달 */}
             {activeVerifyPartner && (
                 <div className={styles.modalOverlay} onClick={() => setActiveVerifyPartner(null)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', maxHeight: '88vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>B2B 파트너 본인인증 상세정보</h3>
                             <button className={styles.modalClose} onClick={() => setActiveVerifyPartner(null)}>
@@ -832,9 +832,13 @@ export default function PartnersPage() {
     );
 }
 
-// 개별 파트너 출금 내역 로그 컴포넌트
+// 개별 파트너 적립 & 환급(출금) 내역 로그 컴포넌트
 function WithdrawalLogs({ partnerId }: { partnerId: string }) {
+    const [tab, setTab] = useState<'withdraw' | 'reward'>('withdraw');
     const [logs, setLogs] = useState<any[]>([]);
+    const [rewards, setRewards] = useState<any[]>([]);
+    const [totalPaidAmount, setTotalPaidAmount] = useState(0);
+    const [totalRewardAmount, setTotalRewardAmount] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -844,8 +848,12 @@ function WithdrawalLogs({ partnerId }: { partnerId: string }) {
                 const res = await fetch(`/api/b2b/admin/withdrawal-logs?partnerId=${partnerId}`);
                 const data = await res.json();
                 setLogs(data.logs || []);
+                setRewards(data.rewards || []);
+                setTotalPaidAmount(data.totalPaidAmount || 0);
+                setTotalRewardAmount(data.totalRewardAmount || 0);
             } catch {
                 setLogs([]);
+                setRewards([]);
             } finally {
                 setLoading(false);
             }
@@ -862,46 +870,157 @@ function WithdrawalLogs({ partnerId }: { partnerId: string }) {
         }
     };
 
-    if (loading) {
-        return <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>출금 내역 불러오는 중...</div>;
-    }
+    const formatRewardType = (type: string) => {
+        switch (type) {
+            case 'wreath_reward': return '화환 판매 적립';
+            case 'reward_cancel': return '화환 판매 취소';
+            case 'referral_bonus': return '추천 수당';
+            case 'condolence_reward': return '조의금 수당';
+            case 'withdrawal': return '환급 신청';
+            default: return '수당 적립';
+        }
+    };
 
-    if (logs.length === 0) {
-        return <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>출금 내역이 없습니다.</div>;
+    if (loading) {
+        return <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>내역 불러오는 중...</div>;
     }
 
     return (
         <div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>출금 내역 ({logs.length}건)</div>
-            <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#f8fafc', position: 'sticky', top: 0 }}>
-                            <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>일시</th>
-                            <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>신청금액</th>
-                            <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>실수령액</th>
-                            <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>상태</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {logs.map((log: any) => {
-                            const st = statusLabel(log.status);
-                            const dt = new Date(log.created_at);
-                            const dateStr = `${dt.getFullYear()}.${String(dt.getMonth() + 1).padStart(2, '0')}.${String(dt.getDate()).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
-                            return (
-                                <tr key={log.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
-                                    <td style={{ padding: '8px 10px', color: '#475569', whiteSpace: 'nowrap' }}>{dateStr}</td>
-                                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', fontFamily: 'monospace' }}>{(log.amount || 0).toLocaleString()}원</td>
-                                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace' }}>{(log.net_amount || 0).toLocaleString()}원</td>
-                                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                        <span style={{ color: st.color, fontWeight: '700', fontSize: '11px' }}>{st.text}</span>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+            {/* 상단 탭 & 총 지급액 요약 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                        onClick={() => setTab('withdraw')}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            borderRadius: '6px',
+                            border: '1px solid',
+                            borderColor: tab === 'withdraw' ? '#10b981' : '#e2e8f0',
+                            backgroundColor: tab === 'withdraw' ? '#ecfdf5' : '#ffffff',
+                            color: tab === 'withdraw' ? '#047857' : '#64748b',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        환급/출금 내역 ({logs.length}건)
+                    </button>
+                    <button
+                        onClick={() => setTab('reward')}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            borderRadius: '6px',
+                            border: '1px solid',
+                            borderColor: tab === 'reward' ? '#10b981' : '#e2e8f0',
+                            backgroundColor: tab === 'reward' ? '#ecfdf5' : '#ffffff',
+                            color: tab === 'reward' ? '#047857' : '#64748b',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        적립 내역 ({rewards.length}건)
+                    </button>
+                </div>
+
+                <div style={{ fontSize: '12px', textAlign: 'right' }}>
+                    {tab === 'withdraw' ? (
+                        <span style={{ color: '#475569' }}>
+                            총 지급 완료액: <strong style={{ color: '#10b981', fontSize: '13px' }}>{totalPaidAmount.toLocaleString()}원</strong>
+                        </span>
+                    ) : (
+                        <span style={{ color: '#475569' }}>
+                            총 적립액: <strong style={{ color: '#2563eb', fontSize: '13px' }}>{totalRewardAmount.toLocaleString()}원</strong>
+                        </span>
+                    )}
+                </div>
             </div>
+
+            {/* 환급(출금) 내역 테이블 */}
+            {tab === 'withdraw' && (
+                logs.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        출금/환급 신청 내역이 없습니다.
+                    </div>
+                ) : (
+                    <div style={{ maxHeight: '220px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f8fafc', position: 'sticky', top: 0 }}>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>일시</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>신청금액</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>실수령액</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>입금 계좌</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {logs.map((log: any) => {
+                                    const st = statusLabel(log.status);
+                                    const dt = new Date(log.created_at);
+                                    const kstString = dt.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+                                    const kstDate = new Date(kstString);
+                                    const dateStr = `${kstDate.getFullYear()}.${String(kstDate.getMonth() + 1).padStart(2, '0')}.${String(kstDate.getDate()).padStart(2, '0')} ${String(kstDate.getHours()).padStart(2, '0')}:${String(kstDate.getMinutes()).padStart(2, '0')}`;
+                                    const accInfo = log.bank_name ? `${log.bank_name} ${log.account_no || ''} (${log.account_holder || ''})`.trim() : '등록 정산 계좌';
+                                    return (
+                                        <tr key={log.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                                            <td style={{ padding: '8px 10px', color: '#475569', whiteSpace: 'nowrap' }}>{dateStr}</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', fontFamily: 'monospace' }}>{(log.amount || 0).toLocaleString()}원</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '700', color: '#047857', fontFamily: 'monospace' }}>{(log.net_amount || log.amount || 0).toLocaleString()}원</td>
+                                            <td style={{ padding: '8px 10px', color: '#334155', fontSize: '11px' }}>{accInfo}</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                                <span style={{ color: st.color, fontWeight: '700', fontSize: '11px' }}>{st.text}</span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            )}
+
+            {/* 적립 내역 테이블 */}
+            {tab === 'reward' && (
+                rewards.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        적립 내역이 없습니다.
+                    </div>
+                ) : (
+                    <div style={{ maxHeight: '220px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f8fafc', position: 'sticky', top: 0 }}>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>일시</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>적립 항목</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>내용</th>
+                                    <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>적립금</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rewards.map((r: any) => {
+                                    const dt = new Date(r.created_at);
+                                    const kstString = dt.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+                                    const kstDate = new Date(kstString);
+                                    const dateStr = `${kstDate.getFullYear()}.${String(kstDate.getMonth() + 1).padStart(2, '0')}.${String(kstDate.getDate()).padStart(2, '0')} ${String(kstDate.getHours()).padStart(2, '0')}:${String(kstDate.getMinutes()).padStart(2, '0')}`;
+                                    const isMinus = (r.amount || 0) < 0;
+                                    return (
+                                        <tr key={r.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                                            <td style={{ padding: '8px 10px', color: '#475569', whiteSpace: 'nowrap' }}>{dateStr}</td>
+                                            <td style={{ padding: '8px 10px', fontWeight: '600', color: '#1e293b' }}>{formatRewardType(r.type)}</td>
+                                            <td style={{ padding: '8px 10px', color: '#64748b', fontSize: '11px' }}>{r.description || '-'}</td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '700', color: isMinus ? '#ef4444' : '#2563eb', fontFamily: 'monospace' }}>
+                                                {isMinus ? '' : '+'}{(r.amount || 0).toLocaleString()}원
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            )}
         </div>
     );
 }

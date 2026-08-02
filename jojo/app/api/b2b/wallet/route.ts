@@ -45,15 +45,15 @@ export async function GET(request: NextRequest) {
             .single();
         if (depError) console.error('[DEBUG] depError:', depError);
 
-        // 🛡️ 24시간 이내 결제/적립된 수당은 정산 대기 금액(Lock)으로 유예 처리
+        // 24시간 이내 적립된 수당은 입금 예정 금액(Lock)으로 유예 처리
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: recentRewards } = await supabase
             .from('deposit_transactions')
             .select('amount')
             .eq('user_id', userId)
+            .gt('amount', 0)
             .gte('created_at', oneDayAgo);
 
-        // 24시간 이내의 순 적립 수당 합계 (취소건 차감 감안)
         const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
         const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);
 
@@ -184,10 +184,10 @@ export async function POST(request: NextRequest) {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: recentRewards } = await supabase
         .from('deposit_transactions')
-        .select('amount, type')
+        .select('amount')
         .eq('user_id', userId)
-        .gte('created_at', oneDayAgo)
-        .or('amount.gt.0,type.eq.reward_cancel');
+        .gt('amount', 0)
+        .gte('created_at', oneDayAgo);
 
     const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
     const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);

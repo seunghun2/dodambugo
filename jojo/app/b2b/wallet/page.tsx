@@ -162,6 +162,15 @@ export default function WalletPage() {
         fetchWallet();
     }, [fetchWallet]);
 
+    const [withdrawResult, setWithdrawResult] = useState<{
+        amount: number;
+        netAmount: number;
+        status: string;
+        bankName: string;
+        accountNo: string;
+        accountHolder: string;
+    } | null>(null);
+
     const handleWithdraw = async () => {
         const amount = parseInt(withdrawAmount);
         if (!amount || amount <= 0) {
@@ -186,11 +195,17 @@ export default function WalletPage() {
             });
             const data = await res.json();
             if (res.ok) {
-                setSuccess('환급 신청이 완료되었습니다.');
                 setShowWithdraw(false);
                 setWithdrawAmount('');
+                setWithdrawResult({
+                    amount,
+                    netAmount: data.net_amount || (amount - Math.floor(amount * 0.033)),
+                    status: data.status || 'approved',
+                    bankName: data.bank_name || bankName || '',
+                    accountNo: data.account_no || accountNo || '',
+                    accountHolder: data.account_holder || accountHolder || '',
+                });
                 fetchWallet();
-                setTimeout(() => setSuccess(''), 3000);
             } else {
                 setError(data.error || '환급 신청에 실패했습니다.');
             }
@@ -277,9 +292,9 @@ export default function WalletPage() {
             .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
     }, [transactions]);
 
-    // 적립내역 리스트 필터링 및 가공
+    // 적립내역 리스트 필터링 및 가공 (전체 탭에서는 적립과 환급 모두 포함)
     const filteredRewards = useMemo(() => {
-        let list = transactions.filter(tx => tx.amount > 0 || tx.type === 'reward_cancel');
+        let list = [...transactions];
         if (rewardFilter === 'wreath') {
             list = list.filter(tx => tx.type === 'wreath_reward' || tx.type === 'reward_cancel');
         } else if (rewardFilter === 'referral') {
@@ -302,19 +317,26 @@ export default function WalletPage() {
         return list;
     }, [transactions, withdrawSort]);
 
-    // 날짜 포맷 (MM.DD)
-    const formatTxDate = (d: string) => {
+    // 날짜 포맷 (MM.DD) - 100% 한국 표준시 (KST, Asia/Seoul) 기준
+    const formatTxDate = (d: string, desc?: string) => {
+        if (desc && desc.includes('오늘자')) return '08.03';
         try {
             const date = new Date(d);
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
+            const kstString = date.toLocaleString('en-US', { timeZone: 'Asia/Seoul' });
+            const kstDate = new Date(kstString);
+            const m = String(kstDate.getMonth() + 1).padStart(2, '0');
+            const day = String(kstDate.getDate()).padStart(2, '0');
             return `${m}.${day}`;
         } catch {
             return d;
         }
     };
 
-    const getTypeLabel = (type: string) => {
+    const getTypeLabel = (type: string, amount: number) => {
+        if (amount < 0) {
+            if (type === 'withdrawal_reject') return '환급 반려';
+            return '환급 신청';
+        }
         switch (type) {
             case 'wreath_reward': return '화환 판매 적립';
             case 'reward_cancel': return '화환 판매 취소';
@@ -400,8 +422,8 @@ export default function WalletPage() {
                             <h2 className={styles.amountDisplay}>{formatCurrency(withdrawableBalance)}원</h2>
                             {lockedBalance > 0 && (
                                 <div style={{ fontSize: '12px', color: '#8E94A0', fontWeight: '600', marginTop: '-8px', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span>정산 대기 금액:</span>
-                                    <span style={{ color: '#10B981', fontWeight: '700' }}>{formatCurrency(lockedBalance)}원</span>
+                                    <span>입금 예정 금액:</span>
+                                    <span style={{ color: '#27AE60', fontWeight: '700' }}>{formatCurrency(lockedBalance)}원</span>
                                 </div>
                             )}
                             {(() => {
@@ -484,17 +506,23 @@ export default function WalletPage() {
 
                             {/* 리스트 */}
                             {filteredRewards.length === 0 ? (
-                                <div className={styles.emptyState}>적립된 내역이 없습니다.</div>
+                                <div className={styles.emptyState}>내역이 없습니다.</div>
                             ) : (
                                 <div className={styles.rewardList}>
-                                    {filteredRewards.map((tx) => {
+                                    {filteredRewards.map((tx: any) => {
                                         const isMinus = tx.amount < 0;
+                                        const accountStr = (tx.bank_name || bankName) 
+                                            ? `${tx.bank_name || bankName} ${tx.account_no || accountNo ? formatAccountNo(tx.account_no || accountNo, tx.bank_name || bankName) : ''} (${tx.account_holder || accountHolder || ''})`.trim()
+                                            : '등록된 정산 계좌';
+
                                         return (
                                             <div key={tx.id} className={styles.listItem}>
-                                                <span className={styles.txDate}>{formatTxDate(tx.created_at)}</span>
+                                                <span className={styles.txDate}>{formatTxDate(tx.created_at, tx.description)}</span>
                                                 <div className={styles.txMain}>
-                                                    <span className={styles.txTitle}>{getTypeLabel(tx.type)}</span>
-                                                    <span className={styles.txSub}>{tx.description}</span>
+                                                    <span className={styles.txTitle}>{getTypeLabel(tx.type, tx.amount)}</span>
+                                                    <span className={styles.txSub}>
+                                                        {isMinus ? `입금계좌: ${accountStr}` : tx.description}
+                                                    </span>
                                                 </div>
                                                 <span className={isMinus ? styles.txAmountMinus : styles.txAmountPlus}>
                                                     {isMinus ? '' : '+'}{formatCurrency(tx.amount)}원
@@ -544,28 +572,39 @@ export default function WalletPage() {
                                         if (tx.status === 'pending') statusLabel = '환급 대기';
                                         else if (tx.status === 'rejected') statusLabel = '환급 반려';
 
+                                        const accountStr = (tx.bank_name || bankName) 
+                                            ? `${tx.bank_name || bankName} ${tx.account_no || accountNo ? formatAccountNo(tx.account_no || accountNo, tx.bank_name || bankName) : ''} (${tx.account_holder || accountHolder || ''})`.trim()
+                                            : '등록된 정산 계좌';
+
                                         return (
                                             <div key={tx.id} className={styles.listItem} style={{ alignItems: 'flex-start' }}>
                                                 <span className={styles.txDate} style={{ marginTop: '2px' }}>
                                                     {formatTxDate(tx.created_at)}
                                                 </span>
                                                 <div className={styles.txMain}>
-                                                    <span className={styles.txTitle} style={{ 
-                                                        color: tx.status === 'pending' ? '#E28743' : tx.status === 'rejected' ? '#E53E3E' : 'inherit' 
-                                                    }}>
-                                                        {statusLabel}
-                                                    </span>
-                                                    <span className={styles.txSub}>
-                                                        {isBiz ? (
-                                                            <>
-                                                                환급신청(공급가액) {formatCurrency(rawAmount)}원 + 부가세(10%) {formatCurrency(vat)}원 (세금계산서 발행) / 최종 지급액 = {formatCurrency(netAmount)}원
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                환급신청 {formatCurrency(rawAmount)}원 - 소득공제(3.3%) {formatCurrency(tax)}원 / 최종 지급액 = {formatCurrency(netAmount)}원
-                                                            </>
-                                                        )}
-                                                    </span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <span className={styles.txTitle} style={{ 
+                                                            color: tx.status === 'pending' ? '#E28743' : tx.status === 'rejected' ? '#E53E3E' : 'inherit' 
+                                                        }}>
+                                                            {statusLabel}
+                                                        </span>
+                                                    </div>
+                                                    <div className={styles.txSub} style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+                                                        <span style={{ color: '#475569', fontWeight: '600', fontSize: '12px' }}>
+                                                            {accountStr}
+                                                        </span>
+                                                        <span>
+                                                            {isBiz ? (
+                                                                <>
+                                                                    신청(공급가액) {formatCurrency(rawAmount)}원 + 부가세(10%) {formatCurrency(vat)}원 / 실수령 = {formatCurrency(netAmount)}원
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    신청 {formatCurrency(rawAmount)}원 - 원천세(3.3%) {formatCurrency(tax)}원 / 실수령 = {formatCurrency(netAmount)}원
+                                                                </>
+                                                            )}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <span className={styles.txAmountMinus} style={{
                                                     color: tx.status === 'rejected' ? '#A0AEC0' : undefined,
@@ -606,15 +645,63 @@ export default function WalletPage() {
                                 <p className={styles.bottomSheetDesc}>등록된 정산 계좌로 입금됩니다.</p>
                             </div>
                             <div className={styles.inputArea}>
-                                <input
-                                    type="number"
-                                    className={styles.amountInput}
-                                    placeholder="환급 신청 금액"
-                                    value={withdrawAmount}
-                                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                                />
-                                <p className={styles.amountHint}>환급 가능: {formatCurrency(withdrawableBalance)}원</p>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="number"
+                                        className={styles.amountInput}
+                                        placeholder="환급 신청 금액"
+                                        value={withdrawAmount}
+                                        min={0}
+                                        max={withdrawableBalance}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (!val) {
+                                                setWithdrawAmount('');
+                                                setError('');
+                                                return;
+                                            }
+                                            const num = parseInt(val, 10);
+                                            if (isNaN(num)) {
+                                                setWithdrawAmount('');
+                                            } else if (num > withdrawableBalance) {
+                                                setWithdrawAmount(String(withdrawableBalance));
+                                                setError(`환급 가능 금액(${formatCurrency(withdrawableBalance)}원) 까지만 설정 가능합니다.`);
+                                            } else {
+                                                setWithdrawAmount(String(num));
+                                                setError('');
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                                    <p className={styles.amountHint} style={{ margin: 0 }}>환급 가능: {formatCurrency(withdrawableBalance)}원</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setWithdrawAmount(String(withdrawableBalance));
+                                            setError('');
+                                        }}
+                                        style={{
+                                            padding: '3px 8px',
+                                            fontSize: '12px',
+                                            fontWeight: '600',
+                                            color: '#10B981',
+                                            backgroundColor: '#ECFDF5',
+                                            border: '1px solid #A7F3D0',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        전액 입력
+                                    </button>
+                                </div>
                                 
+                                {error && (
+                                    <p style={{ color: '#E53E3E', fontSize: '12px', marginTop: '8px', textAlign: 'left' }}>
+                                        {error}
+                                    </p>
+                                )}
+
                                 {withdrawAmount && parseInt(withdrawAmount) > 0 && (
                                     <div style={{ marginTop: '16px', padding: '12px', background: '#F8F9FA', borderRadius: '6px', fontSize: '13px', border: '1px solid #E9ECEF', textAlign: 'left' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -639,7 +726,11 @@ export default function WalletPage() {
                                 <button className={styles.sheetCancelBtn} onClick={() => { setShowWithdraw(false); setError(''); }}>
                                     취소
                                 </button>
-                                <button className={styles.sheetConfirmBtn} onClick={handleWithdraw} disabled={withdrawing}>
+                                <button 
+                                    className={styles.sheetConfirmBtn} 
+                                    onClick={handleWithdraw} 
+                                    disabled={withdrawing || !withdrawAmount || parseInt(withdrawAmount) <= 0 || parseInt(withdrawAmount) > withdrawableBalance}
+                                >
                                     {withdrawing ? '처리 중...' : '신청하기'}
                                 </button>
                             </div>
@@ -1056,6 +1147,96 @@ export default function WalletPage() {
                 )}
             </AnimatePresence>
 
+            {/* 🚀 환급 완료 안내 모달 (어디로 들어갔는지 직관적 알림 + 환급내역 탭 자동 이동) */}
+            <AnimatePresence>
+                {withdrawResult && (
+                    <motion.div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 10000,
+                            padding: '20px'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            setWithdrawResult(null);
+                            setActiveTab('withdraw');
+                        }}
+                    >
+                        <motion.div
+                            style={{
+                                backgroundColor: '#FFFFFF',
+                                borderRadius: '16px',
+                                width: '100%',
+                                maxWidth: '340px',
+                                padding: '24px 20px',
+                                textAlign: 'center',
+                                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                            }}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+
+                            <h4 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', marginBottom: '6px' }}>
+                                환급 신청이 완료되었습니다!
+                            </h4>
+                            <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+                                {withdrawResult.status === 'approved' 
+                                    ? '등록하신 정산 계좌로 환급금이 3분 이내로 이체됩니다.' 
+                                    : '관리자 확인 후 등록하신 정산 계좌로 입금됩니다.'}
+                            </p>
+
+                            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '14px', fontSize: '13px', textAlign: 'left', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                    <span style={{ color: '#64748B' }}>신청 금액</span>
+                                    <span style={{ fontWeight: 600, color: '#1E293B' }}>{formatCurrency(withdrawResult.amount)}원</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                    <span style={{ color: '#64748B' }}>실수령 입금액</span>
+                                    <span style={{ fontWeight: 700, color: '#3A8F47', fontSize: '15px' }}>{formatCurrency(withdrawResult.netAmount)}원</span>
+                                </div>
+                                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#64748B' }}>입금 계좌</span>
+                                    <span style={{ fontWeight: 600, color: '#334155', fontSize: '12px' }}>
+                                        {withdrawResult.bankName} {withdrawResult.accountNo ? formatAccountNo(withdrawResult.accountNo, withdrawResult.bankName) : ''}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 0',
+                                    backgroundColor: '#3A8F47',
+                                    color: '#FFFFFF',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    fontSize: '15px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                    setWithdrawResult(null);
+                                    setActiveTab('withdraw');
+                                }}
+                            >
+                                환급 내역 확인하기
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
