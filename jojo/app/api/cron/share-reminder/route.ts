@@ -104,31 +104,33 @@ export async function GET(request: NextRequest) {
 
             try {
                 const isB2B = !!bugo.b2b_user_id;
-                // B2B 부고장 공유 리마인더일 경우 B2B bugoon 템플릿 및 B2B 파라미터 적용
-                const templateId = isB2B 
-                    ? 'KA01TP260714223554397jpnpiNrrFt2'  // B2B 전용 부고온 템플릿
-                    : SHARE_REMINDER_TEMPLATE_ID;
+                if (isB2B) {
+                    // B2B 부고장의 공유 리마인더: B2B 부고온 전용 LMS 문자로 깔끔하게 전송 (생성완료 템플릿 오남용 방지)
+                    const { sendLMS } = await import('@/lib/solapi');
+                    const b2bShareMsg = `[부고온] 상주님, 아직 부고장을 지인분들께 공유하지 않으셨습니다.
 
-                const alimtalkVars: Record<string, string> = isB2B ? {
-                    '대표상주명': bugo.deceased_name ? `故 ${bugo.deceased_name} 상주` : '',
-                    '고인명': bugo.deceased_name || '',
-                    '장례식장': '부고장 공유 안내',
-                    '발인일시': '지인분들에게 간편하게 전하세요',
-                    '부고번호': bugo.bugo_number,
-                    'owner_token': bugo.owner_token || '',
-                } : {
-                    '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
-                    '부고번호': bugo.bugo_number,
-                    'owner_token': bugo.owner_token || '',
-                };
+■ 고인: 故 ${bugo.deceased_name || ''}님
 
-                await sendAlimtalk(
-                    phone,
-                    templateId,
-                    alimtalkVars,
-                    undefined,
-                    isB2B
-                );
+아래 링크를 눌러 지인분들에게 간편하게 부고장을 전달해 주세요.
+
+■ 부고장 확인 및 공유하기:
+https://bugoon.maeumbugo.co.kr/view/${bugo.bugo_number}?token=${bugo.owner_token || ''}&share=true`;
+
+                    await sendLMS(phone, `[부고온] 부고장 공유 안내`, b2bShareMsg);
+                } else {
+                    // B2C 부고장의 공유 리마인더: B2C 알림톡 발송
+                    await sendAlimtalk(
+                        phone,
+                        SHARE_REMINDER_TEMPLATE_ID,
+                        {
+                            '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                            '부고번호': bugo.bugo_number,
+                            'owner_token': bugo.owner_token || '',
+                        },
+                        undefined,
+                        false
+                    );
+                }
 
                 // testBugoNumber가 아닐 때만 share_reminder_sent 플래그 업데이트
                 if (!testBugoNumber) {
