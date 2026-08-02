@@ -122,7 +122,7 @@ ${continueUrl}
         // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송
         const { data: bugos } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id')
+            .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id, funeral_home, room_number, funeral_date, funeral_time, funeral_type')
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
             .or('share_count.is.null,share_count.lt.4')
@@ -157,17 +157,38 @@ ${continueUrl}
             for (const [phone, bugo] of targets) {
                 try {
                     const isB2B = !!bugo.b2b_user_id;
-                    await sendAlimtalk(
-                        phone,
-                        SHARE_REMINDER_TEMPLATE_ID,
-                        {
-                            '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
-                            '부고번호': bugo.bugo_number,
-                            'owner_token': bugo.owner_token || '',
-                        },
-                        undefined,
-                        isB2B
-                    );
+                    const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
+                        ? bugo.funeral_type
+                        : `${bugo.funeral_home || ''} ${bugo.room_number || ''}`.trim();
+                    const funeralDateTime = `${bugo.funeral_date || ''} ${bugo.funeral_time || ''}`.trim();
+
+                    if (isB2B) {
+                        await sendAlimtalk(
+                            phone,
+                            'KA01TP2602070138097871zexjvolnSU',
+                            {
+                                '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                                '장례식장': funeralLocation || '장례식장',
+                                '발인일시': funeralDateTime || '미정',
+                                '부고번호': bugo.bugo_number,
+                                'owner_token': bugo.owner_token || '',
+                            },
+                            undefined,
+                            true
+                        );
+                    } else {
+                        await sendAlimtalk(
+                            phone,
+                            SHARE_REMINDER_TEMPLATE_ID,
+                            {
+                                '고인명': bugo.deceased_name ? `故 ${bugo.deceased_name}` : '',
+                                '부고번호': bugo.bugo_number,
+                                'owner_token': bugo.owner_token || '',
+                            },
+                            undefined,
+                            false
+                        );
+                    }
                     await supabase
                         .from('bugo')
                         .update({ share_reminder_sent: true })
