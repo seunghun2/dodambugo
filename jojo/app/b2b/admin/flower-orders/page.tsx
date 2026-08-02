@@ -356,7 +356,7 @@ export default function FlowerOrdersPage() {
                                             <th>결제금액</th>
                                             <th>상태</th>
                                             <th>파트너 수당</th>
-                                            <th>추천인 보너스</th>
+                                            <th>추천 수당</th>
                                             <th>결제수단</th>
                                         </tr>
                                     </thead>
@@ -400,10 +400,14 @@ export default function FlowerOrdersPage() {
                                                     </td>
                                                     <td style={{ 
                                                         fontWeight: '600', 
-                                                        color: order.status === 'cancelled' ? '#94a3b8' : '#d4a84b',
+                                                        color: order.status === 'cancelled' ? '#94a3b8' : (order.bonus_amount > 0 ? '#d4a84b' : '#94a3b8'),
                                                         textDecoration: order.status === 'cancelled' ? 'line-through' : 'none'
                                                     }}>
-                                                        {order.status === 'cancelled' ? '취소' : `+${formatCurrency(order.bonus_amount)}원`}
+                                                        {order.status === 'cancelled' 
+                                                            ? '취소' 
+                                                            : order.bonus_amount > 0 
+                                                                ? `+${formatCurrency(order.bonus_amount)}원` 
+                                                                : '-'}
                                                     </td>
                                                     <td style={{ fontSize: '12px', color: '#64748b' }}>
                                                         {order.payment_method}

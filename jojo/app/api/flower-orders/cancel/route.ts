@@ -168,6 +168,47 @@ export async function POST(request: NextRequest) {
                         type: 'reward_cancel',
                         description: `화환 주문 취소로 인한 수당 회수 (${order.order_number})`,
                     });
+
+                // 5. 해당 주문에 매칭된 추천인 수당(referral_bonus)이 있다면 추천인 수당도 함께 회수
+                const { data: refTx } = await supabase
+                    .from('deposit_transactions')
+                    .select('*')
+                    .eq('related_order_id', order.id)
+                    .eq('type', 'referral_bonus')
+                    .maybeSingle();
+
+                if (refTx && refTx.user_id && refTx.amount > 0) {
+                    const recommenderId = refTx.user_id;
+                    const bonusAmount = refTx.amount;
+
+                    const { data: refDeposit } = await supabase
+                        .from('deposits')
+                        .select('balance')
+                        .eq('user_id', recommenderId)
+                        .single();
+
+                    if (refDeposit) {
+                        const newRefBalance = Math.max(0, (refDeposit.balance || 0) - bonusAmount);
+                        await supabase
+                            .from('deposits')
+                            .update({
+                                balance: newRefBalance,
+                                updated_at: new Date().toISOString(),
+                            })
+                            .eq('user_id', recommenderId);
+                        
+                        console.log(`📉 B2B 추천인 수당 회수 성공: Recommender=${recommenderId}, Amount=-${bonusAmount}, NewBalance=${newRefBalance}`);
+                    }
+
+                    await supabase
+                        .from('deposit_transactions')
+                        .insert({
+                            user_id: recommenderId,
+                            amount: -bonusAmount,
+                            type: 'reward_cancel',
+                            description: `화환 주문 취소로 인한 추천 수당 회수 (${order.order_number})`,
+                        });
+                }
             } catch (err) {
                 console.error('❌ B2B 수당 회수 처리 중 에러:', err);
             }
@@ -177,7 +218,7 @@ export async function POST(request: NextRequest) {
                 insertInAppAlarm(
                     partnerId!, 'flower_refund',
                     '화환 주문이 취소되었습니다',
-                    `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''} | 사유: ${cancelReason || '고객 요청'}`,
+                    `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''}`,
                     '/b2b/wallet', 'alarm_order'
                 );
             });

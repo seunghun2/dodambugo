@@ -1253,7 +1253,7 @@ ${url}
                     <div className="flower-modal-overlay" onClick={() => setFlowerModalOpen(false)}>
                         <div className="flower-modal" onClick={(e) => e.stopPropagation()}>
                             <div className="flower-modal-header">
-                                <button className="flower-modal-close" onClick={() => setFlowerModalOpen(false)}>
+                                <button className="flower-modal-close" style={{ color: '#888888' }} onClick={() => setFlowerModalOpen(false)}>
                                     <span className="material-symbols-outlined">close</span>
                                 </button>
                                 <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
