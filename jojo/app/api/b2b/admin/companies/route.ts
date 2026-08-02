@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
             .select()
             .single();
 
-        // 칼럼 누락으로 에러 발생 시 필수 기본 필드만으로 시도
+        // 1차 폴백: 확장 칼럼만 제거하고 수당 칼럼 유지
         if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 방어 조치 실행:', error.message);
-            const fallbackRes = await supabase
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 1차 폴백:', error.message);
+            const fb1 = await supabase
                 .from('b2b_companies')
                 .insert({
                     name,
@@ -64,8 +64,39 @@ export async function POST(request: NextRequest) {
                 })
                 .select()
                 .single();
-            newCompany = fallbackRes.data;
-            error = fallbackRes.error;
+            newCompany = fb1.data;
+            error = fb1.error;
+        }
+
+        // 2차 폴백: wreath_member_commission_amount 등 추가 수당 칼럼도 누락된 경우 최소 안전 칼럼으로 insert
+        if (error && error.message.includes('Could not find')) {
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 2차 폴백:', error.message);
+            const fb2 = await supabase
+                .from('b2b_companies')
+                .insert({
+                    name,
+                    business_no: business_no || '',
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                })
+                .select()
+                .single();
+            newCompany = fb2.data;
+            error = fb2.error;
+        }
+
+        // 3차 최종 폴백: name, business_no 최원초 필드로 insert
+        if (error && error.message.includes('Could not find')) {
+            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 3차 최종 폴백:', error.message);
+            const fb3 = await supabase
+                .from('b2b_companies')
+                .insert({
+                    name,
+                    business_no: business_no || '',
+                })
+                .select()
+                .single();
+            newCompany = fb3.data;
+            error = fb3.error;
         }
 
         if (error) {
@@ -106,9 +137,9 @@ export async function PUT(request: NextRequest) {
             .select()
             .single();
 
-        // 칼럼 누락 방어
+        // 1차 폴백
         if (error && error.message.includes('Could not find')) {
-            const fallbackRes = await supabase
+            const fb1 = await supabase
                 .from('b2b_companies')
                 .update({
                     name,
@@ -119,8 +150,39 @@ export async function PUT(request: NextRequest) {
                 .eq('id', id)
                 .select()
                 .single();
-            updatedCompany = fallbackRes.data;
-            error = fallbackRes.error;
+            updatedCompany = fb1.data;
+            error = fb1.error;
+        }
+
+        // 2차 폴백
+        if (error && error.message.includes('Could not find')) {
+            const fb2 = await supabase
+                .from('b2b_companies')
+                .update({
+                    name,
+                    business_no: business_no || '',
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                })
+                .eq('id', id)
+                .select()
+                .single();
+            updatedCompany = fb2.data;
+            error = fb2.error;
+        }
+
+        // 3차 폴백
+        if (error && error.message.includes('Could not find')) {
+            const fb3 = await supabase
+                .from('b2b_companies')
+                .update({
+                    name,
+                    business_no: business_no || '',
+                })
+                .eq('id', id)
+                .select()
+                .single();
+            updatedCompany = fb3.data;
+            error = fb3.error;
         }
 
         if (error) {
