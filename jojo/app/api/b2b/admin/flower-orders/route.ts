@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
                     b2b_users ( company_name, owner_name )
                 )
             `)
-            .neq('status', 'pending');
+            .neq('status', 'pending')
+            .not('bugo.b2b_user_id', 'is', null);
 
         if (search) {
             query = query.or(`product_name.ilike.%${search}%,recipient_name.ilike.%${search}%,funeral_home.ilike.%${search}%`);

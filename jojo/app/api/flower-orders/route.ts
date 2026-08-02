@@ -57,6 +57,16 @@ export async function GET(request: NextRequest) {
                 }
             }
         }
+        // B2B 부고장의 화환은 제외 (B2C 전용 어드민)
+        const { data: b2bBugoIds } = await supabase
+            .from('bugo')
+            .select('id')
+            .not('b2b_user_id', 'is', null);
+
+        if (b2bBugoIds && b2bBugoIds.length > 0) {
+            const excludeIds = b2bBugoIds.map((b: any) => b.id);
+            query = query.not('bugo_id', 'in', `(${excludeIds.join(',')})`);
+        }
 
         const { data, error, count } = await query;
 
