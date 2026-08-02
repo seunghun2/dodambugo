@@ -45,14 +45,13 @@ export async function GET(request: NextRequest) {
             .single();
         if (depError) console.error('[DEBUG] depError:', depError);
 
-        // 🛡️ 24시간 이내 적립/취소 수당 보류(Lock) 금액 계산 (취소 차감 포함)
+        // 🛡️ 24시간 이내 적립/취소 수당 보류(Lock) 금액 계산 (모든 취소 차감 포함)
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: recentRewards } = await supabase
             .from('deposit_transactions')
-            .select('amount, type')
+            .select('amount')
             .eq('user_id', userId)
-            .gte('created_at', oneDayAgo)
-            .or('amount.gt.0,type.eq.reward_cancel');
+            .gte('created_at', oneDayAgo);
 
         const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
         const withdrawableBalance = Math.max(0, (deposit?.balance || 0) - lockedAmount);
