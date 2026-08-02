@@ -105,7 +105,9 @@ ${customUrl}
                             '발인일시': dateTimeInfo,
                             '부고번호': bugo_number,
                             'owner_token': bugo.owner_token || '',
-                        }
+                        },
+                        undefined,
+                        true
                     );
                     results.push({ name: m.name, status: 'sent_alimtalk' });
                 } catch (err) {
