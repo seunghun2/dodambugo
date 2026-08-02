@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import CalendarPicker from '@/app/b2b/create/sections/CalendarPicker';
 import styles from './form.module.css';
 
 export default function VerifyFormPage() {
@@ -15,6 +16,7 @@ export default function VerifyFormPage() {
     const [rrnBack, setRrnBack] = useState('');
     const [idType, setIdType] = useState<'주민등록증' | '운전면허증'>('주민등록증');
     const [idIssueDate, setIdIssueDate] = useState('');
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [driverLicenseNo, setDriverLicenseNo] = useState('');
     const [phone, setPhone] = useState('');
 
@@ -91,11 +93,28 @@ export default function VerifyFormPage() {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        // 로그인 체크
+        // 로그인 체크 및 본인 정보 (이름, 휴대폰 번호) 자동 입력 (pre-fill)
         const token = localStorage.getItem('b2b_token');
         if (!token) {
             router.push('/b2b/login');
+            return;
         }
+
+        const b2bUser = localStorage.getItem('b2b_user');
+        if (b2bUser) {
+            try {
+                const user = JSON.parse(b2bUser);
+                if (user.owner_name) setName(user.owner_name);
+                if (user.phone) setPhone(user.phone.replace(/[^0-9]/g, ''));
+            } catch {}
+        }
+
+        fetch('/api/b2b/me', {
+            headers: { Authorization: `Bearer ${token}` }
+        }).then(r => r.json()).then(data => {
+            if (data.owner_name) setName(data.owner_name);
+            if (data.phone) setPhone(data.phone.replace(/[^0-9]/g, ''));
+        }).catch(() => {});
     }, [router]);
 
     // 타이머 처리
@@ -120,31 +139,56 @@ export default function VerifyFormPage() {
         return `${m}:${String(s).padStart(2, '0')}`;
     };
 
-    // 인증번호 발송 모사
-    const handleSendSms = () => {
+    // 🚀 실전 SMS 인증번호 발송 (SOLAPI 연동)
+    const handleSendSms = async () => {
         if (!phone || phone.length < 10) {
             setError('올바른 휴대폰 번호를 입력해주세요.');
             return;
         }
         setError('');
         setSmsError('');
-        setIsSmsSent(true);
-        setTimer(180);
-        setSmsSuccess('인증번호가 발송되었습니다. (테스트 번호: 123456)');
+
+        try {
+            const res = await fetch('/api/b2b/verify/send-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setIsSmsSent(true);
+                setTimer(180);
+                setSmsSuccess('인증번호가 발송되었습니다.');
+            } else {
+                setError(data.error || '문자 발송에 실패했습니다.');
+            }
+        } catch {
+            setError('문자 발송 중 오류가 발생했습니다.');
+        }
     };
 
-    // 인증번호 확인 모사
-    const handleVerifySms = (val: string) => {
+    // 🚀 실전 SMS 인증번호 6자리 실시간 검증
+    const handleVerifySms = async (val: string) => {
         setSmsCode(val);
         setSmsError('');
         if (val.length === 6) {
-            if (val === '123456') {
-                setIsPhoneVerified(true);
-                setSmsSuccess('본인인증이 완료되었습니다.');
-                setSmsError('');
-                if (timerRef.current) clearInterval(timerRef.current);
-            } else {
-                setSmsError('인증번호가 일치하지 않습니다.');
+            try {
+                const res = await fetch('/api/b2b/verify/check-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, code: val }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setIsPhoneVerified(true);
+                    setSmsSuccess('휴대폰 본인인증이 완료되었습니다.');
+                    setSmsError('');
+                    if (timerRef.current) clearInterval(timerRef.current);
+                } else {
+                    setSmsError(data.error || '인증번호가 일치하지 않습니다.');
+                }
+            } catch {
+                setSmsError('인증번호 확인 중 오류가 발생했습니다.');
             }
         }
     };
@@ -337,13 +381,25 @@ export default function VerifyFormPage() {
                             {idType === '주민등록증' ? (
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>주민등록증 발급일자</label>
-                                    <input
-                                        type="text"
+                                    <div 
                                         className={styles.input}
-                                        placeholder="주민등록증 하단의 발급일자를 입력해주세요 (예: 2023.05.12)"
-                                        value={idIssueDate}
-                                        onChange={(e) => setIdIssueDate(e.target.value)}
-                                    />
+                                        onClick={() => setIsCalendarOpen(true)}
+                                        style={{ 
+                                            cursor: 'pointer', 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'space-between',
+                                            color: idIssueDate ? '#0f172a' : '#94a3b8'
+                                        }}
+                                    >
+                                        <span>{idIssueDate ? idIssueDate.replace(/-/g, '.') : '발급일자를 선택해주세요 (예: 2023.05.12)'}</span>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className={styles.formGroup}>
@@ -477,6 +533,15 @@ export default function VerifyFormPage() {
                         {submitting ? '제출 중...' : '다음'}
                     </button>
                 </form>
+
+                {/* 마음부고 전용 커스텀 달력 바텀시트 피커 */}
+                <CalendarPicker
+                    isOpen={isCalendarOpen}
+                    title="주민등록증 발급일자 선택"
+                    value={idIssueDate}
+                    onSelect={(date) => setIdIssueDate(date)}
+                    onClose={() => setIsCalendarOpen(false)}
+                />
             </div>
         </div>
     );

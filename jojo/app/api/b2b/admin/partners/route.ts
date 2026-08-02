@@ -142,10 +142,35 @@ export async function GET(request: NextRequest) {
             alarm_deposit: p.alarm_deposit,
             alarm_deceased: p.alarm_deceased,
             alarm_notice: p.alarm_notice,
-            company_id: p.company_id
-        })) || [];
+            company_id: p.company_id,
 
-        return NextResponse.json({ success: true, partners: formattedPartners });
+            // 本인認証 (Identity Verification) & 자동입금 (Auto Payout) 토글 필드 연동
+            identity_verified: p.identity_verified || false,
+            verification_status: p.verification_status || (p.identity_verified ? 'verified' : 'unverified'),
+            identity_name: p.identity_name || p.owner_name,
+            rrn_front: p.rrn_front || '',
+            rrn_back: p.rrn_back || '',
+            identity_type: p.identity_type || '',
+            id_issue_date: p.id_issue_date || '',
+            identity_phone: p.identity_phone || p.phone,
+            id_card_url: p.id_card_url || '',
+            auto_payout_enabled: p.auto_payout_enabled ?? true
+        }));
+
+        // 신분증 이미지 서명 URL 일괄 생성 (비공개 버킷에서도 100% 렌더링)
+        for (const partner of formattedPartners) {
+            if (partner.id_card_url && !partner.id_card_url.startsWith('http')) {
+                const storagePath = partner.id_card_url.replace(/^b2b-id-cards\//, '');
+                const { data: signedData } = await supabase.storage
+                    .from('b2b-id-cards')
+                    .createSignedUrl(storagePath, 3600);
+                if (signedData?.signedUrl) {
+                    partner.id_card_url = signedData.signedUrl;
+                }
+            }
+        }
+
+        return NextResponse.json({ success: true, partners: formattedPartners || [] });
     } catch (error: any) {
         console.error('B2B 파트너 조회 API 오류:', error);
         return NextResponse.json({ error: '파트너 목록을 가져오는데 실패했습니다.' }, { status: 500 });
@@ -161,7 +186,7 @@ export async function PATCH(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { partnerId, status, companyId } = body;
+        const { partnerId, status, companyId, auto_payout_enabled } = body;
 
         if (!partnerId) {
             return NextResponse.json({ error: '파트너 ID가 필요합니다.' }, { status: 400 });
@@ -178,6 +203,10 @@ export async function PATCH(request: NextRequest) {
 
         if (companyId !== undefined) {
             updateData.company_id = companyId;
+        }
+
+        if (auto_payout_enabled !== undefined) {
+            updateData.auto_payout_enabled = Boolean(auto_payout_enabled);
         }
 
         if (Object.keys(updateData).length === 0) {

@@ -47,7 +47,13 @@ interface Partner {
     identity_phone?: string;
     id_card_url?: string;
     verification_status?: 'pending' | 'verified' | 'failed' | null;
+    auto_payout_enabled?: boolean;
 }
+
+const getFullImageUrl = (url?: string) => {
+    if (!url) return '';
+    return url;
+};
 
 export default function PartnersPage() {
     const [partners, setPartners] = useState<Partner[]>([]);
@@ -69,6 +75,28 @@ export default function PartnersPage() {
 
     // 본인인증(실명/세무용 주민번호) 상세 조회 모달 상태
     const [activeVerifyPartner, setActiveVerifyPartner] = useState<Partner | null>(null);
+
+    // 자동입금 (ON / OFF) 토글 변경 처리
+    const handleToggleAutoPayout = async (partnerId: string, currentVal?: boolean) => {
+        const newVal = !(currentVal ?? true);
+        try {
+            const res = await fetch('/api/b2b/admin/partners', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ partnerId, auto_payout_enabled: newVal })
+            });
+            if (res.ok) {
+                setPartners(prev => prev.map(p => p.id === partnerId ? { ...p, auto_payout_enabled: newVal } : p));
+                if (activeVerifyPartner && activeVerifyPartner.id === partnerId) {
+                    setActiveVerifyPartner((prev: Partner | null) => prev ? { ...prev, auto_payout_enabled: newVal } : null);
+                }
+            } else {
+                alert('자동입금 설정 변경에 실패했습니다.');
+            }
+        } catch {
+            alert('설정 변경 중 오류가 발생했습니다.');
+        }
+    };
 
     // 개별 푸시 발송 처리
     const handleSendPushSubmit = async (e: React.FormEvent) => {
@@ -613,6 +641,31 @@ export default function PartnersPage() {
                         </div>
                         <div className={styles.modalBody} style={{ fontSize: '14px', lineHeight: '1.6', color: '#1e293b' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #f1f3f5', backgroundColor: '#f8fafc', borderRadius: '8px', margin: '4px 0' }}>
+                                    <div>
+                                        <span style={{ color: '#1e293b', fontWeight: '700', fontSize: '14px' }}>수당 자동입금 설정</span>
+                                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                                            {(activeVerifyPartner.auto_payout_enabled ?? true) ? 'ON: 파트너 출금 시 즉시 이체됨' : 'OFF: 어드민 승인(보류) 대기됨'}
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleToggleAutoPayout(activeVerifyPartner.id, activeVerifyPartner.auto_payout_enabled)}
+                                        style={{
+                                            padding: '6px 14px',
+                                            borderRadius: '20px',
+                                            border: 'none',
+                                            fontWeight: 'bold',
+                                            fontSize: '13px',
+                                            cursor: 'pointer',
+                                            backgroundColor: (activeVerifyPartner.auto_payout_enabled ?? true) ? '#10b981' : '#64748b',
+                                            color: '#ffffff',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        {(activeVerifyPartner.auto_payout_enabled ?? true) ? '자동입금 ON' : '자동입금 OFF'}
+                                    </button>
+                                </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
                                     <span style={{ color: '#64748b' }}>회사명</span>
                                     <span style={{ fontWeight: '600' }}>{activeVerifyPartner.company_name}</span>
@@ -671,6 +724,13 @@ export default function PartnersPage() {
                                                 src={getFullImageUrl(activeVerifyPartner.id_card_url)} 
                                                 alt="신분증 원본" 
                                                 style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f8fafc', padding: '4px' }}
+                                                onError={(e) => {
+                                                    // 로컬 업로드 이미지 호환 렌더링
+                                                    const target = e.currentTarget;
+                                                    if (activeVerifyPartner.id_card_url) {
+                                                        target.src = activeVerifyPartner.id_card_url.startsWith('/') ? activeVerifyPartner.id_card_url : `/${activeVerifyPartner.id_card_url}`;
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     ) : (
@@ -679,6 +739,12 @@ export default function PartnersPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* 출금 내역 로그 */}
+                        <div className={styles.modalBody} style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                            <WithdrawalLogs partnerId={activeVerifyPartner.id} />
+                        </div>
+
                         <div className={styles.modalFooter}>
                             <button className={styles.btnSecondary} onClick={() => setActiveVerifyPartner(null)}>
                                 닫기
@@ -762,6 +828,80 @@ export default function PartnersPage() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// 개별 파트너 출금 내역 로그 컴포넌트
+function WithdrawalLogs({ partnerId }: { partnerId: string }) {
+    const [logs, setLogs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchLogs = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/b2b/admin/withdrawal-logs?partnerId=${partnerId}`);
+                const data = await res.json();
+                setLogs(data.logs || []);
+            } catch {
+                setLogs([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchLogs();
+    }, [partnerId]);
+
+    const statusLabel = (s: string) => {
+        switch (s) {
+            case 'approved': return { text: '지급완료', color: '#10b981' };
+            case 'pending': return { text: '대기중', color: '#f59e0b' };
+            case 'rejected': return { text: '거절', color: '#ef4444' };
+            default: return { text: s, color: '#64748b' };
+        }
+    };
+
+    if (loading) {
+        return <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>출금 내역 불러오는 중...</div>;
+    }
+
+    if (logs.length === 0) {
+        return <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>출금 내역이 없습니다.</div>;
+    }
+
+    return (
+        <div>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>출금 내역 ({logs.length}건)</div>
+            <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#f8fafc', position: 'sticky', top: 0 }}>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>일시</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>신청금액</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>실수령액</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '600', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {logs.map((log: any) => {
+                            const st = statusLabel(log.status);
+                            const dt = new Date(log.created_at);
+                            const dateStr = `${dt.getFullYear()}.${String(dt.getMonth() + 1).padStart(2, '0')}.${String(dt.getDate()).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+                            return (
+                                <tr key={log.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                                    <td style={{ padding: '8px 10px', color: '#475569', whiteSpace: 'nowrap' }}>{dateStr}</td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '600', fontFamily: 'monospace' }}>{(log.amount || 0).toLocaleString()}원</td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace' }}>{(log.net_amount || 0).toLocaleString()}원</td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                        <span style={{ color: st.color, fontWeight: '700', fontSize: '11px' }}>{st.text}</span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

@@ -476,7 +476,5 @@
         box-shadow: none !important;
     }
     
-    body {
-        background-color: #ffffff !important;
-    }
+    /* 전역 body 스타일은 dashboard-print.css에 분리 */
 }

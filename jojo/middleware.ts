@@ -173,18 +173,10 @@ function autoBlockIP(ip: string, reason: string) {
   }).catch(() => { });
 }
 
-// 슬랙 알림 (경쟁사 의심)
+// 슬랙 알림 (경쟁사 의심) - 슬랙 비발송 처리 (대표님 지침 반영)
 function notifySlack(ip: string, reason: string) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-  if (!webhookUrl) return;
-
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text: `🚨 *경쟁사 의심 IP 자동 차단*\nIP: \`${ip}\`\n사유: ${reason}\n\n👉 /admin/blocked-ips 에서 확인`,
-    }),
-  }).catch(() => { });
+  // 슬랙으로 경쟁사 의심 IP 차단 알림을 발송하지 않습니다.
+  return;
 }
 
 export async function middleware(request: NextRequest) {

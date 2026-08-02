@@ -80,9 +80,8 @@ export default function CalendarPicker({ isOpen, title, value, onSelect, onClose
   // 선택된 날짜 문자열
   const selectedStr = value || '';
 
-  // 표시할 줄 수 (빈 줄 제거)
-  const totalRows = Math.ceil(calendarDays.filter((d, i) => i < 42 && (d !== null || i < 35)).length / 7);
-  const visibleDays = calendarDays.slice(0, totalRows * 7);
+  // 🛡️ 대표님 지침: 월 변경 시 바텀시트 모달 높이가 덜컹 움직이지 않도록 항상 6주(42칸) 고정
+  const visibleDays = calendarDays.slice(0, 42);
 
   return (
     <div className={styles.bottomSheetOverlay} onClick={onClose}>
@@ -119,11 +118,21 @@ export default function CalendarPicker({ isOpen, title, value, onSelect, onClose
           {/* 날짜 셀 */}
           {visibleDays.map((day, i) => {
             if (day === null || (day as number) <= 0) {
-              // 이전 달 날짜 또는 빈칸
+              // 이전 달 또는 다음 달 날짜
+              let otherDayNum = '';
+              if (day !== null && (day as number) <= 0) {
+                otherDayNum = String(Math.abs(day as number));
+              } else {
+                const currentMonthLastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+                const firstDayDow = new Date(viewYear, viewMonth, 1).getDay();
+                const nextMonthDay = i + 1 - (firstDayDow + currentMonthLastDay);
+                if (nextMonthDay > 0) otherDayNum = String(nextMonthDay);
+              }
+
               return (
                 <div key={`empty-${i}`} className={styles.calendarDay}>
                   <span className={styles.calendarDayOther}>
-                    {day !== null && (day as number) <= 0 ? Math.abs(day as number) : ''}
+                    {otherDayNum}
                   </span>
                 </div>
               );

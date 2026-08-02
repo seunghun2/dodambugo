@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendAlimtalk } from '@/lib/solapi';
-import { generateReviewCode } from '@/app/api/burial-review/route';
+import { generateReviewCode } from '@/lib/burial-review';
 
 // Cron Job: 매일 오후 5시 (한국시간) 실행
 // "0 8 * * *" = UTC 08:00 = KST 17:00

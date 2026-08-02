@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { IconPrinter, IconDownload, IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import styles from './settlements.module.css';
+import './settlements-print.css';
 
 interface SettlementDetail {
     id: string;

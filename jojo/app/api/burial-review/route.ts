@@ -2,20 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { sendBurialReviewNotification } from '@/lib/slack';
+import { generateReviewCode } from '@/lib/burial-review';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-// 부고번호 → 랜덤 보이는 코드 생성 (항상 동일한 결과)
-export function generateReviewCode(bugoNumber: string): string {
-    return crypto
-        .createHash('md5')
-        .update('maeum-review-' + bugoNumber)
-        .digest('hex')
-        .substring(0, 10);
-}
 
 // 리뷰 제출 API
 export async function POST(request: NextRequest) {

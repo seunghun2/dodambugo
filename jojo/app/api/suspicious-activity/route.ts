@@ -88,17 +88,17 @@ export async function POST(request: NextRequest) {
 
                     console.log(`🔒 자동 차단: ${ip} — ${fullReason}`);
 
-                    // 슬랙 알림
-                    const slackUrl = process.env.SLACK_WEBHOOK_URL;
-                    if (slackUrl) {
-                        await fetch(slackUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                text: `🔒 *IP 자동 차단*\n• IP: \`${ip}\`\n• 사유: ${fullReason}\n• 감지 횟수: ${activityCount}회`
-                            })
-                        }).catch(() => { });
-                    }
+                    // 슬랙 알림 비발송 처리 (대표님 지침 반영)
+                    // const slackUrl = process.env.SLACK_WEBHOOK_URL;
+                    // if (slackUrl) {
+                    //     await fetch(slackUrl, {
+                    //         method: 'POST',
+                    //         headers: { 'Content-Type': 'application/json' },
+                    //         body: JSON.stringify({
+                    //             text: `🔒 *IP 자동 차단*\n• IP: \`${ip}\`\n• 사유: ${fullReason}\n• 감지 횟수: ${activityCount}회`
+                    //         })
+                    //     }).catch(() => { });
+                    // }
                 }
             }
         }

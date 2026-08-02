@@ -15,6 +15,7 @@ import {
 } from '@tabler/icons-react';
 import { supabase } from '@/lib/supabase';
 import styles from './notices.module.css';
+import './notices-global.css';
 
 interface B2BNotice {
     id: string;

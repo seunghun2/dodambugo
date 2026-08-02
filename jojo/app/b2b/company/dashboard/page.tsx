@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPrinter, IconDownload, IconLogout, IconBuilding, IconCoins, IconListCheck } from '@tabler/icons-react';
 import styles from './dashboard.module.css';
+import './dashboard-print.css';
 
 interface User {
     id: string;

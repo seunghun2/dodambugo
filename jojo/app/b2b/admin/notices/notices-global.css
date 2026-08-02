@@ -1,0 +1,8 @@
+/* 공지사항 에디터 전역 스타일 */
+div[contenteditable]:empty::before {
+    content: attr(data-placeholder);
+    color: #64748b;
+    font-size: 14px;
+    pointer-events: none;
+    display: block;
+}

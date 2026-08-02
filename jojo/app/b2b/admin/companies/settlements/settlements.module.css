@@ -339,28 +339,11 @@
   background-color: #334155;
   border-color: #334155;
 }
-
 /* 🖨️ 인쇄 전용 @media print CSS 설계 (인쇄 시 완벽 정산서 폼 변환) */
+/* 전역 셀렉터(body, aside 등)는 settlements-print.css 에 분리 */
 @media print {
-  body {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-  }
-
   /* 뒤로가기 버튼, 탑바, 사이드바 등 웹 요소 완전 숨김 */
   .no-print {
-    display: none !important;
-  }
-  
-  :global(.no-print) {
-    display: none !important;
-  }
-  
-  /* 어드민 사이드바, 헤더 영역 숨김처리 */
-  :global(aside), 
-  :global(header), 
-  :global(nav), 
-  :global(button) {
     display: none !important;
   }
 

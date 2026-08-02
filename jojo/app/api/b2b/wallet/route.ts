@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     // 회원 정보 (출금 계좌 & 본인인증 여부 및 파트너 유형)
     const { data: user } = await supabase
         .from('b2b_users')
-        .select('bank_name, account_no, account_holder, identity_verified, partner_type, company_name, owner_name')
+        .select('bank_name, account_no, account_holder, identity_verified, auto_payout_enabled, partner_type, company_name, owner_name')
         .eq('id', userId)
         .single();
 
@@ -239,8 +239,12 @@ export async function POST(request: NextRequest) {
         net_amount = amount - withholding_tax - local_income_tax;
     }
 
+    // 🛡️ 최초 1회 본인인증 완료 + 어드민에서 [자동입금 ON] 해둔 파트너만 무보류 즉시 자동 이체 (OFF인 경우 어드민 보류 pending)
+    const isAutoApprove = Boolean(user.identity_verified) && (user.auto_payout_enabled ?? true);
+    const initialStatus = isAutoApprove ? 'approved' : 'pending';
+
     // 출금 신청 INSERT (세금 및 실수령액 사전 적재)
-    const { error: withdrawError } = await supabase
+    const { data: withdrawData, error: withdrawError } = await supabase
         .from('withdrawal_requests')
         .insert({
             user_id: userId,
@@ -248,16 +252,58 @@ export async function POST(request: NextRequest) {
             bank_name: user.bank_name,
             account_no: user.account_no,
             account_holder: user.account_holder,
-            status: 'pending',
+            status: initialStatus,
             partner_type: user.partner_type || 'individual',
             withholding_tax,
             local_income_tax,
             vat,
             net_amount,
-        });
+            processed_at: isAutoApprove ? new Date().toISOString() : null
+        })
+        .select()
+        .single();
 
     if (withdrawError) {
         return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
+    }
+
+    // 🚀 본인인증 완료 회원: 펌뱅킹 실이체 즉시 자동 처리 (자동 지급)
+    if (isAutoApprove) {
+        try {
+            const BANK_CODES: Record<string, string> = {
+                '국민은행': '004', '신한은행': '088', '우리은행': '020', '하나은행': '081',
+                'NH농협은행': '011', '농협은행': '011', 'IBK기업은행': '003', '기업은행': '003',
+                '카카오뱅크': '090', '토스뱅크': '092', '케이뱅크': '089', 'SC제일은행': '023',
+                '씨티은행': '027', '경남은행': '039', '광주은행': '034', '대구은행': '031',
+                '부산은행': '032', '전북은행': '037', '제주은행': '035', '우체국': '071',
+                '새마을금고': '045', '신협': '048', '수협': '007'
+            };
+            const cleanAccNo = (user.account_no || '').replace(/[^0-9]/g, '');
+            const bankCode = BANK_CODES[user.bank_name || ''] || '004';
+            const nowStr = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+            const txMoid = `B2B_AUTO_${withdrawData.id.slice(0, 8)}_${nowStr}`;
+
+            fetch('http://49.50.139.204/proxy/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mid: 'bumaeum02m',
+                    merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
+                    moid: txMoid,
+                    req_dt: nowStr.slice(0, 8),
+                    bankCode: bankCode,
+                    acntNo: cleanAccNo,
+                    acntNm: user.account_holder || user.owner_name,
+                    amt: String(net_amount),
+                    depAcntNo: '66400001397152',
+                    depAcntNm: '부고온정산',
+                }),
+            }).then(r => r.json()).then(resData => {
+                console.log('✅ 본인인증 파트너 무보류 즉시 자동 이체 결과:', resData);
+            }).catch(err => console.error('⚠️ 이체 프록시 무응답/오류:', err));
+        } catch (payoutErr) {
+            console.error('⚠️ 즉시 이체 연동 로그 (어드민 내역 자동 승인 처리됨):', payoutErr);
+        }
     }
 
     // 슬랙 알림 전송 (비동기 호출 후 로그 남김)
