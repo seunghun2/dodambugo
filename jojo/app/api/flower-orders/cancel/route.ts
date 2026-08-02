@@ -142,13 +142,15 @@ export async function POST(request: NextRequest) {
                     .single();
                 partnerUserOwnerName = partnerUser?.owner_name || '';
 
-                // 1. 수당 적립금 설정값 조회
-                const { data: rewardSetting } = await supabase
-                    .from('b2b_settings')
-                    .select('value')
-                    .eq('key', 'wreath_reward_amount')
-                    .single();
-                const rewardAmount = parseInt(rewardSetting?.value || '10000');
+                // 1. 해당 주문으로 실제 적립되었던 수당 거래 내역 조회 (정확한 회수금액 확보)
+                const { data: originalRewardTx } = await supabase
+                    .from('deposit_transactions')
+                    .select('amount')
+                    .eq('related_order_id', order.id)
+                    .eq('type', 'wreath_reward')
+                    .maybeSingle();
+
+                const rewardAmount = originalRewardTx?.amount ? Math.abs(originalRewardTx.amount) : 20000;
 
                 // 2. 현재 잔액 조회
                 const { data: currentDeposit } = await supabase
@@ -223,6 +225,13 @@ export async function POST(request: NextRequest) {
                             description: `화환 주문 취소로 인한 추천 수당 회수 (${order.order_number})`,
                         });
                 }
+
+                // 6. 상조회사 정산 장부(b2b_company_settlements) 상태 취소(cancelled)로 변경
+                await supabase
+                    .from('b2b_company_settlements')
+                    .update({ status: 'cancelled' })
+                    .eq('order_id', order.id);
+                console.log(`📉 상조회사 정산 장부 취소 처리 완료: OrderId=${order.id}`);
             } catch (err) {
                 console.error('❌ B2B 수당 회수 처리 중 에러:', err);
             }

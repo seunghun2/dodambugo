@@ -134,11 +134,12 @@ export async function GET(request: NextRequest) {
                 const orderInfo = orderMap.get(s.order_id) || null;
                 const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
                 const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
+                const isCancelled = s.status === 'cancelled';
 
                 return {
                     id: s.id,
                     order_id: s.order_id,
-                    amount: s.amount,
+                    amount: isCancelled ? 0 : s.amount,
                     status: s.status,
                     payment_date: s.payment_date,
                     created_at: s.created_at,
