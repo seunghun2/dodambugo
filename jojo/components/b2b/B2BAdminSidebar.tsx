@@ -144,6 +144,17 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             </nav>
 
             <div className={styles.footerArea}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 10px', marginBottom: '14px', fontSize: '11px', color: '#94a3b8' }}>
+                    <Link href="/b2b/faq" target="_blank" style={{ color: '#94a3b8', textDecoration: 'none' }}>자주 묻는 질문</Link>
+                    <span>·</span>
+                    <Link href="/b2b/inquiry" target="_blank" style={{ color: '#94a3b8', textDecoration: 'none' }}>1:1 문의</Link>
+                    <span>·</span>
+                    <Link href="/b2b/notice" target="_blank" style={{ color: '#94a3b8', textDecoration: 'none' }}>공지사항</Link>
+                    <span>·</span>
+                    <Link href="/b2b/terms" target="_blank" style={{ color: '#94a3b8', textDecoration: 'none' }}>이용약관</Link>
+                    <span>·</span>
+                    <Link href="/b2b/privacy" target="_blank" style={{ color: '#94a3b8', textDecoration: 'none' }}>개인정보 처리방침</Link>
+                </div>
                 <button className={styles.logoutBtn} onClick={onLogout}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                         <IconLogout stroke={1.5} size={16} />
