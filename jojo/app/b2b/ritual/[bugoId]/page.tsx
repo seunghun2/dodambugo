@@ -481,7 +481,7 @@ export default function RitualDetailPage() {
 
   // 보내기 전송 확인 모달 및 토스트 상태
   const [isSendConfirmModalOpen, setIsSendConfirmModalOpen] = useState(false);
-  const [userPhone, setUserPhone] = useState('010-1234-5678');
+  const [userPhone, setUserPhone] = useState('');
   const [toastMessage, setToastMessage] = useState('');
 
   // 캔버스 참조
@@ -489,10 +489,15 @@ export default function RitualDetailPage() {
 
   // 부고장 데이터 로드 및 프리필
   const fetchBugo = useCallback(async () => {
-    const token = localStorage.getItem('b2b_token');
-    if (!token) {
-      router.push('/b2b/login');
-      return;
+    // 로그인된 파트너 유저의 실제 휴대폰 번호 세팅
+    const userData = localStorage.getItem('b2b_user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        if (parsedUser.phone) {
+          setUserPhone(parsedUser.phone);
+        }
+      } catch {}
     }
 
     try {
