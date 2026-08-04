@@ -1028,7 +1028,7 @@ export default function SettingsPage() {
                         </label>
                     </div>
 
-                    {/* 부고장 그룹 */}
+                    {/* 미연동 기능으로 대표님 지시에 따라 미노출 처리 (추후 백엔드 및 뷰 연동 고도화 예정)
                     <div className={styles.groupTitle}>부고장</div>
                     <div className={styles.rowItem}>
                         <div className={styles.rowLeft}>
@@ -1058,7 +1058,6 @@ export default function SettingsPage() {
                             <span className={styles.slider}></span>
                         </label>
                     </div>
-                    {/* 미연동 기능으로 대표님 지시에 따라 미노출 처리
                     <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('price')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>화환 판매가격 설정</span>

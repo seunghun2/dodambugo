@@ -1,5 +1,15 @@
 # 마음부고 변경 이력
 
+## 2026-08-05
+
+### 📱 1:1 문의 페이지 앱 상단 safe-area 패딩 보정
+- **파일**: `app/b2b/inquiry/inquiry.module.css`
+- 모바일 앱(iOS WKWebView) 환경에서 상단 노치/상태바 영역과 1:1 문의 헤더가 겹치던 현상 수정 (`.fixedHeaderContainer`에 `padding-top: env(safe-area-inset-top, 0px)` 추가)
+
+### 🙈 설정 내 미연동 부고장 옵션 3종 미노출 처리
+- **파일**: `app/b2b/settings/page.tsx`
+- 백엔드 DB 및 부고장 View 미연동 옵션 3종(`화환 판매가격 설정`, `상주 만족도`, `판매정보`) 설정 목록에서 미노출(주석 처리) 완료. (추후 연동 고도화 시 재노출 예정)
+
 ## 2026-08-03
 
 ### 🐛 펌뱅킹 이체 비동기 누수 버그 수정 (치명적 결함)
