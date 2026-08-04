@@ -489,13 +489,20 @@ export default function RitualDetailPage() {
 
   // 부고장 데이터 로드 및 프리필
   const fetchBugo = useCallback(async () => {
-    // 로그인된 파트너 유저의 실제 휴대폰 번호 세팅
+    // 로그인된 파트너 유저의 실제 휴대폰 번호 세팅 (자동 하이픈 포맷팅 적용)
     const userData = localStorage.getItem('b2b_user');
     if (userData) {
       try {
         const parsedUser = JSON.parse(userData);
         if (parsedUser.phone) {
-          setUserPhone(parsedUser.phone);
+          const raw = String(parsedUser.phone).replace(/[^0-9]/g, '');
+          let formatted = raw;
+          if (raw.length > 7) {
+            formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7, 11)}`;
+          } else if (raw.length > 3) {
+            formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+          }
+          setUserPhone(formatted);
         }
       } catch {}
     }
@@ -1069,7 +1076,7 @@ export default function RitualDetailPage() {
   const handleConfirmSend = () => {
     setIsSendConfirmModalOpen(false);
     const targetPhone = userPhone.trim() || '담당자 번호';
-    setToastMessage(`${targetPhone} 번호로 카카오 알림톡 전송이 완료되었습니다.`);
+    setToastMessage(`${targetPhone} 번호로 문자메시지 전송이 완료되었습니다.`);
     setTimeout(() => {
       setToastMessage('');
     }, 3000);
@@ -1773,7 +1780,7 @@ export default function RitualDetailPage() {
             boxSizing: 'border-box'
           }} onClick={(e) => e.stopPropagation()}>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '17px', fontWeight: 'bold', color: '#111827' }}>
-              카카오 알림톡 전송
+              문자메시지 전송
             </h4>
             <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#6b7280', lineHeight: '1.4' }}>
               수신받으실 휴대폰 번호를 확인하거나 직접 수정하신 후 [네]를 눌러주세요.
@@ -1802,8 +1809,8 @@ export default function RitualDetailPage() {
                   border: '1px solid #d1d5db',
                   fontSize: '15px',
                   fontWeight: '600',
-                  color: '#166534',
-                  backgroundColor: '#f0fdf4',
+                  color: '#111827',
+                  backgroundColor: '#ffffff',
                   outline: 'none',
                   boxSizing: 'border-box',
                   textAlign: 'center'
