@@ -1068,7 +1068,8 @@ export default function RitualDetailPage() {
 
   const handleConfirmSend = () => {
     setIsSendConfirmModalOpen(false);
-    setToastMessage('카카오 알림톡 전송이 완료되었습니다.');
+    const targetPhone = userPhone.trim() || '담당자 번호';
+    setToastMessage(`${targetPhone} 번호로 카카오 알림톡 전송이 완료되었습니다.`);
     setTimeout(() => {
       setToastMessage('');
     }, 3000);
@@ -1771,12 +1772,44 @@ export default function RitualDetailPage() {
             textAlign: 'center',
             boxSizing: 'border-box'
           }} onClick={(e) => e.stopPropagation()}>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '17px', fontWeight: 'bold', color: '#111827' }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '17px', fontWeight: 'bold', color: '#111827' }}>
               카카오 알림톡 전송
             </h4>
-            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#4b5563', lineHeight: '1.5', wordBreak: 'keep-all' }}>
-              담당자 연락처 (<strong style={{ color: '#166534', fontWeight: 'bold' }}>{userPhone || '등록된 연락처'}</strong>)로 생성이 완료된 이미지를 카카오 알림톡으로 전송하시겠습니까?
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#6b7280', lineHeight: '1.4' }}>
+              수신받으실 휴대폰 번호를 확인하거나 직접 수정하신 후 [네]를 눌러주세요.
             </p>
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                전송 휴대폰 번호
+              </label>
+              <input
+                type="tel"
+                value={userPhone}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const nums = raw.replace(/[^0-9]/g, '');
+                  let formatted = nums;
+                  if (nums.length <= 3) formatted = nums;
+                  else if (nums.length <= 7) formatted = `${nums.slice(0, 3)}-${nums.slice(3)}`;
+                  else formatted = `${nums.slice(0, 3)}-${nums.slice(3, 7)}-${nums.slice(7, 11)}`;
+                  setUserPhone(formatted);
+                }}
+                placeholder="010-0000-0000"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#166534',
+                  backgroundColor: '#f0fdf4',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  textAlign: 'center'
+                }}
+              />
+            </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button 
                 type="button" 
