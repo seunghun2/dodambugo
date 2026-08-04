@@ -123,7 +123,7 @@ function CompleteContent() {
                             if (isIOS) {
                                 window.location.href = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
                             } else {
-                                alert('안드로이드(Android) 파트너 앱은 구글 플레이스토어 정식 출시 준비 중입니다.\n현재는 모바일 웹 브라우저에서 동일하게 모든 기능을 편리하게 이용하실 수 있습니다!');
+                                window.location.href = 'https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon&hl=ko';
                             }
                         }}
                     >

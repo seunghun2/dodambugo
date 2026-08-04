@@ -97,7 +97,7 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **관련 MD**:
   - [APP_SUBMISSION.md](file:///Users/el/Desktop/dodam/jojo/docs/APP_SUBMISSION.md) (앱 제출 전체 진행 기록 — **이 파일을 반드시 참조**)
   - [DUNS_INFO.md](file:///Users/el/Desktop/dodam/jojo/docs/DUNS_INFO.md) (반려 이력 및 보완 조치 기록)
-- **인프라 셋업**: App Store Connect 앱 등록 완료, Google Play Console 등록 대기 중
+- **인프라 셋업**: App Store Connect 및 Google Play Console 앱 정식 출시 완료 (`kr.co.maeumbugo.bugoon`).
 
 ---
 
