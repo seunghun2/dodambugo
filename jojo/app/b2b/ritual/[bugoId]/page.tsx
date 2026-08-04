@@ -479,6 +479,11 @@ export default function RitualDetailPage() {
   // 캘린더 모달 오픈 여부
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  // 보내기 전송 확인 모달 및 토스트 상태
+  const [isSendConfirmModalOpen, setIsSendConfirmModalOpen] = useState(false);
+  const [userPhone, setUserPhone] = useState('010-1234-5678');
+  const [toastMessage, setToastMessage] = useState('');
+
   // 캔버스 참조
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -1053,7 +1058,15 @@ export default function RitualDetailPage() {
   };
 
   const handleSend = () => {
-    alert('장례지도사 알림톡으로 생성이 완료된 이미지가 즉시 전송되었습니다.');
+    setIsSendConfirmModalOpen(true);
+  };
+
+  const handleConfirmSend = () => {
+    setIsSendConfirmModalOpen(false);
+    setToastMessage('카카오 알림톡 전송이 완료되었습니다.');
+    setTimeout(() => {
+      setToastMessage('');
+    }, 3000);
   };
 
   return (
@@ -1730,6 +1743,97 @@ export default function RitualDetailPage() {
 
       {/* 숨겨진 캔버스 (이미지 생성용) */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+      {/* 카카오 알림톡 보내기 확인 모달 팝업 */}
+      {isSendConfirmModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }} onClick={() => setIsSendConfirmModalOpen(false)}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '340px',
+            padding: '24px 20px 20px 20px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            textAlign: 'center',
+            boxSizing: 'border-box'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '17px', fontWeight: 'bold', color: '#111827' }}>
+              카카오 알림톡 전송
+            </h4>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#4b5563', lineHeight: '1.5', wordBreak: 'keep-all' }}>
+              담당자 연락처 (<strong style={{ color: '#166534', fontWeight: 'bold' }}>{userPhone || '등록된 연락처'}</strong>)로 생성이 완료된 이미지를 카카오 알림톡으로 전송하시겠습니까?
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsSendConfirmModalOpen(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px 0',
+                  borderRadius: '10px',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                아니오
+              </button>
+              <button 
+                type="button" 
+                onClick={handleConfirmSend}
+                style={{
+                  flex: 1,
+                  padding: '12px 0',
+                  borderRadius: '10px',
+                  border: 'none',
+                  backgroundColor: '#166534',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                네
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 전송 완료 토스트 팝업 */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
+          color: '#ffffff',
+          padding: '12px 22px',
+          borderRadius: '30px',
+          fontSize: '14px',
+          fontWeight: '500',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          zIndex: 10000,
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+          animation: 'fadeIn 0.2s ease-in-out'
+        }}>
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
