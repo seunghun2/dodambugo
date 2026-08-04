@@ -54,6 +54,9 @@ export default function DashboardPage() {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
+    // 적립금 노출 여부 저장값 불러오기 (기본값 OFF: false)
+    setBalanceVisible(localStorage.getItem('b2b_balance_visible') === 'true');
+
     // 푸시 알림 등록 및 앱 아이콘 뱃지(빨간 1) 클리어
     registerPushNotifications(parsedUser.id, router);
     clearAppBadge();
@@ -278,12 +281,12 @@ export default function DashboardPage() {
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </span>
-              <button className={styles.hideBtn} onClick={(e) => { e.stopPropagation(); setBalanceVisible(false); }}>
+              <button className={styles.hideBtn} onClick={(e) => { e.stopPropagation(); setBalanceVisible(false); localStorage.setItem('b2b_balance_visible', 'false'); }}>
                 가리기
               </button>
             </div>
           ) : (
-            <button className={styles.inquiryBtn} onClick={() => setBalanceVisible(true)}>
+            <button className={styles.inquiryBtn} onClick={() => { setBalanceVisible(true); localStorage.setItem('b2b_balance_visible', 'true'); }}>
               조회하기
             </button>
           )}

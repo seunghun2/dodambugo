@@ -193,8 +193,8 @@ export default function SettingsPage() {
     const [accountVerified, setAccountVerified] = useState(false);
     const [accountVerifyLoading, setAccountVerifyLoading] = useState(false);
 
-    // 토글 스위치 상태값들 (설정 & 알림 용)
-    const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+    // 토글 스위치 상태값들 (설정 & 알림 용) - 적립 금액 표시는 기본 OFF(false)로 설정
+    const [isBalanceVisible, setIsBalanceVisible] = useState(false);
     const [isMournerSatisfy, setIsMournerSatisfy] = useState(true);
     const [isSalesInfo, setIsSalesInfo] = useState(true);
 
@@ -370,6 +370,9 @@ export default function SettingsPage() {
                 setAlarmDeposit(data.user.alarm_deposit ?? true);
                 setAlarmNotice(data.user.alarm_notice ?? true);
                 setAlarmEvent(data.user.alarm_event ?? true);
+
+                // 메인 화면 적립금 표시 설정 로컬 스토리지 불러오기 (기본값 OFF: false)
+                setIsBalanceVisible(localStorage.getItem('b2b_balance_visible') === 'true');
 
                 // 로컬 스토리지 데이터 최신화
                 localStorage.setItem('b2b_user', JSON.stringify(data.user));
@@ -1022,7 +1025,11 @@ export default function SettingsPage() {
                             <input 
                                 type="checkbox" 
                                 checked={isBalanceVisible} 
-                                onChange={() => setIsBalanceVisible(!isBalanceVisible)} 
+                                onChange={() => {
+                                    const nextVal = !isBalanceVisible;
+                                    setIsBalanceVisible(nextVal);
+                                    localStorage.setItem('b2b_balance_visible', String(nextVal));
+                                }} 
                             />
                             <span className={styles.slider}></span>
                         </label>
