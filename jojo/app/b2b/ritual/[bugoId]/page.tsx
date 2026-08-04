@@ -1075,8 +1075,15 @@ export default function RitualDetailPage() {
 
   const handleConfirmSend = () => {
     setIsSendConfirmModalOpen(false);
-    const targetPhone = userPhone.trim() || '담당자 번호';
-    setToastMessage(`${targetPhone} 번호로 문자메시지 전송이 완료되었습니다.`);
+    const targetPhone = userPhone.replace(/[^0-9]/g, '');
+    const formattedPhone = userPhone.trim() || '담당자 번호';
+    const docType = activeTab === 'wipae' ? '위패' : '축문';
+    const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서 생성이 완료되었습니다.`;
+    
+    // 네이티브/모바일 SMS 문자 발송 앱 이동
+    window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
+
+    setToastMessage(`${formattedPhone} 번호로 문자메시지 전송이 완료되었습니다.`);
     setTimeout(() => {
       setToastMessage('');
     }, 3000);
