@@ -1015,7 +1015,7 @@ export default function SettingsPage() {
                     <div className={styles.groupTitle}>메인화면</div>
                     <div className={styles.rowItem}>
                         <div className={styles.rowLeft}>
-                            <span className={styles.rowLabel}>적립 예정 금액</span>
+                            <span className={styles.rowLabel}>적립 금액</span>
                             <span className={styles.rowDesc}>메인 화면 대시보드에 적립 금액을 기본으로 표시합니다.</span>
                         </div>
                         <label className={styles.toggleSwitch}>

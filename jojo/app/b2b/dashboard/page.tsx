@@ -269,7 +269,7 @@ export default function DashboardPage() {
       {/* 잔액 요약 */}
       <section className={styles.section}>
         <div className={styles.balanceRow}>
-          <span className={styles.balanceLabel}>적립 예정 금액</span>
+          <span className={styles.balanceLabel}>적립 금액</span>
           {balanceVisible ? (
             <div className={styles.balanceActiveRow}>
               <span className={styles.balanceAmount} onClick={() => router.push('/b2b/wallet')}>
