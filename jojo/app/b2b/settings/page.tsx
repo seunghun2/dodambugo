@@ -1058,6 +1058,7 @@ export default function SettingsPage() {
                             <span className={styles.slider}></span>
                         </label>
                     </div>
+                    {/* 미연동 기능으로 대표님 지시에 따라 미노출 처리
                     <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('price')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>화환 판매가격 설정</span>
@@ -1067,6 +1068,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
+                    */}
 
                     {/* 보안 및 인증 그룹 */}
                     <div className={styles.groupTitle}>보안 및 인증</div>
