@@ -1084,14 +1084,14 @@ export default function RitualDetailPage() {
 
       if (error) throw error;
 
-      const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${data.id}`;
+      const shareUrl = `${window.location.origin}/b2b/ritual/view/${data.id}`;
       const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서가 준비되었습니다.\n\n▶ 인쇄하기 (A4):\n${shareUrl}`;
 
       window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
     } catch (err) {
       console.error('ritual_shares 저장 실패:', err);
       // 저장 실패 시 기존 방식으로 fallback
-      const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${bugoNumber || ''}?tab=${activeTab}`;
+      const shareUrl = `${window.location.origin}/b2b/ritual/view/${bugoNumber || ''}?tab=${activeTab}`;
       const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서가 준비되었습니다.\n\n▶ 인쇄하기 (A4):\n${shareUrl}`;
       window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
     }
