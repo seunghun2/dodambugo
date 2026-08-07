@@ -1103,46 +1103,50 @@ export default function RitualDetailPage() {
           <span className={styles.headerTitle}>故 {deceasedName} 의례 문서</span>
         </header>
 
-        {/* 탭 바 */}
-        <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', margin: '0 20px', gap: '0', backgroundColor: '#ffffff' }}>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              textAlign: 'center',
-              fontSize: '16px',
-              fontWeight: activeTab === 'wipae' ? '700' : '500',
-              color: activeTab === 'wipae' ? '#111827' : '#6b7280',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderBottom: activeTab === 'wipae' ? '3px solid #166534' : '3px solid transparent',
-              cursor: 'pointer',
-              marginBottom: '-2px'
-            }}
-            onClick={() => setActiveTab('wipae')}
-          >
-            위패
-          </button>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              textAlign: 'center',
-              fontSize: '16px',
-              fontWeight: activeTab === 'chukmun' ? '700' : '500',
-              color: activeTab === 'chukmun' ? '#111827' : '#6b7280',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderBottom: activeTab === 'chukmun' ? '3px solid #166534' : '3px solid transparent',
-              cursor: 'pointer',
-              marginBottom: '-2px'
-            }}
-            onClick={() => setActiveTab('chukmun')}
-          >
-            축문
-          </button>
+        {/* 탭 바 (선명한 토글 세그먼트 버튼) */}
+        <div style={{ padding: '0 20px 12px 20px', backgroundColor: '#ffffff' }}>
+          <div style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '4px', gap: '4px' }}>
+            <button
+              type="button"
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                textAlign: 'center',
+                fontSize: '15px',
+                fontWeight: activeTab === 'wipae' ? '700' : '600',
+                color: activeTab === 'wipae' ? '#166534' : '#64748b',
+                backgroundColor: activeTab === 'wipae' ? '#ffffff' : 'transparent',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: activeTab === 'wipae' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => setActiveTab('wipae')}
+            >
+              위패 작성
+            </button>
+            <button
+              type="button"
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                textAlign: 'center',
+                fontSize: '15px',
+                fontWeight: activeTab === 'chukmun' ? '700' : '600',
+                color: activeTab === 'chukmun' ? '#166534' : '#64748b',
+                backgroundColor: activeTab === 'chukmun' ? '#ffffff' : 'transparent',
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: activeTab === 'chukmun' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => setActiveTab('chukmun')}
+            >
+              축문 작성
+            </button>
+          </div>
         </div>
       </div>
 
