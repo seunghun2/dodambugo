@@ -20,6 +20,7 @@
   max-width: 480px;
   z-index: 100;
   background-color: #ffffff;
+  border-bottom: 1px solid var(--b2b-border-light);
 }
 
 /* 헤더 */
@@ -27,9 +28,8 @@
   display: flex;
   align-items: flex-end;
   height: calc(52px + env(safe-area-inset-top, 0px));
-  padding: 0 20px 10px 20px;
+  padding: 0 20px 8px 20px;
   padding-top: env(safe-area-inset-top, 0px);
-  border-bottom: 1px solid var(--b2b-border-light);
   background-color: #ffffff;
   width: 100%;
   max-width: 480px;
