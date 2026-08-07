@@ -5,7 +5,7 @@
   background: var(--bg-white);
   max-width: 480px;
   margin: 0 auto;
-  padding-top: calc(52px + env(safe-area-inset-top, 0px));
+  padding-top: calc(108px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
 }
 
