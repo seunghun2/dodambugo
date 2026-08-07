@@ -29,8 +29,6 @@ export default function RitualViewPage({ params }: PageProps) {
           return;
         }
 
-        // A4 인쇄 버튼과 100% 동일한 방식: 페이지 전체를 서식 HTML로 교체
-        // 인쇄 버튼만 상단에 삽입 (인쇄 시 자동 숨김)
         const printBtnHtml = `
           <div id="print-btn-bar" style="
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
@@ -47,7 +45,6 @@ export default function RitualViewPage({ params }: PageProps) {
           </div>
         `;
 
-        // 인쇄 시 버튼 숨김 CSS 추가
         const printCss = `
           <style>
             @media print { #print-btn-bar { display: none !important; } }
@@ -55,12 +52,10 @@ export default function RitualViewPage({ params }: PageProps) {
           </style>
         `;
 
-        // 서식 HTML에 인쇄 버튼과 CSS 삽입
         const fullHtml = data.html_content
           .replace('</head>', printCss + '</head>')
           .replace('</body>', printBtnHtml + '</body>');
 
-        // 현재 페이지를 서식 HTML로 완전 교체 (A4 인쇄와 동일한 렌더링)
         document.open();
         document.write(fullHtml);
         document.close();
@@ -81,7 +76,6 @@ export default function RitualViewPage({ params }: PageProps) {
     );
   }
 
-  // 로딩 중 표시 (HTML 로드 완료 시 document.write로 전체 교체됨)
   return (
     <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif' }}>
       <p style={{ fontSize: '18px', color: '#64748b', fontWeight: 600 }}>서식을 불러오는 중입니다...</p>

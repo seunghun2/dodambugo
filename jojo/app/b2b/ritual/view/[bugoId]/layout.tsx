@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 
-// 모바일에서도 PC 뷰포트로 강제 렌더링 (A4 규격 인쇄용)
 export const viewport: Viewport = {
-  width: 1024,
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
 };
