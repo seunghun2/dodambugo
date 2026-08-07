@@ -84,15 +84,17 @@ export default function RitualListPage() {
 
   return (
     <div className={styles.page}>
-      {/* 헤더 */}
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <span className={styles.headerTitle}>위패 / 축문</span>
-      </header>
+      {/* 헤더 (상단 고정) */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, margin: '0 auto', maxWidth: '480px', zIndex: 100, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+        <header className={styles.header} style={{ borderBottom: 'none' }}>
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span className={styles.headerTitle}>위패 / 축문</span>
+        </header>
+      </div>
 
       {/* 부고장 리스트 */}
       <section className={styles.section}>
