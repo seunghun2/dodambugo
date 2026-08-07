@@ -91,7 +91,7 @@ export default function RitualListPage() {
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <span className={styles.headerTitle}>위패 / 축문 / 지방</span>
+        <span className={styles.headerTitle}>위패 / 축문</span>
       </header>
 
       {/* 부고장 리스트 */}
