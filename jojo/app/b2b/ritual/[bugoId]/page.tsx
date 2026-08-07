@@ -1106,16 +1106,16 @@ export default function RitualDetailPage() {
         {/* 탭 바 */}
         <div className={styles.tabBar}>
           <button
-            className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('chukmun')}
-          >
-            축문
-          </button>
-          <button
             className={`${styles.tab} ${activeTab === 'wipae' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('wipae')}
           >
             위패
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('chukmun')}
+          >
+            축문
           </button>
         </div>
       </div>

@@ -163,9 +163,9 @@
   flex: 1;
   padding: 14px 0;
   text-align: center;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--b2b-text-tertiary);
+  color: #6b7280;
   background: none;
   border: none;
   cursor: pointer;
@@ -175,7 +175,8 @@
 }
 
 .tabActive {
-  color: var(--b2b-text-primary);
+  color: #111827;
+  font-weight: 700;
 }
 
 .tabActive::after {
@@ -184,7 +185,7 @@
   bottom: -2px;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: var(--b2b-accent);
 }
 
