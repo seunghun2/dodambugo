@@ -28,6 +28,7 @@ interface SavedFacility {
 
 const FUNERAL_TYPES = [
   { value: '일반장례', label: '일반장례' },
+  { value: '가족장', label: '가족장' },
   { value: '무빈소장례', label: '무빈소장례' },
 ];
 
