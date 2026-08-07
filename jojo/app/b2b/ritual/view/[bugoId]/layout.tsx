@@ -1,6 +1,12 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
-// OG 메타태그: 문자 미리보기에 "의례 서식 인쇄" 표시
+// 모바일에서도 PC 뷰포트로 강제 렌더링 (A4 규격 인쇄용)
+export const viewport: Viewport = {
+  width: 1024,
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: '부고온 - 의례 서식 인쇄',
   description: '위패/축문 A4 서식을 인쇄하실 수 있습니다.',

@@ -13,115 +13,78 @@ interface PageProps {
 
 export default function RitualViewPage({ params }: PageProps) {
   const { bugoId } = use(params);
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'error' | 'done'>('loading');
 
   useEffect(() => {
-    async function loadShare() {
+    async function loadAndRender() {
       try {
-        const { data, error: fetchError } = await supabase
+        const { data, error } = await supabase
           .from('ritual_shares')
           .select('html_content')
           .eq('id', bugoId)
           .single();
 
-        if (fetchError || !data) {
-          setError(true);
+        if (error || !data) {
+          setStatus('error');
           return;
         }
 
-        setHtmlContent(data.html_content);
+        // A4 인쇄 버튼과 100% 동일한 방식: 페이지 전체를 서식 HTML로 교체
+        // 인쇄 버튼만 상단에 삽입 (인쇄 시 자동 숨김)
+        const printBtnHtml = `
+          <div id="print-btn-bar" style="
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+            background: #fff; border-top: 1px solid #e2e8f0;
+            padding: 16px 20px; display: flex; justify-content: center;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-family: sans-serif;
+          ">
+            <button onclick="window.print()" style="
+              width: 100%; max-width: 400px; padding: 18px 0;
+              font-size: 20px; font-weight: 800; color: #fff;
+              background: #166534; border: none; border-radius: 14px;
+              cursor: pointer; box-shadow: 0 4px 12px rgba(22,101,52,0.3);
+            ">인쇄하기</button>
+          </div>
+        `;
+
+        // 인쇄 시 버튼 숨김 CSS 추가
+        const printCss = `
+          <style>
+            @media print { #print-btn-bar { display: none !important; } }
+            body { padding-bottom: 80px; }
+          </style>
+        `;
+
+        // 서식 HTML에 인쇄 버튼과 CSS 삽입
+        const fullHtml = data.html_content
+          .replace('</head>', printCss + '</head>')
+          .replace('</body>', printBtnHtml + '</body>');
+
+        // 현재 페이지를 서식 HTML로 완전 교체 (A4 인쇄와 동일한 렌더링)
+        document.open();
+        document.write(fullHtml);
+        document.close();
       } catch (err) {
         console.error(err);
-        setError(true);
-      } finally {
-        setLoading(false);
+        setStatus('error');
       }
     }
-    loadShare();
+    loadAndRender();
   }, [bugoId]);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  if (loading) {
+  if (status === 'error') {
     return (
-      <div style={{ display: 'flex', height: '100dvh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif' }}>
-        <p style={{ fontSize: '18px', color: '#64748b', fontWeight: 600 }}>서식을 불러오는 중입니다...</p>
-      </div>
-    );
-  }
-
-  if (error || !htmlContent) {
-    return (
-      <div style={{ display: 'flex', height: '100dvh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif', flexDirection: 'column', gap: '12px' }}>
         <p style={{ fontSize: '20px', color: '#ef4444', fontWeight: 700 }}>문서를 찾을 수 없습니다</p>
         <p style={{ fontSize: '14px', color: '#94a3b8' }}>링크가 만료되었거나 잘못된 주소입니다.</p>
       </div>
     );
   }
 
+  // 로딩 중 표시 (HTML 로드 완료 시 document.write로 전체 교체됨)
   return (
-    <>
-      <style>{`
-        @media print {
-          .print-btn-bar { display: none !important; }
-          body { margin: 0; padding: 0; }
-          .doc-frame { border: none !important; }
-        }
-      `}</style>
-
-      {/* 인쇄 버튼 바 - 화면에서만 보이고, 인쇄 시 숨김 */}
-      <div className="print-btn-bar" style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
-        padding: '16px 20px',
-        display: 'flex',
-        justifyContent: 'center',
-        boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
-        fontFamily: 'sans-serif',
-      }}>
-        <button
-          onClick={handlePrint}
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '18px 0',
-            fontSize: '20px',
-            fontWeight: 800,
-            color: '#ffffff',
-            backgroundColor: '#166534',
-            border: 'none',
-            borderRadius: '14px',
-            cursor: 'pointer',
-            letterSpacing: '0.02em',
-            boxShadow: '0 4px 12px rgba(22,101,52,0.3)',
-          }}
-        >
-          🖨️ 인쇄하기
-        </button>
-      </div>
-
-      {/* 서식 HTML을 iframe으로 렌더링 (있는 그대로 출력) */}
-      <iframe
-        className="doc-frame"
-        srcDoc={htmlContent}
-        style={{
-          width: '100%',
-          height: '100dvh',
-          border: 'none',
-          display: 'block',
-          paddingBottom: '80px',
-        }}
-        title="의례 서식 문서"
-      />
-    </>
+    <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif' }}>
+      <p style={{ fontSize: '18px', color: '#64748b', fontWeight: 600 }}>서식을 불러오는 중입니다...</p>
+    </div>
   );
 }
