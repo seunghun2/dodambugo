@@ -19,6 +19,10 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **관련 MD**: 
   - [PROJECT_STRATEGY.md](file:///Users/el/Desktop/dodam/jojo/PROJECT_STRATEGY.md) (모바일 앱 배포 전략)
 - **인프라 셋업**: Capacitor Asset Generator 툴을 통한 플랫폼별 이미지 자동 생성
+- **Android 키스토어 및 SHA-256 지문**:
+  - 패키지명: `kr.co.maeumbugo.bugoonplus`
+  - Keystore: `android/bugoon-release.keystore` (alias: `bugoon`, pass: `bugoon2026`)
+  - SHA-256: `35:1A:E0:81:CD:84:BC:17:53:76:0D:F3:6D:D7:4F:FB:C8:8F:8A:F9:19:9E:4D:7E:62:88:1A:54:28:71:4E:18`
 
 ### 1-2. 초기 앱 구동 로그 시스템 구축 ⏳ 우선순위 낮음
 - **설명**: 모바일 환경에서의 비정상 종료 및 사용자 행동 추적용 앱 로그 수집기 구현
