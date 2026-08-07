@@ -1090,7 +1090,7 @@ export default function RitualDetailPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.detailPage}>
       {/* 상단 헤더와 탭 영역을 통합 고정하기 위한 컨테이너 */}
       <div className={styles.fixedHeaderContainer}>
         {/* 헤더 */}
