@@ -1077,6 +1077,7 @@ export default function RitualDetailPage() {
     setIsSendConfirmModalOpen(false);
     const targetPhone = userPhone.replace(/[^0-9]/g, '');
     const formattedPhone = userPhone.trim() || '담당자 번호';
+    const docType = activeTab === 'wipae' ? '위패' : '축문';
     const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${bugoNumber || ''}?tab=${activeTab}`;
     const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서 생성이 완료되었습니다.\n\n▶ A4 규격 인쇄 및 PDF 저장 바로가기:\n${shareUrl}`;
     
