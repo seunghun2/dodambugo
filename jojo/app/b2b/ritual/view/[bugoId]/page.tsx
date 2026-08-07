@@ -1,46 +1,46 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { supabase } from '@/lib/supabase';
-import { IconPrinter } from '@tabler/icons-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface PageProps {
   params: Promise<{ bugoId: string }>;
-  searchParams: Promise<{ tab?: string }>;
 }
 
-export default function RitualViewPage({ params, searchParams }: PageProps) {
+export default function RitualViewPage({ params }: PageProps) {
   const { bugoId } = use(params);
-  const { tab } = use(searchParams);
-
-  const activeTab = tab === 'chukmun' ? 'chukmun' : 'wipae';
-  const isWipae = activeTab === 'wipae';
-  const [bugo, setBugo] = useState<any>(null);
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadShare() {
       try {
-        const { data } = await supabase
-          .from('bugo')
-          .select('*')
+        const { data, error: fetchError } = await supabase
+          .from('ritual_shares')
+          .select('html_content')
           .eq('id', bugoId)
           .single();
 
-        if (data) {
-          setBugo(data);
+        if (fetchError || !data) {
+          setError(true);
+          return;
         }
+
+        setHtmlContent(data.html_content);
       } catch (err) {
         console.error(err);
+        setError(true);
       } finally {
         setLoading(false);
       }
     }
-    loadData();
+    loadShare();
   }, [bugoId]);
-
-  const deceasedName = bugo?.deceased_name || '홍길동';
-  const docTitle = isWipae ? '위패' : '축문';
 
   const handlePrint = () => {
     window.print();
@@ -48,73 +48,80 @@ export default function RitualViewPage({ params, searchParams }: PageProps) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-        <p style={{ fontSize: '16px', color: '#64748b', fontWeight: 600 }}>A4 서식 문서 불러오는 중...</p>
+      <div style={{ display: 'flex', height: '100dvh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif' }}>
+        <p style={{ fontSize: '18px', color: '#64748b', fontWeight: 600 }}>서식을 불러오는 중입니다...</p>
       </div>
     );
   }
 
-  // 100% 동일한 A4 렌더링 텍스트 조합
-  const chars = isWipae 
-    ? ['顯', '妣', '孺', '人', ...deceasedName.split(''), '神', '位']
-    : ['維', '歲', '次', '謹', '以', '故', ...deceasedName.split(''), '之', '靈'];
+  if (error || !htmlContent) {
+    return (
+      <div style={{ display: 'flex', height: '100dvh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', fontFamily: 'sans-serif', flexDirection: 'column', gap: '12px' }}>
+        <p style={{ fontSize: '20px', color: '#ef4444', fontWeight: 700 }}>문서를 찾을 수 없습니다</p>
+        <p style={{ fontSize: '14px', color: '#94a3b8' }}>링크가 만료되었거나 잘못된 주소입니다.</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', padding: '20px 10px', boxSizing: 'border-box' }}>
+    <>
       <style>{`
         @media print {
-          .no-print { display: none !important; }
-          body { background-color: #ffffff !important; padding: 0 !important; }
-          .a4-container { box-shadow: none !important; margin: 0 !important; border: none !important; width: 100% !important; padding: 0 !important; }
+          .print-btn-bar { display: none !important; }
+          body { margin: 0; padding: 0; }
+          .doc-frame { border: none !important; }
         }
       `}</style>
 
-      {/* 상단 컨트롤 바 */}
-      <div className="no-print" style={{ maxWidth: '794px', margin: '0 auto 16px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', padding: '16px 20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
-            故 {deceasedName} 님 {docTitle} 서식 (A4)
-          </h2>
-          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
-            [A4 인쇄 / PDF 저장] 버튼을 누르시면 절취선 포함 고화질로 출력됩니다.
-          </p>
-        </div>
+      {/* 인쇄 버튼 바 - 화면에서만 보이고, 인쇄 시 숨김 */}
+      <div className="print-btn-bar" style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e2e8f0',
+        padding: '16px 20px',
+        display: 'flex',
+        justifyContent: 'center',
+        boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
+        fontFamily: 'sans-serif',
+      }}>
         <button
           onClick={handlePrint}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#166534', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '10px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '18px 0',
+            fontSize: '20px',
+            fontWeight: 800,
+            color: '#ffffff',
+            backgroundColor: '#166534',
+            border: 'none',
+            borderRadius: '14px',
+            cursor: 'pointer',
+            letterSpacing: '0.02em',
+            boxShadow: '0 4px 12px rgba(22,101,52,0.3)',
+          }}
         >
-          <IconPrinter size={18} />
-          A4 인쇄 / PDF 저장
+          🖨️ 인쇄하기
         </button>
       </div>
 
-      {/* A4 용지 컨테이너 (실제 서식 규격과 100% 일치) */}
-      <div className="a4-container" style={{ width: '100%', maxWidth: '794px', minHeight: '1123px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', padding: '60px 40px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        
-        <div style={{ position: 'relative', width: '2.3cm', minHeight: '14cm', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-          {/* 절취선 바운딩 */}
-          <div style={{ position: 'absolute', top: '-6mm', left: '-6mm', right: '-6mm', bottom: '-6mm', border: '2px dashed #94a3b8', borderRadius: '4px' }} />
-          <div style={{ position: 'absolute', top: '-11mm', left: '50%', transform: 'translateX(-50%)', fontSize: '11px', color: '#64748b', fontFamily: 'sans-serif', white-space: 'nowrap' }}>
-            절취선을 따라 잘라 주세요 ({docTitle} 규격: 2.3 x 14cm)
-          </div>
-
-          {/* 한문/한글 고화질 서식 본체 */}
-          <div style={{ fontFamily: "'Batang', 'Nanum Myeongjo', 'Gungsuh', serif", display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', zIndex: 1, padding: '10px 0' }}>
-            {chars.map((c, idx) => (
-              <div key={idx} style={{ fontSize: '32px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
-                {c}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 하단 서비스 출처 */}
-        <div style={{ marginTop: '80px', textAlign: 'center' }}>
-          <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, fontFamily: 'sans-serif' }}>
-            부고온(BugoON) 모바일 의례문서 정식 서식
-          </p>
-        </div>
-      </div>
-    </div>
+      {/* 서식 HTML을 iframe으로 렌더링 (있는 그대로 출력) */}
+      <iframe
+        className="doc-frame"
+        srcDoc={htmlContent}
+        style={{
+          width: '100%',
+          height: '100dvh',
+          border: 'none',
+          display: 'block',
+          paddingBottom: '80px',
+        }}
+        title="의례 서식 문서"
+      />
+    </>
   );
 }

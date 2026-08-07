@@ -776,15 +776,12 @@ export default function RitualDetailPage() {
   };
 
   // A4 PDF 인쇄 (명조체 바탕 강제화 및 종교 SVG 포함)
-  const handlePrint = () => {
+  // 인쇄용 HTML 문자열 생성 (위패/축문 공용)
+  const generatePrintHtml = (): string => {
     if (activeTab === 'chukmun') {
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) return;
-
       const isHanja = chukmunTextType === 'hanja' && religion !== 'christian' && religion !== 'catholic';
       const activeLines = isHanja ? chukmunResult.lines : chukmunResult.koreanLines;
 
-      // 한문 모드: 각 줄과 그에 대응하는 한글 음독을 개별 세로 열로 병기 렌더링 (우측 -> 좌측 순서)
       let hanjaColumnsHtml = '';
       if (isHanja) {
         hanjaColumnsHtml = activeLines.map((line, cIdx) => {
@@ -811,7 +808,7 @@ export default function RitualDetailPage() {
         }).join('');
       }
 
-      printWindow.document.write(`
+      return `
         <!DOCTYPE html>
         <html><head><title>축문 - 故 ${deceasedName}</title>
         <style>
@@ -887,17 +884,14 @@ export default function RitualDetailPage() {
               : activeLines.map(line => `<div class="line">${line}</div>`).join('')
             }
           </div>
-          <script>window.onload = function() { window.print(); }</script>
         </body></html>
-      `);
-      printWindow.document.close();
-      return;
+      `;
     }
 
+    // 위패 HTML 생성
     const isWipae = activeTab === 'wipae';
     const columns = buildTabletColumns(isWipae);
     
-    // 규격별 가로/세로 cm 계산 (지방/위패 공용)
     let widthCm = 8.7;
     let heightCm = 24.8;
 
@@ -912,16 +906,10 @@ export default function RitualDetailPage() {
       heightCm = 14.0;
     }
 
-    // 종교별 상단 마크 SVG
     const religionSvgStr = RELIGION_SVGS[religion] || '';
-
-    // 선택된 무늬 스킨의 인쇄용 SVG 취득 (1cm = 10px 비율로 가상 뷰박스 생성)
     const borderSvgHtml = getBorderSvgString(widthCm * 10, heightCm * 10, jibangSize === 'honbaek' ? 'none' : borderSkin);
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
+    return `
       <!DOCTYPE html>
       <html><head><title>${isWipae ? '위패' : '지방'} - 故 ${deceasedName}</title>
       <style>
@@ -940,7 +928,6 @@ export default function RitualDetailPage() {
           align-items: stretch;
           justify-content: center;
         }
-        /* 절취선 */
         .cutline {
           position: absolute;
           top: -4mm; left: -4mm; right: -4mm; bottom: -4mm;
@@ -953,7 +940,6 @@ export default function RitualDetailPage() {
           font-size: 9px; color: #aaa; font-family: sans-serif;
           white-space: nowrap;
         }
-        /* 지방/위패 본체 — 선택한 테두리 SVG 스킨 동적 적용 */
         .paper {
           width: 100%; height: 100%;
           position: relative;
@@ -1063,9 +1049,17 @@ export default function RitualDetailPage() {
             </div>
           </div>
         </div>
-        <script>window.onload = function() { window.print(); }</script>
       </body></html>
-    `);
+    `;
+  };
+
+  const handlePrint = () => {
+    const html = generatePrintHtml();
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    // 자동 인쇄 스크립트 삽입
+    const htmlWithPrint = html.replace('</body>', '<script>window.onload = function() { window.print(); }</script></body>');
+    printWindow.document.write(htmlWithPrint);
     printWindow.document.close();
   };
 
@@ -1073,16 +1067,34 @@ export default function RitualDetailPage() {
     setIsSendConfirmModalOpen(true);
   };
 
-  const handleConfirmSend = () => {
+  const handleConfirmSend = async () => {
     setIsSendConfirmModalOpen(false);
     const targetPhone = userPhone.replace(/[^0-9]/g, '');
     const formattedPhone = userPhone.trim() || '담당자 번호';
     const docType = activeTab === 'wipae' ? '위패' : '축문';
-    const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${bugoNumber || ''}?tab=${activeTab}`;
-    const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서 생성이 완료되었습니다.\n\n▶ A4 규격 인쇄 및 PDF 저장 바로가기:\n${shareUrl}`;
-    
-    // 네이티브/모바일 SMS 문자 발송 앱 이동
-    window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
+
+    // 현재 세팅된 인쇄용 HTML을 Supabase에 저장
+    const printHtml = generatePrintHtml();
+    try {
+      const { data, error } = await supabase
+        .from('ritual_shares')
+        .insert({ bugo_id: bugoNumber, tab_type: activeTab, html_content: printHtml })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+
+      const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${data.id}`;
+      const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서가 준비되었습니다.\n\n▶ 인쇄하기 (A4):\n${shareUrl}`;
+
+      window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
+    } catch (err) {
+      console.error('ritual_shares 저장 실패:', err);
+      // 저장 실패 시 기존 방식으로 fallback
+      const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/ritual/view/${bugoNumber || ''}?tab=${activeTab}`;
+      const smsBody = `[부고온] 故 ${deceasedName || '고인'} 님의 ${docType} 문서가 준비되었습니다.\n\n▶ 인쇄하기 (A4):\n${shareUrl}`;
+      window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(smsBody)}`;
+    }
 
     setToastMessage(`${formattedPhone} 번호로 문자메시지 전송이 완료되었습니다.`);
     setTimeout(() => {
