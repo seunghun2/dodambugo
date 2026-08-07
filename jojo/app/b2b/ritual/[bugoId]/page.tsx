@@ -1104,15 +1104,41 @@ export default function RitualDetailPage() {
         </header>
 
         {/* 탭 바 */}
-        <div className={styles.tabBar}>
+        <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', margin: '0 20px', gap: '0', backgroundColor: '#ffffff' }}>
           <button
-            className={`${styles.tab} ${activeTab === 'wipae' ? styles.tabActive : ''}`}
+            type="button"
+            style={{
+              flex: 1,
+              padding: '12px 0',
+              textAlign: 'center',
+              fontSize: '16px',
+              fontWeight: activeTab === 'wipae' ? '700' : '500',
+              color: activeTab === 'wipae' ? '#111827' : '#6b7280',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'wipae' ? '3px solid #166534' : '3px solid transparent',
+              cursor: 'pointer',
+              marginBottom: '-2px'
+            }}
             onClick={() => setActiveTab('wipae')}
           >
             위패
           </button>
           <button
-            className={`${styles.tab} ${activeTab === 'chukmun' ? styles.tabActive : ''}`}
+            type="button"
+            style={{
+              flex: 1,
+              padding: '12px 0',
+              textAlign: 'center',
+              fontSize: '16px',
+              fontWeight: activeTab === 'chukmun' ? '700' : '500',
+              color: activeTab === 'chukmun' ? '#111827' : '#6b7280',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'chukmun' ? '3px solid #166534' : '3px solid transparent',
+              cursor: 'pointer',
+              marginBottom: '-2px'
+            }}
             onClick={() => setActiveTab('chukmun')}
           >
             축문
