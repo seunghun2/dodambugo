@@ -213,6 +213,7 @@ export function translateHanjaToHangul(text: string): string {
     '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무', '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
     '丑': '축', '寅': '인', '卯': '묘', '辰': '진', '巳': '사', '午': '오', '申': '신', '酉': '유', '戌': '술', '亥': '해',
     '一': '일', '二': '이', '三': '삼', '四': '사', '五': '오', '六': '육', '七': '칠', '八': '팔', '九': '구', '十': '십',
+    '1': '일', '2': '이', '3': '삼', '4': '사', '5': '오', '6': '육', '7': '칠', '8': '팔', '9': '구', '0': '영',
     '年': '년', '月': '월', '日': '일', '初': '초', '正': '정', '返': '반', '來': '래', '虞': '우', '慰': '위'
   };
   return text.split('').map(char => dict[char] || char).join('');
@@ -523,9 +524,6 @@ export function generateChukmun(input: ChukmunInput): ChukmunResult {
   }
 
   const readingLines = lines.map(line => {
-    if (line === dateLineHan) {
-      return dateLineReading;
-    }
     return translateHanjaToHangul(line);
   });
 

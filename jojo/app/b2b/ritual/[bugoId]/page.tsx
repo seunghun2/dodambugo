@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { generateJibang, RELATIONSHIP_TITLE } from '@/lib/ritual/jibang';
-import { generateChukmun } from '@/lib/ritual/chukmun';
+import { generateChukmun, translateHanjaToHangul } from '@/lib/ritual/chukmun';
 import { generateWipae } from '@/lib/ritual/wipae';
 import { getYearGanji, getMonthGanji, getDayGanji } from '@/lib/ritual/ganji';
 import CalendarPicker from '@/app/b2b/create/sections/CalendarPicker';
@@ -784,21 +784,19 @@ export default function RitualDetailPage() {
 
       let hanjaColumnsHtml = '';
       if (isHanja) {
-        hanjaColumnsHtml = activeLines.map((line, cIdx) => {
-          const readingLine = chukmunResult.readingLines?.[cIdx] || '';
+        hanjaColumnsHtml = activeLines.map((line) => {
           const lineChars = line.split('');
-          const readingChars = readingLine.split('');
           
-          const pairsHtml = lineChars.map((c, chIdx) => {
-            const rc = readingChars[chIdx] || '';
+          const pairsHtml = lineChars.map((c) => {
             const isSpace = c === ' ';
-            
             if (isSpace) {
               return `<div class="char-pair space-row"></div>`;
             }
+            const rc = translateHanjaToHangul(c);
+            const isHangulOrSelf = rc === c;
             return `
               <div class="char-pair">
-                <span class="reading-char">${rc}</span>
+                <span class="reading-char">${isHangulOrSelf ? '' : rc}</span>
                 <span class="hanja-char">${c}</span>
               </div>
             `;
@@ -812,7 +810,7 @@ export default function RitualDetailPage() {
         <!DOCTYPE html>
         <html><head><title>축문 - 故 ${deceasedName}</title>
         <style>
-          @page { size: A4 portrait; margin: 20mm; }
+          @page { size: A4 portrait; margin: 25mm 20mm; }
           html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
           body { 
             font-family: 'Batang', 'Nanum Myeongjo', 'Gungsuh', 'Georgia', serif; 
@@ -820,9 +818,12 @@ export default function RitualDetailPage() {
             display: flex;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
           }
           .content { 
             display: flex;
+            padding-top: 30px;
+            box-sizing: border-box;
             ${isHanja ? `
               flex-direction: row-reverse;
               justify-content: center;

@@ -29,12 +29,13 @@ export default function RitualViewPage({ params }: PageProps) {
           return;
         }
 
-        // 방안 1: 화면에서는 A4 서식 원본 전체를 모바일 기기 화면 폭에 맞춰 비율대로 스마트 축소 (Scale)
-        // 인쇄(@media print) 시에는 축소를 해제하여 100% 원본 A4 규격 그대로 출력
-        const viewStyle = `
+        const rawHtml = data.html_content;
+
+        // 화면 뷰어 및 인쇄 시 상단 여백(패딩) 보정 스타일
+        const injectedStyles = `
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <style>
-            /* 화면 (Screen) 모드: 슬레이트 배경 및 스마트폰 화면 비율 축소 */
+            /* 화면(Screen) 모드: 스마트폰 해상도에 맞춘 퍼센트(zoom) 시각적 축소 */
             @media screen {
               html, body {
                 background-color: #f1f5f9 !important;
@@ -42,72 +43,58 @@ export default function RitualViewPage({ params }: PageProps) {
                 padding: 0 !important;
                 width: 100vw !important;
                 min-height: 100vh !important;
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: flex-start !important;
-                overflow-x: hidden !important;
                 box-sizing: border-box !important;
+                overflow-x: hidden !important;
               }
-
-              /* A4 서식 원본 컨테이너 감싸기 */
-              .a4-scale-wrapper {
-                margin-top: 16px !important;
-                margin-bottom: 90px !important;
-                transform-origin: top center !important;
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
-                background-color: #ffffff !important;
-                border-radius: 4px !important;
+              body {
+                padding-top: 30px !important;
+                padding-bottom: 120px !important;
+              }
+              .content {
+                padding-top: 40px !important;
+              }
+              @media (max-width: 768px) {
+                body > div:not(#print-btn-bar),
+                body > .content,
+                body > .container {
+                  zoom: 0.48;
+                  -webkit-text-size-adjust: 100%;
+                }
+              }
+              @media (max-width: 480px) {
+                body > div:not(#print-btn-bar),
+                body > .content,
+                body > .container {
+                  zoom: 0.42;
+                  -webkit-text-size-adjust: 100%;
+                }
               }
             }
 
-            /* 인쇄 (@media print) 모드: 100% 원본 A4 출력 */
+            /* 인쇄 (@media print) 모드: A4 1페이지 100% 동일 출력 및 상단 패딩 보정 */
             @media print {
+              @page { size: A4 portrait; margin: 25mm 20mm !important; }
               html, body {
                 background-color: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                display: block !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                overflow: hidden !important;
+                zoom: 1 !important;
               }
-              .a4-scale-wrapper {
-                transform: none !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
+              .content {
+                padding-top: 35mm !important;
+                box-sizing: border-box !important;
+              }
+              body > div, body > .content, body > .container {
+                zoom: 1 !important;
               }
               #print-btn-bar { 
                 display: none !important; 
               }
             }
           </style>
-          <script>
-            // 모바일 화면 폭에 맞춰 A4 서식을 비율대로 자동 축소하는 스크립트
-            function autoScaleA4() {
-              const wrapper = document.querySelector('.a4-scale-wrapper');
-              if (!wrapper) return;
-              const screenWidth = window.innerWidth;
-              // A4 화면 렌더링 기준 너비 (800px)
-              const baseWidth = 800;
-              if (screenWidth < baseWidth) {
-                const targetWidth = screenWidth - 32; // 좌우 여백 16px씩
-                const scale = targetWidth / baseWidth;
-                wrapper.style.transform = 'scale(' + scale + ')';
-                // scale로 줄어들면서 생긴 아래 여백 보정
-                const targetHeight = wrapper.offsetHeight * scale;
-                wrapper.parentElement.style.height = (targetHeight + 110) + 'px';
-              } else {
-                wrapper.style.transform = 'none';
-                wrapper.parentElement.style.height = 'auto';
-              }
-            }
-            window.addEventListener('resize', autoScaleA4);
-            window.addEventListener('load', autoScaleA4);
-            setTimeout(autoScaleA4, 100);
-          </script>
         `;
 
         const printBtnHtml = `
@@ -116,7 +103,7 @@ export default function RitualViewPage({ params }: PageProps) {
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
             border-top: 1px solid #e2e8f0;
             padding: 14px 20px; display: flex; justify-content: center;
-            box-shadow: 0 -4px 16px rgba(0,0,0,0.06); font-family: sans-serif;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.08); font-family: sans-serif;
           ">
             <button onclick="window.print()" style="
               width: 100%; max-width: 440px; padding: 16px 0;
@@ -128,19 +115,8 @@ export default function RitualViewPage({ params }: PageProps) {
           </div>
         `;
 
-        // 원본 HTML 내용에 스케일 래퍼(.a4-scale-wrapper) 적용
-        let processedHtml = data.html_content;
-        
-        // body 태그 내의 콘텐츠를 .a4-scale-wrapper 로 감싸기
-        const bodyContentMatch = processedHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-        if (bodyContentMatch && bodyContentMatch[1]) {
-          const bodyInner = bodyContentMatch[1];
-          const wrappedBody = `<body><div style="width: 100%; display: flex; justify-content: center;"><div class="a4-scale-wrapper" style="width: 800px; min-height: 1000px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; box-sizing: border-box; padding: 40px 20px;">${bodyInner}</div></div></body>`;
-          processedHtml = processedHtml.replace(/<body[^>]*>[\s\S]*<\/body>/i, wrappedBody);
-        }
-
-        const fullHtml = processedHtml
-          .replace('</head>', viewStyle + '</head>')
+        const fullHtml = rawHtml
+          .replace('</head>', injectedStyles + '</head>')
           .replace('</body>', printBtnHtml + '</body>');
 
         document.open();
