@@ -15,14 +15,15 @@ export function useSwipeBack() {
   const isSwiping = useRef(false);
 
   useEffect(() => {
-    // 메인 탭 페이지에서는 뒤로갈 곳이 없으므로 스와이프 비활성화
-    const noSwipePaths = ['/b2b/dashboard', '/b2b/login', '/b2b'];
-    if (noSwipePaths.includes(pathname)) return;
+    // 메인 루트/로그인 페이지에서는 뒤로가기 스와이프 비활성화
+    const isNoSwipe = pathname === '/b2b' || pathname === '/b2b/' || pathname === '/b2b/dashboard' || pathname === '/b2b/login';
+    if (isNoSwipe) return;
 
-    // 터치 시작: 왼쪽 가장자리(30px 이내)에서만 스와이프 감지
+    // 터치 시작: 화면 좌측 80px 이내 (또는 화면 너비의 20%) 영역에서 감지
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
-      if (touch.clientX > 30) return;
+      const maxEdge = Math.min(window.innerWidth * 0.25, 80);
+      if (touch.clientX > maxEdge) return;
 
       startX.current = touch.clientX;
       startY.current = touch.clientY;
@@ -36,8 +37,8 @@ export function useSwipeBack() {
       const dx = touch.clientX - startX.current;
       const dy = touch.clientY - startY.current;
 
-      // 수평 이동 시 브라우저 기본 동작 방지
-      if (dx > 20 && dx > Math.abs(dy) * 1.3) {
+      // 우측 수평 이동 시 브라우저 기본 이동 및 오버스크롤 방지
+      if (dx > 15 && dx > Math.abs(dy)) {
         if (e.cancelable) e.preventDefault();
       }
     };
@@ -49,8 +50,8 @@ export function useSwipeBack() {
       const dx = touch.clientX - startX.current;
       const dy = touch.clientY - startY.current;
 
-      // 오른쪽으로 60px 이상 밀었을 때 뒤로가기 실행 (화면 꿀렁거림 X)
-      if (dx > 60 && dx > Math.abs(dy) * 1.3) {
+      // 오른쪽으로 40px 이상 밀고 수평 이동이 우세할 때 뒤로가기 실행
+      if (dx > 40 && dx > Math.abs(dy)) {
         router.back();
       }
 
@@ -58,9 +59,10 @@ export function useSwipeBack() {
       isSwiping.current = false;
     };
 
-    // 마우스 테스트 지원
+    // 마우스 테스트 지원 (PC 브라우저 에뮬레이션 시)
     const handleMouseDown = (e: MouseEvent) => {
-      if (e.clientX > 30) return;
+      const maxEdge = Math.min(window.innerWidth * 0.25, 80);
+      if (e.clientX > maxEdge) return;
       startX.current = e.clientX;
       startY.current = e.clientY;
       isSwiping.current = true;
@@ -72,7 +74,7 @@ export function useSwipeBack() {
       const dx = e.clientX - startX.current;
       const dy = e.clientY - startY.current;
 
-      if (dx > 60 && dx > Math.abs(dy) * 1.3) {
+      if (dx > 40 && dx > Math.abs(dy)) {
         router.back();
       }
 
