@@ -79,7 +79,7 @@ export default function B2BCompletePage() {
               accountHolder: m.accountHolder || m.account_holder || '',
               accountNumber: m.accountNumber || m.account_number || '',
               send: m.send !== undefined ? m.send : true,
-              accountDisplay: m.accountDisplay || 'mine',
+              accountDisplay: m.accountDisplay || 'all',
             }));
             setMourners(mapped);
           }
@@ -138,11 +138,34 @@ export default function B2BCompletePage() {
     ));
   };
 
-  // 계좌 노출 옵션 변경
-  const handleDisplayChange = (index: number, val: 'mine' | 'all' | 'none') => {
-    setMourners(prev => prev.map((m, idx) => 
+  // 계좌 노출 옵션 변경 (선택 즉시 DB에 실시간 저장)
+  const handleDisplayChange = async (index: number, val: 'mine' | 'all' | 'none') => {
+    const updatedMourners = mourners.map((m, idx) => 
       idx === index ? { ...m, accountDisplay: val } : m
-    ));
+    );
+    setMourners(updatedMourners);
+
+    try {
+      await supabase
+        .from('bugo')
+        .update({
+          mourners: JSON.stringify(updatedMourners.map(m => ({
+            relationship: m.relationship,
+            name: m.name,
+            contact: m.contact,
+            bank: m.bank,
+            accountHolder: m.accountHolder,
+            accountNumber: m.accountNumber,
+            send: m.send,
+            accountDisplay: m.accountDisplay
+          })))
+        })
+        .eq('bugo_number', params.bugoNumber);
+      
+      showToast('계좌 노출 설정이 저장되었습니다.');
+    } catch (err) {
+      console.error('계좌 노출 자동 저장 실패:', err);
+    }
   };
 
   // 발송 실행 및 DB 저장
