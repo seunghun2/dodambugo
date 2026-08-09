@@ -25,34 +25,16 @@ export async function GET(
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
 
-            // source 컬럼으로 조회 시도, PostgREST 캐시 문제 시 moid 기반 fallback
-            let b2bOrders: any[] = [];
-            try {
-                const { data } = await supabase
-                    .from('condolence_orders')
-                    .select('*')
-                    .eq('source', 'b2b')
-                    .order('id', { ascending: true });
-                b2bOrders = data || [];
-            } catch {
-                // source 컬럼 캐시 미반영 시 moid BCOND_ 기반으로 fallback
-                const { data } = await supabase
-                    .from('condolence_orders')
-                    .select('*')
-                    .like('moid', 'BCOND_%')
-                    .order('id', { ascending: true });
-                b2bOrders = data || [];
-            }
+            // moid가 BCOND_로 시작하는 주문 = B2B 부의금
+            const { data: allOrders } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .order('id', { ascending: true });
 
-            // source 쿼리가 빈 결과면 moid fallback도 시도
-            if (b2bOrders.length === 0) {
-                const { data } = await supabase
-                    .from('condolence_orders')
-                    .select('*')
-                    .like('moid', 'BCOND_%')
-                    .order('id', { ascending: true });
-                b2bOrders = data || [];
-            }
+            // JS에서 B2B 필터링 (PostgREST 캐시 문제 완전 회피)
+            const b2bOrders = (allOrders || []).filter(
+                (o: any) => o.moid?.startsWith('BCOND_') || o.source === 'b2b'
+            );
 
             const targetOrder = b2bOrders[doNum - 1];
             if (!targetOrder) {
