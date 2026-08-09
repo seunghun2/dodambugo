@@ -1113,16 +1113,21 @@ ${url}
                                             });
                                         }
                                     });
-                                } else if (bugo.account_info && Array.isArray(bugo.account_info)) {
-                                    // 하위 호환용 (옛날 부고장)
-                                    bugo.account_info.forEach((acc, idx) => {
-                                        if (acc.bank && acc.number) {
+                                if (allAccounts.length === 0 && bugo.account_info) {
+                                    let accArr: any[] = [];
+                                    if (Array.isArray(bugo.account_info)) {
+                                        accArr = bugo.account_info;
+                                    } else if (typeof bugo.account_info === 'string') {
+                                        try { accArr = JSON.parse(bugo.account_info); } catch (e) {}
+                                    }
+                                    accArr.forEach((acc: any, idx: number) => {
+                                        if (acc.bank && (acc.number || acc.accountNumber)) {
                                             allAccounts.push({
                                                 bank: acc.bank,
-                                                holder: acc.holder || bugo.mourner_name || '',
-                                                number: acc.number,
-                                                relationship: bugo.relationship || '상주',
-                                                name: bugo.mourner_name || '',
+                                                holder: acc.holder || acc.accountHolder || acc.account_holder || bugo.mourner_name || '',
+                                                number: acc.number || acc.accountNumber,
+                                                relationship: acc.relationship || bugo.relationship || '상주',
+                                                name: acc.name || bugo.mourner_name || '',
                                                 mournerIndex: idx
                                             });
                                         }

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// ISR: 60초마다 캐시 갱신 (동시 접속 시 DB 부하 방지)
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
