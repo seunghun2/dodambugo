@@ -654,13 +654,26 @@ export async function POST(request: NextRequest) {
                     // B2B 부의금이면 DO 순번 계산 (DO000001, DO000002...)
                     if (moid.startsWith('BCOND_') && insertedOrder?.id) {
                         try {
-                            const { count } = await supabase
+                            let doCount = 0;
+                            // source 컬럼으로 시도
+                            const { count, error: countErr } = await supabase
                                 .from('condolence_orders')
                                 .select('id', { count: 'exact', head: true })
                                 .eq('source', 'b2b')
                                 .lte('id', insertedOrder.id);
-                            if (count && count > 0) {
-                                condolenceOrderNumber = 'DO' + String(count).padStart(6, '0');
+                            if (!countErr && count && count > 0) {
+                                doCount = count;
+                            } else {
+                                // fallback: moid BCOND_ 패턴
+                                const { count: moidCount } = await supabase
+                                    .from('condolence_orders')
+                                    .select('id', { count: 'exact', head: true })
+                                    .like('moid', 'BCOND_%')
+                                    .lte('id', insertedOrder.id);
+                                doCount = moidCount || 0;
+                            }
+                            if (doCount > 0) {
+                                condolenceOrderNumber = 'DO' + String(doCount).padStart(6, '0');
                             }
                         } catch (e) {
                             // DO 순번 계산 실패해도 결제 자체는 정상 처리

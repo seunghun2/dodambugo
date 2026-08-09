@@ -18,22 +18,43 @@ export async function GET(
     }
 
     try {
-        let query = supabase.from('condolence_orders').select('*');
-
         if (orderNumber.startsWith('DO')) {
             // B2B DO 주문번호 → B2B 순번으로 조회
             const doNum = parseInt(orderNumber.replace('DO', ''), 10);
             if (isNaN(doNum) || doNum < 1) {
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
-            // B2B 주문만 id 오름차순으로 가져와서 N번째 찾기
-            const { data: b2bOrders } = await supabase
-                .from('condolence_orders')
-                .select('*')
-                .eq('source', 'b2b')
-                .order('id', { ascending: true });
 
-            const targetOrder = (b2bOrders || [])[doNum - 1];
+            // source 컬럼으로 조회 시도, PostgREST 캐시 문제 시 moid 기반 fallback
+            let b2bOrders: any[] = [];
+            try {
+                const { data } = await supabase
+                    .from('condolence_orders')
+                    .select('*')
+                    .eq('source', 'b2b')
+                    .order('id', { ascending: true });
+                b2bOrders = data || [];
+            } catch {
+                // source 컬럼 캐시 미반영 시 moid BCOND_ 기반으로 fallback
+                const { data } = await supabase
+                    .from('condolence_orders')
+                    .select('*')
+                    .like('moid', 'BCOND_%')
+                    .order('id', { ascending: true });
+                b2bOrders = data || [];
+            }
+
+            // source 쿼리가 빈 결과면 moid fallback도 시도
+            if (b2bOrders.length === 0) {
+                const { data } = await supabase
+                    .from('condolence_orders')
+                    .select('*')
+                    .like('moid', 'BCOND_%')
+                    .order('id', { ascending: true });
+                b2bOrders = data || [];
+            }
+
+            const targetOrder = b2bOrders[doNum - 1];
             if (!targetOrder) {
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
@@ -41,22 +62,38 @@ export async function GET(
             return NextResponse.json({ success: true, order: targetOrder });
 
         } else if (orderNumber.startsWith('CO')) {
-            query = query.eq('order_number', orderNumber);
+            const { data, error } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .eq('order_number', orderNumber)
+                .single();
+            if (error || !data) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            return NextResponse.json({ success: true, order: data });
+
         } else if (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_')) {
-            query = query.eq('moid', orderNumber);
+            const { data, error } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .eq('moid', orderNumber)
+                .single();
+            if (error || !data) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            return NextResponse.json({ success: true, order: data });
+
         } else {
-            query = query.eq('id', orderNumber);
+            const { data, error } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .eq('id', orderNumber)
+                .single();
+            if (error || !data) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            return NextResponse.json({ success: true, order: data });
         }
-
-        const { data, error } = await query.single();
-
-        if (error || !data) {
-            console.error('부의금 주문 조회 실패:', error);
-            return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
-        }
-
-        // B2C 주문은 CO 그대로 유지 (마음부고 영향 zero)
-        return NextResponse.json({ success: true, order: data });
     } catch (err) {
         console.error('부의금 주문 조회 오류:', err);
         return NextResponse.json({ error: '서버 오류' }, { status: 500 });

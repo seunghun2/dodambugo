@@ -13,14 +13,25 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // B2B 부의금 주문만 조회 (source = 'b2b')
-        const { data: orders, error: orderError } = await supabase
+        // B2B 부의금 주문만 조회 (source = 'b2b', fallback: moid BCOND_)
+        let orders: any[] = [];
+        const { data: srcData, error: srcError } = await supabase
             .from('condolence_orders')
             .select('*')
             .eq('source', 'b2b')
             .order('created_at', { ascending: false });
 
-        if (orderError) throw orderError;
+        if (!srcError && srcData && srcData.length > 0) {
+            orders = srcData;
+        } else {
+            // source 컬럼 캐시 미반영 시 moid 패턴으로 fallback
+            const { data: moidData } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .like('moid', 'BCOND_%')
+                .order('created_at', { ascending: false });
+            orders = moidData || [];
+        }
 
         // B2B 파트너 정보 매칭용
         const { data: b2bBugos } = await supabase
