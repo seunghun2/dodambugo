@@ -21,9 +21,11 @@ export async function GET(
         // CO로 시작하면 order_number로 검색, 아니면 id로 검색
         let query = supabase.from('condolence_orders').select('*');
 
-        if (orderNumber.startsWith('CO') || orderNumber.startsWith('DO')) {
-            const rawCoNumber = orderNumber.replace(/^DO/, 'CO');
-            query = query.or(`order_number.eq.${orderNumber},order_number.eq.${rawCoNumber},id.eq.30`);
+        if (orderNumber === 'DO000001') {
+            query = query.eq('id', 30);
+        } else if (orderNumber.startsWith('CO') || orderNumber.startsWith('DO')) {
+            const targetOrderNum = orderNumber.startsWith('DO') ? orderNumber.replace(/^DO/, 'CO') : orderNumber;
+            query = query.eq('order_number', targetOrderNum);
         } else if (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_')) {
             query = query.eq('moid', orderNumber);
         } else {
