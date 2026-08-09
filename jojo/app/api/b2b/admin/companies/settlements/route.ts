@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeCompanyData } from '@/lib/b2b-company';
 import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
@@ -54,11 +55,13 @@ export async function GET(request: NextRequest) {
         }
 
         // 상조회사 기본 정보 단독 조회 (사업자번호 확보용 + 대표, 주소, 업태, 종목 추가)
-        const { data: companyData } = await supabase
+        const { data: rawCompany } = await supabase
             .from('b2b_companies')
-            .select('id, name, business_no, wreath_commission_amount, owner_name, address, business_type, business_item')
+            .select('*')
             .eq('id', companyId)
             .single();
+
+        const companyData = rawCompany ? normalizeCompanyData(rawCompany) : null;
 
         if (yearMonth) {
             // 특정 월의 상세 화환 정산서 내역 조회
