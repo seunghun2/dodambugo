@@ -227,8 +227,12 @@ export default function PaymentCallbackPage() {
                     }
 
                     setTimeout(() => {
-                        if (orderNumber && (orderNumber.startsWith('CO') || orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_'))) {
-                            window.location.href = `${pathPrefix}/order/${orderNumber}`;
+                        let finalOrderNum = orderNumber;
+                        if (finalOrderNum && (isB2b || finalOrderNum.startsWith('BCOND_'))) {
+                            finalOrderNum = finalOrderNum.replace(/^CO/, 'DO');
+                        }
+                        if (finalOrderNum && (finalOrderNum.startsWith('CO') || finalOrderNum.startsWith('DO') || finalOrderNum.startsWith('COND_') || finalOrderNum.startsWith('BCOND_'))) {
+                            window.location.href = `${pathPrefix}/order/${finalOrderNum}`;
                         } else {
                             window.location.href = `${pathPrefix}/view/${finalBugoId2}/condolence/complete`;
                         }

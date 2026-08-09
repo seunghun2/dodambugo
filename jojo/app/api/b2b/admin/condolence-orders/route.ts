@@ -55,8 +55,11 @@ export async function GET(request: NextRequest) {
                 ? (b2bUser[0] as any)?.owner_name 
                 : (b2bUser as any)?.owner_name;
 
+            const displayOrderNumber = (o.id === 30) ? 'DO000001' : (o.order_number ? o.order_number.replace(/^CO/, 'DO') : 'DO' + String(o.id).padStart(6, '0'));
+
             return {
                 ...o,
+                order_number: displayOrderNumber,
                 bugo_number: realBugo?.bugo_number || o.bugo_number,
                 company_name: companyName || '일반 B2C',
                 owner_name: ownerName || '-'
