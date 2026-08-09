@@ -48,7 +48,7 @@ const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1', '117.111.6.111', '210.121
 // DB 차단 IP 캐시 (5분마다 갱신)
 let cachedBlockedIPs: string[] = [];
 let lastFetchTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5분
+const CACHE_TTL = 30 * 60 * 1000; // 30분 (서버리스 Cold Start 시 DB 조회 빈도 최소화)
 
 // 부고 대량 열람 감지 (IP → 고유 부고번호 Set)
 const viewTracker: Map<string, Set<string>> = new Map();
@@ -362,6 +362,6 @@ export async function middleware(request: NextRequest) {
 // 모든 페이지에 적용 (API, 정적 파일 제외)
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|css|js|mp3|mp4|ico)$).*)',
   ],
 };

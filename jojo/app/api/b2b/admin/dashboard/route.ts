@@ -14,38 +14,29 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // 1. 파트너 통계
-        const { data: partnersData, error: partnersError } = await supabase
-            .from('b2b_users')
-            .select('status');
+        // 1~3. 파트너/예치금/출금 통계 병렬 조회 (성능 최적화)
+        const [
+            { data: partnersData, error: partnersError },
+            { data: depositsData, error: depositsError },
+            { data: withdrawalsData, error: withdrawalsError },
+        ] = await Promise.all([
+            supabase.from('b2b_users').select('status'),
+            supabase.from('deposits').select('balance'),
+            supabase.from('withdrawal_requests').select('amount, status').eq('status', 'pending'),
+        ]);
 
         if (partnersError) throw partnersError;
+        if (depositsError) throw depositsError;
+        if (withdrawalsError) throw withdrawalsError;
 
         let totalPartners = 0;
         let pendingPartners = 0;
-
         partnersData?.forEach(p => {
             if (p.status === 'approved') totalPartners++;
             else if (p.status === 'pending') pendingPartners++;
         });
 
-        // 2. 총 예치금 잔고 합계
-        const { data: depositsData, error: depositsError } = await supabase
-            .from('deposits')
-            .select('balance');
-
-        if (depositsError) throw depositsError;
-
         const totalDepositBalance = depositsData?.reduce((sum, dep) => sum + (dep.balance || 0), 0) || 0;
-
-        // 3. 출금 대기 통계
-        const { data: withdrawalsData, error: withdrawalsError } = await supabase
-            .from('withdrawal_requests')
-            .select('amount, status')
-            .eq('status', 'pending');
-
-        if (withdrawalsError) throw withdrawalsError;
-
         const pendingWithdrawalsCount = withdrawalsData?.length || 0;
         const pendingWithdrawalsAmount = withdrawalsData?.reduce((sum, req) => sum + (req.amount || 0), 0) || 0;
 

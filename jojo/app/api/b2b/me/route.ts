@@ -74,22 +74,18 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        const { data: deposit, error: depositError } = await supabase
-            .from('deposits')
-            .select('balance')
-            .eq('user_id', userId)
-            .maybeSingle();
+        // 예치금 + 추천 목록 병렬 조회 (성능 최적화)
+        const [
+            { data: deposit, error: depositError },
+            { data: rawReferralList },
+        ] = await Promise.all([
+            supabase.from('deposits').select('balance').eq('user_id', userId).maybeSingle(),
+            supabase.from('b2b_users').select('id, owner_name, company_name, created_at').eq('recommender_id', userId).order('created_at', { ascending: false }),
+        ]);
 
         if (depositError) {
             console.error('Deposits 조회 오류:', depositError);
         }
-
-        // 추천한 회원 수 및 상세 목록 (recommender_id 기준)
-        const { data: rawReferralList } = await supabase
-            .from('b2b_users')
-            .select('id, owner_name, company_name, created_at')
-            .eq('recommender_id', userId)
-            .order('created_at', { ascending: false });
 
         const referralList = (rawReferralList || []).map((refUser: any) => ({
             id: refUser.id,

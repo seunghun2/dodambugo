@@ -94,25 +94,29 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        {/* Pretendard: preload로 렌더링 차단 최소화 */}
+        {/* Nanum Myeongjo: 부고장 본문 폰트 — 논블로킹 로드 */}
         <link
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
-          rel="preload"
-          as="style"
+          href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+          rel="stylesheet"
+          media="print"
+          // @ts-ignore
+          onLoad="this.media='all'"
         />
+        {/* Pretendard: 논블로킹 로드 (화면 먼저 표시 → 폰트 나중 적용) */}
         <link
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
           rel="stylesheet"
+          media="print"
+          // @ts-ignore
+          onLoad="this.media='all'"
         />
-        {/* Material Symbols: preload hint로 빠른 로딩 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-          rel="preload"
-          as="style"
-        />
+        {/* Material Symbols: 논블로킹 로드 */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
+          media="print"
+          // @ts-ignore
+          onLoad="this.media='all'"
         />
         {/* 카카오 SDK */}
         <Script 
@@ -159,8 +163,8 @@ export default function RootLayout({
         <KakaoInit />
         {/* 🔒 개발자 도구 방지 및 F12 차단 (disable-devtool 라이브러리 연동) */}
         <Script
-          src="https://cdn.jsdelivr.net/npm/disable-devtool@latest"
-          strategy="beforeInteractive"
+          src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.8"
+          strategy="lazyOnload"
         />
         <Script
           id="devtools-blocker"

@@ -3,7 +3,7 @@
    Canvas: 360 x 650px (헤더) / 전체 스크롤
    Font: KoPubWorld바탕체 (XD 스펙), NanumMyeongjo (폴백)
 ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+/* Nanum Myeongjo: layout.tsx에서 논블로킹으로 로드됨 — CSS @import 제거 (렌더링 블로킹 방지) */
 
 /* KoPub 바탕체 - 웹폰트 */
 @font-face {

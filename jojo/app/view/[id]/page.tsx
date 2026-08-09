@@ -1,14 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { redirect } from 'next/navigation';
 import ViewContent from './ViewContent';
 import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// 캐시 완전 비활성화 - 매 요청마다 실시간 DB 조회
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ISR: 60초마다 캐시 갱신 (동시 접속 시 DB 부하 방지)
+export const revalidate = 60;
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
@@ -18,8 +17,8 @@ function getSupabase() {
     );
 }
 
-// 부고 조회 (캐시 없음 - 실시간)
-const getBugo = async (id: string) => {
+// 부고 조회 (React cache로 같은 요청 내 중복 쿼리 방지)
+const getBugo = cache(async (id: string) => {
     const supabase = getSupabase();
     const isUUID = id.includes('-') && id.length > 10;
 
@@ -30,7 +29,7 @@ const getBugo = async (id: string) => {
         const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
         return result.data?.[0] || null;
     }
-};
+});
 
 // 상품 조회 (캐시 없음 - 실시간)
 const getProducts = async () => {
@@ -42,17 +41,8 @@ const getProducts = async () => {
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const supabase = getSupabase();
-    const isUUID = id.includes('-') && id.length > 10;
-
-    let data = null;
-    if (isUUID) {
-        const result = await supabase.from('bugo').select('deceased_name, funeral_home').eq('id', id).limit(1);
-        data = result.data?.[0];
-    } else {
-        const result = await supabase.from('bugo').select('deceased_name, funeral_home').eq('bugo_number', id).limit(1);
-        data = result.data?.[0];
-    }
+    // React cache()로 getBugo 재사용 — BugoContentLoader와 동일 요청 내 DB 1번만 조회
+    const data = await getBugo(id);
 
     if (!data) {
         return { title: '부고장을 찾을 수 없습니다 | 마음부고' };

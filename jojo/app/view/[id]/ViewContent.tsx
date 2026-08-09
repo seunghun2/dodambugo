@@ -352,15 +352,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
     }, [selectedFlower, router, params.id]);
 
-    // 🚀 초기 Prefetch: 모든 상품 페이지 미리 로드 (페이지 로드 시)
-    useEffect(() => {
-        if (flowerProducts.length > 0) {
-            flowerProducts.forEach(product => {
-                router.prefetch(`/view/${params.id}/order/${product.sort_order}`);
-                router.prefetch(`/view/${params.id}/flower/${product.sort_order}`);
-            });
-        }
-    }, [flowerProducts, router, params.id]);
+    // 🚀 초기 Prefetch: 전체 상품 일괄 프리페치 제거 (성능 최적화 — 선택한 상품만 프리페치)
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);

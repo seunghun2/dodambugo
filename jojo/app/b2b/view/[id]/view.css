@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+/* Nanum Myeongjo: layout.tsx에서 논블로킹으로 로드됨 — CSS @import 제거 (렌더링 블로킹 방지) */
 
 :root {
     --primary: #3A8F47;
