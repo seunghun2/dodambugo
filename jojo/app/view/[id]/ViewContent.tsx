@@ -1124,7 +1124,12 @@ ${url}
                                 let filteredAccounts = allAccounts;
 
                                 if (mParam) {
-                                    const mournersArr = Array.isArray(bugo.mourners) ? bugo.mourners : [];
+                                     let mournersArr: any[] = [];
+                                     if (Array.isArray(bugo.mourners)) {
+                                         mournersArr = bugo.mourners;
+                                     } else if (typeof bugo.mourners === 'string') {
+                                         try { mournersArr = JSON.parse(bugo.mourners); } catch (e) {}
+                                     }
                                     const isNumeric = /^\d+$/.test(mParam);
                                     let currentMourner = null;
 
