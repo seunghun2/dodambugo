@@ -1197,6 +1197,7 @@ ${url}
                                             });
                                         }
                                     });
+                                }
                                 if (allAccounts.length === 0 && bugo.account_info) {
                                     let accArr: any[] = [];
                                     if (Array.isArray(bugo.account_info)) {
