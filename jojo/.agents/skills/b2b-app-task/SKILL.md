@@ -416,6 +416,22 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   7. **번들 및 패키지 최적화**: `next.config.ts`에 `optimizePackageImports` 적용, AVIF/WebP 이미지 포맷 추가, `package.json` 패키지 정리.
 - **관련 소스코드**: `jojo/app/layout.tsx`, `jojo/app/view/[id]/page.tsx`, `jojo/app/view/[id]/ViewContent.tsx`, `jojo/next.config.ts`, `jojo/middleware.ts`, `jojo/app/api/b2b/admin/dashboard/route.ts`, `jojo/app/api/b2b/me/route.ts`, `jojo/package.json`
 
+### 13-20. 부고온 플러스 B2B 수수료 쉐어 구조 및 모바일 부의금 어드민 정산 로드맵 정립 (2026-08-09)
+- **비즈니스 핵심 맥락 및 철학**:
+  1. **브랜드 정체성**: 기존 '부고온' 앱 실패 타산지석 ➔ 상조회사 제휴/외주 기반의 완결판 **'부고온 플러스'** 재탄생.
+  2. **3대 수익 파이프라인**: ① 근조화환 (정산 연동 100% 완료), ② 모바일 부의금 (어드민 수수료 정산 구축 예정), ③ 답례품 (추후 연동).
+  3. **수수료 및 자산 보호 규칙**:
+     - 프리랜서 파트너: 기본 수당(20,000원) + 추천인 보너스(2,500원) 적립.
+     - 상조 소속 파트너: 상조 세팅값(지도사 수당 + 상조 본사 수수료)으로 동적 전환. 추천인 보너스는 신규 적립 제외.
+     - **상조 탈퇴 시 예치금 100% 안전 보존**: 파트너가 상조 탈퇴 시 기존 지갑 잔액(예: 25,000원)은 본인의 진짜 자산이므로 **1원도 차감 없이 100% 안전 유지**. 탈퇴 이후 새로 파는 건에 대해서만 신규 추천 수당 발생 차단.
+     - **상조회사 수수료 정당화 전략**: 상조 정산 시 PG 원가(3%) + 부가세(VAT 10%) + 플랫폼 최소 운영대행비(2%)를 명목 공제하여 대표님의 플랫폼 실속을 챙기고 상조회사에 정당한 세금/원가 명세서 제공.
+- **차기 개발 4대 상세 태스크 (부의금 어드민 정산)**:
+  - **Task 1**: 상조회사 설정(`b2b_companies`) 부의금 수수료 세팅 칼럼 신설 (`condolence_fee_rate`, `condolence_pg_rate`, `condolence_platform_rate`, `condolence_vat_enabled`)
+  - **Task 2**: 부의금 결제 승인 API(`approve/route.ts` / `webhook`) 정산 분해 로직 (PG 3% / 운영 2% / VAT 10% 차감 후 잔여금 상조회사 정산 적재)
+  - **Task 3**: 어드민 정산서(`b2b/admin/companies/settlements`) 화환+부의금 탭 통합 및 CSV/PDF 정산 명세서 다운로드 구현
+  - **Task 4**: 상조 탈퇴 처리 시 예치금 잔액 보존 + 추천인 연결고리 정돈
+
+
 
 
 
