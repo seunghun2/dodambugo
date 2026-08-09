@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { 
             name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            gift_commission_amount, gift_member_commission_amount,
             owner_name, address, business_type, business_item,
-            condolence_fee_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
+            condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
         } = body;
 
         if (!name) {
@@ -46,12 +47,15 @@ export async function POST(request: NextRequest) {
             business_no: business_no || '',
             wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
             wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
+            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
+            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
         };
         if (owner_name !== undefined) insertPayload.owner_name = owner_name;
         if (address !== undefined) insertPayload.address = address;
         if (business_type !== undefined) insertPayload.business_type = business_type;
         if (business_item !== undefined) insertPayload.business_item = business_item;
         if (condolence_fee_rate !== undefined) insertPayload.condolence_fee_rate = parseFloat(condolence_fee_rate);
+        if (condolence_company_rate !== undefined) insertPayload.condolence_company_rate = parseFloat(condolence_company_rate);
         if (condolence_pg_rate !== undefined) insertPayload.condolence_pg_rate = parseFloat(condolence_pg_rate);
         if (condolence_platform_rate !== undefined) insertPayload.condolence_platform_rate = parseFloat(condolence_platform_rate);
         if (condolence_vat_enabled !== undefined) insertPayload.condolence_vat_enabled = Boolean(condolence_vat_enabled);
@@ -96,8 +100,9 @@ export async function PUT(request: NextRequest) {
         const body = await request.json();
         const { 
             id, name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            gift_commission_amount, gift_member_commission_amount,
             owner_name, address, business_type, business_item,
-            condolence_fee_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
+            condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
         } = body;
 
         if (!id || !name) {
@@ -109,12 +114,15 @@ export async function PUT(request: NextRequest) {
             business_no: business_no || '',
             wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
             wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
+            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
+            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
         };
         if (owner_name !== undefined) updatePayload.owner_name = owner_name;
         if (address !== undefined) updatePayload.address = address;
         if (business_type !== undefined) updatePayload.business_type = business_type;
         if (business_item !== undefined) updatePayload.business_item = business_item;
         if (condolence_fee_rate !== undefined) updatePayload.condolence_fee_rate = parseFloat(condolence_fee_rate);
+        if (condolence_company_rate !== undefined) updatePayload.condolence_company_rate = parseFloat(condolence_company_rate);
         if (condolence_pg_rate !== undefined) updatePayload.condolence_pg_rate = parseFloat(condolence_pg_rate);
         if (condolence_platform_rate !== undefined) updatePayload.condolence_platform_rate = parseFloat(condolence_platform_rate);
         if (condolence_vat_enabled !== undefined) updatePayload.condolence_vat_enabled = Boolean(condolence_vat_enabled);

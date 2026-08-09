@@ -33,11 +33,15 @@ export async function GET(request: NextRequest) {
             orders = moidData || [];
         }
 
-        // B2B 파트너 정보 매칭용
+        // B2B 파트너 정보 & 상조회사 매칭용
         const { data: b2bBugos } = await supabase
             .from('bugo')
-            .select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name )')
+            .select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name, company_id )')
             .not('b2b_user_id', 'is', null);
+
+        const { data: b2bCompanies } = await supabase
+            .from('b2b_companies')
+            .select('id, name, condolence_company_rate');
 
         // id 오름차순으로 순번 계산 후 최신순으로 재정렬
         const sortedById = [...(orders || [])].sort((a, b) => a.id - b.id);
@@ -53,6 +57,17 @@ export async function GET(request: NextRequest) {
             const ownerName = Array.isArray(b2bUser) 
                 ? (b2bUser[0] as any)?.owner_name 
                 : (b2bUser as any)?.owner_name;
+            const companyId = Array.isArray(b2bUser) 
+                ? (b2bUser[0] as any)?.company_id 
+                : (b2bUser as any)?.company_id;
+
+            const company = (b2bCompanies || []).find(c => c.id === companyId || c.name === companyName);
+            const companyRate = company?.condolence_company_rate ?? 3.3;
+
+            // 상조회사 쉐어 몫 = 부의금 원금 * (상조 쉐어 퍼센트 / 100)
+            const companyShareAmount = Math.round((o.amount || 0) * (companyRate / 100));
+            // 플랫폼 몫 = 총 수수료 - 상조회사 몫 (최소 0원 이상)
+            const platformShareAmount = Math.max(0, (o.fee || 0) - companyShareAmount);
 
             // B2B 주문번호: DO 접두사 (순번 기반)
             const doNum = idToDoNum.get(o.id) || 1;
@@ -63,7 +78,10 @@ export async function GET(request: NextRequest) {
                 order_number: displayOrderNumber,
                 bugo_number: realBugo?.bugo_number || o.bugo_number,
                 company_name: companyName || '알 수 없음',
-                owner_name: ownerName || '-'
+                owner_name: ownerName || '-',
+                condolence_company_rate: companyRate,
+                company_share_amount: companyShareAmount,
+                platform_share_amount: platformShareAmount
             };
         });
 

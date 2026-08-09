@@ -667,9 +667,26 @@ export default function PartnersPage() {
                                     </button>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
-                                    <span style={{ color: '#64748b' }}>회사명</span>
+                                    <span style={{ color: '#64748b' }}>소속 상조회사</span>
                                     <span style={{ fontWeight: '600' }}>{activeVerifyPartner.company_name}</span>
                                 </div>
+                                {(() => {
+                                    const comp = companies.find(c => c.id === activeVerifyPartner.company_id || c.name === activeVerifyPartner.company_name);
+                                    if (!comp) return null;
+                                    return (
+                                        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 12px', margin: '4px 0' }}>
+                                            <div style={{ fontWeight: '700', fontSize: '13px', color: '#166534', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span>📋 소속 상조회사 수수료 & 요율표</span>
+                                                <span>{comp.name}</span>
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#15803d', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                <div>• <strong>부의금 상조 쉐어:</strong> <span style={{ color: '#047857', fontWeight: 'bold' }}>{comp.condolence_company_rate ?? 3.3}%</span></div>
+                                                <div>• <strong>화환 수당 (본사/지도사):</strong> {comp.wreath_commission_amount?.toLocaleString() ?? '10,000'}원 / {comp.wreath_member_commission_amount?.toLocaleString() ?? '10,000'}원</div>
+                                                <div>• <strong>답례품 수당 (본사/지도사):</strong> {comp.gift_commission_amount?.toLocaleString() ?? '5,000'}원 / {comp.gift_member_commission_amount?.toLocaleString() ?? '5,000'}원</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f3f5' }}>
                                     <span style={{ color: '#64748b' }}>본인인증 상태</span>
                                     <span>

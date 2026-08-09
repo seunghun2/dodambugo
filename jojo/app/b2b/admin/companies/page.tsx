@@ -11,6 +11,9 @@ interface Company {
     business_no?: string;
     wreath_commission_amount: number;
     wreath_member_commission_amount?: number;
+    gift_commission_amount?: number;
+    gift_member_commission_amount?: number;
+    condolence_company_rate?: number;
     created_at: string;
     owner_name?: string;
     address?: string;
@@ -33,6 +36,9 @@ export default function CompaniesPage() {
     const [businessNo, setBusinessNo] = useState('');
     const [wreathCommission, setWreathCommission] = useState('10000');
     const [wreathMemberCommission, setWreathMemberCommission] = useState('10000');
+    const [giftCommission, setGiftCommission] = useState('5000');
+    const [giftMemberCommission, setGiftMemberCommission] = useState('5000');
+    const [condolenceCompanyRate, setCondolenceCompanyRate] = useState('3.3');
     const [ownerName, setOwnerName] = useState('');
     const [address, setAddress] = useState('');
     const [businessType, setBusinessType] = useState('');
@@ -79,6 +85,9 @@ export default function CompaniesPage() {
             setBusinessNo(company.business_no || '');
             setWreathCommission(String(company.wreath_commission_amount ?? 10000));
             setWreathMemberCommission(String(company.wreath_member_commission_amount ?? 10000));
+            setGiftCommission(String(company.gift_commission_amount ?? 5000));
+            setGiftMemberCommission(String(company.gift_member_commission_amount ?? 5000));
+            setCondolenceCompanyRate(String(company.condolence_company_rate ?? 3.3));
             setOwnerName(company.owner_name || '');
             setAddress(company.address || '');
             setBusinessType(company.business_type || '');
@@ -88,6 +97,9 @@ export default function CompaniesPage() {
             setBusinessNo('');
             setWreathCommission('10000');
             setWreathMemberCommission('10000');
+            setGiftCommission('5000');
+            setGiftMemberCommission('5000');
+            setCondolenceCompanyRate('3.3');
             setOwnerName('');
             setAddress('');
             setBusinessType('');
@@ -103,6 +115,9 @@ export default function CompaniesPage() {
 
         const amount = parseInt(wreathCommission);
         const memberAmount = parseInt(wreathMemberCommission);
+        const giftAmount = parseInt(giftCommission);
+        const giftMemberAmount = parseInt(giftMemberCommission);
+        const condRate = parseFloat(condolenceCompanyRate);
 
         if (!name.trim()) {
             setError('상조회사명을 입력해주세요.');
@@ -110,6 +125,14 @@ export default function CompaniesPage() {
         }
         if (isNaN(amount) || amount < 0 || isNaN(memberAmount) || memberAmount < 0) {
             setError('정산 수당은 0원 이상의 정수로 입력해주세요.');
+            return;
+        }
+        if (isNaN(giftAmount) || giftAmount < 0 || isNaN(giftMemberAmount) || giftMemberAmount < 0) {
+            setError('답례품 수당은 0원 이상의 정수로 입력해주세요.');
+            return;
+        }
+        if (isNaN(condRate) || condRate < 0) {
+            setError('부의금 상조 쉐어 퍼센트는 0% 이상으로 입력해주세요.');
             return;
         }
 
@@ -124,6 +147,9 @@ export default function CompaniesPage() {
                     business_no: businessNo,
                     wreath_commission_amount: amount,
                     wreath_member_commission_amount: memberAmount,
+                    gift_commission_amount: giftAmount,
+                    gift_member_commission_amount: giftMemberAmount,
+                    condolence_company_rate: condRate,
                     owner_name: ownerName,
                     address,
                     business_type: businessType,
@@ -488,7 +514,7 @@ export default function CompaniesPage() {
                                 </div>
 
                                 <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>소속 지도사(팀원) 분배 수당 *</label>
+                                    <label className={styles.label}>소속 지도사(팀원) 화환 수당 *</label>
                                     <div className={styles.inputWrapper}>
                                         <input
                                             type="number"
@@ -502,6 +528,58 @@ export default function CompaniesPage() {
                                     </div>
                                     <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
                                         화환을 직접 판매한 소속 지도사 지갑에 적립할 수당
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>부의금 상조회사 쉐어 비율 *</label>
+                                    <div className={styles.inputWrapper}>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            className={`${styles.input} ${styles.inputWithUnit}`}
+                                            value={condolenceCompanyRate}
+                                            onChange={(e) => setCondolenceCompanyRate(e.target.value)}
+                                            placeholder="예: 3.3"
+                                            required
+                                        />
+                                        <span className={styles.unit}>%</span>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                        조의금 결제 시 상조회사 본사 몫으로 정산할 쉐어 비율 (%)
+                                    </p>
+                                </div>
+
+                                <div className={styles.formGroup} style={{ flex: 1 }}>
+                                    <label className={styles.label}>답례품 본사 / 지도사 수당 *</label>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                                            <input
+                                                type="number"
+                                                className={`${styles.input} ${styles.inputWithUnit}`}
+                                                value={giftCommission}
+                                                onChange={(e) => setGiftCommission(e.target.value)}
+                                                placeholder="본사: 5000"
+                                                required
+                                            />
+                                            <span className={styles.unit}>원</span>
+                                        </div>
+                                        <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                                            <input
+                                                type="number"
+                                                className={`${styles.input} ${styles.inputWithUnit}`}
+                                                value={giftMemberCommission}
+                                                onChange={(e) => setGiftMemberCommission(e.target.value)}
+                                                placeholder="지도사: 5000"
+                                                required
+                                            />
+                                            <span className={styles.unit}>원</span>
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                        답례품 판매 시 본사 적립금 / 지도사 지갑 적립 수당
                                     </p>
                                 </div>
                             </div>
