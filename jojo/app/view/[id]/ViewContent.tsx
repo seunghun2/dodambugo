@@ -438,10 +438,13 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
 
-            // 초기화 안되어있으면 초기화
-            if (!Kakao.isInitialized()) {
-                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
+            const isBugoonDomain = typeof window !== 'undefined' && window.location.hostname.includes('bugoon');
+            const targetKakaoKey = isBugoonDomain ? '40f451664b3863f70a9537714dddd821' : '5aa868e69d68e913ed9da7c3def45151';
+
+            if (Kakao.isInitialized()) {
+                try { Kakao.cleanup(); } catch (e) {}
             }
+            Kakao.init(targetKakaoKey);
 
             // 날짜/시간 포맷
             const formatKakaoDate = () => {
