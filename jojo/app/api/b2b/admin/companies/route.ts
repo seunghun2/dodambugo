@@ -1,42 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeCompanyData } from '@/lib/b2b-company';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-function packCompanyData(comp: any) {
-    if (!comp) return comp;
-    let owner_name = comp.owner_name || '';
-    let address = comp.address || '';
-    let business_type = comp.business_type || '';
-    let business_item = comp.business_item || '';
-    let wreath_member_commission_amount = comp.wreath_member_commission_amount;
-    let real_business_no = comp.business_no || '';
-
-    if (comp.business_no && comp.business_no.includes('::')) {
-        const parts = comp.business_no.split('::');
-        real_business_no = parts[0] || '';
-        owner_name = owner_name || parts[1] || '';
-        address = address || parts[2] || '';
-        business_type = business_type || parts[3] || '';
-        business_item = business_item || parts[4] || '';
-        if (wreath_member_commission_amount === undefined && parts[5]) {
-            wreath_member_commission_amount = parseInt(parts[5]);
-        }
-    }
-
-    return {
-        ...comp,
-        business_no: real_business_no,
-        owner_name,
-        address,
-        business_type,
-        business_item,
-        wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000,
-    };
-}
 
 // GET: 상조회사 목록 조회
 export async function GET(request: NextRequest) {
@@ -50,7 +19,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        const packedCompanies = (companies || []).map(packCompanyData);
+        const packedCompanies = (companies || []).map(normalizeCompanyData);
 
         return NextResponse.json({ success: true, companies: packedCompanies });
     } catch (err: any) {
@@ -58,11 +27,15 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST: 신규 상조회사 등록 (표준 사업자 정보 필드 추가)
+// POST: 신규 상조회사 등록 (표준 사업자 정보 및 부의금 수수료 칼럼 지원)
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, business_no, wreath_commission_amount, wreath_member_commission_amount, owner_name, address, business_type, business_item } = body;
+        const { 
+            name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            owner_name, address, business_type, business_item,
+            condolence_fee_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
+        } = body;
 
         if (!name) {
             return NextResponse.json({ error: '상조회사명을 입력해주세요.' }, { status: 400 });
@@ -71,13 +44,17 @@ export async function POST(request: NextRequest) {
         const insertPayload: Record<string, any> = {
             name,
             business_no: business_no || '',
-            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
         };
-        if (owner_name) insertPayload.owner_name = owner_name;
-        if (address) insertPayload.address = address;
-        if (business_type) insertPayload.business_type = business_type;
-        if (business_item) insertPayload.business_item = business_item;
+        if (owner_name !== undefined) insertPayload.owner_name = owner_name;
+        if (address !== undefined) insertPayload.address = address;
+        if (business_type !== undefined) insertPayload.business_type = business_type;
+        if (business_item !== undefined) insertPayload.business_item = business_item;
+        if (condolence_fee_rate !== undefined) insertPayload.condolence_fee_rate = parseFloat(condolence_fee_rate);
+        if (condolence_pg_rate !== undefined) insertPayload.condolence_pg_rate = parseFloat(condolence_pg_rate);
+        if (condolence_platform_rate !== undefined) insertPayload.condolence_platform_rate = parseFloat(condolence_platform_rate);
+        if (condolence_vat_enabled !== undefined) insertPayload.condolence_vat_enabled = Boolean(condolence_vat_enabled);
 
         let { data: newCompany, error } = await supabase
             .from('b2b_companies')
@@ -85,9 +62,9 @@ export async function POST(request: NextRequest) {
             .select()
             .single();
 
-        // 칼럼 누락 에러 발생 시 스마트 인코딩 폴백 실행
+        // 칼럼 미생성 구 DB 환경 대비 2중 하위 호환 폴백 실행
         if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 스마트 인코딩 폴백 실행:', error.message);
+            console.warn('⚠️ b2b_companies 레거시 DB 환경 2중 하위호환 폴백 실행:', error.message);
             const encodedBizNo = `${business_no || ''}::${owner_name || ''}::${address || ''}::${business_type || ''}::${business_item || ''}::${wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000}`;
             
             const fbRes = await supabase
@@ -95,7 +72,7 @@ export async function POST(request: NextRequest) {
                 .insert({
                     name,
                     business_no: encodedBizNo,
-                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
                 })
                 .select()
                 .single();
@@ -107,17 +84,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, company: packCompanyData(newCompany) });
+        return NextResponse.json({ success: true, company: normalizeCompanyData(newCompany) });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
 }
 
-// PUT: 상조회사 정보 및 수당 수정 (표준 사업자 정보 필드 추가)
+// PUT: 상조회사 정보 및 수당 수정 (표준 사업자 정보 및 부의금 수수료 칼럼 지원)
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        const { id, name, business_no, wreath_commission_amount, wreath_member_commission_amount, owner_name, address, business_type, business_item } = body;
+        const { 
+            id, name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            owner_name, address, business_type, business_item,
+            condolence_fee_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
+        } = body;
 
         if (!id || !name) {
             return NextResponse.json({ error: 'ID와 상조회사명은 필수 항목입니다.' }, { status: 400 });
@@ -126,13 +107,17 @@ export async function PUT(request: NextRequest) {
         const updatePayload: Record<string, any> = {
             name,
             business_no: business_no || '',
-            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
-            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount) : 10000,
+            wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
         };
         if (owner_name !== undefined) updatePayload.owner_name = owner_name;
         if (address !== undefined) updatePayload.address = address;
         if (business_type !== undefined) updatePayload.business_type = business_type;
         if (business_item !== undefined) updatePayload.business_item = business_item;
+        if (condolence_fee_rate !== undefined) updatePayload.condolence_fee_rate = parseFloat(condolence_fee_rate);
+        if (condolence_pg_rate !== undefined) updatePayload.condolence_pg_rate = parseFloat(condolence_pg_rate);
+        if (condolence_platform_rate !== undefined) updatePayload.condolence_platform_rate = parseFloat(condolence_platform_rate);
+        if (condolence_vat_enabled !== undefined) updatePayload.condolence_vat_enabled = Boolean(condolence_vat_enabled);
 
         let { data: updatedCompany, error } = await supabase
             .from('b2b_companies')
@@ -141,9 +126,9 @@ export async function PUT(request: NextRequest) {
             .select()
             .single();
 
-        // 칼럼 누락 에러 시 스마트 인코딩 폴백 실행
+        // 칼럼 미생성 구 DB 환경 대비 2중 하위 호환 폴백 실행
         if (error && error.message.includes('Could not find')) {
-            console.warn('⚠️ b2b_companies 스키마 칼럼 누락 스마트 인코딩 폴백 실행 (PUT):', error.message);
+            console.warn('⚠️ b2b_companies 레거시 DB 환경 2중 하위호환 폴백 실행 (PUT):', error.message);
             const encodedBizNo = `${business_no || ''}::${owner_name || ''}::${address || ''}::${business_type || ''}::${business_item || ''}::${wreath_member_commission_amount !== undefined ? wreath_member_commission_amount : 10000}`;
 
             const fbRes = await supabase
@@ -151,7 +136,7 @@ export async function PUT(request: NextRequest) {
                 .update({
                     name,
                     business_no: encodedBizNo,
-                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount) : 10000,
+                    wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
                 })
                 .eq('id', id)
                 .select()
@@ -164,7 +149,7 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, company: packCompanyData(updatedCompany) });
+        return NextResponse.json({ success: true, company: normalizeCompanyData(updatedCompany) });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
@@ -200,3 +185,4 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });
     }
 }
+

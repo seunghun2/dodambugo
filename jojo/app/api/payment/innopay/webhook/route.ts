@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendAlimtalk } from '@/lib/solapi';
 import { sendFlowerOrderNotification } from '@/lib/slack';
+import { normalizeCompanyData } from '@/lib/b2b-company';
 
 // Supabase 클라이언트
 const supabase = createClient(
@@ -95,24 +96,15 @@ export async function POST(request: NextRequest) {
                             let companyCommission = 0;
 
                             if (partnerUser?.company_id) {
-                                const { data: companyRecord } = await supabase
+                                const { data: rawCompany } = await supabase
                                     .from('b2b_companies')
                                     .select('*')
                                     .eq('id', partnerUser.company_id)
                                     .single();
 
-                                companyCommission = companyRecord?.wreath_commission_amount !== undefined 
-                                    ? companyRecord.wreath_commission_amount 
-                                    : 10000;
-
-                                let memberComm = companyRecord?.wreath_member_commission_amount;
-                                if ((memberComm === undefined || memberComm === null) && companyRecord?.business_no && companyRecord.business_no.includes('::')) {
-                                    const parts = companyRecord.business_no.split('::');
-                                    if (parts[5]) {
-                                        memberComm = parseInt(parts[5]);
-                                    }
-                                }
-                                rewardAmount = memberComm !== undefined && memberComm !== null ? memberComm : 10000;
+                                const companyRecord = normalizeCompanyData(rawCompany);
+                                companyCommission = companyRecord.wreath_commission_amount;
+                                rewardAmount = companyRecord.wreath_member_commission_amount;
                             } else {
                                 // 개인/프리랜서 파트너: 기본 지도사 수당 (20,000원) 100% 지급
                                 const { data: rewardSetting } = await supabase
