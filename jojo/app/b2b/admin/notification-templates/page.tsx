@@ -126,6 +126,11 @@ export default function NotificationTemplatesPage() {
                 timing: '화환 배송이 완료되면 자동 발송됩니다.',
                 icon: '🌸',
             },
+            flower_delivery_completed: {
+                name: '화환 배송 완료 알림',
+                timing: '화환 배송이 완료되면 자동 발송됩니다.',
+                icon: '🌸',
+            },
             settlement: {
                 name: '정산 완료 안내',
                 timing: '월별 정산금이 계좌로 입금되면 자동 발송됩니다.',

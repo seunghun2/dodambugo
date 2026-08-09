@@ -19,6 +19,7 @@ export type NotificationEventType =
   | 'new_funeral'
   | 'condolence_earned'
   | 'delivery_complete'
+  | 'flower_delivery_completed'
   | 'settlement'
   | 'notice'
   | 'referral_signup'
@@ -150,6 +151,7 @@ export async function sendPartnerNotification(
       'settlement': 'alarm_deposit',
       'new_funeral': 'alarm_deceased',
       'delivery_complete': 'alarm_deceased',
+      'flower_delivery_completed': 'alarm_deceased',
       'funeral_reminder': 'alarm_deceased',
       'notice': 'alarm_notice',
       'signup_approved': 'alarm_notice',
