@@ -45,5 +45,5 @@ export default async function B2BThanksPage({ params }: PageProps) {
         notFound();
     }
 
-    return <ThanksContent bugo={data} bugoId={id} />;
+    return <ThanksContent bugo={data} bugoId={id} isB2bPage={true} />;
 }

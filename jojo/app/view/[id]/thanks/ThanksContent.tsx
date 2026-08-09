@@ -27,6 +27,7 @@ interface BugoData {
 interface ThanksContentProps {
     bugo: BugoData;
     bugoId: string;
+    isB2bPage?: boolean;
 }
 
 // 종교별 심볼 이미지
@@ -105,9 +106,10 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
     }
 };
 
-export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
+export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContentProps) {
     const router = useRouter();
-    const isB2b = useIsB2b();
+    const hookIsB2b = useIsB2b();
+    const isB2b = isB2bPage !== undefined ? isB2bPage : hookIsB2b;
     const pathPrefix = isB2b ? '/b2b' : '';
     // thanks_religion이 저장되어 있으면 그걸 사용, 없으면 기존 religion 사용
     const initialReligion = (bugo as any).thanks_religion || getReligionType(bugo.religion);
