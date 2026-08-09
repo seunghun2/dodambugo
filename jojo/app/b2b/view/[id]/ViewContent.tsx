@@ -263,23 +263,29 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
             })
                 .then(res => res.json())
                 .then(result => {
+                    const mParam = searchParams.get('m');
+                    const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
+
                     if (result.valid) {
                         // 유효한 토큰 → localStorage에 저장
                         localStorage.setItem(storageKey, 'true');
                         setIsOwner(true);
                     }
-                    // 토큰 유효 여부 상관없이 URL 정리
-                    window.history.replaceState({}, '', window.location.pathname);
+                    // 토큰 유효 여부 상관없이 URL 정리 (?m= 파라미터 보존)
+                    window.history.replaceState({}, '', cleanUrl);
                 })
                 .catch(() => {
+                    const mParam = searchParams.get('m');
+                    const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
                     // 에러 시에도 URL 정리
-                    window.history.replaceState({}, '', window.location.pathname);
+                    window.history.replaceState({}, '', cleanUrl);
                 });
         } else if (ownerParam === 'true') {
             // 기존 owner=true 방식 (하위 호환)
             localStorage.setItem(storageKey, 'true');
             setIsOwner(true);
-            const cleanUrl = window.location.pathname;
+            const mParam = searchParams.get('m');
+            const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
             window.history.replaceState({}, '', cleanUrl);
         } else {
             // localStorage에서 확인
@@ -386,7 +392,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
     };
 
-    // 공유용 URL: B2B는 bugoon.maeumbugo.co.kr 도메인 사용 + /b2b/view/ → /view/ 변환
+    // 공유용 URL: B2B는 bugoon.maeumbugo.co.kr 도메인 사용 + /b2b/view/ → /view/ 변환 (+ ?m= 상주 파라미터 유지)
     const getCleanShareUrl = (utmMedium?: string) => {
         // /b2b/view/7799 → /view/7799 로 변환 (조문객은 /view/ 경로로 접근)
         const pathname = window.location.pathname.replace(/^\/b2b\/view\//, '/view/');
@@ -395,10 +401,14 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
             : window.location.hostname.includes('maeumbugo.co.kr')
                 ? `https://bugoon.maeumbugo.co.kr${pathname}`
                 : `${window.location.origin}${pathname}`;
+
+        const mParam = searchParams.get('m');
+        const mQuery = mParam !== null ? `m=${encodeURIComponent(mParam)}` : '';
+
         if (utmMedium) {
-            return `${baseUrl}?utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
+            return `${baseUrl}?${mQuery ? `${mQuery}&` : ''}utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
         }
-        return baseUrl;
+        return mQuery ? `${baseUrl}?${mQuery}` : baseUrl;
     };
     // 공유 횟수 서버 추적
     const trackShare = (method: string) => {
@@ -773,12 +783,59 @@ ${url}
                             )}
                         </div>
                     )}
-                    <p className="header-dynamic-text">
-                        {bugo.death_date ? formatDateShort(bugo.death_date) : ''} 故 {bugo.deceased_name}님께서<br />
-                        별세하셨기에 삼가 알려드립니다.<br />
-                        마음으로 따뜻한 위로 부탁드리며<br />
-                        고인의 명복을 빌어주시길 바랍니다.
-                    </p>
+                    {(() => {
+                        const mParam = searchParams.get('m');
+                        let mArr: any[] = [];
+                        if (Array.isArray(bugo.mourners)) {
+                            mArr = bugo.mourners;
+                        } else if (typeof bugo.mourners === 'string') {
+                            try { mArr = JSON.parse(bugo.mourners); } catch (e) {}
+                        }
+
+                        let currentRel = bugo.relationship || '상주';
+                        let currentName = bugo.mourner_name || '';
+
+                        if (mParam && mArr.length > 0) {
+                            const isNumeric = /^\d+$/.test(mParam);
+                            const target = isNumeric 
+                                ? mArr[parseInt(mParam, 10)] 
+                                : mArr.find((m: any) => m.name === mParam);
+                            if (target && target.name) {
+                                currentRel = target.relationship || currentRel;
+                                currentName = target.name;
+                            }
+                        }
+
+                        // 고인과의 관계 호칭 구하기 ('부친', '모친', '장인', '장모' 등)
+                        const getFormattedRelation = (rel: string, gender: string) => {
+                            if (!rel) return '';
+                            const directDeceasedTerms = [
+                                '부친', '모친', '시부', '시모', '장인', '장모', 
+                                '조부', '조모', '외조부', '외조모', '증조부', '증조모', 
+                                '남편', '아내', '숙부', '숙모', '백부', '백모', 
+                                '고모', '고모부', '이모', '이모부', '삼촌', '외삼촌', 
+                                '시숙', '시동생', '시누이', '처남', '처제', '처형'
+                            ];
+                            if (directDeceasedTerms.includes(rel.trim())) {
+                                return rel.trim();
+                            }
+                            return getDeceasedRelation(rel, gender);
+                        };
+
+                        const relTerm = getFormattedRelation(currentRel, bugo.gender || '남');
+                        const mournerText = currentName 
+                            ? `${currentName}의 ${relTerm ? `${relTerm} ` : ''}` 
+                            : '';
+
+                        return (
+                            <p className="header-dynamic-text">
+                                {mournerText}故 {bugo.deceased_name}님께서<br />
+                                {bugo.death_date ? `${formatDateShort(bugo.death_date)} ` : ''}별세하셨기에 삼가 알려드립니다.<br />
+                                마음으로 따뜻한 위로 부탁드리며<br />
+                                고인의 명복을 빌어주시길 바랍니다.
+                            </p>
+                        );
+                    })()}
                 </div>
             </div>
 
