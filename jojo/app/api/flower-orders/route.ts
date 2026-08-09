@@ -119,11 +119,26 @@ export async function POST(request: NextRequest) {
             insertData.source = 'b2b';
         }
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('flower_orders')
             .insert(insertData)
             .select()
             .single();
+
+        // Supabase 클라우드 PostgREST 스키마 캐시 미갱신 시 자동 폴백 처리
+        if (error && error.message?.includes('schema cache')) {
+            delete insertData.source;
+            const retry = await supabase
+                .from('flower_orders')
+                .insert(insertData)
+                .select()
+                .single();
+            data = retry.data;
+            error = retry.error;
+            if (data?.id && isB2B) {
+                await supabase.from('flower_orders').update({ source: 'b2b' }).eq('id', data.id);
+            }
+        }
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
