@@ -60,7 +60,7 @@ export default function OrderDetailPage() {
         withdrawal: false,
     });
 
-    const isCondolence = orderId?.startsWith('CO');
+    const isCondolence = orderId?.startsWith('CO') || orderId?.startsWith('COND_') || orderId?.startsWith('BCOND_');
 
     useEffect(() => {
         async function fetchOrder() {

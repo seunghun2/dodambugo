@@ -46,13 +46,14 @@ export async function POST(request: NextRequest) {
 
             // DB 업데이트 - 송금 완료
             if (moid) {
+                const rawMoid = moid.replace('CONDTX_', '').replace('BCTX_', '');
                 const { error } = await supabase
                     .from('condolence_orders')
                     .update({
                         status: 'transferred',
                         settled_at: new Date().toISOString(),
                     })
-                    .or(`order_number.eq.${moid},order_number.like.%${moid.replace('CONDTX_', '')}%`);
+                    .or(`order_number.eq.${moid},order_number.like.%${rawMoid}%,moid.like.%${rawMoid}%`);
 
                 if (error) {
                     console.error('❌ DB 업데이트 오류:', error);
@@ -72,12 +73,13 @@ export async function POST(request: NextRequest) {
 
             // DB 업데이트 - 입금 불능
             if (moid) {
+                const rawMoid = moid.replace('CONDTX_', '').replace('BCTX_', '');
                 const { error } = await supabase
                     .from('condolence_orders')
                     .update({
                         status: 'transfer_failed',
                     })
-                    .or(`order_number.eq.${moid},order_number.like.%${moid.replace('CONDTX_', '')}%`);
+                    .or(`order_number.eq.${moid},order_number.like.%${rawMoid}%,moid.like.%${rawMoid}%`);
 
                 if (error) {
                     console.error('❌ DB 업데이트 오류:', error);

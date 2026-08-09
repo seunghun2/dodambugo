@@ -207,8 +207,10 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
         // 수수료 포함 총 결제금액
         const totalAmount = Math.round(selectedAmount * 1.086);
 
-        // 고유 주문번호 생성
-        const moid = `COND_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // 고유 주문번호 생성 (B2B는 BCOND_ 접두사로 PG 구분)
+        const isB2B = typeof window !== 'undefined' && window.location.pathname.startsWith('/b2b');
+        const moidPrefix = isB2B ? 'BCOND_' : 'COND_';
+        const moid = `${moidPrefix}${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         // 결제 정보 sessionStorage에 저장 (콜백에서 사용)
         sessionStorage.setItem(`condolence_payment_${params.id}`, JSON.stringify({

@@ -568,7 +568,8 @@ export async function POST(request: NextRequest) {
 
         // 💰 부의금 결제인 경우 - condolence_orders 테이블에 저장 + 슬랙 알림
         let condolenceOrderNumber = '';
-        if (moid && moid.startsWith('COND_')) {
+        const isCondolenceMoid = moid && (moid.startsWith('COND_') || moid.startsWith('BCOND_'));
+        if (isCondolenceMoid) {
             try {
                 // mallReserved에서 부의금 정보 추출
                 const mallReservedData = approveResult.data?.etc?.mallReserved;
@@ -639,6 +640,7 @@ export async function POST(request: NextRequest) {
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',
                         receipt_url: receiptUrl,
+                        ...(moid.startsWith('BCOND_') ? { source: 'b2b' } : {}),
                     })
                     .select('id, order_number')
                     .single();
@@ -781,7 +783,7 @@ export async function POST(request: NextRequest) {
                             console.error('❌ 지원하지 않는 은행:', condolenceInfo.bankName);
                         } else {
                             const cleanAccNo = (condolenceInfo.accountNo || '').replace(/-/g, '');
-                            const txMoid = `CONDTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                            const txMoid = moid.replace(/^BCOND_/, 'BCTX_').replace(/^COND_/, 'CONDTX_');
                             const now2 = new Date();
                             const reqDt = now2.getFullYear().toString() +
                                 String(now2.getMonth() + 1).padStart(2, '0') +
@@ -922,7 +924,7 @@ export async function POST(request: NextRequest) {
                 amt,
                 receiptUrl,
                 orderNumber: condolenceOrderNumber || orderData?.order_number || moid,
-                paymentType: moid?.startsWith('COND_') ? 'condolence' : 'flower',
+                paymentType: (moid?.startsWith('COND_') || moid?.startsWith('BCOND_')) ? 'condolence' : 'flower',
                 approvedAt: new Date().toISOString(),
             },
         });

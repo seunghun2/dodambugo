@@ -85,8 +85,8 @@ export default function PaymentCallbackPage() {
                 console.error('mallReserved 파싱 오류:', e, mallReserved);
             }
 
-            // moid가 COND_로 시작하면 부의금 결제
-            if (!paymentType && moid && moid.startsWith('COND_')) {
+            // moid가 COND_ 또는 BCOND_(B2B)로 시작하면 부의금 결제
+            if (!paymentType && moid && (moid.startsWith('COND_') || moid.startsWith('BCOND_'))) {
                 paymentType = 'condolence';
             }
 
@@ -186,8 +186,8 @@ export default function PaymentCallbackPage() {
                     }
                 }
 
-                // orderNumber가 COND_로 시작하면 부의금 (최종 폴백)
-                if (!paymentType && orderNumber && orderNumber.startsWith('COND_')) {
+                // orderNumber가 COND_ 또는 BCOND_(B2B)로 시작하면 부의금 (최종 폴백)
+                if (!paymentType && orderNumber && (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_'))) {
                     paymentType = 'condolence';
                 }
 
@@ -227,7 +227,7 @@ export default function PaymentCallbackPage() {
                     }
 
                     setTimeout(() => {
-                        if (orderNumber && orderNumber.startsWith('CO')) {
+                        if (orderNumber && (orderNumber.startsWith('CO') || orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_'))) {
                             window.location.href = `${pathPrefix}/order/${orderNumber}`;
                         } else {
                             window.location.href = `${pathPrefix}/view/${finalBugoId2}/condolence/complete`;

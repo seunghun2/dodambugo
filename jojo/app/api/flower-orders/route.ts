@@ -86,7 +86,10 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase();
         const body = await request.json();
 
-        const orderNumber = `MG${Date.now()}`;
+        // 주문번호 생성 (B2B는 BF 접두사로 PG 구분)
+        const isB2B = body.source === 'b2b';
+        const orderPrefix = isB2B ? 'BF' : 'MG';
+        const orderNumber = `${orderPrefix}${Date.now()}`;
 
         const insertData: Record<string, any> = {
                 bugo_id: body.bugo_id,
@@ -109,6 +112,11 @@ export async function POST(request: NextRequest) {
         // partner_data가 있을 때만 포함 (스키마 캐시 이슈 방지)
         if (body.partner_data) {
             insertData.partner_data = body.partner_data;
+        }
+
+        // B2B source 저장
+        if (isB2B) {
+            insertData.source = 'b2b';
         }
 
         const { data, error } = await supabase

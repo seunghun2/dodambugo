@@ -173,6 +173,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     payment_status: 'pending', // 결제 대기 상태
                     moid: moid, // 주문번호 저장
                     partner_data: orderData.partner_data || null,
+                    ...(typeof window !== 'undefined' && window.location.pathname.startsWith('/b2b') ? { source: 'b2b' } : {}),
                 }),
             });
 
