@@ -106,6 +106,8 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
     }
 };
 
+import { useSwipeTab } from '@/hooks/useSwipeTab';
+
 export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContentProps) {
     const router = useRouter();
     const hookIsB2b = useIsB2b();
@@ -114,6 +116,18 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
     // thanks_religion이 저장되어 있으면 그걸 사용, 없으면 기존 religion 사용
     const initialReligion = (bugo as any).thanks_religion || getReligionType(bugo.religion);
     const [activeTab, setActiveTab] = useState<ReligionType>(initialReligion);
+
+    const religionTabKeys: ReligionType[] = ['general', 'christian', 'catholic', 'buddhist'];
+    useSwipeTab({
+        onPrevTab: () => {
+            const idx = religionTabKeys.indexOf(activeTab);
+            if (idx > 0) handleTabChange(religionTabKeys[idx - 1]);
+        },
+        onNextTab: () => {
+            const idx = religionTabKeys.indexOf(activeTab);
+            if (idx < religionTabKeys.length - 1) handleTabChange(religionTabKeys[idx + 1]);
+        },
+    });
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [customMessages, setCustomMessages] = useState<ThanksMessages>(parseCustomMessages(bugo.thanks_message));

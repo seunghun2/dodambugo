@@ -1,83 +1,92 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+
+interface UseSwipeTabOptions {
+  onPrevTab?: () => void;
+  onNextTab?: () => void;
+  enabled?: boolean;
+}
 
 /**
- * 화면이 흔들리거나 전체 화면이 꿀렁거리며 움직이지 않고,
- * 손가락 좌측 가장자리 스와이프 제스처만 깔끔하게 감지하여 뒤로가는 훅
+ * 인위적인 DOM 트랜스폼/투명도 효과 없이
+ * 손가락 좌우 스와이프 제스처만 깔끔하게 감지하여 탭을 전환하는 가벼운 훅
  */
-export function useSwipeBack() {
-  const router = useRouter();
-  const pathname = usePathname();
+export function useSwipeTab({ onPrevTab, onNextTab, enabled = true }: UseSwipeTabOptions) {
   const startX = useRef(0);
   const startY = useRef(0);
-  const isSwiping = useRef(false);
+  const isSwipingTab = useRef(false);
 
   useEffect(() => {
-    // 메인 탭 페이지에서는 뒤로갈 곳이 없으므로 스와이프 비활성화
-    const noSwipePaths = ['/b2b/dashboard', '/b2b/login', '/b2b'];
-    if (noSwipePaths.includes(pathname)) return;
+    if (!enabled) return;
 
-    // 터치 시작: 왼쪽 가장자리(30px 이내)에서만 스와이프 감지
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
-      if (touch.clientX > 30) return;
+      if (touch.clientX <= 30) return; // 엣지 뒤로가기 양보
 
       startX.current = touch.clientX;
       startY.current = touch.clientY;
-      isSwiping.current = true;
+      isSwipingTab.current = true;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isSwiping.current || startX.current === 0) return;
+      if (!isSwipingTab.current || startX.current === 0) return;
 
       const touch = e.touches[0];
       const dx = touch.clientX - startX.current;
       const dy = touch.clientY - startY.current;
 
-      // 수평 이동 시 브라우저 기본 동작 방지
-      if (dx > 20 && dx > Math.abs(dy) * 1.3) {
+      if (Math.abs(dx) > 25 && Math.abs(dx) > Math.abs(dy) * 1.4) {
         if (e.cancelable) e.preventDefault();
       }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isSwiping.current || startX.current === 0) return;
+      if (!isSwipingTab.current || startX.current === 0) return;
 
       const touch = e.changedTouches[0];
       const dx = touch.clientX - startX.current;
       const dy = touch.clientY - startY.current;
 
-      // 오른쪽으로 60px 이상 밀었을 때 뒤로가기 실행 (화면 꿀렁거림 X)
-      if (dx > 60 && dx > Math.abs(dy) * 1.3) {
-        router.back();
+      // 45px 이상 슥 밀었을 때 깔끔하게 탭 전환
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        if (dx < 0 && onNextTab) {
+          onNextTab();
+        } else if (dx > 0 && onPrevTab) {
+          onPrevTab();
+        }
       }
 
       startX.current = 0;
-      isSwiping.current = false;
+      startY.current = 0;
+      isSwipingTab.current = false;
     };
 
-    // 마우스 테스트 지원
+    // 마우스 드래그 지원 (개발자 도구용)
     const handleMouseDown = (e: MouseEvent) => {
-      if (e.clientX > 30) return;
+      if (e.clientX <= 40) return;
       startX.current = e.clientX;
       startY.current = e.clientY;
-      isSwiping.current = true;
+      isSwipingTab.current = true;
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      if (!isSwiping.current || startX.current === 0) return;
+      if (!isSwipingTab.current || startX.current === 0) return;
 
       const dx = e.clientX - startX.current;
       const dy = e.clientY - startY.current;
 
-      if (dx > 60 && dx > Math.abs(dy) * 1.3) {
-        router.back();
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        if (dx < 0 && onNextTab) {
+          onNextTab();
+        } else if (dx > 0 && onPrevTab) {
+          onPrevTab();
+        }
       }
 
       startX.current = 0;
-      isSwiping.current = false;
+      startY.current = 0;
+      isSwipingTab.current = false;
     };
 
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -93,5 +102,5 @@ export function useSwipeBack() {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [pathname, router]);
+  }, [onPrevTab, onNextTab, enabled]);
 }

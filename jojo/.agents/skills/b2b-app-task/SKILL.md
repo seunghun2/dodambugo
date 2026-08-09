@@ -400,5 +400,12 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   3. **대시보드 감사장 링크 & 카카오 API 키 보완**: B2B 대시보드 [답례문 보내기] 클릭 시 `?select=thanks` 모드가 자동 포함되도록 수정하고, B2B 전용 카카오 앱 키(`40f45166...`)로 자동 분기 처리.
 - **관련 소스코드**: `jojo/app/b2b/view/[id]/thanks/page.tsx`, `jojo/app/view/[id]/thanks/ThanksContent.tsx`, `jojo/app/view/[id]/thanks/thanks.css`, `jojo/app/b2b/dashboard/page.tsx`
 
+### 13-18. B2B 파트너 앱 4대 주요 탭 화면 스와이프 제스처 연동 & 무흔들림 정갈 제스처 고도화 (2026-08-09)
+- **상세 내용**:
+  1. **앱 내 4대 탭 화면 전수 스와이프 연동**: `useSwipeTab.ts` 유틸 훅을 구축하여 ① 1:1 문의(`create` ↔ `list`), ② 의례문서(`wipae` ↔ `chukmun`), ③ 지갑/적립(`reward` ↔ `withdraw`), ④ 감사장/답례문(`general` ↔ `christian` ↔ `catholic` ↔ `buddhist`) 4개 탭 화면 전체에 손가락 좌/우 터치 제스처 연동 완수.
+  2. **인위적인 전체 화면 꿀렁거림 전면 제거**: 인위적인 DOM `transform` 및 `opacity` 널뛰기를 100% 걷어내고, 화면 전체가 단단하고 편안하게 100% 고정된 상태에서 깔끔하게 터치 제스처만 동작하는 정갈한 Clean Fixed Gesture 모드로 최적화.
+- **관련 소스코드**: `jojo/hooks/useSwipeTab.ts`, `jojo/hooks/useSwipeBack.ts`, `jojo/app/b2b/inquiry/page.tsx`, `jojo/app/b2b/ritual/[bugoId]/page.tsx`, `jojo/app/b2b/wallet/page.tsx`, `jojo/app/view/[id]/thanks/ThanksContent.tsx`
+
+
 
 

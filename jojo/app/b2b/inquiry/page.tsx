@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+import { useSwipeTab } from '@/hooks/useSwipeTab';
 import styles from './inquiry.module.css';
 
 interface User {
@@ -29,6 +30,11 @@ export default function B2BInquiryPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
+
+  useSwipeTab({
+    onPrevTab: () => setActiveTab('create'),
+    onNextTab: () => setActiveTab('list'),
+  });
   
   // 문의하기 폼 상태
   const [title, setTitle] = useState('');

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSwipeTab } from '@/hooks/useSwipeTab';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './wallet.module.css';
@@ -106,6 +107,10 @@ export default function WalletPage() {
 
     // 탭 및 필터 상태
     const [activeTab, setActiveTab] = useState<'reward' | 'withdraw'>('reward');
+    useSwipeTab({
+        onPrevTab: () => setActiveTab('reward'),
+        onNextTab: () => setActiveTab('withdraw'),
+    });
     const [rewardFilter, setRewardFilter] = useState<'all' | 'wreath' | 'referral' | 'condolence'>('all');
     const [withdrawSort, setWithdrawSort] = useState<'recent' | 'old'>('recent');
 

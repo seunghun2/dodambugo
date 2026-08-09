@@ -433,6 +433,8 @@ const getBorderSvgString = (w: number, h: number, skin: 'none' | 'scallop' | 'do
   return '';
 };
 
+import { useSwipeTab } from '@/hooks/useSwipeTab';
+
 export default function RitualDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -441,6 +443,11 @@ export default function RitualDetailPage() {
   const [bugo, setBugo] = useState<BugoDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('wipae');
+
+  useSwipeTab({
+    onPrevTab: () => setActiveTab('wipae'),
+    onNextTab: () => setActiveTab('chukmun'),
+  });
 
   // 1. 공통 종교 상태
   const [religion, setReligion] = useState<'general' | 'buddhism' | 'christian' | 'catholic'>('general');
