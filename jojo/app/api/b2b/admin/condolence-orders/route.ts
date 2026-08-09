@@ -20,11 +20,8 @@ export async function GET(request: NextRequest) {
 
         if (bugoError) throw bugoError;
 
-        if (!b2bBugos || b2bBugos.length === 0) {
-            return NextResponse.json({ success: true, orders: [] });
-        }
-
-        const bugoIds = b2bBugos.map(b => String(b.id));
+        const safeBugoList = b2bBugos || [];
+        const bugoIds = safeBugoList.map(b => String(b.id));
         
         const partnerMap = new Map<string, { company_name: string; owner_name: string }>();
         b2bBugos.forEach(b => {
@@ -36,11 +33,15 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        const { data: orders, error: orderError } = await supabase
-            .from('condolence_orders')
-            .select('*')
-            .in('bugo_number', bugoIds)
-            .order('created_at', { ascending: false });
+        let query = supabase.from('condolence_orders').select('*');
+
+        if (bugoIds.length > 0) {
+            query = query.or(`source.eq.b2b,bugo_id.in.(${bugoIds.join(',')})`);
+        } else {
+            query = query.eq('source', 'b2b');
+        }
+
+        const { data: orders, error: orderError } = await query.order('created_at', { ascending: false });
 
         if (orderError) throw orderError;
 
