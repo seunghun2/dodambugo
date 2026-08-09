@@ -189,14 +189,14 @@ export async function POST(request: NextRequest) {
                                 }
                             });
 
-                            // 5. 추천인 보너스 적립 (개인/프리랜서 파트너만, 더좋은라이프 등 상조회사 소속은 추천수당 제외)
+                            // 5. 추천인 보너스 적립 (개인/프리랜서 파트너만, 상조회사 소속 파트너는 추천수당 제외)
                             const { data: partnerInfo } = await supabase
                                 .from('b2b_users')
                                 .select('recommender_id, company_id, company_name, owner_name')
                                 .eq('id', partnerId)
                                 .single();
 
-                            const isSangjoCorporate = partnerInfo?.company_id || (partnerInfo?.company_name && partnerInfo.company_name.includes('더좋은라이프'));
+                            const isSangjoCorporate = Boolean(partnerInfo?.company_id);
                             if (!isSangjoCorporate && partnerInfo?.recommender_id) {
                                 const { data: bonusSetting } = await supabase
                                     .from('b2b_settings')
