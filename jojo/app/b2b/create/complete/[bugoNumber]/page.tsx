@@ -104,6 +104,33 @@ export default function B2BCompletePage() {
     }, 2000);
   };
 
+  // 상주별 개별 부고장 URL 생성
+  const getMournerUrl = (index: number) => {
+    if (typeof window === 'undefined') return '';
+    const hostname = window.location.hostname;
+    const domain = hostname.includes('maeumbugo.co.kr')
+      ? 'https://bugoon.maeumbugo.co.kr'
+      : window.location.origin;
+    return `${domain}/view/${params.bugoNumber}?m=${index}`;
+  };
+
+  // URL 복사
+  const copyUrl = async (url: string, name: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast(`${name}님 부고장 URL이 복사되었습니다.`);
+    } catch {
+      // 폴백
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast(`${name}님 부고장 URL이 복사되었습니다.`);
+    }
+  };
+
   // 발송 체크박스 토글
   const handleToggleSend = (index: number) => {
     setMourners(prev => prev.map((m, idx) => 
@@ -261,6 +288,27 @@ export default function B2BCompletePage() {
           </div>
         ))}
       </div>
+
+      {/* 상주별 개별 부고장 URL 목록 */}
+      {mourners.length > 1 && (
+        <div className={styles.urlSection}>
+          <h3 className={styles.urlSectionTitle}>상주별 부고장 URL</h3>
+          {mourners.map((m, index) => (
+            <div className={styles.urlRow} key={index}>
+              <div className={styles.urlLabel}>
+                <span className={styles.urlRelation}>{m.relationship || '상주'}</span>
+                <span className={styles.urlName}>{m.name}</span>
+              </div>
+              <div className={styles.urlCopyArea}>
+                <span className={styles.urlText}>/view/{params.bugoNumber}?m={index}</span>
+                <button className={styles.btnCopyUrl} onClick={() => copyUrl(getMournerUrl(index), m.name)}>
+                  📋 복사
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 발송 버튼 그룹 */}
       <div className={styles.sendButtonGroup}>
