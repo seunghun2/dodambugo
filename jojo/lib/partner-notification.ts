@@ -43,12 +43,15 @@ function replaceVariables(template: string, variables: Record<string, string>): 
 
   const fallbackPartnerName = variables['파트너명'] || variables['수신자명'] || '파트너';
   const fallbackJoiningName = variables['가입파트너명'] || variables['신규파트너명'] || variables['가입자명'] || '신규 파트너';
+  const fallbackBarinTime = variables['발인시간'] || variables['발인일시'] || variables['발인시각'] || '';
 
   const mergedVars: Record<string, string> = {
     ...variables,
     '파트너명': fallbackPartnerName,
     '가입파트너명': fallbackJoiningName,
     '신규파트너명': fallbackJoiningName,
+    '발인시간': fallbackBarinTime,
+    '발인일시': fallbackBarinTime,
   };
 
   for (const [key, value] of Object.entries(mergedVars)) {

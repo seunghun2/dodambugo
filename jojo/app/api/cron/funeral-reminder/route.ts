@@ -92,6 +92,7 @@ export async function GET() {
                     await sendPartnerNotification(bugo.b2b_user_id, 'funeral_reminder', {
                         고인명: bugo.deceased_name || '',
                         장례식장: bugo.funeral_home || '',
+                        발인시간: bugo.funeral_time || '',
                         발인일시: `${bugo.funeral_date} ${bugo.funeral_time || ''}`.trim(),
                     }, { url: '/b2b/manage', bugo_number: bugo.bugo_number });
                     sent++;

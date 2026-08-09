@@ -46,7 +46,11 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     !pathname.includes('/create') &&        
     !pathname.includes('/order');           
 
-  const isAdmin = pathname && (pathname.startsWith('/b2b/admin') || pathname.startsWith('/b2b/company'));
+  const isAdmin = pathname && (
+    pathname.startsWith('/b2b/admin') || 
+    pathname.startsWith('/b2b/company') ||
+    pathname.startsWith('/admin')
+  );
 
   // 조문객 대상 페이지 (부고장, 주문, 리뷰 등)는 래퍼 스타일 최소화
   const isViewerPage = pathname && (
