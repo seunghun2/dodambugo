@@ -640,7 +640,6 @@ export async function POST(request: NextRequest) {
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',
                         receipt_url: receiptUrl,
-                        ...(moid.startsWith('BCOND_') ? { source: 'b2b' } : {}),
                     })
                     .select('id, order_number')
                     .single();
@@ -654,29 +653,16 @@ export async function POST(request: NextRequest) {
                     // B2B 부의금이면 DO 순번 계산 (DO000001, DO000002...)
                     if (moid.startsWith('BCOND_') && insertedOrder?.id) {
                         try {
-                            let doCount = 0;
-                            // source 컬럼으로 시도
-                            const { count, error: countErr } = await supabase
+                            const { count } = await supabase
                                 .from('condolence_orders')
                                 .select('id', { count: 'exact', head: true })
-                                .eq('source', 'b2b')
+                                .like('moid', 'BCOND_%')
                                 .lte('id', insertedOrder.id);
-                            if (!countErr && count && count > 0) {
-                                doCount = count;
-                            } else {
-                                // fallback: moid BCOND_ 패턴
-                                const { count: moidCount } = await supabase
-                                    .from('condolence_orders')
-                                    .select('id', { count: 'exact', head: true })
-                                    .like('moid', 'BCOND_%')
-                                    .lte('id', insertedOrder.id);
-                                doCount = moidCount || 0;
-                            }
-                            if (doCount > 0) {
-                                condolenceOrderNumber = 'DO' + String(doCount).padStart(6, '0');
+
+                            if (count && count > 0) {
+                                condolenceOrderNumber = 'DO' + String(count).padStart(6, '0');
                             }
                         } catch (e) {
-                            // DO 순번 계산 실패해도 결제 자체는 정상 처리
                             console.error('DO 순번 계산 오류:', e);
                         }
                     }
@@ -748,7 +734,7 @@ export async function POST(request: NextRequest) {
                         funeral_home: bugoData?.funeral_home || '',
                         bank_name: condolenceInfo.bankName || '',
                         account_no: condolenceInfo.accountNo || '',
-                    }, !!bugoData?.b2b_user_id);
+                    }, !!bugoData?.b2b_user_id || moid.startsWith('BCOND_'));
                     console.log('✅ 부의금 슬랙 알림 발송 완료');
                 } catch (slackErr) {
                     console.error('❌ 부의금 슬랙 알림 실패:', slackErr);
@@ -758,7 +744,7 @@ export async function POST(request: NextRequest) {
                 if (buyerInfo.tel) {
                     try {
                         const buyerPhone = (buyerInfo.tel || '').replace(/-/g, '');
-                        const isB2B = !!bugoData?.b2b_user_id;
+                        const isB2B = !!bugoData?.b2b_user_id || moid.startsWith('BCOND_');
                         await sendAlimtalk(
                             buyerPhone,
                             'KA01TP260213055510356BnS8IHlKvWB',  // 부의금 결제완료 템플릿
@@ -908,7 +894,7 @@ export async function POST(request: NextRequest) {
 
                                     if (mournerPhone) {
                                         const cleanPhone = mournerPhone.replace(/-/g, '');
-                                        const isB2B = !!bugoData?.b2b_user_id;
+                                        const isB2B = !!bugoData?.b2b_user_id || moid.startsWith('BCOND_');
                                         await sendAlimtalk(
                                             cleanPhone,
                                             'KA01TP260213060236557haj4AEvPgIn',  // 부의금 전달 완료 (상주용)
