@@ -79,7 +79,7 @@ export default function B2BCompletePage() {
               accountHolder: m.accountHolder || m.account_holder || '',
               accountNumber: m.accountNumber || m.account_number || '',
               send: m.send !== undefined ? m.send : true,
-              accountDisplay: m.accountDisplay || 'all',
+              accountDisplay: m.accountDisplay || m.account_display || 'all',
             }));
             setMourners(mapped);
           }
@@ -138,7 +138,7 @@ export default function B2BCompletePage() {
     ));
   };
 
-  // 계좌 노출 옵션 변경 (선택 즉시 DB에 실시간 저장)
+  // 계좌 노출 옵션 변경 (선택 즉시 서버 API를 통해 DB에 실시간 저장)
   const handleDisplayChange = async (index: number, val: 'mine' | 'all' | 'none') => {
     const updatedMourners = mourners.map((m, idx) => 
       idx === index ? { ...m, accountDisplay: val } : m
@@ -146,10 +146,12 @@ export default function B2BCompletePage() {
     setMourners(updatedMourners);
 
     try {
-      await supabase
-        .from('bugo')
-        .update({
-          mourners: JSON.stringify(updatedMourners.map(m => ({
+      const res = await fetch('/api/b2b/update-account-display', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bugo_number: params.bugoNumber,
+          mourners: updatedMourners.map(m => ({
             relationship: m.relationship,
             name: m.name,
             contact: m.contact,
@@ -158,11 +160,15 @@ export default function B2BCompletePage() {
             accountNumber: m.accountNumber,
             send: m.send,
             accountDisplay: m.accountDisplay
-          })))
-        })
-        .eq('bugo_number', params.bugoNumber);
-      
-      showToast('계좌 노출 설정이 저장되었습니다.');
+          }))
+        }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast('계좌 노출 설정이 저장되었습니다.');
+      } else {
+        console.error('계좌 노출 저장 오류:', result.error);
+      }
     } catch (err) {
       console.error('계좌 노출 자동 저장 실패:', err);
     }

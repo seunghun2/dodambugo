@@ -913,8 +913,19 @@ ${url}
                 </div>
                 {/* 부고 공유하기 / 부의금 보내기 버튼 - 모든 장례형식에서 표시 */}
                 {(() => {
-                    const hasAccount = (bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
-                        (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber));
+                    // 현재 상주의 계좌 노출 설정 확인 (none이면 부의금보내기 버튼 숨김)
+                    const mParam = searchParams.get('m');
+                    let accountHidden = false;
+                    if (mParam) {
+                        let mArr: any[] = [];
+                        if (Array.isArray(bugo.mourners)) mArr = bugo.mourners;
+                        else if (typeof bugo.mourners === 'string') try { mArr = JSON.parse(bugo.mourners); } catch(e) {}
+                        const idx = /^\d+$/.test(mParam) ? parseInt(mParam, 10) : mArr.findIndex((m: any) => m.name === mParam);
+                        if (idx >= 0 && mArr[idx] && mArr[idx].accountDisplay === 'none') accountHidden = true;
+                    }
+
+                    const hasAccount = !accountHidden && ((bugo.account_info && Array.isArray(bugo.account_info) && bugo.account_info.length > 0) ||
+                        (bugo.mourners && Array.isArray(bugo.mourners) && bugo.mourners.some((m: any) => m.bank && m.accountNumber)));
 
                     if (hasAccount) {
                         return (
@@ -1087,33 +1098,40 @@ ${url}
                         </div>
                         <div className="account-list">
                             {(() => {
-                                const allAccounts: Array<{ bank: string; holder: string; number: string; relationship?: string; name?: string }> = [];
+                                const allAccounts: Array<{ bank: string; holder: string; number: string; relationship?: string; name?: string; mournerIndex: number }> = [];
 
-                                // 대표상주 계좌 (account_info)
-                                if (bugo.account_info && Array.isArray(bugo.account_info)) {
-                                    bugo.account_info.forEach(acc => {
+                                let mournersArr: any[] = [];
+                                if (Array.isArray(bugo.mourners)) {
+                                    mournersArr = bugo.mourners;
+                                } else if (typeof bugo.mourners === 'string') {
+                                    try { mournersArr = JSON.parse(bugo.mourners); } catch (e) {}
+                                }
+
+                                // mourners 목록의 계좌만 단일 출처로 조립 (이중 조립 방지)
+                                if (mournersArr.length > 0) {
+                                    mournersArr.forEach((m: any, idx: number) => {
+                                        if (m.bank && (m.accountNumber || m.number)) {
+                                            allAccounts.push({
+                                                bank: m.bank,
+                                                holder: m.accountHolder || m.account_holder || m.holder || m.name || '',
+                                                number: m.accountNumber || m.number,
+                                                relationship: m.relationship || '',
+                                                name: m.name || '',
+                                                mournerIndex: idx
+                                            });
+                                        }
+                                    });
+                                } else if (bugo.account_info && Array.isArray(bugo.account_info)) {
+                                    // 하위 호환용 (옛날 부고장)
+                                    bugo.account_info.forEach((acc, idx) => {
                                         if (acc.bank && acc.number) {
                                             allAccounts.push({
                                                 bank: acc.bank,
                                                 holder: acc.holder || bugo.mourner_name || '',
                                                 number: acc.number,
                                                 relationship: bugo.relationship || '상주',
-                                                name: bugo.mourner_name || ''
-                                            });
-                                        }
-                                    });
-                                }
-
-                                // 추가 상주들 계좌 (mourners[0] 제외 - 대표상주와 중복 방지)
-                                if (bugo.mourners && Array.isArray(bugo.mourners)) {
-                                    bugo.mourners.slice(1).forEach((m: any) => {
-                                        if (m.bank && m.accountNumber) {
-                                            allAccounts.push({
-                                                bank: m.bank,
-                                                holder: m.accountHolder || m.name || '',
-                                                number: m.accountNumber,
-                                                relationship: m.relationship || '',
-                                                name: m.name || ''
+                                                name: bugo.mourner_name || '',
+                                                mournerIndex: idx
                                             });
                                         }
                                     });
@@ -1124,31 +1142,26 @@ ${url}
                                 let filteredAccounts = allAccounts;
 
                                 if (mParam) {
-                                     let mournersArr: any[] = [];
-                                     if (Array.isArray(bugo.mourners)) {
-                                         mournersArr = bugo.mourners;
-                                     } else if (typeof bugo.mourners === 'string') {
-                                         try { mournersArr = JSON.parse(bugo.mourners); } catch (e) {}
-                                     }
                                     const isNumeric = /^\d+$/.test(mParam);
+                                    let targetIdx = -1;
                                     let currentMourner = null;
 
                                     if (isNumeric) {
-                                        const idx = parseInt(mParam, 10);
-                                        currentMourner = mournersArr[idx];
+                                        targetIdx = parseInt(mParam, 10);
+                                        currentMourner = mournersArr[targetIdx];
                                     } else {
-                                        // 하이브리드 폴백: 기존 텍스트(이름) 대응
-                                        currentMourner = mournersArr.find((m: any) => m.name === mParam);
+                                        targetIdx = mournersArr.findIndex((m: any) => m.name === mParam);
+                                        if (targetIdx !== -1) currentMourner = mournersArr[targetIdx];
                                     }
 
                                     if (currentMourner) {
-                                        const displayOpt = (currentMourner as any).accountDisplay || 'mine';
+                                        const displayOpt = (currentMourner as any).accountDisplay || 'all';
                                         if (displayOpt === 'none') {
                                             filteredAccounts = [];
                                         } else if (displayOpt === 'mine') {
-                                            filteredAccounts = allAccounts.filter(
-                                                acc => acc.name === currentMourner.name || acc.holder === currentMourner.name
-                                            );
+                                            filteredAccounts = allAccounts.filter(acc => acc.mournerIndex === targetIdx);
+                                        } else {
+                                            filteredAccounts = allAccounts;
                                         }
                                     }
                                 }

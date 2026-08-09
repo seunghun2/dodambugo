@@ -6,7 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './view.css';
 
-// Node.js Runtime for stable cache and DB connections
+// 캐시 비활성화 - 계좌 노출 설정 등 실시간 반영 필요
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // 서버 사이드 Supabase 클라이언트
 function getSupabase() {
@@ -16,23 +18,19 @@ function getSupabase() {
     );
 }
 
-// 캐시된 부고 조회 (60초)
-const getCachedBugo = (id: string) => unstable_cache(
-    async () => {
-        const supabase = getSupabase();
-        const isUUID = id.includes('-') && id.length > 10;
+// 부고 조회 (실시간 - 계좌 노출 설정 즉시 반영)
+const getBugo = async (id: string) => {
+    const supabase = getSupabase();
+    const isUUID = id.includes('-') && id.length > 10;
 
-        if (isUUID) {
-            const result = await supabase.from('bugo').select('*').eq('id', id).is('deleted_at', null).limit(1);
-            return result.data?.[0] || null;
-        } else {
-            const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
-            return result.data?.[0] || null;
-        }
-    },
-    ['bugo-data', id],
-    { revalidate: 60 }
-)();
+    if (isUUID) {
+        const result = await supabase.from('bugo').select('*').eq('id', id).is('deleted_at', null).limit(1);
+        return result.data?.[0] || null;
+    } else {
+        const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
+        return result.data?.[0] || null;
+    }
+};
 
 // 캐시된 상품 조회 (30초)
 const getCachedProducts = unstable_cache(
@@ -44,9 +42,6 @@ const getCachedProducts = unstable_cache(
     ['flower-products'],
     { revalidate: 30 }
 );
-
-// ISR: 60초마다 재생성
-export const revalidate = 60;
 
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -104,7 +99,7 @@ function BugoSkeleton() {
 
 // 데이터 fetch + 렌더링 담당
 async function B2BBugoContentLoader({ id }: { id: string }) {
-    const bugoData = await getCachedBugo(id);
+    const bugoData = await getBugo(id);
 
     if (!bugoData) {
         return (

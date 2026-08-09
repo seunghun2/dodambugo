@@ -94,13 +94,14 @@ function BugoSkeleton() {
 }
 
 // 데이터 fetch + 렌더링 담당 (async server component)
-async function BugoContentLoader({ id }: { id: string }) {
+async function BugoContentLoader({ id, searchParams }: { id: string; searchParams: URLSearchParams }) {
     // 캐시된 부고 데이터 조회 (60초 캐시)
     const bugoData = await getBugo(id);
 
-    // B2B 부고장인 경우 B2B 전용 뷰 경로로 즉시 리다이렉트
+    // B2B 부고장인 경우 B2B 전용 뷰 경로로 즉시 리다이렉트 (쿼리 파라미터 유지)
     if (bugoData && bugoData.b2b_user_id) {
-        redirect(`/b2b/view/${id}`);
+        const qs = searchParams.toString();
+        redirect(`/b2b/view/${id}${qs ? `?${qs}` : ''}`);
     }
 
     // 부고를 찾을 수 없는 경우
@@ -188,12 +189,17 @@ async function BugoContentLoader({ id }: { id: string }) {
 }
 
 // 메인 페이지 컴포넌트 - Suspense로 Streaming 적용
-export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ViewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const { id } = await params;
+    const sp = await searchParams;
+    const urlSearchParams = new URLSearchParams();
+    Object.entries(sp).forEach(([key, val]) => {
+        if (typeof val === 'string') urlSearchParams.set(key, val);
+    });
 
     return (
         <Suspense fallback={<BugoSkeleton />}>
-            <BugoContentLoader id={id} />
+            <BugoContentLoader id={id} searchParams={urlSearchParams} />
         </Suspense>
     );
 }
