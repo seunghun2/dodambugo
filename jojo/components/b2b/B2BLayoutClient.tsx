@@ -4,9 +4,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { BottomTabBar } from './BottomTabBar';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 
 export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  useSwipeBack();
 
   // iOS/Android: 상태바가 WebView 영역 위로 얹어지게(오버레이) 설정하여 검은 띠 제거
   useEffect(() => {
