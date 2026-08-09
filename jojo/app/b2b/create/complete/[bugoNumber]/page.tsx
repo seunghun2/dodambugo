@@ -289,26 +289,7 @@ export default function B2BCompletePage() {
         ))}
       </div>
 
-      {/* 상주별 개별 부고장 URL 목록 */}
-      {mourners.length > 1 && (
-        <div className={styles.urlSection}>
-          <h3 className={styles.urlSectionTitle}>상주별 부고장 URL</h3>
-          {mourners.map((m, index) => (
-            <div className={styles.urlRow} key={index}>
-              <div className={styles.urlLabel}>
-                <span className={styles.urlRelation}>{m.relationship || '상주'}</span>
-                <span className={styles.urlName}>{m.name}</span>
-              </div>
-              <div className={styles.urlCopyArea}>
-                <span className={styles.urlText}>/view/{params.bugoNumber}?m={index}</span>
-                <button className={styles.btnCopyUrl} onClick={() => copyUrl(getMournerUrl(index), m.name)}>
-                  📋 복사
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+
 
       {/* 발송 버튼 그룹 */}
       <div className={styles.sendButtonGroup}>
