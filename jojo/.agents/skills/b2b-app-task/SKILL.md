@@ -378,3 +378,11 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 신규 파트너가 공유받은 링크 클릭 시 회원가입 페이지(`app/b2b/signup/page.tsx`)에서 쿼리 파라미터(`?ref=XXXX`)를 자동으로 인식하여 추천 코드가 폼에 쏙 입력되고 추천인 성명/회사명이 즉시 노출되도록 `useSearchParams` & `Suspense` 자동 연동 완비.
 - **관련 소스코드**: `jojo/app/b2b/dashboard/page.tsx`, `jojo/app/b2b/settings/page.tsx`, `jojo/app/b2b/signup/page.tsx`
 
+### 13-15. B2B 상주별 계좌 노출 옵션 DB 자동저장 & 뷰어 실시간 반영 & 정통 맞춤 호칭 고도화 (2026-08-09)
+- **상세 내용**:
+  1. **Supabase RLS 우회 API 신설**: 클라이언트 사이드 `supabase.update()`의 RLS 무반영 버그를 극복하기 위해 전용 백엔드 API (`/api/b2b/update-account-display`)를 구축하여 상주별 계좌 노출 옵션(`accountDisplay: 'none' | 'mine' | 'all'`)이 DB `bugo.mourners`에 100% 안전하게 저장되도록 전면 수정.
+  2. **B2B 뷰어 캐시 제거 & 쿼리 파라미터 보존**: B2B 부고 뷰어(`app/b2b/view/[id]/page.tsx`)의 60초 stale 캐시(`unstable_cache`)를 제거하고 `force-dynamic`으로 변경하여 계좌 노출 설정 변경 시 즉시 반영되도록 조치. B2C->B2B 리다이렉트 및 토큰 인증, 공유하기(`getCleanShareUrl`) 시에도 `?m=0` 상주 파라미터가 유실되지 않고 영구 보존되도록 개선.
+  3. **계좌 미노출('none') 시 버튼 숨김**: 접속한 상주의 계좌 옵션이 `none`인 경우 부의금보내기 버튼이 아예 노출되지 않도록 스마트 제어.
+  4. **정통 맞춤 호칭 동적 생성**: 접속 상주에 따라 `[상주이름]의 [관계호칭] 故 [고인이름]님께서` (예: `백승훈의 모친 故 백승훈님께서`, `김미연의 부친 故 백승훈님께서`) 형식으로 정갈하고 완벽한 호칭 매핑 구현. 30여 개 친족 예법 단어(부친, 모친, 장인, 장모, 남편, 아내 등) 전수 자동 감지.
+- **관련 소스코드**: `jojo/app/api/b2b/update-account-display/route.ts`, `jojo/app/b2b/create/complete/[bugoNumber]/page.tsx`, `jojo/app/b2b/view/[id]/page.tsx`, `jojo/app/b2b/view/[id]/ViewContent.tsx`
+
