@@ -16,30 +16,37 @@ function getSupabase() {
     );
 }
 
-// 캐시 비활성화 - 실시간 DB 조회
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// 캐시된 부고 조회 (60초)
+const getCachedBugo = (id: string) => unstable_cache(
+    async () => {
+        const supabase = getSupabase();
+        const isUUID = id.includes('-') && id.length > 10;
 
-// 실시간 부고 조회
-const getBugo = async (id: string) => {
-    const supabase = getSupabase();
-    const isUUID = id.includes('-') && id.length > 10;
+        if (isUUID) {
+            const result = await supabase.from('bugo').select('*').eq('id', id).is('deleted_at', null).limit(1);
+            return result.data?.[0] || null;
+        } else {
+            const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
+            return result.data?.[0] || null;
+        }
+    },
+    ['bugo-data', id],
+    { revalidate: 60 }
+)();
 
-    if (isUUID) {
-        const result = await supabase.from('bugo').select('*').eq('id', id).is('deleted_at', null).limit(1);
-        return result.data?.[0] || null;
-    } else {
-        const result = await supabase.from('bugo').select('*').eq('bugo_number', id).is('deleted_at', null).order('created_at', { ascending: false }).limit(1);
-        return result.data?.[0] || null;
-    }
-};
+// 캐시된 상품 조회 (30초)
+const getCachedProducts = unstable_cache(
+    async () => {
+        const supabase = getSupabase();
+        const result = await supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true });
+        return result.data || [];
+    },
+    ['flower-products'],
+    { revalidate: 30 }
+);
 
-// 실시간 상품 조회
-const getProducts = async () => {
-    const supabase = getSupabase();
-    const result = await supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true });
-    return result.data || [];
-};
+// ISR: 60초마다 재생성
+export const revalidate = 60;
 
 // 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -97,7 +104,7 @@ function BugoSkeleton() {
 
 // 데이터 fetch + 렌더링 담당
 async function B2BBugoContentLoader({ id }: { id: string }) {
-    const bugoData = await getBugo(id);
+    const bugoData = await getCachedBugo(id);
 
     if (!bugoData) {
         return (
@@ -123,7 +130,7 @@ async function B2BBugoContentLoader({ id }: { id: string }) {
     const supabase = getSupabase();
     const [ordersResult, productsData] = await Promise.all([
         supabase.from('flower_orders').select('sender_name, ribbon_text1, ribbon_text2').eq('bugo_id', bugoData.id).in('status', ['completed', 'delivered']).order('created_at', { ascending: false }),
-        getProducts()
+        getCachedProducts()
     ]);
 
     const rawFlowerOrders = ordersResult.data || [];
