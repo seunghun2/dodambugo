@@ -257,7 +257,7 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className={styles.featureCard} onClick={() => router.push('/b2b/manage')}>
+          <div className={styles.featureCard} onClick={() => router.push('/b2b/manage?select=thanks')}>
             <span className={styles.featureLabel}>답례문{"\n"}보내기</span>
             <div className={styles.featureIcon}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

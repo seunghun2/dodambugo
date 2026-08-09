@@ -142,9 +142,11 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
     // 공유 URL (card 페이지로 - DB의 thanks_religion 사용)
     const getShareUrl = () => {
         if (typeof window !== 'undefined') {
-            return `${window.location.origin}/view/${bugoId}/thanks/card`;
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const domain = isLocal ? 'https://bugoon.maeumbugo.co.kr' : window.location.origin;
+            return `${domain}/view/${bugoId}/thanks/card`;
         }
-        return '';
+        return `https://bugoon.maeumbugo.co.kr/view/${bugoId}/thanks/card`;
     };
 
     // 카카오 공유
@@ -367,13 +369,13 @@ ${mournerName} 배상`;
                     style={{
                         flex: 1,
                         padding: '16px',
-                        backgroundColor: isB2b ? '#3A8F47' : '#FFCC45',
+                        backgroundColor: '#FEE500',
                         border: 'none',
                         borderRadius: '8px',
                         fontFamily: "'Pretendard', sans-serif",
                         fontSize: '16px',
-                        fontWeight: 600,
-                        color: isB2b ? '#FFFFFF' : '#000000',
+                        fontWeight: 700,
+                        color: '#000000',
                         cursor: 'pointer'
                     }}
                 >
