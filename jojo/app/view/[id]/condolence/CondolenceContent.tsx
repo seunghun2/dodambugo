@@ -108,7 +108,6 @@ const AMOUNT_OPTIONS_FALLBACK = [
     { value: 300000, label: '30만원' },
     { value: 500000, label: '50만원' },
     { value: 1000000, label: '100만원' },
-    { value: 100, label: '100원(테스트)' },
     { value: 1000, label: '1,000원(테스트)' },
 ];
 
