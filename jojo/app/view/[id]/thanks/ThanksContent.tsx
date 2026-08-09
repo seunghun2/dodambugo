@@ -155,9 +155,11 @@ export default function ThanksContent({ bugo, bugoId }: ThanksContentProps) {
         const shareUrl = getShareUrl();
         if (typeof window !== 'undefined' && (window as any).Kakao) {
             const Kakao = (window as any).Kakao;
-            if (!Kakao.isInitialized()) {
-                Kakao.init('5aa868e69d68e913ed9da7c3def45151');
+            const kakaoKey = isB2b ? '40f451664b3863f70a9537714dddd821' : '5aa868e69d68e913ed9da7c3def45151';
+            if (Kakao.isInitialized()) {
+                try { Kakao.cleanup(); } catch (e) {}
             }
+            Kakao.init(kakaoKey);
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
@@ -369,13 +371,13 @@ ${mournerName} 배상`;
                     style={{
                         flex: 1,
                         padding: '16px',
-                        backgroundColor: '#FEE500',
+                        backgroundColor: isB2b ? '#3A8F47' : '#FFCC45',
                         border: 'none',
                         borderRadius: '8px',
                         fontFamily: "'Pretendard', sans-serif",
                         fontSize: '16px',
                         fontWeight: 700,
-                        color: '#000000',
+                        color: isB2b ? '#FFFFFF' : '#000000',
                         cursor: 'pointer'
                     }}
                 >

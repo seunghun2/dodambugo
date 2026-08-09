@@ -546,12 +546,12 @@
    B2B Theme (Green Accent) Overrides
    ========================================== */
 .thanks-page.b2b-theme .thanks-cta-btn {
-    background: #FEE500 !important;
-    color: #000000 !important;
+    background: #3A8F47 !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
 }
 .thanks-page.b2b-theme .thanks-cta-btn:active {
-    background: #E6CE00 !important;
+    background: #2D6E37 !important;
 }
 .thanks-page.b2b-theme .thanks-tab.active {
     color: #3A8F47 !important;
