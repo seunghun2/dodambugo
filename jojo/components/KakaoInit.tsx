@@ -10,13 +10,22 @@ declare global {
 
 export default function KakaoInit() {
     useEffect(() => {
-        // 카카오 SDK 초기화
+        const getKakaoKey = () => {
+            if (typeof window !== 'undefined') {
+                const isB2B = window.location.hostname.includes('bugoon') || window.location.pathname.includes('/b2b');
+                if (isB2B) return '40f451664b3863f70a9537714dddd821';
+            }
+            return '5aa868e69d68e913ed9da7c3def45151';
+        };
+
         const initKakao = () => {
             if (typeof window !== 'undefined' && window.Kakao) {
-                if (!window.Kakao.isInitialized()) {
-                    window.Kakao.init('5aa868e69d68e913ed9da7c3def45151');
-                    console.log('Kakao SDK initialized');
+                const key = getKakaoKey();
+                if (window.Kakao.isInitialized()) {
+                    try { window.Kakao.cleanup(); } catch (e) {}
                 }
+                window.Kakao.init(key);
+                console.log('Kakao SDK initialized with key:', key);
             }
         };
 
@@ -51,9 +60,19 @@ export function shareKakao(options: {
         return false;
     }
 
-    if (!window.Kakao.isInitialized()) {
-        window.Kakao.init('5aa868e69d68e913ed9da7c3def45151');
+    const getKakaoKey = () => {
+        if (typeof window !== 'undefined') {
+            const isB2B = window.location.hostname.includes('bugoon') || window.location.pathname.includes('/b2b');
+            if (isB2B) return '40f451664b3863f70a9537714dddd821';
+        }
+        return '5aa868e69d68e913ed9da7c3def45151';
+    };
+
+    const targetKey = getKakaoKey();
+    if (window.Kakao.isInitialized()) {
+        try { window.Kakao.cleanup(); } catch (e) {}
     }
+    window.Kakao.init(targetKey);
 
     const url = window.location.href;
 
