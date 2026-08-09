@@ -19,19 +19,18 @@ export async function GET(
 
     try {
         if (orderNumber.startsWith('DO')) {
-            // B2B DO 주문번호 → B2B 순번으로 조회
+            // B2B DO 주문번호 → B2B 순번으로 조회 (DO000001, DO000002...)
             const doNum = parseInt(orderNumber.replace('DO', ''), 10);
             if (isNaN(doNum) || doNum < 1) {
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
 
-            // moid가 BCOND_로 시작하는 주문 = B2B 부의금
+            // moid가 BCOND_로 시작하는 주문 또는 source가 b2b인 주문
             const { data: allOrders } = await supabase
                 .from('condolence_orders')
                 .select('*')
                 .order('id', { ascending: true });
 
-            // JS에서 B2B 필터링 (PostgREST 캐시 문제 완전 회피)
             const b2bOrders = (allOrders || []).filter(
                 (o: any) => o.moid?.startsWith('BCOND_') || o.source === 'b2b'
             );
@@ -41,6 +40,26 @@ export async function GET(
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
             targetOrder.order_number = 'DO' + String(doNum).padStart(6, '0');
+            return NextResponse.json({ success: true, order: targetOrder });
+
+        } else if (orderNumber.startsWith('BCOND_')) {
+            // B2B moid로 직접 조회시에도 DO 순번 계산하여 반환
+            const { data: allOrders } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .order('id', { ascending: true });
+
+            const b2bOrders = (allOrders || []).filter(
+                (o: any) => o.moid?.startsWith('BCOND_') || o.source === 'b2b'
+            );
+
+            const targetIdx = b2bOrders.findIndex((o: any) => o.moid === orderNumber);
+            if (targetIdx === -1) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+
+            const targetOrder = b2bOrders[targetIdx];
+            targetOrder.order_number = 'DO' + String(targetIdx + 1).padStart(6, '0');
             return NextResponse.json({ success: true, order: targetOrder });
 
         } else if (orderNumber.startsWith('CO')) {
@@ -54,7 +73,7 @@ export async function GET(
             }
             return NextResponse.json({ success: true, order: data });
 
-        } else if (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_')) {
+        } else if (orderNumber.startsWith('COND_')) {
             const { data, error } = await supabase
                 .from('condolence_orders')
                 .select('*')

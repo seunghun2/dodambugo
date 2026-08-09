@@ -226,12 +226,26 @@ export default function PaymentCallbackPage() {
                         sessionStorage.setItem(`condolence_payment_${finalBugoId2}`, JSON.stringify(parsedData));
                     }
 
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         let finalOrderNum = orderNumber;
                         if (finalOrderNum && (isB2b || finalOrderNum.startsWith('BCOND_'))) {
-                            finalOrderNum = finalOrderNum.replace(/^CO/, 'DO');
+                            if (finalOrderNum.startsWith('CO')) {
+                                finalOrderNum = finalOrderNum.replace(/^CO/, 'DO');
+                            } else if (finalOrderNum.startsWith('BCOND_')) {
+                                try {
+                                    const res = await fetch(`/api/condolence/orders/${finalOrderNum}`);
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        if (data.success && data.order?.order_number) {
+                                            finalOrderNum = data.order.order_number;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('DO 주문번호 변환 실패:', e);
+                                }
+                            }
                         }
-                        if (finalOrderNum && (finalOrderNum.startsWith('CO') || finalOrderNum.startsWith('DO') || finalOrderNum.startsWith('COND_') || finalOrderNum.startsWith('BCOND_'))) {
+                        if (finalOrderNum && (finalOrderNum.startsWith('CO') || finalOrderNum.startsWith('DO'))) {
                             window.location.href = `${pathPrefix}/order/${finalOrderNum}`;
                         } else {
                             window.location.href = `${pathPrefix}/view/${finalBugoId2}/condolence/complete`;
