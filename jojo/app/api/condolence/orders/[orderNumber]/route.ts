@@ -23,6 +23,8 @@ export async function GET(
 
         if (orderNumber.startsWith('CO')) {
             query = query.eq('order_number', orderNumber);
+        } else if (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_')) {
+            query = query.eq('moid', orderNumber);
         } else {
             query = query.eq('id', orderNumber);
         }
