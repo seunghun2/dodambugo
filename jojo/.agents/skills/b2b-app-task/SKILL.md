@@ -404,7 +404,18 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
 - **상세 내용**:
   1. **앱 내 4대 탭 화면 전수 스와이프 연동**: `useSwipeTab.ts` 유틸 훅을 구축하여 ① 1:1 문의(`create` ↔ `list`), ② 의례문서(`wipae` ↔ `chukmun`), ③ 지갑/적립(`reward` ↔ `withdraw`), ④ 감사장/답례문(`general` ↔ `christian` ↔ `catholic` ↔ `buddhist`) 4개 탭 화면 전체에 손가락 좌/우 터치 제스처 연동 완수.
   2. **인위적인 전체 화면 꿀렁거림 전면 제거**: 인위적인 DOM `transform` 및 `opacity` 널뛰기를 100% 걷어내고, 화면 전체가 단단하고 편안하게 100% 고정된 상태에서 깔끔하게 터치 제스처만 동작하는 정갈한 Clean Fixed Gesture 모드로 최적화.
-- **관련 소스코드**: `jojo/hooks/useSwipeTab.ts`, `jojo/hooks/useSwipeBack.ts`, `jojo/app/b2b/inquiry/page.tsx`, `jojo/app/b2b/ritual/[bugoId]/page.tsx`, `jojo/app/b2b/wallet/page.tsx`, `jojo/app/view/[id]/thanks/ThanksContent.tsx`
+
+### 13-19. 앱 로딩 속도 7대 핵심 최적화 완수 (2026-08-09)
+- **상세 내용**:
+  1. **렌더링 블로킹 스크립트 제거**: `disable-devtool` 스크립트 `beforeInteractive` → `lazyOnload` 전환 및 버전 고정(`0.3.8`).
+  2. **외부 폰트 렌더링 블로킹 해소**: CSS 내 `@import` 폰트(Nanum Myeongjo) 제거 및 `layout.tsx`에서 `display=swap` 기반 로드로 일원화.
+  3. **미들웨어 IP 조회 최적화**: DB 차단 IP 캐시 TTL 5분 → 30분 확장 및 static assets matcher 예외 항목 대폭 확장.
+  4. **B2C 뷰 페이지 ISR 캐시 & 중복 쿼리 제거**: `view/[id]/page.tsx`에 ISR 60초 캐시(`revalidate = 60`) 적용 및 `React.cache()`로 동일 요청 내 Supabase DB 중복 조회 100% 제거.
+  5. **API 라우트 `Promise.all` 병렬화**: `api/b2b/admin/dashboard` 및 `api/b2b/me` 등 독립적 DB 쿼리 병렬화로 응답 속도 대폭 개선.
+  6. **불필요한 Prefetch 폭풍 제거**: 페이지 로드 시 20여 개 꽃 상품 페이지 전체 프리페치 루프 제거.
+  7. **번들 및 패키지 최적화**: `next.config.ts`에 `optimizePackageImports` 적용, AVIF/WebP 이미지 포맷 추가, `package.json` 패키지 정리.
+- **관련 소스코드**: `jojo/app/layout.tsx`, `jojo/app/view/[id]/page.tsx`, `jojo/app/view/[id]/ViewContent.tsx`, `jojo/next.config.ts`, `jojo/middleware.ts`, `jojo/app/api/b2b/admin/dashboard/route.ts`, `jojo/app/api/b2b/me/route.ts`, `jojo/package.json`
+
 
 
 
