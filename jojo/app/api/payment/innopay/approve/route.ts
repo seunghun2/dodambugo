@@ -651,6 +651,23 @@ export async function POST(request: NextRequest) {
                     condolenceOrderNumber = insertedOrder?.order_number || String(insertedOrder?.id);
                     console.log('✅ 부의금 주문 DB 저장 성공:', condolenceOrderNumber);
 
+                    // B2B 부의금이면 DO 순번 계산 (DO000001, DO000002...)
+                    if (moid.startsWith('BCOND_') && insertedOrder?.id) {
+                        try {
+                            const { count } = await supabase
+                                .from('condolence_orders')
+                                .select('id', { count: 'exact', head: true })
+                                .eq('source', 'b2b')
+                                .lte('id', insertedOrder.id);
+                            if (count && count > 0) {
+                                condolenceOrderNumber = 'DO' + String(count).padStart(6, '0');
+                            }
+                        } catch (e) {
+                            // DO 순번 계산 실패해도 결제 자체는 정상 처리
+                            console.error('DO 순번 계산 오류:', e);
+                        }
+                    }
+
                     // =============================================
                     // [B2B] 조의금 결제 시 파트너 예치금 자동 적립
                     // =============================================

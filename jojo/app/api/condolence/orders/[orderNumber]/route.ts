@@ -18,14 +18,30 @@ export async function GET(
     }
 
     try {
-        // CO로 시작하면 order_number로 검색, 아니면 id로 검색
         let query = supabase.from('condolence_orders').select('*');
 
-        if (orderNumber === 'DO000001') {
-            query = query.eq('id', 30);
-        } else if (orderNumber.startsWith('CO') || orderNumber.startsWith('DO')) {
-            const targetOrderNum = orderNumber.startsWith('DO') ? orderNumber.replace(/^DO/, 'CO') : orderNumber;
-            query = query.eq('order_number', targetOrderNum);
+        if (orderNumber.startsWith('DO')) {
+            // B2B DO 주문번호 → B2B 순번으로 조회
+            const doNum = parseInt(orderNumber.replace('DO', ''), 10);
+            if (isNaN(doNum) || doNum < 1) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            // B2B 주문만 id 오름차순으로 가져와서 N번째 찾기
+            const { data: b2bOrders } = await supabase
+                .from('condolence_orders')
+                .select('*')
+                .eq('source', 'b2b')
+                .order('id', { ascending: true });
+
+            const targetOrder = (b2bOrders || [])[doNum - 1];
+            if (!targetOrder) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            targetOrder.order_number = 'DO' + String(doNum).padStart(6, '0');
+            return NextResponse.json({ success: true, order: targetOrder });
+
+        } else if (orderNumber.startsWith('CO')) {
+            query = query.eq('order_number', orderNumber);
         } else if (orderNumber.startsWith('COND_') || orderNumber.startsWith('BCOND_')) {
             query = query.eq('moid', orderNumber);
         } else {
@@ -39,19 +55,10 @@ export async function GET(
             return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
         }
 
-        // B2B 부의금 주문번호 표시 변환 (CO -> DO, 첫 결제건 DO000001 고정)
-        if (data.source === 'b2b' || data.moid?.startsWith('BCOND_') || orderNumber.startsWith('DO')) {
-            if (data.id === 30 || orderNumber === 'DO000001') {
-                data.order_number = 'DO000001';
-            } else {
-                data.order_number = data.order_number ? data.order_number.replace(/^CO/, 'DO') : 'DO' + String(data.id).padStart(6, '0');
-            }
-        }
-
+        // B2C 주문은 CO 그대로 유지 (마음부고 영향 zero)
         return NextResponse.json({ success: true, order: data });
     } catch (err) {
         console.error('부의금 주문 조회 오류:', err);
         return NextResponse.json({ error: '서버 오류' }, { status: 500 });
     }
 }
-

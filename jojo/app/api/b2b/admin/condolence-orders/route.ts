@@ -28,6 +28,11 @@ export async function GET(request: NextRequest) {
             .select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name )')
             .not('b2b_user_id', 'is', null);
 
+        // id 오름차순으로 순번 계산 후 최신순으로 재정렬
+        const sortedById = [...(orders || [])].sort((a, b) => a.id - b.id);
+        const idToDoNum = new Map<number, number>();
+        sortedById.forEach((o, idx) => { idToDoNum.set(o.id, idx + 1); });
+
         const formattedOrders = (orders || []).map(o => {
             const realBugo = (b2bBugos || []).find(b => String(b.id) === String(o.bugo_number));
             const b2bUser = realBugo?.b2b_users;
@@ -38,10 +43,9 @@ export async function GET(request: NextRequest) {
                 ? (b2bUser[0] as any)?.owner_name 
                 : (b2bUser as any)?.owner_name;
 
-            // B2B 주문번호: DO 접두사 (첫 결제건 DO000001 고정)
-            const displayOrderNumber = (o.id === 30)
-                ? 'DO000001'
-                : (o.order_number ? o.order_number.replace(/^CO/, 'DO') : 'DO' + String(o.id).padStart(6, '0'));
+            // B2B 주문번호: DO 접두사 (순번 기반)
+            const doNum = idToDoNum.get(o.id) || 1;
+            const displayOrderNumber = 'DO' + String(doNum).padStart(6, '0');
 
             return {
                 ...o,

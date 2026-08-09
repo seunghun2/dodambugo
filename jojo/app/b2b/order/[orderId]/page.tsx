@@ -60,7 +60,7 @@ export default function B2BOrderDetailPage() {
         withdrawal: false,
     });
 
-    const isCondolence = orderId?.startsWith('CO') || orderId?.startsWith('COND_') || orderId?.startsWith('BCOND_');
+    const isCondolence = orderId?.startsWith('CO') || orderId?.startsWith('DO') || orderId?.startsWith('COND_') || orderId?.startsWith('BCOND_');
 
     useEffect(() => {
         async function fetchOrder() {
