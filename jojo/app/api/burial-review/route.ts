@@ -19,13 +19,28 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '필수 정보가 누락되었습니다.' }, { status: 400 });
         }
 
-        // 리뷰코드로 부고번호 역추적
-        const { data: bugo } = await supabase
+        // 리뷰코드로 부고번호 역추적 (최신순 우선 + 장지 있는 부고 필터)
+        let matched: any = null;
+        const { data: bugoWithBurial } = await supabase
             .from('bugo')
             .select('bugo_number, burial_place, mourner_name, phone_password, applicant_phone')
-            .is('deleted_at', null);
+            .is('deleted_at', null)
+            .not('burial_place', 'is', null)
+            .order('created_at', { ascending: false })
+            .limit(5000);
 
-        const matched = bugo?.find(b => generateReviewCode(String(b.bugo_number)) === reviewCode);
+        matched = bugoWithBurial?.find(b => generateReviewCode(String(b.bugo_number)) === reviewCode);
+
+        if (!matched) {
+            const { data: allBugo } = await supabase
+                .from('bugo')
+                .select('bugo_number, burial_place, mourner_name, phone_password, applicant_phone')
+                .is('deleted_at', null)
+                .order('created_at', { ascending: false })
+                .limit(5000);
+            matched = allBugo?.find(b => generateReviewCode(String(b.bugo_number)) === reviewCode);
+        }
+
         if (!matched) {
             return NextResponse.json({ error: '잘못된 접근입니다.' }, { status: 403 });
         }
