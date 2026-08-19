@@ -668,16 +668,15 @@ export async function POST(request: NextRequest) {
                     }
 
                     // =============================================
-                    // [B2B] 조의금 결제 시 파트너 예치금 자동 적립
-                    // 상조 소속 파트너: 수수료에서 상조 쉐어(condolence_company_rate%) 차감 후 적립
-                    // 개인/프리랜서: 수수료 전액 적립
+                    // [B2B] 조의금 결제 시 상조회사 정산 적재
+                    // 수수료 분배: PG 3% / 상조회사 몫 / 나머지 플랫폼(대표님)
+                    // 지도사는 부의금 수수료에서 받는 몫 없음
                     // =============================================
                     if (bugoData?.b2b_user_id && fee > 0) {
                         try {
                             const partnerId = bugoData.b2b_user_id;
-                            let partnerReward = fee; // 기본: 수수료 전액
 
-                            // 상조회사 소속 여부 확인 및 쉐어 차감
+                            // 상조회사 소속 여부 확인
                             const { data: condolencePartner } = await supabase
                                 .from('b2b_users')
                                 .select('company_id')
@@ -704,53 +703,10 @@ export async function POST(request: NextRequest) {
                                         status: 'pending'
                                     });
                                     console.log(`✅ [B2B] 상조회사 ${condolencePartner.company_id}에 부의금 쉐어 ${companyShare}원 정산 적재`);
-
-                                    // 지도사 수당에서 상조 쉐어 차감
-                                    partnerReward = Math.max(0, fee - companyShare);
                                 }
                             }
-
-                            // 파트너 예치금 적립 (상조 쉐어 차감 후)
-                            if (partnerReward > 0) {
-                                const { data: currentDeposit } = await supabase
-                                    .from('deposits')
-                                    .select('balance')
-                                    .eq('user_id', partnerId)
-                                    .single();
-
-                                if (currentDeposit) {
-                                    await supabase
-                                        .from('deposits')
-                                        .update({
-                                            balance: (currentDeposit.balance || 0) + partnerReward,
-                                            updated_at: new Date().toISOString(),
-                                        })
-                                        .eq('user_id', partnerId);
-                                } else {
-                                    await supabase
-                                        .from('deposits')
-                                        .insert({
-                                            user_id: partnerId,
-                                            balance: partnerReward,
-                                            updated_at: new Date().toISOString(),
-                                        });
-                                }
-
-                                // 적립 내역 기록
-                                await supabase
-                                    .from('deposit_transactions')
-                                    .insert({
-                                        user_id: partnerId,
-                                        amount: partnerReward,
-                                        type: 'condolence_reward',
-                                        description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
-                                        related_order_id: condolenceOrderNumber || moid,
-                                    });
-                            }
-
-                            console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${partnerReward}원 적립 완료`);
                         } catch (b2bCondolenceError) {
-                            console.error('❌ [B2B] 조의금 예치금 적립 오류 (결제는 정상):', b2bCondolenceError);
+                            console.error('❌ [B2B] 조의금 상조 정산 적재 오류 (결제는 정상):', b2bCondolenceError);
                         }
                     }
                 }
