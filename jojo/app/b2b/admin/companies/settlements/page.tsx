@@ -25,6 +25,21 @@ interface SettlementDetail {
     } | null;
 }
 
+interface CondolenceSettlementDetail {
+    id: number;
+    order_number: string;
+    buyer_name: string;
+    recipient_name: string;
+    amount: number;
+    fee: number;
+    company_rate: number;
+    share_amount: number;
+    partner_name: string;
+    deceased_name: string;
+    status: string;
+    created_at: string;
+}
+
 interface SettleSummary {
     pending_amount: number;
     completed_amount: number;
@@ -58,6 +73,7 @@ function SettlementsContent() {
     const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
     const [monthlyList, setMonthlyList] = useState<MonthlySummary[]>([]);
     const [settlements, setSettlements] = useState<SettlementDetail[]>([]);
+    const [condolenceSettlements, setCondolenceSettlements] = useState<CondolenceSettlementDetail[]>([]);
     const [selectedYearMonth, setSelectedYearMonth] = useState<string | null>(null);
     const [summary, setSummary] = useState<SettleSummary>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
     const [loading, setLoading] = useState(true);
@@ -112,6 +128,7 @@ function SettlementsContent() {
             const data = await res.json();
             if (data.success) {
                 setSettlements(data.settlements || []);
+                setCondolenceSettlements(data.condolenceSettlements || []);
                 if (data.company) {
                     setCompanyInfo(data.company);
                 }
@@ -166,15 +183,16 @@ function SettlementsContent() {
 
     // 5. 엑셀 다운로드 (CSV 내보내기)
     const handleDownloadCSV = () => {
-        if (!selectedYearMonth || settlements.length === 0) {
+        if (!selectedYearMonth || (settlements.length === 0 && condolenceSettlements.length === 0)) {
             alert('다운로드할 정산 내역이 없습니다.');
             return;
         }
 
         const [year, month] = selectedYearMonth.split('-');
-        const headers = ['거래일시', '주문번호', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
         
-        const rows = settlements.map(s => [
+        // 화환 정산 내역
+        const wreathHeaders = ['[화환] 거래일시', '주문번호', '장례지도사명', '고인명(상가)', '화환 상품명', '주문자명', '정산 금액(수당)', '정산 상태'];
+        const wreathRows = settlements.map(s => [
             new Date(s.created_at).toLocaleString(),
             s.order?.order_number || '-',
             s.order?.partner_name || '-',
@@ -185,9 +203,30 @@ function SettlementsContent() {
             s.status === 'pending' ? '정산대기' : '정산완료'
         ]);
 
-        const csvContent = 
-            '\ufeff' + // UTF-8 BOM
-            [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
+        // 부의금 정산 내역
+        const condolenceHeaders = ['[부의금] 거래일시', '주문번호', '장례지도사명', '고인명(상가)', '보낸분', '부의금액', '수수료', '상조쉐어(%)', '정산 금액', '정산 상태'];
+        const condolenceRows = condolenceSettlements.map(c => [
+            new Date(c.created_at).toLocaleString(),
+            c.order_number || '-',
+            c.partner_name || '-',
+            c.deceased_name || '-',
+            c.buyer_name || '-',
+            c.amount,
+            c.fee,
+            `${c.company_rate}%`,
+            c.share_amount,
+            c.status === 'pending' ? '정산대기' : '정산완료'
+        ]);
+
+        const allLines = [
+            wreathHeaders.join(','),
+            ...wreathRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')),
+            '', // 빈 줄 구분
+            condolenceHeaders.join(','),
+            ...condolenceRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+        ];
+
+        const csvContent = '\ufeff' + allLines.join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -325,7 +364,7 @@ function SettlementsContent() {
                         <div className={styles.invoiceTitleContainer}>
                             <h1 className={styles.invoiceMainTitle}>정 산 서</h1>
                             <div className={styles.invoiceSubText}>
-                                귀사와의 거래에 따른 화환 판매 정산 내역을 아래와 같이 명세하여 송부합니다.
+                                귀사와의 거래에 따른 정산 내역을 아래와 같이 명세하여 송부합니다.
                             </div>
                         </div>
                     </div>
@@ -391,28 +430,41 @@ function SettlementsContent() {
                     </div>
 
                     {/* 정산 정보 간이 요약 */}
-                    <div className={styles.invoiceInfoSection}>
-                        <table className={styles.infoTable}>
-                           <tbody>
-                                <tr>
-                                    <td className={styles.infoLabel}>정산 상태</td>
-                                    <td className={styles.infoValue}>
-                                        {hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
-                                    </td>
-                                    <td className={styles.infoLabel}>지급일자</td>
-                                    <td className={styles.infoValue}>
-                                        {hasPending ? '지급 대기' : formatDate(settlements[0]?.payment_date)}
-                                    </td>
-                                    <td className={styles.infoLabel}>합계 정산금액</td>
-                                    <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
-                                        {((currentMonthData?.pending_amount || 0) + (currentMonthData?.completed_amount || 0)).toLocaleString()}원
-                                    </td>
-                                </tr>
-                           </tbody>
-                        </table>
-                    </div>
+                    {(() => {
+                        const flowerPending = settlements.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
+                        const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
+                        const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
+                        const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
 
-                    {/* 상세 내역 테이블 */}
+                        const totalPending = flowerPending + condolencePending;
+                        const totalCompleted = flowerCompleted + condolenceCompleted;
+                        const grandTotal = totalPending + totalCompleted;
+
+                        return (
+                            <div className={styles.invoiceInfoSection}>
+                                <table className={styles.infoTable}>
+                                   <tbody>
+                                        <tr>
+                                            <td className={styles.infoLabel}>정산 상태</td>
+                                            <td className={styles.infoValue}>
+                                                {totalPending > 0 ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
+                                            </td>
+                                            <td className={styles.infoLabel}>지급일자</td>
+                                            <td className={styles.infoValue}>
+                                                {totalPending > 0 ? '지급 대기' : formatDate(settlements[0]?.payment_date)}
+                                            </td>
+                                            <td className={styles.infoLabel}>합계 정산금액</td>
+                                            <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
+                                                {grandTotal.toLocaleString()}원
+                                            </td>
+                                        </tr>
+                                   </tbody>
+                                </table>
+                            </div>
+                        );
+                    })()}
+
+                    {/* 화환 상세 내역 테이블 */}
                     <div className={styles.invoiceBody}>
                         <h3 className={styles.invoiceTableTitle}>■ 화환 판매 정산 세부 내역 명세</h3>
                         <table className={styles.invoiceTable}>
@@ -421,7 +473,7 @@ function SettlementsContent() {
                                     <th>결제 일시</th>
                                     <th>주문 번호</th>
                                     <th>장례지도사명</th>
-                                    <th>고인명 (상가)</th>
+                                    <th>고인명</th>
                                     <th>화환 상품명 (주문자)</th>
                                     <th style={{ textAlign: 'right' }}>정산 금액</th>
                                     <th>상태</th>
@@ -436,9 +488,7 @@ function SettlementsContent() {
                                     </tr>
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
-                                            정산할 판매 건이 존재하지 않습니다.
-                                        </td>
+                                        <td colSpan={7} style={{ height: '36px' }}></td>
                                     </tr>
                                 ) : (
                                     settlements.map((s) => (
@@ -481,26 +531,104 @@ function SettlementsContent() {
                         </table>
                     </div>
 
-                    {/* 하단 서명란 및 정산 처리 버튼 */}
-                    <div className={styles.invoiceFooter}>
-                        <div className={styles.invoiceTotalBlock}>
-                            <span>정산 대기 합계 : <strong>{(currentMonthData?.pending_amount || 0).toLocaleString()}원</strong></span>
-                            <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong>{(currentMonthData?.completed_amount || 0).toLocaleString()}원</strong></span>
-                        </div>
-
-                        {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}
-                        {hasPending && (
-                            <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                                <button 
-                                    className={styles.completeBtn}
-                                    onClick={() => handleCompleteSettlement(selectedYearMonth)}
-                                >
-                                    <IconCheck size={18} style={{ marginRight: '6px' }} />
-                                    <span>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월 정산 완료 처리</span>
-                                </button>
-                            </div>
-                        )}
+                    {/* 부의금 정산 세부 내역 명세 (테이블 무조건 상시 노출, 내역 없을 시 텍스트 문구 없이 깔끔한 빈 줄만 표시) */}
+                    <div className={styles.invoiceBody} style={{ marginTop: '28px' }}>
+                        <h3 className={styles.invoiceTableTitle}>■ 부의금 정산 세부 내역 명세</h3>
+                        <table className={styles.invoiceTable}>
+                            <thead>
+                                <tr>
+                                    <th>결제 일시</th>
+                                    <th>주문 번호</th>
+                                    <th>장례지도사명</th>
+                                    <th>고인명</th>
+                                    <th>부의금액 (조문객)</th>
+                                    <th>수수료율 (%)</th>
+                                    <th style={{ textAlign: 'right' }}>정산 금액</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailLoading ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
+                                            상세 정산 내역을 조회하는 중...
+                                        </td>
+                                    </tr>
+                                ) : condolenceSettlements.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ height: '36px' }}></td>
+                                    </tr>
+                                ) : (
+                                    condolenceSettlements.map((c) => (
+                                        <tr key={c.id}>
+                                            <td style={{ fontSize: '11px' }}>
+                                                <div>{new Date(c.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                                            </td>
+                                            <td style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 'bold' }}>
+                                                {c.order_number}
+                                            </td>
+                                            <td style={{ fontWeight: '500' }}>
+                                                {c.partner_name}
+                                            </td>
+                                            <td style={{ fontWeight: '600' }}>
+                                                {c.deceased_name}
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span>{(c.amount || 0).toLocaleString()}원</span>
+                                                    <span style={{ fontSize: '11px', color: '#000000', marginLeft: '4px' }}>
+                                                        ({c.buyer_name || ''})
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td style={{ fontWeight: 'bold', color: '#059669' }}>
+                                                {c.company_rate}%
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                                {c.share_amount.toLocaleString()}원
+                                            </td>
+                                            <td>
+                                                {c.status === 'completed' || c.status === 'transferred' ? '완료' : c.status === 'cancelled' ? '취소' : '대기'}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
+
+                    {/* 하단 서명란 및 정산 처리 버튼 */}
+                    {(() => {
+                        const flowerPending = settlements.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
+                        const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
+                        const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
+                        const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
+
+                        const totalPending = flowerPending + condolencePending;
+                        const totalCompleted = flowerCompleted + condolenceCompleted;
+
+                        return (
+                            <div className={styles.invoiceFooter}>
+                                <div className={styles.invoiceTotalBlock}>
+                                    <span>정산 대기 합계 : <strong>{totalPending.toLocaleString()}원</strong></span>
+                                    <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong>{totalCompleted.toLocaleString()}원</strong></span>
+                                </div>
+
+                                {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}
+                                {totalPending > 0 && (
+                                    <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                                        <button 
+                                            className={styles.completeBtn}
+                                            onClick={() => handleCompleteSettlement(selectedYearMonth)}
+                                        >
+                                            <IconCheck size={18} style={{ marginRight: '6px' }} />
+                                            <span>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월 정산 완료 처리</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
         </div>

@@ -133,7 +133,10 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            const detailedList = settlements.map(s => {
+            // 화환 정산만 필터 (부의금 정산 레코드는 order_id가 BCOND_ 접두사)
+            const wreathSettlements = settlements.filter(s => !s.order_id?.startsWith('BCOND_'));
+
+            const detailedList = wreathSettlements.map(s => {
                 const orderInfo = orderMap.get(s.order_id) || null;
                 const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
                 const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
@@ -186,11 +189,21 @@ export async function GET(request: NextRequest) {
 
                     if (condOrders) {
                         const companyRate = companyData?.condolence_company_rate ?? 3.3;
+
+                        // 부의금 정산 레코드의 마감 상태를 b2b_company_settlements에서 조회
+                        const condSettlementRecords = settlements.filter(s => s.order_id?.startsWith('BCOND_'));
+                        const condSettleMap = new Map<string, string>();
+                        condSettlementRecords.forEach(s => condSettleMap.set(s.order_id, s.status));
+
                         condolenceList = condOrders.map(c => {
                             const matchedBugo = compBugos.find(b => String(b.id) === String(c.bugo_number) || String(b.bugo_number) === String(c.bugo_number));
                             const matchedUser = compUsers.find(u => u.id === matchedBugo?.b2b_user_id);
                             const shareAmount = Math.round((c.amount || 0) * (companyRate / 100));
                             const isCancelled = c.status === 'cancelled';
+
+                            // 정산 마감 상태: b2b_company_settlements 기준 (completed → 정산완료)
+                            const condOrderNumber = c.moid?.startsWith('BCOND_') ? c.moid : `BCOND_${c.id}`;
+                            const settlementStatus = condSettleMap.get(condOrderNumber) || 'pending';
 
                             return {
                                 id: c.id,
@@ -203,7 +216,7 @@ export async function GET(request: NextRequest) {
                                 share_amount: isCancelled ? 0 : shareAmount,
                                 partner_name: matchedUser?.owner_name || '미등록',
                                 deceased_name: matchedBugo?.deceased_name || '미등록',
-                                status: c.status,
+                                status: settlementStatus, // b2b_company_settlements 기준 상태
                                 created_at: c.created_at
                             };
                         });
