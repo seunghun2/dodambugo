@@ -130,9 +130,8 @@ export async function sendLMS(to: string, subject: string, text: string) {
 
 // B2C 템플릿 ID -> B2B (부고온플러스) 템플릿 ID 매핑 테이블
 const B2B_TEMPLATE_MAP: Record<string, string> = {
-    // 1. 부고장 생성 완료 (상주용)
-    'KA01TP2602070138097871zexjvolnSU': 'KA01TP260714223554397jpnpiNrrFt2', // b2b_부고장 생성
-    'KA01TP2602121532276099rVDeNpBxvE': 'KA01TP260714223554397jpnpiNrrFt2', // b2b_부고장 생성 (추가상주)
+    // 1. 부고장 생성 완료 (상주용) — 2026-08-20 새 템플릿 교체 (?m= 파라미터 포함 맞춤 링크)
+    'KA01TP2602070138097871zexjvolnSU': 'KA01TP26080907213286667y3LSdpjeU', // b2b_부고장 생성
     // 2. 감사장 안내 (상주용)
     'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내
     // 3. 화환 결제 완료 (조문객용)
