@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
                         .order('created_at', { ascending: false });
 
                     if (condOrders) {
-                        const companyRate = companyData?.condolence_company_rate ?? 3.6;
+                        const companyRate = companyData?.condolence_company_rate ?? 3.3;
                         condolenceList = condOrders.map(c => {
                             const matchedBugo = compBugos.find(b => String(b.id) === String(c.bugo_number) || String(b.bugo_number) === String(c.bugo_number));
                             const matchedUser = compUsers.find(u => u.id === matchedBugo?.b2b_user_id);
