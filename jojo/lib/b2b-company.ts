@@ -15,6 +15,7 @@ export interface B2BCompany {
     wreath_member_commission_amount: number; // 소속 지도사 화환 수당 (기본 10,000원)
     gift_commission_amount: number; // 상조 본사 답례품 수수료 (기본 5,000원)
     gift_member_commission_amount: number; // 소속 지도사 답례품 수당 (기본 5,000원)
+    gift_company_rate?: number; // 답례품 상조 쉐어 퍼센트 (%) (선택)
     condolence_fee_rate: number; // 부의금 총 수수료율 (기본 8.6%)
     condolence_company_rate: number; // 상조회사 부의금 쉐어 수수료율 (%) (기본 3.3%)
     condolence_pg_rate: number; // PG 원가 명목 수수료율 (기본 3.0%)
@@ -38,7 +39,7 @@ export function normalizeCompanyData(comp: any): B2BCompany {
             gift_commission_amount: 5000,
             gift_member_commission_amount: 5000,
             condolence_fee_rate: 8.6,
-            condolence_company_rate: 3.3,
+            condolence_company_rate: 3.6, // 8.6 - 3.0(PG) - 2.0(플랫폼) = 3.6
             condolence_pg_rate: 3.0,
             condolence_platform_rate: 2.0,
             condolence_vat_enabled: true,
@@ -91,7 +92,7 @@ export function normalizeCompanyData(comp: any): B2BCompany {
             : 8.6,
         condolence_company_rate: comp.condolence_company_rate !== undefined && comp.condolence_company_rate !== null
             ? Number(comp.condolence_company_rate)
-            : 3.3,
+            : 3.6, // 8.6 - 3.0(PG) - 2.0(플랫폼) = 3.6
         condolence_pg_rate: comp.condolence_pg_rate !== undefined && comp.condolence_pg_rate !== null
             ? Number(comp.condolence_pg_rate)
             : 3.0,

@@ -157,10 +157,65 @@ export async function GET(request: NextRequest) {
                 };
             });
 
+            // 부의금 쉐어 정산 내역 조인 (상조 소속 지도사의 부고장 결제건)
+            let condolenceList: any[] = [];
+            const { data: compUsers } = await supabase
+                .from('b2b_users')
+                .select('id, owner_name, company_name')
+                .eq('company_id', companyId);
+
+            if (compUsers && compUsers.length > 0) {
+                const userIds = compUsers.map(u => u.id);
+                const { data: compBugos } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number, deceased_name, b2b_user_id')
+                    .in('b2b_user_id', userIds);
+
+                if (compBugos && compBugos.length > 0) {
+                    const bugoIds = compBugos.map(b => String(b.id));
+                    const bugoNums = compBugos.map(b => String(b.bugo_number)).filter(Boolean);
+                    const allBugoKeys = Array.from(new Set([...bugoIds, ...bugoNums]));
+
+                    const { data: condOrders } = await supabase
+                        .from('condolence_orders')
+                        .select('*')
+                        .in('bugo_number', allBugoKeys)
+                        .gte('created_at', startOfMonth)
+                        .lt('created_at', endOfMonth)
+                        .order('created_at', { ascending: false });
+
+                    if (condOrders) {
+                        const companyRate = companyData?.condolence_company_rate ?? 3.6;
+                        condolenceList = condOrders.map(c => {
+                            const matchedBugo = compBugos.find(b => String(b.id) === String(c.bugo_number) || String(b.bugo_number) === String(c.bugo_number));
+                            const matchedUser = compUsers.find(u => u.id === matchedBugo?.b2b_user_id);
+                            const shareAmount = Math.round((c.amount || 0) * (companyRate / 100));
+                            const isCancelled = c.status === 'cancelled';
+
+                            return {
+                                id: c.id,
+                                order_number: c.moid?.startsWith('BCOND_') ? `DO${String(c.id).padStart(6, '0')}` : c.order_number || `DO${String(c.id).padStart(6, '0')}`,
+                                buyer_name: c.buyer_name,
+                                recipient_name: c.recipient_name,
+                                amount: c.amount,
+                                fee: c.fee,
+                                company_rate: companyRate,
+                                share_amount: isCancelled ? 0 : shareAmount,
+                                partner_name: matchedUser?.owner_name || '미등록',
+                                deceased_name: matchedBugo?.deceased_name || '미등록',
+                                status: c.status,
+                                created_at: c.created_at
+                            };
+                        });
+                    }
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 company: companyData || null,
-                settlements: detailedList
+                settlements: detailedList,
+                condolenceSettlements: condolenceList
             });
         } else {
             // 전체 대금 정산 월별 요약 목록 조회

@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
         sortedById.forEach((o, idx) => { idToDoNum.set(o.id, idx + 1); });
 
         const formattedOrders = (orders || []).map(o => {
-            const realBugo = (b2bBugos || []).find(b => String(b.id) === String(o.bugo_number));
+            // 부고장을 생성한 B2B 장례지도사 정보 매칭
+            const realBugo = (b2bBugos || []).find(b => String(b.id) === String(o.bugo_number) || String(b.bugo_number) === String(o.bugo_number));
             const b2bUser = realBugo?.b2b_users;
             const companyName = Array.isArray(b2bUser) 
                 ? (b2bUser[0] as any)?.company_name 
@@ -62,12 +63,14 @@ export async function GET(request: NextRequest) {
                 : (b2bUser as any)?.company_id;
 
             const company = (b2bCompanies || []).find(c => c.id === companyId || c.name === companyName);
-            const companyRate = company?.condolence_company_rate ?? 3.3;
+            // 상조회사 소속 파트너 여부 판단 (company_id가 있고 b2b_companies에 존재하는 경우만 상조 소속으로 인정)
+            const isCompanyPartner = !!companyId && !!company && companyName !== '알 수 없음';
+            const companyRate = isCompanyPartner ? (company?.condolence_company_rate ?? 3.6) : 0;
 
-            // 상조회사 쉐어 몫 = 부의금 원금 * (상조 쉐어 퍼센트 / 100)
-            const companyShareAmount = Math.round((o.amount || 0) * (companyRate / 100));
-            // 플랫폼 몫 = 총 수수료 - 상조회사 몫 (최소 0원 이상)
-            const platformShareAmount = Math.max(0, (o.fee || 0) - companyShareAmount);
+            // 상조회사 쉐어 몫 = 상조 소속일 때만 퍼센트 적용, 상조 미소속이면 0원
+            const companyShareAmount = isCompanyPartner ? Math.round((o.amount || 0) * (companyRate / 100)) : 0;
+            // 대표님(플랫폼) 몫 = 상조 미소속 시 수수료 100% 전체, 상조 소속 시 수수료 - 상조 몫
+            const platformShareAmount = isCompanyPartner ? Math.max(0, (o.fee || 0) - companyShareAmount) : (o.fee || 0);
 
             // B2B 주문번호: DO 접두사 (순번 기반)
             const doNum = idToDoNum.get(o.id) || 1;
