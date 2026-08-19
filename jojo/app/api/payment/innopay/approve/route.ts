@@ -669,49 +669,86 @@ export async function POST(request: NextRequest) {
 
                     // =============================================
                     // [B2B] 조의금 결제 시 파트너 예치금 자동 적립
+                    // 상조 소속 파트너: 수수료에서 상조 쉐어(condolence_company_rate%) 차감 후 적립
+                    // 개인/프리랜서: 수수료 전액 적립
                     // =============================================
                     if (bugoData?.b2b_user_id && fee > 0) {
                         try {
                             const partnerId = bugoData.b2b_user_id;
+                            let partnerReward = fee; // 기본: 수수료 전액
 
-                            // 파트너 예치금 조회
-                            const { data: currentDeposit } = await supabase
-                                .from('deposits')
-                                .select('balance')
-                                .eq('user_id', partnerId)
+                            // 상조회사 소속 여부 확인 및 쉐어 차감
+                            const { data: condolencePartner } = await supabase
+                                .from('b2b_users')
+                                .select('company_id')
+                                .eq('id', partnerId)
                                 .single();
 
-                            if (currentDeposit) {
-                                await supabase
+                            if (condolencePartner?.company_id) {
+                                const { data: rawCompany } = await supabase
+                                    .from('b2b_companies')
+                                    .select('*')
+                                    .eq('id', condolencePartner.company_id)
+                                    .single();
+
+                                const companyData = normalizeCompanyData(rawCompany);
+                                const companyRate = companyData.condolence_company_rate; // 기본 3.3%
+                                const companyShare = Math.round(selectedAmount * (companyRate / 100));
+
+                                if (companyShare > 0) {
+                                    // 상조회사 정산 테이블에 부의금 쉐어 적재
+                                    await supabase.from('b2b_company_settlements').insert({
+                                        company_id: condolencePartner.company_id,
+                                        order_id: condolenceOrderNumber || moid,
+                                        amount: companyShare,
+                                        status: 'pending'
+                                    });
+                                    console.log(`✅ [B2B] 상조회사 ${condolencePartner.company_id}에 부의금 쉐어 ${companyShare}원 정산 적재`);
+
+                                    // 지도사 수당에서 상조 쉐어 차감
+                                    partnerReward = Math.max(0, fee - companyShare);
+                                }
+                            }
+
+                            // 파트너 예치금 적립 (상조 쉐어 차감 후)
+                            if (partnerReward > 0) {
+                                const { data: currentDeposit } = await supabase
                                     .from('deposits')
-                                    .update({
-                                        balance: (currentDeposit.balance || 0) + fee,
-                                        updated_at: new Date().toISOString(),
-                                    })
-                                    .eq('user_id', partnerId);
-                            } else {
-                                // 예치금 테이블에 없으면 새로 생성
+                                    .select('balance')
+                                    .eq('user_id', partnerId)
+                                    .single();
+
+                                if (currentDeposit) {
+                                    await supabase
+                                        .from('deposits')
+                                        .update({
+                                            balance: (currentDeposit.balance || 0) + partnerReward,
+                                            updated_at: new Date().toISOString(),
+                                        })
+                                        .eq('user_id', partnerId);
+                                } else {
+                                    await supabase
+                                        .from('deposits')
+                                        .insert({
+                                            user_id: partnerId,
+                                            balance: partnerReward,
+                                            updated_at: new Date().toISOString(),
+                                        });
+                                }
+
+                                // 적립 내역 기록
                                 await supabase
-                                    .from('deposits')
+                                    .from('deposit_transactions')
                                     .insert({
                                         user_id: partnerId,
-                                        balance: fee,
-                                        updated_at: new Date().toISOString(),
+                                        amount: partnerReward,
+                                        type: 'condolence_reward',
+                                        description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
+                                        related_order_id: condolenceOrderNumber || moid,
                                     });
                             }
 
-                            // 적립 내역 기록
-                            await supabase
-                                .from('deposit_transactions')
-                                .insert({
-                                    user_id: partnerId,
-                                    amount: fee,
-                                    type: 'condolence_reward',
-                                    description: `조의금 수당 적립 (${buyerInfo.name || '조문객'})`,
-                                    related_order_id: condolenceOrderNumber || moid,
-                                });
-
-                            console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${fee}원 적립 완료`);
+                            console.log(`✅ [B2B] 파트너 ${partnerId}에게 조의금 수당 ${partnerReward}원 적립 완료`);
                         } catch (b2bCondolenceError) {
                             console.error('❌ [B2B] 조의금 예치금 적립 오류 (결제는 정상):', b2bCondolenceError);
                         }
