@@ -1,5 +1,45 @@
 # 마음부고 변경 이력
 
+## 2026-08-21
+
+### 🪦 B2B 부고장 제작 장지 정보 입력란(BurialSection) 복원 & 표기명 통일
+- **파일**: `app/b2b/create/sections/BurialSection.tsx`, `app/b2b/create/page.tsx`, `app/b2b/manage/page.tsx`
+- 부고장 제작 시 `상주정보`와 `기타옵션` 사이에 장지 정보 섹션 신규 작성 및 배치 (1차 장지 기본 노출 + `+ 2차 장지 추가/삭제` 지원).
+- 미리보기 팝업 모달 및 부고 관리 상세 모달에서 `1차장지` ➡️ `장지`로 표기명 통일.
+
+### 📱 상주별 알림톡 링크(?m=) 변수 연동 & 호칭 개인화
+- **파일**: `app/api/b2b/send-mourner-notify/route.ts`, `app/api/bugo-notify/route.ts`, `app/b2b/view/[id]/ViewContent.tsx`
+- 상주별 알림톡 발송 시 최신 B2B 알림톡 템플릿에 `m` 파라미터(상주 등록 순서 0, 1, 2...) 전달 연동 (버튼 클릭 시 `?m={m}`으로 자동 랜딩).
+- 상주 이름 `trim()` 처리로 조사 띄어쓰기(`고둘리의 부친`, `백승훈의 장인`) 자연스럽게 보정.
+- 카톡 알림톡 실발송 및 맞춤 호칭 변환 검증 완료.
+
+## 2026-08-20
+
+### 💰 B2B 수당 및 부의금 정산 분배 정책 확정 & 정산서 버그 수정
+- **파일**: `lib/b2b-company.ts`, `app/api/b2b/admin/settings/route.ts`, `app/api/payment/innopay/approve/route.ts`, `app/api/b2b/admin/companies/settlements/route.ts`, `app/b2b/admin/companies/settlements/page.tsx`
+- 부의금 수수료 8.6% 확정: PG+VAT 3.3% / 플랫폼 2.0% / 상조회사 3.3% / 지도사 0원.
+- 정산서 API 부의금 이중 표시 버그, 정산 완료 상태 불일치 버그, CSV 다운로드 부의금 누락 버그 3건 수정 완료.
+
+## 2026-08-09
+
+### 🏢 B2B 상조회사 수수료율 & 수당 세팅 어드민 구축
+- **파일**: `lib/b2b-company.ts`, `app/api/b2b/admin/companies/route.ts`, `app/b2b/admin/companies/page.tsx`
+- 신규 상조회사 등록 및 수정 모달에 부의금 수수료율(%), 화환 판매 본사/팀원 수당(원), 답례품 본사/팀원 수당(원) 및 선택적 답례품 수수료율(%) 필드 추가 및 DB 저장 연동
+
+### 📋 파트너 관리 내 상조회사 수수료 & 요율표 개요 카드 연동
+- **파일**: `app/b2b/admin/partners/page.tsx`
+- 파트너 상세 정보 모달 내 소속 상조회사의 수수료율 및 화환/답례품 수당 요율표 요약 카드 UI 연동
+
+### 💰 조의금 주문 관리 어드민 상조 소속별 몫 조건부 분배
+- **파일**: `app/api/b2b/admin/condolence-orders/route.ts`, `app/b2b/admin/condolence-orders/page.tsx`
+- 부고장을 개설한 장례지도사가 상조회사 소속일 때만 상조 몫 수수료율(%) 적용 및 분배
+- 상조 미소속(개인 파트너/일반 부고장)의 경우 상조 몫 0원(0%), 대표님(플랫폼) 몫 100% 수수료 전액 집계
+
+### 📄 상조회사 월별 통합 정산서 출력 및 명세표 개편
+- **파일**: `app/api/b2b/admin/companies/settlements/route.ts`, `app/b2b/admin/companies/settlements/page.tsx`
+- 월별 정산서 출력 화면에 `■ 화환 판매 정산 세부 내역 명세`와 `■ 부의금 정산 세부 내역 명세` 독립 렌더링
+- 상단/하단 총 정산금액에 화환 정산액 + 부의금 정산액 통산 합산 집계
+
 ## 2026-08-05
 
 ### 📱 1:1 문의 페이지 앱 상단 safe-area 패딩 보정
