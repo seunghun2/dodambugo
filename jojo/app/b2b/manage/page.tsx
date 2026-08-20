@@ -454,7 +454,7 @@ function B2BManagePageContent() {
               </div>
 
               <div className={styles.modalRow}>
-                <span className={styles.modalLabel}>1차장지</span>
+                <span className={styles.modalLabel}>장지</span>
                 <span className={styles.modalValue}>
                   {selectedBugo.burial_place ? (
                     `${selectedBugo.burial_place}${selectedBugo.burial_place2 ? ` / ${selectedBugo.burial_place2}` : ''}`

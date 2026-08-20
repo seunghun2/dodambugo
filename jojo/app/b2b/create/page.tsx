@@ -609,9 +609,9 @@ export default function B2BCreatePage() {
                 </span>
               </div>
 
-              {/* 1차장지 */}
+              {/* 장지 */}
               <div className={styles.previewInfoRow}>
-                <span className={styles.previewLabel}>1차장지</span>
+                <span className={styles.previewLabel}>장지</span>
                 <span className={styles.previewValue}>
                   {formData.burial_place ? (
                     `${formData.burial_place}${formData.burial_place2 ? ` / ${formData.burial_place2}` : ''}`
