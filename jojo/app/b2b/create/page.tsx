@@ -7,6 +7,7 @@ import FuneralHomeSection from './sections/FuneralHomeSection';
 import DeceasedSection from './sections/DeceasedSection';
 import DateTimeSection from './sections/DateTimeSection';
 import MournerSection from './sections/MournerSection';
+import BurialSection from './sections/BurialSection';
 import PhotoSection from './sections/PhotoSection';
 import OptionsSection from './sections/OptionsSection';
 import FacilitySearchModal from '@/components/FacilitySearchModal';
@@ -509,6 +510,12 @@ export default function B2BCreatePage() {
           mourners={mourners}
           onMournersChange={setMourners}
           errors={errors}
+        />
+
+        {/* 장지 정보 */}
+        <BurialSection
+          formData={formData}
+          onChange={handleChange}
         />
 
         {/* 옵션 */}
