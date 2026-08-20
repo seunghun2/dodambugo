@@ -822,7 +822,8 @@ ${url}
                             return getDeceasedRelation(rel, gender);
                         };
 
-                        const trimmedName = currentName.trim();
+                        const relTerm = getFormattedRelation(currentRel, bugo.gender || '남');
+                        const trimmedName = (currentName || '').trim();
                         const mournerText = trimmedName 
                             ? `${trimmedName}의 ${relTerm ? `${relTerm} ` : ''}` 
                             : '';
