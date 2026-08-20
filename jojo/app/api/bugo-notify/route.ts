@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
                         '발인일시': dateTimeInfo,
                         '부고번호': bugo_number,
                         'owner_token': bugo.owner_token || '',
+                        'm': '0',
                     },
                     undefined,
                     isB2B

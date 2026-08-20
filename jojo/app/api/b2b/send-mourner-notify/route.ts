@@ -97,14 +97,13 @@ ${customUrl}
                 try {
                     await sendAlimtalk(
                         phone,
-                        'KA01TP260714223554397jpnpiNrrFt2', // B2B 부고장 알림톡 템플릿 (bugoon 프로필)
+                        'KA01TP2602070138097871zexjvolnSU', // B2B 부고장 알림톡 템플릿 (m 파라미터 포함)
                         {
-                            '대표상주명': bugo.mourner_name || '',
-                            '고인명': bugo.deceased_name || '',
+                            '고인명': deceased ? `故 ${deceased}` : '',
                             '장례식장': funeralLocation,
                             '발인일시': dateTimeInfo,
                             '부고번호': bugo_number,
-                            'owner_token': bugo.owner_token || '',
+                            'm': String(mParamValue),
                         },
                         undefined,
                         true
