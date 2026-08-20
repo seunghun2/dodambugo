@@ -822,9 +822,9 @@ ${url}
                             return getDeceasedRelation(rel, gender);
                         };
 
-                        const relTerm = getFormattedRelation(currentRel, bugo.gender || '남');
-                        const mournerText = currentName 
-                            ? `${currentName}의 ${relTerm ? `${relTerm} ` : ''}` 
+                        const trimmedName = currentName.trim();
+                        const mournerText = trimmedName 
+                            ? `${trimmedName}의 ${relTerm ? `${relTerm} ` : ''}` 
                             : '';
 
                         return (
