@@ -260,24 +260,29 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
                 body: JSON.stringify({ bugoId, token: tokenParam })
             })
                 .then(res => res.json())
-                .then(result => {
+                    const mParam = searchParams.get('m');
+                    const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
+
                     if (result.valid) {
                         // 유효한 토큰 → localStorage에 저장
                         localStorage.setItem(storageKey, 'true');
                         setIsOwner(true);
                     }
-                    // 토큰 유효 여부 상관없이 URL 정리
-                    window.history.replaceState({}, '', window.location.pathname);
+                    // 토큰 유효 여부 상관없이 URL 정리 (?m= 파라미터 보존)
+                    window.history.replaceState({}, '', cleanUrl);
                 })
                 .catch(() => {
+                    const mParam = searchParams.get('m');
+                    const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
                     // 에러 시에도 URL 정리
-                    window.history.replaceState({}, '', window.location.pathname);
+                    window.history.replaceState({}, '', cleanUrl);
                 });
         } else if (ownerParam === 'true') {
             // 기존 owner=true 방식 (하위 호환)
             localStorage.setItem(storageKey, 'true');
             setIsOwner(true);
-            const cleanUrl = window.location.pathname;
+            const mParam = searchParams.get('m');
+            const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
             window.history.replaceState({}, '', cleanUrl);
         } else {
             // localStorage에서 확인
@@ -378,16 +383,24 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         }
     };
 
-    // 공유용 URL: owner 파라미터 제거 + 프로덕션 도메인 강제 + UTM 파라미터
+    // 공유용 URL: owner 파라미터 제거 + 접속 도메인(부고온/마음부고) 유지 + ?m= 상주 파라미터 유지
     const getCleanShareUrl = (utmMedium?: string) => {
         const pathname = window.location.pathname;
-        const baseUrl = window.location.hostname.includes('maeumbugo.co.kr')
-            ? `https://maeumbugo.co.kr${pathname}`
-            : `${window.location.origin}${pathname}`;
+        const isBugoon = window.location.hostname.includes('bugoon.maeumbugo.co.kr');
+        const isMaeumBugo = window.location.hostname.includes('maeumbugo.co.kr');
+        const baseUrl = isBugoon
+            ? `https://bugoon.maeumbugo.co.kr${pathname}`
+            : isMaeumBugo
+                ? `https://maeumbugo.co.kr${pathname}`
+                : `${window.location.origin}${pathname}`;
+
+        const mParam = searchParams.get('m');
+        const mQuery = mParam !== null ? `m=${encodeURIComponent(mParam)}` : '';
+
         if (utmMedium) {
-            return `${baseUrl}?utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
+            return `${baseUrl}?${mQuery ? `${mQuery}&` : ''}utm_source=share&utm_medium=${utmMedium}&utm_campaign=bugo`;
         }
-        return baseUrl;
+        return mQuery ? `${baseUrl}?${mQuery}` : baseUrl;
     };
     // 공유 횟수 서버 추적
     const trackShare = (method: string) => {
