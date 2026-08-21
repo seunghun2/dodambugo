@@ -27,6 +27,11 @@
 - 화환 결제: `flower_orders.status === 'completed'` 확인 가드를 추가하여 새로고침/재시도 시 파트너 수당 및 추천 보너스 이중 적립 원천 차단.
 - 부의금 결제: `condolence_orders`의 `moid` 중복 확인 가드를 추가하여 상조 정산 및 알림톡 중복 발송 차단.
 
+### 💰 화환 결제 금액 할인가 반영 및 크론 송금액 보정
+- **파일**: `app/view/[id]/payment/[productId]/PaymentContent.tsx`, `app/api/cron/auto-approve-withdrawals/route.ts`
+- `PaymentContent`: 할인 상품 주문 시 정가 대신 `effectivePrice(orderData.productPrice || product.price)`를 결제 금액(`taxFreeAmt`)으로 전달하도록 보정.
+- `auto-approve-withdrawals`: 송금 시 세전 금액 대신 실수령액(`req.net_amount || req.amount`)을 전달하도록 방어 코드 보강.
+
 ## 2026-08-21
 
 

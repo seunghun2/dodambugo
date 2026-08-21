@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
                         bankCode: bankCode,
                         acntNo: cleanAccNo,
                         acntNm: req.account_holder,
-                        amt: String(req.amount),
+                        amt: String(req.net_amount || req.amount),
                         depAcntNo: '66400001397152',
                         depAcntNm: '부고온정산',
                     }),

@@ -218,6 +218,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
             })();
 
             // INNOPAY 결제창 호출
+            const effectivePrice = orderData.productPrice || product.price;
             window.innopay.goPay({
                 payMethod: payMethodMap[paymentMethod] || 'CARD',
                 mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
@@ -225,13 +226,13 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                 goodsName: product.name,
                 goodsCnt: '1',
                 amt: '0',  // 과세금액 없음 (화환 = 전액 면세)
-                taxFreeAmt: String(product.price),  // 면세금액 = 상품가격 (총 결제금액 = amt + taxFreeAmt)
+                taxFreeAmt: String(effectivePrice),  // 면세금액 = 상품가격 (총 결제금액 = amt + taxFreeAmt)
                 buyerName: paymentForm.senderName,
                 buyerTel: paymentForm.senderPhone.replace(/-/g, ''),
                 buyerEmail: 'order@maeumbugo.co.kr',
                 returnUrl: `${window.location.origin}${dynamicPrefix}/view/${bugoId}/payment/callback`,
                 currency: 'KRW',
-                mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id, originalTaxFreeAmt: String(product.price) }),
+                mallReserved: JSON.stringify({ bugoId, productId, orderId: result.id, originalTaxFreeAmt: String(effectivePrice) }),
                 vBankExpDate: paymentMethod === 'virtual' ? getVBankExpDate() : '', // 가상계좌 입금기한
             });
 
