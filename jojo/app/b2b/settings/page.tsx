@@ -391,8 +391,10 @@ export default function SettingsPage() {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             const viewParam = params.get('view');
-            if (viewParam === 'faq' || viewParam === 'notice') {
-                setView(viewParam as any);
+            if (viewParam === 'notice') {
+                router.replace('/b2b/notice');
+            } else if (viewParam === 'faq') {
+                setView('faq');
             }
         }
     }, [fetchUser]);
