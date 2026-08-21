@@ -1,6 +1,23 @@
 # 마음부고 변경 이력
 
+## 2026-08-22
+
+### 💳 부의금 카드결제 상주별 계좌 매핑 오류 수정 & mourners 안전 파싱
+- **파일**: `app/view/[id]/ViewContent.tsx`, `app/b2b/view/[id]/ViewContent.tsx`, `app/view/[id]/condolence/page.tsx`, `app/b2b/view/[id]/condolence/page.tsx`
+- 부의금 모달 카드결제 클릭 시 화면 순서(`i`) 대신 상주 고유 인덱스(`acc.mournerIndex`) 전달.
+- 카드결제 화면에서 DB `bugo.mourners` JSON 문자열 안전 파싱 및 `?m=` 파라미터 기반 1:1 정확한 상주 계좌 선택 로직 통일.
+
+### 🔇 부의금 결제 승인 시 지도사(파트너) 대상 불필요한 LMS 발송 로직 제거
+- **파일**: `app/api/payment/innopay/approve/route.ts`
+- 지도사는 부의금 수당 대상이 아니므로, 오해를 유발하던 파트너 대상 조의금 LMS 문자 발송 블록 완전 제거 (문자 비용 절감).
+
+### 🔐 계좌 노출 설정 API 및 회원탈퇴 API 보안 가드 적용
+- **파일**: `app/api/b2b/update-account-display/route.ts`, `app/api/b2b/withdraw/route.ts`, `app/b2b/create/complete/[bugoNumber]/page.tsx`
+- `update-account-display`: JWT 인증 + 부고장 개설자 소유권(`b2b_user_id === userId`) 검증 가드 추가하여 외부 계좌 변조 원천 차단.
+- `withdraw`: 비인증 전화번호 기반 강제 탈퇴 코드 제거하고 JWT 로그인 본인 인증 필수화.
+
 ## 2026-08-21
+
 
 ### 🪦 B2B 부고장 제작 장지 정보 입력란(BurialSection) 복원 & 표기명 통일
 - **파일**: `app/b2b/create/sections/BurialSection.tsx`, `app/b2b/create/page.tsx`, `app/b2b/manage/page.tsx`
