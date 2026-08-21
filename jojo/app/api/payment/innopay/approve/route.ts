@@ -830,39 +830,6 @@ export async function POST(request: NextRequest) {
                                         .eq('order_number', condolenceOrderNumber);
                                 }
 
-                                // 📱 [B2B] 파트너에게 "조의금 수당 적립 및 상주 이체 완료" 문자 알림 발송
-                                if (bugoData?.b2b_user_id) {
-                                    try {
-                                        const { data: partnerUser } = await supabase
-                                            .from('b2b_users')
-                                            .select('phone, company_name, owner_name')
-                                            .eq('id', bugoData.b2b_user_id)
-                                            .single();
-
-                                        if (partnerUser?.phone) {
-                                            const partnerPhone = partnerUser.phone.replace(/-/g, '');
-                                            const { sendLMS } = await import('@/lib/solapi');
-                                            
-                                            const partnerMsg = `[부고온] 조의금 수당 적립 및 이체 완료 안내
-
-안녕하세요, ${partnerUser.company_name} ${partnerUser.owner_name} 파트너님.
-개설하신 부고에서 조의금 이체 및 수당 적립이 완료되었습니다.
-
-■ 고인명: 故 ${bugoData.deceased_name || ''}
-■ 조문객: ${buyerInfo.name || ''}
-■ 이체금액: ${(selectedAmount || 0).toLocaleString()}원
-■ 파트너 수당: ${(fee || 0).toLocaleString()}원 적립 완료
-
-적립 현황은 파트너 앱에서 확인 가능합니다.
-■ 파트너 정산: https://bugoon.co.kr/b2b/wallet`;
-
-                                            await sendLMS(partnerPhone, '[부고온] 조의금 수당 적립 안내', partnerMsg);
-                                            console.log(`📱 [B2B] 파트너 조의금 수당 적립 문자 발송 완료: ${partnerPhone}`);
-                                        }
-                                    } catch (partnerSmsErr) {
-                                        console.error('❌ [B2B] 파트너 조의금 알림 발송 실패:', partnerSmsErr);
-                                    }
-                                }
 
 
                                 // 📱 상주에게 "부의금 전달 완료" 알림톡 발송
