@@ -1294,7 +1294,7 @@ ${url}
                                                         fontWeight: 500
                                                     }}
                                                     onClick={() => {
-                                                        window.location.href = `/b2b/view/${params.id}/condolence?m=${i}`;
+                                                        window.location.href = `/b2b/view/${params.id}/condolence?m=${acc.mournerIndex}`;
                                                     }}
                                                 >
                                                     카드결제
