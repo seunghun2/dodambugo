@@ -36,50 +36,71 @@ export default async function B2BCondolencePage({
 
     let account = null;
     if (bugo) {
-        const allAccounts: Array<{
-            relationship: string;
-            name: string;
-            bank: string;
-            holder: string;
-            number: string;
-        }> = [];
+        let mournersArr: any[] = [];
+        if (Array.isArray(bugo.mourners)) {
+            mournersArr = bugo.mourners;
+        } else if (typeof bugo.mourners === 'string') {
+            try { mournersArr = JSON.parse(bugo.mourners); } catch (e) {}
+        }
 
-        if (bugo.account_info) {
+        const isNumeric = /^\d+$/.test(m || '');
+        let targetMourner: any = null;
+
+        if (m) {
+            if (isNumeric) {
+                const idx = parseInt(m, 10);
+                if (idx >= 0 && idx < mournersArr.length) {
+                    targetMourner = mournersArr[idx];
+                }
+            } else {
+                targetMourner = mournersArr.find((item: any) => item.name === m);
+            }
+        }
+
+        // 1. 지정된 상주의 계좌가 있으면 그 계좌 사용
+        if (targetMourner && targetMourner.bank && (targetMourner.accountNumber || targetMourner.number)) {
+            account = {
+                relationship: targetMourner.relationship || '',
+                name: targetMourner.name || targetMourner.accountHolder || '',
+                bank: targetMourner.bank || '',
+                holder: targetMourner.accountHolder || targetMourner.account_holder || targetMourner.holder || targetMourner.name || '',
+                number: targetMourner.accountNumber || targetMourner.number || '',
+            };
+        }
+
+        // 2. 만약 지정 상주 계좌가 없으면, mournersArr 전체 중 첫 번째 유효 계좌 찾기
+        if (!account && mournersArr.length > 0) {
+            const firstWithAcc = mournersArr.find((item: any) => item.bank && (item.accountNumber || item.number));
+            if (firstWithAcc) {
+                account = {
+                    relationship: firstWithAcc.relationship || '',
+                    name: firstWithAcc.name || firstWithAcc.accountHolder || '',
+                    bank: firstWithAcc.bank || '',
+                    holder: firstWithAcc.accountHolder || firstWithAcc.account_holder || firstWithAcc.holder || firstWithAcc.name || '',
+                    number: firstWithAcc.accountNumber || firstWithAcc.number || '',
+                };
+            }
+        }
+
+        // 3. 그래도 없으면 account_info fallback
+        if (!account && bugo.account_info) {
             try {
                 const accounts = typeof bugo.account_info === 'string'
                     ? JSON.parse(bugo.account_info)
                     : bugo.account_info;
                 if (Array.isArray(accounts) && accounts.length > 0) {
                     const acc = accounts[0];
-                    allAccounts.push({
+                    account = {
                         relationship: '',
                         name: bugo.mourner_name || acc.holder || '',
                         bank: acc.bank || '',
-                        holder: acc.holder || '',
-                        number: acc.number || '',
-                    });
+                        holder: acc.holder || acc.accountHolder || '',
+                        number: acc.number || acc.accountNumber || '',
+                    };
                 }
             } catch (e) {
                 console.error('account_info 파싱 오류:', e);
             }
-        }
-
-        if (bugo.mourners && Array.isArray(bugo.mourners)) {
-            bugo.mourners.forEach((m: any) => {
-                if (m.accountNumber && m.bank) {
-                    allAccounts.push({
-                        relationship: m.relationship || '',
-                        name: m.name || m.accountHolder || '',
-                        bank: m.bank || '',
-                        holder: m.accountHolder || m.name || '',
-                        number: m.accountNumber || '',
-                    });
-                }
-            });
-        }
-
-        if (allAccounts.length > 0) {
-            account = allAccounts[Math.min(mournerIndex, allAccounts.length - 1)];
         }
     }
 
