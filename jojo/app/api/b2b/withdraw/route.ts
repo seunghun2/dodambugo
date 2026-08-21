@@ -38,20 +38,10 @@ export async function POST(request: NextRequest) {
             body = await request.json();
         } catch {}
 
-        let userId = getUserIdFromToken(request) || body.userId;
-        const targetPhone = body.phone;
-
-        if (!userId && targetPhone) {
-            const { data: found } = await supabase
-                .from('b2b_users')
-                .select('id')
-                .eq('phone', targetPhone.replace(/[^0-9]/g, ''))
-                .maybeSingle();
-            if (found) userId = found.id;
-        }
+        const userId = getUserIdFromToken(request);
 
         if (!userId) {
-            return NextResponse.json({ error: '로그인이 필요하거나 대상 회원을 찾을 수 없습니다.' }, { status: 401 });
+            return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
         }
 
         // 1. 유저 및 예치금 잔액 조회

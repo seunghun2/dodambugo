@@ -146,9 +146,13 @@ export default function B2BCompletePage() {
     setMourners(updatedMourners);
 
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('b2b_token') : null;
       const res = await fetch('/api/b2b/update-account-display', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           bugo_number: params.bugoNumber,
           mourners: updatedMourners.map(m => ({
