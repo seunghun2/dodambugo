@@ -17,7 +17,11 @@ export default function SettingsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await fetch('/api/b2b/admin/settings');
+                const token = typeof window !== 'undefined' ? (localStorage.getItem('b2b_token') || sessionStorage.getItem('admin_token') || '') : '';
+                const headers: Record<string, string> = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/b2b/admin/settings', { headers });
                 if (!res.ok) {
                     throw new Error('설정 정보를 가져오는데 실패했습니다.');
                 }
@@ -55,9 +59,13 @@ export default function SettingsPage() {
 
         setSaving(true);
         try {
+            const token = typeof window !== 'undefined' ? (localStorage.getItem('b2b_token') || sessionStorage.getItem('admin_token') || '') : '';
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const res = await fetch('/api/b2b/admin/settings', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     wreath_reward_amount: wReward,
                     referral_bonus_amount: rBonus,

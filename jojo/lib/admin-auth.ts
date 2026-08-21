@@ -30,5 +30,14 @@ export function verifyAdmin(request: NextRequest): boolean {
         } catch {}
     }
 
+    // 3. b2b_token 쿠키 검증 (B2B 로그인 세션 호환)
+    const b2bToken = request.cookies.get('b2b_token')?.value;
+    if (b2bToken) {
+        try {
+            const decoded = jwt.verify(b2bToken, JWT_SECRET) as any;
+            if (decoded.userId || decoded.role === 'admin') return true;
+        } catch {}
+    }
+
     return false;
 }

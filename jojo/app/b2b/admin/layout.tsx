@@ -41,6 +41,11 @@ export default function B2BAdminLayout({
         });
 
         if (res.ok) {
+            const data = await res.json();
+            if (data.token) {
+                sessionStorage.setItem('admin_token', data.token);
+                localStorage.setItem('admin_token', data.token);
+            }
             sessionStorage.setItem('admin_session', 'authenticated');
             setIsAuthenticated(true);
         } else {
