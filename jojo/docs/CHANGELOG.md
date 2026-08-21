@@ -16,8 +16,11 @@
 - `update-account-display`: JWT 인증 + 부고장 개설자 소유권(`b2b_user_id === userId`) 검증 가드 추가하여 외부 계좌 변조 원천 차단.
 ### 🔐 비밀번호 재설정 SMS 인증 토큰(JWT) 검증 가드 적용
 - **파일**: `app/api/phone-verify/confirm/route.ts`, `app/b2b/login/forgot/page.tsx`, `app/api/b2b/reset-password/route.ts`
-- SMS 인증번호 확인 성공 시 10분 유효 `verificationToken` 발급.
-- 비밀번호 재설정 시 서버에서 해당 인증 토큰을 필수 검증하여 외부 무단 비밀번호 변경/계정 탈취 100% 원천 차단.
+### 💸 출금 동시성(Race Condition) 이중 출금 방어 (선차감 후송금 보상 트랜잭션)
+- **파일**: `app/api/b2b/wallet/route.ts`
+- 출금 실행 시 DB 지갑 잔액을 원자적(`gte balance`)으로 선(先)차감 후 펌뱅킹 송금하도록 순서 재구성.
+- 더블 클릭이나 동시 다중 요청 시 첫 번째 1건만 통과하고 나머지는 잔액 부족으로 즉시 차단.
+- 은행 송금 실패 시 깎였던 잔액을 즉시 지갑으로 안전하게 자동 복구(환불)하는 보상 트랜잭션 구현.
 
 ## 2026-08-21
 

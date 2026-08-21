@@ -239,12 +239,35 @@ export async function POST(request: NextRequest) {
         net_amount = amount - withholding_tax - local_income_tax;
     }
 
-    // 🛡️ 1단계: 최초 DB 적재 시 무조건 'pending' 상태로 안정적 생성
+    // 🛡️ 1단계: 지갑 잔액 원자적 선차감 (동시성 이중 출금 / 더블 클릭 완벽 방어)
+    const { data: updatedDeposit, error: deductError } = await supabase
+        .from('deposits')
+        .update({ 
+            balance: deposit.balance - amount, 
+            updated_at: new Date().toISOString() 
+        })
+        .eq('user_id', userId)
+        .gte('balance', amount)
+        .select('balance')
+        .single();
+
+    if (deductError || !updatedDeposit) {
+        return NextResponse.json({ error: '잔액이 부족하거나 이미 처리 중인 출금 요청이 있습니다.' }, { status: 400 });
+    }
+
+    // 출금 차감 거래 내역 INSERT
+    await supabase.from('deposit_transactions').insert({
+        user_id: userId,
+        amount: -amount,
+        type: 'withdrawal',
+        description: `출금 신청 (${user.bank_name} ${user.account_no})`,
+    });
+
+    // 🛡️ 2단계: 출금 신청 INSERT (우선 pending 상태로 등록)
     const isAutoApprove = Boolean(user.identity_verified) && (user.auto_payout_enabled ?? true);
-    let finalStatus: 'pending' | 'approved' = 'pending';
+    let finalStatus: 'pending' | 'approved' | 'rejected' = 'pending';
     let processedAt: string | null = null;
 
-    // 출금 신청 INSERT (우선 pending 상태로 안심 등록)
     const { data: withdrawData, error: withdrawError } = await supabase
         .from('withdrawal_requests')
         .insert({
@@ -265,10 +288,15 @@ export async function POST(request: NextRequest) {
         .single();
 
     if (withdrawError) {
+        // 출금 신청서 생성 실패 시 차감 잔액 롤백
+        await supabase
+            .from('deposits')
+            .update({ balance: deposit.balance, updated_at: new Date().toISOString() })
+            .eq('user_id', userId);
         return NextResponse.json({ error: '출금 신청에 실패했습니다.' }, { status: 500 });
     }
 
-    // 🚀 2단계: [자동입금 ON] 파트너인 경우 동기(await)로 펌뱅킹 실이체 직접 실행
+    // 🚀 3단계: [자동입금 ON] 파트너인 경우 동기(await)로 펌뱅킹 실이체 실행
     if (isAutoApprove) {
         try {
             const BANK_CODES: Record<string, string> = {
@@ -312,7 +340,7 @@ export async function POST(request: NextRequest) {
             console.log('📥 [B2B] 펌뱅킹 자동 이체 응답 수신:', transferResult);
 
             if (transferResult && transferResult.resultCode === '0000') {
-                // 🟢 3단계: 이체 완전 성공 시에만 'approved' (송금완료) 로 DB 승인 처리!
+                // 🟢 이체 완전 성공 시 'approved' (송금완료) 처리
                 finalStatus = 'approved';
                 processedAt = new Date().toISOString();
 
@@ -323,15 +351,37 @@ export async function POST(request: NextRequest) {
 
                 console.log(`✅ [B2B] 실계좌 입금 100% 성공 및 DB approved 업데이트 완료: RequestID=${withdrawData.id}`);
             } else {
-                // 🔴 펌뱅킹 이체 실패 시: DB 상태를 'pending' (대기중)으로 유지하여 어드민에서 [송금진행] 가능하도록 함!
-                console.error(`⚠️ [B2B] 펌뱅킹 이체 거절/실패 (사유: ${transferResult?.resultMsg || '알 수 없음'}). status: pending (대기중)으로 유지합니다.`);
+                // 🔴 이체 실패 시: 보상 트랜잭션 (선차감했던 잔액 자동 복구/환불)
+                console.error(`⚠️ [B2B] 펌뱅킹 이체 실패 (${transferResult?.resultMsg || '오류'}). 잔액을 자동 복구합니다.`);
+                
+                await supabase
+                    .from('deposits')
+                    .update({ balance: deposit.balance, updated_at: new Date().toISOString() })
+                    .eq('user_id', userId);
+
+                await supabase.from('deposit_transactions').insert({
+                    user_id: userId,
+                    amount: amount,
+                    type: 'withdrawal_refund',
+                    description: `출금 이체 실패로 인한 잔액 자동 복구 (${transferResult?.resultMsg || '이체 실패'})`,
+                });
+
+                await supabase
+                    .from('withdrawal_requests')
+                    .update({ status: 'rejected' })
+                    .eq('id', withdrawData.id);
+
+                return NextResponse.json({ 
+                    error: `출금 이체 실패: ${transferResult?.resultMsg || '은행 전산 오류'}. 잔액이 안전하게 복구되었습니다.` 
+                }, { status: 400 });
             }
-        } catch (payoutErr) {
-            console.error('❌ [B2B] 펌뱅킹 API 통신 실패 (네트워크 타임아웃/오류). status: pending (대기중)으로 안전 유지:', payoutErr);
+        } catch (payoutErr: any) {
+            console.error('❌ [B2B] 펌뱅킹 통신 타임아웃/오류:', payoutErr);
+            // 통신 에러 시에는 이중 송금 방지를 위해 pending 상태 유지 후 관리자 확인 유도
         }
     }
 
-    // 슬랙 알림 전송 (비동기 호출 후 로그 남김)
+    // 슬랙 알림 전송 (비동기)
     if (user) {
         sendB2BWithdrawalRequestNotification({
             company_name: user.company_name || '미등록',
@@ -345,19 +395,13 @@ export async function POST(request: NextRequest) {
         }).catch(err => console.error('❌ 출금 신청 슬랙 알림 실패:', err));
     }
 
-    // 예치금 차감
-    await supabase
-        .from('deposits')
-        .update({ balance: deposit.balance - amount, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-
-    // 거래 내역 INSERT
-    await supabase.from('deposit_transactions').insert({
-        user_id: userId,
-        amount: -amount,
-        type: 'withdrawal',
-        description: `출금 신청 (${user.bank_name} ${user.account_no})`,
+    return NextResponse.json({ 
+        success: true, 
+        message: finalStatus === 'approved' ? '출금이 완료되었습니다.' : '출금 신청이 접수되었습니다.',
+        net_amount,
+        status: finalStatus,
+        bank_name: user.bank_name,
+        account_no: user.account_no,
+        account_holder: user.account_holder
     });
-
-    return NextResponse.json({ success: true, message: '출금 신청이 완료되었습니다.' });
 }
