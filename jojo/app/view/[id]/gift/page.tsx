@@ -90,11 +90,11 @@ export default function GiftPage() {
     const fetchBugoInfo = async () => {
         setLoading(true);
         try {
-            const { data } = await supabase
-                .from('bugos')
-                .select('deceased_name, mourner_name')
-                .eq('bugo_number', bugoId)
-                .single();
+            const isUUID = bugoId.includes('-') && bugoId.length > 10;
+            const query = supabase.from('bugo').select('deceased_name, mourner_name').is('deleted_at', null);
+            const { data } = isUUID
+                ? await query.eq('id', bugoId).single()
+                : await query.eq('bugo_number', bugoId).single();
 
             if (data) {
                 setBugoInfo(data);

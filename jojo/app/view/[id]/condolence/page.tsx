@@ -12,13 +12,16 @@ export default async function CondolencePage({
     const { m } = await searchParams;
     const mournerIndex = parseInt(m || '0', 10);
 
-    // DB에서 bugo 계좌 정보 조회
-    const { data: bugo } = await supabase
+    // DB에서 bugo 계좌 정보 조회 (UUID 및 bugo_number 둘 다 완벽 지원)
+    const isUUID = id.includes('-') && id.length > 10;
+    const query = supabase
         .from('bugo')
         .select('mourner_name, account_info, mourners')
-        .eq('bugo_number', id)
-        .is('deleted_at', null)
-        .single();
+        .is('deleted_at', null);
+
+    const { data: bugo } = isUUID
+        ? await query.eq('id', id).single()
+        : await query.eq('bugo_number', id).order('created_at', { ascending: false }).limit(1).single();
 
     let account = null;
     if (bugo) {
