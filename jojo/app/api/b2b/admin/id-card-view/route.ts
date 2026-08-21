@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +9,11 @@ const supabase = createClient(
 
 // GET: 어드민 보안 신분증 이미지 서빙 (Service Role 임시 서명 URL로 100% 원본 렌더링)
 export async function GET(request: NextRequest) {
+    // 🛡️ 보안 가드: 관리자 로그인(JWT) 검증 필수
+    if (!verifyAdmin(request)) {
+        return new NextResponse('권한이 없습니다.', { status: 403 });
+    }
+
     try {
         const { searchParams } = new URL(request.url);
         let path = searchParams.get('path');
