@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
@@ -9,7 +10,7 @@ const supabase = createClient(
 
 // GET: 특정 상조회사의 본사 계정(담당자) 목록 조회
 export async function GET(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
 // POST: 상조회사 본사 전용 계정 신규 발급
 export async function POST(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
 // PUT: 기존 B2B 가입 파트너를 본사 계정으로 매핑 및 비밀번호 변경
 export async function PUT(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

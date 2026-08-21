@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendLMS } from '@/lib/solapi';
@@ -10,7 +11,7 @@ const supabase = createClient(
 
 // GET: B2B 파트너 목록 조회 (부고장 건수, 누적 열람수, 누적 화환 판매건수 실시간 집계 추가)
 export async function GET(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH: B2B 파트너 상태 변경 (승인/반려/차단)
 export async function PATCH(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -267,7 +268,7 @@ export async function PATCH(request: NextRequest) {
 
 // POST: B2B 파트너 비밀번호 초기화 (기본값 '00000000')
 export async function POST(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

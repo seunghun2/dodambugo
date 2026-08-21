@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendB2BWithdrawalApproveNotification, sendB2BWithdrawalRejectNotification } from '@/lib/slack';
@@ -9,7 +10,7 @@ const supabase = createClient(
 
 // GET: 출금 신청 목록 조회
 export async function GET(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
@@ -89,7 +90,7 @@ const getBankCode = (name: string) => {
 
 // POST: 출금 신청 승인 또는 반려 처리 (이노페이 송금 API 연동 + RPC)
 export async function POST(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

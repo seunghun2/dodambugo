@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeCompanyData } from '@/lib/b2b-company';
@@ -12,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
 
 // GET: 특정 상조회사의 월별 대금 정산 요약 목록 또는 특정 월의 상세 내역 조회 (지도사명, 고인명, 부고ID 조인 추가)
 export async function GET(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     let isCompanyUser = false;
     const { searchParams } = new URL(request.url);
     const companyId = searchParams.get('companyId');
@@ -295,7 +296,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH: 특정 상조회사의 특정 월(yearMonth)에 발생한 대기 건을 대금 정산 완료 처리
 export async function PATCH(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

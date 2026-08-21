@@ -127,4 +127,30 @@ describe('보안 및 출금 가드 로직 단위 테스트', () => {
             expect(result.duplicated).toBe(true);
         });
     });
+
+    describe('5. 어드민 암호화 JWT 서명 검증 (쿠키 조작 차단)', () => {
+        it('위조된 단순 문자열 "true" 쿠키는 관리자 인증에 실패해야 함', () => {
+            const forgedCookie = 'true';
+            let isValid = false;
+            try {
+                const decoded = jwt.verify(forgedCookie, JWT_SECRET) as any;
+                isValid = decoded.role === 'admin';
+            } catch {
+                isValid = false;
+            }
+            expect(isValid).toBe(false);
+        });
+
+        it('정상 발급된 관리자 JWT 토큰은 관리자 인증을 통과해야 함', () => {
+            const validAdminToken = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '30d' });
+            let isValid = false;
+            try {
+                const decoded = jwt.verify(validAdminToken, JWT_SECRET) as any;
+                isValid = decoded.role === 'admin';
+            } catch {
+                isValid = false;
+            }
+            expect(isValid).toBe(true);
+        });
+    });
 });

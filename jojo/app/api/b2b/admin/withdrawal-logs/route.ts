@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8,7 +9,7 @@ const supabase = createClient(
 
 // GET: 특정 파트너의 출금 내역 조회
 export async function GET(request: NextRequest) {
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdmin = verifyAdmin(request);
     if (!isAdmin) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }

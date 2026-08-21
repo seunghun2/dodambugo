@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,9 +8,8 @@ const supabase = createClient(
 );
 
 export async function GET(request: NextRequest) {
-    // 보안 가드: admin_ip 쿠키 검증
-    const isAdmin = request.cookies.get('admin_ip')?.value === 'true';
-    if (!isAdmin) {
+    // 보안 가드: 암호화된 관리자 JWT 검증
+    if (!verifyAdmin(request)) {
         return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
     }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { signAdminToken } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,11 +34,12 @@ export async function POST(request: NextRequest) {
                     .eq('ip_address', ip);
             }
 
-            // 응답에 admin_ip 쿠키 설정 (미들웨어에서 화이트리스트 판별용)
+            // 응답에 암호화된 관리자 JWT 토큰 쿠키 설정
             const host = request.headers.get('host') || '';
             const isProdDomain = host.includes('maeumbugo.co.kr');
+            const adminToken = signAdminToken();
 
-            const response = NextResponse.json({ success: true });
+            const response = NextResponse.json({ success: true, token: adminToken });
             const cookieOptions: any = {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -50,7 +52,8 @@ export async function POST(request: NextRequest) {
                 cookieOptions.domain = '.maeumbugo.co.kr';
             }
 
-            response.cookies.set('admin_ip', 'true', cookieOptions);
+            response.cookies.set('admin_token', adminToken, cookieOptions);
+            response.cookies.set('admin_ip', adminToken, cookieOptions);
             return response;
         } else {
             return NextResponse.json({ error: 'Invalid password' }, { status: 401 });

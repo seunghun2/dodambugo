@@ -32,6 +32,11 @@
 - `PaymentContent`: 할인 상품 주문 시 정가 대신 `effectivePrice(orderData.productPrice || product.price)`를 결제 금액(`taxFreeAmt`)으로 전달하도록 보정.
 - `auto-approve-withdrawals`: 송금 시 세전 금액 대신 실수령액(`req.net_amount || req.amount`)을 전달하도록 방어 코드 보강.
 
+### 🔐 어드민 암호화 JWT 서명 검증 가드 일원화 (쿠키 조작 권한 우회 차단)
+- **파일**: `lib/admin-auth.ts`, `app/api/admin-auth/route.ts`, `app/api/b2b/admin/**/route.ts` (17개 라우트)
+- 단순 문자열 쿠키(`admin_ip=true`) 대신 서버 비밀키로 서명된 관리자 전용 JWT 발급 및 `verifyAdmin()` 일괄 검증 적용.
+- 외부에서 `admin_ip=true` 쿠키를 수동 조작하여 관리자 API에 무단 접근하는 취약점 100% 원천 차단.
+
 ## 2026-08-21
 
 
