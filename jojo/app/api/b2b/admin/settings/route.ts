@@ -67,18 +67,17 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: '올바른 설정값을 입력해주세요.' }, { status: 400 });
         }
 
-        const updates = [
-            { key: 'wreath_reward_amount', value: String(wreath_reward_amount) },
-            { key: 'referral_bonus_amount', value: String(referral_bonus_amount) },
-            { key: 'min_withdrawal_amount', value: String(min_withdrawal_amount) },
+        // 각 설정값 개별 update (확실한 DB 반영)
+        const updatePromises = [
+            supabase.from('b2b_settings').update({ value: String(wreath_reward_amount) }).eq('key', 'wreath_reward_amount'),
+            supabase.from('b2b_settings').update({ value: String(referral_bonus_amount) }).eq('key', 'referral_bonus_amount'),
+            supabase.from('b2b_settings').update({ value: String(min_withdrawal_amount) }).eq('key', 'min_withdrawal_amount'),
         ];
 
-        // 다중 Upsert 실행
-        const { error } = await supabase
-            .from('b2b_settings')
-            .upsert(updates, { onConflict: 'key' });
-
-        if (error) throw error;
+        const results = await Promise.all(updatePromises);
+        for (const res of results) {
+            if (res.error) throw res.error;
+        }
 
         console.log(`⚙️ B2B 어드민 설정 업데이트 완료:`, body);
 
