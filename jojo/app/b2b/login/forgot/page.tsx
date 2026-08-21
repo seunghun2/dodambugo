@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconArrowLeft } from '@tabler/icons-react';
 import styles from './forgot.module.css';
@@ -28,12 +28,23 @@ export default function ForgotPasswordPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [verificationToken, setVerificationToken] = useState('');
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, []);
 
     const startTimer = () => {
+        if (timerRef.current) clearInterval(timerRef.current);
         setTimer(180);
-        const interval = setInterval(() => {
+        timerRef.current = setInterval(() => {
             setTimer((prev) => {
-                if (prev <= 1) { clearInterval(interval); return 0; }
+                if (prev <= 1) {
+                    if (timerRef.current) clearInterval(timerRef.current);
+                    return 0;
+                }
                 return prev - 1;
             });
         }, 1000);

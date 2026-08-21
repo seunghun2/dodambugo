@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEye, IconEyeOff, IconCheck } from '@tabler/icons-react';
 import styles from './signup.module.css';
@@ -110,13 +110,22 @@ function SignupInner() {
         referralInfo: null,
     });
 
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, []);
+
     // 타이머
     const startTimer = () => {
+        if (timerRef.current) clearInterval(timerRef.current);
         setTimer(180);
-        const interval = setInterval(() => {
+        timerRef.current = setInterval(() => {
             setTimer((prev) => {
                 if (prev <= 1) {
-                    clearInterval(interval);
+                    if (timerRef.current) clearInterval(timerRef.current);
                     return 0;
                 }
                 return prev - 1;

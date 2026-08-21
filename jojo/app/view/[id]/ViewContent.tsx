@@ -260,6 +260,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
                 body: JSON.stringify({ bugoId, token: tokenParam })
             })
                 .then(res => res.json())
+                .then(result => {
                     const mParam = searchParams.get('m');
                     const cleanUrl = window.location.pathname + (mParam !== null ? `?m=${encodeURIComponent(mParam)}` : '');
 
