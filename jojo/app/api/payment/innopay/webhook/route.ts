@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
                                     .select('value')
                                     .eq('key', 'referral_bonus_amount')
                                     .single();
-                                const bonusAmount = parseInt(bonusSetting?.value || '2000');
+                                const bonusAmount = parseInt(bonusSetting?.value || '2500');
 
                                 // 추천인 잔액 업데이트
                                 const { data: refDeposit } = await supabase
