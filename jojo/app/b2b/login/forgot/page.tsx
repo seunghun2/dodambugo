@@ -27,6 +27,7 @@ export default function ForgotPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [verificationToken, setVerificationToken] = useState('');
 
     const startTimer = () => {
         setTimer(180);
@@ -111,6 +112,7 @@ export default function ForgotPasswordPage() {
             });
             const data = await res.json();
             if (res.ok) {
+                setVerificationToken(data.verificationToken || '');
                 setVerified(true);
                 setStep(2);
             } else {
@@ -143,6 +145,7 @@ export default function ForgotPasswordPage() {
                 body: JSON.stringify({
                     phone: phone.replace(/[^0-9]/g, ''),
                     newPassword,
+                    verificationToken,
                 }),
             });
             const data = await res.json();

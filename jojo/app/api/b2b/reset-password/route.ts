@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 
@@ -6,6 +7,8 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
 
 export async function POST(req: NextRequest) {
     try {
@@ -74,11 +77,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: '가입된 파트너 계정을 찾을 수 없습니다.' }, { status: 404 });
         }
 
-        // 기존 비밀번호 검증 (currentPassword가 전달되었을 때)
+        // 기존 비밀번호 검증 (currentPassword가 전달되었을 때 - 로그인 중 변경)
         if (currentPassword) {
             const isPasswordCorrect = await bcrypt.compare(currentPassword, partner.password_hash);
             if (!isPasswordCorrect) {
                 return NextResponse.json({ error: '기존 비밀번호가 일치하지 않습니다.' }, { status: 400 });
+            }
+        } else {
+            // 비밀번호 찾기(재설정) 시: SMS 인증 토큰 검증 필수
+            if (!body.verificationToken) {
+                return NextResponse.json({ error: '휴대폰 인증이 필요합니다.' }, { status: 401 });
+            }
+
+            try {
+                const decoded = jwt.verify(body.verificationToken, JWT_SECRET) as any;
+                if (decoded.phone !== cleanPhone || decoded.purpose !== 'reset-password') {
+                    return NextResponse.json({ error: '유효하지 않은 인증 정보입니다. 다시 인증해 주세요.' }, { status: 401 });
+                }
+            } catch (tokenErr) {
+                return NextResponse.json({ error: '인증 유효시간이 만료되었습니다. 다시 인증해 주세요.' }, { status: 401 });
             }
         }
 
