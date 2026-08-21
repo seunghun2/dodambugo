@@ -22,6 +22,11 @@
 - 더블 클릭이나 동시 다중 요청 시 첫 번째 1건만 통과하고 나머지는 잔액 부족으로 즉시 차단.
 - 은행 송금 실패 시 깎였던 잔액을 즉시 지갑으로 안전하게 자동 복구(환불)하는 보상 트랜잭션 구현.
 
+### 🛡️ 결제 승인 중복 방지 (Idempotency Guard)
+- **파일**: `app/api/payment/innopay/approve/route.ts`, `__tests__/security-wallet.test.ts`
+- 화환 결제: `flower_orders.status === 'completed'` 확인 가드를 추가하여 새로고침/재시도 시 파트너 수당 및 추천 보너스 이중 적립 원천 차단.
+- 부의금 결제: `condolence_orders`의 `moid` 중복 확인 가드를 추가하여 상조 정산 및 알림톡 중복 발송 차단.
+
 ## 2026-08-21
 
 

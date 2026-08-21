@@ -259,6 +259,23 @@ export async function POST(request: NextRequest) {
         const transactionId = approveResult.data?.tid || tid || '';
 
         if (actualOrderId) {
+            // 🛡️ 1. 중복 승인 방지 (이미 처리된 주문인 경우 중복 수당 적립 및 중복 알림 방지)
+            const { data: existingOrder } = await supabase
+                .from('flower_orders')
+                .select('id, status, order_number')
+                .eq('id', actualOrderId)
+                .maybeSingle();
+
+            if (existingOrder?.status === 'completed') {
+                console.log(`ℹ️ [Flower Order] 이미 처리 완료된 주문입니다 (중복 승인 방지): ${actualOrderId}`);
+                return NextResponse.json({
+                    success: true,
+                    message: '이미 결제 처리가 완료된 주문입니다.',
+                    orderId: actualOrderId,
+                    orderNumber: existingOrder.order_number
+                });
+            }
+
             // 1단계: status 먼저 업데이트 (확실히 작동)
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
@@ -571,6 +588,22 @@ export async function POST(request: NextRequest) {
         const isCondolenceMoid = moid && (moid.startsWith('COND_') || moid.startsWith('BCOND_'));
         if (isCondolenceMoid) {
             try {
+                // 🛡️ 1. 부의금 중복 승인 방지 (이미 저장된 moid가 있는 경우 중복 정산 및 슬랙/알림톡 발송 방지)
+                const { data: existingCondolence } = await supabase
+                    .from('condolence_orders')
+                    .select('id, order_number, status')
+                    .eq('moid', moid)
+                    .maybeSingle();
+
+                if (existingCondolence) {
+                    console.log(`ℹ️ [Condolence Order] 이미 처리 완료된 부의금 주문입니다 (중복 승인 방지): ${moid}`);
+                    return NextResponse.json({
+                        success: true,
+                        message: '이미 결제 처리가 완료된 부의금 주문입니다.',
+                        orderNumber: existingCondolence.order_number || String(existingCondolence.id)
+                    });
+                }
+
                 // mallReserved에서 부의금 정보 추출
                 const mallReservedData = approveResult.data?.etc?.mallReserved;
                 let condolenceInfo: any = {};

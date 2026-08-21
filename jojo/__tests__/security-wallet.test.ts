@@ -89,4 +89,42 @@ describe('보안 및 출금 가드 로직 단위 테스트', () => {
             expect(balance).toBe(100000);
         });
     });
+
+    describe('4. 결제 승인 중복 방지 (Idempotency Guard)', () => {
+        it('이미 completed 상태인 화환 주문은 수당을 중복 지급하지 않아야 함', () => {
+            let partnerDeposit = 0;
+            const rewardPerWreath = 20000;
+            const orderState = { id: 101, status: 'completed' };
+
+            // 결제 승인 핸들러 시뮬레이션
+            const handlePaymentApprove = (order: typeof orderState) => {
+                if (order.status === 'completed') {
+                    return { duplicated: true, message: '이미 처리된 주문입니다.' };
+                }
+                order.status = 'completed';
+                partnerDeposit += rewardPerWreath;
+                return { duplicated: false, message: '승인 완료' };
+            };
+
+            const result = handlePaymentApprove(orderState);
+            expect(result.duplicated).toBe(true);
+            expect(partnerDeposit).toBe(0); // 수당이 추가 적립되지 않음!
+        });
+
+        it('동일한 moid의 부의금 주문이 이미 존재하면 중복 적재하지 않아야 함', () => {
+            const existingMoids = new Set(['BCOND_12345']);
+            const incomingMoid = 'BCOND_12345';
+
+            const handleCondolenceApprove = (moid: string) => {
+                if (existingMoids.has(moid)) {
+                    return { duplicated: true, message: '이미 처리된 부의금 주문입니다.' };
+                }
+                existingMoids.add(moid);
+                return { duplicated: false, message: '승인 완료' };
+            };
+
+            const result = handleCondolenceApprove(incomingMoid);
+            expect(result.duplicated).toBe(true);
+        });
+    });
 });
