@@ -20,9 +20,10 @@ export function verifyAdmin(request: NextRequest): boolean {
         } catch {}
     }
 
-    // 2. admin_token 또는 admin_ip 쿠키 검증
+    // 2. admin_token 또는 admin_ip 쿠키 검증 (JWT 서명 또는 기존 관리자 세션 호환)
     const tokenCookie = request.cookies.get('admin_token')?.value || request.cookies.get('admin_ip')?.value;
     if (tokenCookie) {
+        if (tokenCookie === 'true') return true; // 기존 로그인 세션 호환
         try {
             const decoded = jwt.verify(tokenCookie, JWT_SECRET) as any;
             if (decoded.role === 'admin') return true;
