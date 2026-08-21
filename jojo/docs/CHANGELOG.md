@@ -45,6 +45,11 @@
 - **파일**: `app/api/b2b/verify/route.ts`
 - 미연동된 더미 모의 OCR 코드를 제거하고, 가입자명과 입력된 실명 일치 대조 및 신분증 안전 저장 구조로 직관화.
 
+### 💰 추천인 보너스 수당 기본값(Fallback) 2,500원 통일 및 어드민 DB 실시간 동기화
+- **파일**: `app/api/payment/innopay/webhook/route.ts`, `app/api/b2b/admin/settings/route.ts`
+- 웹훅 승인 시 추천인 보너스 비상 기본값을 2,000원 ➡️ 2,500원으로 통일.
+- 어드민 설정 화면에서 대표님이 입력한 수당/보너스/출금 기준 금액이 Supabase 운영 DB에 실시간 덮어쓰기(`update`)되도록 안정화.
+
 ## 2026-08-21
 
 
