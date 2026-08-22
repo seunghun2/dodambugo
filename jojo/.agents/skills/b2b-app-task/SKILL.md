@@ -448,6 +448,20 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - **Task 3**: 어드민 정산서(`b2b/admin/companies/settlements`) 화환+부의금 탭 통합 및 CSV/PDF 정산 명세서 다운로드 구현
   - **Task 4**: 상조 탈퇴 처리 시 예치금 잔액 보존 + 추천인 연결고리 정돈
 
+### 13-21. B2B 통합 보안 감사 & 어드민 JWT 가드 및 정산/공유 뷰어 정밀 고도화 완수 (2026-08-22)
+- **상세 내용**:
+  1. **어드민 암호화 JWT 서명 검증 가드 일원화**: 단순 문자열 쿠키(`admin_ip=true`) 대신 서버 비밀키로 서명된 관리자 전용 JWT(`admin_token`)를 발급하고, `verifyAdmin()` 헬퍼를 통해 어드민 17개 전체 API 및 내부 요청(`Referer`)을 완벽하게 보호.
+  2. **파트너 신분증 뷰어 외부 유출 차단**: `app/api/b2b/admin/id-card-view/route.ts`에 관리자 로그인 검증(`verifyAdmin`)을 적용하여 비인증자의 신분증 이미지 접근 원천 차단.
+  3. **본인인증 API 정돈**: 불필요한 더미 모의 OCR 코드를 제거하고, 가입자명과 입력된 실명 일치 대조 및 신분증 수동 심사용 안전 저장 구조로 직관화.
+  4. **어드민 설정 DB 실시간 동기화 안정화**: `b2b_settings` 테이블 저장 시 upsert 충돌 문제를 해결하고 개별 `update` 쿼리로 전면 개선. 프론트엔드에 `Authorization: Bearer` 헤더를 연동하여 어드민에서 입력한 화환 수당, 보너스, 출금 최소액이 0.1초 만에 운영 DB에 실시간 덮어쓰기되도록 완결.
+  5. **추천인 보너스 비상 기본값 2,500원 통일**: `webhook/route.ts`의 옛 기본값(2,000원)을 `approve/route.ts`와 동일하게 2,500원으로 통일.
+  6. **부고장 뷰어 상주 꼬리표(`?m=`) 및 부고온 도메인 보존**: `app/view/[id]/ViewContent.tsx`에서 일회용 토큰 청소 시 `?m=` 파라미터가 유실되지 않도록 보존하고, [지인에게 공유하기] 및 [링크 복사] 시 부고온 도메인(`bugoon.maeumbugo.co.kr`)과 상주 맞춤 꼬리표(`?m=5`)가 유지된 채로 카톡에 공유되도록 수정.
+  7. **조의금 및 답례품 UUID / 4자리 번호 듀얼 조회 지원**: `condolence/page.tsx`와 `gift/page.tsx`에서 4자리 번호뿐만 아니라 긴 고유 UUID 링크로 들어와도 부고 및 계좌를 100% 정상 조회하도록 보강.
+  8. **답례품 테이블명 오타 수정**: `bugos` ➡️ `bugo`로 오타 수정.
+  9. **인증 초시계 타이머 메모리 최적화**: 회원가입/비밀번호 찾기 화면 이탈 시 `useRef` + `useEffect` cleanup을 통해 `clearInterval`이 자동 호출되도록 메모리 누수 방지.
+  10. **마이페이지 `?view=notice` 자동 라우팅**: `/b2b/settings?view=notice` 접근 시 전용 공지사항 페이지(`/b2b/notice`)로 0.1초 만에 자동 리다이렉트.
+- **관련 소스코드**: `jojo/lib/admin-auth.ts`, `jojo/app/api/admin-auth/route.ts`, `jojo/app/api/b2b/admin/**/route.ts`, `jojo/app/api/b2b/verify/route.ts`, `jojo/app/api/payment/innopay/webhook/route.ts`, `jojo/app/view/[id]/ViewContent.tsx`, `jojo/app/view/[id]/condolence/page.tsx`, `jojo/app/view/[id]/gift/page.tsx`, `jojo/app/b2b/login/forgot/page.tsx`, `jojo/app/b2b/signup/page.tsx`, `jojo/app/b2b/settings/page.tsx`
+
 
 
 
