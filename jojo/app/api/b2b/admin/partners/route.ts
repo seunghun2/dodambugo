@@ -122,11 +122,18 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        // 5. 상조회사 목록 조회하여 company_id -> 회사명 매핑
+        const { data: b2bCompanies } = await supabase
+            .from('b2b_companies')
+            .select('id, name');
+        const companyMap = new Map<string, string>();
+        b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
+
         // 결과 가공
         const formattedPartners = partners?.map(p => ({
             id: p.id,
             phone: p.phone,
-            company_name: p.company_name,
+            company_name: (p.company_id && companyMap.get(p.company_id)) || p.company_name || '개인',
             owner_name: p.owner_name,
             bank_name: p.bank_name,
             account_no: p.account_no,
@@ -203,7 +210,15 @@ export async function PATCH(request: NextRequest) {
         }
 
         if (companyId !== undefined) {
-            updateData.company_id = companyId;
+            updateData.company_id = companyId || null;
+            if (companyId) {
+                const { data: comp } = await supabase.from('b2b_companies').select('name').eq('id', companyId).single();
+                if (comp?.name) {
+                    updateData.company_name = comp.name;
+                }
+            } else {
+                updateData.company_name = '개인';
+            }
         }
 
         if (auto_payout_enabled !== undefined) {

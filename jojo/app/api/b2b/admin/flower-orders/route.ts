@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
                     deceased_name,
                     mourners,
                     b2b_user_id,
-                    b2b_users ( company_name, owner_name )
+                    b2b_users ( company_name, owner_name, company_id )
                 )
             `)
             .neq('status', 'pending')
@@ -64,7 +64,14 @@ export async function GET(request: NextRequest) {
 
         const orderIds = ordersData.map(o => o.id);
 
-        // 2. 해당 주문들에 매칭된 예치금 거래 내역(수당 적립액 확인용) 조회
+        // 2. 상조회사 목록 조회
+        const { data: b2bCompanies } = await supabase
+            .from('b2b_companies')
+            .select('id, name');
+        const companyMap = new Map<string, string>();
+        b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
+
+        // 3. 해당 주문들에 매칭된 예치금 거래 내역(수당 적립액 확인용) 조회
         const { data: txData, error: txError } = await supabase
             .from('deposit_transactions')
             .select('related_order_id, amount, type')
@@ -72,7 +79,7 @@ export async function GET(request: NextRequest) {
 
         if (txError) throw txError;
 
-        // 3. 거래 내역을 주문 ID 기준으로 매핑 (wreath_reward 및 referral_bonus)
+        // 4. 거래 내역을 주문 ID 기준으로 매핑 (wreath_reward 및 referral_bonus)
         const txMap: Record<string, { reward: number; bonus: number }> = {};
         orderIds.forEach(id => {
             txMap[id] = { reward: 0, bonus: 0 };
@@ -89,13 +96,14 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        // 4. 최종 결과 가공
+        // 5. 최종 결과 가공
         const formattedOrders = ordersData.map(o => {
             const price = Number(o.product_price) || 0;
             const txInfo = txMap[o.id] || { reward: 0, bonus: 0 };
 
             const bugo = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;
             const b2bUser = bugo ? (Array.isArray(bugo.b2b_users) ? bugo.b2b_users[0] : bugo.b2b_users) : null;
+            const displayCompanyName = (b2bUser?.company_id && companyMap.get(b2bUser.company_id)) || b2bUser?.company_name || '개인';
 
             // 상주 정보에서 대표 상주 성함 파싱
             let primaryMournerName = '';
@@ -129,7 +137,7 @@ export async function GET(request: NextRequest) {
                 ribbon_text1: o.ribbon_text1 || '',
                 ribbon_text2: o.ribbon_text2 || '',
                 deceased_name: bugo?.deceased_name || '알 수 없음',
-                company_name: b2bUser?.company_name || '알 수 없음',
+                company_name: displayCompanyName,
                 owner_name: b2bUser?.owner_name || '알 수 없음',
                 reward_amount: txInfo.reward,
                 bonus_amount: txInfo.bonus

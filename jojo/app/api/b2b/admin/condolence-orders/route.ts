@@ -64,8 +64,9 @@ export async function GET(request: NextRequest) {
                 : (b2bUser as any)?.company_id;
 
             const company = (b2bCompanies || []).find(c => c.id === companyId || c.name === companyName);
+            const displayCompanyName = company?.name || companyName || '개인';
             // 상조회사 소속 파트너 여부 판단 (company_id가 있고 b2b_companies에 존재하는 경우만 상조 소속으로 인정)
-            const isCompanyPartner = !!companyId && !!company && companyName !== '알 수 없음';
+            const isCompanyPartner = !!companyId && !!company && displayCompanyName !== '알 수 없음' && displayCompanyName !== '개인';
             const companyRate = isCompanyPartner ? (company?.condolence_company_rate ?? 3.3) : 0;
 
             // 상조회사 쉐어 몫 = 상조 소속일 때만 퍼센트 적용, 상조 미소속이면 0원
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
                 ...o,
                 order_number: displayOrderNumber,
                 bugo_number: realBugo?.bugo_number || o.bugo_number,
-                company_name: companyName || '알 수 없음',
+                company_name: displayCompanyName,
                 owner_name: ownerName || '-',
                 condolence_company_rate: companyRate,
                 company_share_amount: companyShareAmount,
