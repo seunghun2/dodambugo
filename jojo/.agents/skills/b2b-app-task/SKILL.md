@@ -462,7 +462,11 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   10. **마이페이지 `?view=notice` 자동 라우팅**: `/b2b/settings?view=notice` 접근 시 전용 공지사항 페이지(`/b2b/notice`)로 0.1초 만에 자동 리다이렉트.
   11. **어드민 API 5대 쿼리 `Promise.all` 병렬 고속화 (5~8배 가속)**: 파트너 관리(`partners/route.ts`), 부의금 주문(`condolence-orders/route.ts`), 화환 주문(`flower-orders/route.ts`)의 순차 쿼리들을 동시 병렬 쿼리로 전환하여 로딩 속도를 1.5~2.5초에서 0.2~0.3초대로 단축.
   12. **사이드바 메뉴 위치 직관화**: `B2BAdminSidebar.tsx`에서 **[조의금 주문 관리]** 탭을 **[B2B 화환 주문]** 바로 아래로 이동하여 관리 편의성 극대화.
-- **관련 소스코드**: `jojo/lib/admin-auth.ts`, `jojo/app/api/admin-auth/route.ts`, `jojo/app/api/b2b/admin/**/route.ts`, `jojo/app/api/b2b/verify/route.ts`, `jojo/app/api/payment/innopay/webhook/route.ts`, `jojo/app/view/[id]/ViewContent.tsx`, `jojo/app/view/[id]/condolence/page.tsx`, `jojo/app/view/[id]/gift/page.tsx`, `jojo/app/b2b/login/forgot/page.tsx`, `jojo/app/b2b/signup/page.tsx`, `jojo/app/b2b/settings/page.tsx`, `jojo/components/b2b/B2BAdminSidebar.tsx`
+### 13-22. ⏳ [차기 예정] B2B 카카오톡 공유 썸네일('부고온') 단독 브랜딩 정돈
+- **배경 및 목적**:
+  - 상주가 조문객/지인에게 카카오톡으로 부고장을 공유할 때, 현재 썸네일(`og-bugoon.png`)에 **"장례지도사를 위한 모바일부고장"** 문구가 적혀 있어 조문객 입장에서 어색함.
+  - 다음 작업 시 하단 서브텍스트("장례지도사를 위한~")를 제거하고, 오직 **"부고온"** 로고만 단정하고 격조 높게 들어간 정갈한 썸네일 이미지로 교체 예정.
+- **관련 파일**: `jojo/public/og-bugoon.png`, `jojo/app/b2b/view/[id]/ViewContent.tsx`
 
 
 
