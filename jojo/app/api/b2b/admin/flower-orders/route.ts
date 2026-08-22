@@ -48,28 +48,26 @@ export async function GET(request: NextRequest) {
             .neq('status', 'pending')
             .not('bugo.b2b_user_id', 'is', null);
 
-        if (search) {
-            query = query.or(`product_name.ilike.%${search}%,recipient_name.ilike.%${search}%,funeral_home.ilike.%${search}%`);
-        }
-
-        query = query.order('created_at', { ascending: false });
-
-        const { data: ordersData, error: ordersError } = await query;
+        // 1~2. 화환 주문 및 상조회사 목록 병렬 조회 (초고속화)
+        const [
+            { data: ordersData, error: ordersError },
+            { data: b2bCompanies, error: compError }
+        ] = await Promise.all([
+            query,
+            supabase.from('b2b_companies').select('id, name')
+        ]);
 
         if (ordersError) throw ordersError;
+        if (compError) console.error('상조회사 조회 오류:', compError);
+
+        const companyMap = new Map<string, string>();
+        b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
 
         if (!ordersData || ordersData.length === 0) {
             return NextResponse.json({ success: true, orders: [] });
         }
 
         const orderIds = ordersData.map(o => o.id);
-
-        // 2. 상조회사 목록 조회
-        const { data: b2bCompanies } = await supabase
-            .from('b2b_companies')
-            .select('id, name');
-        const companyMap = new Map<string, string>();
-        b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
 
         // 3. 해당 주문들에 매칭된 예치금 거래 내역(수당 적립액 확인용) 조회
         const { data: txData, error: txError } = await supabase

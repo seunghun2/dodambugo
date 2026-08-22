@@ -40,92 +40,59 @@ export async function GET(request: NextRequest) {
         // 최신 가입 순 정렬
         query = query.order('created_at', { ascending: false });
 
-        const { data: partners, error } = await query;
+        // 1~5. 파트너, 예치금, 부고, 화환주문, 상조회사 5대 쿼리 동시 병렬 조회 (초고속화)
+        const [
+            { data: partners, error: partnersError },
+            { data: deposits, error: depError },
+            { data: bugos, error: bugoError },
+            { data: flowerOrders, error: flowerError },
+            { data: b2bCompanies, error: compError }
+        ] = await Promise.all([
+            query,
+            supabase.from('deposits').select('user_id, balance'),
+            supabase.from('bugo').select('id, b2b_user_id, view_count, created_at').is('deleted_at', null).not('b2b_user_id', 'is', null),
+            supabase.from('flower_orders').select('id, bugo_id').in('status', ['paid', 'completed', 'approved']),
+            supabase.from('b2b_companies').select('id, name')
+        ]);
 
-        if (error) throw error;
-
-        // 2. deposits 전체 조회하여 user_id -> balance 맵 생성
-        const { data: deposits, error: depError } = await supabase
-            .from('deposits')
-            .select('user_id, balance');
-
-        if (depError) {
-            console.error('B2B 파트너 예치금 잔액 조회 오류:', depError);
-        }
+        if (partnersError) throw partnersError;
+        if (depError) console.error('B2B 파트너 예치금 잔액 조회 오류:', depError);
+        if (bugoError) console.error('B2B 파트너 부고 조회 중 오류:', bugoError);
+        if (flowerError) console.error('B2B 파트너 화환 판매 내역 조회 오류:', flowerError);
 
         const balanceMap = new Map<string, number>();
-        if (deposits) {
-            deposits.forEach((d: any) => {
-                if (d.user_id) {
-                    balanceMap.set(String(d.user_id), Number(d.balance || 0));
-                }
-            });
-        }
-
-        // 3. 모든 부고장(bugo) 목록 조회 (삭제되지 않은 건)
-        const { data: bugos, error: bugoError } = await supabase
-            .from('bugo')
-            .select('id, b2b_user_id, view_count, created_at')
-            .is('deleted_at', null)
-            .not('b2b_user_id', 'is', null);
-
-        if (bugoError) {
-            console.error('B2B 파트너 부고 조회 중 오류:', bugoError);
-        }
+        deposits?.forEach((d: any) => {
+            if (d.user_id) balanceMap.set(String(d.user_id), Number(d.balance || 0));
+        });
 
         const bugoCountMap = new Map<string, number>();
         const bugoViewMap = new Map<string, number>();
         const bugoToUserMap = new Map<string, string>(); // bugo_id -> b2b_user_id 매핑용
         const latestBugoMap = new Map<string, string>(); // b2b_user_id -> 최근부고일시
 
-        if (bugos) {
-            bugos.forEach((b: any) => {
-                const userId = String(b.b2b_user_id);
-                const bugoId = String(b.id);
-
-                // 부고장 개수 누적
-                bugoCountMap.set(userId, (bugoCountMap.get(userId) || 0) + 1);
-                // 누적 조회수 합산
-                bugoViewMap.set(userId, (bugoViewMap.get(userId) || 0) + (b.view_count || 0));
-                
-                // 매핑 정보 보관
-                bugoToUserMap.set(bugoId, userId);
-
-                // 최근 부고 개설일 갱신
-                const date = b.created_at;
-                const prevDate = latestBugoMap.get(userId);
-                if (!prevDate || new Date(date) > new Date(prevDate)) {
-                    latestBugoMap.set(userId, date);
-                }
-            });
-        }
-
-        // 4. 승인된 화환 주문(flower_orders) 조회
-        const { data: flowerOrders, error: flowerError } = await supabase
-            .from('flower_orders')
-            .select('id, bugo_id')
-            .in('status', ['paid', 'completed', 'approved']);
-
-        if (flowerError) {
-            console.error('B2B 파트너 화환 판매 내역 조회 오류:', flowerError);
-        }
+        bugos?.forEach((b: any) => {
+            const userId = String(b.b2b_user_id);
+            const bugoId = String(b.id);
+            bugoCountMap.set(userId, (bugoCountMap.get(userId) || 0) + 1);
+            bugoViewMap.set(userId, (bugoViewMap.get(userId) || 0) + (b.view_count || 0));
+            bugoToUserMap.set(bugoId, userId);
+            const date = b.created_at;
+            const prevDate = latestBugoMap.get(userId);
+            if (!prevDate || new Date(date) > new Date(prevDate)) {
+                latestBugoMap.set(userId, date);
+            }
+        });
 
         const flowerSoldCountMap = new Map<string, number>();
-        if (flowerOrders) {
-            flowerOrders.forEach((o: any) => {
-                if (o.bugo_id) {
-                    const userId = bugoToUserMap.get(String(o.bugo_id));
-                    if (userId) {
-                        flowerSoldCountMap.set(userId, (flowerSoldCountMap.get(userId) || 0) + 1);
-                    }
+        flowerOrders?.forEach((o: any) => {
+            if (o.bugo_id) {
+                const userId = bugoToUserMap.get(String(o.bugo_id));
+                if (userId) {
+                    flowerSoldCountMap.set(userId, (flowerSoldCountMap.get(userId) || 0) + 1);
                 }
-            });
-        }
+            }
+        });
 
-        // 5. 상조회사 목록 조회하여 company_id -> 회사명 매핑
-        const { data: b2bCompanies } = await supabase
-            .from('b2b_companies')
-            .select('id, name');
         const companyMap = new Map<string, string>();
         b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
 

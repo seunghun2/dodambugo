@@ -14,35 +14,23 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // B2B 부의금 주문만 조회 (source = 'b2b', fallback: moid BCOND_)
-        let orders: any[] = [];
-        const { data: srcData, error: srcError } = await supabase
-            .from('condolence_orders')
-            .select('*')
-            .eq('source', 'b2b')
-            .order('created_at', { ascending: false });
+        // 1~3. 부의금 주문, 부고장 목록, 상조회사 정보 3대 쿼리 동시 병렬 조회 (초고속화)
+        const [
+            { data: srcData, error: srcError },
+            { data: b2bBugos, error: bugoError },
+            { data: b2bCompanies, error: compError }
+        ] = await Promise.all([
+            supabase.from('condolence_orders').select('*').order('created_at', { ascending: false }),
+            supabase.from('bugo').select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name, company_id )').not('b2b_user_id', 'is', null),
+            supabase.from('b2b_companies').select('id, name, condolence_company_rate')
+        ]);
 
-        if (!srcError && srcData && srcData.length > 0) {
-            orders = srcData;
-        } else {
-            // source 컬럼 캐시 미반영 시 moid 패턴으로 fallback
-            const { data: moidData } = await supabase
-                .from('condolence_orders')
-                .select('*')
-                .like('moid', 'BCOND_%')
-                .order('created_at', { ascending: false });
-            orders = moidData || [];
-        }
+        if (srcError) throw srcError;
+        if (bugoError) console.error('부고 정보 조회 오류:', bugoError);
+        if (compError) console.error('상조회사 조회 오류:', compError);
 
-        // B2B 파트너 정보 & 상조회사 매칭용
-        const { data: b2bBugos } = await supabase
-            .from('bugo')
-            .select('id, bugo_number, b2b_user_id, b2b_users ( company_name, owner_name, company_id )')
-            .not('b2b_user_id', 'is', null);
-
-        const { data: b2bCompanies } = await supabase
-            .from('b2b_companies')
-            .select('id, name, condolence_company_rate');
+        // B2B 부의금 주문만 필터 (source = 'b2b' 또는 moid BCOND_ 접두사)
+        const orders = (srcData || []).filter(o => o.source === 'b2b' || o.moid?.startsWith('BCOND_'));
 
         // id 오름차순으로 순번 계산 후 최신순으로 재정렬
         const sortedById = [...(orders || [])].sort((a, b) => a.id - b.id);
