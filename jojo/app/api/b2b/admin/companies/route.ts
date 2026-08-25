@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeCompanyData } from '@/lib/b2b-company';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,6 +10,9 @@ const supabase = createClient(
 
 // GET: 상조회사 목록 조회
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+    }
     try {
         const { data: companies, error } = await supabase
             .from('b2b_companies')
@@ -29,6 +33,9 @@ export async function GET(request: NextRequest) {
 
 // POST: 신규 상조회사 등록 (표준 사업자 정보 및 부의금 수수료 칼럼 지원)
 export async function POST(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+    }
     try {
         const body = await request.json();
         const { 
@@ -59,6 +66,12 @@ export async function POST(request: NextRequest) {
         if (condolence_pg_rate !== undefined) insertPayload.condolence_pg_rate = parseFloat(condolence_pg_rate);
         if (condolence_platform_rate !== undefined) insertPayload.condolence_platform_rate = parseFloat(condolence_platform_rate);
         if (condolence_vat_enabled !== undefined) insertPayload.condolence_vat_enabled = Boolean(condolence_vat_enabled);
+
+        // 상조회사 로그인 계정 자동 발급 (사업자번호 기반 또는 랜덤 코드)
+        const loginId = business_no ? business_no.replace(/-/g, '') : `company_${Date.now().toString(36)}`;
+        const tempPassword = Math.random().toString(36).slice(-8);
+        insertPayload.login_id = loginId;
+        insertPayload.login_password = tempPassword;
 
         let { data: newCompany, error } = await supabase
             .from('b2b_companies')
@@ -96,6 +109,9 @@ export async function POST(request: NextRequest) {
 
 // PUT: 상조회사 정보 및 수당 수정 (표준 사업자 정보 및 부의금 수수료 칼럼 지원)
 export async function PUT(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+    }
     try {
         const body = await request.json();
         const { 
@@ -165,6 +181,9 @@ export async function PUT(request: NextRequest) {
 
 // DELETE: 상조회사 삭제
 export async function DELETE(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+    }
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');

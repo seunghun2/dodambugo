@@ -185,7 +185,12 @@ export async function middleware(request: NextRequest) {
   const hostLower = host.toLowerCase();
 
   // 로컬 호스트 여부 감지 (localhost, 127.0.0.1, 192.168.x.x 등)
-  const isLocal = hostLower.startsWith('localhost') || hostLower.startsWith('127.0.0.1') || hostLower.startsWith('192.168.');
+  const isLocal = hostLower.startsWith('localhost') || hostLower.startsWith('127.0.0.1') || hostLower.startsWith('192.168.') || hostLower.startsWith('10.');
+
+  // 로컬 개발 환경 접속 시 무조건 즉시 통과 (차단/스피너 방지)
+  if (isLocal) {
+    return NextResponse.next();
+  }
 
   // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
   const isB2BSubdomain =

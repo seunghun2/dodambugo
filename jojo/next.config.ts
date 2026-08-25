@@ -4,8 +4,6 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
   reactCompiler: true,
   serverExternalPackages: ['firebase-admin'],
-  // 아이콘 라이브러리 트리쉐이킹 최적화 (번들 사이즈 대폭 감소)
-  optimizePackageImports: ['@tabler/icons-react', 'react-icons', '@mantine/core'],
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
