@@ -130,8 +130,8 @@ export const cssVariablesResolver: CSSVariablesResolver = (theme) => ({
         '--dodam-shadow-md': 'var(--shadow-md)',
     },
     light: {
-        // 라이트 모드 전용 변수
-        '--mantine-color-body': '#FFFFFF',
+        // 라이트 모드 전용 변수 - 전체 배경을 회색(#F3F4F6)으로 통일
+        '--mantine-color-body': '#F3F4F6',
     },
     dark: {
         // 다크 모드 전용 변수 (필요시 추가)
