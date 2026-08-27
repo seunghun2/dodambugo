@@ -70,48 +70,58 @@ export async function GET(request: NextRequest) {
 
         console.log(`📬 감사장 알림톡 발송 대상: ${bugos.length}건`);
 
+        // 📱 전화번호별 중복 제거 (상주가 부고장을 복제/여러 개 만들어도 1명당 1회만 발송)
+        const bugosByPhone = new Map<string, typeof bugos>();
+        for (const bugo of bugos) {
+            if (!bugo.phone_password) continue;
+            const phone = bugo.phone_password.replace(/-/g, '');
+            if (!bugosByPhone.has(phone)) {
+                bugosByPhone.set(phone, []);
+            }
+            bugosByPhone.get(phone)!.push(bugo);
+        }
+
+        console.log(`📬 감사장 알림톡 고유 발송 대상: ${bugosByPhone.size}명 (총 부고 ${bugos.length}건)`);
+
         let sentCount = 0;
         const errors: string[] = [];
 
-        for (const bugo of bugos) {
-            if (!bugo.phone_password) {
-                console.log(`⏭️ 전화번호 없음: ${bugo.bugo_number}`);
-                continue;
-            }
-
-            const phoneNumber = bugo.phone_password.replace(/-/g, '');
+        for (const [phoneNumber, phoneBugos] of bugosByPhone.entries()) {
+            // 대표 부고 1건 선택 (가장 최근 것)
+            const primaryBugo = phoneBugos[0];
+            const allBugoNumbers = phoneBugos.map(b => b.bugo_number);
 
             try {
-                // 감사장 알림톡 발송
-                const isB2B = !!bugo.b2b_user_id;
+                // 감사장 알림톡 발송 (상주당 1회)
+                const isB2B = !!primaryBugo.b2b_user_id;
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2 - 께서 제거)
                     {
-                        '상주명': bugo.mourner_name || '',
-                        '고인명': bugo.deceased_name || '',
-                        '부고ID': bugo.bugo_number,
+                        '상주명': primaryBugo.mourner_name || '',
+                        '고인명': primaryBugo.deceased_name || '',
+                        '부고ID': primaryBugo.bugo_number,
                     },
                     undefined,
                     isB2B
                 );
 
-                // thanks_sent 플래그 업데이트
+                // 해당 전화번호의 모든 부고(복제본 포함) thanks_sent 일괄 업데이트
                 await supabase
                     .from('bugo')
                     .update({ thanks_sent: true })
-                    .eq('bugo_number', bugo.bugo_number);
+                    .in('bugo_number', allBugoNumbers);
 
-                console.log(`✅ 감사장 알림톡 발송 완료: ${bugo.bugo_number} → ${phoneNumber}`);
+                console.log(`✅ 감사장 알림톡 발송 완료: ${primaryBugo.bugo_number} 외 ${phoneBugos.length - 1}건 → ${phoneNumber}`);
                 sentCount++;
 
             } catch (err) {
-                console.error(`❌ 발송 실패: ${bugo.bugo_number}`, err);
-                errors.push(bugo.bugo_number);
+                console.error(`❌ 발송 실패: ${phoneNumber} (${allBugoNumbers.join(', ')})`, err);
+                errors.push(...allBugoNumbers);
             }
         }
 
-        console.log(`📊 발송 완료: ${sentCount}/${bugos.length}건`);
+        console.log(`📊 발송 완료: ${sentCount}/${bugosByPhone.size}명 (부고 ${bugos.length}건)`);
 
         return NextResponse.json({
             success: true,

@@ -105,32 +105,8 @@ export async function POST(request: NextRequest) {
                 );
                 console.log('✅ 부고 생성 알림톡 발송 완료:', phoneNumber);
 
-                // 📅 감사장 알림톡 예약 발송 (발인 다음날 10시 KST)
-                if (funeral_date) {
-                    try {
-                        const [fy, fm, fd] = funeral_date.split('-').map(Number);
-                        const nextDay = new Date(fy, fm - 1, fd + 1);
-                        const ny = nextDay.getFullYear();
-                        const nm = String(nextDay.getMonth() + 1).padStart(2, '0');
-                        const nd = String(nextDay.getDate()).padStart(2, '0');
-                        const scheduledKST = `${ny}-${nm}-${nd}T10:00:00+09:00`;
-
-                        await sendAlimtalk(
-                            phoneNumber,
-                            'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2)
-                            {
-                                '상주명': mourner_name || '',
-                                '고인명': deceased_name || '',
-                                '부고ID': bugo_number,
-                            },
-                            scheduledKST,  // 예약 발송!
-                            isB2B
-                        );
-                        console.log('📅 감사장 알림톡 예약 완료:', phoneNumber, '→', scheduledKST);
-                    } catch (thanksErr) {
-                        console.error('감사장 예약 발송 실패:', thanksErr);
-                    }
-                }
+                // 📅 감사장 알림톡은 발인 다음날 Cron(/api/cron/thanks-notify)에서 전화번호당 1회 단일 발송됨
+                // (부고 복제 시 솔라피 예약 중복 생성 및 수정 전 날짜 오발송 방지)
 
                 // 📢 공유 리마인더는 cron(/api/cron/share-reminder)에서 처리
                 // share_count = 0인 사람에게만 발송하기 위해
