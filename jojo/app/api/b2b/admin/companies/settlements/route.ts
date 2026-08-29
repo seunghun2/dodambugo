@@ -134,8 +134,8 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // 화환 정산만 필터 (부의금 정산 레코드는 order_id가 BCOND_ 접두사)
-            const wreathSettlements = settlements.filter(s => !s.order_id?.startsWith('BCOND_'));
+            // 화환 정산만 필터 (부의금 정산 레코드는 order_id가 BCOND_, COND_, DO 접두사)
+            const wreathSettlements = settlements.filter(s => !s.order_id?.startsWith('BCOND_') && !s.order_id?.startsWith('COND_') && !s.order_id?.startsWith('DO'));
 
             const detailedList = wreathSettlements.map(s => {
                 const orderInfo = orderMap.get(s.order_id) || null;
@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
                         const companyRate = companyData?.condolence_company_rate ?? 3.3;
 
                         // 부의금 정산 레코드의 마감 상태를 b2b_company_settlements에서 조회
-                        const condSettlementRecords = settlements.filter(s => s.order_id?.startsWith('BCOND_'));
+                        const condSettlementRecords = settlements.filter(s => s.order_id?.startsWith('BCOND_') || s.order_id?.startsWith('COND_') || s.order_id?.startsWith('DO'));
                         const condSettleMap = new Map<string, string>();
                         condSettlementRecords.forEach(s => condSettleMap.set(s.order_id, s.status));
 
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
 
                             // 정산 마감 상태: b2b_company_settlements 기준 (completed → 정산완료)
                             const condOrderNumber = c.moid?.startsWith('BCOND_') ? c.moid : `BCOND_${c.id}`;
-                            const settlementStatus = condSettleMap.get(condOrderNumber) || 'pending';
+                            const settlementStatus = condSettleMap.get(condOrderNumber) || condSettleMap.get(c.order_number) || condSettleMap.get(c.moid) || 'pending';
 
                             return {
                                 id: c.id,

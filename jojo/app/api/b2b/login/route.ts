@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
                 phone: user.phone,
                 company_name: user.company_name,
                 owner_name: user.owner_name,
+                company_id: user.company_id || null,
                 my_referral_code: user.my_referral_code,
                 balance: deposit?.balance || 0,
                 bank_name: user.bank_name || null,

@@ -72,7 +72,14 @@ export async function POST(request: NextRequest) {
         const salt = bcrypt.genSaltSync(10);
         const passwordHash = bcrypt.hashSync(password, salt);
 
-        // 3. 본사 전용 파트너 계정 삽입
+        // 3. 고유 추천 코드 생성
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let my_referral_code = '';
+        for (let i = 0; i < 6; i++) {
+            my_referral_code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // 4. 본사 전용 파트너 계정 삽입
         const { data: newUser, error: insertError } = await supabase
             .from('b2b_users')
             .insert({
@@ -81,6 +88,7 @@ export async function POST(request: NextRequest) {
                 owner_name: ownerName,
                 company_name: companyName,
                 company_id: companyId,
+                my_referral_code,
                 status: 'approved' // 본사 발급 계정은 즉시 승인
             })
             .select()
