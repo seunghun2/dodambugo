@@ -12,6 +12,7 @@ const navItems = [
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
     { href: '/admin/products', icon: 'inventory_2', label: '상품 등록' },
     { href: '/admin/condolence-settings', icon: 'credit_card', label: '조의금 설정' },
+    { href: '/admin/marketing', icon: 'bar_chart', label: '마케팅/광고비' },
     { href: '/admin/inquiries', icon: 'mail', label: '문의 관리' },
     { href: '/admin/blocked-ips', icon: 'block', label: 'IP 제한' },
 ];

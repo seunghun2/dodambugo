@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         // 3. 실제 매출 데이터 (화환 주문 + 부의금) 조회
         const { data: flowerOrders } = await supabase
             .from('flower_orders')
-            .select('created_at, total_price, status')
+            .select('created_at, product_price, status')
             .eq('status', 'completed')
             .gte('created_at', `${year}-01-01T00:00:00Z`)
             .lte('created_at', `${year}-12-31T23:59:59Z`);
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
 
         flowerOrders?.forEach(o => {
             const m = new Date(o.created_at).getMonth() + 1;
-            if (salesMonthly[m]) salesMonthly[m].flowerRevenue += Number(o.total_price || 0);
+            if (salesMonthly[m]) salesMonthly[m].flowerRevenue += Number(o.product_price || 0);
         });
 
         condolenceOrders?.forEach(o => {
