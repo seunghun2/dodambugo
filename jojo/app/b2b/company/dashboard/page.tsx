@@ -417,19 +417,19 @@ export default function CompanyDashboardPage() {
                             </ul>
                         </div>
 
-                        {/* 1-2. KPI 요약 위젯 카드 (인쇄 제외) */}
+                        {/* 1-2. 당월 KPI 요약 위젯 카드 (선택된 월 기준 연동, 인쇄 제외) */}
                         <div className={`${styles.statsGrid} no-print`}>
                             <div className={styles.statCard}>
-                                <span className={styles.statLabel}>미지급 정산 대금</span>
+                                <span className={styles.statLabel}>당월 미지급 정산 대금</span>
                                 <div className={styles.statValueRow}>
-                                    <span className={`${styles.statValue} ${styles.pendingColor}`}>{settleSummary.pending_amount.toLocaleString()}</span>
+                                    <span className={`${styles.statValue} ${styles.pendingColor}`}>{totalPending.toLocaleString()}</span>
                                     <span className={styles.statUnit}>원</span>
                                 </div>
                             </div>
                             <div className={styles.statCard}>
-                                <span className={styles.statLabel}>지급 완료 대금</span>
+                                <span className={styles.statLabel}>당월 지급 완료 대금</span>
                                 <div className={styles.statValueRow}>
-                                    <span className={`${styles.statValue} ${styles.completedColor}`}>{settleSummary.completed_amount.toLocaleString()}</span>
+                                    <span className={`${styles.statValue} ${styles.completedColor}`}>{totalCompleted.toLocaleString()}</span>
                                     <span className={styles.statUnit}>원</span>
                                 </div>
                             </div>
