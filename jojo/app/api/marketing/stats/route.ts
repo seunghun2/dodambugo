@@ -111,18 +111,18 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // 3. 실제 매출 데이터 (화환 주문 + 부의금) 조회
+        // 3. 실제 매출 데이터 (배송완료 화환 + 입금완료 부의금) 조회
         const { data: flowerOrders } = await supabase
             .from('flower_orders')
             .select('created_at, product_price, status')
-            .eq('status', 'completed')
+            .in('status', ['delivered', 'completed'])
             .gte('created_at', `${year}-01-01T00:00:00Z`)
             .lte('created_at', `${year}-12-31T23:59:59Z`);
 
         const { data: condolenceOrders } = await supabase
             .from('condolence_orders')
             .select('created_at, amount, status')
-            .eq('status', 'completed')
+            .in('status', ['transferred', 'completed'])
             .gte('created_at', `${year}-01-01T00:00:00Z`)
             .lte('created_at', `${year}-12-31T23:59:59Z`);
 
