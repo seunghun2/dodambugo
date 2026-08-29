@@ -428,18 +428,22 @@ function SettlementsContent() {
                         const totalCompleted = flowerCompleted + condolenceCompleted;
                         const grandTotal = totalPending + totalCompleted;
 
+                        const isSettled = totalCompleted > 0 && totalPending === 0;
+
                         return (
                             <div className={styles.invoiceInfoSection}>
                                 <table className={styles.infoTable}>
                                    <tbody>
                                         <tr>
                                             <td className={styles.infoLabel}>정산 상태</td>
-                                            <td className={styles.infoValue}>
-                                                {totalPending > 0 ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
+                                            <td className={styles.infoValue} style={{ fontWeight: 'bold', color: '#0f172a' }}>
+                                                {isSettled ? '정산 완료 (지급완료)' : '정산 대기'}
                                             </td>
                                             <td className={styles.infoLabel}>지급일자</td>
                                             <td className={styles.infoValue}>
-                                                {totalPending > 0 ? '지급 대기' : formatDate(settlements[0]?.payment_date)}
+                                                {isSettled && (settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date)
+                                                    ? formatDate(settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date)
+                                                    : '지급 대기'}
                                             </td>
                                             <td className={styles.infoLabel}>합계 정산금액</td>
                                             <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
@@ -607,17 +611,26 @@ function SettlementsContent() {
                                 </div>
 
                                 {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}
-                                {totalPending > 0 && (
-                                    <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                                <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                                    {totalPending > 0 ? (
                                         <button 
                                             className={styles.completeBtn}
                                             onClick={() => handleCompleteSettlement(selectedYearMonth)}
                                         >
                                             <IconCheck size={18} style={{ marginRight: '6px' }} />
-                                            <span>{selectedYearMonth.split('-')[0]}년 {selectedYearMonth.split('-')[1]}월 정산 완료 처리</span>
+                                            <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료 처리</span>
                                         </button>
-                                    </div>
-                                )}
+                                    ) : totalCompleted > 0 ? (
+                                        <div style={{ padding: '10px 20px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '8px', fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <IconCheck size={18} />
+                                            <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료됨 (지급 완료)</span>
+                                        </div>
+                                    ) : (
+                                        <div style={{ padding: '10px 20px', background: '#f8fafc', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }}>
+                                            해당 월에 발생한 정산 대상 거래 내역이 없습니다. (0건 / 0원)
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         );
                     })()}
