@@ -11,17 +11,16 @@ description: Vercel 프로덕션 배포 절차. 배포할 때 반드시 참조.
 # 1. 빌드 확인 (필수!)
 cd /Users/el/Desktop/dodam/jojo && npm run build
 
-# 2. git commit & push
+# 2. git commit & push (Vercel 자동 프로덕션 배포 트리거 - 1회만 실행됨)
 cd /Users/el/Desktop/dodam
-git add jojo/
+git add jojo/수정한파일
 git commit -m "feat(b2b): 설명"
 git push origin main
-
-# 3. Deploy Hook으로 Production 배포 트리거
-curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_QGmrjQUKL1tOj5CZxe69Zckan0U0/NupvEQP1ch"
 ```
 
-> ⚠️ git push만으로는 Preview 배포만 됨. **반드시 Deploy Hook을 호출**해야 Production 배포.
+> ⚠️ **주의 (비용 절감 필수 규칙)**: 
+> `git push origin main`을 실행하면 Vercel이 자동으로 프로덕션 배포를 1회 실행합니다.
+> **절대로 수동 Deploy Hook(curl)을 중복 호출하지 말 것!** (빌드 CPU 요금이 2배로 청구됨)
 
 ## 배포 전 체크리스트
 
@@ -35,7 +34,6 @@ curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_QGmrjQUKL1tOj5CZ
 ```bash
 git revert HEAD
 git push origin main
-curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_QGmrjQUKL1tOj5CZxe69Zckan0U0/NupvEQP1ch"
 ```
 
 ## .vercelignore
