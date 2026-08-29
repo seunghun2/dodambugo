@@ -203,17 +203,26 @@
   line-height: 1.6;
 }
 
-/* 정식 사업자 정보 블록 (양옆 병렬 배치) */
+/* 정식 사업자 정보 블록 (양옆 병렬 5:5 배치) */
+.businessContainer,
 .businessSection {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.businessBox,
 .businessCard {
-  flex: 1;
+  flex: 1 1 50% !important;
+  width: calc(50% - 10px) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
+.businessSideTitle,
 .businessTitle {
   font-size: 13px;
   font-weight: 700;
@@ -341,16 +350,17 @@
 }
 /* 🖨️ 인쇄 전용 @media print CSS 설계 (인쇄 시 완벽 정산서 폼 변환) */
 /* 전역 셀렉터(body, aside 등)는 settlements-print.css */
-/* 상단 날짜 필터 바 (중앙 정렬) */
+/* 상단 날짜 및 정산 관리 컨트롤 바 */
 .filterBar {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px 18px;
+  border-radius: 10px;
+  padding: 12px 20px;
   margin-bottom: 24px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .monthNavBox {
@@ -391,6 +401,53 @@
   min-width: 110px;
   text-align: center;
   letter-spacing: 0.5px;
+}
+
+.completeActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.completeActionBtn:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+}
+
+.settledBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.emptyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 /* 인쇄 스타일 */

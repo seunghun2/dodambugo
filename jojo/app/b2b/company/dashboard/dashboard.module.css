@@ -382,13 +382,19 @@
 }
 
 .partiesBlock {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 24px !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .partyBox {
-    flex: 1;
+    flex: 1 1 50% !important;
+    width: calc(50% - 12px) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .partyLabel {

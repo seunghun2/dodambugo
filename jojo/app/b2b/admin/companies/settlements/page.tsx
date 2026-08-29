@@ -1,53 +1,57 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { IconPrinter, IconDownload, IconArrowLeft, IconCheck, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { 
+    IconBuilding, 
+    IconPrinter, 
+    IconDownload, 
+    IconCheck, 
+    IconArrowLeft, 
+    IconChevronLeft, 
+    IconChevronRight 
+} from '@tabler/icons-react';
 import styles from './settlements.module.css';
 import './settlements-print.css';
 
+interface MonthlySummary {
+    month: string;
+    total_amount: number;
+    pending_amount: number;
+    completed_amount: number;
+    count: number;
+}
+
 interface SettlementDetail {
     id: string;
-    order_id: string;
     amount: number;
     status: 'pending' | 'completed' | 'cancelled';
     payment_date: string | null;
     created_at: string;
-    updated_at?: string;
-    order: {
+    order?: {
         order_number: string;
-        product_name: string;
-        sender_name: string;
         deceased_name: string;
         partner_name: string;
-        partner_company: string;
-        bugo_id: string;
-    } | null;
+        product_name: string;
+        sender_name: string;
+    };
 }
 
 interface CondolenceSettlementDetail {
-    id: number;
+    id: string;
     order_number: string;
-    buyer_name: string;
-    recipient_name: string;
     amount: number;
-    fee: number;
-    company_rate: number;
     share_amount: number;
-    partner_name: string;
-    deceased_name: string;
-    status: string;
+    company_rate: number;
+    status: 'pending' | 'completed' | 'transferred' | 'cancelled';
+    payment_date: string | null;
     created_at: string;
+    buyer_name: string;
+    deceased_name: string;
+    partner_name: string;
 }
 
 interface SettleSummary {
-    pending_amount: number;
-    completed_amount: number;
-    total_count: number;
-}
-
-interface MonthlySummary {
-    month: string;
     pending_amount: number;
     completed_amount: number;
     total_count: number;
@@ -79,22 +83,24 @@ function SettlementsContent() {
     const [loading, setLoading] = useState(true);
     const [detailLoading, setDetailLoading] = useState(false);
 
-    // 날짜 포맷 함수 (YYYY년 MM월 DD일)
-    const formatDate = (dateStr: string | null) => {
-        if (!dateStr) return '정산 대기';
+    // 날짜 및 시간 포맷 함수 (YYYY-MM-DD HH:mm)
+    const formatDateTime = (dateStr: string | null) => {
+        if (!dateStr) return '지급 대기';
         try {
             const d = new Date(dateStr);
             const yyyy = d.getFullYear();
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
-            return `${yyyy}년 ${mm}월 ${dd}일`;
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
         } catch {
             return dateStr;
         }
     };
 
     // 1. 월별 정산 현황 조회
-    const fetchMonthlySummary = async () => {
+    const fetchMonthlySummary = useCallback(async () => {
         if (!companyId) return;
         setLoading(true);
         try {
@@ -108,23 +114,28 @@ function SettlementsContent() {
                 
                 // 만약 월별 내역이 있다면 가장 최근 월을 자동으로 조회
                 if (data.monthlyList && data.monthlyList.length > 0) {
-                    fetchMonthlyDetail(data.monthlyList[0].month);
+                    setSelectedYearMonth(data.monthlyList[0].month);
+                } else {
+                    const now = new Date();
+                    const curMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    setSelectedYearMonth(curMonth);
                 }
             }
         } catch (err: any) {
-            alert(err.message);
+            console.error('월별 정산 목록 조회 오류:', err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [companyId]);
 
-    // 2. 특정 월의 상세 정산서 조회
-    const fetchMonthlyDetail = async (yearMonth: string) => {
+    // 2. 특정 월의 세부 내역 조회 (화환 + 부의금)
+    const fetchMonthlyDetail = useCallback(async (yearMonth: string) => {
+        if (!companyId || !yearMonth) return;
         setDetailLoading(true);
         setSelectedYearMonth(yearMonth);
         try {
             const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}&yearMonth=${yearMonth}`);
-            if (!res.ok) throw new Error('상세 정산서를 로드하지 못했습니다.');
+            if (!res.ok) throw new Error('세부 정산 내역을 로드하지 못했습니다.');
             const data = await res.json();
             if (data.success) {
                 setSettlements(data.settlements || []);
@@ -134,16 +145,31 @@ function SettlementsContent() {
                 }
             }
         } catch (err: any) {
-            alert(err.message);
+            console.error('세부 정산 내역 조회 오류:', err);
         } finally {
             setDetailLoading(false);
         }
+    }, [companyId]);
+
+    useEffect(() => {
+        fetchMonthlySummary();
+    }, [fetchMonthlySummary]);
+
+    useEffect(() => {
+        if (selectedYearMonth) {
+            fetchMonthlyDetail(selectedYearMonth);
+        }
+    }, [selectedYearMonth, fetchMonthlyDetail]);
+
+    // 월 선택 핸들러
+    const handleSelectMonth = (month: string) => {
+        fetchMonthlyDetail(month);
     };
 
-    // 3. 월 단위 정산 완료 처리
+    // 3. 특정 월 전체 정산 완료(지급 완료) 처리
     const handleCompleteSettlement = async (yearMonth: string) => {
         const [year, month] = yearMonth.split('-');
-        if (!confirm(`[${year}년 ${month}월] 정산서를 완료(송금 완료) 마감 처리하시겠습니까?\n실제 회사 통장으로 계좌 이체를 처리한 후 확인해주셔야 합니다.`)) {
+        if (!confirm(`[${companyInfo?.name || companyName}]의 ${year}년 ${month}월분 정산을 '정산 완료(지급 완료)' 처리하시겠습니까?\n\n* 실제 대금 지급이 확인된 후 실행해 주세요.`)) {
             return;
         }
 
@@ -151,12 +177,15 @@ function SettlementsContent() {
             const res = await fetch('/api/b2b/admin/companies/settlements', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ companyId, yearMonth })
+                body: JSON.stringify({
+                    companyId,
+                    yearMonth
+                })
             });
 
             if (!res.ok) {
                 const errData = await res.json();
-                throw new Error(errData.error || '정산 처리에 실패했습니다.');
+                throw new Error(errData.error || '정산 완료 처리에 실패했습니다.');
             }
 
             const data = await res.json();
@@ -221,49 +250,64 @@ function SettlementsContent() {
             s.order?.product_name || '-',
             s.order?.sender_name || '-',
             s.amount,
-            s.status === 'pending' ? '정산대기' : '정산완료'
+            s.status === 'completed' ? '정산완료' : s.status === 'cancelled' ? '주문취소' : '정산대기'
         ]);
 
         // 부의금 정산 내역
-        const condolenceHeaders = ['[부의금] 거래일시', '주문번호', '장례지도사명', '고인명(상가)', '보낸분', '부의금액', '수수료', '상조쉐어(%)', '정산 금액', '정산 상태'];
+        const condolenceHeaders = ['[부의금] 결제일시', '주문번호', '장례지도사명', '고인명(상가)', '부의금액', '조문객(입금자)', '수수료율', '정산 금액(쉐어)', '정산 상태'];
         const condolenceRows = condolenceSettlements.map(c => [
             new Date(c.created_at).toLocaleString(),
             c.order_number || '-',
             c.partner_name || '-',
             c.deceased_name || '-',
-            c.buyer_name || '-',
             c.amount,
-            c.fee,
+            c.buyer_name || '-',
             `${c.company_rate}%`,
             c.share_amount,
-            c.status === 'pending' ? '정산대기' : '정산완료'
+            c.status === 'completed' || c.status === 'transferred' ? '정산완료' : c.status === 'cancelled' ? '취소' : '정산대기'
         ]);
 
-        const allLines = [
-            wreathHeaders.join(','),
-            ...wreathRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')),
-            '', // 빈 줄 구분
-            condolenceHeaders.join(','),
-            ...condolenceRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+        const combinedHeaders = ['구분', '거래일시', '주문번호', '장례지도사명', '고인명(상가)', '상세내용', '주문/조문객', '정산 금액', '정산 상태'];
+        const combinedRows = [
+            ...settlements.map(s => [
+                '화환',
+                new Date(s.created_at).toLocaleString(),
+                s.order?.order_number || '-',
+                s.order?.partner_name || '-',
+                s.order?.deceased_name || '-',
+                s.order?.product_name || '-',
+                s.order?.sender_name || '-',
+                s.amount,
+                s.status === 'completed' ? '정산완료' : s.status === 'cancelled' ? '주문취소' : '정산대기'
+            ]),
+            ...condolenceSettlements.map(c => [
+                '부의금',
+                new Date(c.created_at).toLocaleString(),
+                c.order_number || '-',
+                c.partner_name || '-',
+                c.deceased_name || '-',
+                `부의금 수수료 쉐어 (${c.company_rate}%)`,
+                c.buyer_name || '-',
+                c.share_amount,
+                c.status === 'completed' || c.status === 'transferred' ? '정산완료' : c.status === 'cancelled' ? '취소' : '정산대기'
+            ])
         ];
 
-        const csvContent = '\ufeff' + allLines.join('\n');
+        const csvContent = 
+            '\ufeff' + 
+            [combinedHeaders.join(','), ...combinedRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        
+
         link.setAttribute('href', url);
-        link.setAttribute('download', `정산서_${companyName}_${year}년_${month}월.csv`);
+        link.setAttribute('download', `정산서_${companyInfo?.name || companyName}_${year}년_${month}월.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
-
-    useEffect(() => {
-        fetchMonthlySummary();
-    }, [companyId]);
 
     if (loading) {
         return (
@@ -273,8 +317,17 @@ function SettlementsContent() {
         );
     }
 
-    const currentMonthData = monthlyList.find(m => m.month === selectedYearMonth);
-    const hasPending = currentMonthData ? currentMonthData.pending_amount > 0 : false;
+    // 당월 금액 계산
+    const flowerPending = settlements.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
+    const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
+    const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
+    const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
+
+    const totalPending = flowerPending + condolencePending;
+    const totalCompleted = flowerCompleted + condolenceCompleted;
+    const grandTotal = totalPending + totalCompleted;
+    const isSettled = totalCompleted > 0 && totalPending === 0;
+    const latestPaymentDate = settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date;
 
     return (
         <div className={styles.container}>
@@ -318,7 +371,7 @@ function SettlementsContent() {
                 </div>
             </div>
 
-            {/* 상단 정산 대상월 필터 바 (중앙 정렬, 인쇄 제외) */}
+            {/* 상단 정산 대상월 및 액션 컨트롤 바 (정산서 밖 배치, 인쇄 제외) */}
             {selectedYearMonth && (
                 <div className={`${styles.filterBar} no-print`}>
                     <div className={styles.monthNavBox}>
@@ -342,6 +395,28 @@ function SettlementsContent() {
                             <IconChevronRight size={18} />
                         </button>
                     </div>
+
+                    {/* 상단 액션 컨트롤 버튼 및 상태 타임스탬프 (정산서 밖 독립 영역) */}
+                    <div>
+                        {totalPending > 0 ? (
+                            <button 
+                                className={styles.completeActionBtn}
+                                onClick={() => handleCompleteSettlement(selectedYearMonth)}
+                            >
+                                <IconCheck size={16} />
+                                <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료 처리 (지급 확정)</span>
+                            </button>
+                        ) : totalCompleted > 0 ? (
+                            <div className={styles.settledBadge}>
+                                <IconCheck size={16} />
+                                <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료 (처리일시: {formatDateTime(latestPaymentDate)})</span>
+                            </div>
+                        ) : (
+                            <div className={styles.emptyBadge}>
+                                <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 대상 없음 (0원)</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -358,21 +433,22 @@ function SettlementsContent() {
                     </div>
 
                     {/* 공급자 & 공급받는자 정식 사업자 명세 정보 테이블 (정산서 정석 포맷) */}
-                    <div className={styles.businessSection}>
-                        <div className={styles.businessCard}>
-                            <div className={styles.businessTitle}>■ 공급받는자</div>
+                    <div className={styles.businessContainer}>
+                        {/* 공급받는자 (상조회사) */}
+                        <div className={styles.businessBox}>
+                            <div className={styles.businessSideTitle}>■ 공급받는자</div>
                             <table className={styles.businessTable}>
                                 <tbody>
                                     <tr>
-                                        <td className={styles.businessLabel}>등록 번호</td>
+                                        <td className={styles.businessLabel}>등록번호</td>
                                         <td className={styles.businessValue}>{companyInfo?.business_no || '미등록'}</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>상호 (법인명)</td>
+                                        <td className={styles.businessLabel}>상호(법인명)</td>
                                         <td className={styles.businessValue}>{companyInfo?.name || companyName}</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>성명 (대표자)</td>
+                                        <td className={styles.businessLabel}>성명(대표자)</td>
                                         <td className={styles.businessValue}>{companyInfo?.owner_name || '-'}</td>
                                     </tr>
                                     <tr>
@@ -388,20 +464,22 @@ function SettlementsContent() {
                                 </tbody>
                             </table>
                         </div>
-                        <div className={styles.businessCard}>
-                            <div className={styles.businessTitle}>■ 공급자</div>
+
+                        {/* 공급자 (마음부고) */}
+                        <div className={styles.businessBox}>
+                            <div className={styles.businessSideTitle}>■ 공급자</div>
                             <table className={styles.businessTable}>
                                 <tbody>
                                     <tr>
-                                        <td className={styles.businessLabel}>등록 번호</td>
+                                        <td className={styles.businessLabel}>등록번호</td>
                                         <td className={styles.businessValue}>408-22-68851</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>상호 (법인명)</td>
+                                        <td className={styles.businessLabel}>상호(법인명)</td>
                                         <td className={styles.businessValue}>마음부고</td>
                                     </tr>
                                     <tr>
-                                        <td className={styles.businessLabel}>성명 (대표자)</td>
+                                        <td className={styles.businessLabel}>성명(대표자)</td>
                                         <td className={styles.businessValue}>김미연</td>
                                     </tr>
                                     <tr>
@@ -418,43 +496,28 @@ function SettlementsContent() {
                     </div>
 
                     {/* 정산 정보 간이 요약 */}
-                    {(() => {
-                        const flowerPending = settlements.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
-                        const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
-                        const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
-                        const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
-
-                        const totalPending = flowerPending + condolencePending;
-                        const totalCompleted = flowerCompleted + condolenceCompleted;
-                        const grandTotal = totalPending + totalCompleted;
-
-                        const isSettled = totalCompleted > 0 && totalPending === 0;
-
-                        return (
-                            <div className={styles.invoiceInfoSection}>
-                                <table className={styles.infoTable}>
-                                   <tbody>
-                                        <tr>
-                                            <td className={styles.infoLabel}>정산 상태</td>
-                                            <td className={styles.infoValue} style={{ fontWeight: 'bold', color: '#0f172a' }}>
-                                                {isSettled ? '정산 완료 (지급완료)' : '정산 대기'}
-                                            </td>
-                                            <td className={styles.infoLabel}>지급일자</td>
-                                            <td className={styles.infoValue}>
-                                                {isSettled && (settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date)
-                                                    ? formatDate(settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date)
-                                                    : '지급 대기'}
-                                            </td>
-                                            <td className={styles.infoLabel}>합계 정산금액</td>
-                                            <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
-                                                {grandTotal.toLocaleString()}원
-                                            </td>
-                                        </tr>
-                                   </tbody>
-                                </table>
-                            </div>
-                        );
-                    })()}
+                    <div className={styles.invoiceInfoSection}>
+                        <table className={styles.infoTable}>
+                           <tbody>
+                                <tr>
+                                    <td className={styles.infoLabel}>정산 상태</td>
+                                    <td className={styles.infoValue} style={{ fontWeight: 'bold', color: '#0f172a' }}>
+                                        {isSettled ? '정산 완료 (지급완료)' : '정산 대기'}
+                                    </td>
+                                    <td className={styles.infoLabel}>지급일자</td>
+                                    <td className={styles.infoValue}>
+                                        {isSettled && latestPaymentDate
+                                            ? formatDateTime(latestPaymentDate)
+                                            : '지급 대기'}
+                                    </td>
+                                    <td className={styles.infoLabel}>합계 정산금액</td>
+                                    <td className={styles.infoValue} style={{ fontWeight: 'bold' }}>
+                                        {grandTotal.toLocaleString()}원
+                                    </td>
+                                </tr>
+                           </tbody>
+                        </table>
+                    </div>
 
                     {/* 화환 상세 내역 테이블 */}
                     <div className={styles.invoiceBody}>
@@ -474,49 +537,47 @@ function SettlementsContent() {
                             <tbody>
                                 {detailLoading ? (
                                     <tr>
-                                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
-                                            상세 정산 내역을 조회하는 중...
+                                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            정산 상세 내역을 불러오는 중...
                                         </td>
                                     </tr>
                                 ) : settlements.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
-                                            해당 월에 발생한 화환 판매 정산 내역이 없습니다. (0건 / 0원)
+                                            해당 월에 발생한 화환 판매 내역이 없습니다. (0건 / 0원)
                                         </td>
                                     </tr>
                                 ) : (
                                     settlements.map((s) => (
                                         <tr key={s.id}>
-                                             <td style={{ fontSize: '11px' }}>
-                                                 <div>{new Date(s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
-                                                 {s.status === 'cancelled' && (
-                                                     <div style={{ fontSize: '10px', color: '#333333', marginTop: '2px', fontWeight: '500' }}>
-                                                         취소: {new Date(s.updated_at || s.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                                                     </div>
-                                                 )}
-                                             </td>
-                                            <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {new Date(s.created_at).toLocaleDateString('ko-KR', {
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </td>
+                                            <td style={{ fontFamily: 'monospace', textAlign: 'center' }}>
                                                 {s.order?.order_number || '-'}
                                             </td>
-                                            <td style={{ fontWeight: '500' }}>
+                                            <td style={{ textAlign: 'center' }}>
                                                 {s.order?.partner_name || '-'}
                                             </td>
-                                            <td style={{ fontWeight: '600' }}>
-                                                {s.order?.deceased_name || '미등록'}
+                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>
+                                                {s.order?.deceased_name || '-'}
                                             </td>
                                             <td>
-                                                <div>
-                                                    <span>{s.order?.product_name || '-'}</span>
-                                                    <span style={{ fontSize: '11px', color: '#000000', marginLeft: '4px' }}>
-                                                        ({s.order?.sender_name || ''})
-                                                    </span>
+                                                <div>{s.order?.product_name || '-'}</div>
+                                                <div style={{ fontSize: '11px', color: '#000000' }}>
+                                                    (주문자: {s.order?.sender_name || '-'})
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                                 {s.amount.toLocaleString()}원
                                             </td>
                                             <td>
-                                                {s.status === 'pending' ? '대기' : s.status === 'cancelled' ? '취소' : '완료'}
+                                                {s.status === 'completed' ? '완료' : s.status === 'cancelled' ? '취소' : '대기'}
                                             </td>
                                         </tr>
                                     ))
@@ -525,8 +586,8 @@ function SettlementsContent() {
                         </table>
                     </div>
 
-                    {/* 부의금 정산 세부 내역 명세 (테이블 무조건 상시 노출, 내역 없을 시 텍스트 문구 없이 깔끔한 빈 줄만 표시) */}
-                    <div className={styles.invoiceBody} style={{ marginTop: '28px' }}>
+                    {/* 부의금 상세 내역 테이블 */}
+                    <div className={styles.invoiceBody} style={{ marginTop: '24px' }}>
                         <h3 className={styles.invoiceTableTitle}>■ 부의금 정산 세부 내역 명세</h3>
                         <table className={styles.invoiceTable}>
                             <thead>
@@ -535,7 +596,7 @@ function SettlementsContent() {
                                     <th>주문 번호</th>
                                     <th>장례지도사명</th>
                                     <th>고인명</th>
-                                    <th>부의금액 (조문객)</th>
+                                    <th>부의 금액 (조문객)</th>
                                     <th>수수료율 (%)</th>
                                     <th style={{ textAlign: 'right' }}>정산 금액</th>
                                     <th>상태</th>
@@ -544,8 +605,8 @@ function SettlementsContent() {
                             <tbody>
                                 {detailLoading ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#000000' }}>
-                                            상세 정산 내역을 조회하는 중...
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            정산 상세 내역을 불러오는 중...
                                         </td>
                                     </tr>
                                 ) : condolenceSettlements.length === 0 ? (
@@ -557,17 +618,22 @@ function SettlementsContent() {
                                 ) : (
                                     condolenceSettlements.map((c) => (
                                         <tr key={c.id}>
-                                            <td style={{ fontSize: '11px' }}>
-                                                <div>{new Date(c.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {new Date(c.created_at).toLocaleDateString('ko-KR', {
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
                                             </td>
-                                            <td style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 'bold' }}>
-                                                {c.order_number}
+                                            <td style={{ fontFamily: 'monospace', textAlign: 'center' }}>
+                                                {c.order_number || '-'}
                                             </td>
-                                            <td style={{ fontWeight: '500' }}>
-                                                {c.partner_name}
+                                            <td style={{ textAlign: 'center' }}>
+                                                {c.partner_name || '-'}
                                             </td>
-                                            <td style={{ fontWeight: '600' }}>
-                                                {c.deceased_name}
+                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>
+                                                {c.deceased_name || '-'}
                                             </td>
                                             <td>
                                                 <div>
@@ -593,47 +659,13 @@ function SettlementsContent() {
                         </table>
                     </div>
 
-                    {/* 하단 서명란 및 정산 처리 버튼 */}
-                    {(() => {
-                        const flowerPending = settlements.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
-                        const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
-                        const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
-                        const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
-
-                        const totalPending = flowerPending + condolencePending;
-                        const totalCompleted = flowerCompleted + condolenceCompleted;
-
-                        return (
-                            <div className={styles.invoiceFooter}>
-                                <div className={styles.invoiceTotalBlock}>
-                                    <span>정산 대기 합계 : <strong>{totalPending.toLocaleString()}원</strong></span>
-                                    <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong>{totalCompleted.toLocaleString()}원</strong></span>
-                                </div>
-
-                                {/* 대금 정산 확인/완료 버튼 (인쇄 시에는 보이지 않음) */}
-                                <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                                    {totalPending > 0 ? (
-                                        <button 
-                                            className={styles.completeBtn}
-                                            onClick={() => handleCompleteSettlement(selectedYearMonth)}
-                                        >
-                                            <IconCheck size={18} style={{ marginRight: '6px' }} />
-                                            <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료 처리</span>
-                                        </button>
-                                    ) : totalCompleted > 0 ? (
-                                        <div style={{ padding: '10px 20px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '8px', fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <IconCheck size={18} />
-                                            <span>{selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월 정산 완료됨 (지급 완료)</span>
-                                        </div>
-                                    ) : (
-                                        <div style={{ padding: '10px 20px', background: '#f8fafc', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }}>
-                                            해당 월에 발생한 정산 대상 거래 내역이 없습니다. (0건 / 0원)
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })()}
+                    {/* 하단 서명 및 총액 블록 (순수 정산서 문서 서식) */}
+                    <div className={styles.invoiceFooter}>
+                        <div className={styles.invoiceTotalBlock}>
+                            <span>정산 대기 합계 : <strong>{totalPending.toLocaleString()}원</strong></span>
+                            <span style={{ marginLeft: '24px' }}>정산 완료 합계 : <strong>{totalCompleted.toLocaleString()}원</strong></span>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

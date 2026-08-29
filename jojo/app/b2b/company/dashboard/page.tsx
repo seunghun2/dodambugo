@@ -544,7 +544,19 @@ export default function CompanyDashboardPage() {
                                                     </td>
                                                     <td className={styles.summaryTh}>지급일자</td>
                                                     <td className={styles.summaryTd}>
-                                                        {isSettled && latestPaymentDate ? new Date(latestPaymentDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '지급 대기'}
+                                                        {isSettled && latestPaymentDate ? (() => {
+                                                            try {
+                                                                const d = new Date(latestPaymentDate);
+                                                                const yyyy = d.getFullYear();
+                                                                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                                                const dd = String(d.getDate()).padStart(2, '0');
+                                                                const hh = String(d.getHours()).padStart(2, '0');
+                                                                const min = String(d.getMinutes()).padStart(2, '0');
+                                                                return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                                                            } catch {
+                                                                return String(latestPaymentDate);
+                                                            }
+                                                        })() : '지급 대기'}
                                                     </td>
                                                     <td className={styles.summaryTh}>합계 금액</td>
                                                     <td className={styles.summaryTd} style={{ fontWeight: 'bold' }}>{totalAmount.toLocaleString()}원</td>
