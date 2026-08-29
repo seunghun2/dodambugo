@@ -1,0 +1,273 @@
+.container {
+    padding: 32px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+    color: #1e293b;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.refreshBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background-color: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.refreshBtn:hover {
+    background-color: #334155;
+}
+
+/* KPI 카드 그리드 */
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.kpiCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.kpiTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.kpiLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.kpiBadge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.badgeNaver {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badgeTotal {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badgeProfit {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.badgeRoas {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+}
+
+.kpiValue {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.kpiSub {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* 테이블 섹션 */
+.sectionCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.statsTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: right;
+}
+
+.statsTable th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-bottom: 1px solid #cbd5e1;
+    border-top: 1px solid #cbd5e1;
+    white-space: nowrap;
+}
+
+.statsTable td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.statsTable tr:hover td {
+    background-color: #f8fafc;
+}
+
+.alignLeft {
+    text-align: left !important;
+}
+
+.alignCenter {
+    text-align: center !important;
+}
+
+.positiveProfit {
+    color: #16a34a !important;
+    font-weight: 700;
+}
+
+.negativeProfit {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+.roasHigh {
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* 스크립트 복사 박스 */
+.scriptBox {
+    background-color: #0f172a;
+    border-radius: 10px;
+    padding: 20px;
+    color: #e2e8f0;
+    position: relative;
+    margin-top: 14px;
+}
+
+.scriptHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.scriptTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #38bdf8;
+}
+
+.copyBtn {
+    padding: 6px 14px;
+    background-color: #38bdf8;
+    color: #0f172a;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.copyBtn:hover {
+    opacity: 0.9;
+}
+
+.scriptCode {
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #94a3b8;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.guideSteps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #475569;
+    background-color: #f1f5f9;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.guideStepItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stepNumber {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #0f172a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+}

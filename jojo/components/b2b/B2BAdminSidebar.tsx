@@ -113,6 +113,11 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             icon: <IconBan stroke={1.5} size={22} />
         },
         {
+            href: '/b2b/admin/marketing',
+            label: '마케팅 & 광고비 관리',
+            icon: <IconChartBar stroke={1.5} size={22} />
+        },
+        {
             href: '/b2b/admin/settings',
             label: '어드민 설정',
             icon: <IconSettings stroke={1.5} size={22} />
