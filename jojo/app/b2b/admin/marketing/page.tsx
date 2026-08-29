@@ -20,8 +20,10 @@ interface MonthlyItem {
     naverCost: number;
     googleCost: number;
     totalCost: number;
-    flowerRevenue: number;
-    condolenceRevenue: number;
+    flowerCount: number;
+    flowerProfit: number;
+    condolenceGross: number;
+    condolenceProfit: number;
     totalRevenue: number;
     netProfit: number;
     roas: number;
@@ -34,6 +36,8 @@ interface SummaryData {
     bizmoney: number;
     totalMarketingSpend: number;
     totalRevenue: number;
+    totalFlowerCount: number;
+    totalCondolenceGross: number;
     netProfit: number;
     overallRoas: number;
     totalBugoCreated: number;
@@ -164,17 +168,17 @@ function main() {
                     </div>
                 </div>
 
-                {/* 3. 누적 매출 & 순마진 */}
+                {/* 3. 누적 플랫폼 마진 순수익 */}
                 <div className={styles.kpiCard}>
                     <div className={styles.kpiTop}>
-                        <span className={styles.kpiLabel}>광고 대비 총 결제 매출</span>
-                        <span className={`${styles.kpiBadge} ${styles.badgeProfit}`}>화환 + 부의금</span>
+                        <span className={styles.kpiLabel}>총 플랫폼 순수익</span>
+                        <span className={`${styles.kpiBadge} ${styles.badgeProfit}`}>화환 5만 + 부의금 8.6%</span>
                     </div>
                     <div className={styles.kpiValue}>
                         {summary ? `${summary.totalRevenue.toLocaleString()}원` : '-'}
                     </div>
                     <div className={styles.kpiSub}>
-                        순마진: {summary ? `${summary.netProfit.toLocaleString()}원` : '-'}
+                        순마진 (수익-광고비): <strong style={{ color: summary && summary.netProfit >= 0 ? '#16a34a' : '#dc2626' }}>{summary ? `${summary.netProfit.toLocaleString()}원` : '-'}</strong>
                     </div>
                 </div>
 
@@ -188,7 +192,7 @@ function main() {
                         {summary ? `${summary.overallCpa.toLocaleString()}원` : '-'}
                     </div>
                     <div className={styles.kpiSub}>
-                        누적 종합 ROAS: {summary ? `${summary.overallRoas}%` : '-'} (부고 {summary?.totalBugoCreated}건)
+                        수익 대비 ROAS: {summary ? `${summary.overallRoas}%` : '-'} (부고 {summary?.totalBugoCreated}건)
                     </div>
                 </div>
             </div>
@@ -196,7 +200,7 @@ function main() {
             {/* 월별 마케팅 및 매출 대조 리포트 테이블 */}
             <div className={styles.sectionCard}>
                 <div className={styles.sectionHeader}>
-                    <h2 className={styles.sectionTitle}>2026년 월별 마케팅 비용 및 실 결제 매출 대조</h2>
+                    <h2 className={styles.sectionTitle}>2026년 월별 마케팅 비용 및 실 순수익(화환 5만/부의금 8.6%) 대조</h2>
                 </div>
                 <div className={styles.tableWrapper}>
                     <table className={styles.statsTable}>
@@ -206,11 +210,11 @@ function main() {
                                 <th>네이버 광고비</th>
                                 <th>구글 광고비</th>
                                 <th>총 광고비</th>
-                                <th>화환 주문 매출</th>
-                                <th>부의금 결제액</th>
-                                <th>총 매출</th>
-                                <th>순수익</th>
-                                <th>ROAS</th>
+                                <th>화환 수익 (건당 5만)</th>
+                                <th>부의금 수익 (8.6%)</th>
+                                <th>총 플랫폼 수익</th>
+                                <th>실제 순마진</th>
+                                <th>수익 ROAS</th>
                                 <th>부고장 생성</th>
                                 <th>CPA (건당 단가)</th>
                             </tr>
@@ -226,9 +230,15 @@ function main() {
                                     <td style={{ fontWeight: 700, color: '#0f172a' }}>
                                         {item.totalCost.toLocaleString()}원
                                     </td>
-                                    <td>{item.flowerRevenue.toLocaleString()}원</td>
-                                    <td>{item.condolenceRevenue.toLocaleString()}원</td>
-                                    <td style={{ fontWeight: 700 }}>
+                                    <td>
+                                        {item.flowerProfit.toLocaleString()}원
+                                        <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>({item.flowerCount}건)</span>
+                                    </td>
+                                    <td>
+                                        {item.condolenceProfit.toLocaleString()}원
+                                        <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>(결제 {item.condolenceGross.toLocaleString()}원)</span>
+                                    </td>
+                                    <td style={{ fontWeight: 700, color: '#0f172a' }}>
                                         {item.totalRevenue.toLocaleString()}원
                                     </td>
                                     <td className={item.netProfit >= 0 ? styles.positiveProfit : styles.negativeProfit}>

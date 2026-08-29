@@ -133,20 +133,29 @@ export async function GET(request: NextRequest) {
             .gte('created_at', `${year}-01-01T00:00:00Z`)
             .lte('created_at', `${year}-12-31T23:59:59Z`);
 
-        const salesMonthly: Record<number, { flowerRevenue: number; condolenceRevenue: number; bugoCount: number }> = {};
+        const salesMonthly: Record<number, { flowerCount: number; flowerProfit: number; condolenceGross: number; condolenceProfit: number; bugoCount: number }> = {};
         const currentMonth = new Date().getMonth() + 1;
         for (let m = 1; m <= currentMonth; m++) {
-            salesMonthly[m] = { flowerRevenue: 0, condolenceRevenue: 0, bugoCount: 0 };
+            salesMonthly[m] = { flowerCount: 0, flowerProfit: 0, condolenceGross: 0, condolenceProfit: 0, bugoCount: 0 };
         }
 
+        // 화환: 건당 50,000원 순수익
         flowerOrders?.forEach(o => {
             const m = new Date(o.created_at).getMonth() + 1;
-            if (salesMonthly[m]) salesMonthly[m].flowerRevenue += Number(o.product_price || 0);
+            if (salesMonthly[m]) {
+                salesMonthly[m].flowerCount += 1;
+                salesMonthly[m].flowerProfit += 50000;
+            }
         });
 
+        // 부의금: 결제액의 8.6% 순수익
         condolenceOrders?.forEach(o => {
             const m = new Date(o.created_at).getMonth() + 1;
-            if (salesMonthly[m]) salesMonthly[m].condolenceRevenue += Number(o.amount || 0);
+            if (salesMonthly[m]) {
+                const gross = Number(o.amount || 0);
+                salesMonthly[m].condolenceGross += gross;
+                salesMonthly[m].condolenceProfit += Math.round(gross * 0.086);
+            }
         });
 
         bugoList?.forEach(b => {
@@ -157,23 +166,27 @@ export async function GET(request: NextRequest) {
         // 5. 통합 월별 테이블 데이터 조립
         const monthlyReport = [];
         let totalMarketingSpend = 0;
-        let totalRevenue = 0;
+        let totalPlatformProfit = 0;
+        let totalFlowerCount = 0;
+        let totalCondolenceGross = 0;
         let totalBugoCreated = 0;
         let totalClicks = 0;
 
         for (let m = 1; m <= currentMonth; m++) {
             const naver = naverMonthly[m] || { cost: 0, clicks: 0, impressions: 0 };
             const google = googleMonthly[m] || { cost: 0, clicks: 0, impressions: 0 };
-            const sales = salesMonthly[m] || { flowerRevenue: 0, condolenceRevenue: 0, bugoCount: 0 };
+            const sales = salesMonthly[m] || { flowerCount: 0, flowerProfit: 0, condolenceGross: 0, condolenceProfit: 0, bugoCount: 0 };
 
             const totalCost = naver.cost + google.cost;
-            const monthRevenue = sales.flowerRevenue + sales.condolenceRevenue;
-            const netProfit = monthRevenue - totalCost;
-            const roas = totalCost > 0 ? Math.round((monthRevenue / totalCost) * 100) : 0;
+            const monthProfit = sales.flowerProfit + sales.condolenceProfit;
+            const netProfit = monthProfit - totalCost;
+            const roas = totalCost > 0 ? Math.round((monthProfit / totalCost) * 100) : 0;
             const cpa = sales.bugoCount > 0 ? Math.round(totalCost / sales.bugoCount) : 0;
 
             totalMarketingSpend += totalCost;
-            totalRevenue += monthRevenue;
+            totalPlatformProfit += monthProfit;
+            totalFlowerCount += sales.flowerCount;
+            totalCondolenceGross += sales.condolenceGross;
             totalBugoCreated += sales.bugoCount;
             totalClicks += naver.clicks + google.clicks;
 
@@ -183,9 +196,11 @@ export async function GET(request: NextRequest) {
                 naverCost: naver.cost,
                 googleCost: google.cost,
                 totalCost,
-                flowerRevenue: sales.flowerRevenue,
-                condolenceRevenue: sales.condolenceRevenue,
-                totalRevenue: monthRevenue,
+                flowerCount: sales.flowerCount,
+                flowerProfit: sales.flowerProfit,
+                condolenceGross: sales.condolenceGross,
+                condolenceProfit: sales.condolenceProfit,
+                totalRevenue: monthProfit, // 실제 플랫폼 마진 수익
                 netProfit,
                 roas,
                 bugoCount: sales.bugoCount,
@@ -194,7 +209,7 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        const overallRoas = totalMarketingSpend > 0 ? Math.round((totalRevenue / totalMarketingSpend) * 100) : 0;
+        const overallRoas = totalMarketingSpend > 0 ? Math.round((totalPlatformProfit / totalMarketingSpend) * 100) : 0;
         const overallCpa = totalBugoCreated > 0 ? Math.round(totalMarketingSpend / totalBugoCreated) : 0;
 
         return NextResponse.json({
@@ -202,8 +217,10 @@ export async function GET(request: NextRequest) {
             summary: {
                 bizmoney,
                 totalMarketingSpend,
-                totalRevenue,
-                netProfit: totalRevenue - totalMarketingSpend,
+                totalRevenue: totalPlatformProfit,
+                totalFlowerCount,
+                totalCondolenceGross,
+                netProfit: totalPlatformProfit - totalMarketingSpend,
                 overallRoas,
                 totalBugoCreated,
                 overallCpa,
