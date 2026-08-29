@@ -279,7 +279,7 @@
     font-weight: 700;
 }
 
-/* 상단 날짜 필터 바 */
+/* 상단 날짜 필터 바 (중앙 정렬) */
 .filterBar {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
@@ -287,30 +287,18 @@
     padding: 12px 18px;
     margin-bottom: 24px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.filterGroup {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.filterLabel {
-    font-size: 13px;
-    font-weight: 700;
-    color: #334155;
 }
 
 .monthNavBox {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
     background-color: #f8fafc;
     border: 1px solid #cbd5e1;
-    padding: 3px 10px;
+    padding: 6px 16px;
     border-radius: 8px;
 }
 
@@ -318,8 +306,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     background-color: #ffffff;
     border: 1px solid #cbd5e1;
@@ -336,35 +324,12 @@
 }
 
 .monthDisplayText {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     color: #0f172a;
-    min-width: 90px;
+    min-width: 110px;
     text-align: center;
-}
-
-.quickBtn {
-    padding: 5px 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #475569;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.quickBtn:hover {
-    background-color: #f1f5f9;
-    color: #0f172a;
-    border-color: #cbd5e1;
-}
-
-.quickBtnActive {
-    background-color: #0f172a;
-    color: #ffffff;
-    border-color: #0f172a;
+    letter-spacing: 0.5px;
 }
 
 /* 단일 풀와이드 정산서 카드 */
@@ -510,6 +475,210 @@
 
 .detailTable td:last-child {
     border-right: none;
+}
+
+/* 소속 지도사(팀원) 관리 스타일 */
+.membersCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.membersHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.membersTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.membersTableWrapper {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.membersTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.membersTable th {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #475569;
+    text-align: left;
+}
+
+.membersTable td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 14px 16px;
+    color: #334155;
+}
+
+.membersTable tr:last-child td {
+    border-bottom: none;
+}
+
+.actionBtnReset {
+    padding: 6px 12px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actionBtnReset:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+/* 모달 스타일 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modalCard {
+    background-color: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.modalHeader {
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.closeBtn:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.modalForm {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.formInput {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.formInput:focus {
+    border-color: #0f172a;
+}
+
+.formHelp {
+    font-size: 11px;
+    color: #64748b;
+    margin: 0;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.modalCancelBtn {
+    padding: 0 16px;
+    height: 38px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+}
+
+.modalSubmitBtn {
+    padding: 0 18px;
+    height: 38px;
+    background-color: #0f172a;
+    border: 1px solid #0f172a;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modalSubmitBtn:hover {
+    background-color: #1e293b;
 }
 
 /* 인쇄용 미디어 쿼리 */

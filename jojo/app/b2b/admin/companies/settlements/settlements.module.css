@@ -341,7 +341,7 @@
 }
 /* 🖨️ 인쇄 전용 @media print CSS 설계 (인쇄 시 완벽 정산서 폼 변환) */
 /* 전역 셀렉터(body, aside 등)는 settlements-print.css */
-/* 상단 날짜 필터 바 */
+/* 상단 날짜 필터 바 (중앙 정렬) */
 .filterBar {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
@@ -349,29 +349,17 @@
   padding: 12px 18px;
   margin-bottom: 24px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-}
-
-.filterGroup {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filterLabel {
-  font-size: 13px;
-  font-weight: 700;
-  color: #334155;
 }
 
 .monthNavBox {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   background-color: #f8fafc;
   border: 1px solid #cbd5e1;
-  padding: 3px 10px;
+  padding: 6px 16px;
   border-radius: 8px;
 }
 
@@ -379,8 +367,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
@@ -397,35 +385,12 @@
 }
 
 .monthDisplayText {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: #0f172a;
-  min-width: 90px;
+  min-width: 110px;
   text-align: center;
-}
-
-.quickBtn {
-  padding: 5px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.quickBtn:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
-}
-
-.quickBtnActive {
-  background-color: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
+  letter-spacing: 0.5px;
 }
 
 /* 인쇄 스타일 */

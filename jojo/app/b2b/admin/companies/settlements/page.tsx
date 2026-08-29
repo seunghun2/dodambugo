@@ -318,58 +318,29 @@ function SettlementsContent() {
                 </div>
             </div>
 
-            {/* 상단 정산 대상월 필터 바 (인쇄 제외) */}
+            {/* 상단 정산 대상월 필터 바 (중앙 정렬, 인쇄 제외) */}
             {selectedYearMonth && (
                 <div className={`${styles.filterBar} no-print`}>
-                    <div className={styles.filterGroup}>
-                        <span className={styles.filterLabel}>정산 대상월 :</span>
-                        <div className={styles.monthNavBox}>
-                            <button 
-                                type="button" 
-                                onClick={handlePrevMonth} 
-                                className={styles.monthNavBtn} 
-                                title="이전 달 조회"
-                            >
-                                <IconChevronLeft size={16} />
-                            </button>
-                            <span className={styles.monthDisplayText}>
-                                {selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월
-                            </span>
-                            <button 
-                                type="button" 
-                                onClick={handleNextMonth} 
-                                className={styles.monthNavBtn} 
-                                title="다음 달 조회"
-                            >
-                                <IconChevronRight size={16} />
-                            </button>
-                        </div>
-                    </div>
-                    <div className={styles.filterGroup}>
-                        {(() => {
-                            const now = new Date();
-                            const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                            const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                            const prevMonthKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
-                            return (
-                                <>
-                                    <button
-                                        type="button"
-                                        className={`${styles.quickBtn} ${selectedYearMonth === currentMonthKey ? styles.quickBtnActive : ''}`}
-                                        onClick={() => handleSelectMonth(currentMonthKey)}
-                                    >
-                                        이번 달
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`${styles.quickBtn} ${selectedYearMonth === prevMonthKey ? styles.quickBtnActive : ''}`}
-                                        onClick={() => handleSelectMonth(prevMonthKey)}
-                                    >
-                                        지난 달
-                                    </button>
-                                </>
-                            );
-                        })()}
+                    <div className={styles.monthNavBox}>
+                        <button 
+                            type="button" 
+                            onClick={handlePrevMonth} 
+                            className={styles.monthNavBtn} 
+                            title="이전 달 조회"
+                        >
+                            <IconChevronLeft size={18} />
+                        </button>
+                        <span className={styles.monthDisplayText}>
+                            {selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월
+                        </span>
+                        <button 
+                            type="button" 
+                            onClick={handleNextMonth} 
+                            className={styles.monthNavBtn} 
+                            title="다음 달 조회"
+                        >
+                            <IconChevronRight size={18} />
+                        </button>
                     </div>
                 </div>
             )}
