@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { IconPrinter, IconDownload, IconArrowLeft, IconCheck } from '@tabler/icons-react';
+import { IconPrinter, IconDownload, IconArrowLeft, IconCheck, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import styles from './settlements.module.css';
 import './settlements-print.css';
 
@@ -176,6 +176,27 @@ function SettlementsContent() {
         }
     };
 
+    // 이전 달 / 다음 달 이동
+    const handlePrevMonth = () => {
+        if (!selectedYearMonth) return;
+        const [year, month] = selectedYearMonth.split('-').map(Number);
+        const prevDate = new Date(year, month - 2, 1);
+        const prevYear = prevDate.getFullYear();
+        const prevMonth = String(prevDate.getMonth() + 1).padStart(2, '0');
+        const prevKey = `${prevYear}-${prevMonth}`;
+        fetchMonthlyDetail(prevKey);
+    };
+
+    const handleNextMonth = () => {
+        if (!selectedYearMonth) return;
+        const [year, month] = selectedYearMonth.split('-').map(Number);
+        const nextDate = new Date(year, month, 1);
+        const nextYear = nextDate.getFullYear();
+        const nextMonth = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const nextKey = `${nextYear}-${nextMonth}`;
+        fetchMonthlyDetail(nextKey);
+    };
+
     // 4. 인쇄 (Print) 처리
     const handlePrint = () => {
         window.print();
@@ -183,8 +204,8 @@ function SettlementsContent() {
 
     // 5. 엑셀 다운로드 (CSV 내보내기)
     const handleDownloadCSV = () => {
-        if (!selectedYearMonth || (settlements.length === 0 && condolenceSettlements.length === 0)) {
-            alert('다운로드할 정산 내역이 없습니다.');
+        if (!selectedYearMonth) {
+            alert('다운로드할 정산월이 선택되지 않았습니다.');
             return;
         }
 
@@ -257,7 +278,7 @@ function SettlementsContent() {
 
     return (
         <div className={styles.container}>
-            {/* 뒤로가기 및 타이틀 (인쇄 시 숨김 처리) */}
+            {/* 뒤로가기 및 액션 버튼 (인쇄 시 숨김 처리) */}
             <div className={`${styles.headerArea} no-print`}>
                 <button className={styles.backBtn} onClick={() => router.push('/b2b/admin/companies')}>
                     <IconArrowLeft size={16} />
@@ -268,7 +289,7 @@ function SettlementsContent() {
                         <IconPrinter size={16} />
                         <span>인쇄하기</span>
                     </button>
-                    <button className={styles.actionBtn} onClick={handleDownloadCSV} disabled={settlements.length === 0}>
+                    <button className={styles.actionBtn} onClick={handleDownloadCSV}>
                         <IconDownload size={16} />
                         <span>엑셀 다운로드</span>
                     </button>
@@ -279,13 +300,13 @@ function SettlementsContent() {
             <div className={`${styles.summaryBox} no-print`}>
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryLabel}>미정산 총액</div>
-                    <div className={styles.summaryValue} style={{ color: '#000000' }}>
+                    <div className={styles.summaryValue} style={{ color: '#0f172a' }}>
                         {(summary.pending_amount || 0).toLocaleString()}원
                     </div>
                 </div>
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryLabel}>정산 완료 총액</div>
-                    <div className={styles.summaryValue} style={{ color: '#000000' }}>
+                    <div className={styles.summaryValue} style={{ color: '#334155' }}>
                         {(summary.completed_amount || 0).toLocaleString()}원
                     </div>
                 </div>
@@ -297,65 +318,61 @@ function SettlementsContent() {
                 </div>
             </div>
 
-            {/* 월별 요약 장부 목록 (인쇄 시 숨김 처리) */}
-            <div className={`${styles.section} no-print`} style={{ marginBottom: '24px' }}>
-                <h3 className={styles.sectionTitle}>월별 정산 장부 목록</h3>
-                <div className={styles.tableCard}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>정산월</th>
-                                <th>정산 대기 금액</th>
-                                <th>정산 완료 금액</th>
-                                <th>건수</th>
-                                <th>상태</th>
-                                <th>조회</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {monthlyList.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: '#94a3b8' }}>
-                                        기록된 정산 내역이 없습니다.
-                                    </td>
-                                </tr>
-                            ) : (
-                                monthlyList.map((m) => {
-                                    const [year, month] = m.month.split('-');
-                                    const isSelected = selectedYearMonth === m.month;
-                                    return (
-                                        <tr key={m.month} className={isSelected ? styles.selectedRow : ''}>
-                                            <td style={{ fontWeight: '600' }}>{year}년 {month}월</td>
-                                            <td style={{ color: '#000000' }}>
-                                                {m.pending_amount.toLocaleString()}원
-                                            </td>
-                                            <td style={{ color: '#000000' }}>
-                                                {m.completed_amount.toLocaleString()}원
-                                            </td>
-                                            <td>{m.total_count}건</td>
-                                            <td>
-                                                {m.pending_amount > 0 ? (
-                                                    <span className={`${styles.badge} ${styles.badgePending}`}>정산 대기</span>
-                                                ) : (
-                                                    <span className={`${styles.badge} ${styles.badgeCompleted}`}>정산 완료</span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <button 
-                                                    className={styles.viewDetailBtn} 
-                                                    onClick={() => fetchMonthlyDetail(m.month)}
-                                                >
-                                                    정산서 확인
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+            {/* 상단 정산 대상월 필터 바 (인쇄 제외) */}
+            {selectedYearMonth && (
+                <div className={`${styles.filterBar} no-print`}>
+                    <div className={styles.filterGroup}>
+                        <span className={styles.filterLabel}>정산 대상월 :</span>
+                        <div className={styles.monthNavBox}>
+                            <button 
+                                type="button" 
+                                onClick={handlePrevMonth} 
+                                className={styles.monthNavBtn} 
+                                title="이전 달 조회"
+                            >
+                                <IconChevronLeft size={16} />
+                            </button>
+                            <span className={styles.monthDisplayText}>
+                                {selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월
+                            </span>
+                            <button 
+                                type="button" 
+                                onClick={handleNextMonth} 
+                                className={styles.monthNavBtn} 
+                                title="다음 달 조회"
+                            >
+                                <IconChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className={styles.filterGroup}>
+                        {(() => {
+                            const now = new Date();
+                            const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                            const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                            const prevMonthKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+                            return (
+                                <>
+                                    <button
+                                        type="button"
+                                        className={`${styles.quickBtn} ${selectedYearMonth === currentMonthKey ? styles.quickBtnActive : ''}`}
+                                        onClick={() => handleSelectMonth(currentMonthKey)}
+                                    >
+                                        이번 달
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.quickBtn} ${selectedYearMonth === prevMonthKey ? styles.quickBtnActive : ''}`}
+                                        onClick={() => handleSelectMonth(prevMonthKey)}
+                                    >
+                                        지난 달
+                                    </button>
+                                </>
+                            );
+                        })()}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* 📄 실제 일반 회사용 정규 정산서 디자인 (인쇄 출력 시 메인 레이아웃으로 출력) */}
             {selectedYearMonth && (
@@ -363,8 +380,8 @@ function SettlementsContent() {
                     <div className={styles.invoiceHeader}>
                         <div className={styles.invoiceTitleContainer}>
                             <h1 className={styles.invoiceMainTitle}>정 산 서</h1>
-                            <div className={styles.invoiceSubText}>
-                                귀사와의 거래에 따른 정산 내역을 아래와 같이 명세하여 송부합니다.
+                            <div className={styles.invoiceSubText} style={{ marginTop: '8px' }}>
+                                귀사와의 거래에 따른 {selectedYearMonth.split('-')[0]}년 {parseInt(selectedYearMonth.split('-')[1], 10)}월분 정산 내역을 아래와 같이 명세하여 송부합니다.
                             </div>
                         </div>
                     </div>
@@ -488,7 +505,9 @@ function SettlementsContent() {
                                     </tr>
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} style={{ height: '36px' }}></td>
+                                        <td colSpan={7} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                                            해당 월에 발생한 화환 판매 정산 내역이 없습니다. (0건 / 0원)
+                                        </td>
                                     </tr>
                                 ) : (
                                     settlements.map((s) => (
@@ -556,7 +575,9 @@ function SettlementsContent() {
                                     </tr>
                                 ) : condolenceSettlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} style={{ height: '36px' }}></td>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                                            해당 월에 발생한 부의금 정산 내역이 없습니다. (0건 / 0원)
+                                        </td>
                                     </tr>
                                 ) : (
                                     condolenceSettlements.map((c) => (

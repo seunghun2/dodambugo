@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconPrinter, IconDownload, IconLogout, IconBuilding, IconListCheck } from '@tabler/icons-react';
+import { IconPrinter, IconDownload, IconLogout, IconBuilding, IconListCheck, IconChevronLeft, IconChevronRight, IconUsers } from '@tabler/icons-react';
 import styles from './dashboard.module.css';
 import './dashboard-print.css';
 
@@ -98,6 +98,10 @@ export default function CompanyDashboardPage() {
                     }
                     if (data.monthlyList && data.monthlyList.length > 0) {
                         fetchSettleMonthlyDetail(data.monthlyList[0].month, companyId);
+                    } else {
+                        const now = new Date();
+                        const curMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                        setSettleSelectedMonth(curMonth);
                     }
                 }
             }
@@ -115,6 +119,27 @@ export default function CompanyDashboardPage() {
         }
     }, [user, fetchSettleMonthlyList]);
 
+    // 이전 달 / 다음 달 이동
+    const handlePrevMonth = () => {
+        if (!settleSelectedMonth || !user?.company_id) return;
+        const [year, month] = settleSelectedMonth.split('-').map(Number);
+        const prevDate = new Date(year, month - 2, 1);
+        const prevYear = prevDate.getFullYear();
+        const prevMonth = String(prevDate.getMonth() + 1).padStart(2, '0');
+        const prevKey = `${prevYear}-${prevMonth}`;
+        fetchSettleMonthlyDetail(prevKey, user.company_id);
+    };
+
+    const handleNextMonth = () => {
+        if (!settleSelectedMonth || !user?.company_id) return;
+        const [year, month] = settleSelectedMonth.split('-').map(Number);
+        const nextDate = new Date(year, month, 1);
+        const nextYear = nextDate.getFullYear();
+        const nextMonth = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const nextKey = `${nextYear}-${nextMonth}`;
+        fetchSettleMonthlyDetail(nextKey, user.company_id);
+    };
+
     // 로그아웃
     const handleLogout = () => {
         localStorage.removeItem('b2b_token');
@@ -129,8 +154,8 @@ export default function CompanyDashboardPage() {
 
     // 엑셀 다운로드 (CSV: 화환 + 부의금 통합)
     const handleDownloadCSV = () => {
-        if (!settleSelectedMonth || (settleDetails.length === 0 && condolenceDetails.length === 0) || !user) {
-            alert('다운로드할 내역이 존재하지 않습니다.');
+        if (!settleSelectedMonth || !user) {
+            alert('다운로드할 정산월이 선택되지 않았습니다.');
             return;
         }
 
@@ -198,6 +223,11 @@ export default function CompanyDashboardPage() {
         );
     }
 
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonthKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+
     const flowerPending = settleDetails.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.amount, 0);
     const flowerCompleted = settleDetails.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
     const condolencePending = condolenceDetails.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
@@ -205,7 +235,7 @@ export default function CompanyDashboardPage() {
     const totalPending = flowerPending + condolencePending;
     const totalCompleted = flowerCompleted + condolenceCompleted;
     const totalAmount = totalPending + totalCompleted;
-    const hasPending = totalPending > 0;
+    const isSettled = totalCompleted > 0 && totalPending === 0;
     const latestPaymentDate = settleDetails[0]?.payment_date || condolenceDetails[0]?.payment_date;
 
     return (
@@ -224,6 +254,14 @@ export default function CompanyDashboardPage() {
                     <div className={`${styles.navItem} ${styles.navItemActive}`}>
                         <IconListCheck size={20} />
                         <span>정산서 조회</span>
+                    </div>
+                    <div 
+                        className={styles.navItem} 
+                        onClick={() => alert(`[${user.company_name}] 소속 지도사(팀원) 계정 발급 및 관리는 본사 관리자 승인 절차에 따라 진행됩니다.\n계정 발급 및 추가 문의는 마스터 관리자에게 문의해 주세요.`)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <IconUsers size={20} />
+                        <span>소속 지도사(팀원) 관리</span>
                     </div>
                 </nav>
 
@@ -259,7 +297,16 @@ export default function CompanyDashboardPage() {
                     </div>
                 </div>
 
-                {/* KPI 요약 위젯 카드 (인쇄 제외) */}
+                {/* 1. 정산 및 세금계산서 발행 안내 배너 (인쇄 제외) */}
+                <div className={`${styles.noticeBanner} no-print`}>
+                    <div className={styles.noticeTitle}>정산 및 세금계산서 발행 안내</div>
+                    <ul className={styles.noticeList}>
+                        <li>당월(1일 ~ 말일)에 발생한 정산 내역은 <strong>익월 10일 이전</strong>까지 확인 후 당사로 세금계산서를 발행해 주시기 바랍니다.</li>
+                        <li>전자세금계산서 발행 확인 후 <strong>익월 15일 이내</strong>에 등록된 지정 계좌로 정산 대금이 지급됩니다.</li>
+                    </ul>
+                </div>
+
+                {/* 2. KPI 요약 위젯 카드 (인쇄 제외) */}
                 <div className={`${styles.statsGrid} no-print`}>
                     <div className={styles.statCard}>
                         <span className={styles.statLabel}>미지급 정산 대금</span>
@@ -277,58 +324,62 @@ export default function CompanyDashboardPage() {
                     </div>
                 </div>
 
-                {/* 정산 장부 및 세부 내역 영역 */}
-                <div className={styles.contentLayout}>
-                    <div className={styles.gridTwoColumns}>
-                        {/* 1. 월별 정산 목록 (좌측) */}
-                        <div className={`${styles.monthlyCard} no-print`}>
-                            <h3 className={styles.cardSectionTitle}>월별 정산 장부</h3>
-                            <div className={styles.tableWrapper}>
-                                <table className={styles.table}>
-                                    <thead>
-                                        <tr>
-                                            <th>정산 대상월</th>
-                                            <th style={{ textAlign: 'right' }}>미지급액</th>
-                                            <th style={{ textAlign: 'right' }}>지급완료액</th>
-                                            <th style={{ textAlign: 'center' }}>조회</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {settleLoading ? (
-                                            <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>장부 로딩 중...</td></tr>
-                                        ) : settleMonthlyList.length === 0 ? (
-                                            <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>장부 기록이 존재하지 않습니다.</td></tr>
-                                        ) : (
-                                            settleMonthlyList.map(m => (
-                                                <tr key={m.month} className={settleSelectedMonth === m.month ? styles.activeRow : ''}>
-                                                    <td style={{ fontWeight: 'bold' }}>{m.month.split('-')[0]}년 {m.month.split('-')[1]}월</td>
-                                                    <td style={{ textAlign: 'right', color: '#ef4444', fontWeight: '500' }}>{m.pending_amount.toLocaleString()}원</td>
-                                                    <td style={{ textAlign: 'right', color: '#10b981', fontWeight: '500' }}>{m.completed_amount.toLocaleString()}원</td>
-                                                    <td style={{ textAlign: 'center' }}>
-                                                        <button 
-                                                            onClick={() => fetchSettleMonthlyDetail(m.month, user.company_id)}
-                                                            className={styles.selectBtn}
-                                                        >
-                                                            선택
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                {/* 3. 상단 정산 대상월 필터 바 (인쇄 제외) */}
+                <div className={`${styles.filterBar} no-print`}>
+                    <div className={styles.filterGroup}>
+                        <span className={styles.filterLabel}>정산 대상월 :</span>
+                        <div className={styles.monthNavBox}>
+                            <button 
+                                type="button" 
+                                onClick={handlePrevMonth} 
+                                className={styles.monthNavBtn} 
+                                title="이전 달 조회"
+                            >
+                                <IconChevronLeft size={16} />
+                            </button>
+                            <span className={styles.monthDisplayText}>
+                                {settleSelectedMonth ? `${settleSelectedMonth.split('-')[0]}년 ${parseInt(settleSelectedMonth.split('-')[1], 10)}월` : '-'}
+                            </span>
+                            <button 
+                                type="button" 
+                                onClick={handleNextMonth} 
+                                className={styles.monthNavBtn} 
+                                title="다음 달 조회"
+                            >
+                                <IconChevronRight size={16} />
+                            </button>
                         </div>
+                    </div>
+                    <div className={styles.filterGroup}>
+                        <button
+                            type="button"
+                            className={`${styles.quickBtn} ${settleSelectedMonth === currentMonthKey ? styles.quickBtnActive : ''}`}
+                            onClick={() => fetchSettleMonthlyDetail(currentMonthKey, user.company_id)}
+                        >
+                            이번 달
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.quickBtn} ${settleSelectedMonth === prevMonthKey ? styles.quickBtnActive : ''}`}
+                            onClick={() => fetchSettleMonthlyDetail(prevMonthKey, user.company_id)}
+                        >
+                            지난 달
+                        </button>
+                    </div>
+                </div>
 
-                        {/* 2. 정식 규격 명세 장부 (우측 대형 슬롯) */}
-                        <div className={styles.sheetCard}>
-                            {settleSelectedMonth ? (
-                                <div className={styles.invoiceSheet}>
-                                    {/* 명세 타이틀 */}
-                                    <div className={styles.invoiceTitleBlock}>
-                                        <h2 className={styles.invoiceMainTitle}>정 산 서</h2>
-                                        <span className={styles.invoiceSubTitle}>정산 대상월 : {settleSelectedMonth.split('-')[0]}년 {settleSelectedMonth.split('-')[1]}월분</span>
-                                    </div>
+                {/* 정산 장부 및 세부 내역 영역 (풀와이드 단일 레이아웃) */}
+                <div className={styles.contentLayout}>
+                    <div className={styles.sheetCard}>
+                        {settleSelectedMonth ? (
+                            <div className={styles.invoiceSheet}>
+                                {/* 명세 타이틀 (순수 고유 정산서 문서 양식) */}
+                                <div className={styles.invoiceTitleBlock}>
+                                    <h2 className={styles.invoiceMainTitle}>정 산 서</h2>
+                                    <span className={styles.invoiceSubTitle}>
+                                        정산 대상월 : {settleSelectedMonth.split('-')[0]}년 {settleSelectedMonth.split('-')[1]}월분
+                                    </span>
+                                </div>
 
                                     {/* 공급자 & 공급받는자 영수 명세 */}
                                     <div className={styles.partiesBlock}>
@@ -396,12 +447,12 @@ export default function CompanyDashboardPage() {
                                         <tbody>
                                             <tr>
                                                 <td className={styles.summaryTh}>정산 상태</td>
-                                                <td className={styles.summaryTd} style={{ fontWeight: 'bold', color: hasPending ? '#ef4444' : '#0f172a' }}>
-                                                    {hasPending ? '정산 대기 (미지급)' : '정산 완료 (지급완료)'}
+                                                <td className={styles.summaryTd} style={{ fontWeight: 'bold', color: '#0f172a' }}>
+                                                    {isSettled ? '정산 완료 (지급완료)' : '정산 대기'}
                                                 </td>
                                                 <td className={styles.summaryTh}>지급일자</td>
                                                 <td className={styles.summaryTd}>
-                                                    {hasPending || !latestPaymentDate ? '지급 대기' : new Date(latestPaymentDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                                                    {isSettled && latestPaymentDate ? new Date(latestPaymentDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '지급 대기'}
                                                 </td>
                                                 <td className={styles.summaryTh}>합계 금액</td>
                                                 <td className={styles.summaryTd} style={{ fontWeight: 'bold' }}>{totalAmount.toLocaleString()}원</td>
@@ -490,15 +541,14 @@ export default function CompanyDashboardPage() {
                                                     )}
                                                 </tbody>
                                             </table>
-                                        </div>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className={styles.emptyDetail}>
-                                    조회할 정산월을 선택해 주세요.
-                                </div>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className={styles.emptyDetail}>
+                                조회할 정산월을 선택해 주세요.
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

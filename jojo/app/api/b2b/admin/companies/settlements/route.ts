@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
                     .from('b2b_users')
                     .select('company_id')
                     .eq('id', decoded.userId)
-                    .single();
+                    .maybeSingle();
                 
                 if (user && user.company_id && user.company_id === companyId) {
                     isCompanyUser = true;
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
             .from('b2b_companies')
             .select('*')
             .eq('id', companyId)
-            .single();
+            .maybeSingle();
 
         const companyData = rawCompany ? normalizeCompanyData(rawCompany) : null;
 
@@ -265,10 +265,22 @@ export async function GET(request: NextRequest) {
             });
 
             // 객체 배열 형태로 변환 및 내림차순 정렬
-            const monthlyList = Array.from(monthlySummaryMap.entries()).map(([month, data]) => ({
+            let monthlyList = Array.from(monthlySummaryMap.entries()).map(([month, data]) => ({
                 month,
                 ...data
             })).sort((a, b) => b.month.localeCompare(a.month));
+
+            // 정산 내역이 0건이더라도 당월 기본 장부 엔트리를 항상 제공하여 정산서 서식이 즉시 표시되도록 보장
+            if (monthlyList.length === 0) {
+                const now = new Date();
+                const curMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                monthlyList = [{
+                    month: curMonth,
+                    pending_amount: 0,
+                    completed_amount: 0,
+                    total_count: 0
+                }];
+            }
 
             // 전체 정산 통계 도출
             let pendingTotal = 0;

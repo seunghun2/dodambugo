@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice, IconUser } from '@tabler/icons-react';
+import { IconPlus, IconX, IconEdit, IconTrash, IconFileInvoice, IconUser, IconCopy, IconCheck, IconRotateClockwise } from '@tabler/icons-react';
 import styles from './companies.module.css';
 
 interface Company {
@@ -48,11 +48,12 @@ export default function CompaniesPage() {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [selectedCompanyForAccount, setSelectedCompanyForAccount] = useState<Company | null>(null);
     const [companyUsers, setCompanyUsers] = useState<any[]>([]);
+    const [copiedUrl, setCopiedUrl] = useState(false);
     
     // 신규 본사 계정 발급용 폼 상태
     const [newAccName, setNewAccName] = useState('');
     const [newAccPhone, setNewAccPhone] = useState('');
-    const [newAccPassword, setNewAccPassword] = useState('');
+    const [newAccPassword, setNewAccPassword] = useState('Aa123!');
     const [newAccError, setNewAccError] = useState('');
 
     // 목록 조회
@@ -225,19 +226,28 @@ export default function CompaniesPage() {
         setSelectedCompanyForAccount(company);
         setNewAccName('');
         setNewAccPhone('');
-        setNewAccPassword('');
+        setNewAccPassword('Aa123!');
         setNewAccError('');
         setCompanyUsers([]);
         fetchCompanyUsers(company.id);
         setAccountModalOpen(true);
     };
 
+    const handleCopyAdminUrl = () => {
+        const url = 'https://bugoon.maeumbugo.co.kr/b2b/company/login';
+        navigator.clipboard.writeText(url);
+        setCopiedUrl(true);
+        setTimeout(() => setCopiedUrl(false), 2000);
+    };
+
     const handleCreateAccount = async (e: React.FormEvent) => {
         e.preventDefault();
         setNewAccError('');
 
-        if (!newAccName.trim() || !newAccPhone.trim() || !newAccPassword.trim()) {
-            setNewAccError('모든 항목을 입력해 주세요.');
+        const finalPassword = newAccPassword.trim() || 'Aa123!';
+
+        if (!newAccName.trim() || !newAccPhone.trim()) {
+            setNewAccError('담당자명과 휴대폰 번호를 입력해 주세요.');
             return;
         }
 
@@ -250,7 +260,7 @@ export default function CompaniesPage() {
                     companyName: selectedCompanyForAccount?.name,
                     ownerName: newAccName,
                     phone: newAccPhone,
-                    password: newAccPassword
+                    password: finalPassword
                 })
             });
 
@@ -258,9 +268,9 @@ export default function CompaniesPage() {
             if (res.ok && data.success) {
                 setNewAccName('');
                 setNewAccPhone('');
-                setNewAccPassword('');
+                setNewAccPassword('Aa123!');
                 fetchCompanyUsers(selectedCompanyForAccount!.id);
-                alert('본사 담당자 계정이 정상적으로 추가 발급되었습니다.');
+                alert(`[${selectedCompanyForAccount?.name}] 본사 담당자 계정이 발급되었습니다.\n(초기 비밀번호: ${finalPassword})`);
             } else {
                 setNewAccError(data.error || '계정 발급 실패');
             }
@@ -270,20 +280,21 @@ export default function CompaniesPage() {
     };
 
     const handleResetPassword = async (userId: string, ownerName: string) => {
-        const newPw = prompt(`[${ownerName}] 님의 새로운 비밀번호를 입력해 주세요:`, '00000000');
-        if (!newPw) return;
+        if (!confirm(`[${ownerName}] 님의 비밀번호를 기본값 'Aa123!' (으)로 초기화하시겠습니까?`)) {
+            return;
+        }
 
         try {
             const res = await fetch('/api/b2b/admin/companies/accounts', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, password: newPw })
+                body: JSON.stringify({ userId, password: 'Aa123!' })
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                alert('비밀번호가 성공적으로 변경되었습니다.');
+                alert(`[${ownerName}] 님의 비밀번호가 'Aa123!' (으)로 성공적으로 초기화되었습니다.`);
             } else {
-                alert(data.error || '비밀번호 변경 실패');
+                alert(data.error || '비밀번호 초기화 실패');
             }
         } catch {
             alert('서버 연결 실패');
@@ -610,10 +621,30 @@ export default function CompaniesPage() {
                             </button>
                         </div>
                         
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {/* 0. 상조 본사 로그인 접속 주소 안내 및 복사 */}
+                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b' }}>상조 본사 로그인 전용 주소</div>
+                                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', fontFamily: 'monospace', marginTop: '2px' }}>
+                                        https://bugoon.maeumbugo.co.kr/b2b/company/login
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleCopyAdminUrl}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: '600', color: '#334155', cursor: 'pointer', transition: 'all 0.2s' }}
+                                >
+                                    {copiedUrl ? <IconCheck size={14} style={{ color: '#10b981' }} /> : <IconCopy size={14} />}
+                                    <span>{copiedUrl ? '복사 완료' : '주소 복사'}</span>
+                                </button>
+                            </div>
+
                             {/* 1. 신규 본사 담당자 로그인 계정 생성/발급 */}
-                            <form onSubmit={handleCreateAccount} style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0f172a' }}>🔑 본사 어드민 담당자 계정 신규 발급</h3>
+                            <form onSubmit={handleCreateAccount} style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>
+                                    본사 담당자 계정 신규 발급
+                                </div>
                                 
                                 {newAccError && (
                                     <div style={{ color: '#ef4444', fontSize: '12px', marginBottom: '8px' }}>{newAccError}</div>
@@ -652,8 +683,7 @@ export default function CompaniesPage() {
                                             style={{ height: '36px', fontSize: '12px' }}
                                             value={newAccPassword}
                                             onChange={(e) => setNewAccPassword(e.target.value)}
-                                            placeholder="비밀번호 설정"
-                                            required
+                                            placeholder="기본: Aa123!"
                                         />
                                     </div>
                                     <button type="submit" className={styles.submitBtn} style={{ height: '36px', padding: '0 16px', fontSize: '12px', whiteSpace: 'nowrap' }}>
@@ -664,7 +694,9 @@ export default function CompaniesPage() {
 
                             {/* 2. 등록된 본사 관리자 계정 목록 */}
                             <div>
-                                <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#0f172a' }}>📋 소속 담당자 로그인 계정 목록</h3>
+                                <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#0f172a' }}>
+                                    소속 담당자 로그인 계정 목록
+                                </div>
                                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                                     <table className={styles.table} style={{ fontSize: '12px' }}>
                                         <thead>
@@ -672,7 +704,7 @@ export default function CompaniesPage() {
                                                 <th style={{ padding: '10px', textAlign: 'left' }}>담당자명</th>
                                                 <th style={{ padding: '10px', textAlign: 'left' }}>로그인 휴대폰 ID</th>
                                                 <th style={{ padding: '10px', textAlign: 'center' }}>가입일</th>
-                                                <th style={{ padding: '10px', textAlign: 'center', width: '160px' }}>관리</th>
+                                                <th style={{ padding: '10px', textAlign: 'center', width: '170px' }}>관리</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -692,13 +724,15 @@ export default function CompaniesPage() {
                                                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                                                                 <button 
                                                                     onClick={() => handleResetPassword(u.id, u.owner_name)}
-                                                                    style={{ border: '1px solid #cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', background: '#ffffff', cursor: 'pointer', color: '#0f172a' }}
+                                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', border: '1px solid #cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#ffffff', cursor: 'pointer', color: '#0f172a' }}
+                                                                    title="비밀번호를 Aa123! 로 초기화합니다"
                                                                 >
-                                                                    비번 변경
+                                                                    <IconRotateClockwise size={12} />
+                                                                    <span>비번 초기화</span>
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleRemoveMapping(u.id, u.owner_name)}
-                                                                    style={{ border: '1px solid #ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', background: '#ef4444', cursor: 'pointer', color: '#ffffff' }}
+                                                                    style={{ border: '1px solid #fee2e2', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#fef2f2', cursor: 'pointer', color: '#ef4444' }}
                                                                 >
                                                                     해제
                                                                 </button>

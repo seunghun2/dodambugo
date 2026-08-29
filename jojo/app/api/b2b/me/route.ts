@@ -46,14 +46,15 @@ export async function GET(request: NextRequest) {
             .from('b2b_users')
             .select('id, phone, company_name, owner_name, bank_name, account_no, account_holder, my_referral_code, status, created_at, identity_verified, alarm_all, alarm_deceased, alarm_reward, alarm_referral, alarm_order, alarm_deposit, alarm_notice, alarm_event, avatar_url, company_id')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
 
         if (userError) {
-            return NextResponse.json({ error: `Supabase 쿼리 오류: ${userError.message}` }, { status: 500 });
+            console.error('B2B me query error:', userError);
+            return NextResponse.json({ error: `회원 정보 조회 실패: ${userError.message}` }, { status: 500 });
         }
 
         if (!user) {
-            return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 404 });
+            return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 401 });
         }
 
         // 기존 8자리 영문 혼용 추천코드를 숫자 4자리로 자동 갱신
