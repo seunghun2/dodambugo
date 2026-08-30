@@ -249,13 +249,29 @@ export default function OrderContent({ initialProduct, productId }: OrderContent
       // 최종 리본 문구 결정
       const finalRibbon1 = isCustomMessage ? form.customMessage : form.ribbonText1;
 
+      // 지역별 가격 계산
+      const targetAddress = form.address || form.funeralHome || '';
+      const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+      const targetRegion = REGION_KEYWORDS.find(r => targetAddress.includes(r)) || '';
+      const basePrice = product.discount_price || product.price;
+      const regSurcharge = (product.regional_prices && targetRegion && product.regional_prices[targetRegion]) || 0;
+      let specSurcharge = 0;
+      if (product.special_surcharges && targetAddress) {
+        for (const [keyword, surcharge] of Object.entries(product.special_surcharges)) {
+          if (targetAddress.includes(keyword)) {
+            specSurcharge = Math.max(specSurcharge, surcharge);
+          }
+        }
+      }
+      const finalB2bProductPrice = basePrice + regSurcharge + specSurcharge;
+
       // sessionStorage 저장
       const orderPayload = {
         ribbonText1: finalRibbon1,
         ribbonText2: form.ribbonText2,
         recipientName: form.mournerName,
         productName: product.name,
-        productPrice: product.discount_price || product.price,
+        productPrice: finalB2bProductPrice,
         funeralHome: form.funeralHome,
         room: form.roomNumber,
         address: form.address,

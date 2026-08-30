@@ -13,7 +13,31 @@ interface FlowerProduct {
     price: number;
     discount_price: number | null;
     images: string[];
+    regional_prices?: Record<string, number>;
+    special_surcharges?: Record<string, number>;
 }
+
+// 지역별 가격 계산 헬퍼 (시/도 추가금 + 특수지역 추가금)
+const calculateRegionalPrice = (
+    basePrice: number,
+    discountPrice: number | null,
+    regionalPrices: Record<string, number> | undefined,
+    specialSurcharges: Record<string, number> | undefined,
+    region: string,
+    address: string
+): number => {
+    const price = discountPrice || basePrice;
+    const regionalSurcharge = (regionalPrices && region && regionalPrices[region]) || 0;
+    let specialSurcharge = 0;
+    if (specialSurcharges && address) {
+        for (const [keyword, surcharge] of Object.entries(specialSurcharges)) {
+            if (address.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge);
+            }
+        }
+    }
+    return price + regionalSurcharge + specialSurcharge;
+};
 
 interface BugoData {
     id: string;
@@ -39,6 +63,19 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
     const pathPrefix = isB2b ? '/b2b' : '';
     const bugo = initialBugo;
     const product = initialProduct;
+
+    // 지역 및 최종 가격 계산
+    const funeralAddress = bugo?.address || bugo?.funeral_home || '';
+    const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+    const bugoRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
+    const finalProductPrice = product ? calculateRegionalPrice(
+        product.price,
+        product.discount_price,
+        product.regional_prices,
+        product.special_surcharges,
+        bugoRegion,
+        funeralAddress
+    ) : 0;
 
     const [isCustomMessage, setIsCustomMessage] = useState(false); // 직접입력 여부
     const [recipientModalOpen, setRecipientModalOpen] = useState(false); // 상주변경 모달
@@ -114,13 +151,13 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
             ribbonText2: orderForm.ribbonText2,
             recipientName: orderForm.recipientName,
             productName: product.name,
-            productPrice: product.discount_price || product.price,
+            productPrice: finalProductPrice,
             funeralHome: bugo.funeral_home || '',
             room: bugo.room_number || '',
             address: bugo.address || '',
         }));
         // GA: 화환 주문 제출 이벤트
-        gaEvents.submitFlowerOrder(productId, product.discount_price || product.price);
+        gaEvents.submitFlowerOrder(productId, finalProductPrice);
         // payment 페이지로 이동
         router.push(`${pathPrefix}/view/${bugoId}/payment/${productId}`);
     };
@@ -149,7 +186,7 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                         </div>
                         <div className="product-info">
                             <h3>{product.name}</h3>
-                            <p className="price">{(product.discount_price || product.price).toLocaleString()}원</p>
+                            <p className="price">{finalProductPrice.toLocaleString()}원</p>
                         </div>
                     </div>
                 </section>
