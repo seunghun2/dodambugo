@@ -20,7 +20,8 @@ import {
     IconPackage,
     IconAdjustments,
     IconMailOpened,
-    IconHistory
+    IconHistory,
+    IconChartBar
 } from '@tabler/icons-react';
 import styles from './B2BAdminSidebar.module.css';
 
