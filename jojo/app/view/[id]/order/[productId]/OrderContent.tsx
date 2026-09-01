@@ -8,6 +8,7 @@ import './order.css';
 
 interface FlowerProduct {
     id: string;
+    sort_order: number;
     name: string;
     description: string;
     price: number;
@@ -15,6 +16,7 @@ interface FlowerProduct {
     images: string[];
     regional_prices?: Record<string, number>;
     special_surcharges?: Record<string, number>;
+    exclude_regions?: string[];
 }
 
 // 지역별 가격 계산 헬퍼 (시/도 추가금 + 특수지역 추가금)
@@ -145,6 +147,10 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
             alert('부고 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
             return;
         }
+        if (product?.exclude_regions && product.exclude_regions.some((r: string) => funeralAddress.includes(r))) {
+            alert('해당 장례식장은 화훼사 직배송이 불가능한 지역(세종/도서지역 등)입니다. 상주님께 모바일 조의금 또는 위로 메시지를 전달해 주세요.');
+            return;
+        }
         // sessionStorage에 주문 정보 저장
         sessionStorage.setItem(`order_${bugoId}_${productId}`, JSON.stringify({
             ribbonText1: orderForm.ribbonText1,
@@ -176,7 +182,14 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
             </header>
 
             <div className="order-content">
-                {/* 선택한 상품 */}
+                {product?.exclude_regions && product.exclude_regions.some((r: string) => funeralAddress.includes(r)) && (
+                    <div style={{ padding: '14px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color: '#991B1B', fontSize: '13px', lineHeight: '1.5', marginBottom: '16px' }}>
+                        <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                            <span>⚠️</span> <span>배송 제한 지역 안내</span>
+                        </div>
+                        해당 장례식장 소재지는 화훼사 직발송이 불가능한 지역(세종/도서산간 등)으로, 화환 주문 접수가 불가합니다.
+                    </div>
+                )}
                 {/* Step 1: 선택한 상품 */}
                 <section className="order-section">
                     <h2 className="section-title">선택한 상품</h2>
