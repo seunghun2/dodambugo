@@ -179,9 +179,9 @@ export async function POST(request: NextRequest) {
       await supabase.from('b2b_notification_logs').insert({
         recipient_phone: recipientPhone,
         recipient_name: recipientName,
-        type: 'push',
+        channel: 'push',
         title,
-        content: pushBody,
+        body: pushBody,
         status: isSuccess,
         error_message: fcmError || null
       });

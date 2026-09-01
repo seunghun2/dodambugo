@@ -6,12 +6,14 @@ import styles from '../partners/partners.module.css'; // 디자인 톤앤매너 
 
 interface NotificationLog {
     id: string;
-    recipient_phone: string;
+    recipient_phone?: string;
     recipient_name?: string;
-    type: 'alimtalk' | 'sms' | 'lms' | 'push';
+    type?: string;
+    channel?: string;
     title: string;
-    content: string;
-    status: 'success' | 'fail';
+    content?: string;
+    body?: string;
+    status: 'success' | 'fail' | 'skipped';
     error_message?: string;
     created_at: string;
 }
@@ -62,8 +64,9 @@ export default function NotificationLogsPage() {
         setSearchQuery(searchTerm);
     };
 
-    const getTypeIcon = (type: string) => {
-        switch (type) {
+    const getTypeIcon = (type?: string) => {
+        const val = (type || '').toLowerCase();
+        switch (val) {
             case 'alimtalk':
                 return <span style={{ color: '#FEE500', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }} title="카카오 알림톡"><IconMessage size={16} /> 알림톡</span>;
             case 'push':
@@ -73,13 +76,16 @@ export default function NotificationLogsPage() {
             case 'sms':
                 return <span style={{ color: '#6b7280', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }} title="SMS 단문문자"><IconDeviceMobile size={16} /> SMS</span>;
             default:
-                return <span>{type}</span>;
+                return <span>{type || '-'}</span>;
         }
     };
 
     const getStatusBadge = (status: string) => {
         if (status === 'success') {
             return <span className={`${styles.badge} ${styles.badgeApproved}`}>발송성공</span>;
+        }
+        if (status === 'skipped') {
+            return <span className={styles.badge} style={{ backgroundColor: '#f1f5f9', color: '#64748b', border: '1px solid #cbd5e1' }}>미발송(토큰없음)</span>;
         }
         return <span className={`${styles.badge} ${styles.badgeRejected}`}>발송실패</span>;
     };
@@ -126,6 +132,7 @@ export default function NotificationLogsPage() {
                         <option value="all">모든 발송상태</option>
                         <option value="success">발송 성공</option>
                         <option value="fail">발송 실패</option>
+                        <option value="skipped">미발송 (토큰없음)</option>
                     </select>
 
                     <button type="submit" className={styles.searchBtn}>
@@ -179,18 +186,18 @@ export default function NotificationLogsPage() {
                                             {formatDate(log.created_at)}
                                         </td>
                                         <td style={{ fontWeight: '600', fontFamily: 'monospace' }}>
-                                            {log.recipient_phone}
+                                            {log.recipient_phone || '-'}
                                         </td>
                                         <td>{log.recipient_name || '-'}</td>
-                                        <td>{getTypeIcon(log.type)}</td>
+                                        <td>{getTypeIcon(log.channel || log.type)}</td>
                                         <td style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>
-                                            {log.title}
+                                            {log.title || '-'}
                                         </td>
                                         <td style={{ fontSize: '13px', color: '#0f172a', whiteSpace: 'pre-wrap', maxWidth: '300px', lineHeight: '1.4' }}>
-                                            {log.content}
+                                            {log.body || log.content || '-'}
                                         </td>
                                         <td>{getStatusBadge(log.status)}</td>
-                                        <td style={{ fontSize: '12px', color: '#ef4444', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={log.error_message}>
+                                        <td style={{ fontSize: '12px', color: log.status === 'fail' ? '#ef4444' : '#64748b', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={log.error_message}>
                                             {log.error_message || '-'}
                                         </td>
                                     </tr>

@@ -192,15 +192,27 @@ export async function sendPushToPartner(
             notification: { title, body },
             data: data || {},
             apns: {
+              headers: {
+                'apns-priority': '10',
+                'apns-push-type': 'alert',
+              },
               payload: {
                 aps: {
+                  alert: {
+                    title,
+                    body,
+                  },
                   sound: 'default',
                   badge: 1,
+                  'content-available': 1,
                 },
               },
             },
             android: {
+              priority: 'high',
               notification: {
+                title,
+                body,
                 sound: 'default',
                 channelId: 'default',
               },

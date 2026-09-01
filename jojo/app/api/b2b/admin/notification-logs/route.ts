@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
             .select('*');
 
         if (type !== 'all') {
-            query = query.eq('type', type);
+            query = query.eq('channel', type);
         }
 
         if (status !== 'all') {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         }
 
         if (search) {
-            query = query.or(`recipient_phone.ilike.%${search}%,recipient_name.ilike.%${search}%,title.ilike.%${search}%,content.ilike.%${search}%`);
+            query = query.or(`recipient_phone.ilike.%${search}%,recipient_name.ilike.%${search}%,title.ilike.%${search}%,body.ilike.%${search}%`);
         }
 
         // 최신 발송 순 100건 정렬

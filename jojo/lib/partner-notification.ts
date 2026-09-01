@@ -70,16 +70,17 @@ async function logNotification(
   channel: string,
   title: string,
   body: string,
-  status: 'success' | 'fail',
+  status: 'success' | 'fail' | 'skipped',
   errorMessage?: string,
-  recipientPhone?: string
+  recipientPhone?: string,
+  recipientName?: string
 ) {
   try {
     await supabase.from('b2b_notification_logs').insert({
       partner_id: partnerId,
       event_type: eventType,
       channel,
-      recipient_name: title,
+      recipient_name: recipientName || title,
       title,
       body,
       status,
@@ -136,7 +137,7 @@ export async function sendPartnerNotification(
     // 3. 파트너 알림 설정 조회
     const { data: partner } = await supabase
       .from('b2b_users')
-      .select('alarm_all, alarm_deposit, alarm_deceased, alarm_notice, alarm_referral, alarm_reward, alarm_order, alarm_event, phone')
+      .select('alarm_all, alarm_deposit, alarm_deceased, alarm_notice, alarm_referral, alarm_reward, alarm_order, alarm_event, phone, owner_name, company_name')
       .eq('id', partnerId)
       .single();
 
@@ -144,6 +145,8 @@ export async function sendPartnerNotification(
       console.log(`[PartnerNotification] 파트너 알림 OFF: ${partnerId}`);
       return;
     }
+
+    const partnerDisplayName = partner.owner_name || partner.company_name || '파트너';
 
     // 이벤트 타입별 세부 알림 설정 체크
     const alarmMap: Record<string, string> = {
@@ -174,12 +177,43 @@ export async function sendPartnerNotification(
           type: eventType,
           ...(pushData || {}),
         });
-        await logNotification(partnerId, eventType, 'push', title, body,
-          result.success > 0 ? 'success' : 'fail',
-          result.failed > 0 ? 'FCM 전송 실패' : undefined
+
+        let pushStatus: 'success' | 'fail' | 'skipped' = 'fail';
+        let errorMsg: string | undefined = undefined;
+
+        if (result.success > 0) {
+          pushStatus = 'success';
+        } else if (result.failed > 0) {
+          pushStatus = 'fail';
+          errorMsg = result.errorDetails?.join(', ') || 'FCM 전송 실패';
+        } else {
+          pushStatus = 'skipped';
+          errorMsg = '앱 미설치 (푸시 토큰 없음)';
+        }
+
+        await logNotification(
+          partnerId,
+          eventType,
+          'push',
+          title,
+          body,
+          pushStatus,
+          errorMsg,
+          partner.phone,
+          partnerDisplayName
         );
       } catch (err: any) {
-        await logNotification(partnerId, eventType, 'push', title, body, 'fail', err?.message);
+        await logNotification(
+          partnerId,
+          eventType,
+          'push',
+          title,
+          body,
+          'fail',
+          err?.message,
+          partner.phone,
+          partnerDisplayName
+        );
       }
     }
 
@@ -187,9 +221,9 @@ export async function sendPartnerNotification(
     if (channels.includes('lms') && partner.phone) {
       try {
         await sendLMS(partner.phone, title, body);
-        await logNotification(partnerId, eventType, 'lms', title, body, 'success', undefined, partner.phone);
+        await logNotification(partnerId, eventType, 'lms', title, body, 'success', undefined, partner.phone, partnerDisplayName);
       } catch (err: any) {
-        await logNotification(partnerId, eventType, 'lms', title, body, 'fail', err?.message, partner.phone);
+        await logNotification(partnerId, eventType, 'lms', title, body, 'fail', err?.message, partner.phone, partnerDisplayName);
       }
     }
 
@@ -198,9 +232,9 @@ export async function sendPartnerNotification(
       try {
         const { sendSMS } = await import('./solapi');
         await sendSMS(partner.phone, `${title}\n${body}`);
-        await logNotification(partnerId, eventType, 'sms', title, body, 'success', undefined, partner.phone);
+        await logNotification(partnerId, eventType, 'sms', title, body, 'success', undefined, partner.phone, partnerDisplayName);
       } catch (err: any) {
-        await logNotification(partnerId, eventType, 'sms', title, body, 'fail', err?.message, partner.phone);
+        await logNotification(partnerId, eventType, 'sms', title, body, 'fail', err?.message, partner.phone, partnerDisplayName);
       }
     }
 
