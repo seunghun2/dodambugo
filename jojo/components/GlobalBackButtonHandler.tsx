@@ -76,14 +76,38 @@ export default function GlobalBackButtonHandler() {
         return;
       }
 
-      // 5. B2B 서브 페이지들 (부고관리, 적립금, 설정, 제례의식, 공지사항, 문의 등)
+      // 5. 화환 주문 화면 -> 화환 상품 목록으로 복귀
+      if (currentPath.startsWith('/b2b/flower/order')) {
+        window.history.pushState({ appAnchor: true }, '', '/b2b/flower');
+        router.replace('/b2b/flower');
+        return;
+      }
+
+      // 6. 화환 목록 화면 -> 마이페이지(설정)로 복귀
+      if (currentPath === '/b2b/flower' || currentPath === '/b2b/flower/') {
+        window.history.pushState({ appAnchor: true }, '', '/b2b/settings');
+        router.replace('/b2b/settings');
+        return;
+      }
+
+      // 7. 화환 결제 화면 (/view/[id]/payment/[productId]) -> 이전 화면(주문서)으로 복귀
+      if (currentPath.includes('/payment/')) {
+        if (window.history.length > 2) {
+          router.back();
+        } else {
+          router.replace('/b2b/flower');
+        }
+        return;
+      }
+
+      // 8. B2B 1차 서브 페이지들 (부고관리, 적립금, 설정, 제례의식, 공지사항, 문의 등) -> 대시보드로 복귀
       if (currentPath.startsWith('/b2b/')) {
         window.history.pushState({ appAnchor: true }, '', '/b2b/dashboard');
         router.replace('/b2b/dashboard');
         return;
       }
 
-      // 6. 부고장 뷰어 화면 (/view/[id] 또는 /b2b/view/[id])
+      // 9. 부고장 뷰어 화면 (/view/[id] 또는 /b2b/view/[id])
       if (currentPath.includes('/view/')) {
         // B2B 지도사 계정으로 로그인되어 있다면 대시보드로 이동
         const token = typeof window !== 'undefined' ? localStorage.getItem('b2b_token') : null;

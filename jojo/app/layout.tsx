@@ -5,7 +5,7 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import './globals.css';
 
-import { MantineProvider, mantineHtmlProps, ColorSchemeScript } from '@mantine/core';
+import { MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ModalsProvider } from '@mantine/modals';
 import { dodamTheme } from '@/lib/theme';
@@ -91,7 +91,6 @@ export default function RootLayout({
     <html lang="ko" {...mantineHtmlProps} suppressHydrationWarning>
       <head>
         <meta name="format-detection" content="telephone=no, address=no, email=no" />
-        <ColorSchemeScript defaultColorScheme="light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />

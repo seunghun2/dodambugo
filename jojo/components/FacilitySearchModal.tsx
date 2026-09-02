@@ -14,10 +14,11 @@ interface FacilitySearchModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSelect: (facility: { name: string; address: string; phone?: string }, source: 'facility' | 'address') => void;
+    initialTab?: 'facility' | 'address';
 }
 
-export default function FacilitySearchModal({ isOpen, onClose, onSelect }: FacilitySearchModalProps) {
-    const [activeTab, setActiveTab] = useState<'facility' | 'address'>('facility');
+export default function FacilitySearchModal({ isOpen, onClose, onSelect, initialTab = 'facility' }: FacilitySearchModalProps) {
+    const [activeTab, setActiveTab] = useState<'facility' | 'address'>(initialTab);
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState<Facility[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -27,9 +28,10 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
     // 모달 열릴 때 검색창에 포커스 + 초기화 + 로컬스토리지 즐겨찾기 로드
     useEffect(() => {
         if (isOpen) {
+            setActiveTab(initialTab);
             setSearchQuery('');
             setResults([]);
-            if (activeTab === 'facility') {
+            if (initialTab === 'facility') {
                 setTimeout(() => searchInputRef.current?.focus(), 100);
             }
             
@@ -40,7 +42,7 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
                 }
             } catch {}
         }
-    }, [isOpen, activeTab]);
+    }, [isOpen, initialTab]);
 
     const [favorites, setFavorites] = useState<{name: string; address: string; tel: string}[]>([]);
 
@@ -107,37 +109,59 @@ export default function FacilitySearchModal({ isOpen, onClose, onSelect }: Facil
         setResults(filtered.slice(0, 20));
     }, [searchQuery, activeTab, allFacilities]);
 
+    // onSelect/onClose를 ref로 저장하여 useEffect dependency 문제 방지
+    const onSelectRef = useRef(onSelect);
+    const onCloseRef = useRef(onClose);
+    useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+    useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
     // 다음 주소검색 초기화
     useEffect(() => {
-        if (isOpen && activeTab === 'address' && postcodeContainerRef.current) {
-            const script = document.createElement('script');
-            script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-            script.async = true;
-            script.onload = () => {
-                if (window.daum && postcodeContainerRef.current) {
-                    new window.daum.Postcode({
-                        oncomplete: (data: any) => {
-                            const address = data.roadAddress || data.jibunAddress;
-                            onSelect({
-                                name: data.buildingName || '',
-                                address: address
-                            }, 'address');
-                            onClose();
-                        },
-                        width: '100%',
-                        height: '100%'
-                    }).embed(postcodeContainerRef.current);
-                }
-            };
-            document.body.appendChild(script);
+        if (!isOpen || activeTab !== 'address') return;
 
-            return () => {
-                if (script.parentNode) {
-                    script.parentNode.removeChild(script);
+        const initPostcode = () => {
+            const container = postcodeContainerRef.current;
+            if (!container || !window.daum?.Postcode) return;
+            container.innerHTML = '';
+            new window.daum.Postcode({
+                oncomplete: (data: any) => {
+                    const address = data.roadAddress || data.jibunAddress;
+                    onSelectRef.current({
+                        name: data.buildingName || '',
+                        address: address
+                    }, 'address');
+                    onCloseRef.current();
+                },
+                width: '100%',
+                height: '100%'
+            }).embed(container);
+        };
+
+        // DOM mount 후 약간의 딜레이를 주어 ref가 확실히 연결되도록
+        const timer = setTimeout(() => {
+            if (window.daum?.Postcode) {
+                initPostcode();
+            } else {
+                const existingScript = document.querySelector('script[src*="postcode.v2.js"]');
+                if (existingScript) {
+                    // 이미 로드된 스크립트가 있으면 load 이벤트 대기
+                    if (window.daum?.Postcode) {
+                        initPostcode();
+                    } else {
+                        existingScript.addEventListener('load', initPostcode);
+                    }
+                } else {
+                    const script = document.createElement('script');
+                    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+                    script.async = true;
+                    script.onload = () => initPostcode();
+                    document.head.appendChild(script);
                 }
-            };
-        }
-    }, [isOpen, activeTab, onSelect, onClose]);
+            }
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [isOpen, activeTab]);
 
     const handleFacilitySelect = (facility: Facility) => {
         onSelect({ name: facility.name, address: facility.address, phone: facility.phone }, 'facility');

@@ -71,7 +71,10 @@ function B2BManagePageContent() {
       const { data, error } = await supabase
         .from('bugo')
         .select('*')
-        .eq('b2b_user_id', userId);
+        .eq('b2b_user_id', userId)
+        .is('deleted_at', null)
+        .neq('template_id', 'flower_only')
+        .neq('status', 'temporary');
 
       if (error) {
         if (error.code === 'PGRST301' || error.message?.includes('JWT') || error.message?.includes('token')) {

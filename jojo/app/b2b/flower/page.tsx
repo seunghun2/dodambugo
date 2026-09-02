@@ -69,7 +69,7 @@ export default function FlowerListPage() {
     <div className={styles.page}>
       {/* 헤더 */}
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+        <button className={styles.backBtn} onClick={() => router.back()}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -80,7 +80,7 @@ export default function FlowerListPage() {
 
       {/* 안내 배너 */}
       <div className={styles.banner}>
-        주문하실 화환 상품을 선택해 주세요.
+        주문하실 상품을 선택해 주세요 (지역별 배송비 상이)
       </div>
 
       {/* 상품 리스트 */}
@@ -126,7 +126,7 @@ export default function FlowerListPage() {
                   <p className={styles.productDesc}>{product.description}</p>
                   <div className={styles.priceContainer}>
                     <span className={styles.salePrice}>
-                      {displayPrice.toLocaleString()}원
+                      {displayPrice.toLocaleString()}원 ~
                     </span>
                     {hasDiscount && (
                       <span className={styles.originalPrice}>
