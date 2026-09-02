@@ -491,6 +491,16 @@ export default function B2BCreatePage() {
     }
   };
 
+  // 📱 모바일 키패드 가림 방지: 인풋 포커스 시 키보드 위로 인풋을 부드럽게 스크롤
+  const handleFocusCapture = (e: React.FocusEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  };
+
   return (
     <div className={styles.page}>
       {/* 헤더 */}
@@ -506,7 +516,7 @@ export default function B2BCreatePage() {
         </button>
       </header>
 
-      <div className={styles.content}>
+      <div className={styles.content} onFocusCapture={handleFocusCapture}>
         {/* 장례식장 정보 */}
         <FuneralHomeSection
           formData={formData}

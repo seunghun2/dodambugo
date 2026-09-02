@@ -6,7 +6,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding-top: calc(56px + env(safe-area-inset-top, 0px));
-  padding-bottom: 40px;
+  padding-bottom: 240px; /* 모바일 키보드 팝업 시 스크롤 공간 충분히 확보 */
 }
 
 /* 헤더 */
