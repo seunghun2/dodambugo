@@ -245,6 +245,16 @@ export default function B2BCompletePage() {
     setShowViewModal(true);
   };
 
+  // 📱 안드로이드 뒤로가기 (<) 시 미리보기 모달 우선 닫기
+  useEffect(() => {
+    if (showViewModal) {
+      window.history.pushState({ viewModalOpen: true }, '');
+      const handlePopState = () => setShowViewModal(false);
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+    }
+  }, [showViewModal]);
+
   if (loading) {
     return (
       <div className={styles.page} style={{ justifyContent: 'center', alignItems: 'center' }}>

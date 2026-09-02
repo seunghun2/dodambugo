@@ -159,6 +159,16 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
         }
     }, [bugo]);
 
+    // 📱 안드로이드 뒤로가기 (<) 시 상주변경 모달 우선 닫기
+    useEffect(() => {
+        if (!recipientModalOpen) return;
+
+        window.history.pushState({ recipientModal: true }, '');
+        const handlePopState = () => setRecipientModalOpen(false);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [recipientModalOpen]);
+
     // sessionStorage에서 이전 입력값 복원
     useEffect(() => {
         // GA: 주문 페이지 조회 이벤트

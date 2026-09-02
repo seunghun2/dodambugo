@@ -237,6 +237,25 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
         };
     }, [bugo.bugo_number]);
 
+    // 📱 안드로이드 뒤로가기 (<) 시 팝업/모달 우선 닫기 처리
+    useEffect(() => {
+        const isAnyModalOpen = shareModalOpen || accountModalOpen || flowerModalOpen;
+        if (!isAnyModalOpen) return;
+
+        window.history.pushState({ b2cViewModal: true }, '');
+
+        const handlePopState = () => {
+            setShareModalOpen(false);
+            setAccountModalOpen(false);
+            setFlowerModalOpen(false);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [shareModalOpen, accountModalOpen, flowerModalOpen]);
+
     // 지역 정보 계산
     const funeralAddress = bugo.address || bugo.funeral_home || '';
     const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];

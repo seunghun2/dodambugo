@@ -245,6 +245,40 @@ export default function B2BCreatePage() {
     }
   };
 
+  // 📱 안드로이드 뒤로가기 (<) 시 모달 우선 닫기 처리
+  useEffect(() => {
+    const isModalOpen = showPreview || showFacilitySearch;
+    if (!isModalOpen) return;
+
+    window.history.pushState({ createModalOpen: true }, '');
+
+    const handlePopState = () => {
+      setShowPreview(false);
+      setShowFacilitySearch(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [showPreview, showFacilitySearch]);
+
+  const handleBack = () => {
+    if (showPreview) {
+      setShowPreview(false);
+      return;
+    }
+    if (showFacilitySearch) {
+      setShowFacilitySearch(false);
+      return;
+    }
+    if (isEditMode) {
+      router.push('/b2b/manage');
+    } else {
+      router.push('/b2b/dashboard');
+    }
+  };
+
   // 폼 필드 업데이트
   const handleChange = useCallback((field: string, value: string | boolean) => {
     setFormData(prev => {
@@ -461,7 +495,7 @@ export default function B2BCreatePage() {
     <div className={styles.page}>
       {/* 헤더 */}
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
+        <button className={styles.backBtn} onClick={handleBack}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>

@@ -233,11 +233,26 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
                 });
         });
 
-        return () => {
-            cleanupScreenshot();
-            cleanupDevTools();
-        };
     }, [bugo.bugo_number]);
+
+    // 📱 안드로이드 뒤로가기 (<) 시 팝업/모달 우선 닫기 처리
+    useEffect(() => {
+        const isAnyModalOpen = shareModalOpen || accountModalOpen || flowerModalOpen;
+        if (!isAnyModalOpen) return;
+
+        window.history.pushState({ b2bViewModal: true }, '');
+
+        const handlePopState = () => {
+            setShareModalOpen(false);
+            setAccountModalOpen(false);
+            setFlowerModalOpen(false);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [shareModalOpen, accountModalOpen, flowerModalOpen]);
 
     // 지역 정보 계산
     const funeralAddress = bugo.address || bugo.funeral_home || '';
