@@ -1917,7 +1917,7 @@ button.memorial-cta-item {
    ======================================== */
 .floating-flower-cta {
     position: fixed;
-    bottom: 20px;
+    bottom: max(24px, calc(16px + env(safe-area-inset-bottom)));
     left: 50%;
     transform: translateX(-50%) translateY(100px);
     width: calc(100% - 32px);

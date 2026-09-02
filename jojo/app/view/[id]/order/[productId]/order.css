@@ -3,7 +3,7 @@
 .order-page {
     min-height: 100vh;
     background: #F5F5F5;
-    padding-bottom: 100px;
+    padding-bottom: max(160px, calc(100px + env(safe-area-inset-bottom)));
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
@@ -374,6 +374,7 @@ html.fonts-loaded .order-page .material-symbols-outlined {
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .recipient-modal {
@@ -382,6 +383,9 @@ html.fonts-loaded .order-page .material-symbols-outlined {
     background: #FFFFFF;
     border-radius: 20px 20px 0 0;
     animation: slideUp 0.3s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes slideUp {

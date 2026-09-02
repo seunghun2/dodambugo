@@ -107,10 +107,26 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
         '주님의 위로와 소망이 함께 하기를 기원합니다',
     ];
 
+    // 상주 목록 파싱
+    const parsedMourners: any[] = (() => {
+        if (!bugo?.mourners) return [];
+        try {
+            return typeof bugo.mourners === 'string' ? JSON.parse(bugo.mourners) : bugo.mourners;
+        } catch {
+            return [];
+        }
+    })();
+
     // 상주 이름 초기값
-    const initialRecipientName = bugo?.mourners && bugo.mourners.length > 0
-        ? bugo.mourners[0].name
-        : bugo?.mourner_name || '';
+    const getPrimaryMournerName = (): string => {
+        if (Array.isArray(parsedMourners) && parsedMourners.length > 0) {
+            const firstWithName = parsedMourners.find((m: any) => m && m.name && String(m.name).trim() !== '');
+            if (firstWithName?.name) return firstWithName.name;
+        }
+        return bugo?.mourner_name || '';
+    };
+
+    const initialRecipientName = getPrimaryMournerName();
 
     // 주문 폼
     const [orderForm, setOrderForm] = useState({
@@ -121,6 +137,27 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
         customMessage: '', // 직접입력 문구
         recipientName: initialRecipientName, // 받으시는 분 (상주)
     });
+
+    // 모바일 키패드 가림 방지 자동 스크롤 핸들러
+    const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const target = e.target;
+        setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    };
+
+    // bugo 데이터 로드 시 recipientName 동기화
+    useEffect(() => {
+        const primaryName = getPrimaryMournerName();
+        if (primaryName) {
+            setOrderForm(prev => {
+                if (!prev.recipientName || prev.recipientName === '상주') {
+                    return { ...prev, recipientName: primaryName };
+                }
+                return prev;
+            });
+        }
+    }, [bugo]);
 
     // sessionStorage에서 이전 입력값 복원
     useEffect(() => {
@@ -235,6 +272,7 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                             placeholder="예시) 주식회사 대표 홍길동"
                             value={orderForm.ribbonText2}
                             onChange={(e) => setOrderForm({ ...orderForm, ribbonText2: e.target.value })}
+                            onFocus={handleInputFocus}
                             autoFocus
                         />
                     </div>
@@ -244,6 +282,7 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                         <select
                             className="message-select"
                             value={isCustomMessage ? 'custom' : orderForm.ribbonText1}
+                            onFocus={handleInputFocus}
                             onChange={(e) => {
                                 if (e.target.value === 'custom') {
                                     setIsCustomMessage(true);
@@ -269,6 +308,7 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                                 placeholder="문구를 직접 입력해주세요"
                                 value={orderForm.customMessage}
                                 onChange={(e) => setOrderForm({ ...orderForm, customMessage: e.target.value, ribbonText1: e.target.value })}
+                                onFocus={handleInputFocus}
                             />
                         </div>
                     )}
@@ -330,13 +370,42 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                                 </button>
                             </div>
                             <div className="recipient-modal-content">
+                                {parsedMourners.filter(m => m.name).length > 0 && (
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label style={{ display: 'block', fontSize: '13px', color: '#666', marginBottom: '8px', fontWeight: 500 }}>
+                                            등록된 상주 목록에서 선택
+                                        </label>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {parsedMourners.filter(m => m.name).map((m: any, idx: number) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    style={{
+                                                        padding: '8px 12px',
+                                                        borderRadius: '8px',
+                                                        border: tempRecipientName === m.name ? '1.5px solid #1A1A1A' : '1px solid #E5E5E5',
+                                                        background: tempRecipientName === m.name ? '#F5F5F5' : '#FFFFFF',
+                                                        color: '#1A1A1A',
+                                                        fontWeight: tempRecipientName === m.name ? 600 : 400,
+                                                        fontSize: '14px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={() => setTempRecipientName(m.name)}
+                                                >
+                                                    [{m.relationship || '상주'}] {m.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="form-group">
-                                    <label>상주명</label>
+                                    <label>상주명 직접 입력</label>
                                     <input
                                         type="text"
                                         placeholder="상주명을 입력해주세요"
                                         value={tempRecipientName}
                                         onChange={(e) => setTempRecipientName(e.target.value)}
+                                        onFocus={handleInputFocus}
                                         autoFocus
                                     />
                                 </div>
