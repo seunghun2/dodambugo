@@ -16,6 +16,7 @@ import MicrosoftClarity from '@/components/MicrosoftClarity';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
+import GlobalBackButtonHandler from '@/components/GlobalBackButtonHandler';
 
 export const metadata = {
   title: '마음부고 - 무료 모바일 부고장 만들기 | 3분 완성, 카카오톡 공유',
@@ -193,6 +194,7 @@ export default function RootLayout({
         <MantineProvider theme={dodamTheme} defaultColorScheme="light">
           <ModalsProvider>
             <Notifications position="top-center" zIndex={10000} />
+            <GlobalBackButtonHandler />
             <MainLayout>
               {children}
             </MainLayout>
