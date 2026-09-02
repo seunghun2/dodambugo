@@ -281,7 +281,6 @@ export default function B2BCreatePage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.deceased_name.trim()) newErrors.deceased_name = '고인명을 입력해주세요';
-    if (!formData.age.trim()) newErrors.age = '연세를 입력해주세요';
     if (!formData.gender && !formData.hide_gender) newErrors.gender = '성별을 선택해주세요';
 
     if (formData.funeral_type !== '무빈소장례') {

@@ -10,6 +10,7 @@ interface FlowerProduct {
   name: string;
   description: string;
   price: number;
+  b2b_price?: number | null;
   discount_price: number | null;
   images: string[];
   sort_order: number;
@@ -90,8 +91,9 @@ export default function FlowerListPage() {
           </div>
         ) : (
           products.map((product) => {
-            const displayPrice = product.discount_price !== null ? product.discount_price : product.price;
-            const hasDiscount = product.discount_price !== null && product.discount_price < product.price;
+            const b2bBase = product.b2b_price || product.price;
+            const displayPrice = product.discount_price !== null ? product.discount_price : b2bBase;
+            const hasDiscount = product.discount_price !== null && product.discount_price < b2bBase;
 
             return (
               <div

@@ -202,8 +202,7 @@ export default function CompletePage() {
 
         const text = `[訃告]
 故 ${bugo?.deceased_name} 님께서${mournerName ? ` (상주 ${mournerName})` : ''}
-${deathDateTime}에
-별세하셨기에 아래와 같이 부고를 전해드립니다.
+${deathDateTime ? `${deathDateTime}에\n` : ''}별세하셨기에 아래와 같이 부고를 전해드립니다.
 
 [부고장 확인하기]
 ${bugoUrl}

@@ -62,25 +62,28 @@ export default function B2BCompletePage() {
         if (error) throw error;
         setBugo(data);
 
-        // 상주 목록 파싱 및 상태 초기화
+        // 상주 목록 파싱 및 상태 초기화 (연락처 없는 상주도 빠짐없이 보존)
         if (data.mourners) {
           const parsedMourners = typeof data.mourners === 'string'
             ? JSON.parse(data.mourners)
             : data.mourners;
 
           if (Array.isArray(parsedMourners)) {
-            // 연락처(contact)가 등록되어 있는 상주만 발송 목록 대상에 포함
-            const validMourners = parsedMourners.filter((m: any) => m.name && m.contact && m.contact.trim() !== '');
-            const mapped = validMourners.map((m: any) => ({
-              relationship: m.relationship || '',
-              name: m.name || '',
-              contact: m.contact || '',
-              bank: m.bank || '',
-              accountHolder: m.accountHolder || m.account_holder || '',
-              accountNumber: m.accountNumber || m.account_number || '',
-              send: m.send !== undefined ? m.send : true,
-              accountDisplay: m.accountDisplay || m.account_display || 'all',
-            }));
+            // 이름이 있는 모든 상주를 목록에 보존
+            const validMourners = parsedMourners.filter((m: any) => m && m.name && String(m.name).trim() !== '');
+            const mapped = validMourners.map((m: any) => {
+              const hasContact = Boolean(m.contact && String(m.contact).trim() !== '');
+              return {
+                relationship: m.relationship || '',
+                name: m.name || '',
+                contact: m.contact || '',
+                bank: m.bank || '',
+                accountHolder: m.accountHolder || m.account_holder || '',
+                accountNumber: m.accountNumber || m.account_number || '',
+                send: m.send !== undefined ? (hasContact && m.send) : hasContact,
+                accountDisplay: m.accountDisplay || m.account_display || 'all',
+              };
+            });
             setMourners(mapped);
           }
         }
@@ -295,31 +298,39 @@ export default function B2BCompletePage() {
           <div className={styles.colDisplay}>계좌 노출</div>
         </div>
 
-        {mourners.map((m, index) => (
-          <div className={styles.tableRow} key={index}>
-            <div className={styles.colSend}>
-              <input
-                type="checkbox"
-                className={styles.checkbox}
-                checked={m.send}
-                onChange={() => handleToggleSend(index)}
-              />
+        {mourners.map((m, index) => {
+          const hasContact = Boolean(m.contact && m.contact.trim() !== '');
+          return (
+            <div className={styles.tableRow} key={index}>
+              <div className={styles.colSend}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={hasContact && m.send}
+                  disabled={!hasContact}
+                  onChange={() => hasContact && handleToggleSend(index)}
+                  title={!hasContact ? '연락처가 없어 발송 대상에서 제외됩니다.' : ''}
+                />
+              </div>
+              <div className={styles.colRel}>{m.relationship || '상주'}</div>
+              <div className={styles.colName}>
+                {m.name || '-'}
+                {!hasContact && <span style={{ fontSize: '11px', color: '#999', marginLeft: '4px' }}>(연락처 없음)</span>}
+              </div>
+              <div className={styles.colDisplay}>
+                <select
+                  className={styles.select}
+                  value={m.accountDisplay}
+                  onChange={(e) => handleDisplayChange(index, e.target.value as any)}
+                >
+                  <option value="mine">내 계좌만 노출</option>
+                  <option value="all">모든 계좌 노출</option>
+                  <option value="none">모든 계좌 노출안함</option>
+                </select>
+              </div>
             </div>
-            <div className={styles.colRel}>{m.relationship || '상주'}</div>
-            <div className={styles.colName}>{m.name || '-'}</div>
-            <div className={styles.colDisplay}>
-              <select
-                className={styles.select}
-                value={m.accountDisplay}
-                onChange={(e) => handleDisplayChange(index, e.target.value as any)}
-              >
-                <option value="mine">내 계좌만 노출</option>
-                <option value="all">모든 계좌 노출</option>
-                <option value="none">모든 계좌 노출안함</option>
-              </select>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
 

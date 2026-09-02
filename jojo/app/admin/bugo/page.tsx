@@ -58,6 +58,7 @@ export default function AdminBugoPage() {
         const { data, error } = await supabase
             .from('bugo')
             .select('*')
+            .is('b2b_user_id', null)
             .order('created_at', { ascending: false });
 
         if (error) {

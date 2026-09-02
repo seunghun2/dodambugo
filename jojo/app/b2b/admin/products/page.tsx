@@ -21,6 +21,7 @@ interface FlowerProduct {
     id: string;
     name: string;
     price: number;
+    b2b_price?: number | null;
     discount_price: number | null;
     category: string;
     images: string[];
@@ -40,6 +41,7 @@ interface Category {
 const emptyProduct: Partial<FlowerProduct> = {
     name: '',
     price: 0,
+    b2b_price: null,
     discount_price: null,
     category: '',
     images: [],
@@ -364,7 +366,8 @@ export default function B2BAdminProductsPage() {
                                     <th style={{ width: '80px' }}>이미지</th>
                                     <th>상품명</th>
                                     <th>카테고리</th>
-                                    <th>판매 가격</th>
+                                    <th>B2C 가격</th>
+                                    <th>B2B 가격</th>
                                     <th>할인 가격</th>
                                     <th style={{ width: '100px' }}>정렬 순서</th>
                                     <th style={{ width: '100px' }}>노출 상태</th>
@@ -393,6 +396,11 @@ export default function B2BAdminProductsPage() {
                                         <td>{product.category}</td>
                                         <td>
                                             <span className={styles.priceNormal}>{formatPrice(product.price)}원</span>
+                                        </td>
+                                        <td>
+                                            <span className={styles.priceNormal} style={{ color: '#2563eb', fontWeight: 600 }}>
+                                                {product.b2b_price ? formatPrice(product.b2b_price) + '원' : '-'}
+                                            </span>
                                         </td>
                                         <td>
                                             {product.discount_price ? (
@@ -452,7 +460,7 @@ export default function B2BAdminProductsPage() {
                                 {/* 가격 및 할인가격 */}
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
-                                        <label className={styles.label}>판매 가격 (원) *</label>
+                                        <label className={styles.label}>B2C 가격 (원) *</label>
                                         <input
                                             type="number"
                                             className={styles.input}
@@ -461,6 +469,17 @@ export default function B2BAdminProductsPage() {
                                             placeholder="0"
                                             min="0"
                                             required
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>B2B 가격 (원)</label>
+                                        <input
+                                            type="number"
+                                            className={styles.input}
+                                            value={editForm.b2b_price !== null && editForm.b2b_price !== undefined ? editForm.b2b_price : ''}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, b2b_price: e.target.value ? parseInt(e.target.value) : null }))}
+                                            placeholder="미입력 시 B2C가 적용"
+                                            min="0"
                                         />
                                     </div>
                                     <div className={styles.formGroup}>

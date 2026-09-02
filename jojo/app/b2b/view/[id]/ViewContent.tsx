@@ -194,7 +194,7 @@ const calculateRegionalPrice = (
 export interface ViewContentProps {
     initialBugo: BugoData;
     initialFlowerOrders?: Array<{ sender_name: string; ribbon_text1: string; ribbon_text2: string }>;
-    initialFlowerProducts?: Array<{ id: string; sort_order: number; name: string; description: string; price: number; discount_price: number | null; images: string[]; regional_prices?: Record<string, number>; special_surcharges?: Record<string, number> }>;
+    initialFlowerProducts?: Array<{ id: string; sort_order: number; name: string; description: string; price: number; b2b_price?: number | null; discount_price: number | null; images: string[]; regional_prices?: Record<string, number>; special_surcharges?: Record<string, number> }>;
 }
 
 export default function ViewContent({ initialBugo, initialFlowerOrders = [], initialFlowerProducts = [] }: ViewContentProps) {
@@ -519,8 +519,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
 
         const text = `[訃告]
 故 ${bugo?.deceased_name} 님께서${mournerName ? ` (상주 ${mournerName})` : ''}
-${deathDateTime}에
-별세하셨기에 아래와 같이 부고를 전해드립니다.
+${deathDateTime ? `${deathDateTime}에\n` : ''}별세하셨기에 아래와 같이 부고를 전해드립니다.
 
 [부고장 확인하기]
 ${url}
@@ -1368,7 +1367,7 @@ ${url}
                                 <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                                 <p className="flower-modal-subtitle">
                                     {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')} 故{bugo?.deceased_name}님께서<br />
-                                    {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
+                                    {bugo?.death_date ? `${bugo.death_date.split('T')[0].replace(/-/g, '.')} ` : ''}별세하셨기에 삼가 알려드립니다
                                 </p>
                             </div>
 
@@ -1392,7 +1391,7 @@ ${url}
                                             <p className="flower-product-desc">{product.description}</p>
                                             <div className="flower-product-price">
                                                 <span className="sale-price">
-                                                    {calculateRegionalPrice(product.price, product.discount_price, product.regional_prices, product.special_surcharges, bugoRegion, bugoAddress).toLocaleString()}원
+                                                    {calculateRegionalPrice(product.b2b_price || product.price, product.discount_price, product.regional_prices, product.special_surcharges, bugoRegion, bugoAddress).toLocaleString()}원
                                                 </span>
                                             </div>
                                         </div>

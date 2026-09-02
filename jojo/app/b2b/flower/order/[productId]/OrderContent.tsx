@@ -10,6 +10,7 @@ interface FlowerProduct {
   name: string;
   description: string;
   price: number;
+  b2b_price?: number | null;
   discount_price: number | null;
   images: string[];
   sort_order: number;
@@ -253,7 +254,7 @@ export default function OrderContent({ initialProduct, productId }: OrderContent
       const targetAddress = form.address || form.funeralHome || '';
       const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
       const targetRegion = REGION_KEYWORDS.find(r => targetAddress.includes(r)) || '';
-      const basePrice = product.discount_price || product.price;
+      const basePrice = product.discount_price || product.b2b_price || product.price;
       const regSurcharge = (product.regional_prices && targetRegion && product.regional_prices[targetRegion]) || 0;
       let specSurcharge = 0;
       if (product.special_surcharges && targetAddress) {
@@ -324,7 +325,7 @@ export default function OrderContent({ initialProduct, productId }: OrderContent
             <div className={styles.productInfo}>
               <h3 className={styles.productName}>{product.name}</h3>
               <p className={styles.price}>
-                {(product.discount_price || product.price).toLocaleString()}원
+                {(product.discount_price || product.b2b_price || product.price).toLocaleString()}원
               </p>
             </div>
           </div>

@@ -12,6 +12,7 @@ interface FlowerProduct {
     name: string;
     description: string;
     price: number;
+    b2b_price?: number | null;
     discount_price: number | null;
     images: string[];
     regional_prices?: Record<string, number>;
@@ -70,14 +71,26 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
     const funeralAddress = bugo?.address || bugo?.funeral_home || '';
     const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
     const bugoRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
+    const effectiveBasePrice = (isB2b && product?.b2b_price) ? product.b2b_price : (product?.price || 0);
     const finalProductPrice = product ? calculateRegionalPrice(
-        product.price,
+        effectiveBasePrice,
         product.discount_price,
         product.regional_prices,
         product.special_surcharges,
         bugoRegion,
         funeralAddress
     ) : 0;
+
+    const regionalSurcharge = (product?.regional_prices && bugoRegion && product.regional_prices[bugoRegion]) || 0;
+    let specialSurcharge = 0;
+    if (product?.special_surcharges && funeralAddress) {
+        for (const [keyword, surcharge] of Object.entries(product.special_surcharges)) {
+            if (funeralAddress.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge);
+            }
+        }
+    }
+    const totalSurcharge = regionalSurcharge + specialSurcharge;
 
     const [isCustomMessage, setIsCustomMessage] = useState(false); // 직접입력 여부
     const [recipientModalOpen, setRecipientModalOpen] = useState(false); // 상주변경 모달
@@ -199,7 +212,14 @@ export default function OrderContent({ initialBugo, initialProduct, bugoId, prod
                         </div>
                         <div className="product-info">
                             <h3>{product.name}</h3>
-                            <p className="price">{finalProductPrice.toLocaleString()}원</p>
+                            <p className="price">
+                                {finalProductPrice.toLocaleString()}원
+                                {totalSurcharge > 0 && (
+                                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 'normal', marginLeft: '6px' }}>
+                                        (지역 배송비 +{totalSurcharge.toLocaleString()}원 포함)
+                                    </span>
+                                )}
+                            </p>
                         </div>
                     </div>
                 </section>

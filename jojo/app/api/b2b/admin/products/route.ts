@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
         const {
             name,
             price,
+            b2b_price,
             discount_price,
             category,
             images,
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
             .insert({
                 name,
                 price: Number(price),
+                b2b_price: (b2b_price !== null && b2b_price !== undefined) ? Number(b2b_price) : null,
                 discount_price: (discount_price !== null && discount_price !== undefined) ? Number(discount_price) : null,
                 category: category || '근조화환',
                 images: images || [],
@@ -109,6 +111,7 @@ export async function PATCH(request: NextRequest) {
             id,
             name,
             price,
+            b2b_price,
             discount_price,
             category,
             images,
@@ -124,6 +127,9 @@ export async function PATCH(request: NextRequest) {
         const updateData: any = {};
         if (name !== undefined) updateData.name = name;
         if (price !== undefined) updateData.price = Number(price);
+        if (b2b_price !== undefined) {
+            updateData.b2b_price = (b2b_price !== null && b2b_price !== undefined) ? Number(b2b_price) : null;
+        }
         if (discount_price !== undefined) {
             updateData.discount_price = (discount_price !== null && discount_price !== undefined) ? Number(discount_price) : null;
         }

@@ -9,6 +9,7 @@ interface FlowerProduct {
     id: string;
     name: string;
     price: number;
+    b2b_price?: number | null;
     discount_price: number | null;
     category: string;
     images: string[];
@@ -43,6 +44,7 @@ const DEFAULT_REGIONAL_PRICES: Record<string, number> = {
 const emptyProduct: Partial<FlowerProduct> = {
     name: '',
     price: 0,
+    b2b_price: null,
     discount_price: null,
     category: '근조화환',
     images: [],
@@ -127,6 +129,7 @@ export default function AdminProductsPage() {
                     .insert({
                         name: editForm.name,
                         price: editForm.price,
+                        b2b_price: editForm.b2b_price || null,
                         discount_price: editForm.discount_price || null,
                         category: editForm.category,
                         images: editForm.images || [],
@@ -148,6 +151,7 @@ export default function AdminProductsPage() {
                     .update({
                         name: editForm.name,
                         price: editForm.price,
+                        b2b_price: editForm.b2b_price || null,
                         discount_price: editForm.discount_price || null,
                         category: editForm.category,
                         images: editForm.images || [],
@@ -327,7 +331,8 @@ export default function AdminProductsPage() {
                                             <th style={{ width: '60px' }}>이미지</th>
                                             <th>상품명</th>
                                             <th>카테고리</th>
-                                            <th>가격</th>
+                                            <th>B2C 가격</th>
+                                            <th>B2B 가격</th>
                                             <th>할인가</th>
                                             <th>상태</th>
                                             <th>등록일</th>
@@ -337,7 +342,7 @@ export default function AdminProductsPage() {
                                     <tbody>
                                         {filteredProducts.length === 0 ? (
                                             <tr>
-                                                <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                                <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                                                     등록된 상품이 없습니다
                                                 </td>
                                             </tr>
@@ -360,6 +365,9 @@ export default function AdminProductsPage() {
                                                     <td className="name-cell">{product.name}</td>
                                                     <td>{product.category}</td>
                                                     <td className="number-cell">{formatPrice(product.price)}원</td>
+                                                    <td className="number-cell">
+                                                        {product.b2b_price ? formatPrice(product.b2b_price) + '원' : '-'}
+                                                    </td>
                                                     <td className="number-cell">
                                                         {product.discount_price ? formatPrice(product.discount_price) + '원' : '-'}
                                                     </td>
@@ -412,12 +420,21 @@ export default function AdminProductsPage() {
 
                                         <div className="form-row">
                                             <div className="form-group">
-                                                <label>가격 *</label>
+                                                <label>B2C 가격 *</label>
                                                 <input
                                                     type="number"
                                                     value={editForm.price || ''}
                                                     onChange={(e) => setEditForm({ ...editForm, price: parseInt(e.target.value) || 0 })}
                                                     placeholder="0"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>B2B 가격 (부고온)</label>
+                                                <input
+                                                    type="number"
+                                                    value={editForm.b2b_price || ''}
+                                                    onChange={(e) => setEditForm({ ...editForm, b2b_price: parseInt(e.target.value) || null })}
+                                                    placeholder="미입력 시 B2C가 적용"
                                                 />
                                             </div>
                                             <div className="form-group">

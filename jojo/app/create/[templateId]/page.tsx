@@ -1072,7 +1072,6 @@ export default function WriteFormPage() {
         else if (!phoneVerified && !editBugoNumber) newErrors.applicant_phone = '휴대폰 인증을 완료해주세요';
         else if (editBugoNumber && originalPhone && formData.applicant_phone !== originalPhone && !phoneVerified) newErrors.applicant_phone = '변경된 번호는 인증이 필요합니다';
         if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
-        if (!formData.age) newErrors.age = '연세를 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
         if (!formData.relationship || !formData.primary_mourner) newErrors.primary_mourner = '상주를 입력해주세요';

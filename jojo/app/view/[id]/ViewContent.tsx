@@ -514,8 +514,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
 
         const text = `[訃告]
 故 ${bugo?.deceased_name} 님께서${mournerName ? ` (상주 ${mournerName})` : ''}
-${deathDateTime}에
-별세하셨기에 아래와 같이 부고를 전해드립니다.
+${deathDateTime ? `${deathDateTime}에\n` : ''}별세하셨기에 아래와 같이 부고를 전해드립니다.
 
 [부고장 확인하기]
 ${url}
@@ -1292,7 +1291,7 @@ ${url}
                                 <h2 className="flower-modal-title">故{bugo?.deceased_name}님</h2>
                                 <p className="flower-modal-subtitle">
                                     {bugo?.mourners?.[0]?.relationship} {bugo?.mourners?.[0]?.name}님의 {getDeceasedRelation(bugo?.mourners?.[0]?.relationship || '', bugo?.gender || '')} 故{bugo?.deceased_name}님께서<br />
-                                    {bugo?.death_date?.split('T')[0]?.replace(/-/g, '.')} 별세하셨기에 삼가 알려드립니다
+                                    {bugo?.death_date ? `${bugo.death_date.split('T')[0].replace(/-/g, '.')} ` : ''}별세하셨기에 삼가 알려드립니다
                                 </p>
                             </div>
 
