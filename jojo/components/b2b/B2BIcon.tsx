@@ -12,6 +12,7 @@ interface B2BIconProps {
     | 'reply'
     | 'bell'
     | 'wallet'
+    | 'flower'
     | 'check-circle'
     | 'copy'
     | 'settings'
@@ -120,6 +121,17 @@ export function B2BIcon({
         <svg {...svgProps}>
           <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
           <line x1="2" y1="10" x2="22" y2="10" />
+        </svg>
+      );
+    case 'flower':
+      return (
+        <svg {...svgProps}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
+          <path d="M12 7.5V9" />
+          <path d="M7.5 12H9" />
+          <path d="M16.5 12H15" />
+          <path d="M12 16.5V15" />
         </svg>
       );
     case 'check-circle':

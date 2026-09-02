@@ -703,6 +703,13 @@ export default function SettingsPage() {
                                 <B2BIcon name="wallet" size={20} className={styles.gridIconSvg} />
                             </div>
                         </div>
+
+                        <div className={styles.gridCard} onClick={() => router.push('/b2b/flower')}>
+                            <span className={styles.gridLabel}>화환{"\n"}구매</span>
+                            <div className={styles.gridIcon}>
+                                <B2BIcon name="flower" size={20} className={styles.gridIconSvg} />
+                            </div>
+                        </div>
                     </div>
                 </section>
 
