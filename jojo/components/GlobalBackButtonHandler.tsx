@@ -31,7 +31,7 @@ export default function GlobalBackButtonHandler() {
       }
 
       // 2. 홈 / 대시보드 화면인 경우 (2회 누르면 종료)
-      const isHome = currentPath === '/b2b/dashboard' || currentPath === '/b2b' || currentPath === '/b2b/' || currentPath === '/';
+      const isHome = currentPath === '/b2b/dashboard' || currentPath === '/b2b' || currentPath === '/b2b/' || currentPath === '/' || currentPath === '/b2b/login' || currentPath === '/b2b/login/';
       if (isHome) {
         if (backPressedRef.current) {
           // 2번째 누름: 앱 정상 종료
