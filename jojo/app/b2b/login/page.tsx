@@ -34,7 +34,7 @@ function LoginContent() {
                     if (data.authenticated) {
                         if (data.token) localStorage.setItem('b2b_token', data.token);
                         if (data.user) localStorage.setItem('b2b_user', JSON.stringify(data.user));
-                        router.push('/b2b/dashboard');
+                        router.replace('/b2b/dashboard');
                         return;
                     }
                 }
@@ -42,7 +42,7 @@ function LoginContent() {
                 // fallback: localStorage 확인
                 const token = localStorage.getItem('b2b_token');
                 if (token) {
-                    router.push('/b2b/dashboard');
+                    router.replace('/b2b/dashboard');
                     return;
                 }
             }
@@ -51,27 +51,27 @@ function LoginContent() {
     }, [router]);
 
     const handleLogin = async () => {
-        if (!phone || !password) {
-            setError('휴대폰 번호와 비밀번호를 입력해 주세요.');
+        if (!phone.trim()) {
+            setError('휴대폰 번호를 입력해 주세요.');
+            return;
+        }
+        if (!password.trim()) {
+            setError('비밀번호를 입력해 주세요.');
             return;
         }
 
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
-        if (cleanPhone.length !== 10 && cleanPhone.length !== 11) {
-            setError('올바른 휴대폰 번호 형식이 아닙니다.');
-            return;
-        }
-
-        setError('');
         setLoading(true);
+        setError('');
+
         try {
             const res = await fetch('/api/b2b/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: cleanPhone, password }),
+                body: JSON.stringify({ phone: phone.replace(/[^0-9]/g, ''), password }),
             });
             const data = await res.json();
-            if (res.ok && data.success) {
+
+            if (res.ok && data.token) {
                 if (autoLogin) {
                     localStorage.setItem('b2b_token', data.token);
                     localStorage.setItem('b2b_user', JSON.stringify(data.user));
@@ -79,7 +79,7 @@ function LoginContent() {
                     sessionStorage.setItem('b2b_token', data.token);
                     sessionStorage.setItem('b2b_user', JSON.stringify(data.user));
                 }
-                router.push('/b2b/dashboard');
+                router.replace('/b2b/dashboard');
             } else {
                 setError(data.error || '로그인에 실패했습니다.');
             }
