@@ -3,10 +3,10 @@
   margin: 0 auto;
   min-height: 100dvh;
   background: #F8F9FA;
-  padding-top: 52px;
+  padding-top: calc(52px + env(safe-area-inset-top, 47px));
   padding-bottom: calc(var(--b2b-bottom-bar-height) + 20px);
   box-sizing: border-box;
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -14,20 +14,21 @@
 /* 헤더 */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  height: 52px;
-  padding: 0 16px;
+  height: calc(52px + env(safe-area-inset-top, 47px));
+  padding: 0 16px 10px 16px;
+  padding-top: env(safe-area-inset-top, 47px);
   border-bottom: 1px solid #F2F4F6;
   background: #ffffff;
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .backBtn {

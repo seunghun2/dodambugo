@@ -395,15 +395,51 @@ export default function SettingsPage() {
                 router.replace('/b2b/notice');
             } else if (viewParam === 'faq') {
                 setView('faq');
+            } else if (viewParam && ['settings_main', 'alarm', 'price', 'info', 'withdraw', 'terms', 'privacy'].includes(viewParam)) {
+                setView(viewParam as any);
             }
         }
-    }, [fetchUser]);
+    }, [fetchUser, router]);
+
+    // 브라우저 뒤로가기 / 손가락 스와이프 뒤로가기 연동 (서브뷰에서 홈으로 튕김 원천 차단)
+    useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            if (e.state && e.state.b2b_view) {
+                setView(e.state.b2b_view);
+            } else {
+                const params = new URLSearchParams(window.location.search);
+                const v = params.get('view');
+                if (v && ['settings_main', 'alarm', 'price', 'info', 'withdraw', 'terms', 'privacy', 'faq'].includes(v)) {
+                    setView(v as any);
+                } else {
+                    setView('main');
+                }
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const openSubView = (targetView: typeof view) => {
+        setView(targetView);
+        if (typeof window !== 'undefined') {
+            window.history.pushState({ b2b_view: targetView }, '', `/b2b/settings?view=${targetView}`);
+        }
+    };
+
+    const navigateBack = (fallback: 'main' | 'settings_main' = 'main') => {
+        if (typeof window !== 'undefined' && window.history.state?.b2b_view) {
+            window.history.back();
+        } else {
+            setView(fallback);
+            if (typeof window !== 'undefined') {
+                window.history.replaceState(null, '', fallback === 'main' ? '/b2b/settings' : `/b2b/settings?view=${fallback}`);
+            }
+        }
+    };
 
     const handleBackToSettings = () => {
-        setView('settings_main');
-        if (typeof window !== 'undefined') {
-            window.history.replaceState(null, '', '/b2b/settings');
-        }
+        navigateBack('settings_main');
     };
 
     const updateAlarmConfig = async (updates: Record<string, boolean>) => {
@@ -644,7 +680,7 @@ export default function SettingsPage() {
                         <span className={styles.profileName}>{user.owner_name} 장례지도사님</span>
                         <span className={styles.profileCompany}>{(!user.company_name || user.company_name === '부고온 파트너 상조' || user.company_name === '개인') ? '개인 장례지도사' : user.company_name}</span>
                     </div>
-                    <button className={styles.infoEditBtn} onClick={() => setView('info')}>
+                    <button className={styles.infoEditBtn} onClick={() => openSubView('info')}>
                         내정보
                     </button>
                 </div>
@@ -720,7 +756,7 @@ export default function SettingsPage() {
                 <section className={styles.myPageSection}>
                     <h3 className={styles.sectionTitle}>마이페이지</h3>
                     <div className={styles.listGroup}>
-                        <div className={styles.listItem} onClick={() => setView('info')}>
+                        <div className={styles.listItem} onClick={() => openSubView('info')}>
                             <span className={styles.listLabel}>내정보</span>
                             <span className={styles.listArrow}>
                                 <B2BIcon name="chevron-right" size={18} />
@@ -738,7 +774,7 @@ export default function SettingsPage() {
                                 <B2BIcon name="chevron-right" size={18} />
                             </span>
                         </div>
-                        <div className={styles.listItem} onClick={() => setView('settings_main')}>
+                        <div className={styles.listItem} onClick={() => openSubView('settings_main')}>
                             <span className={styles.listLabel}>설정</span>
                             <span className={styles.listArrow}>
                                 <B2BIcon name="chevron-right" size={18} />
@@ -1007,7 +1043,7 @@ export default function SettingsPage() {
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>설정</span>
@@ -1017,7 +1053,7 @@ export default function SettingsPage() {
                 <div className={styles.settingsSection}>
                     {/* 알림 설정 그룹 */}
                     <div className={styles.groupTitle}>알림</div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('alarm')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('alarm')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>알림 설정</span>
                         </div>
@@ -1077,7 +1113,7 @@ export default function SettingsPage() {
                             <span className={styles.slider}></span>
                         </label>
                     </div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('price')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('price')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>화환 판매가격 설정</span>
                             <span className={styles.rowDesc}>고객에게 노출될 화환의 할인 금액 및 판매 여부를 관리합니다.</span>
@@ -1109,7 +1145,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('faq')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('faq')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>자주 묻는 질문</span>
                         </div>
@@ -1128,7 +1164,7 @@ export default function SettingsPage() {
 
                     {/* 정보 그룹 */}
                     <div className={styles.groupTitle}>정보</div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('terms')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('terms')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>약관 및 정책</span>
                         </div>
@@ -1136,7 +1172,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('privacy')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('privacy')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>개인정보처리방침</span>
                         </div>
@@ -1144,7 +1180,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
-                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => setView('withdraw')}>
+                    <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => openSubView('withdraw')}>
                         <div className={styles.rowLeft}>
                             <span className={styles.rowLabel}>회원탈퇴</span>
                         </div>
@@ -1329,13 +1365,13 @@ export default function SettingsPage() {
     if (view === 'price') {
         const handleSavePrice = () => {
             alert('화환 상품 설정 정보가 업데이트되었습니다.');
-            setView('settings_main');
+            navigateBack('settings_main');
         };
 
         return (
             <div className={styles.container} style={{ paddingBottom: '80px' }}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('settings_main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>화환 판매가격 설정</span>
@@ -1621,11 +1657,11 @@ export default function SettingsPage() {
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>내정보</span>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={() => openSubView('settings_main')}>
                         <B2BIcon name="menu" size={24} />
                     </button>
                 </header>
@@ -1902,7 +1938,7 @@ export default function SettingsPage() {
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('settings_main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>회원탈퇴</span>
@@ -1946,7 +1982,7 @@ export default function SettingsPage() {
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('settings_main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>약관 및 정책</span>
@@ -2017,7 +2053,7 @@ export default function SettingsPage() {
         return (
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => setView('settings_main')}>
+                    <button className={styles.backBtn} onClick={() => navigateBack('settings_main')}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>개인정보처리방침</span>

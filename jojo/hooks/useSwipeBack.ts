@@ -23,6 +23,8 @@ export function useSwipeBack() {
 
     const getContainer = () => document.getElementById('b2b-page-container');
 
+    const getHeader = () => document.querySelector('header') as HTMLElement | null;
+
     // 뒤에 어두운 배경 반투명 막(Dimmed Overlay) 생성
     const createOverlay = () => {
       if (overlayRef.current) return;
@@ -54,10 +56,10 @@ export function useSwipeBack() {
       }
     };
 
-    // 터치 시작: 좌측 80px (또는 25%) 터치만 감지
+    // 터치 시작: 좌측 100px (또는 30%) 터치 감지
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
-      const maxEdge = Math.min(window.innerWidth * 0.25, 80);
+      const maxEdge = Math.min(window.innerWidth * 0.35, 100);
       if (touch.clientX > maxEdge) return;
 
       startX.current = touch.clientX;
@@ -69,6 +71,10 @@ export function useSwipeBack() {
       if (container) {
         container.style.transition = 'none';
       }
+      const header = getHeader();
+      if (header) {
+        header.style.transition = 'none';
+      }
     };
 
     // 터치 이동: 손가락 따라 실시간 화면 밀림 (1:1 Drag)
@@ -79,12 +85,20 @@ export function useSwipeBack() {
       const dx = touch.clientX - startX.current;
       const dy = touch.clientY - startY.current;
 
-      // 수직 이동이 수평 이동보다 크거나 음수 이동이면 스와이프 취소
+      // 수평/수직 이동 방향 판정 (미세 떨림 완충)
       if (!isSwiping.current) {
-        if (Math.abs(dy) > Math.abs(dx) || dx < 0) {
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+
+        // 8px 미만 미세 이동은 방향 판정 유예 (터치 첫 떨림으로 인한 조기 캔슬 방지)
+        if (absDx < 8 && absDy < 8) return;
+
+        // 왼쪽 드래그이거나 세로 스크롤(dy가 dx의 1.3배 이상)일 때만 스와이프 취소
+        if (dx <= 0 || absDy > absDx * 1.3) {
           startX.current = 0;
           return;
         }
+
         isSwiping.current = true;
         createOverlay();
       }
@@ -94,6 +108,10 @@ export function useSwipeBack() {
       const container = getContainer();
       if (container) {
         container.style.transform = `translateX(${currentX.current}px)`;
+      }
+      const header = getHeader();
+      if (header) {
+        header.style.transform = `translateX(${currentX.current}px)`;
       }
 
       // 화면 밀릴 때 어두운 배경 서서히 옅어짐 (깊이감 효과)
@@ -115,14 +133,18 @@ export function useSwipeBack() {
       }
 
       const container = getContainer();
+      const header = getHeader();
       const threshold = 50; // 50px 이상 밀면 뒤로가기 확정
 
-      if (container) {
-        container.style.transition = 'transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+      if (container || header) {
+        const ease = 'transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+        if (container) container.style.transition = ease;
+        if (header) header.style.transition = ease;
 
         if (currentX.current > threshold) {
           // 화면 오른쪽 밖으로 스르륵 0.2초 슬라이드 아웃
-          container.style.transform = `translateX(100vw)`;
+          if (container) container.style.transform = `translateX(100vw)`;
+          if (header) header.style.transform = `translateX(100vw)`;
 
           if (overlayRef.current) {
             overlayRef.current.style.transition = 'opacity 0.2s ease-out';
@@ -137,12 +159,17 @@ export function useSwipeBack() {
                 container.style.transform = '';
                 container.style.zIndex = '';
               }
+              if (header) {
+                header.style.transition = 'none';
+                header.style.transform = '';
+              }
               removeOverlay();
             }, 50);
           }, 180);
         } else {
           // 50px 미만: 제자리 부드러운 탄성 복귀
-          container.style.transform = '';
+          if (container) container.style.transform = '';
+          if (header) header.style.transform = '';
 
           if (overlayRef.current) {
             overlayRef.current.style.transition = 'opacity 0.2s ease-out';
