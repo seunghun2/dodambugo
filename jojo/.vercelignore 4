@@ -1,0 +1,20 @@
+node_modules
+.next
+out
+tmp
+android
+ios
+*.log
+scratch
+.agent
+.git
+.gitignore
+README.md
+TODO.md
+UPDATES.md
+docs
+*.psd
+*.pptx
+*.pdf
+네이버 인증키
+이노페이 송금대행.pdf

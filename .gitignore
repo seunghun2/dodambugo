@@ -43,3 +43,5 @@ service_account.json
 app_backup/
 components_backup/
 scripts_backup/
+jojo/scripts/test-google-api-deep.mjs
+jojo/scripts/get-google-oauth-token.mjs

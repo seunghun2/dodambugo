@@ -244,10 +244,6 @@ export default function WriteFormPage() {
         if (!bankCd) { notifications.show({ message: '은행을 선택해주세요.', color: 'red' }); return false; }
         if (!accountNo) { notifications.show({ message: '계좌번호를 입력해주세요.', color: 'red' }); return false; }
         const cleanNo = (accountNo || '').replace(/[^0-9]/g, '');
-        if (cleanNo === '86402014773') {
-            notifications.show({ message: '등록이 제한된 계좌입니다.', color: 'red' });
-            return false;
-        }
 
         if (isForMourner) { setMournerAccountVerifying(true); setMournerAccountVerifyFailed(false); }
         else { setAccountVerifying(true); setAccountVerifyFailed(false); }
@@ -1155,24 +1151,6 @@ export default function WriteFormPage() {
 
     const handleConfirmSubmit = async () => {
         setShowPreview(false);
-
-        // 🛡️ 악성/도배 블랙리스트 차단 가드 (전화번호, 고인명, 계좌번호)
-        const cleanPhone = (formData.applicant_phone || '').replace(/[^0-9]/g, '');
-        const cleanDeceased = (formData.deceased_name || '').replace(/\s+/g, '');
-        const BLOCKED_PHONES = ['01032861303'];
-        const BLOCKED_ACCOUNTS = ['86402014773'];
-
-        const hasBlockedAccount =
-            accounts.some(a => BLOCKED_ACCOUNTS.includes((a.number || '').replace(/[^0-9]/g, ''))) ||
-            mourners.some(m => BLOCKED_ACCOUNTS.includes((m.accountNumber || '').replace(/[^0-9]/g, ''))) ||
-            BLOCKED_ACCOUNTS.includes((tempAccount?.number || '').replace(/[^0-9]/g, '')) ||
-            BLOCKED_ACCOUNTS.includes((tempMournerAccount?.number || '').replace(/[^0-9]/g, ''));
-
-        if (BLOCKED_PHONES.includes(cleanPhone) || cleanDeceased.includes('채옥림') || hasBlockedAccount) {
-            alert('일시적인 오류가 발생했습니다. 고객센터로 문의해주세요.');
-            setIsSubmitting(false);
-            return;
-        }
 
         setIsSubmitting(true);
 
