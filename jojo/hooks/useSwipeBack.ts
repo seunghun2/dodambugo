@@ -17,11 +17,6 @@ export function useSwipeBack() {
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // 🍎 iOS(아이폰/아이패드)는 브라우저/WKWebView 자체 네이티브 스와이프 제스처에 100% 위임
-    // JS가 touchmove에서 preventDefault()를 호출하면 iOS 네이티브 뒤로가기 제스처가 씹히는 '죽은 캡처' 현상 원천 방지
-    const isIOS = typeof navigator !== 'undefined' && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
-    if (isIOS) return;
-
     // 메인 루트/로그인/대시보드 페이지에서는 뒤로가기 비활성화
     const isNoSwipe = pathname === '/b2b' || pathname === '/b2b/' || pathname === '/b2b/dashboard' || pathname === '/b2b/login';
     if (isNoSwipe) return;

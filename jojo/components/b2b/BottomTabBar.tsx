@@ -29,7 +29,7 @@ function BottomTabBarContent() {
             key={tab.href}
             onClick={() => {
               if (pathname !== tab.href) {
-                router.replace(tab.href);
+                router.push(tab.href);
               }
             }}
             className={`${styles.tab} ${active ? styles.tabActive : ''}`}
