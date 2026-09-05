@@ -628,7 +628,10 @@ export default function SettingsPage() {
             <div className={styles.container}>
                 {/* 헤더 */}
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+                    <button className={styles.backBtn} onClick={() => {
+                        if (window.history.length > 1) router.back();
+                        else router.replace('/b2b/dashboard');
+                    }}>
                         <B2BIcon name="chevron-left" size={24} />
                     </button>
                     <span className={styles.headerTitle}>마이페이지</span>

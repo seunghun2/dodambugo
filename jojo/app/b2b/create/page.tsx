@@ -272,10 +272,12 @@ export default function B2BCreatePage() {
       setShowFacilitySearch(false);
       return;
     }
-    if (isEditMode) {
-      router.push('/b2b/manage');
+    if (window.history.length > 1) {
+      router.back();
+    } else if (isEditMode) {
+      router.replace('/b2b/manage');
     } else {
-      router.push('/b2b/dashboard');
+      router.replace('/b2b/dashboard');
     }
   };
 

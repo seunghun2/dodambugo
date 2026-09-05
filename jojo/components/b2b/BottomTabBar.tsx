@@ -27,7 +27,11 @@ function BottomTabBarContent() {
         return (
           <button
             key={tab.href}
-            onClick={() => router.push(tab.href)}
+            onClick={() => {
+              if (pathname !== tab.href) {
+                router.replace(tab.href);
+              }
+            }}
             className={`${styles.tab} ${active ? styles.tabActive : ''}`}
           >
             <B2BIcon

@@ -147,7 +147,10 @@ export default function B2BNoticePage() {
       {/* 상단 통합 고정 헤더 */}
       <div className={styles.fixedHeaderContainer}>
         <header className={styles.header}>
-          <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+          <button className={styles.backBtn} onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.replace('/b2b/dashboard');
+          }}>
             <B2BIcon name="chevron-left" size={24} />
           </button>
           <span className={styles.headerTitle}>공지사항</span>

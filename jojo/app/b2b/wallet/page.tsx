@@ -378,7 +378,10 @@ export default function WalletPage() {
             <div className={styles.fixedHeaderContainer}>
                 {/* 헤더 */}
                 <header className={styles.header}>
-                    <button className={styles.backBtn} onClick={() => router.push('/b2b/dashboard')}>
+                    <button className={styles.backBtn} onClick={() => {
+                        if (window.history.length > 1) router.back();
+                        else router.replace('/b2b/dashboard');
+                    }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
