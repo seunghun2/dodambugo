@@ -156,6 +156,10 @@ export function useSwipeBack() {
             }
           }, 200);
         }
+      } else {
+        if (currentX.current > threshold) {
+          router.back();
+        }
       }
 
       startX.current = 0;

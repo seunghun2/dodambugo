@@ -12,37 +12,36 @@ export default function GlobalBackButtonHandler() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // 1. 모바일 브라우저를 위한 히스토리 앵커 삽입
-    const anchorState = { appAnchor: true, path: pathname, t: Date.now() };
-    window.history.pushState(anchorState, '', window.location.href);
-
-    const handleBack = () => {
-      const currentPath = window.location.pathname;
-
-      // 1. 열려있는 모달/팝업이 있으면 모달 닫기
+    // 1. 열려있는 모달/팝업 닫기 함수
+    const closeModalIfOpen = (): boolean => {
       const activeModalCloseBtn = document.querySelector(
-        '.recipient-modal-overlay .btn-modal-close, .flower-modal-overlay .btn-modal-close, .modal-close, [data-modal-close="true"], .account-modal-close, .share-modal-close'
+        '.recipient-modal-overlay .btn-modal-close, .flower-modal-overlay .btn-modal-close, .modal-close, [data-modal-close="true"], .account-modal-close, .share-modal-close, .facility-modal-close'
       ) as HTMLElement;
 
       if (activeModalCloseBtn) {
-        window.history.pushState({ appAnchor: true }, '', window.location.href);
         activeModalCloseBtn.click();
-        return;
+        return true;
       }
+      return false;
+    };
 
-      // 2. 홈 / 대시보드 화면인 경우 (2회 누르면 종료)
+    // 2. 안드로이드 하드웨어 백버튼 / 네이티브 뒤로가기 핸들러
+    const handleNativeBack = () => {
+      // 1순위: 열려있는 모달이 있으면 모달 닫기
+      if (closeModalIfOpen()) return;
+
+      const currentPath = window.location.pathname;
+
+      // 2순위: 최상위 홈/대시보드 화면인 경우 (2회 연속 누르면 앱 종료)
       const isHome = currentPath === '/b2b/dashboard' || currentPath === '/b2b' || currentPath === '/b2b/' || currentPath === '/' || currentPath === '/b2b/login' || currentPath === '/b2b/login/';
       if (isHome) {
         if (backPressedRef.current) {
-          // 2번째 누름: 앱 정상 종료
           if (Capacitor.isNativePlatform()) {
             import('@capacitor/app').then(({ App }) => App.exitApp()).catch(() => {});
           } else {
             window.history.back();
           }
         } else {
-          // 1번째 누름: 앱 꺼짐 차단 + 토스트 안내
-          window.history.pushState({ appAnchor: true }, '', window.location.href);
           backPressedRef.current = true;
           setToastMessage('뒤로가기 버튼을 한 번 더 누르면 종료됩니다.');
 
@@ -55,103 +54,36 @@ export default function GlobalBackButtonHandler() {
         return;
       }
 
-      // 3. 부고 완료 화면 -> 부고 수정 화면으로 복귀
+      // 3순위: 부고 생성 완료 화면 -> 부고 관리 목록으로 안전하게 복귀
       if (currentPath.startsWith('/b2b/create/complete')) {
-        const bugoNumber = currentPath.split('/').pop();
-        window.history.pushState({ appAnchor: true }, '', `/b2b/create?edit=${bugoNumber}`);
-        router.replace(`/b2b/create?edit=${bugoNumber}`);
+        router.replace('/b2b/manage');
         return;
       }
 
-      // 4. 부고 제작/수정 화면
-      if (currentPath.startsWith('/b2b/create')) {
-        const search = window.location.search;
-        if (search.includes('edit=')) {
-          window.history.pushState({ appAnchor: true }, '', '/b2b/manage');
-          router.replace('/b2b/manage');
-        } else {
-          window.history.pushState({ appAnchor: true }, '', '/b2b/dashboard');
-          router.replace('/b2b/dashboard');
-        }
-        return;
-      }
-
-      // 5. 화환 주문 화면 -> 화환 상품 목록으로 복귀
-      if (currentPath.startsWith('/b2b/flower/order')) {
-        window.history.pushState({ appAnchor: true }, '', '/b2b/flower');
-        router.replace('/b2b/flower');
-        return;
-      }
-
-      // 6. 화환 목록 화면 -> 마이페이지(설정)로 복귀
-      if (currentPath === '/b2b/flower' || currentPath === '/b2b/flower/') {
-        window.history.pushState({ appAnchor: true }, '', '/b2b/settings');
-        router.replace('/b2b/settings');
-        return;
-      }
-
-      // 7. 화환 결제 화면 (/view/[id]/payment/[productId]) -> 이전 화면(주문서)으로 복귀
-      if (currentPath.includes('/payment/')) {
-        if (window.history.length > 2) {
-          router.back();
-        } else {
-          router.replace('/b2b/flower');
-        }
-        return;
-      }
-
-      // 8. B2B 1차 서브 페이지들 (부고관리, 적립금, 설정, 제례의식, 공지사항, 문의 등) -> 대시보드로 복귀
-      if (currentPath.startsWith('/b2b/')) {
-        window.history.pushState({ appAnchor: true }, '', '/b2b/dashboard');
-        router.replace('/b2b/dashboard');
-        return;
-      }
-
-      // 9. 부고장 뷰어 화면 (/view/[id] 또는 /b2b/view/[id])
-      if (currentPath.includes('/view/')) {
-        // B2B 지도사 계정으로 로그인되어 있다면 대시보드로 이동
-        const token = typeof window !== 'undefined' ? localStorage.getItem('b2b_token') : null;
-        if (token) {
-          window.history.pushState({ appAnchor: true }, '', '/b2b/dashboard');
-          router.replace('/b2b/dashboard');
-        } else {
-          if (window.history.length > 2) {
-            router.back();
-          } else {
-            router.replace('/');
-          }
-        }
-        return;
-      }
-
-      // 7. 기타 기본 뒤로가기
-      if (window.history.length > 2) {
-        router.back();
-      } else {
-        router.replace('/');
-      }
+      // 4순위: 그 외 모든 일반 화면은 브라우저 히스토리 직전 페이지로 즉시 복귀!
+      router.back();
     };
 
-    // 브라우저 popstate 이벤트 리스너
-    const onPopState = (e: PopStateEvent) => {
-      handleBack();
+    // 3. 브라우저 popstate (모달 닫기 연동)
+    const onPopState = () => {
+      closeModalIfOpen();
     };
     window.addEventListener('popstate', onPopState);
 
-    // Capacitor Native Android 백버튼 리스너 등록 (앱 꺼짐 100% 방지)
+    // 4. Capacitor Native Android 백버튼 리스너 등록
     let removeNativeListener: (() => void) | null = null;
     const initCapacitorBack = async () => {
       try {
         const { App } = await import('@capacitor/app');
         const listener = await App.addListener('backButton', () => {
-          handleBack();
+          handleNativeBack();
         });
         removeNativeListener = () => listener.remove();
       } catch {
         try {
           if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins?.App) {
             (window as any).Capacitor.Plugins.App.addListener('backButton', () => {
-              handleBack();
+              handleNativeBack();
             });
           }
         } catch {}
