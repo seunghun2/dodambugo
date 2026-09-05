@@ -1151,6 +1151,17 @@ export default function WriteFormPage() {
 
     const handleConfirmSubmit = async () => {
         setShowPreview(false);
+
+        // 🛡️ 악성/도배 블랙리스트 차단 가드
+        const cleanPhone = (formData.applicant_phone || '').replace(/[^0-9]/g, '');
+        const cleanDeceased = (formData.deceased_name || '').replace(/\s+/g, '');
+        const BLOCKED_PHONES = ['01032861303'];
+        if (BLOCKED_PHONES.includes(cleanPhone) || cleanDeceased.includes('채옥림')) {
+            alert('일시적인 오류가 발생했습니다. 고객센터로 문의해주세요.');
+            setIsSubmitting(false);
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
