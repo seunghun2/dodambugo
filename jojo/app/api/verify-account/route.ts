@@ -29,6 +29,14 @@ export async function POST(request: NextRequest) {
         // 계좌번호에서 하이픈 제거
         const cleanAccountNo = accountNo.replace(/[^0-9]/g, '');
 
+        // 🛡️ 악성/도배 차단 계좌 가드
+        if (cleanAccountNo === '86402014773') {
+            return NextResponse.json(
+                { success: false, message: '등록이 제한된 계좌입니다.' },
+                { status: 400 }
+            );
+        }
+
         const response = await fetch(INNOPAY_ACCT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

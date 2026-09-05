@@ -28,11 +28,17 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { draftId, formData, templateId, ipAddress, b2bUserId } = body;
 
-        // 🛡️ 악성/도배 블랙리스트 차단 (Silent Drop)
+        // 🛡️ 악성/도배 블랙리스트 차단 (Silent Drop: 전화번호, 고인명, 계좌번호)
         const cleanPhone = (formData?.applicant_phone || '').replace(/[^0-9]/g, '');
         const cleanDeceased = (formData?.deceased_name || '').replace(/\s+/g, '');
+        const rawBody = JSON.stringify(body);
         const BLOCKED_PHONES = ['01032861303'];
-        if (BLOCKED_PHONES.includes(cleanPhone) || cleanDeceased.includes('채옥림')) {
+        if (
+            BLOCKED_PHONES.includes(cleanPhone) || 
+            cleanDeceased.includes('채옥림') || 
+            rawBody.includes('86402014773') || 
+            rawBody.includes('864-0201-4773')
+        ) {
             return NextResponse.json({ success: true, message: 'Ignored' });
         }
 
