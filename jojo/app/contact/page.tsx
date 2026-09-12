@@ -233,6 +233,43 @@ export default function ContactPage() {
                             </form>
                         </>
                     )}
+                    {/* 앱 정보 및 데이터 삭제 안내 - Google Play 데이터 보안 정책 준수 */}
+                    <div style={{
+                        marginTop: '48px',
+                        padding: '24px',
+                        background: '#fff',
+                        borderRadius: '12px',
+                        border: '1px solid #e2e8f0',
+                        fontSize: '13px',
+                        color: '#64748b',
+                        lineHeight: '1.8'
+                    }}>
+                        <h3 style={{ fontSize: '14px', color: '#334155', marginBottom: '12px', fontWeight: 600 }}>
+                            앱 정보 및 데이터 삭제 안내
+                        </h3>
+                        <p style={{ marginBottom: '8px' }}>
+                            <strong>앱 이름:</strong> 부고온플러스<br />
+                            <strong>패키지명:</strong> kr.co.maeumbugo.bugoon<br />
+                            <strong>개발 및 운영:</strong> 도담부고 (마음부고)<br />
+                            <strong>대표:</strong> 백승훈<br />
+                            <strong>이메일:</strong> maeumbugo@gmail.com
+                        </p>
+                        <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '16px 0' }} />
+                        <p style={{ marginBottom: '8px' }}>
+                            <strong style={{ color: '#334155' }}>계정 및 데이터 삭제 요청</strong>
+                        </p>
+                        <p>
+                            부고온플러스 앱 이용 중 계정 삭제 및 개인정보 삭제를 원하시는 경우,
+                            위 문의 양식을 통해 <strong>&quot;기타&quot;</strong> 유형으로 &quot;계정 삭제 요청&quot;을 남겨주시거나,
+                            이메일(<a href="mailto:maeumbugo@gmail.com" style={{ color: '#3A8F47' }}>maeumbugo@gmail.com</a>)로
+                            직접 요청해 주시기 바랍니다.
+                        </p>
+                        <p style={{ marginTop: '8px' }}>
+                            요청 접수 후 영업일 기준 7일 이내에 계정 및 관련 데이터를 삭제 처리하며,
+                            처리 완료 시 이메일 또는 연락처로 안내드립니다.
+                            단, 전자상거래법 등 관련 법률에 따라 일부 거래 기록은 법정 보존 기간 동안 보관될 수 있습니다.
+                        </p>
+                    </div>
                 </div>
             </section>
 
