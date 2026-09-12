@@ -251,7 +251,7 @@ export default function ContactPage() {
                             <strong>앱 이름:</strong> 부고온플러스<br />
                             <strong>패키지명:</strong> kr.co.maeumbugo.bugoon<br />
                             <strong>개발 및 운영:</strong> 도담부고 (마음부고)<br />
-                            <strong>대표:</strong> 백승훈<br />
+                            <strong>대표:</strong> 김미연<br />
                             <strong>이메일:</strong> maeumbugo@gmail.com
                         </p>
                         <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '16px 0' }} />
