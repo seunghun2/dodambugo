@@ -183,7 +183,7 @@ export default function B2BCreatePage() {
           address: data.address || '',
           address_detail: data.address_detail || '',
           deceased_name: data.deceased_name || '',
-          age: data.age ? data.age.toString() : '',
+          age: data.age && Number(data.age) > 0 ? data.age.toString() : '',
           gender: data.gender || '',
           hide_gender: data.hide_gender || false,
           religion: data.religion || '없음',
@@ -392,7 +392,7 @@ export default function B2BCreatePage() {
         relationship: mourners[0]?.relationship || '',
         mourner_name: mourners[0]?.name || '',
         contact: mourners[0]?.contact || '',
-        age: formData.age ? parseInt(formData.age) : null,
+        age: formData.age && Number(formData.age) > 0 ? parseInt(formData.age) : null,
         religion: formData.religion === '없음' ? null : formData.religion,
         religious_title: formData.religious_title || null,
         show_religious_title: formData.show_religious_title,
@@ -613,7 +613,7 @@ export default function B2BCreatePage() {
                 <span className={styles.previewValue}>
                   故 {formData.deceased_name}
                   {formData.religion && formData.religion !== '없음' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}` : ''}
-                  {formData.age ? ` / ${formData.age}세` : ''}
+                  {formData.age && Number(formData.age) > 0 ? ` / ${formData.age}세` : ''}
                   {formData.hide_gender ? '' : formData.gender ? ` / ${formData.gender === '남' ? '남성' : '여성'}` : ''}
                 </span>
               </div>

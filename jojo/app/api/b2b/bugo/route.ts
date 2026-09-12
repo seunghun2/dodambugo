@@ -53,6 +53,12 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { bugoData, isEditMode, editBugoNumber, mourners } = body;
 
+        // age가 0 또는 음수면 null 처리 (화면에 '0세' 또는 '0' 노출 방지)
+        if (bugoData && bugoData.age !== undefined) {
+            const parsedAge = parseInt(bugoData.age);
+            bugoData.age = !isNaN(parsedAge) && parsedAge > 0 ? parsedAge : null;
+        }
+
         if (isEditMode) {
             if (!editBugoNumber) {
                 return NextResponse.json({ error: '수정할 부고 번호가 없습니다.' }, { status: 400 });

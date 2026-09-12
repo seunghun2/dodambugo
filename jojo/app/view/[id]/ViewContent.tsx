@@ -486,7 +486,7 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
                 return `${month}월 ${day}일`;
             };
 
-            const ageText = bugo?.age ? `(향년 ${bugo.age}세)` : '';
+            const ageText = bugo?.age && Number(bugo.age) > 0 ? `(향년 ${bugo.age}세)` : '';
 
             console.log('[카카오 공유] shareUrl:', shareUrl);
 
@@ -767,7 +767,7 @@ ${url}
                             </div>
                             <div className="header-deceased-title">
                                 故 {bugo.deceased_name}님
-                                {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
+                                {Number(bugo.age) > 0 ? <span className="header-deceased-age"> ({bugo.age}세)</span> : null}
                             </div>
                             {/* B2C에서는 종교 호칭 미노출 */}
                             {false && bugo.religious_title && (
@@ -781,7 +781,7 @@ ${url}
                         <div className={`header-deceased-info ${!bugo.religious_title ? 'no-religious-title' : ''}`}>
                             <div className="header-deceased-title">
                                 故 {bugo.deceased_name}님
-                                {bugo.age && <span className="header-deceased-age"> ({bugo.age}세)</span>}
+                                {Number(bugo.age) > 0 ? <span className="header-deceased-age"> ({bugo.age}세)</span> : null}
                             </div>
                             {/* B2C에서는 종교 호칭 미노출 */}
                             {false && bugo.religious_title && (
@@ -828,7 +828,7 @@ ${url}
                     {/* 고인 */}
                     <div className="funeral-info-row funeral-highlight">
                         <span className="funeral-info-label">고인</span>
-                        <span className="funeral-info-value">故{bugo.deceased_name} {bugo.age ? `(향년 ${bugo.age}세)` : ''}</span>
+                        <span className="funeral-info-value">故{bugo.deceased_name} {Number(bugo.age) > 0 ? `(향년 ${bugo.age}세)` : ''}</span>
                     </div>
                     <div className="funeral-info-divider"></div>
                     {/* 일포일시 - 있으면 진하게 표시 (발인보다 먼저) */}

@@ -60,7 +60,10 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
   const [showReligionSheet, setShowReligionSheet] = useState(false);
 
   const handleAgeChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 3);
+    let cleaned = value.replace(/\D/g, '').slice(0, 3);
+    if (cleaned === '0') {
+      cleaned = '';
+    }
     onChange('age', cleaned);
   };
 

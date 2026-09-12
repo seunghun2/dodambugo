@@ -153,7 +153,7 @@ export default function CompletePage() {
                 return `${month}월 ${day}일`;
             };
 
-            const ageText = bugo?.age ? `(향년 ${bugo.age}세)` : '';
+            const ageText = bugo?.age && Number(bugo.age) > 0 ? `(향년 ${bugo.age}세)` : '';
             const kakaoTitle = `故${bugo?.deceased_name}님${ageText}께서 ${formatKakaoDate()} 별세하셨음을 삼가 알려 드립니다`;
             const kakaoDesc = bugo?.funeral_home
                 ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''}`
@@ -342,7 +342,7 @@ ${bugoUrl}
                 <div className="info-card">
                     <div className="info-row">
                         <span className="info-label">고인명</span>
-                        <span className="info-value">故{bugo.deceased_name}{bugo.age ? `[${bugo.age}세]` : ''}</span>
+                        <span className="info-value">故{bugo.deceased_name}{bugo.age && Number(bugo.age) > 0 ? `[${bugo.age}세]` : ''}</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">장례종류</span>

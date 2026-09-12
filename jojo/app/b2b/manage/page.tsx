@@ -421,7 +421,7 @@ function B2BManagePageContent() {
                 <span className={styles.modalValue}>
                   故 {selectedBugo.deceased_name}
                   {selectedBugo.religion && selectedBugo.religion !== '없음' ? ` / ${selectedBugo.religion === '기타' ? selectedBugo.religion_custom : selectedBugo.religion}` : ''}
-                  {selectedBugo.age ? ` / ${selectedBugo.age}세` : ''}
+                  {selectedBugo.age && Number(selectedBugo.age) > 0 ? ` / ${selectedBugo.age}세` : ''}
                   {selectedBugo.gender ? ` / ${selectedBugo.gender === '남' ? '남성' : '여성'}` : ''}
                 </span>
               </div>

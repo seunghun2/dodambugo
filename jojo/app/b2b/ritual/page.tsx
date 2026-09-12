@@ -119,7 +119,7 @@ export default function RitualListPage() {
                 <div className={styles.bugoInfo}>
                   <span className={styles.bugoDeceased}>
                     故 {bugo.deceased_name}
-                    {bugo.age ? ` (향년 ${bugo.age}세)` : ''}
+                    {bugo.age && Number(bugo.age) > 0 ? ` (향년 ${bugo.age}세)` : ''}
                   </span>
                   <span className={styles.bugoMeta}>
                     {bugo.funeral_home || '장례식장 미등록'}

@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return `${month}월 ${day}일`;
     };
 
-    const ageText = bugo.age ? `(향년 ${bugo.age}세)` : '';
+    const ageText = bugo.age && Number(bugo.age) > 0 ? `(향년 ${bugo.age}세)` : '';
     const title = `故 ${bugo.deceased_name}님 부고${ageText}`;
     const description = bugo.funeral_home
         ? `${bugo.funeral_home}${bugo.room_number ? ' ' + bugo.room_number : ''} | ${formatDate()} 별세하셨음을 삼가 알려드립니다.`
