@@ -38,12 +38,14 @@ export async function GET(request: NextRequest) {
         console.log('🔍 장지 후기 알림 대상 검색: 발인일 =', twoDaysAgoStr);
 
         // 2일 전 발인한 부고 중 장지가 있고, 후기 알림 아직 안 보낸 것
+        // ※ B2B(부고온) 건은 상주 만족도 조사 알림톡 제외 (템플릿 문구 '마음부고' 명칭 노출 방지 및 추후 B2B 전용 템플릿 교체 예정)
         const { data: bugos, error } = await supabase
             .from('bugo')
             .select('bugo_number, deceased_name, mourner_name, phone_password, burial_place, review_notify_sent, b2b_user_id')
             .eq('funeral_date', twoDaysAgoStr)
             .not('burial_place', 'is', null)
             .is('deleted_at', null)
+            .is('b2b_user_id', null) // B2C(마음부고)만 발송, B2B(부고온)는 완전 제외
             .or('review_notify_sent.is.null,review_notify_sent.eq.false');
 
         if (error) {
@@ -75,6 +77,11 @@ export async function GET(request: NextRequest) {
         const errors: string[] = [];
 
         for (const [phone, bugo] of targets) {
+            // 방어 로직: B2B 부고장은 장지 후기 알림 발송 제외 (추후 부고온 전용 템플릿 교체 예정)
+            if (bugo.b2b_user_id) {
+                continue;
+            }
+
             try {
                 const reviewCode = generateReviewCode(String(bugo.bugo_number));
                 const isB2B = !!bugo.b2b_user_id;
