@@ -19,6 +19,60 @@ function getSupabase() {
 
 // 부고 조회 (React cache로 같은 요청 내 중복 쿼리 방지)
 const getBugo = cache(async (id: string) => {
+    if (id.startsWith('test-')) {
+        const hasPhoto = !id.includes('nophoto');
+        let template_id = 'basic';
+        if (id.includes('border')) template_id = 'border';
+        else if (id.includes('ribbon')) template_id = 'ribbon';
+        else if (id.includes('flower')) template_id = 'flower';
+
+        let religion = '기독교';
+        let religious_title: string | null = '권사';
+        if (id.includes('catholic')) {
+            religion = '천주교';
+            religious_title = '세례자 요한';
+        } else if (id.includes('buddhism')) {
+            religion = '불교';
+            religious_title = '보살';
+        } else if (id.includes('won')) {
+            religion = '원불교';
+            religious_title = '교도';
+        } else if (id.includes('sgi')) {
+            religion = 'SGI';
+            religious_title = '부인부';
+        } else if (id.includes('etc')) {
+            religion = '기타';
+            religious_title = '성도';
+        }
+
+        if (id.includes('notitle')) {
+            religious_title = null;
+        }
+
+        return {
+            id,
+            bugo_number: '9991',
+            template_id,
+            applicant_name: '홍길동',
+            deceased_name: '김영자',
+            gender: '여',
+            age: 84,
+            religion,
+            religious_title,
+            show_religious_title: true,
+            photo_url: hasPhoto ? 'https://tbteghoppechzotdojna.supabase.co/storage/v1/object/public/bugo-photos/portraits/1787200511051_lvp1l1.png' : null,
+            funeral_home: '서울아산병원 장례식장',
+            room_number: '302호',
+            funeral_date: '2026-09-25',
+            funeral_time: '08:00',
+            death_date: '2026-09-23',
+            mourners: [{ relationship: '아들', name: '홍길동', contact: '010-1234-5678' }],
+            mourner_name: '홍길동',
+            relationship: '아들',
+            message: '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.'
+        };
+    }
+
     const supabase = getSupabase();
     const isUUID = id.includes('-') && id.length > 10;
 

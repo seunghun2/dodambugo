@@ -27,7 +27,7 @@ const relationOptions = [
 ];
 
 // 종교 옵션
-const religionOptions = ['불교', '기독교', '천주교', '무교', '기타'];
+const religionOptions = ['일반', '기독교', '불교', '천주교', '원불교', 'SGI', '기타'];
 
 // 은행 옵션
 const bankOptions = [
@@ -117,8 +117,10 @@ export default function WriteFormPage() {
         gender: '',
         relationship: '',
         age: '',
-        religion: '없음',
+        religion: '일반',
         religion_custom: '',
+        religious_title: '',
+        hide_religious_title: false,
         funeral_type: '일반 장례',
         funeral_home: '',
         room_number: '',
@@ -499,7 +501,7 @@ export default function WriteFormPage() {
                     deceased_name: parsed.deceased_name || '',
                     age: parsed.age?.toString() || '',
                     gender: parsed.gender || '',
-                    religion: parsed.religion || '없음',
+                    religion: parsed.religion || '일반',
                     funeral_type: parsed.funeral_type || '일반 장례',
                     funeral_home: parsed.funeral_home || '',
                     funeral_home_tel: parsed.funeral_home_tel || '',
@@ -671,8 +673,10 @@ export default function WriteFormPage() {
                     gender: data.gender || '',
                     relationship: data.relationship || '',
                     age: data.age?.toString() || '',
-                    religion: data.religion || '없음',
+                    religion: data.religion || '일반',
                     religion_custom: data.religion_custom || '',
+                    religious_title: data.religious_title || '',
+                    hide_religious_title: data.show_religious_title === false,
                     funeral_type: data.funeral_type || '일반 장례',
                     funeral_home: data.funeral_home || '',
                     room_number: data.room_number || '',
@@ -1193,7 +1197,9 @@ export default function WriteFormPage() {
                 mourner_name: formData.primary_mourner || '',
                 contact: formData.applicant_phone || '',
                 age: formData.age ? parseInt(formData.age) : null,
-                religion: formData.religion === '기타' ? formData.religion_custom : (formData.religion || null),
+                religion: formData.religion === '일반' ? null : (formData.religion === '기타' ? formData.religion_custom : (formData.religion || null)),
+                religious_title: formData.religious_title?.trim() || null,
+                show_religious_title: !formData.hide_religious_title,
                 funeral_type: formData.funeral_type || '일반 장례',
                 funeral_home: formData.funeral_home || null,
                 room_number: formData.room_number || null,
@@ -1623,21 +1629,25 @@ export default function WriteFormPage() {
                                             {errors.deceased_name && <p className="field-error">{errors.deceased_name}</p>}
                                         </div>
 
-                                        {/* 연세 + 성별 + 종교 */}
+                                        {/* 고인나이, 성별, 종교 (3컬럼 1행) */}
                                         <div className="form-row form-row-3">
                                             <div className="form-group" data-field="age">
-                                                <label className="form-label required">연세</label>
-                                                <input
-                                                    type="text"
-                                                    name="age"
-                                                    className={`form-input ${errors.age ? 'error' : ''}`}
-                                                    placeholder="연세"
-                                                    maxLength={3}
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
-                                                    value={formData.age}
-                                                    onChange={handleChange}
-                                                />
+                                                <label className="form-label required">고인나이</label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <input
+                                                        type="text"
+                                                        name="age"
+                                                        className={`form-input ${errors.age ? 'error' : ''}`}
+                                                        placeholder="나이"
+                                                        maxLength={3}
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={formData.age}
+                                                        onChange={handleChange}
+                                                        style={{ paddingRight: '36px' }}
+                                                    />
+                                                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#888', fontSize: '14px', pointerEvents: 'none' }}>세</span>
+                                                </div>
                                                 {errors.age && <p className="field-error">{errors.age}</p>}
                                             </div>
 
@@ -1649,14 +1659,14 @@ export default function WriteFormPage() {
                                                     value={formData.gender}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="">선택</option>
+                                                    <option value="">성별</option>
                                                     <option value="남">남</option>
                                                     <option value="여">여</option>
                                                 </select>
                                                 {errors.gender && <p className="field-error">{errors.gender}</p>}
                                             </div>
 
-                                            <div className="form-group">
+                                            <div className="form-group" data-field="religion">
                                                 <label className="form-label">종교</label>
                                                 <select
                                                     name="religion"
@@ -1664,13 +1674,50 @@ export default function WriteFormPage() {
                                                     value={formData.religion}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="없음">없음</option>
                                                     {religionOptions.map(opt => (
                                                         <option key={opt} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                         </div>
+
+                                        {/* 종교 선택 시 (일반이 아닐 때) 직분/호칭 입력 및 미노출 버튼 */}
+                                        {formData.religion && formData.religion !== '일반' && (
+                                            <div className="form-group" data-field="religious_title" style={{ marginTop: '4px' }}>
+                                                <label className="form-label">직분/호칭</label>
+                                                <input
+                                                    type="text"
+                                                    name="religious_title"
+                                                    className="form-input"
+                                                    placeholder="직분/세례명/호칭 (예: 집사, 권사, 보살 등)"
+                                                    value={formData.religious_title}
+                                                    onChange={handleChange}
+                                                />
+                                                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', fontSize: '13px', color: '#666', cursor: 'pointer', marginTop: '8px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        name="hide_religious_title"
+                                                        checked={formData.hide_religious_title}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, hide_religious_title: e.target.checked }))}
+                                                        style={{ width: '16px', height: '16px', accentColor: '#1d2743', cursor: 'pointer' }}
+                                                    />
+                                                    부고장 호칭 미노출
+                                                </label>
+                                            </div>
+                                        )}
+
+                                        {formData.religion === '기타' && (
+                                            <div className="form-group" style={{ marginTop: '8px' }}>
+                                                <input
+                                                    type="text"
+                                                    name="religion_custom"
+                                                    className="form-input"
+                                                    placeholder="종교명을 직접 입력해주세요"
+                                                    value={formData.religion_custom}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        )}
 
                                         {/* 구분선 */}
                                         <hr className="form-divider" />
@@ -2265,7 +2312,7 @@ export default function WriteFormPage() {
                                         <span className="preview-label">고인정보</span>
                                         <span className="preview-value">
                                             {formData.deceased_name}
-                                            {formData.religion && formData.religion !== '없음' && formData.religion !== '무교' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}` : ''}
+                                            {formData.religion && formData.religion !== '없음' && formData.religion !== '무교' && formData.religion !== '일반' ? ` / ${formData.religion === '기타' ? formData.religion_custom : formData.religion}${formData.religious_title ? ` (${formData.religious_title})` : ''}` : ''}
                                             {formData.age ? ` / ${formData.age}세` : ''}
                                             {formData.gender ? ` / ${formData.gender === '남' ? '남성' : '여성'}` : ''}
                                         </span>

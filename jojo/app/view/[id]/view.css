@@ -364,9 +364,9 @@
     color: #3B4551;
 }
 
-/* Flower (아트보드 11) - 본문 Y: 187px, 색상: #FFFFFF */
+/* Flower (아트보드 11) - 본문 Y 위치 살짝 올려서 하단 꽃 겹침 방지 */
 .template-flower .header-text-overlay {
-    top: 28.5%;
+    top: 22.5%;
 }
 
 .template-flower .header-deceased-title,
@@ -477,6 +477,94 @@
 
 .template-flower .header-religious-title {
     background: rgba(255, 255, 255, 0.15);
+}
+
+/* 종교 심볼 뱃지 (회색면, 넉넉한 크기, 컬러 로고, 완벽한 중앙 정렬) */
+.header-religion-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 36px;
+    box-sizing: border-box;
+    border-radius: 9999px;
+    background: #eceef2;
+    border: none;
+    box-shadow: none;
+    color: #2b2f38;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin: 0 auto 12px auto;
+    width: fit-content;
+}
+
+/* 호칭 없이 로고만 있을 때: 44px 정원형 칩 */
+.header-religion-badge.is-icon-only {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    margin: 0 auto 12px auto;
+}
+
+.header-religion-badge svg {
+    display: block;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.header-religion-badge svg.badge-icon-cross {
+    fill: #de0615;
+}
+
+.header-religion-badge svg.badge-icon-catholic {
+    fill: #de0615;
+}
+
+.header-religion-badge svg.badge-icon-lotus {
+    fill: #c94251;
+    transform: translateY(-0.75px);
+}
+
+.header-religion-badge svg.badge-icon-won circle {
+    stroke: #eaad2d;
+}
+
+.header-religion-badge span {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+/* 사진이 있는 헤더에서의 뱃지 위치 */
+.has-photo .header-religion-badge {
+    margin: 8px auto 8px auto;
+}
+
+/* 템플릿별 다크 모드 (화원) */
+.template-flower .header-religion-badge {
+    background: rgba(255, 255, 255, 0.22);
+    border: none;
+    box-shadow: none;
+    color: #ffffff;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-cross {
+    fill: #ff4d4f;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-catholic {
+    fill: #ff4d4f;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-lotus {
+    fill: #ff758f;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-won circle {
+    stroke: #ffd43b;
 }
 
 /* ========================================
