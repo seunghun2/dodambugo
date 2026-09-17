@@ -669,10 +669,19 @@ ${url}
         <div className="b2b-view-wrapper">
             <main className="view-page">
                 {/* B2B 제휴 브랜드 최상단 로고 탑 바 */}
-                {bugo.partner_logo_url && bugo.partner_logo_url !== 'mute' && (
+                {bugo.partner_logo_url && bugo.partner_logo_url !== 'mute' && !bugo.partner_logo_url.startsWith('blob:') && (
                     <div className="b2b-top-header-bar">
                         {mounted ? (
-                            <img src={bugo.partner_logo_url} alt="제휴 브랜드 로고" className="b2b-top-header-logo" />
+                            <img 
+                                src={bugo.partner_logo_url} 
+                                alt="제휴 브랜드 로고" 
+                                className="b2b-top-header-logo" 
+                                onError={(e) => {
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) parent.style.display = 'none';
+                                    else e.currentTarget.style.display = 'none';
+                                }}
+                            />
                         ) : (
                             <div className="b2b-top-header-logo-placeholder" style={{ height: '68px', width: '200px' }} />
                         )}

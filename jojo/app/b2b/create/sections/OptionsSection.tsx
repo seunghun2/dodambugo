@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { IconUpload, IconPlus, IconStar, IconStarFilled, IconCheck } from '@tabler/icons-react';
+import { IconUpload, IconPlus, IconStar, IconStarFilled, IconCheck, IconLoader2 } from '@tabler/icons-react';
+import { supabase } from '@/lib/supabase';
 import styles from './sections.module.css';
 
 interface Props {
@@ -87,6 +88,7 @@ export default function OptionsSection({ formData, onChange }: Props) {
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [activeLogoTab, setActiveLogoTab] = useState<'favorites' | 'presets' | 'custom'>('favorites');
   const [favoriteLogos, setFavoriteLogos] = useState<string[]>([]);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   
   useEffect(() => {
     try {
@@ -123,19 +125,61 @@ export default function OptionsSection({ formData, onChange }: Props) {
 
   const handleLogoSelect = (url: string) => {
     onChange('partner_logo_url', url);
+    try {
+      localStorage.setItem('b2b_last_partner_logo_url', url);
+    } catch (e) {}
     setShowLogoModal(false);
   };
 
   const handleFileAttach = () => {
+    if (uploadingLogo) return;
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    onChange('partner_logo_url', url);
-    setShowLogoModal(false);
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('파일 크기는 최대 10MB까지 가능합니다.');
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const fileName = `partner_logos/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('bugo-photos')
+        .upload(fileName, file, {
+          cacheControl: '31536000',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Logo upload error:', uploadError);
+        alert('로고 업로드에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('bugo-photos')
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData.publicUrl;
+      onChange('partner_logo_url', publicUrl);
+      try {
+        localStorage.setItem('b2b_last_partner_logo_url', publicUrl);
+      } catch (e) {}
+      setShowLogoModal(false);
+    } catch (err) {
+      console.error('Logo upload error:', err);
+      alert('로고 업로드 중 오류가 발생했습니다.');
+    } finally {
+      setUploadingLogo(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   const isLogoOn = !!formData.partner_logo_url;
@@ -172,8 +216,14 @@ export default function OptionsSection({ formData, onChange }: Props) {
           checked={isLogoOn}
           onChange={(val) => {
             if (val) {
-              onChange('partner_logo_url', 'mute');
-              setShowLogoModal(true);
+              let lastLogo = '';
+              try { lastLogo = localStorage.getItem('b2b_last_partner_logo_url') || ''; } catch (e) {}
+              if (lastLogo) {
+                onChange('partner_logo_url', lastLogo);
+              } else {
+                onChange('partner_logo_url', 'mute');
+                setShowLogoModal(true);
+              }
             } else {
               onChange('partner_logo_url', '');
             }
@@ -294,9 +344,24 @@ export default function OptionsSection({ formData, onChange }: Props) {
                       <li>배경이 투명한 로고 사용을 권장합니다</li>
                     </ul>
                   </div>
-                  <button type="button" className={styles.fileUploadBtnFull} onClick={handleFileAttach}>
-                    <IconUpload size={20} />
-                    <span>이미지 업로드</span>
+                  <button 
+                    type="button" 
+                    className={styles.fileUploadBtnFull} 
+                    onClick={handleFileAttach}
+                    disabled={uploadingLogo}
+                    style={uploadingLogo ? { opacity: 0.7, cursor: 'not-allowed' } : undefined}
+                  >
+                    {uploadingLogo ? (
+                      <>
+                        <IconLoader2 size={20} className={styles.spin} />
+                        <span>로고 업로드 중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload size={20} />
+                        <span>이미지 업로드</span>
+                      </>
+                    )}
                   </button>
                   <input
                     ref={fileInputRef}

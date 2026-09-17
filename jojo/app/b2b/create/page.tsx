@@ -157,12 +157,18 @@ export default function B2BCreatePage() {
       setIsEditMode(true);
       loadBugoData(editNum);
     } else if (userStr) {
-      // [신규 작성 모드] 더 이상 소속 상조회사/회사명(user.company_name)을 장례식장명에 자동 대입하지 않고 빈 칸으로 시작합니다.
+      // [신규 작성 모드] 마지막 등록/선택 로고 자동 유지
+      let lastLogo = '';
+      try {
+        lastLogo = localStorage.getItem('b2b_last_partner_logo_url') || '';
+      } catch (e) {}
+
       setFormData(prev => ({
         ...prev,
         funeral_home: '',
         address: '',
         funeral_home_tel: '',
+        partner_logo_url: lastLogo || prev.partner_logo_url,
       }));
     }
   }, [router]);
