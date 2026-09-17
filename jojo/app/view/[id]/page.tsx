@@ -37,9 +37,6 @@ const getBugo = cache(async (id: string) => {
         } else if (id.includes('won')) {
             religion = '원불교';
             religious_title = '교도';
-        } else if (id.includes('sgi')) {
-            religion = 'SGI';
-            religious_title = '부인부';
         } else if (id.includes('etc')) {
             religion = '기타';
             religious_title = '성도';

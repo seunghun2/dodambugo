@@ -27,7 +27,7 @@ const relationOptions = [
 ];
 
 // 종교 옵션
-const religionOptions = ['일반', '기독교', '불교', '천주교', '원불교', 'SGI', '기타'];
+const religionOptions = ['일반', '기독교', '불교', '천주교', '원불교', '기타'];
 
 // 은행 옵션
 const bankOptions = [
@@ -1174,17 +1174,6 @@ export default function WriteFormPage() {
                 ? new Date(`${formData.funeral_date}T${formData.funeral_hour.padStart(2, '0')}:${formData.funeral_minute}:00`).toISOString()
                 : null;
 
-            // B2B 파트너 연결: 로그인 상태이면 b2b_user_id 자동 연결
-            let b2bUserId: string | null = null;
-            try {
-                const b2bUser = localStorage.getItem('b2b_user');
-                const b2bToken = localStorage.getItem('b2b_token');
-                if (b2bUser && b2bToken) {
-                    const parsed = JSON.parse(b2bUser);
-                    b2bUserId = parsed.id || null;
-                }
-            } catch {}
-
             const bugoData = {
                 bugo_number: bugoNumber,
                 template_id: templateId,
@@ -1246,8 +1235,8 @@ export default function WriteFormPage() {
                 ip_address: clientIp || null,
                 // 상주 인증 토큰 (신규 생성 시에만)
                 owner_token: editBugoNumber ? undefined : generateOwnerToken(),
-                // B2B 파트너 연결 (일반 사용자는 null)
-                b2b_user_id: b2bUserId,
+                // B2C 부고장은 항상 null (B2B 파트너 부고장과 엄격 분리)
+                b2b_user_id: null,
             };
 
             // 디버깅: 계좌 정보 확인

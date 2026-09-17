@@ -401,8 +401,8 @@ ${bugoUrl}
                     </div>
                 </div>
 
-                {/* 수정 배너 */}
-                <Link href={`/create/edit/${params.bugoNumber}`} className="copy-banner" style={{ textDecoration: 'none' }}>
+                {/* 수정 배너 (중계 없이 즉시 템플릿 수정 폼으로 직행) */}
+                <Link href={`/create/${bugo?.template_id || 'basic'}?edit=${params.bugoNumber}`} className="copy-banner" style={{ textDecoration: 'none' }}>
                     <p>부고장 내용을 수정하실 수 있습니다</p>
                     <span className="btn-copy-bugo">수정하기</span>
                 </Link>
