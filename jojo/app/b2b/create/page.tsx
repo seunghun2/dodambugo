@@ -64,6 +64,7 @@ export interface BugoFormData {
   partner_logo_url: string;
   no_wreath: boolean;
   auto_reply: boolean;
+  hide_contact: boolean;
 }
 
 const initialFormData: BugoFormData = {
@@ -101,6 +102,7 @@ const initialFormData: BugoFormData = {
   partner_logo_url: '',
   no_wreath: false,
   auto_reply: true,
+  hide_contact: false,
 };
 
 // 부고번호 생성 (4자리 유니크)
@@ -175,6 +177,19 @@ export default function B2BCreatePage() {
       
       if (error) throw error;
       if (data) {
+        let parsedMourners: Mourner[] = [];
+        if (data.mourners) {
+          try {
+            parsedMourners = typeof data.mourners === 'string' ? JSON.parse(data.mourners) : data.mourners;
+          } catch (e) {
+            console.error('상주 파싱 에러', e);
+          }
+        }
+        if (!Array.isArray(parsedMourners) || parsedMourners.length === 0) {
+          parsedMourners = [{ relationship: '', name: '', contact: '' }];
+        }
+        const isHideContact = (parsedMourners as any[]).some(m => m && m.hide_contact === true) || !!data.hide_contact;
+
         setFormData({
           funeral_type: data.funeral_type || '일반장례',
           funeral_home: data.funeral_home || '',
@@ -210,19 +225,8 @@ export default function B2BCreatePage() {
           partner_logo_url: data.partner_logo_url || '',
           no_wreath: data.hide_flower_order || false,
           auto_reply: data.auto_reply !== false,
+          hide_contact: isHideContact,
         });
-
-        let parsedMourners: Mourner[] = [];
-        if (data.mourners) {
-          try {
-            parsedMourners = typeof data.mourners === 'string' ? JSON.parse(data.mourners) : data.mourners;
-          } catch (e) {
-            console.error('상주 파싱 에러', e);
-          }
-        }
-        if (!Array.isArray(parsedMourners) || parsedMourners.length === 0) {
-          parsedMourners = [{ relationship: '', name: '', contact: '' }];
-        }
 
         if (data.account_info) {
           try {
@@ -419,7 +423,10 @@ export default function B2BCreatePage() {
         partner_logo_url: formData.partner_logo_url || null,
         hide_flower_order: formData.no_wreath,
         auto_reply: formData.auto_reply,
-        mourners: JSON.stringify(mourners.filter(m => m.name)),
+        mourners: JSON.stringify(mourners.filter(m => m.name).map(m => ({
+          ...m,
+          hide_contact: formData.hide_contact,
+        }))),
         account_info: mourners[0]?.bank
           ? JSON.stringify([{
               holder: mourners[0].accountHolder,
@@ -672,7 +679,7 @@ export default function B2BCreatePage() {
                   <span className={styles.previewLabel}>{i === 0 ? '대표상주' : '상주'}</span>
                   <div className={styles.previewValue}>
                     <div>
-                      [{m.relationship || '상주'}] {m.name} {m.contact ? `(${m.contact})` : ''}
+                      [{m.relationship || '상주'}] {m.name} {!formData.hide_contact && m.contact ? `(${m.contact})` : ''}
                     </div>
                     {m.bank && m.accountNumber && (
                       <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 'normal', marginTop: '2px' }}>

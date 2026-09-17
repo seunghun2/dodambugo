@@ -128,6 +128,7 @@ interface BugoData {
     ilpo_time?: string;
     hide_funeral?: boolean;
     hide_flower_order?: boolean;
+    hide_contact?: boolean;
     religious_title?: string | null;
     show_religious_title?: boolean;
 }
@@ -909,11 +910,25 @@ ${url}
                 <h2 className="section-title">상주</h2>
                 <div className="mourners-table">
                     {(() => {
+                        // 연락처 미노출 옵션 확인
+                        const isHideContact = (() => {
+                            if (bugo.hide_contact) return true;
+                            if (bugo.mourners) {
+                                let mArr: any[] = [];
+                                if (Array.isArray(bugo.mourners)) mArr = bugo.mourners;
+                                else if (typeof bugo.mourners === 'string') {
+                                    try { mArr = JSON.parse(bugo.mourners); } catch (e) {}
+                                }
+                                return mArr.some((m: any) => m && m.hide_contact === true);
+                            }
+                            return false;
+                        })();
+
                         // 관계별로 그룹핑
-                        const grouped: Record<string, Array<{ name: string; contact: string }>> = {};
-                        mournersList.forEach(m => {
+                        const grouped: Record<string, Array<{ name: string; contact: string; hide_contact?: boolean }>> = {};
+                        mournersList.forEach((m: any) => {
                             if (!grouped[m.relationship]) grouped[m.relationship] = [];
-                            grouped[m.relationship].push({ name: m.name, contact: m.contact });
+                            grouped[m.relationship].push({ name: m.name, contact: m.contact, hide_contact: m.hide_contact });
                         });
                         return Object.entries(grouped).map(([rel, names], i) => (
                             <div className="mourner-row" key={i}>
@@ -922,7 +937,7 @@ ${url}
                                     {names.map((n, j) => (
                                         <span key={j}>
                                             {j > 0 && ', '}
-                                            {n.contact ? (
+                                            {n.contact && !isHideContact && !n.hide_contact ? (
                                                 <a href={`tel:${n.contact}`} className="mourner-tel-inline" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center' }}>
                                                     {n.name}
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="#999999" stroke="none" style={{ marginLeft: '2px' }}>

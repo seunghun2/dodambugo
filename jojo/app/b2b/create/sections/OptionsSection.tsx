@@ -12,6 +12,7 @@ interface Props {
     show_message: boolean;
     death_term: string;
     auto_reply: boolean;
+    hide_contact: boolean;
   };
   onChange: (field: string, value: string | boolean) => void;
 }
@@ -381,6 +382,20 @@ export default function OptionsSection({ formData, onChange }: Props) {
         <Toggle
           checked={formData.auto_reply}
           onChange={(val) => onChange('auto_reply', val)}
+        />
+      </div>
+
+      {/* 6. 연락처 미노출 */}
+      <div className={styles.optionRow}>
+        <div className={styles.optionInfo}>
+          <div className={styles.optionLabel}>연락처 미노출</div>
+          <div className={styles.optionHint}>
+            <em>*</em>부고장에 상주 연락처 및 통화 버튼이 노출되지 않습니다
+          </div>
+        </div>
+        <Toggle
+          checked={formData.hide_contact}
+          onChange={(val) => onChange('hide_contact', val)}
         />
       </div>
     </section>
