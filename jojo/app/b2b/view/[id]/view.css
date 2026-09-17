@@ -344,7 +344,7 @@
 }
 
 .template-basic .header-deceased-title,
-.template-basic .header-religious-title,
+.template-basic .header-religion-badge,
 .template-basic .header-dynamic-text {
     color: #000000;
 }
@@ -355,7 +355,7 @@
 }
 
 .template-border .header-deceased-title,
-.template-border .header-religious-title,
+.template-border .header-religion-badge,
 .template-border .header-dynamic-text {
     color: #1C1C1C;
 }
@@ -366,7 +366,7 @@
 }
 
 .template-ribbon .header-deceased-title,
-.template-ribbon .header-religious-title,
+.template-ribbon .header-religion-badge,
 .template-ribbon .header-dynamic-text {
     color: #3B4551;
 }
@@ -377,14 +377,14 @@
 }
 
 .template-flower .header-deceased-title,
-.template-flower .header-religious-title,
+.template-flower .header-religion-badge,
 .template-flower .header-dynamic-text {
     color: #FFFFFF;
 }
 
 /* 신규 고인 인적정보 오버레이 스타일 */
 .header-deceased-info {
-    margin-bottom: 36px;
+    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -392,7 +392,7 @@
 }
 
 .header-deceased-info.no-religious-title {
-    margin-bottom: 16px; /* 직함(집사 등)이 없으면 그 높이만큼 마진을 축소해서 본문을 위로 당김 */
+    margin-bottom: 16px;
 }
 
 /* 사진이 포함된 헤더 스타일 */
@@ -456,10 +456,6 @@
     font-size: 16px;
 }
 
-.has-photo .header-religious-title {
-    margin-top: -4px;
-}
-
 .header-deceased-title {
     font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
     font-size: 24px;
@@ -472,18 +468,127 @@
     font-weight: 500;
 }
 
-.header-religious-title {
-    font-family: 'KoPub Batang', 'Nanum Myeongjo', serif;
-    font-size: 15px;
+/* 종교 심볼 뱃지 (여유 있는 34px 박스, 부드러운 라운드 8px, 회색 테두리) */
+.header-religion-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    height: 34px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid #d4d7de;
+    box-shadow: none;
+    color: #2b303a;
+    font-size: 13.5px;
     font-weight: 600;
-    background: rgba(0, 0, 0, 0.05);
-    padding: 2px 10px;
-    border-radius: 4px;
-    display: inline-block;
+    letter-spacing: -0.3px;
+    margin: 0 auto 8px auto;
+    width: fit-content;
 }
 
-.template-flower .header-religious-title {
-    background: rgba(255, 255, 255, 0.15);
+/* 호칭 없이 로고만 있을 때: 배경 및 테두리 없이 아이콘만 단독 노출 */
+.header-religion-badge.is-icon-only {
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    margin: 0 auto 12px auto;
+}
+
+.header-religion-badge svg {
+    display: block;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.header-religion-badge.is-icon-only svg.badge-icon-cross {
+    width: 26px;
+    height: 34px;
+}
+
+.header-religion-badge.is-icon-only svg.badge-icon-catholic {
+    width: 27px;
+    height: 36px;
+}
+
+.header-religion-badge.is-icon-only svg.badge-icon-swastika {
+    width: 30px;
+    height: 30px;
+}
+
+.header-religion-badge.is-icon-only svg.badge-icon-won {
+    width: 31px;
+    height: 31px;
+}
+
+.header-religion-badge.is-icon-only svg.badge-icon-won circle {
+    stroke-width: 3.5;
+}
+
+.header-religion-badge svg.badge-icon-cross {
+    fill: #de0615;
+}
+
+.header-religion-badge svg.badge-icon-catholic {
+    fill: #7b0039;
+}
+
+.header-religion-badge svg.badge-icon-swastika {
+    fill: #de0615;
+}
+
+.header-religion-badge svg.badge-icon-won circle {
+    stroke: #eaad2d;
+}
+
+.header-religion-badge span {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    transform: translateY(2px);
+}
+
+/* 사진이 있는 헤더에서의 뱃지 위치 */
+.has-photo .header-religion-badge {
+    margin: 20px auto 0 auto;
+}
+
+.has-photo .header-religion-badge.is-icon-only {
+    margin: 20px auto 0 auto;
+}
+
+/* 템플릿별 다크 모드 (화원) */
+.template-flower .header-religion-badge {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: none;
+    color: #ffffff;
+}
+
+.template-flower .header-religion-badge.is-icon-only {
+    background: transparent;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-cross {
+    fill: #ff4d4f;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-catholic {
+    fill: #e0316d;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-swastika {
+    fill: #ff4d4f;
+}
+
+.template-flower .header-religion-badge svg.badge-icon-won circle {
+    stroke: #ffd43b;
 }
 
 /* ========================================

@@ -135,6 +135,40 @@ interface BugoData {
     partner_logo_url?: string | null;
 }
 
+// 종교별 심볼 공식 SVG (위패/부고 공식 벡터 - 대표님 지시 컬러 및 확대 적용)
+function getReligionIcon(religion?: string) {
+    const rel = (religion || '').trim();
+    if (rel === '기독교' || rel === '개신교') {
+        return (
+            <svg width="15" height="20" viewBox="0 0 20.5 28.2" fill="#de0615" aria-hidden="true" className="badge-icon-cross">
+                <path d="M 7.681,28.162 L 7.681,12.801 L 0.0,12.801 L 0.0,7.681 L 7.681,7.681 L 7.681,0.0 L 12.801,0.0 L 12.801,7.681 L 20.481,7.681 L 20.481,12.801 L 12.800,12.801 L 12.800,28.162 Z" />
+            </svg>
+        );
+    }
+    if (rel === '천주교' || rel === '가톨릭') {
+        return (
+            <svg width="16" height="21" viewBox="0 0 25.8 34" fill="#7b0039" aria-hidden="true" className="badge-icon-catholic">
+                <path d="M 10.552,31.66 A 2.344,2.344 0 0,1 8.207,29.315 A 2.345,2.345 0 0,1 10.552,26.97 L 10.552,16.418 L 7.035,16.418 A 2.345,2.345 0 0,1 4.69,18.763 A 2.344,2.344 0 0,1 2.345,16.418 A 2.344,2.344 0 0,1 0,14.073 A 2.345,2.345 0 0,1 2.345,11.728 A 2.345,2.345 0 0,1 4.69,9.383 A 2.346,2.346 0 0,1 7.035,11.728 L 10.552,11.728 L 10.552,7.035 A 2.344,2.344 0 0,1 8.207,4.69 A 2.345,2.345 0 0,1 10.552,2.345 A 2.345,2.345 0 0,1 12.897,0 A 2.346,2.346 0 0,1 15.242,2.345 A 2.346,2.346 0 0,1 17.587,4.69 A 2.345,2.345 0 0,1 15.242,7.035 L 15.242,11.725 L 18.759,11.725 A 2.345,2.345 0 0,1 21.104,9.38 A 2.346,2.346 0 0,1 23.449,11.725 A 2.346,2.346 0 0,1 25.794,14.07 A 2.345,2.345 0 0,1 23.449,16.415 A 2.345,2.345 0 0,1 21.104,18.76 A 2.344,2.344 0 0,1 18.759,16.415 L 15.242,16.415 L 15.242,26.967 A 2.346,2.346 0 0,1 17.585,29.315 A 2.345,2.345 0 0,1 15.24,31.66 A 2.345,2.345 0 0,1 12.895,34.005 A 2.344,2.344 0 0,1 10.552,31.66" />
+            </svg>
+        );
+    }
+    if (rel === '불교') {
+        return (
+            <svg width="16" height="16" viewBox="0 0 24.8 24.8" fill="#de0615" aria-hidden="true" className="badge-icon-swastika">
+                <path d="M 14.636,24.771 L 10.131,24.771 L 10.131,14.638 L 4.503,14.638 L 4.503,24.77 L 0.003,24.77 L 0.003,10.133 L 10.137,10.133 L 10.137,4.505 L 0.0,4.505 L 0.0,0.0 L 14.635,0.0 L 14.635,10.133 L 20.263,10.133 L 20.263,0.001 L 24.77,0.001 L 24.77,14.64 L 14.636,14.64 L 14.636,20.268 L 24.77,20.268 L 24.77,24.768 L 14.636,24.771 Z" />
+            </svg>
+        );
+    }
+    if (rel === '원불교') {
+        return (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="badge-icon-won">
+                <circle cx="12" cy="12" r="8" stroke="#eaad2d" strokeWidth="3" />
+            </svg>
+        );
+    }
+    return null;
+}
+
 // 상주 관계 + 고인 성별 → 고인-상주 관계 자동 매핑
 function getDeceasedRelation(mournerRelation: string, deceasedGender: string): string {
     const gender = deceasedGender === '남' ? 'male' : 'female';
@@ -665,6 +699,12 @@ ${url}
         return `/images/template-${templateId}.png`;
     };
 
+    // 종교 심볼 뱃지 노출 여부 (대표님 지시: 기본 로고만, 호칭 있으면 로고+호칭)
+    const isReligionValid = bugo.religion && bugo.religion !== '없음' && bugo.religion !== '무교' && bugo.religion !== '일반';
+    const hasReligiousTitle = !!bugo.religious_title?.trim() && bugo.show_religious_title !== false;
+    const shouldShowReligionBadge = isReligionValid || hasReligiousTitle;
+    const badgeTitleText = hasReligiousTitle ? bugo.religious_title!.trim() : '';
+
     return (
         <div className="b2b-view-wrapper">
             <main className="view-page">
@@ -787,28 +827,32 @@ ${url}
                                     className="header-deceased-photo" 
                                 />
                             </div>
+                            {/* 종교 심볼 뱃지 (로고 단독 또는 로고+호칭) */}
+                            {shouldShowReligionBadge && (
+                                <div className={`header-religion-badge ${!badgeTitleText ? 'is-icon-only' : ''}`}>
+                                    {getReligionIcon(bugo.religion)}
+                                    {badgeTitleText && <span>{badgeTitleText}</span>}
+                                </div>
+                            )}
                             <div className="header-deceased-title">
                                 故 {bugo.deceased_name}님
                                 {Number(bugo.age) > 0 ? <span className="header-deceased-age"> ({bugo.age}세)</span> : null}
                             </div>
-                            {bugo.religious_title && bugo.show_religious_title && (
-                                <div className="header-religious-title">
-                                    {bugo.religious_title}
-                                </div>
-                            )}
                         </div>
                     ) : (
                         /* 고인 사진이 없을 때 (기존 텍스트 레이아웃) */
-                        <div className={`header-deceased-info ${!bugo.religious_title ? 'no-religious-title' : ''}`}>
+                        <div className={`header-deceased-info ${!shouldShowReligionBadge ? 'no-religious-title' : ''}`}>
+                            {/* 종교 심볼 뱃지 (로고 단독 또는 로고+호칭) */}
+                            {shouldShowReligionBadge && (
+                                <div className={`header-religion-badge ${!badgeTitleText ? 'is-icon-only' : ''}`}>
+                                    {getReligionIcon(bugo.religion)}
+                                    {badgeTitleText && <span>{badgeTitleText}</span>}
+                                </div>
+                            )}
                             <div className="header-deceased-title">
                                 故 {bugo.deceased_name}님
                                 {Number(bugo.age) > 0 ? <span className="header-deceased-age"> ({bugo.age}세)</span> : null}
                             </div>
-                            {bugo.religious_title && bugo.show_religious_title && (
-                                <div className="header-religious-title">
-                                    {bugo.religious_title}
-                                </div>
-                            )}
                         </div>
                     )}
                     {(() => {

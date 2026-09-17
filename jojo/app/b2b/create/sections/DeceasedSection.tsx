@@ -178,16 +178,16 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
         </div>
       </div>
 
-      {/* 부고장 호칭 노출 — 종교 선택시 우측 정렬 */}
+      {/* 부고장 호칭 미노출 — 종교 선택시 우측 정렬 */}
       {(hasReligion || formData.religion === '기타') && (
         <div className={styles.checkboxRight}>
           <label className={styles.checkbox}>
             <input
               type="checkbox"
-              checked={formData.show_religious_title}
-              onChange={(e) => onChange('show_religious_title', e.target.checked)}
+              checked={!formData.show_religious_title}
+              onChange={(e) => onChange('show_religious_title', !e.target.checked)}
             />
-            부고장 호칭 노출
+            부고장 호칭 미노출
           </label>
         </div>
       )}
