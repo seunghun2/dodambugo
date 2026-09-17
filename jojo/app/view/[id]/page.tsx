@@ -82,23 +82,11 @@ const getBugo = cache(async (id: string) => {
     }
 });
 
-// 상품 조회 (10분 인메모리 캐시 - 뷰어 로딩 가속)
-let cachedProducts: any[] | null = null;
-let productsCacheTime = 0;
-const PRODUCTS_CACHE_TTL = 10 * 60 * 1000;
-
+// 상품 조회 (실시간)
 const getProducts = async () => {
-    const now = Date.now();
-    if (cachedProducts && now - productsCacheTime < PRODUCTS_CACHE_TTL) {
-        return cachedProducts;
-    }
     const supabase = getSupabase();
     const result = await supabase.from('flower_products').select('*').eq('is_active', true).order('sort_order', { ascending: true });
-    if (result.data) {
-        cachedProducts = result.data;
-        productsCacheTime = now;
-    }
-    return cachedProducts || [];
+    return result.data || [];
 };
 
 // 메타데이터 생성 (SEO)
