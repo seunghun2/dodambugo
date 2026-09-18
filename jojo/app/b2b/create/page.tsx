@@ -403,8 +403,12 @@ export default function B2BCreatePage() {
         mourner_name: mourners[0]?.name || '',
         contact: mourners[0]?.contact || '',
         age: formData.age && Number(formData.age) > 0 ? parseInt(formData.age) : null,
-        religion: formData.religion === '없음' ? null : formData.religion,
-        religious_title: formData.religious_title || null,
+        religion: (formData.religion && formData.religion !== '없음' && formData.religion !== '무교')
+          ? (formData.religion === '기타' ? (formData.religion_custom?.trim() || '기타') : formData.religion)
+          : null,
+        religious_title: (formData.religion && formData.religion !== '없음' && formData.religion !== '무교')
+          ? (formData.religious_title?.trim() || null)
+          : null,
         show_religious_title: formData.show_religious_title,
         funeral_type: formData.funeral_type,
         funeral_home: formData.funeral_home || null,

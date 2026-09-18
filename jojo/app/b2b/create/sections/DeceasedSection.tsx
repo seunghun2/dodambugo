@@ -22,7 +22,7 @@ interface Props {
 }
 
 const RELIGIONS = [
-  { value: '없음', label: '없음' },
+  { value: '없음', label: '종교 없음' },
   { value: '불교', label: '불교' },
   { value: '기독교', label: '기독교' },
   { value: '천주교', label: '천주교' },
@@ -41,7 +41,7 @@ function getReligiousTitlePlaceholder(religion: string): string {
 
 // 종교 표시 텍스트
 function getReligionDisplay(religion: string): string {
-  if (!religion || religion === '없음') return '종교';
+  if (!religion || religion === '없음') return '종교 없음';
   const found = RELIGIONS.find(r => r.value === religion);
   return found ? found.label : religion;
 }
@@ -165,7 +165,11 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
             type="text"
             className={styles.input}
             placeholder={getReligiousTitlePlaceholder(formData.religion)}
-            value={formData.religion === '기타' ? formData.religion_custom : formData.religious_title}
+            value={
+              !hasReligion && formData.religion !== '기타'
+                ? ''
+                : (formData.religion === '기타' ? formData.religion_custom : formData.religious_title)
+            }
             onChange={(e) => {
               if (formData.religion === '기타') {
                 onChange('religion_custom', e.target.value);
@@ -241,7 +245,16 @@ export default function DeceasedSection({ formData, onChange, errors }: Props) {
                 key={r.value}
                 type="button"
                 className={`${styles.bottomSheetOption} ${formData.religion === r.value ? styles.bottomSheetOptionActive : ''}`}
-                onClick={() => { onChange('religion', r.value); setShowReligionSheet(false); }}
+                onClick={() => {
+                  onChange('religion', r.value);
+                  if (r.value === '없음' || r.value === '무교' || !r.value) {
+                    onChange('religious_title', '');
+                    onChange('religion_custom', '');
+                  } else if (r.value !== '기타') {
+                    onChange('religion_custom', '');
+                  }
+                  setShowReligionSheet(false);
+                }}
               >
                 {r.label}
               </button>
