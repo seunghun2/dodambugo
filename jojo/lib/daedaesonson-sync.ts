@@ -221,7 +221,7 @@ export async function syncReviewToDaedaesonson(params: SyncParams): Promise<void
         .select('id')
         .eq('facilityId', match.facilityId)
         .eq('source', 'maeumbugo')
-        .ilike('content', `%bugo:${bugoNumber}%`)
+        .or(`sourceUrl.eq.bugo:${bugoNumber},content.ilike.%bugo:${bugoNumber}%`)
         .maybeSingle();
 
     if (existing) {
@@ -229,12 +229,9 @@ export async function syncReviewToDaedaesonson(params: SyncParams): Promise<void
         return;
     }
 
-    // 3) 리뷰 INSERT
-    const author = mournerName ? `${mournerName.charAt(0)}${'*'.repeat(mournerName.length - 1)}` : '마음부고 이용자';
-    const content = [
-        reviewText || '(후기 본문 없음)',
-        `\n[bugo:${bugoNumber}]`, // 중복 방지용 태그 (비노출)
-    ].join('');
+    // 3) 리뷰 INSERT ([bugo:XXXX] 같은 시스템 태그는 content에서 완전 배제, sourceUrl에 보관)
+    const author = mournerName ? `${mournerName.charAt(0)}${'*'.repeat(Math.max(mournerName.length - 1, 1))}` : '마음부고 이용자';
+    const content = (reviewText || '(후기 본문 없음)').replace(/\n?\[bugo:\d+\]/g, '').trim();
 
     const { error: insertErr } = await sb.from('Review').insert({
         facilityId: match.facilityId,
@@ -246,7 +243,7 @@ export async function syncReviewToDaedaesonson(params: SyncParams): Promise<void
         likes: 0,
         userId: null,
         source: 'maeumbugo',
-        sourceUrl: null,
+        sourceUrl: `bugo:${bugoNumber}`,
         sourceDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
     });
