@@ -1,0 +1,19 @@
+# ripgrep & fd ignore file (무거운 파일 및 대용량 바이너리 제외)
+*.xd
+*.psd
+*.ai
+*.sketch
+*.pdf
+*.pptx
+*.xlsx
+*.mp4
+*.mov
+*.zip
+*.tar
+*.gz
+node_modules/
+.next/
+.vercel/
+app_backup/
+components_backup/
+scripts_backup/

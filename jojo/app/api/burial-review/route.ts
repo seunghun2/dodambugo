@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { sendBurialReviewNotification } from '@/lib/slack';
 import { generateReviewCode } from '@/lib/burial-review';
+import { syncReviewToDaedaesonson } from '@/lib/daedaesonson-sync';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -98,6 +99,16 @@ export async function POST(request: NextRequest) {
         } catch (slackErr) {
             console.error('슬랙 알림 실패 (무시):', slackErr);
         }
+
+        // 대대손손 장지 리뷰 자동 동기화 (Non-blocking fire-and-forget)
+        syncReviewToDaedaesonson({
+            burialPlace: burialPlace || matched.burial_place,
+            mournerName: mournerName || matched.mourner_name,
+            rating,
+            reviewText,
+            photos: photos || [],
+            bugoNumber,
+        }).catch(e => console.error('[daedae-sync] 동기화 실패 (무시):', e));
 
         return NextResponse.json({ success: true, id: data.id });
     } catch (err) {

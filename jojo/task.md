@@ -41,3 +41,10 @@
 - `[ ]` **Git 커밋 전 B2B/B2C 격리 상태 및 빌드 자가 검증 수칙 적용**
   - *수칙*: 커밋 전 `npm run build`를 반드시 실행하여 타입 에러를 차단합니다.
   - *수칙*: 커밋할 때마다 `git diff --name-only`를 통해 B2B와 B2C가 의도치 않게 혼재되어 수정되었는지 크로스체크합니다.
+
+## 🕊️ 7. 🔗 마음부고 ⇄ 대대손손 장지 후기(리뷰) 자동 동기화 ✅ 완료
+- `[x]` **장지명 자동 정규화 & 유사도 매칭 및 크로스 DB 동기화**
+  - *매핑 MD*: [daedaesonson-sync/SKILL.md](file:///Users/el/Desktop/dodam/jojo/.agents/skills/daedaesonson-sync/SKILL.md), [HISTORY-2026-09-20.md](file:///Users/el/Desktop/dodam/HISTORY-2026-09-20.md)
+  - *작업 경로*: `jojo/lib/daedaesonson-sync.ts`, `jojo/app/api/burial-review/route.ts`
+  - *검증*: 22건 전수 테스트 완료 (15건 100% 안전 동기화, 오매칭 0건)
+
