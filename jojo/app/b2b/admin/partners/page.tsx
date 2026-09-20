@@ -680,9 +680,13 @@ export default function PartnersPage() {
                                                 <span>{comp.name}</span>
                                             </div>
                                             <div style={{ fontSize: '12px', color: '#15803d', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                <div>• <strong>화환 수당:</strong> <span style={{ color: '#2563eb', fontWeight: '600' }}>본사 {(comp.wreath_commission_amount ?? 10000).toLocaleString()}원</span> / <span style={{ color: '#16a34a', fontWeight: '600' }}>기본3단 {(comp.wreath_basic_amount ?? comp.wreath_member_commission_amount ?? 50000).toLocaleString()}원</span></div>
+                                                <div style={{ paddingLeft: '8px', fontSize: '11px', color: '#4b5563' }}>
+                                                    (바구니 {(comp.wreath_basket_amount ?? 30000).toLocaleString()}원 / 오브제 {(comp.wreath_objet_amount ?? 40000).toLocaleString()}원 / 고급 {(comp.wreath_deluxe_amount ?? 55000).toLocaleString()}원 / 특대 {(comp.wreath_premium_amount ?? 60000).toLocaleString()}원 / 4단 {(comp.wreath_vip_amount ?? 65000).toLocaleString()}원)
+                                                </div>
+                                                <div>• <strong>추천 분할 수당:</strong> 지도사 {(comp.referral_member_bonus ?? 3500).toLocaleString()}원 + 본사 {(comp.referral_company_bonus ?? 6500).toLocaleString()}원</div>
                                                 <div>• <strong>부의금 상조 쉐어:</strong> <span style={{ color: '#047857', fontWeight: 'bold' }}>{comp.condolence_company_rate ?? 3.3}%</span></div>
-                                                <div>• <strong>화환 수당 (본사/지도사):</strong> {comp.wreath_commission_amount?.toLocaleString() ?? '10,000'}원 / {comp.wreath_member_commission_amount?.toLocaleString() ?? '10,000'}원</div>
-                                                <div>• <strong>답례품 수당 (본사/지도사):</strong> {comp.gift_commission_amount?.toLocaleString() ?? '5,000'}원 / {comp.gift_member_commission_amount?.toLocaleString() ?? '5,000'}원</div>
+                                                <div>• <strong>답례품 수당 (본사/지도사):</strong> {(comp.gift_commission_amount ?? 5000).toLocaleString()}원 / {(comp.gift_member_commission_amount ?? 5000).toLocaleString()}원</div>
                                             </div>
                                         </div>
                                     );

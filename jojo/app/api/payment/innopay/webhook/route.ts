@@ -104,7 +104,23 @@ export async function POST(request: NextRequest) {
 
                                 const companyRecord = normalizeCompanyData(rawCompany);
                                 companyCommission = companyRecord.wreath_commission_amount;
-                                rewardAmount = companyRecord.wreath_member_commission_amount;
+
+                                // 상품별 차등 수수료 분기: DB b2b_companies 설정값 동적 적용 (하드코딩 0개)
+                                const pName = (orderData.product_name || '').trim();
+                                if (pName.includes('바구니')) {
+                                    rewardAmount = companyRecord.wreath_basket_amount; // 근조바구니 (DB 설정값)
+                                } else if (pName.includes('오브제')) {
+                                    rewardAmount = companyRecord.wreath_objet_amount; // 오브제 1단 (DB 설정값)
+                                } else if (pName.includes('고급')) {
+                                    rewardAmount = companyRecord.wreath_deluxe_amount; // 고급 근조 3단 (DB 설정값)
+                                } else if (pName.includes('프리미엄') || pName.includes('특대')) {
+                                    rewardAmount = companyRecord.wreath_premium_amount; // 특대 근조 3단 (DB 설정값)
+                                } else if (pName.includes('VIP') || pName.includes('4단')) {
+                                    rewardAmount = companyRecord.wreath_vip_amount; // 근조 4단 화환 (DB 설정값)
+                                } else {
+                                    rewardAmount = companyRecord.wreath_basic_amount || companyRecord.wreath_member_commission_amount; // 근조 3단 기본형 (DB 설정값)
+                                }
+                                console.log(`✅ [B2B-Webhook] 상조회사 [${companyRecord.name || partnerUser.company_name}] 상품별 수수료 DB 동적 적용: [${pName}] ➡️ 지도사 수당 ${rewardAmount}원, 본사 ${companyCommission}원`);
                             } else {
                                 // 개인/프리랜서 파트너: 기본 지도사 수당 (20,000원) 100% 지급
                                 const { data: rewardSetting } = await supabase
@@ -189,60 +205,106 @@ export async function POST(request: NextRequest) {
                                 }
                             });
 
-                            // 5. 추천인 보너스 적립 (개인/프리랜서 파트너만, 상조회사 소속 파트너는 추천수당 제외)
-                            const { data: partnerInfo } = await supabase
-                                .from('b2b_users')
-                                .select('recommender_id, company_id, company_name, owner_name')
-                                .eq('id', partnerId)
-                                .single();
+                            // 5. 추천인 보너스 적립 (개인/프리랜서 파트너의 판매인 경우만, 상조회사 소속 파트너는 추천수당 제외)
+                            const isSangjoCorporate = Boolean(partnerUser?.company_id);
+                            if (!isSangjoCorporate && partnerUser?.recommender_id) {
+                                // 추천인의 소속 정보 확인 (상조회사 소속인지 여부)
+                                const { data: recommenderUser } = await supabase
+                                    .from('b2b_users')
+                                    .select('id, company_id, owner_name')
+                                    .eq('id', partnerUser.recommender_id)
+                                    .maybeSingle();
 
-                            const isSangjoCorporate = Boolean(partnerInfo?.company_id);
-                            if (!isSangjoCorporate && partnerInfo?.recommender_id) {
-                                const { data: bonusSetting } = await supabase
-                                    .from('b2b_settings')
-                                    .select('value')
-                                    .eq('key', 'referral_bonus_amount')
-                                    .single();
-                                const bonusAmount = parseInt(bonusSetting?.value || '2500');
+                                const isRecommenderCorporate = Boolean(recommenderUser?.company_id);
 
-                                // 추천인 잔액 업데이트
-                                const { data: refDeposit } = await supabase
-                                    .from('deposits')
-                                    .select('balance')
-                                    .eq('user_id', partnerInfo.recommender_id)
-                                    .single();
+                                let recommenderBonus = 2500;
+                                let corporateBonus = 0;
 
-                                if (refDeposit) {
-                                    await supabase
-                                        .from('deposits')
-                                        .update({
-                                            balance: (refDeposit.balance || 0) + bonusAmount,
-                                            updated_at: new Date().toISOString(),
-                                        })
-                                        .eq('user_id', partnerInfo.recommender_id);
+                                if (isRecommenderCorporate && recommenderUser?.company_id) {
+                                    // 추천인 소속 상조회사의 DB 설정값(referral_member_bonus, referral_company_bonus) 동적 조회
+                                    const { data: recCompanyRaw } = await supabase
+                                        .from('b2b_companies')
+                                        .select('*')
+                                        .eq('id', recommenderUser.company_id)
+                                        .maybeSingle();
+                                    const recCompany = normalizeCompanyData(recCompanyRaw);
+
+                                    recommenderBonus = recCompany.referral_member_bonus; // 추천 지도사 몫 (DB 값, 기본 3,500원)
+                                    corporateBonus = recCompany.referral_company_bonus; // 상조 본사 몫 (DB 값, 기본 6,500원)
                                 } else {
-                                    await supabase
-                                        .from('deposits')
-                                        .insert({
-                                            user_id: partnerInfo.recommender_id,
-                                            balance: bonusAmount,
-                                            updated_at: new Date().toISOString(),
-                                        });
+                                    // 일반 프리랜서 추천인: 설정값(기본 2,500원)
+                                    const { data: bonusSetting } = await supabase
+                                        .from('b2b_settings')
+                                        .select('value')
+                                        .eq('key', 'referral_bonus_amount')
+                                        .single();
+                                    recommenderBonus = parseInt(bonusSetting?.value || '2500');
                                 }
 
-                                // 추천인 적립 내역 기록
-                                const sellerTitle = partnerInfo.owner_name ? `${partnerInfo.owner_name} 장례지도사님` : '추천 파트너';
-                                await supabase
-                                    .from('deposit_transactions')
-                                    .insert({
-                                        user_id: partnerInfo.recommender_id,
-                                        amount: bonusAmount,
-                                        type: 'referral_bonus',
-                                        description: `추천 수당 (${sellerTitle}의 화환 판매)`,
-                                        related_order_id: String(orderData.id || moid),
+                                // 5-1. 추천인 지도사에게 보너스 적립
+                                if (recommenderBonus > 0) {
+                                    const { data: refDeposit } = await supabase
+                                        .from('deposits')
+                                        .select('balance')
+                                        .eq('user_id', partnerUser.recommender_id)
+                                        .single();
+
+                                    if (refDeposit) {
+                                        await supabase
+                                            .from('deposits')
+                                            .update({
+                                                balance: (refDeposit.balance || 0) + recommenderBonus,
+                                                updated_at: new Date().toISOString(),
+                                            })
+                                            .eq('user_id', partnerUser.recommender_id);
+                                    } else {
+                                        await supabase
+                                            .from('deposits')
+                                            .insert({
+                                                user_id: partnerUser.recommender_id,
+                                                balance: recommenderBonus,
+                                                updated_at: new Date().toISOString(),
+                                            });
+                                    }
+
+                                    const sellerTitle = partnerUser.owner_name ? `${partnerUser.owner_name} 장례지도사님` : '추천 파트너';
+                                    // 추천인 내역 기록
+                                    await supabase
+                                        .from('deposit_transactions')
+                                        .insert({
+                                            user_id: partnerUser.recommender_id,
+                                            amount: recommenderBonus,
+                                            type: 'referral_bonus',
+                                            description: `추천 수당 (${sellerTitle}의 화환 판매 - 가상계좌)`,
+                                            related_order_id: String(orderData.id || moid),
+                                        });
+
+                                    // 추천인 인앱 알람 발송
+                                    import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                                        insertInAppAlarm(
+                                            partnerUser.recommender_id, 'referral_bonus',
+                                            '추천 수당이 적립되었습니다',
+                                            `추천 수당 ${recommenderBonus.toLocaleString()}원 적립 (${sellerTitle}의 화환 판매)`,
+                                            '/b2b/wallet', 'alarm_reward'
+                                        );
                                     });
 
-                                console.log(`✅ [B2B-Webhook] 추천인 ${partnerInfo.recommender_id}에게 보너스 ${bonusAmount}원 적립 완료`);
+                                    console.log(`✅ [B2B-Webhook] 추천인 ${partnerUser.recommender_id}에게 보너스 ${recommenderBonus}원 적립 완료`);
+                                }
+
+                                // 5-2. 추천인이 상조회사 소속인 경우 본사에 분할 수수료(6,500원) 정산 적재
+                                if (isRecommenderCorporate && corporateBonus > 0 && recommenderUser?.company_id) {
+                                    await supabase
+                                        .from('b2b_company_settlements')
+                                        .insert({
+                                            company_id: recommenderUser.company_id,
+                                            order_id: String(orderData.id || moid),
+                                            amount: corporateBonus,
+                                            status: 'pending'
+                                        });
+
+                                    console.log(`✅ [B2B-Webhook] 추천인 소속 상조회사 ${recommenderUser.company_id}에 추천 분할 수수료 ${corporateBonus}원 정산 내역 추가 완료`);
+                                }
                             }
                         }
                     } catch (b2bErr) {

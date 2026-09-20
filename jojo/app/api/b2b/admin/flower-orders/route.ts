@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         txData?.forEach(tx => {
             const orderId = tx.related_order_id;
             if (orderId && txMap[orderId]) {
-                if (tx.type === 'wreath_reward') {
+                if (tx.type === 'wreath_reward' || tx.type === 'flower_reward') {
                     txMap[orderId].reward = tx.amount;
                 } else if (tx.type === 'referral_bonus') {
                     txMap[orderId].bonus = tx.amount;

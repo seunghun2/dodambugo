@@ -494,7 +494,7 @@ export async function POST(request: NextRequest) {
                             .insert({
                                 user_id: partnerId,
                                 amount: rewardAmount,
-                                type: 'flower_reward',
+                                type: 'wreath_reward',
                                 description: `화환 판매 수당 (${orderData.product_name || '화환'})`,
                                 related_order_id: actualOrderId || moid,
                             });

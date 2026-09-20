@@ -508,7 +508,22 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - Supabase MCP: 실제 더좋은라이프 레코드에 8개 수수료 필드 정확히 저장 및 조회 검증 완료
   - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (30.8s)
 
-
-
-
-
+### 17. 결제/웹훅/정산 파이프라인 전수 감사 및 가상계좌(Webhook) 동기화 완수 (2026-09-21)
+- **개요**: 신용카드 승인뿐만 아니라 가상계좌(vbank) 입금 통보 웹훅 및 취소/어드민/지갑 파이프라인 전체를 전수 감사하여 누락된 지점을 완벽하게 동기화.
+- **수정 및 보완 파일**:
+  1. `jojo/app/api/payment/innopay/webhook/route.ts`:
+     - 가상계좌 입금 통보 시에도 상품 6종 차등 수당(바구니 3만, 오브제 4만, 기본3단 5만, 고급 5.5만, 특대 6만, 4단 6.5만) DB 동적 분기 적용.
+     - 추천인 보너스(레거시 2,500원 고정) 누락 해소: 추천인 소속 상조회사 존재 시 `referral_member_bonus`(3,500원) + `referral_company_bonus`(6,500원) DB 동적 분할 적재 동기화.
+  2. `jojo/app/api/payment/innopay/approve/route.ts`:
+     - 예치금 적립 내역 `type`을 DB/어드민 표준인 `'wreath_reward'`로 일원화 (기존 `'flower_reward'`와의 불일치 해소).
+  3. `jojo/app/api/flower-orders/cancel/route.ts`:
+     - 주문 취소 시 수당 회수 쿼리를 `.in('type', ['wreath_reward', 'flower_reward'])`로 듀얼 매칭하여 과거/신규 거래 모두 100% 안전 회수 보장.
+  4. `jojo/app/api/b2b/admin/flower-orders/route.ts`:
+     - 어드민 화환 주문 목록에서 `wreath_reward`와 `flower_reward` 모두 정확하게 수당 집계 표시.
+  5. `jojo/app/b2b/wallet/page.tsx`:
+     - 파트너 지갑 내역 라벨 헬퍼에 `flower_reward` 누락 방지 매핑.
+  6. `jojo/app/b2b/admin/partners/page.tsx`:
+     - 파트너 본인인증 상세 모달의 상조회사 요율표에 상품 6종 수당 및 추천 분할 수당 명시.
+- **검증 완료 내역**:
+  - 단위 테스트: `jojo/__tests__/referral-split.test.ts` 9개 전수 통과
+  - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (126개 페이지 정상 컴파일)

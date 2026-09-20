@@ -342,7 +342,8 @@ export default function WalletPage() {
             return '환급 신청';
         }
         switch (type) {
-            case 'wreath_reward': return '화환 판매 적립';
+            case 'wreath_reward':
+            case 'flower_reward': return '화환 판매 적립';
             case 'reward_cancel': return '화환 판매 취소';
             case 'referral_bonus': return '추천 수당';
             case 'condolence_reward': return '조의금 수당';

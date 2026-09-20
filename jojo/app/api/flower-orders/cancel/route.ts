@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
                     .from('deposit_transactions')
                     .select('amount')
                     .eq('related_order_id', order.id)
-                    .eq('type', 'wreath_reward')
+                    .in('type', ['wreath_reward', 'flower_reward'])
                     .maybeSingle();
 
                 const rewardAmount = originalRewardTx?.amount ? Math.abs(originalRewardTx.amount) : 20000;
