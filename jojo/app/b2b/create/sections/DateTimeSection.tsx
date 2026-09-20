@@ -33,7 +33,7 @@ function formatDate(dateStr: string): string {
   return `${y}. ${m}. ${d}.`;
 }
 
-// 시간 입력 자동 포맷 및 24시간제 실시간 가드 (00~23시, 00~59분 제한)
+// 시간 입력 자동 포맷 (콜론 자동 삽입, 사용자 입력 숫자는 임의 왜곡하지 않음)
 function formatTimeInput(raw: string, prevVal: string = ''): string {
   const isDeleting = prevVal && raw.length < prevVal.length;
   const digits = raw.replace(/\D/g, '').slice(0, 4);
@@ -48,61 +48,31 @@ function formatTimeInput(raw: string, prevVal: string = ''): string {
     return digits.slice(0, 2) + ':' + digits.slice(2);
   }
 
-  // 1자리: 3~9 입력 시 한 자리 시(03~09시)로 간주하여 콜론까지 자동 완성
+  // 1자리: 3~9 입력 시 한 자리 시(03~09시) 의도로 간주하여 0X: 자동 포맷
   if (digits.length === 1) {
-    if (parseInt(digits, 10) >= 3) {
+    if (parseInt(digits, 10) >= 3 && parseInt(digits, 10) <= 9) {
       return `0${digits}:`;
     }
     return digits;
   }
 
-  // 2자리 이상: 시는 00~23 사이로 clamp
-  let h = parseInt(digits.slice(0, 2), 10);
-  if (h > 23) h = 23;
-  const hh = String(h).padStart(2, '0');
-
+  // 2자리
   if (digits.length === 2) {
-    return `${hh}:`;
+    return `${digits}:`;
   }
 
-  // 3자리: 분의 십의 자리 (0~5만 허용, 6 이상 시 5로 clamp)
-  let m1 = parseInt(digits[2], 10);
-  if (m1 > 5) m1 = 5;
-
-  if (digits.length === 3) {
-    return `${hh}:${m1}`;
-  }
-
-  // 4자리: 분 전체 (0~59 사이로 clamp)
-  let m = parseInt(`${m1}${digits[3]}`, 10);
-  if (m > 59) m = 59;
-  const mm = String(m).padStart(2, '0');
-
-  return `${hh}:${mm}`;
+  // 3자리 이상
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
 
-// 포커스 아웃(onBlur) 시 미완성된 시간 자동 보정 (예: '9' -> '09:00', '14' -> '14:00')
-function finalizeTimeInput(value: string): string {
-  if (!value) return '';
-  const digits = value.replace(/\D/g, '');
-  if (!digits) return '';
-
-  if (digits.length === 1) {
-    const h = parseInt(digits, 10);
-    return `${String(h).padStart(2, '0')}:00`;
-  }
-  if (digits.length === 2) {
-    const h = Math.min(23, parseInt(digits, 10));
-    return `${String(h).padStart(2, '0')}:00`;
-  }
-  if (digits.length === 3) {
-    const h = Math.min(23, parseInt(digits.slice(0, 2), 10));
-    const m = Math.min(50, parseInt(digits[2], 10) * 10);
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  }
-  const h = Math.min(23, parseInt(digits.slice(0, 2), 10));
-  const m = Math.min(59, parseInt(digits.slice(2, 4), 10));
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+// 시간 유효성 판별 (00:00 ~ 23:59)
+function isInvalidTime(val: string): boolean {
+  if (!val) return false;
+  const digits = val.replace(/\D/g, '');
+  if (digits.length < 4) return false; // 4자리 완성 전에는 검사 유예
+  const h = parseInt(digits.slice(0, 2), 10);
+  const m = parseInt(digits.slice(2, 4), 10);
+  return h > 23 || m > 59;
 }
 
 interface DateTimeCardProps {
@@ -137,12 +107,9 @@ function DateTimeCard({
     onTimeChange(formatted);
   };
 
-  const handleTimeBlur = () => {
-    if (timeValue) {
-      const finalized = finalizeTimeInput(timeValue);
-      onTimeChange(finalized);
-    }
-  };
+  // 실시간 24시간 범위 초과 검사 (예: 25:00, 34:57 입력 시 즉시 빨간 에러 표시)
+  const isTimeFormatError = isInvalidTime(timeValue);
+  const effectiveTimeError = timeError || (isTimeFormatError ? '올바른 시간(00:00~23:59)을 입력해주세요' : undefined);
 
   return (
     <div className={styles.dtCard}>
@@ -172,8 +139,8 @@ function DateTimeCard({
           </div>
         </div>
 
-        {/* 시간 — 직접 숫자 입력 (24시간제 실시간 가드) */}
-        <div className={`${styles.dtInputWrap} ${timeError ? styles.inputError : ''}`} data-error={timeError ? 'true' : undefined}>
+        {/* 시간 — 직접 숫자 입력 (오류 시 빨간색 테두리 + 하단 경고) */}
+        <div className={`${styles.dtInputWrap} ${effectiveTimeError ? styles.inputError : ''}`} data-error={effectiveTimeError ? 'true' : undefined}>
           <input
             type="text"
             inputMode="numeric"
@@ -182,14 +149,13 @@ function DateTimeCard({
             placeholder="00:00"
             value={timeValue}
             onChange={handleTimeInput}
-            onBlur={handleTimeBlur}
             maxLength={5}
           />
           <IconClock size={20} className={styles.dtInputIcon} />
         </div>
       </div>
-      {(dateError || timeError) && (
-        <p className={styles.fieldError}>{dateError || timeError}</p>
+      {(dateError || effectiveTimeError) && (
+        <p className={styles.fieldError}>{dateError || effectiveTimeError}</p>
       )}
     </div>
   );
@@ -242,6 +208,7 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
         onTimeChange={(v) => onChange('death_time', v)}
         onClear={handleClearDeath}
         onOpenCalendar={() => openCalendar('death_date', '별세일자 선택')}
+        timeError={errors?.death_time}
       />
 
       <DateTimeCard
@@ -252,6 +219,7 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
         onTimeChange={(v) => onChange('checkin_time', v)}
         onClear={handleClearCheckin}
         onOpenCalendar={() => openCalendar('checkin_date', '입실일자 선택')}
+        timeError={errors?.checkin_time}
       />
 
       <DateTimeCard
@@ -262,6 +230,7 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
         onTimeChange={(v) => onChange('encoffin_time', v)}
         onClear={handleClearEncoffin}
         onOpenCalendar={() => openCalendar('encoffin_date', '입관일자 선택')}
+        timeError={errors?.encoffin_time}
       />
 
       <DateTimeCard
@@ -286,6 +255,7 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
           onTimeChange={(v) => onChange('ilpo_time', v)}
           onClear={handleClearIlpo}
           onOpenCalendar={() => openCalendar('ilpo_date', '일포일자 선택')}
+          timeError={errors?.ilpo_time}
         />
       )}
 
