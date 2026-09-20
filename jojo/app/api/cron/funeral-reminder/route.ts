@@ -60,11 +60,20 @@ export async function GET() {
                 
                 // "2026-07-12" + "10:00" 형식 파싱 (KST)
                 const [year, month, day] = dateStr.split(/[-/.]/);
-                const [hour, minute] = timeStr.replace(/시|분/g, ':').replace(/\s/g, '').split(':');
+                const [hourStr, minuteStr] = timeStr.replace(/시|분/g, ':').replace(/\s/g, '').split(':');
                 
+                const hour = parseInt(hourStr || '10', 10);
+                const minute = parseInt(minuteStr || '0', 10);
+
+                // 24시간제 유효성 검증: 0~23시, 0~59분 범위 밖이면 날짜 롤오버 방지를 위해 스킵
+                if (isNaN(hour) || hour < 0 || hour > 23 || isNaN(minute) || minute < 0 || minute > 59) {
+                    console.warn(`[FuneralReminder] ⚠️ 비정상 발인시간 감지 (스킵): ${bugo.bugo_number}, time=${timeStr}`);
+                    continue;
+                }
+
                 funeralDateTime = new Date(
                     parseInt(year), parseInt(month) - 1, parseInt(day),
-                    parseInt(hour || '10'), parseInt(minute || '0')
+                    hour, minute
                 );
                 // KST → UTC
                 funeralDateTime = new Date(funeralDateTime.getTime() - kstOffset);

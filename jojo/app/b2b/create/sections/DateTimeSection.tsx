@@ -33,17 +33,76 @@ function formatDate(dateStr: string): string {
   return `${y}. ${m}. ${d}.`;
 }
 
-// 시간 입력 자동 포맷
-function formatTimeInput(raw: string): string {
+// 시간 입력 자동 포맷 및 24시간제 실시간 가드 (00~23시, 00~59분 제한)
+function formatTimeInput(raw: string, prevVal: string = ''): string {
+  const isDeleting = prevVal && raw.length < prevVal.length;
   const digits = raw.replace(/\D/g, '').slice(0, 4);
-  if (digits.length <= 2) return digits;
-  return digits.slice(0, 2) + ':' + digits.slice(2);
+
+  if (!digits) return '';
+
+  // 백스페이스로 지우는 중일 때는 콜론 강제 없이 자연스럽게 지워지도록 함
+  if (isDeleting) {
+    if (digits.length <= 2) {
+      return digits;
+    }
+    return digits.slice(0, 2) + ':' + digits.slice(2);
+  }
+
+  // 1자리: 3~9 입력 시 한 자리 시(03~09시)로 간주하여 콜론까지 자동 완성
+  if (digits.length === 1) {
+    if (parseInt(digits, 10) >= 3) {
+      return `0${digits}:`;
+    }
+    return digits;
+  }
+
+  // 2자리 이상: 시는 00~23 사이로 clamp
+  let h = parseInt(digits.slice(0, 2), 10);
+  if (h > 23) h = 23;
+  const hh = String(h).padStart(2, '0');
+
+  if (digits.length === 2) {
+    return `${hh}:`;
+  }
+
+  // 3자리: 분의 십의 자리 (0~5만 허용, 6 이상 시 5로 clamp)
+  let m1 = parseInt(digits[2], 10);
+  if (m1 > 5) m1 = 5;
+
+  if (digits.length === 3) {
+    return `${hh}:${m1}`;
+  }
+
+  // 4자리: 분 전체 (0~59 사이로 clamp)
+  let m = parseInt(`${m1}${digits[3]}`, 10);
+  if (m > 59) m = 59;
+  const mm = String(m).padStart(2, '0');
+
+  return `${hh}:${mm}`;
 }
 
-function timeDisplayToValue(display: string): string {
-  const digits = display.replace(/\D/g, '');
-  if (digits.length < 4) return display;
-  return digits.slice(0, 2) + ':' + digits.slice(2, 4);
+// 포커스 아웃(onBlur) 시 미완성된 시간 자동 보정 (예: '9' -> '09:00', '14' -> '14:00')
+function finalizeTimeInput(value: string): string {
+  if (!value) return '';
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+
+  if (digits.length === 1) {
+    const h = parseInt(digits, 10);
+    return `${String(h).padStart(2, '0')}:00`;
+  }
+  if (digits.length === 2) {
+    const h = Math.min(23, parseInt(digits, 10));
+    return `${String(h).padStart(2, '0')}:00`;
+  }
+  if (digits.length === 3) {
+    const h = Math.min(23, parseInt(digits.slice(0, 2), 10));
+    const m = Math.min(50, parseInt(digits[2], 10) * 10);
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+  const h = Math.min(23, parseInt(digits.slice(0, 2), 10));
+  const m = Math.min(59, parseInt(digits.slice(2, 4), 10));
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 interface DateTimeCardProps {
@@ -74,9 +133,15 @@ function DateTimeCard({
   timeError,
 }: DateTimeCardProps) {
   const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatTimeInput(e.target.value);
-    const apiValue = timeDisplayToValue(formatted);
-    onTimeChange(apiValue);
+    const formatted = formatTimeInput(e.target.value, timeValue);
+    onTimeChange(formatted);
+  };
+
+  const handleTimeBlur = () => {
+    if (timeValue) {
+      const finalized = finalizeTimeInput(timeValue);
+      onTimeChange(finalized);
+    }
   };
 
   return (
@@ -107,7 +172,7 @@ function DateTimeCard({
           </div>
         </div>
 
-        {/* 시간 — 직접 숫자 입력 */}
+        {/* 시간 — 직접 숫자 입력 (24시간제 실시간 가드) */}
         <div className={`${styles.dtInputWrap} ${timeError ? styles.inputError : ''}`} data-error={timeError ? 'true' : undefined}>
           <input
             type="text"
@@ -117,6 +182,7 @@ function DateTimeCard({
             placeholder="00:00"
             value={timeValue}
             onChange={handleTimeInput}
+            onBlur={handleTimeBlur}
             maxLength={5}
           />
           <IconClock size={20} className={styles.dtInputIcon} />

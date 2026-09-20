@@ -335,7 +335,24 @@ export default function B2BCreatePage() {
     }
 
     if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
-    if (!formData.funeral_time) newErrors.funeral_time = '발인 시간을 입력해주세요';
+    if (!formData.funeral_time) {
+      newErrors.funeral_time = '발인 시간을 입력해주세요';
+    } else {
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+      if (!timeRegex.test(formData.funeral_time.trim())) {
+        newErrors.funeral_time = '올바른 발인 시간(00:00~23:59)을 입력해주세요';
+      }
+    }
+
+    // 기타 시간 필드(별세, 입실, 입관, 일포)도 값이 있는 경우 형식 검사
+    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    const optionalTimeFields: (keyof typeof formData)[] = ['death_time', 'checkin_time', 'encoffin_time', 'ilpo_time'];
+    for (const f of optionalTimeFields) {
+      const val = formData[f];
+      if (typeof val === 'string' && val.trim() && !timeRegex.test(val.trim())) {
+        newErrors[f] = '올바른 시간(00:00~23:59)을 입력해주세요';
+      }
+    }
 
     // 대표상주 확인
     if (!mourners[0]?.name?.trim()) newErrors.mourner_name = '대표상주 성함을 입력해주세요';
