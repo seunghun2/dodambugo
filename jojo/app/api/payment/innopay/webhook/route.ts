@@ -48,11 +48,35 @@ export async function POST(request: NextRequest) {
             console.error('mallReserved 파싱 오류:', e);
         }
 
+        // orderId가 누락된 경우 moid(주문번호)로 조회 폴백
+        if (!orderId && moid) {
+            const { data: matchedOrder } = await supabase
+                .from('flower_orders')
+                .select('id')
+                .eq('order_number', moid)
+                .maybeSingle();
+            if (matchedOrder?.id) {
+                orderId = matchedOrder.id;
+            }
+        }
+
         console.log('📦 orderId:', orderId, 'moid:', moid);
 
         // DB 업데이트 - 입금 완료 상태로 변경
         let orderData: any = null;
         if (orderId) {
+            // 🛡️ 1. 가상계좌 중복 웹훅 처리 방지 (이미 입금 완료된 주문이면 중복 수당 적립/알림 원천 차단)
+            const { data: existingOrder } = await supabase
+                .from('flower_orders')
+                .select('id, status, order_number')
+                .eq('id', orderId)
+                .maybeSingle();
+
+            if (existingOrder?.status === 'completed') {
+                console.log(`ℹ️ [B2B-Webhook] 이미 입금 처리 완료된 주문 (중복 웹훅 차단): ${orderId}`);
+                return NextResponse.json({ success: true, message: '이미 입금 완료된 주문입니다.' });
+            }
+
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({ status: 'completed' })
@@ -88,7 +112,7 @@ export async function POST(request: NextRequest) {
                             // 2. 파트너 정보 및 소속 상조회사 수당 분배 구조 조회
                             const { data: partnerUser } = await supabase
                                 .from('b2b_users')
-                                .select('company_id, company_name, recommender_id')
+                                .select('company_id, company_name, recommender_id, owner_name')
                                 .eq('id', partnerId)
                                 .single();
 
@@ -207,18 +231,22 @@ export async function POST(request: NextRequest) {
 
                             // 5. 추천인 보너스 적립 (개인/프리랜서 파트너의 판매인 경우만, 상조회사 소속 파트너는 추천수당 제외)
                             const isSangjoCorporate = Boolean(partnerUser?.company_id);
-                            if (!isSangjoCorporate && partnerUser?.recommender_id) {
-                                // 추천인의 소속 정보 확인 (상조회사 소속인지 여부)
+                            const isValidRecommender = partnerUser?.recommender_id && partnerUser.recommender_id !== partnerId;
+                            if (!isSangjoCorporate && isValidRecommender) {
+                                // 추천인의 소속 정보 확인 (상조회사 소속인지 여부 및 활성 상태)
                                 const { data: recommenderUser } = await supabase
                                     .from('b2b_users')
-                                    .select('id, company_id, owner_name')
+                                    .select('id, company_id, owner_name, status, deleted_at')
                                     .eq('id', partnerUser.recommender_id)
                                     .maybeSingle();
 
-                                const isRecommenderCorporate = Boolean(recommenderUser?.company_id);
+                                const isRecommenderActive = recommenderUser && recommenderUser.status !== 'blocked' && !recommenderUser.deleted_at;
 
-                                let recommenderBonus = 2500;
-                                let corporateBonus = 0;
+                                if (isRecommenderActive) {
+                                    const isRecommenderCorporate = Boolean(recommenderUser?.company_id);
+
+                                    let recommenderBonus = 2500;
+                                    let corporateBonus = 0;
 
                                 if (isRecommenderCorporate && recommenderUser?.company_id) {
                                     // 추천인 소속 상조회사의 DB 설정값(referral_member_bonus, referral_company_bonus) 동적 조회
@@ -307,7 +335,8 @@ export async function POST(request: NextRequest) {
                                 }
                             }
                         }
-                    } catch (b2bErr) {
+                    }
+                } catch (b2bErr) {
                         console.error('❌ [B2B-Webhook] 가상계좌 입금 파트너 적립 중 에러:', b2bErr);
                     }
                 }

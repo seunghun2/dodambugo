@@ -533,18 +533,22 @@ export async function POST(request: NextRequest) {
 
                         // 5. 추천인 보너스 적립 (개인/프리랜서 파트너의 판매인 경우만)
                         const isSangjoCorporate = Boolean(partnerUser?.company_id);
-                        if (!isSangjoCorporate && partnerUser?.recommender_id) {
-                            // 추천인의 소속 정보 확인 (상조회사 소속인지 여부)
+                        const isValidRecommender = partnerUser?.recommender_id && partnerUser.recommender_id !== partnerId;
+                        if (!isSangjoCorporate && isValidRecommender) {
+                            // 추천인의 소속 정보 확인 (상조회사 소속인지 여부 및 활성 상태)
                             const { data: recommenderUser } = await supabase
                                 .from('b2b_users')
-                                .select('id, company_id, owner_name')
+                                .select('id, company_id, owner_name, status, deleted_at')
                                 .eq('id', partnerUser.recommender_id)
                                 .maybeSingle();
 
-                            const isRecommenderCorporate = Boolean(recommenderUser?.company_id);
+                            const isRecommenderActive = recommenderUser && recommenderUser.status !== 'blocked' && !recommenderUser.deleted_at;
 
-                            let recommenderBonus = 2500;
-                            let corporateBonus = 0;
+                            if (isRecommenderActive) {
+                                const isRecommenderCorporate = Boolean(recommenderUser?.company_id);
+
+                                let recommenderBonus = 2500;
+                                let corporateBonus = 0;
 
                             if (isRecommenderCorporate && recommenderUser?.company_id) {
                                 // 추천인 소속 상조회사의 DB 설정값(referral_member_bonus, referral_company_bonus) 동적 조회
@@ -630,6 +634,7 @@ export async function POST(request: NextRequest) {
                                 console.log(`✅ [B2B] 추천인 소속 상조회사 ${recommenderUser.company_id}에 추천 분할 수수료 ${corporateBonus}원 정산 내역 추가 완료`);
                             }
                         }
+                    }
                     } catch (companyErr) {
                         console.error('❌ [B2B] 상조회사 정산/추천인 보너스 오류:', companyErr);
                     }
