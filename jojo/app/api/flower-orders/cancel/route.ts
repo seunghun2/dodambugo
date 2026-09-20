@@ -142,11 +142,13 @@ export async function POST(request: NextRequest) {
                     .single();
                 partnerUserOwnerName = partnerUser?.owner_name || '';
 
+                const cancelOrderKeys = [order.id, order.order_number].filter(Boolean);
+
                 // 1. 해당 주문으로 실제 적립되었던 수당 거래 내역 조회 (정확한 회수금액 확보)
                 const { data: originalRewardTx } = await supabase
                     .from('deposit_transactions')
                     .select('amount')
-                    .eq('related_order_id', order.id)
+                    .in('related_order_id', cancelOrderKeys)
                     .in('type', ['wreath_reward', 'flower_reward'])
                     .maybeSingle();
 
@@ -187,7 +189,7 @@ export async function POST(request: NextRequest) {
                 const { data: refTx } = await supabase
                     .from('deposit_transactions')
                     .select('*')
-                    .eq('related_order_id', order.id)
+                    .in('related_order_id', cancelOrderKeys)
                     .eq('type', 'referral_bonus')
                     .maybeSingle();
 
@@ -230,8 +232,8 @@ export async function POST(request: NextRequest) {
                 await supabase
                     .from('b2b_company_settlements')
                     .update({ status: 'cancelled' })
-                    .eq('order_id', order.id);
-                console.log(`📉 상조회사 정산 장부 취소 처리 완료: OrderId=${order.id}`);
+                    .in('order_id', cancelOrderKeys);
+                console.log(`📉 상조회사 정산 장부 취소 처리 완료: OrderIds=${cancelOrderKeys.join(', ')}`);
             } catch (err) {
                 console.error('❌ B2B 수당 회수 처리 중 에러:', err);
             }
