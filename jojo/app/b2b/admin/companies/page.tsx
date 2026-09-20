@@ -11,6 +11,14 @@ interface Company {
     business_no?: string;
     wreath_commission_amount: number;
     wreath_member_commission_amount?: number;
+    wreath_basket_amount?: number;
+    wreath_objet_amount?: number;
+    wreath_basic_amount?: number;
+    wreath_deluxe_amount?: number;
+    wreath_premium_amount?: number;
+    wreath_vip_amount?: number;
+    referral_member_bonus?: number;
+    referral_company_bonus?: number;
     gift_commission_amount?: number;
     gift_member_commission_amount?: number;
     condolence_company_rate?: number;
@@ -35,7 +43,18 @@ export default function CompaniesPage() {
     const [name, setName] = useState('');
     const [businessNo, setBusinessNo] = useState('');
     const [wreathCommission, setWreathCommission] = useState('10000');
-    const [wreathMemberCommission, setWreathMemberCommission] = useState('10000');
+    const [wreathMemberCommission, setWreathMemberCommission] = useState('50000');
+    // 화환 상품별 지도사 차등 수당
+    const [wreathBasketAmount, setWreathBasketAmount] = useState('30000');
+    const [wreathObjetAmount, setWreathObjetAmount] = useState('40000');
+    const [wreathBasicAmount, setWreathBasicAmount] = useState('50000');
+    const [wreathDeluxeAmount, setWreathDeluxeAmount] = useState('55000');
+    const [wreathPremiumAmount, setWreathPremiumAmount] = useState('60000');
+    const [wreathVipAmount, setWreathVipAmount] = useState('65000');
+    // 외부 지도사 추천 분할 수수료
+    const [referralMemberBonus, setReferralMemberBonus] = useState('3500');
+    const [referralCompanyBonus, setReferralCompanyBonus] = useState('6500');
+
     const [giftCommission, setGiftCommission] = useState('5000');
     const [giftMemberCommission, setGiftMemberCommission] = useState('5000');
     const [condolenceCompanyRate, setCondolenceCompanyRate] = useState('3.3');
@@ -85,7 +104,15 @@ export default function CompaniesPage() {
             setName(company.name);
             setBusinessNo(company.business_no || '');
             setWreathCommission(String(company.wreath_commission_amount ?? 10000));
-            setWreathMemberCommission(String(company.wreath_member_commission_amount ?? 10000));
+            setWreathMemberCommission(String(company.wreath_member_commission_amount ?? 50000));
+            setWreathBasketAmount(String(company.wreath_basket_amount ?? 30000));
+            setWreathObjetAmount(String(company.wreath_objet_amount ?? 40000));
+            setWreathBasicAmount(String(company.wreath_basic_amount ?? company.wreath_member_commission_amount ?? 50000));
+            setWreathDeluxeAmount(String(company.wreath_deluxe_amount ?? 55000));
+            setWreathPremiumAmount(String(company.wreath_premium_amount ?? 60000));
+            setWreathVipAmount(String(company.wreath_vip_amount ?? 65000));
+            setReferralMemberBonus(String(company.referral_member_bonus ?? 3500));
+            setReferralCompanyBonus(String(company.referral_company_bonus ?? 6500));
             setGiftCommission(String(company.gift_commission_amount ?? 5000));
             setGiftMemberCommission(String(company.gift_member_commission_amount ?? 5000));
             setCondolenceCompanyRate(String(company.condolence_company_rate ?? 3.3));
@@ -97,7 +124,15 @@ export default function CompaniesPage() {
             setName('');
             setBusinessNo('');
             setWreathCommission('10000');
-            setWreathMemberCommission('10000');
+            setWreathMemberCommission('50000');
+            setWreathBasketAmount('30000');
+            setWreathObjetAmount('40000');
+            setWreathBasicAmount('50000');
+            setWreathDeluxeAmount('55000');
+            setWreathPremiumAmount('60000');
+            setWreathVipAmount('65000');
+            setReferralMemberBonus('3500');
+            setReferralCompanyBonus('6500');
             setGiftCommission('5000');
             setGiftMemberCommission('5000');
             setCondolenceCompanyRate('3.3');
@@ -116,6 +151,14 @@ export default function CompaniesPage() {
 
         const amount = parseInt(wreathCommission);
         const memberAmount = parseInt(wreathMemberCommission);
+        const basketAmount = parseInt(wreathBasketAmount);
+        const objetAmount = parseInt(wreathObjetAmount);
+        const basicAmount = parseInt(wreathBasicAmount);
+        const deluxeAmount = parseInt(wreathDeluxeAmount);
+        const premiumAmount = parseInt(wreathPremiumAmount);
+        const vipAmount = parseInt(wreathVipAmount);
+        const refMemBonus = parseInt(referralMemberBonus);
+        const refCompBonus = parseInt(referralCompanyBonus);
         const giftAmount = parseInt(giftCommission);
         const giftMemberAmount = parseInt(giftMemberCommission);
         const condRate = parseFloat(condolenceCompanyRate);
@@ -125,7 +168,15 @@ export default function CompaniesPage() {
             return;
         }
         if (isNaN(amount) || amount < 0 || isNaN(memberAmount) || memberAmount < 0) {
-            setError('정산 수당은 0원 이상의 정수로 입력해주세요.');
+            setError('화환 본사/지도사 정산 수당은 0원 이상의 정수로 입력해주세요.');
+            return;
+        }
+        if ([basketAmount, objetAmount, basicAmount, deluxeAmount, premiumAmount, vipAmount].some(v => isNaN(v) || v < 0)) {
+            setError('상품별 지도사 수당은 0원 이상의 정수로 입력해주세요.');
+            return;
+        }
+        if (isNaN(refMemBonus) || refMemBonus < 0 || isNaN(refCompBonus) || refCompBonus < 0) {
+            setError('추천 분할 수당은 0원 이상의 정수로 입력해주세요.');
             return;
         }
         if (isNaN(giftAmount) || giftAmount < 0 || isNaN(giftMemberAmount) || giftMemberAmount < 0) {
@@ -147,7 +198,15 @@ export default function CompaniesPage() {
                     name,
                     business_no: businessNo,
                     wreath_commission_amount: amount,
-                    wreath_member_commission_amount: memberAmount,
+                    wreath_member_commission_amount: basicAmount || memberAmount,
+                    wreath_basket_amount: basketAmount,
+                    wreath_objet_amount: objetAmount,
+                    wreath_basic_amount: basicAmount,
+                    wreath_deluxe_amount: deluxeAmount,
+                    wreath_premium_amount: premiumAmount,
+                    wreath_vip_amount: vipAmount,
+                    referral_member_bonus: refMemBonus,
+                    referral_company_bonus: refCompBonus,
                     gift_commission_amount: giftAmount,
                     gift_member_commission_amount: giftMemberAmount,
                     condolence_company_rate: condRate,
@@ -391,7 +450,12 @@ export default function CompaniesPage() {
                                         <td className={styles.td} style={{ fontSize: '12px' }}>
                                             <span style={{ color: '#2563eb', fontWeight: '600' }}>본사: {(c.wreath_commission_amount || 0).toLocaleString()}원</span>
                                             <br />
-                                            <span style={{ color: '#16a34a', fontWeight: '500' }}>팀원: {(c.wreath_member_commission_amount ?? 10000).toLocaleString()}원</span>
+                                            <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                                                기본3단: {(c.wreath_basic_amount ?? c.wreath_member_commission_amount ?? 50000).toLocaleString()}원
+                                            </span>
+                                            <span style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '2px' }}>
+                                                (바구니 {(c.wreath_basket_amount ?? 30000) / 10000}만 ~ 4단 {(c.wreath_vip_amount ?? 65000) / 10000}만)
+                                            </span>
                                         </td>
                                         <td className={styles.td}>
                                             {new Date(c.created_at).toLocaleDateString()}
@@ -437,161 +501,323 @@ export default function CompaniesPage() {
                             </button>
                         </div>
                         <form onSubmit={handleSave} className={styles.form}>
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>상조회사명 *</label>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="예: 보람상조"
-                                    required
-                                />
-                            </div>
+                            <div className={styles.modalBody}>
+                                {/* 섹션 1: 사업자 기본 정보 */}
+                                <div className={styles.sectionCard}>
+                                    <h3 className={styles.sectionTitle}>🏢 상조회사 기본 정보</h3>
+                                    <p className={styles.sectionDesc}>상조회사의 상호명 및 사업자등록 정보를 입력합니다.</p>
 
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>사업자 번호</label>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    value={businessNo}
-                                    onChange={(e) => setBusinessNo(e.target.value)}
-                                    placeholder="예: 120-00-00000"
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>대표자명</label>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    value={ownerName}
-                                    onChange={(e) => setOwnerName(e.target.value)}
-                                    placeholder="예: 홍길동"
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>소재지 주소</label>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    placeholder="예: 서울특별시 마포구 백범로 31"
-                                />
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>업태</label>
-                                    <input
-                                        type="text"
-                                        className={styles.input}
-                                        value={businessType}
-                                        onChange={(e) => setBusinessType(e.target.value)}
-                                        placeholder="예: 서비스업"
-                                    />
-                                </div>
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>종목</label>
-                                    <input
-                                        type="text"
-                                        className={styles.input}
-                                        value={businessItem}
-                                        onChange={(e) => setBusinessItem(e.target.value)}
-                                        placeholder="예: 상조업, 장례식장"
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>화환 판매 본사 분배 수당 *</label>
-                                    <div className={styles.inputWrapper}>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>상조회사명 *</label>
                                         <input
-                                            type="number"
-                                            className={`${styles.input} ${styles.inputWithUnit}`}
-                                            value={wreathCommission}
-                                            onChange={(e) => setWreathCommission(e.target.value)}
-                                            placeholder="예: 10000"
+                                            type="text"
+                                            className={styles.input}
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            placeholder="예: 주식회사 더좋은라이프"
                                             required
                                         />
-                                        <span className={styles.unit}>원</span>
                                     </div>
-                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                                        소속 파트너 화환 판매 시 상조 본사에 적립할 수당
-                                    </p>
-                                </div>
 
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>소속 지도사(팀원) 화환 수당 *</label>
-                                    <div className={styles.inputWrapper}>
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                                            <label className={styles.label}>사업자 번호</label>
+                                            <input
+                                                type="text"
+                                                className={styles.input}
+                                                value={businessNo}
+                                                onChange={(e) => setBusinessNo(e.target.value)}
+                                                placeholder="예: 120-00-00000"
+                                            />
+                                        </div>
+                                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                                            <label className={styles.label}>대표자명</label>
+                                            <input
+                                                type="text"
+                                                className={styles.input}
+                                                value={ownerName}
+                                                onChange={(e) => setOwnerName(e.target.value)}
+                                                placeholder="예: 홍길동"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>소재지 주소</label>
                                         <input
-                                            type="number"
-                                            className={`${styles.input} ${styles.inputWithUnit}`}
-                                            value={wreathMemberCommission}
-                                            onChange={(e) => setWreathMemberCommission(e.target.value)}
-                                            placeholder="예: 10000"
-                                            required
+                                            type="text"
+                                            className={styles.input}
+                                            value={address}
+                                            onChange={(e) => setAddress(e.target.value)}
+                                            placeholder="예: 서울특별시 마포구 백범로 31"
                                         />
-                                        <span className={styles.unit}>원</span>
                                     </div>
-                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                                        화환을 직접 판매한 소속 지도사 지갑에 적립할 수당
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>부의금 상조회사 쉐어 비율 *</label>
-                                    <div className={styles.inputWrapper}>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            className={`${styles.input} ${styles.inputWithUnit}`}
-                                            value={condolenceCompanyRate}
-                                            onChange={(e) => setCondolenceCompanyRate(e.target.value)}
-                                            placeholder="예: 3.3"
-                                            required
-                                        />
-                                        <span className={styles.unit}>%</span>
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                                            <label className={styles.label}>업태</label>
+                                            <input
+                                                type="text"
+                                                className={styles.input}
+                                                value={businessType}
+                                                onChange={(e) => setBusinessType(e.target.value)}
+                                                placeholder="예: 서비스업"
+                                            />
+                                        </div>
+                                        <div className={styles.formGroup} style={{ flex: 1 }}>
+                                            <label className={styles.label}>종목</label>
+                                            <input
+                                                type="text"
+                                                className={styles.input}
+                                                value={businessItem}
+                                                onChange={(e) => setBusinessItem(e.target.value)}
+                                                placeholder="예: 상조업, 장례식장"
+                                            />
+                                        </div>
                                     </div>
-                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                                        조의금 결제 시 상조회사 본사 몫으로 정산할 쉐어 비율 (%)
-                                    </p>
                                 </div>
 
-                                <div className={styles.formGroup} style={{ flex: 1 }}>
-                                    <label className={styles.label}>답례품 본사 / 지도사 수당 *</label>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                                {/* 섹션 2: 화환 정산 수수료 (본사 분배금 + 상품 6종 지도사 차등 수당) */}
+                                <div className={styles.sectionCard}>
+                                    <h3 className={styles.sectionTitle}>💐 화환 정산 수수료 (본사 & 상품별 지도사 수당)</h3>
+                                    <p className={styles.sectionDesc}>
+                                        화환 판매 시 본사 귀속금 및 상품별 지도사 지갑 적립 수당을 설정합니다. (역마진 방지 자동 연동)
+                                    </p>
+
+                                    <div className={styles.formGroup} style={{ marginBottom: '16px' }}>
+                                        <label className={styles.label}>화환 판매 본사 분배 수당 (건당 고정) *</label>
+                                        <div className={styles.inputWrapper}>
                                             <input
                                                 type="number"
                                                 className={`${styles.input} ${styles.inputWithUnit}`}
-                                                value={giftCommission}
-                                                onChange={(e) => setGiftCommission(e.target.value)}
-                                                placeholder="본사: 5000"
+                                                value={wreathCommission}
+                                                onChange={(e) => setWreathCommission(e.target.value)}
+                                                placeholder="예: 10000"
                                                 required
                                             />
                                             <span className={styles.unit}>원</span>
                                         </div>
-                                        <div className={styles.inputWrapper} style={{ flex: 1 }}>
-                                            <input
-                                                type="number"
-                                                className={`${styles.input} ${styles.inputWithUnit}`}
-                                                value={giftMemberCommission}
-                                                onChange={(e) => setGiftMemberCommission(e.target.value)}
-                                                placeholder="지도사: 5000"
-                                                required
-                                            />
-                                            <span className={styles.unit}>원</span>
+                                        <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                            소속 파트너 화환 판매 시 상조회사 본사 계좌로 정산할 수수료 (계약서: 10,000원)
+                                        </p>
+                                    </div>
+
+                                    <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '12px', marginTop: '12px' }}>
+                                        <label className={styles.label} style={{ color: '#0f172a', marginBottom: '8px' }}>
+                                            상품별 소속 지도사(팀원) 수당 (건당 실지급) *
+                                        </label>
+                                        <div className={styles.grid2}>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#475569' }}>
+                                                    1. 근조바구니
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        value={wreathBasketAmount}
+                                                        onChange={(e) => setWreathBasketAmount(e.target.value)}
+                                                        placeholder="30000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#475569' }}>
+                                                    2. 오브제 1단
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        value={wreathObjetAmount}
+                                                        onChange={(e) => setWreathObjetAmount(e.target.value)}
+                                                        placeholder="40000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#1d4ed8', fontWeight: '700' }}>
+                                                    3. 근조 3단 (기본형) ★메인
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        style={{ borderColor: '#3b82f6', backgroundColor: '#eff6ff' }}
+                                                        value={wreathBasicAmount}
+                                                        onChange={(e) => {
+                                                            setWreathBasicAmount(e.target.value);
+                                                            setWreathMemberCommission(e.target.value);
+                                                        }}
+                                                        placeholder="50000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#475569' }}>
+                                                    4. 고급 근조 3단
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        value={wreathDeluxeAmount}
+                                                        onChange={(e) => setWreathDeluxeAmount(e.target.value)}
+                                                        placeholder="55000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#475569' }}>
+                                                    5. 특대 근조 3단
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        value={wreathPremiumAmount}
+                                                        onChange={(e) => setWreathPremiumAmount(e.target.value)}
+                                                        placeholder="60000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label} style={{ fontSize: '12px', color: '#475569' }}>
+                                                    6. 근조 4단 (VIP)
+                                                </label>
+                                                <div className={styles.inputWrapper}>
+                                                    <input
+                                                        type="number"
+                                                        className={`${styles.input} ${styles.inputWithUnit}`}
+                                                        value={wreathVipAmount}
+                                                        onChange={(e) => setWreathVipAmount(e.target.value)}
+                                                        placeholder="65000"
+                                                        required
+                                                    />
+                                                    <span className={styles.unit}>원</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                                        답례품 판매 시 본사 적립금 / 지도사 지갑 적립 수당
+                                </div>
+
+                                {/* 섹션 3: 추천인 분할 수수료 */}
+                                <div className={styles.sectionCard}>
+                                    <h3 className={styles.sectionTitle}>🤝 외부 지도사 추천 시 수수료 분할</h3>
+                                    <p className={styles.sectionDesc}>
+                                        소속 지도사가 추천·가입시킨 외부 프리랜서가 화환을 판매했을 때 1건당 지급할 분할 금액입니다.
                                     </p>
+
+                                    <div className={styles.grid2}>
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.label}>추천 지도사 수당 *</label>
+                                            <div className={styles.inputWrapper}>
+                                                <input
+                                                    type="number"
+                                                    className={`${styles.input} ${styles.inputWithUnit}`}
+                                                    value={referralMemberBonus}
+                                                    onChange={(e) => setReferralMemberBonus(e.target.value)}
+                                                    placeholder="3500"
+                                                    required
+                                                />
+                                                <span className={styles.unit}>원</span>
+                                            </div>
+                                            <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                                추천 지도사 지갑 적립 (계약서: 3,500원)
+                                            </p>
+                                        </div>
+
+                                        <div className={styles.formGroup}>
+                                            <label className={styles.label}>상조 본사 분배 *</label>
+                                            <div className={styles.inputWrapper}>
+                                                <input
+                                                    type="number"
+                                                    className={`${styles.input} ${styles.inputWithUnit}`}
+                                                    value={referralCompanyBonus}
+                                                    onChange={(e) => setReferralCompanyBonus(e.target.value)}
+                                                    placeholder="6500"
+                                                    required
+                                                />
+                                                <span className={styles.unit}>원</span>
+                                            </div>
+                                            <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                                상조 본사 정산 적재 (계약서: 6,500원)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 섹션 4: 부의금 & 답례품 수수료 */}
+                                <div className={styles.sectionCard}>
+                                    <h3 className={styles.sectionTitle}>💳 온라인 부의금 및 답례품 수수료</h3>
+                                    <p className={styles.sectionDesc}>
+                                        온라인 조의금 결제 쉐어율과 모바일 답례품 판매 수당을 설정합니다.
+                                    </p>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>부의금 상조회사 쉐어 비율 *</label>
+                                        <div className={styles.inputWrapper}>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                className={`${styles.input} ${styles.inputWithUnit}`}
+                                                value={condolenceCompanyRate}
+                                                onChange={(e) => setCondolenceCompanyRate(e.target.value)}
+                                                placeholder="3.3"
+                                                required
+                                            />
+                                            <span className={styles.unit}>%</span>
+                                        </div>
+                                        <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                            조의금 결제 시 상조회사 본사 몫으로 정산할 쉐어 비율 (%) (계약서: 3.3%)
+                                        </p>
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>답례품 본사 / 지도사 수당 *</label>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                                                <input
+                                                    type="number"
+                                                    className={`${styles.input} ${styles.inputWithUnit}`}
+                                                    value={giftCommission}
+                                                    onChange={(e) => setGiftCommission(e.target.value)}
+                                                    placeholder="본사: 5000"
+                                                    required
+                                                />
+                                                <span className={styles.unit}>원</span>
+                                            </div>
+                                            <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                                                <input
+                                                    type="number"
+                                                    className={`${styles.input} ${styles.inputWithUnit}`}
+                                                    value={giftMemberCommission}
+                                                    onChange={(e) => setGiftMemberCommission(e.target.value)}
+                                                    placeholder="지도사: 5000"
+                                                    required
+                                                />
+                                                <span className={styles.unit}>원</span>
+                                            </div>
+                                        </div>
+                                        <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                            답례품 판매 시 본사 적립금 / 지도사 지갑 적립 수당
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -600,7 +826,7 @@ export default function CompaniesPage() {
                                     취소
                                 </button>
                                 <button type="submit" className={styles.submitBtn}>
-                                    저장
+                                    {editingCompany ? '수정 내용 저장' : '상조회사 등록'}
                                 </button>
                             </div>
                         </form>

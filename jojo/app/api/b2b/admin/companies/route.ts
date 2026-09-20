@@ -40,6 +40,9 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { 
             name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            wreath_basket_amount, wreath_objet_amount, wreath_basic_amount,
+            wreath_deluxe_amount, wreath_premium_amount, wreath_vip_amount,
+            referral_member_bonus, referral_company_bonus,
             gift_commission_amount, gift_member_commission_amount,
             owner_name, address, business_type, business_item,
             condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
@@ -53,7 +56,15 @@ export async function POST(request: NextRequest) {
             name,
             business_no: business_no || '',
             wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
-            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 50000,
+            wreath_basket_amount: wreath_basket_amount !== undefined ? parseInt(wreath_basket_amount, 10) : 30000,
+            wreath_objet_amount: wreath_objet_amount !== undefined ? parseInt(wreath_objet_amount, 10) : 40000,
+            wreath_basic_amount: wreath_basic_amount !== undefined ? parseInt(wreath_basic_amount, 10) : (wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 50000),
+            wreath_deluxe_amount: wreath_deluxe_amount !== undefined ? parseInt(wreath_deluxe_amount, 10) : 55000,
+            wreath_premium_amount: wreath_premium_amount !== undefined ? parseInt(wreath_premium_amount, 10) : 60000,
+            wreath_vip_amount: wreath_vip_amount !== undefined ? parseInt(wreath_vip_amount, 10) : 65000,
+            referral_member_bonus: referral_member_bonus !== undefined ? parseInt(referral_member_bonus, 10) : 3500,
+            referral_company_bonus: referral_company_bonus !== undefined ? parseInt(referral_company_bonus, 10) : 6500,
             gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
             gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
         };
@@ -116,6 +127,9 @@ export async function PUT(request: NextRequest) {
         const body = await request.json();
         const { 
             id, name, business_no, wreath_commission_amount, wreath_member_commission_amount, 
+            wreath_basket_amount, wreath_objet_amount, wreath_basic_amount,
+            wreath_deluxe_amount, wreath_premium_amount, wreath_vip_amount,
+            referral_member_bonus, referral_company_bonus,
             gift_commission_amount, gift_member_commission_amount,
             owner_name, address, business_type, business_item,
             condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
@@ -129,7 +143,15 @@ export async function PUT(request: NextRequest) {
             name,
             business_no: business_no || '',
             wreath_commission_amount: wreath_commission_amount !== undefined ? parseInt(wreath_commission_amount, 10) : 10000,
-            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 10000,
+            wreath_member_commission_amount: wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 50000,
+            wreath_basket_amount: wreath_basket_amount !== undefined ? parseInt(wreath_basket_amount, 10) : 30000,
+            wreath_objet_amount: wreath_objet_amount !== undefined ? parseInt(wreath_objet_amount, 10) : 40000,
+            wreath_basic_amount: wreath_basic_amount !== undefined ? parseInt(wreath_basic_amount, 10) : (wreath_member_commission_amount !== undefined ? parseInt(wreath_member_commission_amount, 10) : 50000),
+            wreath_deluxe_amount: wreath_deluxe_amount !== undefined ? parseInt(wreath_deluxe_amount, 10) : 55000,
+            wreath_premium_amount: wreath_premium_amount !== undefined ? parseInt(wreath_premium_amount, 10) : 60000,
+            wreath_vip_amount: wreath_vip_amount !== undefined ? parseInt(wreath_vip_amount, 10) : 65000,
+            referral_member_bonus: referral_member_bonus !== undefined ? parseInt(referral_member_bonus, 10) : 3500,
+            referral_company_bonus: referral_company_bonus !== undefined ? parseInt(referral_company_bonus, 10) : 6500,
             gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
             gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
         };

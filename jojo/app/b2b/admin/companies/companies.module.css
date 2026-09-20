@@ -110,9 +110,12 @@
 
 .modalCard {
   width: 100%;
-  max-width: 480px;
+  max-width: 620px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   animation: modalUp 0.2s ease-out;
@@ -129,11 +132,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modalTitle {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
@@ -152,11 +156,56 @@
 
 /* 폼 */
 .form {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.modalBody {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 섹션 카드 */
+.sectionCard {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sectionDesc {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .formGroup {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
 }
 
 .label {
@@ -203,7 +252,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 24px;
+  padding: 14px 24px;
+  border-top: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  margin-top: 0;
 }
 
 .cancelBtn {

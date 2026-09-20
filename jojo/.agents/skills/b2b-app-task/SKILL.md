@@ -489,17 +489,25 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   - 제7조: 지식재산권 마음부고 귀속, 비밀유지 2년
   - 제8조: 서비스 안정성 보장 (데이터 이관 + 기여도 보상 별도 협의 가능)
 
-### 15. 상조회사 소속 추천인 3,500원 / 본사 6,500원 분할 정산 시스템 구현 (2026-09-21)
-- **구현 파일**: `jojo/app/api/payment/innopay/approve/route.ts` (L518~L595)
-- **기능 내용**:
-  - 외부 프리랜서 지도사가 화환을 판매했을 때, 추천인(`recommender_id`)의 소속 상조회사 여부(`b2b_users.company_id`)를 확인.
-  - 상조회사 소속 추천인인 경우:
-    1. 추천 지도사(`deposits`): **3,500원** 적립 + 인앱 알림 발송
-    2. 추천인 소속 상조회사(`b2b_company_settlements`): **6,500원** 자동 정산 대기 적재
-  - 일반 프리랜서 추천인인 경우: 기존 단일 추천 보너스(기본 2,500원) 지급 유지.
-- **검증**:
-  - 4개 시나리오 시뮬레이션 테스트 100% 통과
-  - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (21.3s)
+### 16. 화환 6종 차등 수당 & 추천 분할 수수료 DB 동적화 및 어드민 UI/UX 완결 (2026-09-21)
+- **개요**: 하드코딩을 100% 제거하고, DB(`b2b_companies`) 기반으로 상조회사별 상품 6종 수당과 추천인 분할 수수료를 동적 연동하는 풀스택 파이프라인 완결.
+- **수정 및 추가 파일**:
+  1. `b2b_companies` DB 스키마: `wreath_basket_amount`, `wreath_objet_amount`, `wreath_basic_amount`, `wreath_deluxe_amount`, `wreath_premium_amount`, `wreath_vip_amount`, `referral_member_bonus`, `referral_company_bonus` 8개 컬럼 추가
+  2. `jojo/lib/b2b-company.ts`: B2BCompany 인터페이스 및 `normalizeCompanyData` 8개 필드 기본값/타입 캐스팅 지원
+  3. `jojo/app/api/b2b/admin/companies/route.ts`: POST 및 PUT 요청 시 8개 신규 수수료 필드 검증 및 저장
+  4. `jojo/app/b2b/admin/companies/page.tsx` & `companies.module.css`:
+     - 상조회사 등록/수정 모달에 4대 섹션 카드 UI 도입 (기본정보, 화환 상품 6종 수당 2열 그리드, 추천인 분할 수당, 부의금/답례품)
+     - 하단 고정 액션 바(`formActions`) 및 스크롤 바디(`modalBody`) 구현
+     - 목록 테이블에 본사 수수료 + 기본3단 수당 + 상품 범위 요약 표시
+  5. `jojo/app/api/payment/innopay/approve/route.ts`:
+     - 하드코딩 완전 제거: `orderData.product_name`에 매칭되는 상품별 수당을 `companyRecord`의 DB 컬럼값으로 동적 인입
+     - 추천인 소속 상조회사의 `referral_member_bonus`, `referral_company_bonus` DB 컬럼값을 동적으로 조회하여 분할 적재
+- **검증 완료 내역**:
+  - 단위 테스트: `jojo/__tests__/referral-split.test.ts` (상품 6종 + 추천인 시나리오 100% 통과)
+  - Playwright MCP: 헤드리스 브라우저로 실제 관리자 화면 접속, 신규 모달 및 수정 모달 렌더링/스크롤 검증 및 스크린샷 검수 완료
+  - Supabase MCP: 실제 더좋은라이프 레코드에 8개 수수료 필드 정확히 저장 및 조회 검증 완료
+  - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (30.8s)
+
 
 
 

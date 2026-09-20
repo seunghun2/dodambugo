@@ -435,29 +435,23 @@ export async function POST(request: NextRequest) {
 
                         const companyRecord = normalizeCompanyData(rawCompany);
                         companyCommission = companyRecord.wreath_commission_amount;
-                        const baseMemberCommission = companyRecord.wreath_member_commission_amount;
 
-                        // 상품별 차등 수수료 분기 (계약서 부속서 1 제1조 기준 - 역마진 방지)
-                        // 지도사 기준 수당이 50,000원 이상인 상조회사(더좋은라이프 등)에 대해 상품별 차등 적용
-                        if (baseMemberCommission >= 50000) {
-                            const pName = (orderData.product_name || '').trim();
-                            if (pName.includes('바구니')) {
-                                rewardAmount = 30000; // 근조바구니: 지도사 30,000원 (총수수료 4만, 대표님 역마진 방지)
-                            } else if (pName.includes('오브제')) {
-                                rewardAmount = 40000; // 오브제 1단: 지도사 40,000원 (총수수료 5만)
-                            } else if (pName.includes('고급')) {
-                                rewardAmount = 55000; // 고급 근조 3단: 지도사 55,000원 (총수수료 6.5만)
-                            } else if (pName.includes('프리미엄') || pName.includes('특대')) {
-                                rewardAmount = 60000; // 특대 근조 3단: 지도사 60,000원 (총수수료 7만)
-                            } else if (pName.includes('VIP') || pName.includes('4단')) {
-                                rewardAmount = 65000; // 근조 4단(VIP): 지도사 65,000원 (총수수료 7.5만)
-                            } else {
-                                rewardAmount = 50000; // 근조 3단 기본형: 지도사 50,000원 (총수수료 6만)
-                            }
-                            console.log(`✅ [B2B] 상품별 차등 수수료 적용: [${pName}] ➡️ 지도사 수당 ${rewardAmount}원, 본사 ${companyCommission}원`);
+                        // 상품별 차등 수수료 분기: DB b2b_companies 설정값 동적 적용 (하드코딩 0개)
+                        const pName = (orderData.product_name || '').trim();
+                        if (pName.includes('바구니')) {
+                            rewardAmount = companyRecord.wreath_basket_amount; // 근조바구니 (DB 설정값)
+                        } else if (pName.includes('오브제')) {
+                            rewardAmount = companyRecord.wreath_objet_amount; // 오브제 1단 (DB 설정값)
+                        } else if (pName.includes('고급')) {
+                            rewardAmount = companyRecord.wreath_deluxe_amount; // 고급 근조 3단 (DB 설정값)
+                        } else if (pName.includes('프리미엄') || pName.includes('특대')) {
+                            rewardAmount = companyRecord.wreath_premium_amount; // 특대 근조 3단 (DB 설정값)
+                        } else if (pName.includes('VIP') || pName.includes('4단')) {
+                            rewardAmount = companyRecord.wreath_vip_amount; // 근조 4단 화환 (DB 설정값)
                         } else {
-                            rewardAmount = baseMemberCommission;
+                            rewardAmount = companyRecord.wreath_basic_amount || companyRecord.wreath_member_commission_amount; // 근조 3단 기본형 (DB 설정값)
                         }
+                        console.log(`✅ [B2B] 상조회사 [${companyRecord.name || partnerUser.company_name}] 상품별 수수료 DB 동적 적용: [${pName}] ➡️ 지도사 수당 ${rewardAmount}원, 본사 ${companyCommission}원`);
                     } else {
                         // 개인/프리랜서 파트너: 기본 지도사 수당 (20,000원) 100% 지급
                         const { data: rewardSetting } = await supabase
@@ -500,15 +494,15 @@ export async function POST(request: NextRequest) {
                             .insert({
                                 user_id: partnerId,
                                 amount: rewardAmount,
-                                type: 'wreath_reward',
-                                description: `화환 판매 적립 (${orderData.product_name || '화환'})`,
+                                type: 'flower_reward',
+                                description: `화환 판매 수당 (${orderData.product_name || '화환'})`,
                                 related_order_id: actualOrderId || moid,
                             });
 
-                        console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 적립 완료`);
+                        console.log(`✅ [B2B] 파트너 ${partnerId}에게 ${rewardAmount}원 예치금 적립 완료`);
                     }
 
-                    // 인앱 알람: 화환 주문 + 수당 적립
+                    // 4-1. 인앱 알람 발송
                     await insertInAppAlarm(
                         partnerId, 'flower_order',
                         '화환 주문이 접수되었습니다',
@@ -552,10 +546,17 @@ export async function POST(request: NextRequest) {
                             let recommenderBonus = 2500;
                             let corporateBonus = 0;
 
-                            if (isRecommenderCorporate) {
-                                // 제휴 상조회사 소속 지도사가 외부 지도사를 추천한 경우: 지도사 3,500원 + 상조 본사 6,500원 분할 (합계 10,000원)
-                                recommenderBonus = 3500;
-                                corporateBonus = 6500;
+                            if (isRecommenderCorporate && recommenderUser?.company_id) {
+                                // 추천인 소속 상조회사의 DB 설정값(referral_member_bonus, referral_company_bonus) 동적 조회
+                                const { data: recCompanyRaw } = await supabase
+                                    .from('b2b_companies')
+                                    .select('*')
+                                    .eq('id', recommenderUser.company_id)
+                                    .maybeSingle();
+                                const recCompany = normalizeCompanyData(recCompanyRaw);
+
+                                recommenderBonus = recCompany.referral_member_bonus; // 추천 지도사 몫 (DB 값, 기본 3,500원)
+                                corporateBonus = recCompany.referral_company_bonus; // 상조 본사 몫 (DB 값, 기본 6,500원)
                             } else {
                                 // 일반 프리랜서 추천인: 설정값(기본 2,500원)
                                 const { data: bonusSetting } = await supabase

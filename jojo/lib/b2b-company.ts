@@ -12,7 +12,17 @@ export interface B2BCompany {
     business_type: string;
     business_item: string;
     wreath_commission_amount: number; // 상조 본사 화환 수수료 (기본 10,000원)
-    wreath_member_commission_amount: number; // 소속 지도사 화환 수당 (기본 10,000원)
+    wreath_member_commission_amount: number; // 소속 지도사 화환 수당 기본형 (기본 50,000원)
+    // 상품별 지도사 화환 수당 (계약서 부속서 1 제1조 기준)
+    wreath_basket_amount: number; // 근조바구니 (기본 30,000원)
+    wreath_objet_amount: number; // 오브제 1단 (기본 40,000원)
+    wreath_basic_amount: number; // 근조 3단 기본형 (기본 50,000원)
+    wreath_deluxe_amount: number; // 고급 근조 3단 (기본 55,000원)
+    wreath_premium_amount: number; // 특대 근조 3단 (기본 60,000원)
+    wreath_vip_amount: number; // 근조 4단 화환 (기본 65,000원)
+    // 외부 추천인 화환 판매 시 분할 수수료 (계약서 부속서 1 제2조 3항 기준)
+    referral_member_bonus: number; // 추천 지도사 몫 (기본 3,500원)
+    referral_company_bonus: number; // 상조회사 본사 몫 (기본 6,500원)
     gift_commission_amount: number; // 상조 본사 답례품 수수료 (기본 5,000원)
     gift_member_commission_amount: number; // 소속 지도사 답례품 수당 (기본 5,000원)
     gift_company_rate?: number; // 답례품 상조 쉐어 퍼센트 (%) (선택)
@@ -35,7 +45,15 @@ export function normalizeCompanyData(comp: any): B2BCompany {
             business_type: '',
             business_item: '',
             wreath_commission_amount: 10000,
-            wreath_member_commission_amount: 10000,
+            wreath_member_commission_amount: 50000,
+            wreath_basket_amount: 30000,
+            wreath_objet_amount: 40000,
+            wreath_basic_amount: 50000,
+            wreath_deluxe_amount: 55000,
+            wreath_premium_amount: 60000,
+            wreath_vip_amount: 65000,
+            referral_member_bonus: 3500,
+            referral_company_bonus: 6500,
             gift_commission_amount: 5000,
             gift_member_commission_amount: 5000,
             condolence_fee_rate: 8.6,
@@ -66,6 +84,10 @@ export function normalizeCompanyData(comp: any): B2BCompany {
         }
     }
 
+    const defaultMemberAmount = wreath_member_commission_amount !== undefined && wreath_member_commission_amount !== null 
+        ? Number(wreath_member_commission_amount) 
+        : 50000;
+
     return {
         ...comp,
         id: comp.id || '',
@@ -78,9 +100,31 @@ export function normalizeCompanyData(comp: any): B2BCompany {
         wreath_commission_amount: comp.wreath_commission_amount !== undefined && comp.wreath_commission_amount !== null 
             ? Number(comp.wreath_commission_amount) 
             : 10000,
-        wreath_member_commission_amount: wreath_member_commission_amount !== undefined && wreath_member_commission_amount !== null 
-            ? Number(wreath_member_commission_amount) 
-            : 10000,
+        wreath_member_commission_amount: defaultMemberAmount,
+        wreath_basket_amount: comp.wreath_basket_amount !== undefined && comp.wreath_basket_amount !== null
+            ? Number(comp.wreath_basket_amount)
+            : 30000,
+        wreath_objet_amount: comp.wreath_objet_amount !== undefined && comp.wreath_objet_amount !== null
+            ? Number(comp.wreath_objet_amount)
+            : 40000,
+        wreath_basic_amount: comp.wreath_basic_amount !== undefined && comp.wreath_basic_amount !== null
+            ? Number(comp.wreath_basic_amount)
+            : defaultMemberAmount,
+        wreath_deluxe_amount: comp.wreath_deluxe_amount !== undefined && comp.wreath_deluxe_amount !== null
+            ? Number(comp.wreath_deluxe_amount)
+            : 55000,
+        wreath_premium_amount: comp.wreath_premium_amount !== undefined && comp.wreath_premium_amount !== null
+            ? Number(comp.wreath_premium_amount)
+            : 60000,
+        wreath_vip_amount: comp.wreath_vip_amount !== undefined && comp.wreath_vip_amount !== null
+            ? Number(comp.wreath_vip_amount)
+            : 65000,
+        referral_member_bonus: comp.referral_member_bonus !== undefined && comp.referral_member_bonus !== null
+            ? Number(comp.referral_member_bonus)
+            : 3500,
+        referral_company_bonus: comp.referral_company_bonus !== undefined && comp.referral_company_bonus !== null
+            ? Number(comp.referral_company_bonus)
+            : 6500,
         gift_commission_amount: comp.gift_commission_amount !== undefined && comp.gift_commission_amount !== null 
             ? Number(comp.gift_commission_amount) 
             : 5000,
