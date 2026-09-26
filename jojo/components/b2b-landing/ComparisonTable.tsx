@@ -7,10 +7,10 @@ export default function ComparisonTable() {
     return (
         <section id="comparison" className={styles.compareSection}>
             <div className={styles.compareContainer}>
-                <div className={styles.sectionHeader}>
-                    <span className={styles.sectionTag}>투명한 팩트 비교</span>
-                    <h2 className={styles.sectionTitle}>왜 수많은 지도사들이 부고온플러스로 갈아탈까요?</h2>
-                    <p className={styles.sectionDesc}>
+                <div className={styles.sectionHeaderCenter}>
+                    <div className={styles.sectionPretitle}>투명한 팩트 비교</div>
+                    <h2 className={styles.sectionTitle}>왜 수많은 지도사들이<br />부고온플러스로 갈아탈까요?</h2>
+                    <p style={{ fontSize: '16px', color: '#64748b', marginTop: '10px' }}>
                         기존 레거시 부고 앱들과 부고온플러스의 실제 수당 및 정산 조건을 직접 비교해 보세요.
                     </p>
                 </div>
@@ -59,11 +59,11 @@ export default function ComparisonTable() {
                     </table>
                 </div>
 
-                <div style={{ textAlign: 'center', marginTop: '36px' }}>
+                <div style={{ textAlign: 'center', marginTop: '36px', display: 'flex', justifyContent: 'center' }}>
                     <a 
                         href="https://bugoon.maeumbugo.co.kr/b2b/signup" 
-                        className={styles.heroCtaBtn}
-                        style={{ display: 'inline-flex' }}
+                        className={styles.calcActionBtn}
+                        style={{ minWidth: '320px' }}
                     >
                         지금 바로 부고온플러스 시작하기 →
                     </a>

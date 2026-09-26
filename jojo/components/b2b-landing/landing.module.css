@@ -1,22 +1,23 @@
 /* ==========================================================================
-   부고온플러스 공식 홈페이지 (Landing Page) 모바일 퍼스트 프리미엄 CSS
-   - 딥 에메랄드 그린 (#1B4D3E) + 샴페인 골드 (#D4AF37) + 슬레이트 웜 화이트
-   - 40~60대 장례지도사 최적화 대형 가독성 & 터치 타겟
+   부고온플러스 공식 홈페이지 (Landing Page) 화이트 모던 프리미엄 CSS
+   - 100% 순백색 (#FFFFFF) + 라이트 슬레이트 (#F8FAFC) + 딥 블랙 (#0F172A)
+   - 부고드림/토스 규격의 시원한 여백 & 둥근 모던 카드 (24px)
+   - 정밀 디바이스 목업 (아이폰 베젤, 다이내믹 아일랜드, 앰비언트 섀도우)
    ========================================================================== */
 
 .landingWrapper {
     width: 100%;
     min-height: 100vh;
-    background-color: #0b1e15;
+    background-color: #ffffff;
     color: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, Roboto, "Segoe UI", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", Roboto, sans-serif;
     overflow-x: hidden;
     position: relative;
     -webkit-font-smoothing: antialiased;
 }
 
 /* --------------------------------------------------------------------------
-   1. 헤더 (Header)
+   1. 헤더 (Header) - 클린 화이트 스티키 바
    -------------------------------------------------------------------------- */
 .header {
     position: sticky;
@@ -24,59 +25,64 @@
     left: 0;
     right: 0;
     z-index: 100;
-    height: 68px;
-    background: rgba(11, 30, 21, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    height: 64px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.headerInner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
-    max-width: 1200px;
-    margin: 0 auto;
 }
 
 .logoArea {
     display: flex;
     align-items: center;
-    gap: 10px;
-    cursor: pointer;
+    gap: 8px;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .logoBadge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #2d6a4f, #1b4d3e);
-    border: 1px solid rgba(212, 175, 55, 0.4);
-    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #15803d;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
 }
 
 .logoText {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: #ffffff;
+    color: #0f172a;
 }
 
 .logoHighlight {
-    color: #4ade80;
+    color: #16a34a;
     margin-left: 2px;
 }
 
 .logoSub {
     font-size: 11px;
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.1);
+    color: #64748b;
+    background: #f1f5f9;
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: 600;
-    margin-left: 6px;
+    margin-left: 4px;
 }
 
 .navLinks {
@@ -88,381 +94,506 @@
 .navLink {
     font-size: 15px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #475569;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color 0.15s ease;
 }
 
 .navLink:hover {
-    color: #4ade80;
+    color: #15803d;
 }
 
 .headerActions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .loginBtn {
     font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: #334155;
     text-decoration: none;
     padding: 8px 16px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
 }
 
 .loginBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .startBtn {
     font-size: 14px;
     font-weight: 700;
-    color: #0b1e15;
-    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #ffffff;
+    background: #15803d;
     text-decoration: none;
     padding: 9px 18px;
     border-radius: 8px;
-    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .startBtn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.45);
+    background: #166534;
 }
 
 /* --------------------------------------------------------------------------
-   2. 히어로 섹션 (Hero Section)
+   2. 메인 히어로 섹션 (Main Hero) - 부고드림급 자연스러운 레이아웃
    -------------------------------------------------------------------------- */
 .heroSection {
     position: relative;
-    padding: 70px 20px 80px;
+    padding: 80px 24px 100px;
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    gap: 60px;
 }
 
-.heroGlow {
-    position: absolute;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(11, 30, 21, 0) 70%);
-    pointer-events: none;
-    z-index: 0;
+.heroLeft {
+    flex: 1;
+    max-width: 580px;
+    text-align: left;
 }
 
 .heroBadge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
+    gap: 6px;
+    padding: 6px 14px;
     border-radius: 9999px;
-    background: rgba(45, 106, 79, 0.4);
-    border: 1px solid rgba(74, 222, 128, 0.4);
-    color: #86efac;
-    font-size: 14px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    font-size: 13px;
     font-weight: 700;
     margin-bottom: 24px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1;
 }
 
 .heroTitle {
-    font-size: 44px;
+    font-size: 48px;
     line-height: 1.25;
     font-weight: 800;
-    letter-spacing: -1.2px;
-    color: #ffffff;
+    letter-spacing: -1.5px;
+    color: #0f172a;
     margin-bottom: 20px;
-    z-index: 1;
 }
 
-.goldGradientText {
-    background: linear-gradient(135deg, #fde047 0%, #f59e0b 50%, #fbbf24 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
-}
-
-.greenGradientText {
-    background: linear-gradient(135deg, #86efac 0%, #4ade80 50%, #22c55e 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
+.heroTitleHighlight {
+    color: #15803d;
 }
 
 .heroSubtitle {
-    font-size: 20px;
+    font-size: 19px;
     line-height: 1.6;
-    color: #cbd5e1;
-    max-width: 640px;
-    margin: 0 auto 36px;
-    z-index: 1;
+    color: #475569;
+    margin-bottom: 36px;
     font-weight: 400;
 }
 
 .heroSubtitle strong {
-    color: #ffffff;
+    color: #0f172a;
     font-weight: 700;
 }
 
-/* 빠른 가입 인풋 박스 */
-.quickSignupBox {
-    width: 100%;
-    max-width: 520px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 16px;
+.heroActionGroup {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
-    margin-bottom: 20px;
-    z-index: 1;
+    gap: 16px;
 }
 
-.inputGroup {
+.heroForm {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    max-width: 480px;
 }
 
-.phoneInput {
+.heroInput {
     flex: 1;
-    height: 54px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    height: 52px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
     padding: 0 16px;
-    font-size: 17px;
-    color: #ffffff;
+    font-size: 16px;
+    color: #0f172a;
     outline: none;
-    transition: border-color 0.2s;
-}
-
-.phoneInput:focus {
-    border-color: #4ade80;
-}
-
-.phoneInput::placeholder {
-    color: #64748b;
-}
-
-.heroCtaBtn {
-    height: 54px;
-    padding: 0 24px;
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: #0b1e15;
-    border: none;
-    border-radius: 10px;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
     transition: all 0.2s ease;
 }
 
-.heroCtaBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5);
+.heroInput:focus {
+    background: #ffffff;
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
 }
 
-.heroSubInfo {
+.heroInput::placeholder {
+    color: #94a3b8;
+}
+
+.heroSubmitBtn {
+    height: 52px;
+    padding: 0 24px;
+    background: #15803d;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.heroSubmitBtn:hover {
+    background: #166534;
+}
+
+.heroTrustList {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 20px;
     font-size: 13px;
-    color: #94a3b8;
-    z-index: 1;
+    color: #64748b;
+    margin-top: 4px;
 }
 
-.heroSubInfoItem {
+.heroTrustItem {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
+.checkIcon {
+    color: #15803d;
+    font-weight: 800;
+}
+
 /* --------------------------------------------------------------------------
-   3. 3D 인터랙티브 목업 쇼케이스 (Mockup Showcase)
+   3. 정밀 아이폰 디바이스 목업 (Precision Device Mockup)
    -------------------------------------------------------------------------- */
-.mockupShowcase {
-    width: 100%;
-    margin-top: 40px;
+.heroRight {
+    flex: 1;
     display: flex;
     justify-content: center;
-    z-index: 1;
-    perspective: 1000px;
+    position: relative;
 }
 
-.phoneFrame {
+.mockupContainer {
+    position: relative;
     width: 320px;
-    background: #0f172a;
-    border: 8px solid #334155;
-    border-radius: 40px;
-    overflow: hidden;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(74, 222, 128, 0.2);
-    transform: rotateX(8deg) rotateY(-4deg) rotateZ(1deg);
-    transition: transform 0.4s ease;
+    filter: drop-shadow(0 30px 50px rgba(15, 23, 42, 0.12));
 }
 
-.phoneFrame:hover {
-    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02);
+/* 정밀 아이폰 15/16 Pro 섀시 */
+.deviceChassis {
+    width: 300px;
+    height: 610px;
+    background: #1e293b;
+    border-radius: 46px;
+    padding: 10px;
+    box-shadow: 
+        inset 0 0 2px 1.5px rgba(255, 255, 255, 0.2),
+        0 0 0 1.5px #0f172a,
+        0 20px 40px -10px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
-.phoneInner {
+/* 화면 내부 */
+.deviceScreen {
+    width: 100%;
+    height: 100%;
     background: #ffffff;
-    min-height: 520px;
+    border-radius: 38px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
-.phoneHeader {
-    background: #1b4d3e;
+/* 다이내믹 아일랜드 타원 컷아웃 */
+.dynamicIsland {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 24px;
+    background: #000000;
+    border-radius: 20px;
+    z-index: 10;
+}
+
+/* 부고장 상단 바 */
+.mockAppHeader {
+    background: #15803d;
     color: #ffffff;
-    padding: 16px 14px 12px;
+    padding: 44px 16px 14px;
     text-align: center;
 }
 
-.phoneHeaderText {
+.mockAppBrand {
     font-size: 11px;
-    opacity: 0.8;
+    letter-spacing: 1px;
+    opacity: 0.85;
+    font-weight: 600;
 }
 
-.phoneHeaderTitle {
-    font-size: 16px;
-    font-weight: 700;
+.mockAppTitle {
+    font-size: 15px;
+    font-weight: 800;
     margin-top: 2px;
 }
 
-.phoneBody {
-    padding: 16px;
+/* 부고장 본문 내용 */
+.mockAppBody {
+    padding: 18px 16px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    background: #f8fafc;
 }
 
-.mockOrderCard {
-    background: #f8fafc;
+.mockDeceasedCard {
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.mockRibbon {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.mockName {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.mockAge {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.mockFuneralInfo {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.mockButtonRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.mockWreathBtn {
+    background: #15803d;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.mockCondolenceBtn {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* 플로팅 실시간 수당 알림 팝업 (자연스럽게 겹침) */
+.floatingRewardCard {
+    position: absolute;
+    bottom: 24px;
+    right: -24px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04);
     display: flex;
     align-items: center;
     gap: 12px;
+    z-index: 20;
+    min-width: 230px;
+    animation: floatSubtle 4s ease-in-out infinite;
 }
 
-.mockOrderIcon {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    background: #e2e8f0;
+@keyframes floatSubtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.floatingRewardIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #dcfce7;
+    color: #15803d;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
+    font-weight: 800;
 }
 
-.mockOrderDetails {
-    flex: 1;
-    text-align: left;
+.floatingRewardText {
+    display: flex;
+    flex-direction: column;
 }
 
-.mockOrderName {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1e293b;
+.floatingRewardLabel {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
 }
 
-.mockOrderReward {
-    font-size: 15px;
+.floatingRewardAmount {
+    font-size: 16px;
     font-weight: 800;
     color: #15803d;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 /* --------------------------------------------------------------------------
-   4. 실시간 카운트업 수익 계산기 (Profit Calculator)
+   4. 부고드림 Step 1 벤치마크: 3대 핵심 요약 카드
    -------------------------------------------------------------------------- */
-.calculatorSection {
-    background: #ffffff;
-    padding: 80px 20px;
-    width: 100%;
-}
-
-.calculatorContainer {
-    max-width: 900px;
-    margin: 0 auto;
+.stepSection {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    padding: 100px 24px;
+    border-top: 1px solid #f1f5f9;
 }
 
-.sectionHeader {
+.sectionHeaderCenter {
     text-align: center;
-    margin-bottom: 40px;
+    max-width: 700px;
+    margin: 0 auto 50px;
 }
 
-.sectionTag {
-    display: inline-block;
-    font-size: 13px;
+.sectionPretitle {
+    font-size: 14px;
     font-weight: 700;
-    color: #1b4d3e;
-    background: rgba(27, 77, 62, 0.1);
-    padding: 6px 14px;
-    border-radius: 9999px;
-    margin-bottom: 12px;
+    color: #15803d;
+    margin-bottom: 8px;
 }
 
 .sectionTitle {
-    font-size: 32px;
+    font-size: 34px;
     font-weight: 800;
+    letter-spacing: -1px;
     color: #0f172a;
-    letter-spacing: -0.8px;
-    margin-bottom: 12px;
+    line-height: 1.3;
 }
 
-.sectionDesc {
-    font-size: 16px;
+.stepCardGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.stepCard {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stepCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+
+.stepIconBadge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f0fdf4;
+    color: #15803d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.stepCardTitle {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.stepCardDesc {
+    font-size: 15px;
+    line-height: 1.6;
     color: #64748b;
-    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   5. 실시간 수익 계산기 (클린 화이트 버전)
+   -------------------------------------------------------------------------- */
+.calculatorSection {
+    background: #ffffff;
+    padding: 100px 24px;
+}
+
+.calculatorContainer {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 28px;
+    padding: 48px;
 }
 
 .calcGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
     align-items: center;
 }
 
 .calcInputs {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 32px;
 }
 
 .sliderBlock {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .sliderHeader {
@@ -474,61 +605,60 @@
 .sliderLabel {
     font-size: 16px;
     font-weight: 700;
-    color: #334155;
+    color: #1e293b;
 }
 
 .sliderValue {
     font-size: 18px;
     font-weight: 800;
-    color: #1b4d3e;
+    color: #15803d;
 }
 
 .rangeSlider {
     width: 100%;
-    height: 10px;
-    border-radius: 5px;
+    height: 8px;
+    border-radius: 4px;
     background: #e2e8f0;
     outline: none;
     -webkit-appearance: none;
-    accent-color: #2d6a4f;
+    accent-color: #15803d;
     cursor: pointer;
 }
 
 .calcResultCard {
-    background: linear-gradient(135deg, #0f2d1f, #1b4d3e);
+    background: #ffffff;
+    border: 1.5px solid #bbf7d0;
     border-radius: 20px;
     padding: 32px;
-    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(21, 128, 61, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    box-shadow: 0 12px 30px rgba(15, 45, 31, 0.25);
+    gap: 16px;
     text-align: center;
 }
 
-.calcResultTitle {
-    font-size: 15px;
-    color: #86efac;
+.calcResultLabel {
+    font-size: 14px;
     font-weight: 700;
+    color: #15803d;
 }
 
 .calcResultAmount {
-    font-size: 46px;
+    font-size: 42px;
     font-weight: 900;
-    letter-spacing: -1.5px;
-    color: #fde047;
-    margin: 8px 0;
+    color: #0f172a;
+    letter-spacing: -1px;
 }
 
 .calcBreakdown {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 14px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    padding-top: 16px;
-    text-align: left;
     font-size: 14px;
-    color: #cbd5e1;
+    color: #64748b;
+    text-align: left;
 }
 
 .calcBreakdownRow {
@@ -537,111 +667,29 @@
 }
 
 .calcActionBtn {
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: #0b1e15;
-    padding: 16px;
+    background: #15803d;
+    color: #ffffff;
+    padding: 15px;
     border-radius: 12px;
-    font-size: 17px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
     text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
-    transition: all 0.2s ease;
+    transition: background 0.15s ease;
 }
 
 .calcActionBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.5);
+    background: #166534;
 }
 
 /* --------------------------------------------------------------------------
-   5. 듀얼 타겟 탭 섹션 (Dual Audience Section)
-   -------------------------------------------------------------------------- */
-.dualSection {
-    background: #0f172a;
-    padding: 90px 20px;
-    color: #ffffff;
-}
-
-.dualContainer {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.tabSwitcher {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 40px;
-}
-
-.tabBtn {
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 700;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
-    transition: all 0.2s ease;
-}
-
-.tabBtnActive {
-    background: #2d6a4f;
-    border-color: #4ade80;
-    color: #ffffff;
-    box-shadow: 0 4px 16px rgba(45, 106, 79, 0.4);
-}
-
-.tabContentGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-.benefitCard {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.benefitCard:hover {
-    transform: translateY(-4px);
-    border-color: rgba(74, 222, 128, 0.3);
-}
-
-.benefitIcon {
-    font-size: 32px;
-    margin-bottom: 4px;
-}
-
-.benefitTitle {
-    font-size: 19px;
-    font-weight: 700;
-    color: #ffffff;
-}
-
-.benefitDesc {
-    font-size: 15px;
-    color: #94a3b8;
-    line-height: 1.6;
-}
-
-/* --------------------------------------------------------------------------
-   6. 팩트 비교표 (Comparison Table)
+   6. 팩트 비교표 (화이트 모던)
    -------------------------------------------------------------------------- */
 .compareSection {
-    background: #ffffff;
-    padding: 90px 20px;
+    background: #f8fafc;
+    padding: 100px 24px;
 }
 
 .compareContainer {
@@ -653,29 +701,31 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
     margin-top: 36px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
 }
 
 .compareTable th,
 .compareTable td {
     padding: 18px 20px;
     text-align: center;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .compareTable th {
     background: #f8fafc;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #475569;
 }
 
 .compareTable th.highlightCol,
 .compareTable td.highlightCol {
-    background: rgba(34, 197, 94, 0.05);
+    background: #f0fdf4;
     color: #15803d;
     font-weight: 800;
 }
@@ -683,8 +733,8 @@
 .compareTable td:first-child {
     text-align: left;
     font-weight: 700;
-    color: #334155;
-    background: #f8fafc;
+    color: #1e293b;
+    background: #ffffff;
     width: 28%;
 }
 
@@ -693,86 +743,82 @@
 }
 
 /* --------------------------------------------------------------------------
-   7. 사회적 증거 & 후기 (Testimonials & Logos)
+   7. 지도사 이야기 (Testimonials) - 부고드림 카드 룩
    -------------------------------------------------------------------------- */
-.socialProofSection {
-    background: #f8fafc;
-    padding: 80px 20px;
-    text-align: center;
+.storySection {
+    background: #ffffff;
+    padding: 100px 24px;
 }
 
-.testimonialGrid {
+.storyGrid {
+    max-width: 1100px;
+    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-    max-width: 1100px;
-    margin: 36px auto 0;
 }
 
-.testimonialCard {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 24px;
-    text-align: left;
+.storyCard {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 28px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
 }
 
-.testimonialText {
-    font-size: 15px;
+.storyQuote {
+    font-size: 16px;
     line-height: 1.6;
     color: #334155;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
-.testimonialAuthor {
+.storyQuote strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.storyAuthor {
     display: flex;
     align-items: center;
     gap: 10px;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 12px;
 }
 
-.authorAvatar {
+.storyAvatar {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     background: #e2e8f0;
+    color: #475569;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: #475569;
     font-size: 13px;
 }
 
-.authorInfo {
-    display: flex;
-    flex-direction: column;
-}
-
-.authorName {
+.storyAuthorName {
     font-size: 14px;
     font-weight: 700;
     color: #0f172a;
 }
 
-.authorRole {
+.storyAuthorRole {
     font-size: 12px;
     color: #64748b;
 }
 
 /* --------------------------------------------------------------------------
-   8. 푸터 (Footer)
+   8. 푸터 (Footer) - 담백하고 깔끔한 그레이
    -------------------------------------------------------------------------- */
 .footer {
-    background: #06110c;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 60px 24px 100px;
     color: #64748b;
-    padding: 50px 20px 100px;
     font-size: 13px;
     line-height: 1.7;
 }
@@ -789,32 +835,33 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .footerLogo {
     font-size: 18px;
     font-weight: 800;
-    color: #ffffff;
+    color: #0f172a;
 }
 
 .footerLinks {
     display: flex;
-    gap: 20px;
+    gap: 16px;
 }
 
 .footerLink {
-    color: #94a3b8;
+    color: #64748b;
     text-decoration: none;
+    font-weight: 500;
 }
 
 .footerLink:hover {
-    color: #ffffff;
+    color: #0f172a;
 }
 
 /* --------------------------------------------------------------------------
-   9. 모바일 하단 고정 끈적바 (Sticky Bottom CTA)
+   9. 모바일 하단 고정 끈적바 (Sticky Bottom Bar)
    -------------------------------------------------------------------------- */
 .stickyBottomBar {
     position: fixed;
@@ -822,16 +869,15 @@
     left: 0;
     right: 0;
     z-index: 99;
-    background: rgba(11, 30, 21, 0.94);
+    background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid #e2e8f0;
     padding: 12px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .stickyText {
@@ -841,36 +887,56 @@
 
 .stickySub {
     font-size: 12px;
-    color: #86efac;
-    font-weight: 600;
+    color: #15803d;
+    font-weight: 700;
 }
 
 .stickyMain {
     font-size: 15px;
     font-weight: 800;
-    color: #ffffff;
+    color: #0f172a;
 }
 
 .stickyBtn {
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: #0b1e15;
+    background: #15803d;
+    color: #ffffff;
     padding: 12px 22px;
     border-radius: 10px;
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
 }
 
 /* --------------------------------------------------------------------------
-   10. 반응형 미디어 쿼리 (Responsive Media Queries)
+   10. 반응형 미디어 쿼리 (Responsive)
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
-    .heroTitle {
-        font-size: 32px;
+    .heroSection {
+        flex-direction: column;
+        text-align: center;
+        padding: 50px 20px 60px;
+        gap: 40px;
     }
-    
+
+    .heroLeft {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .heroForm {
+        margin: 0 auto;
+    }
+
+    .heroTrustList {
+        justify-content: center;
+    }
+
+    .heroTitle {
+        font-size: 34px;
+        letter-spacing: -1px;
+    }
+
     .heroSubtitle {
         font-size: 17px;
     }
@@ -879,11 +945,11 @@
         grid-template-columns: 1fr;
     }
 
-    .tabContentGrid {
+    .stepCardGrid {
         grid-template-columns: 1fr;
     }
 
-    .testimonialGrid {
+    .storyGrid {
         grid-template-columns: 1fr;
     }
 
@@ -893,24 +959,15 @@
 }
 
 @media (max-width: 640px) {
-    .header {
-        padding: 0 16px;
-    }
-
-    .heroSection {
-        padding: 50px 16px 60px;
-    }
-
     .heroTitle {
         font-size: 28px;
-        letter-spacing: -0.8px;
     }
 
-    .inputGroup {
+    .heroForm {
         flex-direction: column;
     }
 
-    .phoneInput, .heroCtaBtn {
+    .heroInput, .heroSubmitBtn {
         width: 100%;
     }
 
@@ -919,24 +976,23 @@
     }
 
     .calcResultAmount {
-        font-size: 36px;
+        font-size: 34px;
     }
 
-    .compareTable {
-        font-size: 14px;
+    .mockupContainer {
+        width: 270px;
     }
 
-    .compareTable th,
-    .compareTable td {
-        padding: 12px 10px;
+    .deviceChassis {
+        width: 260px;
+        height: 530px;
+        border-radius: 40px;
     }
 
-    .tabSwitcher {
-        flex-direction: column;
-    }
-
-    .tabBtn {
-        width: 100%;
-        text-align: center;
+    .floatingRewardCard {
+        right: -10px;
+        bottom: 10px;
+        min-width: 200px;
+        padding: 10px 14px;
     }
 }

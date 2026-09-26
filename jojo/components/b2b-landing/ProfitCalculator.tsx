@@ -18,11 +18,11 @@ export default function ProfitCalculator() {
 
     return (
         <section id="calculator" className={styles.calculatorSection}>
-            <div className={styles.sectionHeader}>
-                <span className={styles.sectionTag}>실시간 정산 시뮬레이터</span>
+            <div className={styles.sectionHeaderCenter}>
+                <div className={styles.sectionPretitle}>실시간 정산 시뮬레이터</div>
                 <h2 className={styles.sectionTitle}>내가 한 달에 가져갈 수 있는 부수입은?</h2>
-                <p className={styles.sectionDesc}>
-                    복잡한 계산 없이 슬라이더를 움직여 이번 달 예상 정산금을 직접 확인해 보세요.
+                <p style={{ fontSize: '16px', color: '#64748b', marginTop: '10px' }}>
+                    슬라이더를 움직여 이번 달 예상 정산금을 직접 확인해 보세요.
                 </p>
             </div>
 
@@ -73,14 +73,14 @@ export default function ProfitCalculator() {
                             </div>
                         </div>
 
-                        <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5, background: '#f1f5f9', padding: '12px', borderRadius: '8px' }}>
-                            💡 장례 1건당 화환 2건 판매, 동료 1인당 월 3건 화환 판매 시의 보수적인 예상치입니다.
+                        <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5, background: '#ffffff', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            💡 장례 1건당 화환 2건 판매(평균 수당 5.5만 원), 동료 1인당 월 3건 화환 판매 시의 보수적인 예상치입니다.
                         </div>
                     </div>
 
                     {/* 결과 카드 */}
                     <div className={styles.calcResultCard}>
-                        <div className={styles.calcResultTitle}>이번 달 예상 수령액</div>
+                        <div className={styles.calcResultLabel}>이번 달 예상 수령액</div>
                         <div className={styles.calcResultAmount}>
                             {grandTotal.toLocaleString()}원
                         </div>
@@ -92,7 +92,7 @@ export default function ProfitCalculator() {
                             </div>
                             <div className={styles.calcBreakdownRow}>
                                 <span>추천인 평생 연금 (건당 3,500원)</span>
-                                <strong style={{ color: '#86efac' }}>+{referralBonusTotal.toLocaleString()}원</strong>
+                                <strong style={{ color: '#15803d' }}>+{referralBonusTotal.toLocaleString()}원</strong>
                             </div>
                         </div>
 
@@ -100,7 +100,7 @@ export default function ProfitCalculator() {
                             href="https://bugoon.maeumbugo.co.kr/b2b/signup" 
                             className={styles.calcActionBtn}
                         >
-                            이 수익 지금 바로 내 지갑으로 받기 →
+                            이 수익 지금 바로 받기 →
                         </a>
                     </div>
                 </div>
