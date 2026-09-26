@@ -1,0 +1,942 @@
+/* ==========================================================================
+   부고온플러스 공식 홈페이지 (Landing Page) 모바일 퍼스트 프리미엄 CSS
+   - 딥 에메랄드 그린 (#1B4D3E) + 샴페인 골드 (#D4AF37) + 슬레이트 웜 화이트
+   - 40~60대 장례지도사 최적화 대형 가독성 & 터치 타겟
+   ========================================================================== */
+
+.landingWrapper {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0b1e15;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, Roboto, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   1. 헤더 (Header)
+   -------------------------------------------------------------------------- */
+.header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 68px;
+    background: rgba(11, 30, 21, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logoArea {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.logoBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2d6a4f, #1b4d3e);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.logoText {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.logoHighlight {
+    color: #4ade80;
+    margin-left: 2px;
+}
+
+.logoSub {
+    font-size: 11px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.navLink {
+    font-size: 15px;
+    font-weight: 600;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.navLink:hover {
+    color: #4ade80;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.loginBtn {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.loginBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.startBtn {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b1e15;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+    transition: all 0.2s ease;
+}
+
+.startBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   2. 히어로 섹션 (Hero Section)
+   -------------------------------------------------------------------------- */
+.heroSection {
+    position: relative;
+    padding: 70px 20px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.heroGlow {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(11, 30, 21, 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.heroBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    background: rgba(45, 106, 79, 0.4);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #86efac;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.heroTitle {
+    font-size: 44px;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    color: #ffffff;
+    margin-bottom: 20px;
+    z-index: 1;
+}
+
+.goldGradientText {
+    background: linear-gradient(135deg, #fde047 0%, #f59e0b 50%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.greenGradientText {
+    background: linear-gradient(135deg, #86efac 0%, #4ade80 50%, #22c55e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.heroSubtitle {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    max-width: 640px;
+    margin: 0 auto 36px;
+    z-index: 1;
+    font-weight: 400;
+}
+
+.heroSubtitle strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* 빠른 가입 인풋 박스 */
+.quickSignupBox {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+    margin-bottom: 20px;
+    z-index: 1;
+}
+
+.inputGroup {
+    display: flex;
+    gap: 8px;
+}
+
+.phoneInput {
+    flex: 1;
+    height: 54px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 0 16px;
+    font-size: 17px;
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.phoneInput:focus {
+    border-color: #4ade80;
+}
+
+.phoneInput::placeholder {
+    color: #64748b;
+}
+
+.heroCtaBtn {
+    height: 54px;
+    padding: 0 24px;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #0b1e15;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    transition: all 0.2s ease;
+}
+
+.heroCtaBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5);
+}
+
+.heroSubInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: 13px;
+    color: #94a3b8;
+    z-index: 1;
+}
+
+.heroSubInfoItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   3. 3D 인터랙티브 목업 쇼케이스 (Mockup Showcase)
+   -------------------------------------------------------------------------- */
+.mockupShowcase {
+    width: 100%;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+    perspective: 1000px;
+}
+
+.phoneFrame {
+    width: 320px;
+    background: #0f172a;
+    border: 8px solid #334155;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(74, 222, 128, 0.2);
+    transform: rotateX(8deg) rotateY(-4deg) rotateZ(1deg);
+    transition: transform 0.4s ease;
+}
+
+.phoneFrame:hover {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02);
+}
+
+.phoneInner {
+    background: #ffffff;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+}
+
+.phoneHeader {
+    background: #1b4d3e;
+    color: #ffffff;
+    padding: 16px 14px 12px;
+    text-align: center;
+}
+
+.phoneHeaderText {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.phoneHeaderTitle {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.phoneBody {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mockOrderCard {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mockOrderIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.mockOrderDetails {
+    flex: 1;
+    text-align: left;
+}
+
+.mockOrderName {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.mockOrderReward {
+    font-size: 15px;
+    font-weight: 800;
+    color: #15803d;
+    margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   4. 실시간 카운트업 수익 계산기 (Profit Calculator)
+   -------------------------------------------------------------------------- */
+.calculatorSection {
+    background: #ffffff;
+    padding: 80px 20px;
+    width: 100%;
+}
+
+.calculatorContainer {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.sectionHeader {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.sectionTag {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1b4d3e;
+    background: rgba(27, 77, 62, 0.1);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+}
+
+.sectionTitle {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.8px;
+    margin-bottom: 12px;
+}
+
+.sectionDesc {
+    font-size: 16px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.calcGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+}
+
+.calcInputs {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.sliderBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sliderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sliderLabel {
+    font-size: 16px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.sliderValue {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1b4d3e;
+}
+
+.rangeSlider {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: #e2e8f0;
+    outline: none;
+    -webkit-appearance: none;
+    accent-color: #2d6a4f;
+    cursor: pointer;
+}
+
+.calcResultCard {
+    background: linear-gradient(135deg, #0f2d1f, #1b4d3e);
+    border-radius: 20px;
+    padding: 32px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 12px 30px rgba(15, 45, 31, 0.25);
+    text-align: center;
+}
+
+.calcResultTitle {
+    font-size: 15px;
+    color: #86efac;
+    font-weight: 700;
+}
+
+.calcResultAmount {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: #fde047;
+    margin: 8px 0;
+}
+
+.calcBreakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 16px;
+    text-align: left;
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+.calcBreakdownRow {
+    display: flex;
+    justify-content: space-between;
+}
+
+.calcActionBtn {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #0b1e15;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 800;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+    transition: all 0.2s ease;
+}
+
+.calcActionBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   5. 듀얼 타겟 탭 섹션 (Dual Audience Section)
+   -------------------------------------------------------------------------- */
+.dualSection {
+    background: #0f172a;
+    padding: 90px 20px;
+    color: #ffffff;
+}
+
+.dualContainer {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.tabSwitcher {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.tabBtn {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.tabBtnActive {
+    background: #2d6a4f;
+    border-color: #4ade80;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(45, 106, 79, 0.4);
+}
+
+.tabContentGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.benefitCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.benefitCard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+.benefitIcon {
+    font-size: 32px;
+    margin-bottom: 4px;
+}
+
+.benefitTitle {
+    font-size: 19px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.benefitDesc {
+    font-size: 15px;
+    color: #94a3b8;
+    line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   6. 팩트 비교표 (Comparison Table)
+   -------------------------------------------------------------------------- */
+.compareSection {
+    background: #ffffff;
+    padding: 90px 20px;
+}
+
+.compareContainer {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.compareTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 36px;
+}
+
+.compareTable th,
+.compareTable td {
+    padding: 18px 20px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.compareTable th {
+    background: #f8fafc;
+    font-size: 16px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.compareTable th.highlightCol,
+.compareTable td.highlightCol {
+    background: rgba(34, 197, 94, 0.05);
+    color: #15803d;
+    font-weight: 800;
+}
+
+.compareTable td:first-child {
+    text-align: left;
+    font-weight: 700;
+    color: #334155;
+    background: #f8fafc;
+    width: 28%;
+}
+
+.compareTable tr:last-child td {
+    border-bottom: none;
+}
+
+/* --------------------------------------------------------------------------
+   7. 사회적 증거 & 후기 (Testimonials & Logos)
+   -------------------------------------------------------------------------- */
+.socialProofSection {
+    background: #f8fafc;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.testimonialGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 36px auto 0;
+}
+
+.testimonialCard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.testimonialText {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #334155;
+    margin-bottom: 16px;
+}
+
+.testimonialAuthor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+}
+
+.authorAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #475569;
+    font-size: 13px;
+}
+
+.authorInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.authorName {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.authorRole {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* --------------------------------------------------------------------------
+   8. 푸터 (Footer)
+   -------------------------------------------------------------------------- */
+.footer {
+    background: #06110c;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #64748b;
+    padding: 50px 20px 100px;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.footerContainer {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 20px;
+}
+
+.footerLogo {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.footerLinks {
+    display: flex;
+    gap: 20px;
+}
+
+.footerLink {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+.footerLink:hover {
+    color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   9. 모바일 하단 고정 끈적바 (Sticky Bottom CTA)
+   -------------------------------------------------------------------------- */
+.stickyBottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background: rgba(11, 30, 21, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stickyText {
+    display: flex;
+    flex-direction: column;
+}
+
+.stickySub {
+    font-size: 12px;
+    color: #86efac;
+    font-weight: 600;
+}
+
+.stickyMain {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.stickyBtn {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #0b1e15;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   10. 반응형 미디어 쿼리 (Responsive Media Queries)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .heroTitle {
+        font-size: 32px;
+    }
+    
+    .heroSubtitle {
+        font-size: 17px;
+    }
+
+    .calcGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabContentGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonialGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .navLinks {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .header {
+        padding: 0 16px;
+    }
+
+    .heroSection {
+        padding: 50px 16px 60px;
+    }
+
+    .heroTitle {
+        font-size: 28px;
+        letter-spacing: -0.8px;
+    }
+
+    .inputGroup {
+        flex-direction: column;
+    }
+
+    .phoneInput, .heroCtaBtn {
+        width: 100%;
+    }
+
+    .calculatorContainer {
+        padding: 24px 16px;
+    }
+
+    .calcResultAmount {
+        font-size: 36px;
+    }
+
+    .compareTable {
+        font-size: 14px;
+    }
+
+    .compareTable th,
+    .compareTable td {
+        padding: 12px 10px;
+    }
+
+    .tabSwitcher {
+        flex-direction: column;
+    }
+
+    .tabBtn {
+        width: 100%;
+        text-align: center;
+    }
+}

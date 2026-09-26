@@ -40,6 +40,7 @@ const infiniteLoadingHtml = `
 const HARDCODED_BLOCKED_IPS = [
   '183.98.166.235', // 아이리스코퍼레이션
   '112.184.95.41',  // 홍길동/신사임당 테스트
+  '118.235.92.167', // 010-2918-2119 (후후파/워렌 장난 부고 차단)
 ];
 
 // 관리자 IP (화이트리스트 — 차단/로그 제외)
@@ -192,22 +193,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*) - 대소문자 구분 없이 다양한 환경 지원
+  // B2B 전용 서브도메인 여부 감지 (partner.*, b2b.*, bugoon.*, bugoonplus.*) - 대소문자 구분 없이 다양한 환경 지원
+  const isBugoonPlusSubdomain =
+    hostLower.startsWith('bugoonplus.') ||
+    hostLower.startsWith('bugoonplus-') ||
+    hostLower.includes('.bugoonplus.') ||
+    hostLower.includes('.bugoonplus-');
+
   const isB2BSubdomain =
     // 로컬 환경에서는 포트 3000번, 3001번, 3009번 모두 지원
     (isLocal ? (hostLower.includes(':3000') || hostLower.includes(':3001') || hostLower.includes(':3009')) : false) ||
     hostLower.startsWith('partner.') ||
     hostLower.startsWith('b2b.') ||
     hostLower.startsWith('bugoon.') ||
+    hostLower.startsWith('bugoonplus.') ||
     hostLower.startsWith('partner-') ||
     hostLower.startsWith('b2b-') ||
     hostLower.startsWith('bugoon-') ||
+    hostLower.startsWith('bugoonplus-') ||
     hostLower.includes('.partner.') ||
     hostLower.includes('.b2b.') ||
     hostLower.includes('.bugoon.') ||
+    hostLower.includes('.bugoonplus.') ||
     hostLower.includes('.partner-') ||
     hostLower.includes('.b2b-') ||
-    hostLower.includes('.bugoon-');
+    hostLower.includes('.bugoon-') ||
+    hostLower.includes('.bugoonplus-');
 
   // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화) - 로컬 환경 또는 개발 모드에서는 허용
   if (process.env.NODE_ENV !== 'development' && !isLocal && !isB2BSubdomain && path.startsWith('/b2b')) {
@@ -335,6 +346,22 @@ export async function middleware(request: NextRequest) {
           status: 200,
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
+      }
+    }
+  }
+
+  // bugoonplus.maeumbugo.co.kr 전용 공식 홈페이지 라우팅 (루트 접속 시 /intro 표시)
+  if (isBugoonPlusSubdomain) {
+    const isStaticOrApi =
+      path.startsWith('/_next') ||
+      path.startsWith('/_vercel') ||
+      path.startsWith('/api') ||
+      path.startsWith('/favicon.ico') ||
+      /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map)$/.test(path);
+
+    if (!isStaticOrApi) {
+      if (path === '/' || path === '') {
+        return NextResponse.rewrite(new URL('/intro', request.url));
       }
     }
   }

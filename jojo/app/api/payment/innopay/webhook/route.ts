@@ -77,6 +77,10 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: true, message: '이미 입금 완료된 주문입니다.' });
             }
 
+            if (existingOrder?.status === 'cancelled') {
+                console.warn(`⚠️ [B2B-Webhook] 취소된 주문에 입금 웹훅 인입 (부활 및 오발주 차단): ${orderId}`);
+                return NextResponse.json({ success: true, message: '취소된 주문입니다. (환불 대상)' });
+            }
             const { data: updatedOrder, error: updateError } = await supabase
                 .from('flower_orders')
                 .update({ status: 'completed' })
