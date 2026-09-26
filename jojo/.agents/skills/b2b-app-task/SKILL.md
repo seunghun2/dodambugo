@@ -477,53 +477,26 @@ description: 부고온 모바일 하이브리드 앱 출시, 푸시/스플래시
   4. **화환 + 부의금 2대 정산 명세서 분리 렌더링**: 상조회사 대시보드 화면에 `■ 화환 판매 정산 세부 내역`과 `■ 부의금 정산 세부 내역`을 2개 테이블로 분리 명세하고, A4 정산서 인쇄(`window.print()`) 및 CSV 엑셀 다운로드 파일에 두 내역이 통합 합산되도록 구현 완료.
   5. **커밋 및 배포**: `commit: 4d95cf0` push 완료.
 
-### 14. 더좋은라이프 제휴위탁운영 계약서 작성 및 수수료 정돈 (2026-09-21)
-- **상태**: 📝 작성 완료 (서명 대기 중)
-- **파일 위치**:
-  - 바탕화면: `/Users/el/Desktop/2609_부고온_제휴위탁운영계약서_주식회사마음부고_더좋은라이프.docx`
-  - 데브늄 폴더: `/Users/el/Desktop/데브늄/2609_부고온_제휴위탁운영계약서_주식회사마음부고_더좋은라이프.docx`
+### 14. 더좋은라이프 제휴위탁운영 계약서 작성 중 (2026-09-17)
+- **상태**: 📝 작성 중 (검증 완료, 서명 전)
+- **파일 위치**: `/Users/el/Desktop/데브늄/2609_부고온_제휴위탁운영계약서_주식회사마음부고_더좋은라이프.docx`
 - **구성**: 본문 9개 조 (제1조~제9조) + 부속서 1 (5개 조)
-- **핵심 확정 사항**:
-  - 부속서 제1조: 소비자 판매 기준가 열 삭제, 4열 수수료 중심 표 확정 (기본 3단 상조사 수수료 60,000원 = 지도사 50,000원 + 본사 10,000원)
-  - 본문 제5조 제4항: 본사 귀속 수수료 일체 부가가치세(VAT) 포함 명시 (화환, 부의금 3.3%, 답례품 최대 4%)
+- **핵심 내용**:
+  - 제5조: 화환·부의금·답례품 통합 정산 (익월 15일 이내)
   - 제7조: 지식재산권 마음부고 귀속, 비밀유지 2년
   - 제8조: 서비스 안정성 보장 (데이터 이관 + 기여도 보상 별도 협의 가능)
+  - 부속서 제2조 3항: 추천인 3,500원 / 본사 6,500원 분할
+  - 부속서 제4조: 답례품 최대 4%
+- **미반영 사항**: 추천인 분할 정산 코드 개발 (approve/route.ts), 답례품 결제 시스템 연동
 
-### 16. 화환 6종 차등 수당 & 추천 분할 수수료 DB 동적화 및 어드민 UI/UX 완결 (2026-09-21)
-- **개요**: 하드코딩을 100% 제거하고, DB(`b2b_companies`) 기반으로 상조회사별 상품 6종 수당과 추천인 분할 수수료를 동적 연동하는 풀스택 파이프라인 완결.
-- **수정 및 추가 파일**:
-  1. `b2b_companies` DB 스키마: `wreath_basket_amount`, `wreath_objet_amount`, `wreath_basic_amount`, `wreath_deluxe_amount`, `wreath_premium_amount`, `wreath_vip_amount`, `referral_member_bonus`, `referral_company_bonus` 8개 컬럼 추가
-  2. `jojo/lib/b2b-company.ts`: B2BCompany 인터페이스 및 `normalizeCompanyData` 8개 필드 기본값/타입 캐스팅 지원
-  3. `jojo/app/api/b2b/admin/companies/route.ts`: POST 및 PUT 요청 시 8개 신규 수수료 필드 검증 및 저장
-  4. `jojo/app/b2b/admin/companies/page.tsx` & `companies.module.css`:
-     - 상조회사 등록/수정 모달에 4대 섹션 카드 UI 도입 (기본정보, 화환 상품 6종 수당 2열 그리드, 추천인 분할 수당, 부의금/답례품)
-     - 하단 고정 액션 바(`formActions`) 및 스크롤 바디(`modalBody`) 구현
-     - 목록 테이블에 본사 수수료 + 기본3단 수당 + 상품 범위 요약 표시
-  5. `jojo/app/api/payment/innopay/approve/route.ts`:
-     - 하드코딩 완전 제거: `orderData.product_name`에 매칭되는 상품별 수당을 `companyRecord`의 DB 컬럼값으로 동적 인입
-     - 추천인 소속 상조회사의 `referral_member_bonus`, `referral_company_bonus` DB 컬럼값을 동적으로 조회하여 분할 적재
-- **검증 완료 내역**:
-  - 단위 테스트: `jojo/__tests__/referral-split.test.ts` (상품 6종 + 추천인 시나리오 100% 통과)
-  - Playwright MCP: 헤드리스 브라우저로 실제 관리자 화면 접속, 신규 모달 및 수정 모달 렌더링/스크롤 검증 및 스크린샷 검수 완료
-  - Supabase MCP: 실제 더좋은라이프 레코드에 8개 수수료 필드 정확히 저장 및 조회 검증 완료
-  - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (30.8s)
+### 15. 부고온플러스 공식 홈페이지(bugoonplus.maeumbugo.co.kr) 기획 및 부고드림급 디자인 고도화 (백로그)
+- **상태**: ⏸️ 보류 및 디자인 에셋 고도화 대기 (임시 404 비활성화 완료)
+- **목표**: 부고드림(`bugodream.com`)을 뛰어넘는 자연스러운 화이트 모던 룩 및 고해상도 실물 폰 목업 기반 B2B 공식 홈페이지 구축
+- **보완 핵심 과제**:
+  1. **실물 디바이스 그래픽 에셋 도입**: CSS 코드로 만든 가짜 폰 테두리 대신, 부고드림처럼 **실제 아이폰 고해상도 목업 PNG 에셋(`landing-top-bg2.png`)**에 부고온 부고장/수당 화면을 자연스럽게 합성한 이미지 에셋 확보 필요.
+  2. **순백색 화이트 모던 레이아웃**: 칙칙한 다크톤/글로우 배제, 100% 순백색 바탕 + 큼직한 여백 + 둥근 모던 카드(24px).
+  3. **컴포넌트 보존 현황**: `components/b2b-landing/`에 헤더, 히어로, 수익 계산기, 탭, 비교표, 후기, 기업 제휴 모달 등 10종 컴포넌트 코드 보존 완료. 언제든 재가동 가능.
+- **관련 파일**: `app/intro/page.tsx`, `components/b2b-landing/*`, `middleware.ts`
 
-### 17. 결제/웹훅/정산 파이프라인 전수 감사 및 가상계좌(Webhook) 동기화 완수 (2026-09-21)
-- **개요**: 신용카드 승인뿐만 아니라 가상계좌(vbank) 입금 통보 웹훅 및 취소/어드민/지갑 파이프라인 전체를 전수 감사하여 누락된 지점을 완벽하게 동기화.
-- **수정 및 보완 파일**:
-  1. `jojo/app/api/payment/innopay/webhook/route.ts`:
-     - 가상계좌 입금 통보 시에도 상품 6종 차등 수당(바구니 3만, 오브제 4만, 기본3단 5만, 고급 5.5만, 특대 6만, 4단 6.5만) DB 동적 분기 적용.
-     - 추천인 보너스(레거시 2,500원 고정) 누락 해소: 추천인 소속 상조회사 존재 시 `referral_member_bonus`(3,500원) + `referral_company_bonus`(6,500원) DB 동적 분할 적재 동기화.
-  2. `jojo/app/api/payment/innopay/approve/route.ts`:
-     - 예치금 적립 내역 `type`을 DB/어드민 표준인 `'wreath_reward'`로 일원화 (기존 `'flower_reward'`와의 불일치 해소).
-  3. `jojo/app/api/flower-orders/cancel/route.ts`:
-     - 주문 취소 시 수당 회수 쿼리를 `.in('type', ['wreath_reward', 'flower_reward'])`로 듀얼 매칭하여 과거/신규 거래 모두 100% 안전 회수 보장.
-  4. `jojo/app/api/b2b/admin/flower-orders/route.ts`:
-     - 어드민 화환 주문 목록에서 `wreath_reward`와 `flower_reward` 모두 정확하게 수당 집계 표시.
-  5. `jojo/app/b2b/wallet/page.tsx`:
-     - 파트너 지갑 내역 라벨 헬퍼에 `flower_reward` 누락 방지 매핑.
-  6. `jojo/app/b2b/admin/partners/page.tsx`:
-     - 파트너 본인인증 상세 모달의 상조회사 요율표에 상품 6종 수당 및 추천 분할 수당 명시.
-- **검증 완료 내역**:
-  - 단위 테스트: `jojo/__tests__/referral-split.test.ts` 9개 전수 통과
-  - Next.js 프로덕션 빌드(`npm run build`) 통과 완료 (126개 페이지 정상 컴파일)
+
+
