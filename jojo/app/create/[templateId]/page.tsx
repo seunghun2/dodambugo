@@ -1101,8 +1101,9 @@ export default function WriteFormPage() {
             if (!formData.address) newErrors.address = '주소를 입력해주세요';
         }
 
-        // 일포 OFF일 때만 발인일시 필수
-        if (!showIlpo) {
+        // 일포 OFF일 때만 발인일시 필수 (무빈소장례는 선택 입력)
+        const isNoBinso = formData.funeral_type === '무빈소장례';
+        if (!showIlpo && !isNoBinso) {
             if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
             if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
         }
@@ -1939,7 +1940,12 @@ export default function WriteFormPage() {
 
                                         <div className="form-group" data-field="funeral_date">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <label className={`form-label ${!showIlpo ? 'required' : ''}`} style={{ marginBottom: 0 }}>발인일시</label>
+                                                <label className={`form-label ${!showIlpo && formData.funeral_type !== '무빈소장례' ? 'required' : ''}`} style={{ marginBottom: 0 }}>
+                                                    발인일시
+                                                    {formData.funeral_type === '무빈소장례' && (
+                                                        <span style={{ fontSize: '13px', fontWeight: 'normal', color: 'var(--gray-500)', marginLeft: '4px' }}>(선택)</span>
+                                                    )}
+                                                </label>
                                                 {showIlpo && (
                                                     <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--accent)', cursor: 'pointer', fontWeight: '500' }}>
                                                         <input
@@ -1957,8 +1963,9 @@ export default function WriteFormPage() {
                                                     <div style={{ flex: 6 }}>
                                                         <DatePickerInput
                                                             locale="ko"
-                                                            placeholder="날짜 선택"
+                                                            placeholder={formData.funeral_type === '무빈소장례' ? "날짜 선택 (선택)" : "날짜 선택"}
                                                             value={formData.funeral_date || null}
+                                                            clearable={formData.funeral_type === '무빈소장례'}
                                                             onChange={(value) => setFormData(prev => ({
                                                                 ...prev,
                                                                 funeral_date: value || ''

@@ -24,6 +24,7 @@ interface Props {
   onChange: (field: string, value: string) => void;
   onClear: (fields: string[]) => void;
   errors?: Record<string, string>;
+  isNoBinso?: boolean;
 }
 
 // 날짜 포맷: "2026-06-10" → "2026. 06. 10."
@@ -161,7 +162,7 @@ function DateTimeCard({
   );
 }
 
-export default function DateTimeSection({ formData, onChange, onClear, errors }: Props) {
+export default function DateTimeSection({ formData, onChange, onClear, errors, isNoBinso }: Props) {
   const showIlpo = useMemo(
     () => formData.address?.includes('제주'),
     [formData.address],
@@ -184,6 +185,10 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
 
   const handleClearIlpo = useCallback(() => {
     onClear(['ilpo_date', 'ilpo_time']);
+  }, [onClear]);
+
+  const handleClearFuneral = useCallback(() => {
+    onClear(['funeral_date', 'funeral_time']);
   }, [onClear]);
 
   const openCalendar = (field: string, title: string) => {
@@ -234,9 +239,10 @@ export default function DateTimeSection({ formData, onChange, onClear, errors }:
       />
 
       <DateTimeCard
-        label="발인일시"
-        required
-        showClear={false}
+        label={isNoBinso ? '발인일시 (선택)' : '발인일시'}
+        required={!isNoBinso}
+        showClear={isNoBinso && !!(formData.funeral_date || formData.funeral_time)}
+        onClear={isNoBinso ? handleClearFuneral : undefined}
         dateValue={formData.funeral_date}
         timeValue={formData.funeral_time}
         onDateChange={(v) => onChange('funeral_date', v)}
