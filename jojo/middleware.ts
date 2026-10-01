@@ -44,7 +44,15 @@ const HARDCODED_BLOCKED_IPS = [
 ];
 
 // 관리자 IP (화이트리스트 — 차단/로그 제외)
-const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1', '117.111.6.111', '210.121.187.54'];
+const ADMIN_IPS = ['14.38.63.241', '127.0.0.1', '::1', '117.111.6.111', '117.111.5.105', '210.121.187.54'];
+
+function isAdminIP(ip: string): boolean {
+  if (!ip) return false;
+  if (ADMIN_IPS.includes(ip)) return true;
+  // 대표님 모바일 LTE 대역 (117.111.x.x) 자동 허용
+  if (ip.startsWith('117.111.')) return true;
+  return false;
+}
 
 // DB 차단 IP 캐시 (5분마다 갱신)
 let cachedBlockedIPs: string[] = [];
@@ -114,7 +122,7 @@ async function getBlockedIPs(): Promise<string[]> {
 function logAccess(ip: string, path: string, userAgent: string, referer: string) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
   if (path.startsWith('/admin')) return;
-  if (ADMIN_IPS.includes(ip)) return;
+  if (isAdminIP(ip)) return;
 
   fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
     method: 'POST',
@@ -237,7 +245,7 @@ export async function middleware(request: NextRequest) {
     // 관리자, 사설 IP, B2B 접속 여부 체크 (B2B 사용자는 차단 대상에서 예외 처리)
     const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
     const isExcluded = 
-      ADMIN_IPS.includes(ip) || 
+      isAdminIP(ip) || 
       isAdminCookie || 
       isPrivateIp(ip) || 
       isB2BSubdomain || 

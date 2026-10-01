@@ -1946,17 +1946,36 @@ export default function WriteFormPage() {
                                                         <span style={{ fontSize: '13px', fontWeight: 'normal', color: 'var(--gray-500)', marginLeft: '4px' }}>(선택)</span>
                                                     )}
                                                 </label>
-                                                {showIlpo && (
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--accent)', cursor: 'pointer', fontWeight: '500' }}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={hideFuneral}
-                                                            onChange={(e) => setHideFuneral(e.target.checked)}
-                                                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
-                                                        />
-                                                        노출안함
-                                                    </label>
-                                                )}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    {formData.funeral_type === '무빈소장례' && (formData.funeral_date || (formData.funeral_time && formData.funeral_time !== '00:00')) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(prev => ({ ...prev, funeral_date: '', funeral_time: '' }))}
+                                                            style={{
+                                                                fontSize: '12px',
+                                                                color: '#6b7280',
+                                                                background: '#f3f4f6',
+                                                                border: '1px solid #e5e7eb',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                padding: '2px 8px'
+                                                            }}
+                                                        >
+                                                            비우기
+                                                        </button>
+                                                    )}
+                                                    {showIlpo && (
+                                                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: 'var(--accent)', cursor: 'pointer', fontWeight: '500' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={hideFuneral}
+                                                                onChange={(e) => setHideFuneral(e.target.checked)}
+                                                                style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
+                                                            />
+                                                            노출안함
+                                                        </label>
+                                                    )}
+                                                </div>
                                             </div>
                                             {!hideFuneral && (
                                                 <div className="datetime-row" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
@@ -1971,12 +1990,14 @@ export default function WriteFormPage() {
                                                                 funeral_date: value || ''
                                                             }))}
                                                             valueFormat="YYYY년 MM월 DD일"
-                                                            rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
-                                                            rightSectionPointerEvents="none"
+                                                            rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af', pointerEvents: 'none' }}>calendar_today</span>}
                                                             clearButtonProps={{
                                                                 style: {
                                                                     color: '#9ca3af',
-                                                                    opacity: 0.5,
+                                                                    opacity: 0.6,
+                                                                    pointerEvents: 'auto',
+                                                                    cursor: 'pointer',
+                                                                    touchAction: 'manipulation',
                                                                 },
                                                                 'aria-label': '날짜 지우기',
                                                             }}
@@ -1988,7 +2009,8 @@ export default function WriteFormPage() {
                                                                 },
                                                                 clearButton: {
                                                                     color: '#9ca3af',
-                                                                    opacity: 0.5,
+                                                                    opacity: 0.6,
+                                                                    pointerEvents: 'auto',
                                                                 }
                                                             }}
                                                         />
