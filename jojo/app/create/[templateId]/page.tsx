@@ -1973,11 +1973,22 @@ export default function WriteFormPage() {
                                                             valueFormat="YYYY년 MM월 DD일"
                                                             rightSection={<span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#9ca3af' }}>calendar_today</span>}
                                                             rightSectionPointerEvents="none"
+                                                            clearButtonProps={{
+                                                                style: {
+                                                                    color: '#9ca3af',
+                                                                    opacity: 0.5,
+                                                                },
+                                                                'aria-label': '날짜 지우기',
+                                                            }}
                                                             styles={{
                                                                 input: {
                                                                     height: '48px',
                                                                     borderRadius: '8px',
                                                                     border: errors.funeral_date ? '1px solid #ef4444' : '1px solid var(--gray-200)',
+                                                                },
+                                                                clearButton: {
+                                                                    color: '#9ca3af',
+                                                                    opacity: 0.5,
                                                                 }
                                                             }}
                                                         />
