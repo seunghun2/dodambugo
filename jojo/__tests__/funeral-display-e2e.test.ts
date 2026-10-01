@@ -34,7 +34,7 @@ const SCENARIOS = [
       빈소박스: false,
       입관: false,
       일포: false,
-      발인: false,
+      발인: true,
       장지: false,
       빈소라벨: '무빈소',
       지도: false,
@@ -44,7 +44,7 @@ const SCENARIOS = [
       빈소박스: false,
       입관: true,  // B2B는 encoffin_date 있으면 표시
       일포: false,
-      발인: false,
+      발인: true,
       장지: false,
       빈소라벨: '무빈소',
       지도: false,

@@ -64,9 +64,9 @@ export function shouldShowEncoffin(
 
 /**
  * 발인 표시 여부
- * - 무빈소장례이면 숨김
  * - hide_funeral이 true이면 숨김
  * - funeral_date가 없으면 숨김
+ * - 무빈소장례/가족장이라도 funeral_date가 입력되어 있으면 표시
  */
 export function shouldShowFuneral(opts: {
   funeralType?: string | null;
@@ -75,7 +75,6 @@ export function shouldShowFuneral(opts: {
 }): boolean {
   if (!opts.funeralDate) return false;
   if (opts.hideFuneral) return false;
-  if (isNoCeremony(opts.funeralType)) return false;
   return true;
 }
 

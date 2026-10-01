@@ -87,8 +87,8 @@ describe('shouldShowFuneral', () => {
     expect(shouldShowFuneral({ funeralType: '일반 장례', funeralDate: '2026-01-01' })).toBe(true);
   });
 
-  it('무빈소장례 → 숨김', () => {
-    expect(shouldShowFuneral({ funeralType: '무빈소장례', funeralDate: '2026-01-01' })).toBe(false);
+  it('무빈소장례 + 날짜 있음 → 표시', () => {
+    expect(shouldShowFuneral({ funeralType: '무빈소장례', funeralDate: '2026-01-01' })).toBe(true);
   });
 
   it('hide_funeral → 숨김', () => {
