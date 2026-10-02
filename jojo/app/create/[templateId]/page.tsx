@@ -1260,6 +1260,7 @@ export default function WriteFormPage() {
                 photo_url: showPhoto ? photoUrl : null,
                 status: 'active',
                 ip_address: clientIp || null,
+                source: (typeof window !== 'undefined' ? (sessionStorage.getItem('mb_source') || localStorage.getItem('mb_source') || null) : null),
                 // 상주 인증 토큰 (신규 생성 시에만)
                 owner_token: editBugoNumber ? undefined : generateOwnerToken(),
                 // B2C 부고장은 항상 null (B2B 파트너 부고장과 엄격 분리)

@@ -147,6 +147,42 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* 📊 유입 채널(광고/오가닉) 즉시 감지 및 저장 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var p = new URLSearchParams(window.location.search);
+                  var s = null;
+                  if (p.has('gclid') || p.has('gbraid') || p.has('wbraid')) {
+                    s = 'google_ad';
+                  } else if (p.has('n_media') || p.has('n_query') || p.has('n_ad_group') || p.has('n_ad')) {
+                    s = 'naver_ad';
+                  } else if (p.get('utm_source')) {
+                    s = p.get('utm_source');
+                  } else {
+                    var r = document.referrer || '';
+                    if (r.indexOf('ad.search.naver.com') !== -1) s = 'naver_ad';
+                    else if (r.indexOf('google.') !== -1) s = 'google_organic';
+                    else if (r.indexOf('naver.') !== -1) s = 'naver_organic';
+                    else if (r.indexOf('daum.') !== -1 || r.indexOf('kakao.') !== -1) s = 'daum_kakao';
+                  }
+                  if (s) {
+                    var isPaid = s.indexOf('_ad') !== -1;
+                    var existing = sessionStorage.getItem('mb_source') || localStorage.getItem('mb_source');
+                    var isExistingPaid = existing && existing.indexOf('_ad') !== -1;
+                    if (isPaid || !isExistingPaid) {
+                      sessionStorage.setItem('mb_source', s);
+                      localStorage.setItem('mb_source', s);
+                      document.cookie = 'mb_ad_channel=' + encodeURIComponent(s) + '; path=/; max-age=' + (30*86400) + '; SameSite=Lax';
+                    }
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <GoogleAnalytics />

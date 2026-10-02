@@ -262,6 +262,7 @@ function CreatePageContent() {
                 family_list: mournersText || null,
                 account_info: accountText,
                 photo_url: photoUrl || null,
+                source: (typeof window !== 'undefined' ? (sessionStorage.getItem('mb_source') || localStorage.getItem('mb_source') || null) : null),
             };
 
             const { data, error } = await supabase

@@ -193,6 +193,8 @@ function notifySlack(ip: string, reason: string) {
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const search = request.nextUrl.search;
+  const fullPath = search ? `${path}${search}`.slice(0, 2000) : path;
   const host = request.headers.get('host') || '';
   const hostLower = host.toLowerCase();
 
@@ -255,10 +257,10 @@ export async function middleware(request: NextRequest) {
       path.startsWith('/b2b');
 
     if (!isExcluded) {
-      // 접속 로그 기록 (논블로킹)
+      // 접속 로그 기록 (논블로킹 - 쿼리 파라미터 보존)
       logAccess(
         ip,
-        path,
+        fullPath,
         request.headers.get('user-agent') || '',
         request.headers.get('referer') || ''
       );
@@ -373,7 +375,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // 광고 및 마케팅 유입 파라미터 감지 시 30일 쿠키 설정
+  const searchParams = request.nextUrl.searchParams;
+  let detectedChannel: string | null = null;
+  if (searchParams.has('gclid') || searchParams.has('gbraid') || searchParams.has('wbraid')) {
+    detectedChannel = 'google_ad';
+  } else if (searchParams.has('n_media') || searchParams.has('n_query') || searchParams.has('n_ad_group')) {
+    detectedChannel = 'naver_ad';
+  } else if (searchParams.get('utm_source')) {
+    detectedChannel = searchParams.get('utm_source');
+  }
+
+  if (detectedChannel) {
+    response.cookies.set('mb_ad_channel', detectedChannel, {
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+      sameSite: 'lax',
+    });
+  }
+
+  return response;
 }
 
 // 모든 페이지에 적용 (API, 정적 파일 제외)
