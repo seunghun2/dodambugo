@@ -76,6 +76,47 @@ export async function sendBugoNotification(bugo: {
 }
 
 /**
+ * 화환 주소 2줄 분리 포맷팅
+ * 1줄: 시/도 + 시/군/구 (공백 1칸 포함)
+ * 2줄: 상세 도로명주소 + 장례식장 + 빈소
+ */
+function formatFlowerAddress(address?: string, funeralHall?: string, room?: string): { sidoGungu: string; detailAddress: string } {
+    const hallAndRoom = `${funeralHall || ''} ${room || ''}`.trim();
+    if (!address) {
+        return { sidoGungu: '-', detailAddress: hallAndRoom || '-' };
+    }
+
+    const tokens = address.trim().split(/\s+/);
+    let splitIdx = 2; // 기본: 2단어 (예: 광주광역시 동구, 서울특별시 강남구)
+
+    if (tokens[0]?.includes('세종')) {
+        splitIdx = 1;
+    } else if (tokens.length >= 3) {
+        const third = tokens[2];
+        if (third.endsWith('구') || third.endsWith('군')) {
+            splitIdx = 3; // 예: 경기도 수원시 팔달구, 경상북도 포항시 남구
+        }
+    }
+
+    const sidoGungu = tokens.slice(0, splitIdx).join(' ');
+    let restAddress = tokens.slice(splitIdx).join(' ');
+
+    let detailAddress = restAddress;
+    if (hallAndRoom) {
+        if (detailAddress && !detailAddress.includes(hallAndRoom)) {
+            detailAddress = `${detailAddress} ${hallAndRoom}`.trim();
+        } else if (!detailAddress) {
+            detailAddress = hallAndRoom;
+        }
+    }
+
+    return {
+        sidoGungu: sidoGungu ? `${sidoGungu} ` : '-',
+        detailAddress: detailAddress || '-',
+    };
+}
+
+/**
  * 화환 주문 알림 전송 (#01_02_화환구매)
  * 부고드림 스타일
  */
@@ -119,16 +160,21 @@ export async function sendFlowerOrderNotification(order: {
             : order.chief_mourner_name
         : '-';
 
+    const { sidoGungu, detailAddress } = formatFlowerAddress(order.address, order.funeral_hall, order.room);
+
     const text = `[${brand}] 화환 주문이 접수되었습니다. (부고번호: ${order.bugo_number || '-'} / 주문번호: ${order.id})
 - 상품명: ${order.product_name}
 - 금액: ${priceFormatted}원
 - 빈소: ${order.funeral_hall || '미입력'} ${order.room || ''}
-- 주소: ${order.address || '-'}
-- 리본문구1: ${order.ribbon_text1 || '-'}
-- 리본문구2: ${order.ribbon_text2 || '-'}
+
+- 주소: ${sidoGungu}
+- ${detailAddress}
+
 - 수신자: ${recipientDisplay}
 - 주문자: ${order.sender_name}(${order.sender_phone})
 - 대표상주: ${chiefMournerDisplay}
+- 리본문구1: ${order.ribbon_text1 || '-'}
+- 리본문구2: ${order.ribbon_text2 || '-'}
 - 결제수단: ${order.payment_method || '미정'}
 - 부고장: https://${domain}/view/${order.bugo_number || ''}`;
 
