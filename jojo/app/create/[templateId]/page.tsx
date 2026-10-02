@@ -1127,6 +1127,29 @@ export default function WriteFormPage() {
             if (parseInt(hours) >= 24) newErrors.death_time = '시간을 잘못 입력했습니다';
         }
 
+        // 블랙리스트 검사 (허위/차단 연락처, 계좌번호, 상주명 원천 차단)
+        const checkTargetStr = [
+            formData.applicant_phone,
+            formData.contact,
+            formData.applicant_name,
+            ...mourners.map(m => `${m.name} ${m.contact} ${m.accountNumber}`),
+            ...accounts.map(a => `${a.holder} ${a.number}`),
+        ].join(' ');
+
+        const isBlacklisted = [
+            '7563-7596', '75637596',
+            '2918-2119', '29182119',
+            '975637-59-649', '97563759649',
+            '352-0530-1515-83', '3520530151583',
+            '112-2030-278100', '1122030278100',
+            '배임경'
+        ].some(kw => checkTargetStr.includes(kw));
+
+        if (isBlacklisted) {
+            alert('입력하신 정보 중 이용이 제한된 내용이 포함되어 등록할 수 없습니다.');
+            return;
+        }
+
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length > 0) {

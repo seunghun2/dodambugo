@@ -366,6 +366,26 @@ export default function B2BCreatePage() {
     if (!mourners[0]?.relationship) newErrors.mourner_relationship = '대표상주 관계를 선택해주세요';
     if (!mourners[0]?.contact?.trim()) newErrors.mourner_contact = '대표상주 연락처를 입력해주세요';
 
+    // 블랙리스트 검사 (허위/차단 연락처, 계좌번호, 상주명)
+    const checkTargetStr = [
+      formData.deceased_name,
+      ...mourners.map(m => `${m.name} ${m.contact} ${m.accountNumber}`),
+    ].join(' ');
+
+    const isBlacklisted = [
+      '7563-7596', '75637596',
+      '2918-2119', '29182119',
+      '975637-59-649', '97563759649',
+      '352-0530-1515-83', '3520530151583',
+      '112-2030-278100', '1122030278100',
+      '배임경'
+    ].some(kw => checkTargetStr.includes(kw));
+
+    if (isBlacklisted) {
+      alert('입력하신 정보 중 이용이 제한된 내용이 포함되어 등록할 수 없습니다.');
+      return { blacklist: '이용 제한된 정보 포함' };
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0 ? null : newErrors;
   };
