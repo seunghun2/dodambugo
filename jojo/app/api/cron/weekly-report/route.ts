@@ -165,9 +165,9 @@ export async function GET(request: NextRequest) {
         ],
     };
 
-    // 4. 슬랙 웹훅 전송
+    // 4. 슬랙 웹훅 전송 (#01_01_부고알림 방 우선)
     const webhookUrl = process.env.SLACK_WEBHOOK_REPORT
-        || process.env.SLACK_WEBHOOK_URL
+        || process.env.SLACK_WEBHOOK_B2C_BUGO
         || process.env.SLACK_WEBHOOK_BUGO;
 
     if (!webhookUrl) {
