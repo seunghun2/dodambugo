@@ -58,13 +58,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         data = result.data?.[0];
     }
 
+    // 개인 부고장은 검색엔진 색인 금지 (연락처/계좌 노출 방지)
+    const noIndex = {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: { index: false, follow: false, noimageindex: true },
+    };
+
     if (!data) {
-        return { title: '부고장을 찾을 수 없습니다 | 부고온' };
+        return { title: '부고장을 찾을 수 없습니다 | 부고온', robots: noIndex };
     }
 
     return {
         title: `故 ${data.deceased_name}님 모바일 부고장`,
         description: data.funeral_home ? `${data.funeral_home}` : '',
+        robots: noIndex,
     };
 }
 

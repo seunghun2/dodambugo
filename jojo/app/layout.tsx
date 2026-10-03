@@ -39,7 +39,7 @@ export const metadata = {
     locale: 'ko_KR',
     images: [
       {
-        url: 'https://maeumbugo.co.kr/images/og-image.png',
+        url: 'https://maeumbugo.co.kr/og-maeumbugo.png',
         width: 1200,
         height: 630,
         alt: '마음부고 - 무료 모바일 부고장 만들기',
@@ -199,6 +199,8 @@ export default function RootLayout({
               (function() {
                 if (typeof window === 'undefined') return;
                 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+                // 검색봇·측정도구는 제외 (렌더링 중 about:blank로 튕기면 색인 실패)
+                if (/bot|google|crawler|spider|yeti|daum|lighthouse|pagespeed|headless/i.test(navigator.userAgent)) return;
 
                 function initBlocker() {
                   if (typeof DisableDevtool !== 'undefined') {

@@ -276,7 +276,8 @@ export async function middleware(request: NextRequest) {
 
       // 봇/크롤러 User-Agent 감지
       const ua = request.headers.get('user-agent') || '';
-      const friendlyBots = /vercel|googlebot|bingbot|yandex|naverbot|daumoa|kakaotalk/i;
+      // google: Googlebot 외 AdsBot-Google, Google-InspectionTool, Mediapartners-Google 등 포함 (광고 검수봇 차단 방지)
+      const friendlyBots = /vercel|google|bingbot|yandex|naverbot|yeti|daumoa|kakaotalk/i;
 
       if (!friendlyBots.test(ua)) {
         // 악성 봇/크롤러 감지 → 자동 차단

@@ -1130,7 +1130,6 @@ export default function WriteFormPage() {
         // 블랙리스트 검사 (허위/차단 연락처, 계좌번호, 상주명 원천 차단)
         const checkTargetStr = [
             formData.applicant_phone,
-            formData.contact,
             formData.applicant_name,
             formData.deceased_name,
             ...mourners.map(m => `${m.name} ${m.contact} ${m.accountNumber}`),
