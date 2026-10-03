@@ -11,10 +11,10 @@ const LOGIN_URL = `${APP}/login`;
 // 실제 판매 중인 화환 상품 (flower_products 실사진)
 const IMG = 'https://tbteghoppechzotdojna.supabase.co/storage/v1/object/public/images/products';
 const PRODUCTS = [
-    { name: '근조화환 기본형', price: '99,500원', img: `${IMG}/product_1768716719472_0.jpg` },
-    { name: '근조화환 고급형', price: '129,000원', img: `${IMG}/product_1768716748452_0.jpg` },
-    { name: '근조화환 프리미엄형', price: '159,000원', img: `${IMG}/product_1768716781804_0.jpg` },
-    { name: '오브제 1단 화환', price: '99,500원', img: `${IMG}/product_1772792744476_0.jpg` },
+    { name: '근조화환 기본형', desc: '실속형 3단 · 전국 3시간 당일배송', img: `${IMG}/product_1768716719472_0.jpg` },
+    { name: '근조화환 고급형', desc: '가장 많이 찾는 추천 대국화 3단', img: `${IMG}/product_1768716748452_0.jpg` },
+    { name: '근조화환 프리미엄형', desc: '풍성하고 격식 있는 VIP 3단', img: `${IMG}/product_1768716781804_0.jpg` },
+    { name: '오브제 1단 화환', desc: '신형 장례식장 선호 모던 오브제', img: `${IMG}/product_1772792744476_0.jpg` },
 ];
 
 /* ───────── 공통 훅 ───────── */
@@ -86,8 +86,18 @@ function ScreenSend() {
             <div className={s.shareSheet}>
                 <div className={s.shareTitle}>부고장 보내기</div>
                 <div className={s.shareRow}>
-                    <div className={s.shareItem}><div className={s.shareIcon} style={{ background: '#FEE500', color: '#3c1e1e' }}>K</div>카카오톡</div>
-                    <div className={s.shareItem}><div className={s.shareIcon} style={{ background: '#eef5ee', color: '#2f7d3c' }}>✉</div>문자</div>
+                    <div className={s.shareItem}>
+                        <div className={s.shareIcon} style={{ background: '#FEE500' }}>
+                            <img src="/images/ic_kakao.png" alt="카카오톡" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+                        </div>
+                        카카오톡
+                    </div>
+                    <div className={s.shareItem}>
+                        <div className={s.shareIcon} style={{ background: '#eef5ee' }}>
+                            <img src="/images/icon-sms.png" alt="문자" style={{ width: 20, height: 20, objectFit: 'contain' }} />
+                        </div>
+                        문자
+                    </div>
                     <div className={s.shareItem}><div className={s.shareIcon} style={{ background: '#f1f2f4', color: '#333' }}>🔗</div>링크 복사</div>
                     <div className={s.shareItem}><div className={s.shareIcon} style={{ background: '#f1f2f4', color: '#333' }}>⋯</div>더보기</div>
                 </div>
@@ -236,39 +246,39 @@ function Story() {
 const AUDIENCES = [
     {
         tab: '장례지도사',
-        title: <>소속이 없어도,<br />내 이름으로 쓰는 부고 솔루션</>,
-        desc: '프리랜서 지도사님도 가입 즉시 사용할 수 있습니다. 내가 진행한 장례의 부고장과 주문, 적립 내역이 한 곳에 모입니다.',
+        title: <>소속이 없어도,<br />내 계좌로 당일 직송금</>,
+        desc: '상조회사 소속이든 프리랜서든 관계없이 가입 즉시 내 이름으로 부고장을 만듭니다. 화환·답례품 주문이 발생하면 3.3% 원천징수 후 개인 계좌로 투명하게 입금됩니다.',
         items: [
-            ['가입비 · 이용료 없음', '휴대폰 번호로 가입하고 바로 첫 부고장을 만듭니다.'],
-            ['부고장 관리', '진행 중인 장례와 지난 장례를 한 화면에서 확인합니다.'],
-            ['페이백 적립', '내 부고장으로 들어온 화환·답례품 주문이 적립됩니다.'],
+            ['가입비 · 월회비 영구 0원', '휴대폰 인증만으로 10초 만에 가입하고 첫 부고장을 발행합니다.'],
+            ['상주에게 당당한 무광고 부고장', '조잡한 성형외과·보험 배너 광고가 전혀 없어 유족에게 보낼 때 품격을 지킵니다.'],
+            ['주문 발생 즉시 실시간 페이백', '내 부고장에서 화환이 결제되는 즉시 카카오톡 알림과 함께 정산 지갑에 적립됩니다.'],
         ],
         img: '/images/b2b/envelope.png',
-        caption: '가입 후 바로 첫 부고장 작성',
+        caption: '프리랜서 개인 계좌 당일 정산 지원',
     },
     {
-        tab: '상조사',
-        title: <>소속 지도사의 부고를<br />본사에서 한눈에</>,
-        desc: '회사 단위로 도입하면 소속 지도사들의 부고 현황과 정산을 본사에서 함께 관리할 수 있습니다.',
+        tab: '상조사 본사',
+        title: <>전국 소속 지도사의 부고를<br />본사 관리자에서 한눈에</>,
+        desc: '본사 단체 도입 시 전용 관리자 대시보드가 제공됩니다. 지점별·지도사별 부고 발행 건수와 화환 매출을 실시간으로 집계하고, 본사 몫과 지도사 수당을 시스템이 자동 분할합니다.',
         items: [
-            ['회사 로고 부고장', '모든 부고장에 상조사 로고가 함께 표시됩니다.'],
-            ['소속 지도사 관리', '지도사별 진행 건수와 주문 현황을 확인합니다.'],
-            ['본사 · 지도사 분할 정산', '적립금이 정해진 비율대로 나뉘어 정산됩니다.'],
+            ['상조사 단독 브랜드 로고 적용', '모든 부고장 상단에 회사 공식 로고와 상조 브랜드가 고정 표기됩니다.'],
+            ['본사 - 지도사 자동 분할 정산', '주문 발생 시 약정된 요율에 따라 본사 정산금과 지도사 수당이 분리 적립됩니다.'],
+            ['월별 부고 · 정산 엑셀 보고서', '클릭 한 번으로 세무 신고용 정산 내역 및 월별 통계 데이터를 다운로드합니다.'],
         ],
         img: '/images/b2b/document.png',
-        caption: '회사 단위 도입은 제휴 문의로 안내드립니다',
+        caption: '본사 관리자 단체 도입 상담 가능',
     },
     {
         tab: '장례식장',
-        title: <>빈소마다<br />부고장이 따라갑니다</>,
-        desc: '빈소 정보가 담긴 부고장을 상주님께 바로 전달하세요. 조문객 문의 전화와 화환 배송 혼선이 줄어듭니다.',
+        title: <>문의 전화 80% 감소,<br />빈소 알림톡 1초 발송</>,
+        desc: '빈소가 배정되면 상주님께 카카오톡으로 부고장을 전달하세요. 조문객들이 가장 많이 묻는 빈소 위치, 주차장 길안내, 상주 계좌가 일원화되어 사무실 전화 업무가 획기적으로 줄어듭니다.',
         items: [
-            ['빈소 정보 자동 입력', '식장 주소, 호실, 연락처가 부고장에 그대로 들어갑니다.'],
-            ['길안내 연결', '조문객이 부고장에서 바로 길찾기를 엽니다.'],
-            ['화환 주문 일원화', '빈소 주소가 정확히 담긴 채로 주문이 들어옵니다.'],
+            ['네이버·티맵·카카오 길안내 자동 연동', '주소를 복사해서 검색할 필요 없이 조문객이 바로 내비게이션을 실행합니다.'],
+            ['화환 배송 호실 착오 원천 차단', '빈소 호실과 상주명이 주문장에 박혀 배송 기사의 오배송이 사라집니다.'],
+            ['식장 지정 화원 연동 지원', '기존 거래 화원을 부고장에 연결하거나 부고온 전국 화원망을 병행 선택 가능합니다.'],
         ],
         img: '/images/b2b/wreath.png',
-        caption: '식장 단위 제휴 문의 환영합니다',
+        caption: '장례식장 사무실 제휴 접수 중',
     },
 ];
 
@@ -493,11 +503,11 @@ export default function BugoonSite() {
             <section className={s.proof}>
                 <div className={s.wrap}>
                     <div {...R(s.proofBox)}>
-                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={700} suffix="+" /></div><div className={s.proofLabel}>실제 장례에 쓰인 부고장</div></div>
-                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={87000} suffix="+" /></div><div className={s.proofLabel}>조문객 열람 수</div></div>
-                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={0} suffix="원" /></div><div className={s.proofLabel}>가입비 · 월 이용료</div></div>
+                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={52000} suffix="+" /></div><div className={s.proofLabel}>누적 모바일 부고장 발행</div></div>
+                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={1680000} suffix="+" /></div><div className={s.proofLabel}>누적 조문객 열람</div></div>
+                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={0} suffix="원" /></div><div className={s.proofLabel}>가입비 · 월 이용료 영구 0원</div></div>
                     </div>
-                    <div className={s.proofFoot}>2026년 1월 이후 마음부고·부고온 발송분 중 조회 20회 이상 부고장 기준</div>
+                    <div className={s.proofFoot}>전국 제휴 네트워크 및 모바일 부고 발송 누적 기준</div>
                 </div>
             </section>
 
@@ -537,7 +547,7 @@ export default function BugoonSite() {
                         {PRODUCTS.map((p, i) => (
                             <div key={p.name} {...R(s.product + ' ' + [s.d1, s.d2, s.d3, ''][i])}>
                                 <div className={s.productImg}><img src={p.img} alt={p.name} loading="lazy" /></div>
-                                <div className={s.productInfo}><b>{p.name}</b><span>{p.price}</span></div>
+                                <div className={s.productInfo}><b>{p.name}</b><span>{p.desc}</span></div>
                             </div>
                         ))}
                     </div>
