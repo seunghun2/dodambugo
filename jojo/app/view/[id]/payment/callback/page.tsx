@@ -58,15 +58,7 @@ export default function PaymentCallbackPage() {
 
             console.log('Payment callback received:', { paymentToken, tid, mid, amt, moid, resultCode, resultMsg, payMethod });
 
-            // 결제 실패 체크 (resultCode가 있고 실패인 경우에만)
-            if (resultCode && resultCode !== '0000' && resultCode !== '00') {
-                setStatus('error');
-                setMessage(resultMsg || '결제가 취소되었거나 실패했습니다.');
-                gaEvents.failFlowerPayment(resultMsg || `결제실패_${resultCode}`);
-                return;
-            }
-
-            // mallReserved에서 bugoId, type, originalTaxFreeAmt 추출
+            // mallReserved에서 bugoId, type, originalTaxFreeAmt 추출 (실패 로깅에 orderId가 필요하므로 먼저 파싱)
             let bugoId = '';
             let orderId = '';
             let originalTaxFreeAmt = '';
@@ -84,6 +76,39 @@ export default function PaymentCallbackPage() {
             } catch (e) {
                 console.error('mallReserved 파싱 오류:', e, mallReserved);
             }
+            // orderId 폴백: 결제 직전 저장한 sessionStorage
+            const isCondolenceMoid = !!moid && (moid.startsWith('COND_') || moid.startsWith('BCOND_'));
+            if (!orderId && paymentType !== 'condolence' && !isCondolenceMoid) {
+                try {
+                    const saved = sessionStorage.getItem(`payment_${bugoId || routeBugoId}`);
+                    if (saved) orderId = JSON.parse(saved).orderId || '';
+                } catch { /* noop */ }
+            }
+
+            // 결제 실패 사유 서버 기록 (원인 분석용, 실패해도 UX 영향 없음)
+            const logFail = (stage: string, code: string, msg: string) => {
+                try {
+                    const payload = JSON.stringify({
+                        stage, code, msg, payMethod, amt: amt || taxFreeAmt, moid,
+                        orderId, bugoId: bugoId || routeBugoId,
+                    });
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/payment/fail-log', new Blob([payload], { type: 'application/json' }));
+                    } else {
+                        fetch('/api/payment/fail-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(() => {});
+                    }
+                } catch { /* noop */ }
+            };
+
+            // 결제 실패 체크 (resultCode가 있고 실패인 경우에만)
+            if (resultCode && resultCode !== '0000' && resultCode !== '00') {
+                setStatus('error');
+                setMessage(resultMsg || '결제가 취소되었거나 실패했습니다.');
+                gaEvents.failFlowerPayment(resultMsg || `결제실패_${resultCode}`);
+                logFail('pg_result', resultCode, resultMsg);
+                return;
+            }
+
 
             // moid가 COND_ 또는 BCOND_(B2B)로 시작하면 부의금 결제
             if (!paymentType && moid && (moid.startsWith('COND_') || moid.startsWith('BCOND_'))) {
@@ -124,6 +149,7 @@ export default function PaymentCallbackPage() {
             if (!paymentToken || !tid) {
                 setStatus('error');
                 setMessage('결제 정보가 올바르지 않습니다.');
+                logFail('missing_token', resultCode || '', `params=${Array.from(urlParams.keys()).join(',')} ${resultMsg || ''}`.trim());
                 return;
             }
 
@@ -268,6 +294,7 @@ export default function PaymentCallbackPage() {
                 setStatus('error');
                 setMessage(err.message || '결제 승인 중 오류가 발생했습니다.');
                 gaEvents.failFlowerPayment(err.message || '결제승인오류');
+                logFail('approve', '', String(err?.message || '결제승인오류'));
             }
         }
 
