@@ -1,5 +1,6 @@
-import { notFound } from 'next/navigation';
+import BugoonSite from '@/components/bugoon-site/BugoonSite';
 
+// 부고온 공식 홈페이지
 export default function BugoonPlusIntroPage() {
-    notFound();
+    return <BugoonSite />;
 }
