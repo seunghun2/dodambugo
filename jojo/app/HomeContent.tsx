@@ -389,7 +389,7 @@ export default function HomeContent() {
 
         {/* 히어로 섹션 */}
         <section className="xd-hero">
-          <h1 className="xd-hero-title">무료 모바일 부고장 만들기</h1>
+          <h1 className="xd-hero-title">마음부고, 무료 모바일 부고장 만들기</h1>
           <p className="xd-hero-subtitle">3분 만에 품격 있는 모바일 부고장을 만들고 카카오톡으로 공유하세요.</p>
           <div className="xd-hero-image">
             <Image src="/images/hero-image.jpg" alt="마음부고 부고장 미리보기" width={1024} height={764} priority />

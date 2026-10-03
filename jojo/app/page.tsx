@@ -26,42 +26,10 @@ export const metadata: Metadata = {
     },
 };
 
-// Organization + WebSite + WebApplication 구조화 데이터
+// WebApplication 구조화 데이터 (Organization/WebSite는 HomeContent에서 단일 정의 - 중복 방지)
 const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
-        {
-            '@type': 'Organization',
-            '@id': 'https://maeumbugo.co.kr/#organization',
-            name: '마음부고',
-            url: 'https://maeumbugo.co.kr',
-            logo: {
-                '@type': 'ImageObject',
-                url: 'https://maeumbugo.co.kr/og-maeumbugo.png',
-            },
-            description: '무료 모바일 부고장 제작 서비스. 3분 만에 품격 있는 부고장을 만들고 카카오톡으로 공유하세요.',
-            contactPoint: {
-                '@type': 'ContactPoint',
-                contactType: 'customer service',
-                availableLanguage: 'Korean',
-            },
-        },
-        {
-            '@type': 'WebSite',
-            '@id': 'https://maeumbugo.co.kr/#website',
-            url: 'https://maeumbugo.co.kr',
-            name: '마음부고',
-            description: '무료 모바일 부고장 만들기 - 3분 완성, 카카오톡 공유',
-            publisher: { '@id': 'https://maeumbugo.co.kr/#organization' },
-            potentialAction: {
-                '@type': 'SearchAction',
-                target: {
-                    '@type': 'EntryPoint',
-                    urlTemplate: 'https://maeumbugo.co.kr/search?q={search_term_string}',
-                },
-                'query-input': 'required name=search_term_string',
-            },
-        },
         {
             '@type': 'WebApplication',
             '@id': 'https://maeumbugo.co.kr/#app',

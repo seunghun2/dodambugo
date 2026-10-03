@@ -20,10 +20,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         bugo = data?.[0] || null;
     }
 
+    // 개인 부고장은 검색엔진 색인 금지 (연락처/계좌 노출 방지 + 사이트 품질 신호 보호)
+    const noIndex = {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: { index: false, follow: false, noimageindex: true },
+    };
+
     if (!bugo) {
         return {
             title: '부고장을 찾을 수 없습니다 | 마음부고',
             description: '요청하신 부고장을 찾을 수 없습니다.',
+            robots: noIndex,
         };
     }
 
@@ -51,6 +60,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
         title: `${title} | 마음부고`,
         description,
+        robots: noIndex,
+        alternates: {
+            canonical: `https://maeumbugo.co.kr/view/${id}`,
+        },
         openGraph: {
             title,
             description,

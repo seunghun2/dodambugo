@@ -95,13 +95,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     // React cache()로 getBugo 재사용 — BugoContentLoader와 동일 요청 내 DB 1번만 조회
     const data = await getBugo(id);
 
+    const noIndex = {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: { index: false, follow: false, noimageindex: true },
+    };
+
     if (!data) {
-        return { title: '부고장을 찾을 수 없습니다 | 마음부고' };
+        return { title: '부고장을 찾을 수 없습니다 | 마음부고', robots: noIndex };
     }
 
     return {
         title: `故 ${data.deceased_name}님 부고장 | 마음부고`,
         description: data.funeral_home ? `${data.funeral_home}` : '',
+        robots: noIndex,
     };
 }
 

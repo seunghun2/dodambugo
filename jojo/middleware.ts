@@ -396,6 +396,11 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // 개인 부고장은 HTTP 헤더로도 색인 금지 (메타태그와 이중 보장)
+  if (path.startsWith('/view/') || path.startsWith('/b2b/view/')) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, noimageindex');
+  }
+
   return response;
 }
 

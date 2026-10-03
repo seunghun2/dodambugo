@@ -51,6 +51,17 @@
             ],
             "destination": "https://maeumbugo.co.kr/:path*",
             "permanent": true
+        },
+        {
+            "source": "/:path*",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "www.maeumbugo.co.kr"
+                }
+            ],
+            "destination": "https://maeumbugo.co.kr/:path*",
+            "permanent": true
         }
     ]
 }

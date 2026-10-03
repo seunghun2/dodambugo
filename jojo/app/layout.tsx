@@ -63,9 +63,7 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: 'https://maeumbugo.co.kr',
-  },
+  // canonical은 각 페이지에서 자기 URL로 개별 지정 (전역 지정 시 모든 페이지가 홈으로 상속됨)
   verification: {
     google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',
     other: {
