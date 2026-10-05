@@ -47,11 +47,11 @@ function page(inner) {
 
 const TASKS = [
     // 폰 화면용: 헤더 + 고인 정보 일부 (폰이 짧아 첫 화면 분량만 사용)
-    { out: 'mockup-bugo-main.png', h: 759, html: page(headerHtml('basic', 'template-basic.png') + INFO_TABLE) },
+    { out: 'mockup-bugo-main-v2.png', h: 759, html: page(headerHtml('basic', 'template-basic.png') + INFO_TABLE) },
     // 히어로 카드용: 헤더만
-    { out: 'mockup-bugo-hero.png', h: 650, html: page(headerHtml('basic', 'template-basic.png')) },
-    { out: 'mockup-bugo-flower.png', h: 650, html: page(headerHtml('flower', 'template-flower.png')) },
-    { out: 'mockup-bugo-ribbon.png', h: 650, html: page(headerHtml('ribbon', 'template-ribbon.png')) },
+    { out: 'mockup-bugo-hero-v2.png', h: 650, html: page(headerHtml('basic', 'template-basic.png')) },
+    { out: 'mockup-bugo-flower-v2.png', h: 650, html: page(headerHtml('flower', 'template-flower.png')) },
+    { out: 'mockup-bugo-ribbon-v2.png', h: 650, html: page(headerHtml('ribbon', 'template-ribbon.png')) },
 ];
 
 (async () => {
