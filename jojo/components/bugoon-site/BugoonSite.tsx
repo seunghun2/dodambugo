@@ -492,7 +492,7 @@ export default function BugoonSite() {
                     <div className={s.heroVisual} {...{ 'data-reveal': '' }}>
                         <div className={`${s.card} ${s.cardLeft}`}><img src="/images/mockup-bugo-flower.png" alt="국화 부고장 완성 화면" /></div>
                         <div className={`${s.card} ${s.cardRight}`}><img src="/images/mockup-bugo-ribbon.png" alt="리본 부고장 완성 화면" /></div>
-                        <div className={`${s.card} ${s.cardMain}`}><img src="/images/mockup-bugo-main.png" alt="기본 부고장 완성 화면" /></div>
+                        <div className={`${s.card} ${s.cardMain}`}><img src="/images/mockup-bugo-hero.png" alt="기본 부고장 완성 화면" /></div>
                         <div className={`${s.floatTag} ${s.tagA}`}><span className={s.floatIcon}>✉</span><div>부고장 발송 완료<small>카카오톡으로 전달됨</small></div></div>
                         <div className={`${s.floatTag} ${s.tagB}`}><span className={s.floatIcon}>✿</span><div>화환 주문 도착<small>근조화환 고급형</small></div></div>
                     </div>
