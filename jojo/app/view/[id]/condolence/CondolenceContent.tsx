@@ -136,6 +136,7 @@ export default function CondolenceContent({
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agreed, setAgreed] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [selfBlockedModalOpen, setSelfBlockedModalOpen] = useState(false);
     const [sdkLoaded, setSdkLoaded] = useState(typeof window !== 'undefined' && !!window.innopay);
     const [amountOptions, setAmountOptions] = useState(AMOUNT_OPTIONS_FALLBACK);
 
@@ -222,7 +223,7 @@ export default function CondolenceContent({
         );
 
         if (isNameMatched || isPhoneMatched) {
-            alert('부고장 등록자(상주) 및 계좌 예금주 본인에게는 부의금을 보낼 수 없습니다.\n(여신전문금융업법상 본인 카드 결제 불가)');
+            setSelfBlockedModalOpen(true);
             return;
         }
 
@@ -577,6 +578,50 @@ export default function CondolenceContent({
                     </div>
                 )}
 
+                {/* 🚫 본인 결제(자전거래) 차단 안내 모달 */}
+                {selfBlockedModalOpen && (
+                    <div className="confirm-modal-overlay" onClick={() => setSelfBlockedModalOpen(false)}>
+                        <div className="confirm-modal" onClick={(e) => e.stopPropagation()} style={{ borderTop: '4px solid #e74c3c' }}>
+                            <button className="confirm-modal-x" onClick={() => setSelfBlockedModalOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                                <span style={{ fontSize: '36px' }}>🚫</span>
+                            </div>
+                            <h3 className="confirm-modal-title" style={{ color: '#e74c3c', fontSize: '19px', marginBottom: '8px' }}>
+                                본인 부의금 결제 불가
+                            </h3>
+                            <p className="confirm-modal-desc" style={{ fontSize: '15px', lineHeight: '1.6', color: '#222' }}>
+                                부고장 등록자(상주) 및 계좌 예금주는<br />
+                                <strong>본인 부고장에 부의금을 결제할 수 없습니다.</strong>
+                            </p>
+                            <div style={{
+                                background: '#f8f9fa',
+                                border: '1px solid #e9ecef',
+                                padding: '14px',
+                                borderRadius: '8px',
+                                margin: '16px 0',
+                                textAlign: 'left',
+                                fontSize: '13px',
+                                color: '#555',
+                                lineHeight: '1.6'
+                            }}>
+                                <p style={{ margin: '0 0 6px 0', fontWeight: '700', color: '#e74c3c' }}>⚠️ 관련 법령 안내</p>
+                                <p style={{ margin: '0 0 4px 0' }}>• 여신전문금융업법상 본인 명의 카드를 통한 현금 융통(자전거래 및 카드깡)은 <strong>법적으로 엄격히 금지</strong>되어 있습니다.</p>
+                                <p style={{ margin: '0' }}>• 부의금 카드결제는 <strong>타인(조문객)만 이용 가능</strong>하며, 상주 본인 정보와 일치할 경우 결제가 즉시 차단됩니다.</p>
+                            </div>
+                            <button
+                                className="confirm-modal-btn"
+                                style={{ backgroundColor: '#2d3748', color: '#fff' }}
+                                onClick={() => setSelfBlockedModalOpen(false)}
+                            >
+                                확인했습니다
+                            </button>
+                        </div>
+                    </div>
+                )}
 
             </main>
         </>
