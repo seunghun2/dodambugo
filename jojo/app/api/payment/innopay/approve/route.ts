@@ -698,7 +698,7 @@ export async function POST(request: NextRequest) {
                     const isNumeric = /^\d+$/.test(condBugoId);
                     const { data, error: bugoError } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, funeral_home, phone_password, applicant_phone, mourners, b2b_user_id')
+                        .select('bugo_number, deceased_name, mourner_name, funeral_home, phone_password, applicant_phone, applicant_name, contact, mourners, b2b_user_id')
                         .eq(isNumeric ? 'bugo_number' : 'id', condBugoId)
                         .is('deleted_at', null)
                         .single();
@@ -714,6 +714,59 @@ export async function POST(request: NextRequest) {
                         phone_password: data?.phone_password,
                         mourners: data?.mourners,
                     });
+                }
+
+                // 🛡️ 상주/제작자 본인 결제 (자전거래/카드깡) 서버 차단 검증
+                const creatorInfoFromReserved = condolenceInfo?.creatorInfo;
+                const cleanBuyerTel = String(buyerInfo.tel || condolenceInfo.buyerPhone || '').replace(/[^0-9]/g, '');
+                const cleanApplicantPhone = String(bugoData?.applicant_phone || bugoData?.phone_password || creatorInfoFromReserved?.applicantPhone || '').replace(/[^0-9]/g, '');
+                const cleanContact = String(bugoData?.contact || creatorInfoFromReserved?.contact || '').replace(/[^0-9]/g, '');
+
+                const trimmedBuyerName = String(buyerInfo.name || condolenceInfo.buyerName || '').trim();
+                const trimmedApplicantName = String(bugoData?.applicant_name || creatorInfoFromReserved?.applicantName || '').trim();
+                const trimmedMournerName = String(bugoData?.mourner_name || creatorInfoFromReserved?.mournerName || '').trim();
+                const trimmedHolder = String(condolenceInfo.accountHolder || '').trim();
+
+                const isNameMatched = !!trimmedBuyerName && (
+                    (!!trimmedApplicantName && trimmedBuyerName === trimmedApplicantName) ||
+                    (!!trimmedMournerName && trimmedBuyerName === trimmedMournerName) ||
+                    (!!trimmedHolder && trimmedBuyerName === trimmedHolder)
+                );
+
+                const isPhoneMatched = !!cleanBuyerTel && (
+                    (!!cleanApplicantPhone && cleanBuyerTel === cleanApplicantPhone) ||
+                    (!!cleanContact && cleanBuyerTel === cleanContact)
+                );
+
+                if (isNameMatched || isPhoneMatched) {
+                    console.error(`🚨 [자전거래 차단] 상주 본인 부의금 결제 감지: buyer=${trimmedBuyerName}(${cleanBuyerTel}), applicant=${trimmedApplicantName}(${cleanApplicantPhone}), holder=${trimmedHolder}`);
+
+                    // 1. 이미 승인된 카드 결제 자동 취소 (INNOPAY 취소 API)
+                    try {
+                        const cancelRes = await fetch('https://api.innopay.co.kr/api/cancelApi', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=euc-kr' },
+                            body: new URLSearchParams({
+                                mid: mid || process.env.INNOPAY_MID || 'pgmaeum01m',
+                                tid: tid || transactionId,
+                                svcCd: '01',
+                                partialCancelCode: '0',
+                                cancelAmt: String(totalAmount),
+                                cancelMsg: '여신전문금융업법상 본인 자전거래 차단 및 자동 취소',
+                                cancelPwd: process.env.INNOPAY_CANCEL_PWD || '0612',
+                            }).toString(),
+                        });
+                        const cancelText = await cancelRes.text();
+                        console.log('🔄 자전거래 카드 승인 자동 취소 결과:', cancelText);
+                    } catch (cErr) {
+                        console.error('❌ 카드 자동 취소 실패:', cErr);
+                    }
+
+                    // 2. 송금 절대 하지 않고 에러 반환
+                    return NextResponse.json({
+                        success: false,
+                        error: '부고장 등록자(상주) 및 계좌 예금주 본인에게는 부의금을 보낼 수 없습니다. (여신전문금융업법상 본인 결제 불가)'
+                    }, { status: 400 });
                 }
 
                 // condolence_orders 테이블에 저장

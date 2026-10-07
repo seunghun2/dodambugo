@@ -12,11 +12,11 @@ export default async function CondolencePage({
     const { m } = await searchParams;
     const mournerIndex = parseInt(m || '0', 10);
 
-    // DB에서 bugo 계좌 정보 조회 (UUID 및 bugo_number 둘 다 완벽 지원)
+    // DB에서 bugo 계좌 및 제작자 정보 조회 (UUID 및 bugo_number 둘 다 완벽 지원)
     const isUUID = id.includes('-') && id.length > 10;
     const query = supabase
         .from('bugo')
-        .select('mourner_name, account_info, mourners')
+        .select('mourner_name, account_info, mourners, applicant_name, applicant_phone, contact, phone_password')
         .is('deleted_at', null);
 
     const { data: bugo } = isUUID
@@ -24,7 +24,15 @@ export default async function CondolencePage({
         : await query.eq('bugo_number', id).order('created_at', { ascending: false }).limit(1).single();
 
     let account = null;
+    let creatorInfo = null;
     if (bugo) {
+        creatorInfo = {
+            applicantName: bugo.applicant_name || '',
+            applicantPhone: bugo.applicant_phone || bugo.phone_password || '',
+            mournerName: bugo.mourner_name || '',
+            contact: bugo.contact || '',
+        };
+
         let mournersArr: any[] = [];
         if (Array.isArray(bugo.mourners)) {
             mournersArr = bugo.mourners;
@@ -93,5 +101,5 @@ export default async function CondolencePage({
         }
     }
 
-    return <CondolenceContent account={account} />;
+    return <CondolenceContent account={account} creatorInfo={creatorInfo} />;
 }

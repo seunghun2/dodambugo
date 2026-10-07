@@ -25,7 +25,7 @@ export default async function B2BCondolencePage({
     const isUUID = id.includes('-') && id.length > 10;
     
     // DB에서 bugo 계좌 정보 조회 (B2B/B2C 모두 대응하도록 UUID도 체크)
-    let bugoQuery = supabaseClient.from('bugo').select('mourner_name, account_info, mourners');
+    let bugoQuery = supabaseClient.from('bugo').select('mourner_name, account_info, mourners, applicant_name, applicant_phone, contact, phone_password');
     if (isUUID) {
         bugoQuery = bugoQuery.eq('id', id);
     } else {
@@ -35,7 +35,15 @@ export default async function B2BCondolencePage({
     const { data: bugo } = await bugoQuery.is('deleted_at', null).single();
 
     let account = null;
+    let creatorInfo = null;
     if (bugo) {
+        creatorInfo = {
+            applicantName: bugo.applicant_name || '',
+            applicantPhone: bugo.applicant_phone || bugo.phone_password || '',
+            mournerName: bugo.mourner_name || '',
+            contact: bugo.contact || '',
+        };
+
         let mournersArr: any[] = [];
         if (Array.isArray(bugo.mourners)) {
             mournersArr = bugo.mourners;
@@ -104,5 +112,5 @@ export default async function B2BCondolencePage({
         }
     }
 
-    return <CondolenceContent account={account} />;
+    return <CondolenceContent account={account} creatorInfo={creatorInfo} />;
 }

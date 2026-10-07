@@ -101,6 +101,13 @@ interface AccountInfo {
     number: string;
 }
 
+interface CreatorInfo {
+    applicantName?: string;
+    applicantPhone?: string;
+    mournerName?: string;
+    contact?: string;
+}
+
 const AMOUNT_OPTIONS_FALLBACK = [
     { value: 50000, label: '5만원' },
     { value: 100000, label: '10만원' },
@@ -110,7 +117,13 @@ const AMOUNT_OPTIONS_FALLBACK = [
     { value: 1000000, label: '100만원' },
 ];
 
-export default function CondolenceContent({ account }: { account: AccountInfo | null }) {
+export default function CondolenceContent({
+    account,
+    creatorInfo
+}: {
+    account: AccountInfo | null;
+    creatorInfo?: CreatorInfo | null;
+}) {
     const params = useParams();
     const router = useRouter();
     const isB2b = useIsB2b();
@@ -186,6 +199,33 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
             alert('연락처를 올바르게 입력해주세요. (010-0000-0000)');
             return;
         }
+
+        // 🛡️ 상주/제작자 본인 결제 (자전거래/카드깡) 차단 검증
+        const cleanBuyerPhone = (buyerPhone || '').replace(/[^0-9]/g, '');
+        const cleanApplicantPhone = (creatorInfo?.applicantPhone || '').replace(/[^0-9]/g, '');
+        const cleanContact = (creatorInfo?.contact || '').replace(/[^0-9]/g, '');
+
+        const trimmedBuyerName = (buyerName || '').trim();
+        const trimmedApplicantName = (creatorInfo?.applicantName || '').trim();
+        const trimmedMournerName = (creatorInfo?.mournerName || '').trim();
+        const trimmedHolder = (account?.holder || account?.name || '').trim();
+
+        const isNameMatched = !!trimmedBuyerName && (
+            (!!trimmedApplicantName && trimmedBuyerName === trimmedApplicantName) ||
+            (!!trimmedMournerName && trimmedBuyerName === trimmedMournerName) ||
+            (!!trimmedHolder && trimmedBuyerName === trimmedHolder)
+        );
+
+        const isPhoneMatched = !!cleanBuyerPhone && (
+            (!!cleanApplicantPhone && cleanBuyerPhone === cleanApplicantPhone) ||
+            (!!cleanContact && cleanBuyerPhone === cleanContact)
+        );
+
+        if (isNameMatched || isPhoneMatched) {
+            alert('부고장 등록자(상주) 및 계좌 예금주 본인에게는 부의금을 보낼 수 없습니다.\n(여신전문금융업법상 본인 카드 결제 불가)');
+            return;
+        }
+
         setConfirmModalOpen(true);
     };
 
@@ -252,6 +292,7 @@ export default function CondolenceContent({ account }: { account: AccountInfo | 
                 accountHolder: account?.name || '',
                 bankName: account?.bank || '',
                 accountNo: account?.number || '',
+                creatorInfo,
             }),
         });
     };
