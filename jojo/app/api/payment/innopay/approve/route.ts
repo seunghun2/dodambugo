@@ -752,12 +752,12 @@ export async function POST(request: NextRequest) {
                                 svcCd: '01',
                                 partialCancelCode: '0',
                                 cancelAmt: String(totalAmount),
-                                cancelMsg: '여신전문금융업법상 본인 자전거래 차단 및 자동 취소',
+                                cancelMsg: '상주 본인 결제 차단 및 자동 취소',
                                 cancelPwd: process.env.INNOPAY_CANCEL_PWD || '0612',
                             }).toString(),
                         });
                         const cancelText = await cancelRes.text();
-                        console.log('🔄 자전거래 카드 승인 자동 취소 결과:', cancelText);
+                        console.log('🔄 본인 결제 카드 승인 자동 취소 결과:', cancelText);
                     } catch (cErr) {
                         console.error('❌ 카드 자동 취소 실패:', cErr);
                     }
@@ -765,7 +765,7 @@ export async function POST(request: NextRequest) {
                     // 2. 송금 절대 하지 않고 에러 반환
                     return NextResponse.json({
                         success: false,
-                        error: '부고장 등록자(상주) 및 계좌 예금주 본인에게는 부의금을 보낼 수 없습니다. (여신전문금융업법상 본인 결제 불가)'
+                        error: '부고장 등록자(상주) 본인은 부의금을 직접 결제하실 수 없습니다.'
                     }, { status: 400 });
                 }
 
