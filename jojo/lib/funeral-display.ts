@@ -131,12 +131,15 @@ export function shouldShowMap(funeralType?: string | null): boolean {
  * 화환 보내기 섹션 표시 여부
  * - 일반 장례만 표시
  * - hide_flower_order가 true이면 숨김
+ * - 도계장례식장 화환 품절 대응 (funeralHome에 '도계' 포함 시 숨김)
  */
 export function shouldShowFlowerSection(opts: {
   funeralType?: string | null;
   hideFlowerOrder?: boolean;
+  funeralHome?: string | null;
 }): boolean {
   if (opts.hideFlowerOrder) return false;
+  if (opts.funeralHome && opts.funeralHome.includes('도계')) return false;
   return isNormalFuneral(opts.funeralType);
 }
 

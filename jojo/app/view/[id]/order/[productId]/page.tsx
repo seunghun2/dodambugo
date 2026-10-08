@@ -20,14 +20,14 @@ const getBugo = cache(async (bugoId: string, isUUID: boolean) => {
     if (isUUID) {
         const { data } = await supabase
             .from('bugo')
-            .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+            .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name, hide_flower_order')
             .eq('id', bugoId)
             .limit(1);
         return data?.[0] || null;
     } else {
         const { data } = await supabase
             .from('bugo')
-            .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name')
+            .select('id, bugo_number, deceased_name, funeral_home, room_number, address, mourners, mourner_name, hide_flower_order')
             .eq('bugo_number', bugoId)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -62,6 +62,15 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <div className="order-error">
                 <h2>상품을 찾을 수 없습니다</h2>
                 <a href={`/view/${id}`}>돌아가기</a>
+            </div>
+        );
+    }
+
+    if (bugoData?.hide_flower_order || (bugoData?.funeral_home && bugoData.funeral_home.includes('도계'))) {
+        return (
+            <div className="order-error">
+                <h2>해당 장례식장은 현재 화환 주문이 불가합니다</h2>
+                <a href={`/view/${id}`}>부고장으로 돌아가기</a>
             </div>
         );
     }

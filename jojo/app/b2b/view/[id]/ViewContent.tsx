@@ -1195,7 +1195,7 @@ ${url}
             {/* ========================================
                 꽃으로 마음을 보내신 분 - 일반 장례일 때만 표시
             ======================================== */}
-            {mounted && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order }) && (
+            {mounted && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order, funeralHome: bugo.funeral_home }) && (
                 <section className="section flower-section">
                     <h2 className="section-title">꽃으로 마음을 보내신 분</h2>
 
@@ -1396,7 +1396,7 @@ ${url}
             )}
 
             {
-                mounted && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order }) && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
+                mounted && shouldShowFlowerSection({ funeralType: bugo.funeral_type, hideFlowerOrder: bugo.hide_flower_order, funeralHome: bugo.funeral_home }) && !isFuneralPassed() && !shareModalOpen && !accountModalOpen && (
                     <div
                         className={`floating-flower-cta ${(showFloatingFlower || flowerModalOpen) ? 'show' : 'hide'} ${flowerModalOpen ? 'modal-open' : ''}`}
                     >

@@ -201,6 +201,12 @@ describe('shouldShowFlowerSection', () => {
   it('hideFlowerOrder → 숨김', () => {
     expect(shouldShowFlowerSection({ funeralType: '일반 장례', hideFlowerOrder: true })).toBe(false);
   });
+
+  it('도계장례식장 → 화환 숨김', () => {
+    expect(shouldShowFlowerSection({ funeralType: '일반 장례', funeralHome: '도계장례식장' })).toBe(false);
+    expect(shouldShowFlowerSection({ funeralType: '일반장례', funeralHome: '도계중앙장례식장' })).toBe(false);
+    expect(shouldShowFlowerSection({ funeralType: '일반 장례', funeralHome: '서울아산병원장례식장' })).toBe(true);
+  });
 });
 
 // ── getCeremonyLabel (빈소 라벨) ────────────────────────────────
