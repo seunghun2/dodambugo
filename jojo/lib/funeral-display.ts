@@ -131,7 +131,7 @@ export function shouldShowMap(funeralType?: string | null): boolean {
  * 화환 보내기 섹션 표시 여부
  * - 일반 장례만 표시
  * - hide_flower_order가 true이면 숨김
- * - 도계장례식장 화환 품절 대응 (funeralHome에 '도계' 포함 시 숨김)
+ * - 도계장례식장 화환 품절: 2026년 10월 10일 00:00 KST 이전까지만 임시 차단, 10일 0시부터 자동 정상화
  */
 export function shouldShowFlowerSection(opts: {
   funeralType?: string | null;
@@ -139,7 +139,11 @@ export function shouldShowFlowerSection(opts: {
   funeralHome?: string | null;
 }): boolean {
   if (opts.hideFlowerOrder) return false;
-  if (opts.funeralHome && opts.funeralHome.includes('도계')) return false;
+  if (opts.funeralHome && opts.funeralHome.includes('도계')) {
+    // 2026-10-10 00:00:00 KST 까지만 차단
+    const dogyeOutageUntil = new Date('2026-10-10T00:00:00+09:00').getTime();
+    if (Date.now() < dogyeOutageUntil) return false;
+  }
   return isNormalFuneral(opts.funeralType);
 }
 

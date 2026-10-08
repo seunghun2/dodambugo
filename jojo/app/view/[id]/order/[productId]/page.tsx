@@ -66,7 +66,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         );
     }
 
-    if (bugoData?.hide_flower_order || (bugoData?.funeral_home && bugoData.funeral_home.includes('도계'))) {
+    const dogyeOutageUntil = new Date('2026-10-10T00:00:00+09:00').getTime();
+    const isDogyeOutage = (bugoData?.funeral_home && bugoData.funeral_home.includes('도계')) && Date.now() < dogyeOutageUntil;
+
+    if (bugoData?.hide_flower_order || isDogyeOutage) {
         return (
             <div className="order-error">
                 <h2>해당 장례식장은 현재 화환 주문이 불가합니다</h2>

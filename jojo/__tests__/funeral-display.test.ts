@@ -202,10 +202,19 @@ describe('shouldShowFlowerSection', () => {
     expect(shouldShowFlowerSection({ funeralType: '일반 장례', hideFlowerOrder: true })).toBe(false);
   });
 
-  it('도계장례식장 → 화환 숨김', () => {
+  it('도계장례식장 → 10월 10일 전까지 화환 숨김, 10일 0시부터 자동 복구', () => {
+    // 10월 10일 이전: 차단
     expect(shouldShowFlowerSection({ funeralType: '일반 장례', funeralHome: '도계장례식장' })).toBe(false);
-    expect(shouldShowFlowerSection({ funeralType: '일반장례', funeralHome: '도계중앙장례식장' })).toBe(false);
     expect(shouldShowFlowerSection({ funeralType: '일반 장례', funeralHome: '서울아산병원장례식장' })).toBe(true);
+
+    // 10월 10일 00:00:01 KST 시뮬레이션: 자동 복구
+    const originalNow = Date.now;
+    Date.now = () => new Date('2026-10-10T00:00:01+09:00').getTime();
+    try {
+      expect(shouldShowFlowerSection({ funeralType: '일반 장례', funeralHome: '도계장례식장' })).toBe(true);
+    } finally {
+      Date.now = originalNow;
+    }
   });
 });
 
