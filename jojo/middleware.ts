@@ -75,11 +75,6 @@ const VIEW_THRESHOLD = 5; // 5개 이상 다른 부고 열람 → 자동 차단
 
 const VISIT_THRESHOLD = 50; // 24시간 내 50회 이상 총 방문 → 자동 차단
 
-// 의심 페이지 과다 열람 감지 (IP → 카운트)
-const policyCounter: Map<string, number> = new Map();
-const SUSPICIOUS_PAGES = ['/terms', '/privacy', '/contact'];
-const SUSPICIOUS_PAGE_THRESHOLD = 8; // 8회 이상 → 자동 차단
-
 // 검색 페이지 과다 방문 감지 (IP → 카운트)
 const searchCounter: Map<string, number> = new Map();
 const SEARCH_THRESHOLD = 4; // 4회 이상 → 자동 차단
@@ -308,19 +303,6 @@ export async function middleware(request: NextRequest) {
             notifySlack(ip, reason);
             cachedBlockedIPs.push(ip);
             visitCounter.delete(ip);
-          }
-        }
-
-        // 의심 페이지 과다 열람 감지
-        if (SUSPICIOUS_PAGES.includes(path)) {
-          const count = (policyCounter.get(ip) || 0) + 1;
-          policyCounter.set(ip, count);
-          if (count >= SUSPICIOUS_PAGE_THRESHOLD && !cachedBlockedIPs.includes(ip)) {
-            const reason = `[자동] 의심 페이지 과다 열람 (${count}회)`;
-            autoBlockIP(ip, reason);
-            notifySlack(ip, reason);
-            cachedBlockedIPs.push(ip);
-            policyCounter.delete(ip);
           }
         }
       }
