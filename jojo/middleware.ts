@@ -183,7 +183,7 @@ function autoBlockIP(ip: string, reason: string) {
       'Content-Type': 'application/json',
       'Prefer': 'resolution=ignore-duplicates',
     },
-    body: JSON.stringify({ ip_address: ip, reason: encodeURIComponent(reason), is_active: true }),
+    body: JSON.stringify({ ip_address: ip, reason, is_active: true }),
   }).catch(() => { });
 }
 

@@ -156,8 +156,16 @@ export default function BlockedIPsPage() {
             second: '2-digit',
         });
     };
+    const decodeReason = (r: string) => {
+        if (!r) return '-';
+        try {
+            return decodeURIComponent(r);
+        } catch {
+            return r;
+        }
+    };
 
-    const isAutoBlocked = (r: string) => r?.startsWith('[자동]');
+    const isAutoBlocked = (r: string) => decodeReason(r)?.startsWith('[자동]');
 
     // 차단된 IP인지 확인
     const isBlocked = (ip: string) => blockedIPs.some(b => b.ip_address === ip);
@@ -345,7 +353,7 @@ export default function BlockedIPsPage() {
                                                         {item.ip_address}
                                                     </td>
                                                     <td style={{ fontSize: '13px', color: '#444' }}>
-                                                        {item.reason || '-'}
+                                                        {decodeReason(item.reason)}
                                                     </td>
                                                     <td>
                                                         <span style={{

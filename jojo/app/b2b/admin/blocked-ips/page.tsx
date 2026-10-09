@@ -199,7 +199,16 @@ export default function B2BBlockedIPsPage() {
         });
     };
 
-    const isAutoBlocked = (r: string) => r?.startsWith('[자동]');
+    const decodeReason = (r: string) => {
+        if (!r) return '-';
+        try {
+            return decodeURIComponent(r);
+        } catch {
+            return r;
+        }
+    };
+
+    const isAutoBlocked = (r: string) => decodeReason(r)?.startsWith('[자동]');
 
     const isBlocked = (ip: string) => blockedIPs.some(b => b.ip_address === ip);
 
@@ -426,7 +435,7 @@ export default function B2BBlockedIPsPage() {
                                         paginatedBlockedIPs.map((item) => (
                                             <tr key={item.id}>
                                                 <td className={styles.ipCell}>{item.ip_address}</td>
-                                                <td>{item.reason || '-'}</td>
+                                                <td>{decodeReason(item.reason)}</td>
                                                 <td>
                                                     <span className={`${styles.badge} ${isAutoBlocked(item.reason) ? styles.badgeAuto : styles.badgeManual}`}>
                                                         {isAutoBlocked(item.reason) ? '자동' : '수동'}
