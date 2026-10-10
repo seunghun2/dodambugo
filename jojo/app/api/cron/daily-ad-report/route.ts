@@ -124,7 +124,32 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    // 4. 핵심 지표 계산
+    // 4. 구글 광고 실적 조회 (marketing_ad_spends)
+    const { data: googleSpends } = await supabase
+        .from('marketing_ad_spends')
+        .select('cost, clicks, impressions')
+        .eq('platform', 'google')
+        .eq('spend_date', targetDateStr);
+
+    let gCost = 0;
+    let gClicks = 0;
+    let gImpressions = 0;
+    if (googleSpends && googleSpends.length > 0) {
+        for (const s of googleSpends) {
+            gCost += Number(s.cost || 0);
+            gClicks += Number(s.clicks || 0);
+            gImpressions += Number(s.impressions || 0);
+        }
+    }
+    const gCpc = gClicks > 0 ? Math.round(gCost / gClicks) : 0;
+    const gGenuine = stats.google_ad.genuine_20plus;
+    const gCpa = gGenuine > 0 ? Math.round(gCost / gGenuine) : 0;
+    const gFlowerOrders = stats.google_ad.flower_order_count;
+    const gFlowerRev = stats.google_ad.flower_revenue;
+    const gFlowerMargin = gFlowerOrders * 50000;
+    const gNetProfit = gFlowerMargin - gCost;
+
+    // 5. 네이버 핵심 지표 계산
     const nCost = naverStats?.cost || 0;
     const nClicks = naverStats?.clicks || 0;
     const nCpc = naverStats?.cpc || 0;
@@ -134,6 +159,11 @@ export async function GET(request: NextRequest) {
     const nFlowerRev = stats.naver_ad.flower_revenue;
     const nFlowerMargin = nFlowerOrders * 50000; // 화환 건당 마진 5만 원 기준
     const nNetProfit = nFlowerMargin - nCost;
+
+    // 전체 광고 통합 손익
+    const totalAdCost = nCost + gCost;
+    const totalAdFlowerMargin = nFlowerMargin + gFlowerMargin;
+    const totalAdNetProfit = totalAdFlowerMargin - totalAdCost;
 
     const totalGenuine = Object.values(stats).reduce((sum, c) => sum + c.genuine_20plus, 0);
     const totalBugo = Object.values(stats).reduce((sum, c) => sum + c.total_bugo, 0);
@@ -153,7 +183,23 @@ export async function GET(request: NextRequest) {
             .join(', ')
         : '';
 
-    // 5. 슬랙 메시지 구성
+    // 6. 슬랙 메시지 구성
+    const googleAdSection = gCost > 0 || stats.google_ad.total_bugo > 0
+        ? `2. 구글 광고 실적 (어제)
+- 지출 광고비: ${fmtMoney(gCost)} (${gClicks}클릭, CPC ${fmtMoney(gCpc)})
+- 유입 부고: 총 ${stats.google_ad.total_bugo}건 중 *진성 ${gGenuine}건*
+- 진성 부고 획득단가(CPA): ${gGenuine > 0 ? fmtMoney(gCpa) : '진성 0건'}
+- 화환 결제: ${gFlowerOrders}건 (${fmtMoney(gFlowerRev)})
+- 구글 광고 실질 손익: ${gNetProfit >= 0 ? '+' : ''}${fmtMoney(gNetProfit)} (화환마진 - 광고비)`
+        : `2. 구글 광고: 데이터 없음 (총 ${stats.google_ad.total_bugo}건 / 진성 ${gGenuine}건)`;
+
+    const totalAdSection = totalAdCost > 0
+        ? `\n4. 전체 광고 통합 손익 (네이버+구글)
+- 총 광고비 지출: ${fmtMoney(totalAdCost)} (네이버 ${fmtMoney(nCost)} + 구글 ${fmtMoney(gCost)})
+- 광고 유입 화환 마진: ${fmtMoney(totalAdFlowerMargin)}
+- 광고 집행 최종 순손익: ${totalAdNetProfit >= 0 ? '+' : ''}${fmtMoney(totalAdNetProfit)}`
+        : '';
+
     const slackText = `📊 [마음부고] 일일 광고 & 전환 리포트 (${targetDateStr})
 ${bizAlert}
 
@@ -164,11 +210,13 @@ ${bizAlert}
 - 화환 결제: ${nFlowerOrders}건 (${fmtMoney(nFlowerRev)})
 - 네이버 광고 실질 손익: ${nNetProfit >= 0 ? '+' : ''}${fmtMoney(nNetProfit)} (화환마진 - 광고비)
 
-2. 기타 유입 성과 (어제)
-- 구글 광고: 총 ${stats.google_ad.total_bugo}건 | 진성 ${stats.google_ad.genuine_20plus}건 | 화환 ${stats.google_ad.flower_order_count}건
-- 오가닉/직접: 총 ${stats.organic.total_bugo}건 | 진성 ${stats.organic.genuine_20plus}건 | 화환 ${stats.organic.flower_order_count}건
+${googleAdSection}
 
-3. 어제 전체 실사용자 바닥 수치
+3. 오가닉/직접 유입 (어제)
+- 총 ${stats.organic.total_bugo}건 | *진성 ${stats.organic.genuine_20plus}건* | 화환 ${stats.organic.flower_order_count}건
+${totalAdSection}
+
+5. 어제 전체 실사용자 바닥 수치
 - 진성 부고: *${totalGenuine}건* (전체 ${totalBugo}건)
 - 화환 결제: *${totalFlowerOrders}건* (${fmtMoney(totalFlowerRev)})`;
 
@@ -195,13 +243,25 @@ ${bizAlert}
         targetDate: targetDateStr,
         bizmoney,
         naverStats,
+        googleStats: {
+            cost: gCost,
+            clicks: gClicks,
+            impressions: gImpressions,
+            cpc: gCpc,
+            genuine: gGenuine,
+            cpa: gCpa,
+            netProfit: gNetProfit,
+        },
         channelStats: stats,
         summary: {
             totalBugo,
             totalGenuine,
             totalFlowerOrders,
             totalFlowerRev,
-            nNetProfit,
+            naverNetProfit: nNetProfit,
+            googleNetProfit: gNetProfit,
+            totalAdCost,
+            totalAdNetProfit,
         },
     });
 }
