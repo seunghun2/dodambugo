@@ -470,7 +470,6 @@ export default function BugoonSite() {
                         <a href="#faq">자주 묻는 질문</a>
                     </nav>
                     <div className={s.headerCta}>
-                        <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>앱 다운로드</a>
                         <a href={LOGIN_URL} className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>로그인</a>
                         <a href={SIGNUP_URL} className={`${s.btn} ${s.btnSm} ${s.btnPrimary}`}>무료로 시작하기</a>
                     </div>
