@@ -320,7 +320,7 @@ export async function POST(request: NextRequest) {
                 if (orderData.bugo_id) {
                     const { data: bugoData } = await supabase
                         .from('bugo')
-                        .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address, b2b_user_id')
+                        .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address, b2b_user_id, view_count')
                         .eq('id', orderData.bugo_id)
                         .single();
 
@@ -394,6 +394,7 @@ export async function POST(request: NextRequest) {
                     payment_method: getDetailedPaymentMethod(approveResult.data?.payMethod || payMethod || 'CARD', approveResult.data),
                     chief_mourner_name: orderData.bugo?.mourner_name || '',
                     chief_mourner_phone: orderData.bugo?.phone_password || '',
+                    view_count: orderData.bugo?.view_count ?? 0,
                 }, isB2B);
                 console.log('✅ 슬랙 알림 발송 완료');
             } catch (err) {

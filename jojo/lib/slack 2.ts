@@ -91,6 +91,7 @@ export async function sendFlowerOrderNotification(order: {
     payment_method?: string;
     chief_mourner_name?: string;
     chief_mourner_phone?: string;
+    view_count?: number;
 }): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL;
     const priceFormatted = new Intl.NumberFormat('ko-KR').format(order.price);
@@ -119,7 +120,8 @@ export async function sendFlowerOrderNotification(order: {
 - 수신자: ${recipientDisplay}
 - 주문자: ${order.sender_name}(${order.sender_phone})
 - 대표상주: ${chiefMournerDisplay}
-- 결제수단: ${order.payment_method || '미정'}`;
+- 결제수단: ${order.payment_method || '미정'}
+- ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }

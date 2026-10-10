@@ -138,6 +138,7 @@ export async function sendFlowerOrderNotification(order: {
     payment_method?: string;
     chief_mourner_name?: string;
     chief_mourner_phone?: string;
+    view_count?: number;
 }, isB2B?: boolean): Promise<boolean> {
     const webhookUrl = isB2B
         ? (process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_URL)
@@ -176,7 +177,8 @@ export async function sendFlowerOrderNotification(order: {
 - 리본문구1: ${order.ribbon_text1 || '-'}
 - 리본문구2: ${order.ribbon_text2 || '-'}
 - 결제수단: ${order.payment_method || '미정'}
-- 부고장: https://${domain}/view/${order.bugo_number || ''}`;
+- 부고장: https://${domain}/view/${order.bugo_number || ''}
+- ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }

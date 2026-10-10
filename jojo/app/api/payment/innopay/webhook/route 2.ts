@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
             if (orderData.bugo_id) {
                 const { data } = await supabase
                     .from('bugo')
-                    .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address')
+                    .select('bugo_number, deceased_name, mourner_name, phone_password, mourners, address, b2b_user_id, view_count')
                     .eq('id', orderData.bugo_id)
                     .single();
                 bugoData = data;
@@ -314,6 +314,7 @@ export async function POST(request: NextRequest) {
                 payment_method: 'vbank',
                 chief_mourner_name: bugoData?.mourner_name || '',
                 chief_mourner_phone: bugoData?.phone_password || '',
+                view_count: bugoData?.view_count ?? 0,
             }, !!bugoData?.b2b_user_id).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
