@@ -33,6 +33,7 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     pathname !== '/b2b/' && 
     pathname !== '/b2b/login' && 
     pathname !== '/b2b/login/' && 
+    !pathname.startsWith('/b2b/intro') &&
     !pathname.startsWith('/b2b/signup') && 
     !pathname.startsWith('/b2b/admin') &&
     !pathname.startsWith('/b2b/company') && 
@@ -59,10 +60,21 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/b2b/review')
   );
 
+  const isIntroPage = pathname && (
+    pathname === '/b2b/intro' ||
+    pathname.startsWith('/b2b/intro') ||
+    pathname === '/intro'
+  );
+
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isViewerPage ? 'transparent' : (isAdmin ? '#f8fafc' : '#f8f9fa') }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', backgroundColor: isIntroPage ? '#faf8f4' : (isViewerPage ? 'transparent' : (isAdmin ? '#f8fafc' : '#f8f9fa')) }}>
       {/* 메인 콘텐츠 뷰 */}
-      <div id="b2b-page-container" style={isAdmin ? {
+      <div id="b2b-page-container" style={isIntroPage ? {
+        position: 'relative',
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: 'transparent',
+      } : isAdmin ? {
         position: 'relative',
         width: '100%',
         minHeight: '100vh',
