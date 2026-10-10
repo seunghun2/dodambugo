@@ -31,6 +31,7 @@ export const metadata = {
     images: ['https://bugoon.maeumbugo.co.kr/b2b-og-card.png?v=2'],
   },
   verification: {
+    google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',
     other: {
       'naver-site-verification': '66a39b07b836fb9f07add3bdca299036b4b002fc',
     },
