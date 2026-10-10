@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     const nCpa = nGenuine > 0 ? Math.round(nCost / nGenuine) : 0;
     const nFlowerOrders = stats.naver_ad.flower_order_count;
     const nFlowerRev = stats.naver_ad.flower_revenue;
-    const nFlowerMargin = nFlowerOrders * 20000; // 화환 건당 평균 마진 2만 원 기준
+    const nFlowerMargin = nFlowerOrders * 50000; // 화환 건당 마진 5만 원 기준
     const nNetProfit = nFlowerMargin - nCost;
 
     const totalGenuine = Object.values(stats).reduce((sum, c) => sum + c.genuine_20plus, 0);
