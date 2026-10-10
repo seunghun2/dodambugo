@@ -24,6 +24,11 @@ export const metadata: Metadata = {
             },
         ],
     },
+    verification: {
+        other: {
+            'naver-site-verification': '66a39b07b836fb9f07add3bdca299036b4b002fc',
+        },
+    },
 };
 
 const jsonLd = {

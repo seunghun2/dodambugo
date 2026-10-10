@@ -30,6 +30,11 @@ export const metadata = {
     description: '부고온 B2B 파트너 전용 서비스',
     images: ['https://bugoon.maeumbugo.co.kr/b2b-og-card.png?v=2'],
   },
+  verification: {
+    other: {
+      'naver-site-verification': '66a39b07b836fb9f07add3bdca299036b4b002fc',
+    },
+  },
 };
 
 import { B2BLayoutClient } from '@/components/b2b/B2BLayoutClient';

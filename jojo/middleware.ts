@@ -346,7 +346,7 @@ export async function middleware(request: NextRequest) {
       path.startsWith('/_vercel') ||
       path.startsWith('/api') ||
       path.startsWith('/favicon.ico') ||
-      /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map)$/.test(path);
+      /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map|html)$/.test(path);
 
     if (!isStaticOrApi && !path.startsWith('/b2b')) {
       // /order 경로는 redirect(302)로 URL을 명시적으로 변경 (B2B 주문 페이지 표시)
