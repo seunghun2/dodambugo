@@ -54,13 +54,14 @@ async function fetchNaverMonthly(year: string) {
         const timeRange = encodeURIComponent(JSON.stringify({ since: startDay, until: endDay }));
         const statsPath = `/stats?id=${campaignId}&fields=${fields}&timeRange=${timeRange}`;
 
-        const statsSig = generateSignature(Date.now().toString(), 'GET', '/stats', SECRET_KEY);
+        const statsTimestamp = Date.now().toString();
+        const statsSig = generateSignature(statsTimestamp, 'GET', '/stats', SECRET_KEY);
 
         try {
             const res = await fetch(`${BASE_URL}${statsPath}`, {
                 method: 'GET',
                 headers: {
-                    'X-Timestamp': Date.now().toString(),
+                    'X-Timestamp': statsTimestamp,
                     'X-API-KEY': ACCESS_LICENSE,
                     'X-Customer': CUSTOMER_ID,
                     'X-Signature': statsSig,
