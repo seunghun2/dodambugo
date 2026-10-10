@@ -470,6 +470,7 @@ export default function BugoonSite() {
                         <a href="#faq">자주 묻는 질문</a>
                     </nav>
                     <div className={s.headerCta}>
+                        <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>앱 다운로드</a>
                         <a href={LOGIN_URL} className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>로그인</a>
                         <a href={SIGNUP_URL} className={`${s.btn} ${s.btnSm} ${s.btnPrimary}`}>무료로 시작하기</a>
                     </div>
@@ -480,14 +481,15 @@ export default function BugoonSite() {
             <section className={s.hero} id="top">
                 <div className={`${s.wrap} ${s.heroGrid}`}>
                     <div>
-                        <div {...R()}><span className={s.eyebrow}><span className={s.eyebrowDot} />장례 현장을 위한 모바일 부고 솔루션</span></div>
+                        <div {...R()}><span className={s.eyebrow}><span className={s.eyebrowDot} />장례 현장을 위한 공식 부고 솔루션 · 부고온플러스</span></div>
                         <h1 {...R(s.heroTitle + ' ' + s.d1)}>부고는 1분,<br />나머지는 <em>부고온</em>이<br />챙깁니다.</h1>
-                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 작성부터 발송, 화환 주문, 정산까지. 장례지도사·상조사·장례식장이 쓰는 부고 솔루션입니다.</p>
+                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 작성부터 발송, 화환 주문, 정산까지. 장례지도사·상조사·장례식장이 쓰는 부고 솔루션 부고온플러스입니다.</p>
                         <div {...R(s.heroBtns + ' ' + s.d3)}>
                             <a href={SIGNUP_URL} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
+                            <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>Google Play 앱</a>
                             <button className={`${s.btn} ${s.btnGhost}`} onClick={() => setModal(true)}>도입 문의</button>
                         </div>
-                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없음 · 가입비 0원 · 월 이용료 0원</div>
+                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없음 · 가입비 0원 · 월 이용료 0원 (웹/앱 모두 지원)</div>
                     </div>
                     <div className={s.heroVisual} {...{ 'data-reveal': '' }}>
                         <div className={`${s.card} ${s.cardLeft}`}><img src="/images/mockup-bugo-flower-v2.png" alt="국화 부고장 완성 화면" /></div>
@@ -607,6 +609,7 @@ export default function BugoonSite() {
                     <div className={s.footerTop}>
                         <img src="/images/b2b-logo.png" alt="부고온" className={s.footerLogo} style={{ height: 48, margin: "-8px -10px" }} />
                         <div className={s.footerLinks}>
+                            <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer">Google Play 앱 다운로드</a>
                             <a href={`${APP}/terms`}>이용약관</a>
                             <a href={`${APP}/privacy`}>개인정보처리방침</a>
                             <a href={LOGIN_URL}>파트너 로그인</a>
