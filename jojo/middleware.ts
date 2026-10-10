@@ -362,20 +362,28 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next();
 
-  // 광고 및 마케팅 유입 파라미터 감지 시 30일 쿠키 설정
+  // 광고 및 마케팅 유입 파라미터 감지 시 7일 쿠키 설정
   const searchParams = request.nextUrl.searchParams;
   let detectedChannel: string | null = null;
   if (searchParams.has('gclid') || searchParams.has('gbraid') || searchParams.has('wbraid')) {
-    detectedChannel = 'google_ad';
+    const utmTerm = searchParams.get('utm_term') || searchParams.get('q');
+    detectedChannel = utmTerm ? `google_ad:${utmTerm.trim()}` : 'google_ad';
   } else if (searchParams.has('n_media') || searchParams.has('n_query') || searchParams.has('n_ad_group')) {
-    detectedChannel = 'naver_ad';
+    const nq = searchParams.get('n_query') || searchParams.get('n_keyword');
+    try {
+      detectedChannel = nq ? `naver_ad:${decodeURIComponent(nq).trim()}` : 'naver_ad';
+    } catch {
+      detectedChannel = nq ? `naver_ad:${nq.trim()}` : 'naver_ad';
+    }
   } else if (searchParams.get('utm_source')) {
-    detectedChannel = searchParams.get('utm_source');
+    const src = searchParams.get('utm_source')!;
+    const term = searchParams.get('utm_term');
+    detectedChannel = term ? `${src}:${term.trim()}` : src;
   }
 
   if (detectedChannel) {
     response.cookies.set('mb_ad_channel', detectedChannel, {
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: 7 * 24 * 60 * 60,
       path: '/',
       sameSite: 'lax',
     });

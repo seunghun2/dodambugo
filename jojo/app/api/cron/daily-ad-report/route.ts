@@ -94,12 +94,21 @@ export async function GET(request: NextRequest) {
         organic: { channel: '오가닉/직접/공유', key: 'organic', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0 },
     };
 
+    const naverKeywords: Record<string, { genuine: number; flowerOrders: number }> = {};
+
     for (const b of (bugos || [])) {
         const src = (b.source || '').toLowerCase();
         let targetKey = 'organic';
-        if (src === 'naver_ad' || src.includes('naver_ad')) {
+        if (src.startsWith('naver_ad') || src.includes('naver_ad')) {
             targetKey = 'naver_ad';
-        } else if (src === 'google_ad' || src.includes('google_ad')) {
+            if (src.includes(':')) {
+                const kw = src.split(':')[1]?.trim() || '미지정';
+                if (!naverKeywords[kw]) naverKeywords[kw] = { genuine: 0, flowerOrders: 0 };
+                if ((b.view_count || 0) >= 20) naverKeywords[kw].genuine += 1;
+                const ord = ordersMap[b.id];
+                if (ord) naverKeywords[kw].flowerOrders += ord.count;
+            }
+        } else if (src.startsWith('google_ad') || src.includes('google_ad')) {
             targetKey = 'google_ad';
         }
 
@@ -138,13 +147,19 @@ export async function GET(request: NextRequest) {
         ? `⚠️ *비즈머니 잔액 부족: ${fmtMoney(bizmoney)}* (충전 필요)`
         : `• 비즈머니 잔액: ${bizmoney !== null ? fmtMoney(bizmoney) : '확인불가'}`;
 
+    const keywordListStr = Object.keys(naverKeywords).length > 0
+        ? '\n- 유입 키워드 실적: ' + Object.entries(naverKeywords)
+            .map(([kw, data]) => `[${kw}] 진성 ${data.genuine}건${data.flowerOrders > 0 ? ` / 화환 ${data.flowerOrders}건` : ''}`)
+            .join(', ')
+        : '';
+
     // 5. 슬랙 메시지 구성
     const slackText = `📊 [마음부고] 일일 광고 & 전환 리포트 (${targetDateStr})
 ${bizAlert}
 
 1. 네이버 검색광고 실적 (어제)
 - 지출 광고비: ${fmtMoney(nCost)} (${nClicks}클릭, CPC ${fmtMoney(nCpc)})
-- 유입 부고: 총 ${stats.naver_ad.total_bugo}건 중 *진성 ${nGenuine}건*
+- 유입 부고: 총 ${stats.naver_ad.total_bugo}건 중 *진성 ${nGenuine}건*${keywordListStr}
 - 진성 부고 획득단가(CPA): ${nGenuine > 0 ? fmtMoney(nCpa) : '진성 0건'}
 - 화환 결제: ${nFlowerOrders}건 (${fmtMoney(nFlowerRev)})
 - 네이버 광고 실질 손익: ${nNetProfit >= 0 ? '+' : ''}${fmtMoney(nNetProfit)} (화환마진 - 광고비)
