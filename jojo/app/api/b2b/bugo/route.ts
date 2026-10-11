@@ -94,6 +94,21 @@ export async function POST(request: NextRequest) {
             revalidatePath(`/b2b/view/${editBugoNumber}`, 'page');
             return NextResponse.json({ success: true, bugo_number: editBugoNumber });
         } else {
+            // 차단된 연락처 검사
+            const contactPhone = (mourners?.[0]?.contact || '').replace(/[^0-9]/g, '');
+            if (contactPhone) {
+                const { data: blockedCheck } = await supabase
+                    .from('blocked_phones')
+                    .select('id')
+                    .eq('is_active', true)
+                    .or(`phone.eq.${contactPhone},phone.eq.${mourners?.[0]?.contact}`)
+                    .limit(1);
+
+                if (blockedCheck && blockedCheck.length > 0) {
+                    return NextResponse.json({ error: '등록이 제한된 연락처입니다.' }, { status: 403 });
+                }
+            }
+
             // 부고 신규 생성
             const bugoNumber = await generateBugoNumber();
             const ownerToken = generateOwnerToken();

@@ -1188,6 +1188,23 @@ export default function WriteFormPage() {
         setIsSubmitting(true);
 
         try {
+            // 차단된 연락처 검사 (blocked_phones)
+            const cleanPhone = (formData.applicant_phone || '').replace(/[^0-9]/g, '');
+            if (cleanPhone) {
+                const { data: blockedCheck } = await supabase
+                    .from('blocked_phones')
+                    .select('id')
+                    .eq('is_active', true)
+                    .or(`phone.eq.${cleanPhone},phone.eq.${formData.applicant_phone}`)
+                    .limit(1);
+
+                if (blockedCheck && blockedCheck.length > 0) {
+                    alert('등록이 제한된 연락처입니다. 고객센터로 문의해 주세요.');
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
             // 수정 모드면 기존 번호 사용, 아니면 새 번호 생성
             const bugoNumber = editBugoNumber || await generateBugoNumber();
 
