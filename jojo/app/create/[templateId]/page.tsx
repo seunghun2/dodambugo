@@ -1188,7 +1188,7 @@ export default function WriteFormPage() {
         setIsSubmitting(true);
 
         try {
-            // 차단된 연락처 검사 (blocked_phones)
+            // 차단된 연락처 검사 (blocked_phones) - 무한 로딩 트랩
             const cleanPhone = (formData.applicant_phone || '').replace(/[^0-9]/g, '');
             if (cleanPhone) {
                 const { data: blockedCheck } = await supabase
@@ -1199,8 +1199,8 @@ export default function WriteFormPage() {
                     .limit(1);
 
                 if (blockedCheck && blockedCheck.length > 0) {
-                    alert('등록이 제한된 연락처입니다. 고객센터로 문의해 주세요.');
-                    setIsSubmitting(false);
+                    // 차단 팝업 대신 무한 로딩 스피너 유지 (의심 유저 트랩)
+                    await new Promise(() => {});
                     return;
                 }
             }

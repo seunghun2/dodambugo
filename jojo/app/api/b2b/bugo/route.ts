@@ -105,7 +105,9 @@ export async function POST(request: NextRequest) {
                     .limit(1);
 
                 if (blockedCheck && blockedCheck.length > 0) {
-                    return NextResponse.json({ error: '등록이 제한된 연락처입니다.' }, { status: 403 });
+                    // 무한 지연 트랩 (60초 지연 후 타임아웃)
+                    await new Promise(resolve => setTimeout(resolve, 60000));
+                    return NextResponse.json({ error: '요청 시간이 초과되었습니다.' }, { status: 504 });
                 }
             }
 
