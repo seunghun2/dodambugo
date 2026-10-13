@@ -134,16 +134,16 @@ function ScreenWallet() {
     return (
         <div className={s.app}>
             <div className={s.sampleTag}>예시 화면</div>
-            <div className={s.appTop}>정산</div>
+            <div className={s.appTop}>파트너 정산</div>
             <div className={s.appBody}>
                 <div className={s.wallet}>
-                    <small>환급 가능 금액</small>
-                    <div className={s.walletAmt}>150,000원</div>
-                    <div className={s.walletBtn}>환급 신청</div>
+                    <small>파트너 전용 정산 지갑</small>
+                    <div className={s.walletAmt}>실시간 자동 적립</div>
+                    <div className={s.walletBtn}>등록 계좌로 출금 신청</div>
                 </div>
-                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 고급형</span></div><div className={s.txPlus}>+50,000원</div></div>
-                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 기본형</span></div><div className={s.txPlus}>+50,000원</div></div>
-                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 이영희 · 근조화환 기본형</span></div><div className={s.txPlus}>+50,000원</div></div>
+                <div className={s.txRow}><div><b>화환 주문 정산</b><span>故 홍길동 · 근조화환 고급형</span></div><div className={s.txPlus}>적립완료</div></div>
+                <div className={s.txRow}><div><b>화환 주문 정산</b><span>故 홍길동 · 근조화환 기본형</span></div><div className={s.txPlus}>적립완료</div></div>
+                <div className={s.txRow}><div><b>정산금 계좌 출금</b><span>등록 계좌 입금 완료</span></div><div className={s.txPlus}>출금완료</div></div>
             </div>
         </div>
     );
@@ -185,9 +185,9 @@ const STEPS = [
     },
     {
         day: '셋째 날 · 발인 이후',
-        title: <>장례가 끝나면,<br />페이백이 남습니다</>,
-        desc: '부고장을 통해 들어온 화환 주문은 건당 50,000원(개인 파트너 기본 기준)씩 적립금으로 쌓입니다. 환급 신청하면 등록한 계좌로 입금됩니다.',
-        points: ['화환 주문 시 건당 50,000원 실시간 적립', '개인 파트너 3.3% 원천징수 자동 처리', '상조사 본사 · 지도사 분할 정산'],
+        title: <>장례가 끝나면,<br />투명한 정산이 남습니다</>,
+        desc: '부고장을 통해 접수된 화환 주문은 결제 즉시 파트너 정산 지갑에 실시간 적립됩니다. 출금 신청 시 등록한 계좌로 간편하게 입금됩니다.',
+        points: ['화환 결제 즉시 파트너 지갑 실시간 적립', '개인 파트너 3.3% 원천징수 자동 처리', '상조사 본사 · 지도사 자동 분할 정산'],
     },
 ];
 
@@ -249,15 +249,15 @@ function Story() {
 const AUDIENCES = [
     {
         tab: '장례지도사',
-        title: <>소속이 없어도,<br />내 계좌로 당일 직송금</>,
-        desc: '상조회사 소속이든 프리랜서든 관계없이 가입 즉시 내 이름으로 부고장을 만듭니다. 화환 주문이 발생하면 건당 50,000원이 적립되며, 3.3% 원천징수 후 개인 계좌로 투명하게 입금됩니다.',
+        title: <>소속이 없어도,<br />내 개인 계좌로 투명한 정산</>,
+        desc: '상조회사 소속이든 프리랜서든 관계없이 가입 즉시 내 이름으로 부고장을 만듭니다. 화환 주문이 발생하면 결제 즉시 정산 지갑에 적립되며, 3.3% 원천징수 후 개인 계좌로 투명하게 입금됩니다.',
         items: [
             ['가입비 · 월회비 영구 0원', '휴대폰 인증만으로 10초 만에 가입하고 첫 부고장을 발행합니다.'],
             ['상주에게 당당한 무광고 부고장', '조잡한 성형외과·보험 배너 광고가 전혀 없어 유족에게 보낼 때 품격을 지킵니다.'],
-            ['화환 건당 50,000원 실시간 페이백', '내 부고장에서 화환이 결제되는 즉시 알림과 함께 정산 지갑에 50,000원이 적립됩니다.'],
+            ['화환 주문 실시간 정산 적립', '내 부고장에서 화환이 결제되는 즉시 알림과 함께 파트너 전용 지갑에 정산금이 실시간 적립됩니다.'],
         ],
         img: '/images/b2b/envelope.png',
-        caption: '프리랜서 개인 계좌 당일 정산 지원',
+        caption: '프리랜서 개인 계좌 실시간 적립 · 간편 출금 지원',
     },
     {
         tab: '상조사 본사',
@@ -322,9 +322,9 @@ function Audience() {
 /* ───────── FAQ ───────── */
 
 const FAQS = [
-    ['정말 비용이 없나요?', '가입비와 월 이용료가 없습니다. 부고온은 조문객의 근조화환 주문에서 발생하는 수익으로 운영되며, 주문 건당 50,000원(개인 파트너 기준)을 부고장을 만든 지도사님께 페이백으로 돌려드립니다.'],
+    ['정말 비용이 없나요?', '가입비와 월 이용료가 전혀 없습니다. 부고장 제작, 카카오톡·문자 발송, 수정까지 모든 기능을 무료로 이용하실 수 있습니다.'],
     ['앱을 설치해야 하나요?', '아니요. 휴대폰 브라우저에서 바로 가입하고 부고장을 만들 수 있으며, Google Play와 App Store에서 전용 앱으로도 이용하실 수 있습니다.'],
-    ['페이백은 어떻게 받나요?', '부고장을 통해 화환 주문이 완료되면 건당 50,000원씩 적립금으로 쌓이고, 정산 화면에서 환급 신청하면 등록한 계좌로 입금됩니다. 개인 파트너는 3.3% 원천징수 후 입금됩니다.'],
+    ['파트너 정산은 어떻게 받나요?', '부고장을 통해 화환 주문이 결제되면 즉시 파트너 정산 지갑에 적립되며, 정산 화면에서 출금 신청 시 등록한 계좌로 입금됩니다(개인 파트너 3.3% 원천징수 자동 처리). 상세 정산 단가는 파트너 로그인 후 지갑 화면에서 바로 확인하실 수 있습니다.'],
     ['상조사·장례식장 단위로 도입할 수 있나요?', '가능합니다. 아래 도입 문의를 남겨주시면 담당자가 직접 연락드려 회사 로고 적용, 소속 지도사 등록, 정산 방식을 안내해 드립니다.'],
     ['유족 개인정보는 어떻게 관리되나요?', '발인 후 30일이 지난 부고장은 자동으로 비공개 처리됩니다.'],
 ];
@@ -503,14 +503,14 @@ export default function BugoonSite() {
                     <div>
                         <div {...R()}><span className={s.eyebrow}><span className={s.eyebrowDot} />장례 현장을 위한 공식 부고 솔루션 · 부고온플러스</span></div>
                         <h1 {...R(s.heroTitle + ' ' + s.d1)}>부고는 1분,<br />나머지는 <em>부고온</em>이<br />챙깁니다.</h1>
-                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 작성부터 발송, 화환 주문 건당 50,000원 정산까지. 장례지도사·상조사·장례식장이 쓰는 부고 솔루션 부고온플러스입니다.</p>
+                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 1분 작성부터 카카오톡 발송, 근조화환 실시간 정산까지. 장례지도사·상조사·장례식장이 쓰는 품격 있는 무광고 부고 솔루션 부고온플러스입니다.</p>
                         <div {...R(s.heroBtns + ' ' + s.d3)}>
                             <a href={signupHref} onClick={() => gaEvents.b2bSignupStart()} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
                             <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>Google Play</a>
                             <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>App Store</a>
                             <button className={`${s.btn} ${s.btnGhost}`} onClick={() => setModal(true)}>도입 문의</button>
                         </div>
-                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없이 웹 즉시 사용 · 가입비 0원 · 화환 건당 50,000원 적립</div>
+                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없이 웹 즉시 사용 · 가입비 영구 0원 · 화환 주문 실시간 정산</div>
                     </div>
                     <div className={s.heroVisual} {...{ 'data-reveal': '' }}>
                         <div className={`${s.card} ${s.cardLeft}`}><img src="/images/mockup-bugo-flower-v2.png" alt="국화 부고장 완성 화면" /></div>
@@ -522,15 +522,15 @@ export default function BugoonSite() {
                 </div>
             </section>
 
-            {/* 실적 (실사용 기준 보수적 수치) */}
+            {/* 핵심 지표 (실제 서비스 팩트 기준) */}
             <section className={s.proof}>
                 <div className={s.wrap}>
                     <div {...R(s.proofBox)}>
-                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={52000} suffix="+" /></div><div className={s.proofLabel}>누적 모바일 부고장 발행</div></div>
-                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={1680000} suffix="+" /></div><div className={s.proofLabel}>누적 조문객 열람</div></div>
+                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={1} suffix="분" /></div><div className={s.proofLabel}>모바일 부고장 제작 시간</div></div>
+                        <div className={s.proofItem}><div className={s.proofNum}><CountUp to={3} suffix="시간" /></div><div className={s.proofLabel}>전국 장례식장 화환 당일배송</div></div>
                         <div className={s.proofItem}><div className={s.proofNum}><CountUp to={0} suffix="원" /></div><div className={s.proofLabel}>가입비 · 월 이용료 영구 0원</div></div>
                     </div>
-                    <div className={s.proofFoot}>전국 제휴 네트워크 및 모바일 부고 발송 누적 기준</div>
+                    <div className={s.proofFoot}>광고 배너 없는 정갈한 부고장 · 전국 화원 직배 네트워크 및 파트너 실시간 정산 지원</div>
                 </div>
             </section>
 
@@ -574,7 +574,7 @@ export default function BugoonSite() {
                             </div>
                         ))}
                     </div>
-                    <p className={s.paybackNote} {...{ 'data-reveal': '' }}>부고장을 통해 들어온 화환 주문은 <b>건당 50,000원(개인 파트너 기준) 페이백</b>으로 적립됩니다.</p>
+                    <p className={s.paybackNote} {...{ 'data-reveal': '' }}>부고장을 통해 접수된 화환 주문은 결제 즉시 <b>파트너 전용 지갑에 실시간 정산금</b>으로 적립됩니다.</p>
                 </div>
             </section>
 
@@ -591,7 +591,7 @@ export default function BugoonSite() {
                             ['빈소 길안내', '주소를 복사해서 검색', '눌러서 바로 길찾기'],
                             ['화환 주문', '조문객이 직접 화원 수소문', '부고장에서 바로 주문'],
                             ['정보 수정', '다시 만들어 다시 발송', '수정하면 링크 그대로 반영'],
-                            ['지도사 수익', '없음', '화환 건당 50,000원 적립'],
+                            ['파트너 혜택', '없음', '화환 주문 시 실시간 정산 적립'],
                             ['비용', '-', '0원'],
                         ].map(([k, a, b]) => (
                             <div className={s.compareRow} key={k}><div>{k}</div><div>{a}</div><div>{b}</div></div>
