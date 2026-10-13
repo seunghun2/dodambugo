@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
                 user_agent: `${category || 'event'}:${action}${label ? ':' + label : ''}`,
                 ip_address: request.headers.get('x-forwarded-for') || '127.0.0.1',
             }
-        ]).catch(() => {});
+        ]);
 
         return NextResponse.json({ success: true });
     } catch (error) {
