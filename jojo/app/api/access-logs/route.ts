@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdmin } from '@/lib/admin-auth';
 
 function getSupabase() {
     return createClient(
@@ -11,9 +10,6 @@ function getSupabase() {
 
 // GET: 최근 접속 로그 조회 (offset 기반 페이지네이션)
 export async function GET(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');

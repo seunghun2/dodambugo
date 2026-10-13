@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdmin } from '@/lib/admin-auth';
 
 // Service role 키로 Supabase 클라이언트 생성 (서버에서만 사용)
 const supabaseAdmin = createClient(
@@ -9,9 +8,6 @@ const supabaseAdmin = createClient(
 );
 
 export async function DELETE(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     try {
         const { id } = await request.json();
 

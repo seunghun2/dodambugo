@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,6 +85,9 @@ async function fetchNaverMonthly(year: string) {
 }
 
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         const { searchParams } = new URL(request.url);
         const year = searchParams.get('year') || '2026';

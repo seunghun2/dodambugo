@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 function getSupabase() {
     return createClient(
@@ -10,6 +11,9 @@ function getSupabase() {
 
 // GET: 답례품 뷰, 감사장 공유 등 실시간 이벤트를 요약 조회
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         const supabase = getSupabase();
 

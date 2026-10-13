@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const ACCESS_LICENSE = process.env.NAVER_ADS_ACCESS_LICENSE || '0100000000e412a734d595eda2c3fed12d693a20f99c5ce1c3df63c238030be52bd5cd3e58';
 const SECRET_KEY = process.env.NAVER_ADS_SECRET_KEY || 'AQAAAADkEqc01ZXtosP+0S1pOiD5fNlkEx2S6OnKIH/uZFdhXQ==';
@@ -36,6 +37,9 @@ async function callNaverApi(path: string, method: string = 'GET') {
 
 // GET: 네이버 검색광고 실시간 비즈머니 잔액, 당일 광고비 및 월별 집행 내역
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         const { searchParams } = new URL(request.url);
         const year = searchParams.get('year') || '2026';

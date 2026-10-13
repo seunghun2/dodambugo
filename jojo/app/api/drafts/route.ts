@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,9 +8,6 @@ const supabase = createClient(
 
 // 임시저장 목록 조회 (어드민용)
 export async function GET(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     try {
         const { data, error } = await supabase
             .from('drafts')
