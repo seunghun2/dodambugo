@@ -142,10 +142,11 @@ async function handleRetryTransfers() {
                     const recipientName = (order.recipient_name || '').trim();
 
                     if (order.bugo_number) {
+                        const isNumericBugo = /^\d+$/.test(String(order.bugo_number));
                         const { data: bugoData } = await supabase
                             .from('bugo')
                             .select('*')
-                            .eq('bugo_number', order.bugo_number)
+                            .eq(isNumericBugo ? 'bugo_number' : 'id', order.bugo_number)
                             .order('created_at', { ascending: false })
                             .limit(1)
                             .single();

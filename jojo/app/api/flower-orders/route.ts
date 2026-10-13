@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendFlowerOrderNotification } from '@/lib/slack';
 import { sendAlimtalk } from '@/lib/solapi';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // 알림톡 템플릿 ID
 const ALIMTALK_TEMPLATES = {
@@ -26,6 +27,12 @@ export async function GET(request: NextRequest) {
         const bugoId = searchParams.get('bugo_id');
         const limit = parseInt(searchParams.get('limit') || '500');
         const offset = parseInt(searchParams.get('offset') || '0');
+
+        // 고객 주문완료 화면(bugo_id 지정 + limit=1 단건 조회) 외 전체 목록 조회는 관리자 인증 필수
+        const isCustomerSingleLookup = !!bugoId && limit === 1;
+        if (!isCustomerSingleLookup && !verifyAdmin(request)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         let query = supabase
             .from('flower_orders')
@@ -154,6 +161,9 @@ export async function POST(request: NextRequest) {
 
 // PATCH: 주문 상태 업데이트
 export async function PATCH(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         const supabase = getSupabase();
         const body = await request.json();

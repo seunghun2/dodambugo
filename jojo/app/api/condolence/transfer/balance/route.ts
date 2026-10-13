@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // 2.10 예치금 잔액 조회 요청
 // URL: https://acct.innopay.co.kr/AcctOutRemainSearch.acct
@@ -10,6 +11,9 @@ const INNOPAY_LICENSE_KEY = '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9
 const DEPOSIT_ACCOUNT_NO = '66400001397152';
 
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         console.log('🔍 예치금 잔액 조회 요청');
 
