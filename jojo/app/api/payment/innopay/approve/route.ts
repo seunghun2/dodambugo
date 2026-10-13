@@ -907,7 +907,16 @@ export async function POST(request: NextRequest) {
 
                 // 💸 상주 계좌로 즉시 송금 (서버에서 직접 처리 - 외부 API 호출 없이 이노페이 프록시로 직접)
                 // ✅ 이노페이 IP 등록 완료 (2026-02-13) - 프록시 서버 49.50.139.204 경유
-                if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
+                // 🛡️ 송금액 상한선 검증: 원금(selectedAmount)이 실제 카드 결제 승인액(totalAmount) 이상이거나 최소 수수료(3%) 미만이면 송금 차단
+                const isTransferAmountValid =
+                    selectedAmount > 0 &&
+                    totalAmount > 0 &&
+                    selectedAmount < totalAmount &&
+                    fee >= Math.floor(selectedAmount * 0.03);
+
+                if (!isTransferAmountValid) {
+                    console.error(`🚨 [송금 차단] 부의금 송금 원금(${selectedAmount})이 실제 카드 승인액(${totalAmount}) 대비 비정상입니다 (fee=${fee}, moid=${moid})`);
+                } else if (condolenceInfo.bankName && condolenceInfo.accountNo && selectedAmount > 0) {
                     try {
                         console.log('📤 부의금 송금 시작 (서버 직접):', {
                             bankName: condolenceInfo.bankName,
@@ -972,7 +981,12 @@ export async function POST(request: NextRequest) {
 
                             if (transferResult.resultCode === '0000') {
                                 console.log('✅ 부의금 송금 성공! TID:', transferResult.tid);
-                                if (condolenceOrderNumber) {
+                                if (insertedOrder?.id) {
+                                    await supabase
+                                        .from('condolence_orders')
+                                        .update({ status: 'transferred', settled_at: new Date().toISOString() })
+                                        .eq('id', insertedOrder.id);
+                                } else if (condolenceOrderNumber) {
                                     await supabase
                                         .from('condolence_orders')
                                         .update({ status: 'transferred', settled_at: new Date().toISOString() })
