@@ -117,8 +117,30 @@ export const gaEvents = {
 
     // ========== B2B 부고온플러스 파트너 전환 ==========
     b2bSignupStart: (refCode?: string) => trackEvent('B2B_회원가입시작', 'B2B_전환', refCode || 'direct'),
-    b2bSignupComplete: (myCode?: string) => trackEvent('B2B_회원가입완료', 'B2B_전환', myCode || 'complete', 1),
-    b2bInquirySubmit: (inquiryType?: string) => trackEvent('B2B_도입문의접수', 'B2B_전환', inquiryType || '문의', 1),
+    b2bSignupComplete: (myCode?: string) => {
+        trackEvent('B2B_회원가입완료', 'B2B_전환', myCode || 'complete', 1);
+        try {
+            if (typeof window !== 'undefined' && (window as any).wcs && (window as any).wcs_do) {
+                const _nasa: Record<string, any> = {};
+                if ((window as any).wcs.cnv) {
+                    _nasa['cnv'] = (window as any).wcs.cnv('2', '1'); // 네이버 프리미엄 로그분석: 회원가입(2) 전환
+                }
+                (window as any).wcs_do(_nasa);
+            }
+        } catch {}
+    },
+    b2bInquirySubmit: (inquiryType?: string) => {
+        trackEvent('B2B_도입문의접수', 'B2B_전환', inquiryType || '문의', 1);
+        try {
+            if (typeof window !== 'undefined' && (window as any).wcs && (window as any).wcs_do) {
+                const _nasa: Record<string, any> = {};
+                if ((window as any).wcs.cnv) {
+                    _nasa['cnv'] = (window as any).wcs.cnv('4', '1'); // 네이버 프리미엄 로그분석: 신청/문의(4) 전환
+                }
+                (window as any).wcs_do(_nasa);
+            }
+        } catch {}
+    },
 };
 
 
