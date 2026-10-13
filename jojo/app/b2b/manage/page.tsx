@@ -111,7 +111,7 @@ function B2BManagePageContent() {
     try {
       const { error } = await supabase
         .from('bugo')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('bugo_number', bugoNumber);
 
       if (error) throw error;

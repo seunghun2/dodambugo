@@ -130,7 +130,7 @@ export default function SettingsPage() {
                                 className={styles.input}
                                 value={wreathReward}
                                 onChange={(e) => setWreathReward(e.target.value)}
-                                placeholder="예: 10000"
+                                placeholder="예: 50000"
                                 required
                             />
                             <span className={styles.unit}>원</span>
@@ -147,7 +147,7 @@ export default function SettingsPage() {
                                 className={styles.input}
                                 value={referralBonus}
                                 onChange={(e) => setReferralBonus(e.target.value)}
-                                placeholder="예: 2000"
+                                placeholder="예: 2500"
                                 required
                             />
                             <span className={styles.unit}>원</span>
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                                 className={styles.input}
                                 value={minWithdrawal}
                                 onChange={(e) => setMinWithdrawal(e.target.value)}
-                                placeholder="예: 50000"
+                                placeholder="예: 5000"
                                 required
                             />
                             <span className={styles.unit}>원</span>

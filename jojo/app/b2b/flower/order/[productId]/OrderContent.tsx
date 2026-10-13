@@ -295,8 +295,8 @@ export default function OrderContent({ initialProduct, productId }: OrderContent
       sessionStorage.setItem(`product_cache_${product.sort_order}`, JSON.stringify(product));
       sessionStorage.setItem(`bugo_cache_${targetBugoId}`, JSON.stringify(bugoDataPayload));
 
-      // B2C 결제 페이지로 이동하여 결제 모듈 호출
-      router.push(`/view/${targetBugoId}/payment/${product.sort_order}`);
+      // B2B 결제 페이지로 이동하여 결제 모듈 호출
+      router.push(`/b2b/view/${targetBugoId}/payment/${product.sort_order}`);
     } catch (err) {
       console.error('주문 정보 임시 생성 및 저장 실패:', err);
       alert('주문 진행 중 오류가 발생했습니다. 다시 시도해 주세요.');

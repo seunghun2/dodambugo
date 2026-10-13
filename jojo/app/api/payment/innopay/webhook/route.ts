@@ -97,21 +97,25 @@ export async function POST(request: NextRequest) {
                 // =============================================
                 // [B2B] 화환 판매 시 파트너 예치금 자동 적립 (가상계좌)
                 // =============================================
-                if (orderData?.bugo_id) {
+                if (orderData?.bugo_id || orderData?.partner_data?.b2b_user_id) {
                     try {
-                        // 1. 이 부고에 연결된 B2B 파트너 조회
-                        const { data: bugoRecord } = await supabase
-                            .from('bugo')
-                            .select('b2b_user_id')
-                            .eq('id', orderData.bugo_id)
-                            .single();
+                        // 1. 이 부고에 연결된 B2B 파트너 조회 (부고 소유자 우선, 없을 시 직접 발주 파트너 폴백)
+                        let bugoRecord: { b2b_user_id?: string | null } | null = null;
+                        if (orderData?.bugo_id) {
+                            const { data } = await supabase
+                                .from('bugo')
+                                .select('b2b_user_id')
+                                .eq('id', orderData.bugo_id)
+                                .single();
+                            bugoRecord = data;
+                        }
 
                         if (bugoRecord) {
                             orderData.bugo = bugoRecord;
                         }
 
-                        if (bugoRecord?.b2b_user_id) {
-                            const partnerId = bugoRecord.b2b_user_id;
+                        const partnerId = bugoRecord?.b2b_user_id || orderData?.partner_data?.b2b_user_id;
+                        if (partnerId) {
 
                             // 2. 파트너 정보 및 소속 상조회사 수당 분배 구조 조회
                             const { data: partnerUser } = await supabase

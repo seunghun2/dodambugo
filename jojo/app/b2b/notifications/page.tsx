@@ -150,7 +150,7 @@ export default function B2BNotificationsPage() {
         case 'funeral_reminder':
           const alarmData = item.data as any;
           const bugoId = alarmData?.bugo_id || alarmData?.id;
-          targetUrl = bugoId ? `/view/${bugoId}` : '/b2b/dashboard'; // 고인 부고장으로 이동
+          targetUrl = bugoId ? `/b2b/view/${bugoId}` : '/b2b/dashboard'; // 고인 부고장으로 이동
           break;
         case 'signup_approved':
         case 'new_funeral':

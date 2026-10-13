@@ -93,7 +93,7 @@ function LoginContent() {
         if (e.key === 'Enter') handleLogin();
     };
 
-    const refCode = searchParams.get('ref') || '';
+    const queryStr = searchParams.toString();
 
     return (
         <div className={styles.page}>
@@ -176,7 +176,7 @@ function LoginContent() {
                 <div className={styles.bottom}>
                     <span className={styles.bottomLink} onClick={() => router.push('/b2b/login/forgot')}>비밀번호 찾기</span>
                     <span className={styles.bottomDivider}>|</span>
-                    <span className={styles.bottomLink} onClick={() => router.push(`/b2b/signup${refCode ? `?ref=${refCode}` : ''}`)}>회원가입</span>
+                    <span className={styles.bottomLink} onClick={() => router.push(`/b2b/signup${queryStr ? `?${queryStr}` : ''}`)}>회원가입</span>
                 </div>
             </div>
 
