@@ -244,7 +244,7 @@ export async function middleware(request: NextRequest) {
     };
 
     // 관리자, 사설 IP, B2B 접속 여부 체크 (B2B 사용자는 차단 대상에서 예외 처리)
-    const isAdminCookie = request.cookies.get('admin_ip')?.value === 'true';
+    const isAdminCookie = Boolean(request.cookies.get('admin_token')?.value || request.cookies.get('admin_ip')?.value);
     const isExcluded = 
       isAdminIP(ip) || 
       isAdminCookie || 
