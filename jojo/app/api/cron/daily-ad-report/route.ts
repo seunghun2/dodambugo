@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getNaverDailyStats, getNaverBizmoney } from '@/lib/naver-ads';
+import { getNaverDailyStats, getNaverBizmoney, B2B_CAMPAIGN_ID } from '@/lib/naver-ads';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,20 +49,40 @@ export async function GET(request: NextRequest) {
     const fromIso = `${targetDateStr}T00:00:00+09:00`;
     const toIso = `${targetDateStr}T23:59:59.999+09:00`;
 
-    // 1. 네이버 검색광고 실적 & 비즈머니 조회
-    const [naverStats, bizmoney] = await Promise.all([
+    // 1. 네이버 검색광고(B2C + B2B) 실적 & 비즈머니 조회
+    const [naverStats, naverB2BStats, bizmoney] = await Promise.all([
         getNaverDailyStats(targetDateStr),
+        getNaverDailyStats(targetDateStr, B2B_CAMPAIGN_ID),
         getNaverBizmoney(),
     ]);
 
-    // 2. Supabase 어제 부고, 화환 주문, 부의금 결제 조회
+    // 2. Supabase 어제 부고, 화환 주문, 부의금 결제, B2B 신규 파트너 가입/문의 조회
     const supabase = getSupabase();
-    const { data: bugos, error: bugoError } = await supabase
-        .from('bugo')
-        .select('id, bugo_number, view_count, source, created_at')
-        .is('deleted_at', null)
-        .gte('created_at', fromIso)
-        .lte('created_at', toIso);
+    const [bugoRes, b2bUsersRes, b2bInquiriesRes] = await Promise.all([
+        supabase
+            .from('bugo')
+            .select('id, bugo_number, view_count, source, b2b_user_id, created_at')
+            .is('deleted_at', null)
+            .gte('created_at', fromIso)
+            .lte('created_at', toIso),
+        supabase
+            .from('b2b_users')
+            .select('id, owner_name, company_name, created_at')
+            .neq('status', 'withdrawn')
+            .gte('created_at', fromIso)
+            .lte('created_at', toIso),
+        supabase
+            .from('inquiries')
+            .select('id, name, company, created_at')
+            .eq('inquiry_type', '부고온 제휴문의')
+            .gte('created_at', fromIso)
+            .lte('created_at', toIso),
+    ]);
+
+    const bugos = bugoRes.data;
+    const bugoError = bugoRes.error;
+    const b2bNewUsers = b2bUsersRes.data || [];
+    const b2bInquiries = b2bInquiriesRes.data || [];
 
     if (bugoError) {
         console.error('부고 데이터 조회 실패:', bugoError);
@@ -205,7 +225,7 @@ export async function GET(request: NextRequest) {
     const gPlatformRevenue = gFlowerMargin + gCondolenceFee;
     const gNetProfit = gPlatformRevenue - gCost;
 
-    // 6. 네이버 핵심 지표 계산
+    // 6. 네이버 B2C 핵심 지표 계산
     const nCost = naverStats?.cost || 0;
     const nClicks = naverStats?.clicks || 0;
     const nCpc = naverStats?.cpc || 0;
@@ -218,8 +238,29 @@ export async function GET(request: NextRequest) {
     const nPlatformRevenue = nFlowerMargin + nCondolenceFee;
     const nNetProfit = nPlatformRevenue - nCost;
 
-    // 7. 전체 광고 통합 손익 (네이버 + 구글)
-    const totalAdCost = nCost + gCost;
+    // 6-2. 부고온 B2B 네이버 광고 & 파트너 지표 계산
+    const b2bCost = naverB2BStats?.cost || 0;
+    const b2bClicks = naverB2BStats?.clicks || 0;
+    const b2bCpc = naverB2BStats?.cpc || 0;
+    const b2bSignups = b2bNewUsers.length;
+    const b2bInquiryCount = b2bInquiries.length;
+    const b2bTotalLeads = b2bSignups + b2bInquiryCount;
+    const b2bLeadCpa = b2bTotalLeads > 0 ? Math.round(b2bCost / b2bTotalLeads) : 0;
+
+    let b2bTotalBugo = 0;
+    let b2bGenuineBugo = 0;
+    let b2bFlowerOrders = 0;
+    for (const b of (bugos || [])) {
+        if (b.b2b_user_id) {
+            b2bTotalBugo += 1;
+            if ((b.view_count || 0) >= 20) b2bGenuineBugo += 1;
+            const ord = ordersMap[b.id];
+            if (ord) b2bFlowerOrders += ord.count;
+        }
+    }
+
+    // 7. 전체 광고 통합 손익 (네이버 B2C + 네이버 B2B + 구글)
+    const totalAdCost = nCost + b2bCost + gCost;
     const totalAdPlatformRev = nPlatformRevenue + gPlatformRevenue;
     const totalAdNetProfit = totalAdPlatformRev - totalAdCost;
 
@@ -255,20 +296,30 @@ export async function GET(request: NextRequest) {
             .join(', ')
         : '';
 
+    const b2bSignupNames = b2bSignups > 0
+        ? ` (${b2bNewUsers.map((u: any) => `${u.owner_name || '-'}/${u.company_name || '개인'}`).join(', ')})`
+        : '';
+
     // 9. 슬랙 메시지 구성
+    const b2bAdSection = `2. 부고온 B2B 검색광고 & 파트너 실적 (어제)
+- 지출 광고비: ${fmtMoney(b2bCost)} (${b2bClicks}클릭, CPC ${fmtMoney(b2bCpc)})
+- 신규 파트너 가입: *${b2bSignups}명*${b2bSignupNames} | 제휴 문의: *${b2bInquiryCount}건*
+- 파트너·문의 획득단가(CPA): ${b2bTotalLeads > 0 ? fmtMoney(b2bLeadCpa) : '가입·문의 0건'}
+- B2B 파트너 부고 발행: 총 ${b2bTotalBugo}건 중 *진성 ${b2bGenuineBugo}건* (화환 ${b2bFlowerOrders}건)`;
+
     const googleAdSection = gCost > 0 || stats.google_ad.total_bugo > 0
-        ? `2. 구글 광고 실적 (어제)
+        ? `3. 구글 광고 실적 (어제)
 - 지출 광고비: ${fmtMoney(gCost)} (${gClicks}클릭, CPC ${fmtMoney(gCpc)})
 - 유입 부고: 총 ${stats.google_ad.total_bugo}건 중 *진성 ${gGenuine}건*
 - 진성 부고 획득단가(CPA): ${gGenuine > 0 ? fmtMoney(gCpa) : '진성 0건'}
 - 화환 결제: ${gFlowerOrders}건 (${fmtMoney(gFlowerRev)})
 - 부의금 결제: ${stats.google_ad.condolence_count}건 (${fmtMoney(stats.google_ad.condolence_amount)} / 수익 ${fmtMoney(gCondolenceFee)})
 - 구글 광고 실질 손익: ${gNetProfit >= 0 ? '+' : ''}${fmtMoney(gNetProfit)} (화환+부의금마진 - 광고비)`
-        : `2. 구글 광고: 데이터 없음 (총 ${stats.google_ad.total_bugo}건 / 진성 ${gGenuine}건)`;
+        : `3. 구글 광고: 데이터 없음 (총 ${stats.google_ad.total_bugo}건 / 진성 ${gGenuine}건)`;
 
     const totalAdSection = totalAdCost > 0
-        ? `\n4. 전체 광고 통합 손익 (네이버+구글)
-- 총 광고비 지출: ${fmtMoney(totalAdCost)} (네이버 ${fmtMoney(nCost)} + 구글 ${fmtMoney(gCost)})
+        ? `\n5. 전체 광고 통합 손익 (네이버 B2C+B2B+구글)
+- 총 광고비 지출: ${fmtMoney(totalAdCost)} (네이버 B2C ${fmtMoney(nCost)} + 부고온 B2B ${fmtMoney(b2bCost)} + 구글 ${fmtMoney(gCost)})
 - 광고 유입 수익: ${fmtMoney(totalAdPlatformRev)} (화환 마진 ${fmtMoney(nFlowerMargin + gFlowerMargin)} + 부의금 수익 ${fmtMoney(nCondolenceFee + gCondolenceFee)})
 - 광고 집행 최종 순손익: ${totalAdNetProfit >= 0 ? '+' : ''}${fmtMoney(totalAdNetProfit)}`
         : '';
@@ -276,21 +327,23 @@ export async function GET(request: NextRequest) {
     const slackText = `📊 [마음부고] 일일 광고 & 전환 리포트 (${targetDateStr})
 ${bizAlert}
 
-1. 네이버 검색광고 실적 (어제)
+1. 네이버 검색광고 - 마음부고 B2C (어제)
 - 지출 광고비: ${fmtMoney(nCost)} (${nClicks}클릭, CPC ${fmtMoney(nCpc)})
 - 유입 부고: 총 ${stats.naver_ad.total_bugo}건 중 *진성 ${nGenuine}건*${keywordListStr}
 - 진성 부고 획득단가(CPA): ${nGenuine > 0 ? fmtMoney(nCpa) : '진성 0건'}
 - 화환 결제: ${nFlowerOrders}건 (${fmtMoney(nFlowerRev)})
 - 부의금 결제: ${stats.naver_ad.condolence_count}건 (${fmtMoney(stats.naver_ad.condolence_amount)} / 수익 ${fmtMoney(nCondolenceFee)})
-- 네이버 광고 실질 손익: ${nNetProfit >= 0 ? '+' : ''}${fmtMoney(nNetProfit)} (화환+부의금마진 - 광고비)
+- 네이버 B2C 실질 손익: ${nNetProfit >= 0 ? '+' : ''}${fmtMoney(nNetProfit)} (화환+부의금마진 - 광고비)
+
+${b2bAdSection}
 
 ${googleAdSection}
 
-3. 오가닉/직접 유입 (어제)
+4. 오가닉/직접 유입 (어제)
 - 총 ${stats.organic.total_bugo}건 | *진성 ${stats.organic.genuine_20plus}건* | 화환 ${stats.organic.flower_order_count}건 | 부의금 ${stats.organic.condolence_count}건 (${fmtMoney(stats.organic.condolence_amount)} / 수익 ${fmtMoney(stats.organic.condolence_fee)})
 ${totalAdSection}
 
-5. 어제 전체 실사용자 바닥 수치
+6. 어제 전체 실사용자 바닥 수치
 - 진성 부고: *${totalGenuine}건* (전체 ${totalBugo}건)
 - 화환 결제: *${totalFlowerOrders}건* (${fmtMoney(totalFlowerRev)} / 마진 ${fmtMoney(totalFlowerMargin)})
 - 부의금 결제: *${totalCondolenceOrders}건* (${fmtMoney(totalCondolenceAmount)} / 플랫폼수익 ${fmtMoney(totalCondolenceFee)})
@@ -320,6 +373,18 @@ ${totalAdSection}
         targetDate: targetDateStr,
         bizmoney,
         naverStats,
+        naverB2BStats,
+        b2bStats: {
+            cost: b2bCost,
+            clicks: b2bClicks,
+            cpc: b2bCpc,
+            signups: b2bSignups,
+            inquiries: b2bInquiryCount,
+            leadCpa: b2bLeadCpa,
+            totalBugo: b2bTotalBugo,
+            genuineBugo: b2bGenuineBugo,
+            flowerOrders: b2bFlowerOrders,
+        },
         googleStats: {
             cost: gCost,
             clicks: gClicks,
@@ -342,6 +407,7 @@ ${totalAdSection}
             totalCondolenceFee,
             totalPlatformProfit,
             naverNetProfit: nNetProfit,
+            b2bAdCost: b2bCost,
             googleNetProfit: gNetProfit,
             totalAdCost,
             totalAdNetProfit,

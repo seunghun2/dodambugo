@@ -289,6 +289,13 @@ function SignupInner() {
             }
             checkReferral(cleanRef);
         }
+
+        const utmSrc = searchParams.get('utm_source');
+        const nKw = searchParams.get('n_keyword') || searchParams.get('utm_term');
+        if (utmSrc && utmSrc.trim() && typeof window !== 'undefined') {
+            const sourceVal = nKw ? `${utmSrc.trim()}:${nKw.trim()}` : utmSrc.trim();
+            sessionStorage.setItem('b2b_utm', sourceVal);
+        }
     }, [searchParams]);
 
     // 최종 회원가입 제출
@@ -297,6 +304,7 @@ function SignupInner() {
         setLoading(true);
 
         try {
+            const utmSource = typeof window !== 'undefined' ? sessionStorage.getItem('b2b_utm') : null;
             const res = await fetch('/api/b2b/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -309,6 +317,7 @@ function SignupInner() {
                     account_no: form.accountVerified ? (form.accountNo || null) : null,
                     account_holder: form.accountVerified ? (form.accountHolder || null) : null,
                     referral_code: form.referralCode || null,
+                    utm_source: utmSource || null,
                 }),
             });
             const data = await res.json();

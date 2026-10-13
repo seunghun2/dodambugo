@@ -448,6 +448,12 @@ export default function BugoonSite() {
                 if (refCode && refCode.trim()) {
                     sessionStorage.setItem('b2b_ref', refCode.trim());
                 }
+                const utmSrc = params.get('utm_source');
+                const nKw = params.get('n_keyword') || params.get('utm_term');
+                if (utmSrc && utmSrc.trim()) {
+                    const sourceVal = nKw ? `${utmSrc.trim()}:${nKw.trim()}` : utmSrc.trim();
+                    sessionStorage.setItem('b2b_utm', sourceVal);
+                }
             } catch { /* ignore */ }
         }
     }, []);

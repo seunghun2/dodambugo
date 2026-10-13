@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
             account_no,
             account_holder,
             referral_code, // 추천인 코드 (선택)
+            utm_source,
             checkOnly,
         } = body;
 
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest) {
             content: `${owner_name || company_name || '파트너'}님, 부고온 파트너 회원가입이 완료되었습니다. 모바일 부고장을 작성하고 화환 수익을 창출해 보세요!`,
             body: `${owner_name || company_name || '파트너'}님, 부고온 파트너 회원가입이 완료되었습니다. 모바일 부고장을 작성하고 화환 수익을 창출해 보세요!`,
             type: 'signup_welcome',
-            data: { url: '/b2b/dashboard' },
+            data: { url: '/b2b/dashboard', source: utm_source || null },
             is_read: false
         });
 
@@ -240,7 +241,8 @@ export async function POST(request: NextRequest) {
                 owner_name: owner_name || '파트너',
                 company_name: company_name || '개인',
                 phone: cleanPhone,
-                company_type: company_name === '개인' ? 'individual' : 'business'
+                company_type: company_name === '개인' ? 'individual' : 'business',
+                utm_source: utm_source || undefined,
             });
         } catch (slackErr) {
             console.error('슬랙 신규가입 알림 전송 실패:', slackErr);

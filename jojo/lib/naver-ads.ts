@@ -3,7 +3,8 @@ import crypto from 'crypto';
 const ACCESS_LICENSE = process.env.NAVER_AD_ACCESS_LICENSE || '0100000000e412a734d595eda2c3fed12d693a20f99c5ce1c3df63c238030be52bd5cd3e58';
 const SECRET_KEY = process.env.NAVER_AD_SECRET_KEY || 'AQAAAADkEqc01ZXtosP+0S1pOiD5fNlkEx2S6OnKIH/uZFdhXQ==';
 const CUSTOMER_ID = process.env.NAVER_AD_CUSTOMER_ID || '4257905';
-const CAMPAIGN_ID = process.env.NAVER_AD_CAMPAIGN_ID || 'cmp-a001-01-000000010252118'; // 파워링크#1
+const CAMPAIGN_ID = process.env.NAVER_AD_CAMPAIGN_ID || 'cmp-a001-01-000000010252118'; // 파워링크#1 (마음부고 B2C)
+export const B2B_CAMPAIGN_ID = process.env.NAVER_AD_B2B_CAMPAIGN_ID || 'cmp-a001-01-000000011182473'; // 부고온_브랜드 (부고온 B2B)
 const BASE_URL = 'https://api.searchad.naver.com';
 
 function generateSignature(timestamp: string, method: string, path: string, secretKey: string): string {
@@ -24,12 +25,12 @@ export interface NaverDailyStats {
 /**
  * 네이버 검색광고 특정 일자 실적 조회 (YYYY-MM-DD)
  */
-export async function getNaverDailyStats(dateStr: string): Promise<NaverDailyStats | null> {
+export async function getNaverDailyStats(dateStr: string, campaignId: string = CAMPAIGN_ID): Promise<NaverDailyStats | null> {
     const timestamp = Date.now().toString();
     const method = 'GET';
     const fields = encodeURIComponent('["impCnt","clkCnt","salesAmt","ctr","cpc","avgRnk"]');
     const timeRange = encodeURIComponent(JSON.stringify({ since: dateStr, until: dateStr }));
-    const path = `/stats?id=${CAMPAIGN_ID}&fields=${fields}&timeRange=${timeRange}`;
+    const path = `/stats?id=${campaignId}&fields=${fields}&timeRange=${timeRange}`;
     const signature = generateSignature(timestamp, method, path, SECRET_KEY);
 
     try {

@@ -473,13 +473,15 @@ export async function sendB2BSignupNotification(info: {
     phone: string;
     recommender_name?: string;
     company_type?: string;
+    utm_source?: string;
 }): Promise<boolean> {
     const webhookUrl = process.env.SLACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_DEPOSIT || process.env.SLACK_WEBHOOK_BUGO;
     const text = `[부고온 B2B] 신규 파트너 회원가입
 - 대표자명: ${info.owner_name}
 - 상호/소속: ${info.company_name} (${info.company_type || '개인'})
 - 연락처: ${info.phone}
-- 추천인: ${info.recommender_name || '없음(직접가입)'}`;
+- 추천인: ${info.recommender_name || '없음(직접가입)'}
+- 유입경로: ${info.utm_source || '직접/오가닉'}`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
