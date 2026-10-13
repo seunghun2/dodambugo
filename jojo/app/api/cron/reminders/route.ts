@@ -31,6 +31,13 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabase();
     const results = { draft: { sent: 0, total: 0 }, share: { sent: 0, total: 0 } };
 
+    // 차단된 번호 조회 (전체 cron 공통)
+    const { data: blockedList } = await supabase
+        .from('blocked_phones')
+        .select('phone')
+        .eq('is_active', true);
+    const blockedSet = new Set((blockedList || []).map(b => b.phone.replace(/-/g, '')));
+
     // 한국시간 기준 09~21시 사이만 발송
     const koreaHour = new Date().getUTCHours() + 9;
     const adjustedHour = koreaHour >= 24 ? koreaHour - 24 : koreaHour;
@@ -59,13 +66,24 @@ export async function GET(request: NextRequest) {
             .gt('updated_at', oneDayAgo.toISOString())
             .or('reminder_sent.is.null,reminder_sent.eq.false')
             .not('applicant_phone', 'is', null)
-            .not('applicant_phone', 'eq', '');
+            .not('applicant_phone', 'eq', '')
+            .not('deceased_name', 'is', null)
+            .not('deceased_name', 'eq', '');
 
         if (drafts && drafts.length > 0) {
             results.draft.total = drafts.length;
             console.log(`📝 임시저장 리마인더 대상: ${drafts.length}건`);
 
             for (const draft of drafts) {
+                const phone = draft.applicant_phone.replace(/-/g, '');
+
+                // 차단 번호 제외
+                if (blockedSet.has(phone)) {
+                    console.log(`⛔ 차단된 번호 건너뜀: ${phone}`);
+                    await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
+                    continue;
+                }
+
                 // 이미 부고 완성했는지 확인
                 const { data: existingBugo } = await supabase
                     .from('bugo')
@@ -79,8 +97,6 @@ export async function GET(request: NextRequest) {
                     await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
                     continue;
                 }
-
-                const phone = draft.applicant_phone.replace(/-/g, '');
                 try {
                     const isB2B = !!draft.b2b_user_id;
                     const brand = isB2B ? '부고온' : '마음부고';
@@ -156,6 +172,12 @@ ${continueUrl}
             }
 
             for (const [phone, bugo] of targets) {
+                // 차단 번호 제외
+                if (blockedSet.has(phone)) {
+                    console.log(`⛔ 차단된 번호 공유 리마인더 건너뜀: ${phone}`);
+                    await supabase.from('bugo').update({ share_reminder_sent: true }).eq('bugo_number', bugo.bugo_number);
+                    continue;
+                }
                 try {
                     const isB2B = !!bugo.b2b_user_id;
                     const funeralLocation = (bugo.funeral_type === '가족장' || bugo.funeral_type === '무빈소장례')
