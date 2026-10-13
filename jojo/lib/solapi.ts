@@ -62,11 +62,12 @@ export async function sendSMS(to: string, text: string) {
         // DB 로그 적재
         try {
             await supabase.from('b2b_notification_logs').insert({
+                event_type: 'sms_send',
+                channel: 'sms',
                 recipient_phone: to,
                 recipient_name: '고객',
-                type: 'sms',
                 title: 'SMS 단문 문자',
-                content: text,
+                body: text,
                 status,
                 error_message: errorMessage || null
             });
@@ -114,11 +115,12 @@ export async function sendLMS(to: string, subject: string, text: string) {
         // DB 로그 적재
         try {
             await supabase.from('b2b_notification_logs').insert({
+                event_type: 'lms_send',
+                channel: 'lms',
                 recipient_phone: to,
                 recipient_name: '고객',
-                type: 'lms',
                 title: subject || 'LMS 장문 문자',
-                content: text,
+                body: text,
                 status,
                 error_message: errorMessage || null
             });
@@ -261,11 +263,12 @@ export async function sendAlimtalk(
         // DB 로그 적재
         try {
             await supabase.from('b2b_notification_logs').insert({
+                event_type: 'alimtalk_send',
+                channel: 'alimtalk',
                 recipient_phone: to,
                 recipient_name: variables?.name || variables?.deceased || '고객',
-                type: 'alimtalk',
                 title: `알림톡 (${templateId})`,
-                content: contentText,
+                body: contentText,
                 status,
                 error_message: errorMessage || null
             });

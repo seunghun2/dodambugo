@@ -17,7 +17,24 @@ export default function Header({ showCTA = true }: HeaderProps) {
     const [draftTemplateId, setDraftTemplateId] = useState<string | null>(null);
 
     const checkDraftBeforeCreate = () => {
-        // 템플릿별 임시저장 확인
+        // 1. 통합 임시저장 키(bugo_draft) 우선 확인
+        const singleDraft = localStorage.getItem('bugo_draft');
+        if (singleDraft) {
+            try {
+                const parsed = JSON.parse(singleDraft);
+                const savedAt = new Date(parsed.savedAt);
+                const now = new Date();
+                const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
+
+                if (hoursDiff < 24) {
+                    setDraftTemplateId(parsed.templateId || 'basic');
+                    setDraftModalOpen(true);
+                    return;
+                }
+            } catch (e) { }
+        }
+
+        // 2. 레거시 템플릿별 임시저장 확인 (하위 호환)
         const templates = ['basic', 'simple', 'ribbon', 'border', 'flower'];
         for (const template of templates) {
             const draft = localStorage.getItem(`bugo_draft_${template}`);
@@ -47,6 +64,7 @@ export default function Header({ showCTA = true }: HeaderProps) {
     };
 
     const discardDraft = () => {
+        localStorage.removeItem('bugo_draft');
         if (draftTemplateId) {
             localStorage.removeItem(`bugo_draft_${draftTemplateId}`);
         }

@@ -85,23 +85,39 @@ export default function HomeContent() {
   };
 
   useEffect(() => {
-    // 템플릿별 임시저장 확인
-    const templates = ['basic', 'simple', 'ribbon', 'border', 'flower'];
-    for (const template of templates) {
-      const draft = localStorage.getItem(`bugo_draft_${template}`);
-      if (draft) {
-        try {
-          const parsed = JSON.parse(draft);
-          const savedAt = new Date(parsed.savedAt);
-          const now = new Date();
-          const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
+    // 1. 통합 임시저장 키(bugo_draft) 우선 확인
+    const singleDraft = localStorage.getItem('bugo_draft');
+    if (singleDraft) {
+      try {
+        const parsed = JSON.parse(singleDraft);
+        const savedAt = new Date(parsed.savedAt);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
 
-          if (hoursDiff < 24) {
-            setHasDraft(true);
-            setDraftTemplateId(template);
-            break;
-          }
-        } catch (e) { }
+        if (hoursDiff < 24) {
+          setHasDraft(true);
+          setDraftTemplateId(parsed.templateId || 'basic');
+        }
+      } catch (e) { }
+    } else {
+      // 2. 레거시 템플릿별 임시저장 확인 (하위 호환)
+      const templates = ['basic', 'simple', 'ribbon', 'border', 'flower'];
+      for (const template of templates) {
+        const draft = localStorage.getItem(`bugo_draft_${template}`);
+        if (draft) {
+          try {
+            const parsed = JSON.parse(draft);
+            const savedAt = new Date(parsed.savedAt);
+            const now = new Date();
+            const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
+
+            if (hoursDiff < 24) {
+              setHasDraft(true);
+              setDraftTemplateId(template);
+              break;
+            }
+          } catch (e) { }
+        }
       }
     }
 
@@ -217,6 +233,7 @@ export default function HomeContent() {
   };
 
   const discardDraft = () => {
+    localStorage.removeItem('bugo_draft');
     if (draftTemplateId) {
       localStorage.removeItem(`bugo_draft_${draftTemplateId}`);
     }

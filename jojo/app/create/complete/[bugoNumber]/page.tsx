@@ -233,6 +233,7 @@ ${bugoUrl}
 
         // 같은 템플릿으로 이동 - 기존 draft 삭제
         const templateId = bugo.template_id || 'basic';
+        localStorage.removeItem('bugo_draft');
         localStorage.removeItem(`bugo_draft_${templateId}`);
         localStorage.removeItem('bugo_draft_basic');
         localStorage.removeItem('bugo_draft_1');

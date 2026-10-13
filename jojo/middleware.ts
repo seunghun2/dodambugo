@@ -142,7 +142,6 @@ function trackBugoView(ip: string, bugoNumber: string) {
   if (now - trackerResetTime > TRACKER_TTL) {
     viewTracker.clear();
     visitCounter.clear();
-    policyCounter.clear();
     searchCounter.clear();
     trackerResetTime = now;
   }

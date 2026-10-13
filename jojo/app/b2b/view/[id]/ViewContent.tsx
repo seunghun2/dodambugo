@@ -605,9 +605,7 @@ ${url}
     // 로딩/에러 처리는 서버 컴포넌트에서 담당 (여기선 항상 bugo가 존재함)
 
     // 열람 기한 연장 예외 (고객 요청: 부고번호 → 만료일)
-    const expiryExceptions: Record<string, string> = {
-        '4286': '2026-07-05',  // 금동회/금무수 - 고객 요청으로 7/5까지 연장
-    };
+    const expiryExceptions: Record<string, string> = {};
 
     // 1달 이상 지난 부고는 비공개 처리
     const isExpired = () => {

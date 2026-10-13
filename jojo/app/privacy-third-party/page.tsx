@@ -24,7 +24,7 @@ export default function PrivacyThirdPartyPage() {
                     <h2>1. 개인정보를 제공받는 자</h2>
                     <ul>
                         <li><strong>화환 및 조화 배송 업체:</strong> 전국 제휴 화원</li>
-                        <li><strong>결제 대행 업체:</strong> 토스페이먼츠</li>
+                        <li><strong>결제 대행 업체:</strong> 이노페이(INNOPAY)</li>
                         <li><strong>알림톡 발송 대행:</strong> 카카오</li>
                     </ul>
                 </section>
