@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         smsStore.set(cleanPhone, { code, expiresAt });
 
         // SOLAPI를 통해 실제 문자(SMS) 발송
-        const smsMessage = `[마음부고] 본인확인 인증번호는 [${code}] 입니다. (3분 이내 입력)`;
+        const smsMessage = `[부고온] 본인확인 인증번호는 [${code}] 입니다. (3분 이내 입력)`;
         const smsResult = await sendSMS(cleanPhone, smsMessage);
 
         console.log(`📱 [B2B SMS] 실제 문자 발송 완료 (수신번호: ${cleanPhone}, 인증코드: ${code}):`, smsResult);

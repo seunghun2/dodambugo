@@ -220,8 +220,8 @@ export async function middleware(request: NextRequest) {
     hostLower.includes('.b2b-') ||
     hostLower.includes('.bugoon-');
 
-  // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (scoping 및 보안 강화) - 로컬 환경 또는 개발 모드에서는 허용
-  if (process.env.NODE_ENV !== 'development' && !isLocal && !isB2BSubdomain && path.startsWith('/b2b')) {
+  // B2C 도메인에서 /b2b 경로로 직접 접근하는 경우 404 차단 (단, B2B 부고장 뷰 경로는 호환 허용)
+  if (process.env.NODE_ENV !== 'development' && !isLocal && !isB2BSubdomain && path.startsWith('/b2b') && !path.startsWith('/b2b/view')) {
     return new NextResponse(null, { status: 404 });
   }
 
@@ -338,7 +338,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // B2B subdomain rewrite logic
+  // B2B subdomain rewrite logic (쿼리 파라미터 보존 및 마케팅 쿠키 공통 적용)
+  let response: NextResponse | null = null;
   if (isB2BSubdomain) {
     // static assets, _next 내부 파일, api 경로는 rewrite 대상에서 제외
     const isStaticOrApi =
@@ -349,18 +350,22 @@ export async function middleware(request: NextRequest) {
       /\.(css|js|json|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|txt|xml|pdf|ico|webmanifest|mp3|mp4|wav|map|html)$/.test(path);
 
     if (!isStaticOrApi && !path.startsWith('/b2b')) {
+      const search = request.nextUrl.search || '';
       // /order 경로는 redirect(302)로 URL을 명시적으로 변경 (B2B 주문 페이지 표시)
       if (path.startsWith('/order')) {
-        const redirectUrl = new URL(`/b2b${path}`, request.url);
-        return NextResponse.redirect(redirectUrl);
+        const redirectUrl = new URL(`/b2b${path}${search}`, request.url);
+        response = NextResponse.redirect(redirectUrl);
+      } else {
+        // 나머지 경로는 서버 내부적으로 /b2b를 붙여서 rewrite 처리
+        const rewriteUrl = new URL(`/b2b${path}${search}`, request.url);
+        response = NextResponse.rewrite(rewriteUrl);
       }
-      // 나머지 경로는 서버 내부적으로 /b2b를 붙여서 rewrite 처리
-      const rewriteUrl = new URL(`/b2b${path}`, request.url);
-      return NextResponse.rewrite(rewriteUrl);
     }
   }
 
-  const response = NextResponse.next();
+  if (!response) {
+    response = NextResponse.next();
+  }
 
   // 광고 및 마케팅 유입 파라미터 감지 시 7일 쿠키 설정
   const searchParams = request.nextUrl.searchParams;

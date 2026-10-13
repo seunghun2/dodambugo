@@ -8,6 +8,42 @@ export default function B2BHomePage() {
     const router = useRouter();
 
     useEffect(() => {
+        const search = typeof window !== 'undefined' ? window.location.search : '';
+        try {
+            const params = new URLSearchParams(search);
+            const refCode = params.get('ref') || params.get('code');
+            if (refCode && refCode.trim()) {
+                sessionStorage.setItem('b2b_ref', refCode.trim());
+            }
+        } catch { /* ignore */ }
+
+        const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+        const isAppWebView =
+            /wv|BugoonApp|Capacitor/i.test(ua) ||
+            (typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)')?.matches || (navigator as any).standalone));
+        const hasLocalSession = Boolean(
+            typeof window !== 'undefined' && (localStorage.getItem('b2b_token') || localStorage.getItem('b2b_user'))
+        );
+
+        // 일반 웹 브라우저로 처음 방문한 비로그인 유저는 3초 스플래시 대기 없이 공식 소개 랜딩(/b2b/intro)으로 즉시 안내
+        if (!isAppWebView && !hasLocalSession) {
+            fetch('/api/b2b/auth', { credentials: 'include' })
+                .then((res) => (res.ok ? res.json() : null))
+                .then((data) => {
+                    if (data?.authenticated) {
+                        if (data.token) localStorage.setItem('b2b_token', data.token);
+                        if (data.user) localStorage.setItem('b2b_user', JSON.stringify(data.user));
+                        router.replace('/b2b/dashboard');
+                    } else {
+                        router.replace(`/b2b/intro${search}`);
+                    }
+                })
+                .catch(() => {
+                    router.replace(`/b2b/intro${search}`);
+                });
+            return;
+        }
+
         const timer = setTimeout(async () => {
             try {
                 // 쿠키 기반 인증 확인 (iOS WebView localStorage 불안정 대응)
@@ -30,7 +66,7 @@ export default function B2BHomePage() {
                     return;
                 }
             }
-            router.replace('/b2b/login');
+            router.replace(`/b2b/login${search}`);
         }, 3000);
         return () => clearTimeout(timer);
     }, [router]);

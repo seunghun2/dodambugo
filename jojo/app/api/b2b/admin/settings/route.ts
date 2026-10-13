@@ -8,7 +8,7 @@ const supabase = createClient(
 );
 
 const DEFAULT_SETTINGS = {
-    wreath_reward_amount: '20000',
+    wreath_reward_amount: '50000',
     referral_bonus_amount: '2500',
     min_withdrawal_amount: '5000',
 };

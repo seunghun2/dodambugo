@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import s from './site.module.css';
 
 // 부고온 앱(서브도메인) 경로
 const APP = 'https://bugoon.maeumbugo.co.kr';
 const SIGNUP_URL = `${APP}/signup`;
 const LOGIN_URL = `${APP}/login`;
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon';
+const APP_STORE_URL = 'https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225';
 
 // 실제 판매 중인 화환 상품 (flower_products 실사진)
 const IMG = 'https://tbteghoppechzotdojna.supabase.co/storage/v1/object/public/images/products';
@@ -135,12 +138,12 @@ function ScreenWallet() {
             <div className={s.appBody}>
                 <div className={s.wallet}>
                     <small>환급 가능 금액</small>
-                    <div className={s.walletAmt}>○○○,○○○원</div>
+                    <div className={s.walletAmt}>150,000원</div>
                     <div className={s.walletBtn}>환급 신청</div>
                 </div>
-                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 고급형</span></div><div className={s.txPlus}>적립</div></div>
-                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 기본형</span></div><div className={s.txPlus}>적립</div></div>
-                <div className={s.txRow}><div><b>답례품 주문 적립</b><span>故 홍길동 · 답례품</span></div><div className={s.txPlus}>적립</div></div>
+                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 고급형</span></div><div className={s.txPlus}>+50,000원</div></div>
+                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 홍길동 · 근조화환 기본형</span></div><div className={s.txPlus}>+50,000원</div></div>
+                <div className={s.txRow}><div><b>화환 주문 적립</b><span>故 이영희 · 근조화환 기본형</span></div><div className={s.txPlus}>+50,000원</div></div>
             </div>
         </div>
     );
@@ -183,8 +186,8 @@ const STEPS = [
     {
         day: '셋째 날 · 발인 이후',
         title: <>장례가 끝나면,<br />페이백이 남습니다</>,
-        desc: '부고장을 통해 들어온 화환·답례품 주문은 적립금으로 쌓입니다. 환급 신청하면 등록한 계좌로 입금됩니다.',
-        points: ['적립 내역 실시간 확인', '개인 파트너 3.3% 원천징수 자동 처리', '상조사 본사 · 지도사 분할 정산'],
+        desc: '부고장을 통해 들어온 화환 주문은 건당 50,000원(개인 파트너 기본 기준)씩 적립금으로 쌓입니다. 환급 신청하면 등록한 계좌로 입금됩니다.',
+        points: ['화환 주문 시 건당 50,000원 실시간 적립', '개인 파트너 3.3% 원천징수 자동 처리', '상조사 본사 · 지도사 분할 정산'],
     },
 ];
 
@@ -247,11 +250,11 @@ const AUDIENCES = [
     {
         tab: '장례지도사',
         title: <>소속이 없어도,<br />내 계좌로 당일 직송금</>,
-        desc: '상조회사 소속이든 프리랜서든 관계없이 가입 즉시 내 이름으로 부고장을 만듭니다. 화환·답례품 주문이 발생하면 3.3% 원천징수 후 개인 계좌로 투명하게 입금됩니다.',
+        desc: '상조회사 소속이든 프리랜서든 관계없이 가입 즉시 내 이름으로 부고장을 만듭니다. 화환 주문이 발생하면 건당 50,000원이 적립되며, 3.3% 원천징수 후 개인 계좌로 투명하게 입금됩니다.',
         items: [
             ['가입비 · 월회비 영구 0원', '휴대폰 인증만으로 10초 만에 가입하고 첫 부고장을 발행합니다.'],
             ['상주에게 당당한 무광고 부고장', '조잡한 성형외과·보험 배너 광고가 전혀 없어 유족에게 보낼 때 품격을 지킵니다.'],
-            ['주문 발생 즉시 실시간 페이백', '내 부고장에서 화환이 결제되는 즉시 카카오톡 알림과 함께 정산 지갑에 적립됩니다.'],
+            ['화환 건당 50,000원 실시간 페이백', '내 부고장에서 화환이 결제되는 즉시 알림과 함께 정산 지갑에 50,000원이 적립됩니다.'],
         ],
         img: '/images/b2b/envelope.png',
         caption: '프리랜서 개인 계좌 당일 정산 지원',
@@ -319,9 +322,9 @@ function Audience() {
 /* ───────── FAQ ───────── */
 
 const FAQS = [
-    ['정말 비용이 없나요?', '가입비와 월 이용료가 없습니다. 부고온은 조문객의 화환·답례품 주문에서 발생하는 수익으로 운영되며, 그 일부를 부고장을 만든 지도사님께 페이백으로 돌려드립니다.'],
-    ['앱을 설치해야 하나요?', '아니요. 휴대폰 브라우저에서 바로 가입하고 부고장을 만들 수 있습니다. 상주님과 조문객도 링크만 열면 됩니다.'],
-    ['페이백은 어떻게 받나요?', '부고장을 통해 주문이 완료되면 적립금으로 쌓이고, 정산 화면에서 환급 신청하면 등록한 계좌로 입금됩니다. 개인 파트너는 3.3% 원천징수 후 입금됩니다.'],
+    ['정말 비용이 없나요?', '가입비와 월 이용료가 없습니다. 부고온은 조문객의 근조화환 주문에서 발생하는 수익으로 운영되며, 주문 건당 50,000원(개인 파트너 기준)을 부고장을 만든 지도사님께 페이백으로 돌려드립니다.'],
+    ['앱을 설치해야 하나요?', '아니요. 휴대폰 브라우저에서 바로 가입하고 부고장을 만들 수 있으며, Google Play와 App Store에서 전용 앱으로도 이용하실 수 있습니다.'],
+    ['페이백은 어떻게 받나요?', '부고장을 통해 화환 주문이 완료되면 건당 50,000원씩 적립금으로 쌓이고, 정산 화면에서 환급 신청하면 등록한 계좌로 입금됩니다. 개인 파트너는 3.3% 원천징수 후 입금됩니다.'],
     ['상조사·장례식장 단위로 도입할 수 있나요?', '가능합니다. 아래 도입 문의를 남겨주시면 담당자가 직접 연락드려 회사 로고 적용, 소속 지도사 등록, 정산 방식을 안내해 드립니다.'],
     ['유족 개인정보는 어떻게 관리되나요?', '발인 후 30일이 지난 부고장은 자동으로 비공개 처리됩니다.'],
 ];
@@ -377,6 +380,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 body: JSON.stringify({ type, companyName: company, contactName: name, phone, message }),
             });
             if (!res.ok) throw new Error();
+            gaEvents.b2bInquirySubmit(type);
             setDone(true);
         } catch {
             setError('접수에 실패했습니다. 잠시 후 다시 시도해 주세요.');
@@ -433,6 +437,23 @@ export default function BugoonSite() {
     useReveal();
     const [scrolled, setScrolled] = useState(false);
     const [modal, setModal] = useState(false);
+    const [querySuffix, setQuerySuffix] = useState('');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.search) {
+            setQuerySuffix(window.location.search);
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const refCode = params.get('ref') || params.get('code');
+                if (refCode && refCode.trim()) {
+                    sessionStorage.setItem('b2b_ref', refCode.trim());
+                }
+            } catch { /* ignore */ }
+        }
+    }, []);
+
+    const signupHref = `${SIGNUP_URL}${querySuffix}`;
+    const loginHref = `${LOGIN_URL}${querySuffix}`;
 
     useEffect(() => {
         // globals.css의 html, body { overflow-x: hidden }이 position: sticky를 무력화하므로 clip으로 교체
@@ -470,8 +491,8 @@ export default function BugoonSite() {
                         <a href="#faq">자주 묻는 질문</a>
                     </nav>
                     <div className={s.headerCta}>
-                        <a href={LOGIN_URL} className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>로그인</a>
-                        <a href={SIGNUP_URL} className={`${s.btn} ${s.btnSm} ${s.btnPrimary}`}>무료로 시작하기</a>
+                        <a href={loginHref} className={`${s.btn} ${s.btnSm} ${s.btnGhost}`}>로그인</a>
+                        <a href={signupHref} onClick={() => gaEvents.b2bSignupStart()} className={`${s.btn} ${s.btnSm} ${s.btnPrimary}`}>무료로 시작하기</a>
                     </div>
                 </div>
             </header>
@@ -482,13 +503,14 @@ export default function BugoonSite() {
                     <div>
                         <div {...R()}><span className={s.eyebrow}><span className={s.eyebrowDot} />장례 현장을 위한 공식 부고 솔루션 · 부고온플러스</span></div>
                         <h1 {...R(s.heroTitle + ' ' + s.d1)}>부고는 1분,<br />나머지는 <em>부고온</em>이<br />챙깁니다.</h1>
-                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 작성부터 발송, 화환 주문, 정산까지. 장례지도사·상조사·장례식장이 쓰는 부고 솔루션 부고온플러스입니다.</p>
+                        <p {...R(s.heroDesc + ' ' + s.d2)}>부고장 작성부터 발송, 화환 주문 건당 50,000원 정산까지. 장례지도사·상조사·장례식장이 쓰는 부고 솔루션 부고온플러스입니다.</p>
                         <div {...R(s.heroBtns + ' ' + s.d3)}>
-                            <a href={SIGNUP_URL} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
-                            <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>Google Play 앱</a>
+                            <a href={signupHref} onClick={() => gaEvents.b2bSignupStart()} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
+                            <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>Google Play</a>
+                            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnGhost}`}>App Store</a>
                             <button className={`${s.btn} ${s.btnGhost}`} onClick={() => setModal(true)}>도입 문의</button>
                         </div>
-                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없음 · 가입비 0원 · 월 이용료 0원 (웹/앱 모두 지원)</div>
+                        <div {...R(s.heroNote + ' ' + s.d3)}>앱 설치 없이 웹 즉시 사용 · 가입비 0원 · 화환 건당 50,000원 적립</div>
                     </div>
                     <div className={s.heroVisual} {...{ 'data-reveal': '' }}>
                         <div className={`${s.card} ${s.cardLeft}`}><img src="/images/mockup-bugo-flower-v2.png" alt="국화 부고장 완성 화면" /></div>
@@ -552,7 +574,7 @@ export default function BugoonSite() {
                             </div>
                         ))}
                     </div>
-                    <p className={s.paybackNote} {...{ 'data-reveal': '' }}>부고장을 통해 들어온 주문은 <b>부고장을 만든 지도사님께 페이백</b>으로 적립됩니다.</p>
+                    <p className={s.paybackNote} {...{ 'data-reveal': '' }}>부고장을 통해 들어온 화환 주문은 <b>건당 50,000원(개인 파트너 기준) 페이백</b>으로 적립됩니다.</p>
                 </div>
             </section>
 
@@ -569,7 +591,7 @@ export default function BugoonSite() {
                             ['빈소 길안내', '주소를 복사해서 검색', '눌러서 바로 길찾기'],
                             ['화환 주문', '조문객이 직접 화원 수소문', '부고장에서 바로 주문'],
                             ['정보 수정', '다시 만들어 다시 발송', '수정하면 링크 그대로 반영'],
-                            ['지도사 수익', '없음', '주문마다 페이백 적립'],
+                            ['지도사 수익', '없음', '화환 건당 50,000원 적립'],
                             ['비용', '-', '0원'],
                         ].map(([k, a, b]) => (
                             <div className={s.compareRow} key={k}><div>{k}</div><div>{a}</div><div>{b}</div></div>
@@ -596,7 +618,7 @@ export default function BugoonSite() {
                     <h2 {...R(s.finalTitle)}>다음 부고는<br />부고온으로 보내보세요.</h2>
                     <p {...R(s.finalDesc + ' ' + s.d1)}>가입은 1분, 비용은 0원입니다. 회사·식장 단위 도입은 문의를 남겨주세요.</p>
                     <div {...R(s.finalBtns + ' ' + s.d2)}>
-                        <a href={SIGNUP_URL} className={`${s.btn} ${s.btnWhite}`}>무료로 시작하기</a>
+                        <a href={signupHref} onClick={() => gaEvents.b2bSignupStart()} className={`${s.btn} ${s.btnWhite}`}>무료로 시작하기</a>
                         <button className={`${s.btn} ${s.btnOutlineWhite}`} onClick={() => setModal(true)}>도입 문의</button>
                     </div>
                 </div>
@@ -608,10 +630,11 @@ export default function BugoonSite() {
                     <div className={s.footerTop}>
                         <img src="/images/b2b-logo.png" alt="부고온" className={s.footerLogo} style={{ height: 48, margin: "-8px -10px" }} />
                         <div className={s.footerLinks}>
-                            <a href="https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon" target="_blank" rel="noopener noreferrer">Google Play 앱 다운로드</a>
+                            <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer">Google Play 다운로드</a>
+                            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">App Store 다운로드</a>
                             <a href={`${APP}/terms`}>이용약관</a>
                             <a href={`${APP}/privacy`}>개인정보처리방침</a>
-                            <a href={LOGIN_URL}>파트너 로그인</a>
+                            <a href={loginHref}>파트너 로그인</a>
                         </div>
                     </div>
                     <p>(주)마음부고 | 대표 김미연 | 사업자등록번호 408-22-68851 | 통신판매업신고 2026-서울강남-00502</p>
@@ -623,10 +646,11 @@ export default function BugoonSite() {
             {/* 모바일 하단 고정 CTA */}
             <div className={`${s.mobileBar} ${scrolled ? s.mobileBarOn : ''}`}>
                 <button className={`${s.btn} ${s.btnGhost}`} onClick={() => setModal(true)}>도입 문의</button>
-                <a href={SIGNUP_URL} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
+                <a href={signupHref} onClick={() => gaEvents.b2bSignupStart()} className={`${s.btn} ${s.btnPrimary}`}>무료로 시작하기</a>
             </div>
 
             {modal && <InquiryModal onClose={() => setModal(false)} />}
         </div>
     );
 }
+

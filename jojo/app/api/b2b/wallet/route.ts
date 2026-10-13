@@ -45,13 +45,13 @@ export async function GET(request: NextRequest) {
             .single();
         if (depError) console.error('[DEBUG] depError:', depError);
 
-        // 24시간 이내 적립된 수당은 입금 예정 금액(Lock)으로 유예 처리
+        // 24시간 이내 적립된 순수 수당(취소 차감 반영, 출금 실패 환불건 제외)만 입금 예정 금액(Lock)으로 유예 처리
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: recentRewards } = await supabase
             .from('deposit_transactions')
-            .select('amount')
+            .select('amount, type')
             .eq('user_id', userId)
-            .gt('amount', 0)
+            .in('type', ['wreath_reward', 'referral_bonus', 'condolence_reward', 'reward_cancel'])
             .gte('created_at', oneDayAgo);
 
         const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // 잔액 및 24시간 보류(Lock) 잠금 잔액 확인
+    // 잔액 및 24시간 보류(Lock) 잠금 잔액 확인 (출금 실패 환불건 제외, 취소 차감 반영)
     const { data: deposit } = await supabase
         .from('deposits')
         .select('balance')
@@ -184,9 +184,9 @@ export async function POST(request: NextRequest) {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: recentRewards } = await supabase
         .from('deposit_transactions')
-        .select('amount')
+        .select('amount, type')
         .eq('user_id', userId)
-        .gt('amount', 0)
+        .in('type', ['wreath_reward', 'referral_bonus', 'condolence_reward', 'reward_cancel'])
         .gte('created_at', oneDayAgo);
 
     const lockedAmount = Math.max(0, (recentRewards || []).reduce((sum, tx) => sum + (tx.amount || 0), 0));
@@ -297,18 +297,36 @@ export async function POST(request: NextRequest) {
     }
 
     // 🚀 3단계: [자동입금 ON] 파트너인 경우 동기(await)로 펌뱅킹 실이체 실행
-    if (isAutoApprove) {
+    const BANK_CODES: Record<string, string> = {
+        '국민은행': '004', 'KB국민은행': '004', '국민': '004',
+        '신한은행': '088', '신한': '088',
+        '우리은행': '020', '우리': '020',
+        '하나은행': '081', 'KEB하나은행': '081', '하나': '081',
+        'NH농협은행': '011', '농협은행': '011', '농협': '011',
+        'IBK기업은행': '003', '기업은행': '003', '기업': '003',
+        '카카오뱅크': '090', '카카오': '090',
+        '토스뱅크': '092', '토스': '092',
+        '케이뱅크': '089', '케이': '089',
+        'SC제일은행': '023', 'SC제일': '023', '제일은행': '023',
+        '씨티은행': '027', '한국씨티은행': '027', '씨티': '027',
+        '경남은행': '039', '경남': '039',
+        '광주은행': '034', '광주': '034',
+        '대구은행': '031', '대구': '031', 'iM뱅크': '031', '아이엠뱅크': '031',
+        '부산은행': '032', '부산': '032',
+        '전북은행': '037', '전북': '037',
+        '제주은행': '035', '제주': '035',
+        '우체국': '071', '우체국은행': '071',
+        '새마을금고': '045', '새마을': '045',
+        '신협': '048', '신협은행': '048',
+        '수협': '007', '수협은행': '007',
+        '산업은행': '002', 'KDB산업은행': '002'
+    };
+    const mappedBankCode = BANK_CODES[(user.bank_name || '').trim()];
+
+    if (isAutoApprove && mappedBankCode) {
         try {
-            const BANK_CODES: Record<string, string> = {
-                '국민은행': '004', '신한은행': '088', '우리은행': '020', '하나은행': '081',
-                'NH농협은행': '011', '농협은행': '011', 'IBK기업은행': '003', '기업은행': '003',
-                '카카오뱅크': '090', '토스뱅크': '092', '케이뱅크': '089', 'SC제일은행': '023',
-                '씨티은행': '027', '경남은행': '039', '광주은행': '034', '대구은행': '031',
-                '부산은행': '032', '전북은행': '037', '제주은행': '035', '우체국': '071',
-                '새마을금고': '045', '신협': '048', '수협': '007'
-            };
             const cleanAccNo = (user.account_no || '').replace(/[^0-9]/g, '');
-            const bankCode = BANK_CODES[user.bank_name || ''] || '004';
+            const bankCode = mappedBankCode;
             const nowStr = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
             const txMoid = `B2B_AUTO_${withdrawData.id.slice(0, 8)}_${nowStr}`;
 

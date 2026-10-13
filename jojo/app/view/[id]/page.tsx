@@ -147,10 +147,10 @@ async function BugoContentLoader({ id, searchParams }: { id: string; searchParam
     // 캐시된 부고 데이터 조회 (60초 캐시)
     const bugoData = await getBugo(id);
 
-    // B2B 부고장인 경우 B2B 전용 뷰 경로로 즉시 리다이렉트 (쿼리 파라미터 유지)
+    // B2B 부고장인 경우 B2B 전용 도메인 뷰 경로로 즉시 리다이렉트 (쿼리 파라미터 유지)
     if (bugoData && bugoData.b2b_user_id) {
         const qs = searchParams.toString();
-        redirect(`/b2b/view/${id}${qs ? `?${qs}` : ''}`);
+        redirect(`https://bugoon.maeumbugo.co.kr/view/${id}${qs ? `?${qs}` : ''}`);
     }
 
     // 부고를 찾을 수 없는 경우

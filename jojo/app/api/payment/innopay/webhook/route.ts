@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
                                 .eq('id', partnerId)
                                 .single();
 
-                            let rewardAmount = 20000;
+                            let rewardAmount = 50000;
                             let companyCommission = 0;
 
                             if (partnerUser?.company_id) {
@@ -150,13 +150,13 @@ export async function POST(request: NextRequest) {
                                 }
                                 console.log(`✅ [B2B-Webhook] 상조회사 [${companyRecord.name || partnerUser.company_name}] 상품별 수수료 DB 동적 적용: [${pName}] ➡️ 지도사 수당 ${rewardAmount}원, 본사 ${companyCommission}원`);
                             } else {
-                                // 개인/프리랜서 파트너: 기본 지도사 수당 (20,000원) 100% 지급
+                                // 개인/프리랜서 파트너: 기본 지도사 수당 (50,000원) 100% 지급
                                 const { data: rewardSetting } = await supabase
                                     .from('b2b_settings')
                                     .select('value')
                                     .eq('key', 'wreath_reward_amount')
                                     .single();
-                                rewardAmount = parseInt(rewardSetting?.value || '20000');
+                                rewardAmount = parseInt(rewardSetting?.value || '50000');
                             }
 
                             // 3. 파트너 예치금 적립
@@ -240,11 +240,11 @@ export async function POST(request: NextRequest) {
                                 // 추천인의 소속 정보 확인 (상조회사 소속인지 여부 및 활성 상태)
                                 const { data: recommenderUser } = await supabase
                                     .from('b2b_users')
-                                    .select('id, company_id, owner_name, status, deleted_at')
+                                    .select('id, company_id, owner_name, status')
                                     .eq('id', partnerUser.recommender_id)
                                     .maybeSingle();
 
-                                const isRecommenderActive = recommenderUser && recommenderUser.status !== 'blocked' && !recommenderUser.deleted_at;
+                                const isRecommenderActive = recommenderUser && recommenderUser.status !== 'blocked' && recommenderUser.status !== 'withdrawn';
 
                                 if (isRecommenderActive) {
                                     const isRecommenderCorporate = Boolean(recommenderUser?.company_id);

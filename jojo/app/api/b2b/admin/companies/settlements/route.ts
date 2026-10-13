@@ -134,35 +134,9 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // 화환 정산만 필터 (부의금 정산 레코드는 order_id가 BCOND_, COND_, DO 접두사)
-            const wreathSettlements = settlements.filter(s => !s.order_id?.startsWith('BCOND_') && !s.order_id?.startsWith('COND_') && !s.order_id?.startsWith('DO'));
-
-            const detailedList = wreathSettlements.map(s => {
-                const orderInfo = orderMap.get(s.order_id) || null;
-                const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
-                const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
-                const isCancelled = s.status === 'cancelled';
-
-                return {
-                    id: s.id,
-                    order_id: s.order_id,
-                    amount: isCancelled ? 0 : s.amount,
-                    status: s.status,
-                    payment_date: s.payment_date,
-                    created_at: s.created_at,
-                    updated_at: s.updated_at,
-                    order: orderInfo ? {
-                        ...orderInfo,
-                        deceased_name: bugoInfo?.deceased_name || '미등록',
-                        partner_name: partnerInfo?.owner_name || '미등록',
-                        partner_company: partnerInfo?.company_name || '미등록',
-                        bugo_id: orderInfo.bugo_id
-                    } : null
-                };
-            });
-
-            // 부의금 쉐어 정산 내역 조인 (상조 소속 지도사의 부고장 결제건)
+            // 부의금 쉐어 정산 내역 조인 (상조 소속 지도사의 부고장 결제건) 먼저 조회하여 ID 집합 확보
             let condolenceList: any[] = [];
+            const condOrderKeySet = new Set<string>();
             const { data: compUsers } = await supabase
                 .from('b2b_users')
                 .select('id, owner_name, company_name')
@@ -189,12 +163,23 @@ export async function GET(request: NextRequest) {
                         .order('created_at', { ascending: false });
 
                     if (condOrders) {
+                        condOrders.forEach(c => {
+                            if (c.id) condOrderKeySet.add(String(c.id));
+                            if (c.moid) condOrderKeySet.add(String(c.moid));
+                            if (c.order_number) condOrderKeySet.add(String(c.order_number));
+                        });
+
                         const companyRate = companyData?.condolence_company_rate ?? 3.3;
 
                         // 부의금 정산 레코드의 마감 상태를 b2b_company_settlements에서 조회
-                        const condSettlementRecords = settlements.filter(s => s.order_id?.startsWith('BCOND_') || s.order_id?.startsWith('COND_') || s.order_id?.startsWith('DO'));
+                        const condSettlementRecords = settlements.filter(s =>
+                            s.order_id?.startsWith('BCOND_') ||
+                            s.order_id?.startsWith('COND_') ||
+                            s.order_id?.startsWith('DO') ||
+                            condOrderKeySet.has(String(s.order_id))
+                        );
                         const condSettleMap = new Map<string, string>();
-                        condSettlementRecords.forEach(s => condSettleMap.set(s.order_id, s.status));
+                        condSettlementRecords.forEach(s => condSettleMap.set(String(s.order_id), s.status));
 
                         condolenceList = condOrders.map(c => {
                             const matchedBugo = compBugos.find(b => String(b.id) === String(c.bugo_number) || String(b.bugo_number) === String(c.bugo_number));
@@ -204,7 +189,12 @@ export async function GET(request: NextRequest) {
 
                             // 정산 마감 상태: b2b_company_settlements 기준 (completed → 정산완료)
                             const condOrderNumber = c.moid?.startsWith('BCOND_') ? c.moid : `BCOND_${c.id}`;
-                            const settlementStatus = condSettleMap.get(condOrderNumber) || condSettleMap.get(c.order_number) || condSettleMap.get(c.moid) || 'pending';
+                            const settlementStatus =
+                                condSettleMap.get(String(c.id)) ||
+                                condSettleMap.get(condOrderNumber) ||
+                                condSettleMap.get(c.order_number) ||
+                                condSettleMap.get(c.moid) ||
+                                'pending';
 
                             return {
                                 id: c.id,
@@ -216,14 +206,49 @@ export async function GET(request: NextRequest) {
                                 company_rate: companyRate,
                                 share_amount: isCancelled ? 0 : shareAmount,
                                 partner_name: matchedUser?.owner_name || '미등록',
+                                partner_company: matchedUser?.company_name || '미등록',
                                 deceased_name: matchedBugo?.deceased_name || '미등록',
-                                status: settlementStatus, // b2b_company_settlements 기준 상태
-                                created_at: c.created_at
+                                status: isCancelled ? 'cancelled' : settlementStatus,
+                                settlement_status: isCancelled ? 'cancelled' : settlementStatus,
+                                created_at: c.created_at,
+                                bugo_id: matchedBugo?.bugo_number || c.bugo_number
                             };
                         });
                     }
                 }
             }
+
+            // 화환 정산만 필터 (부의금 정산 레코드 제외)
+            const wreathSettlements = settlements.filter(s =>
+                !s.order_id?.startsWith('BCOND_') &&
+                !s.order_id?.startsWith('COND_') &&
+                !s.order_id?.startsWith('DO') &&
+                !condOrderKeySet.has(String(s.order_id))
+            );
+
+            const detailedList = wreathSettlements.map(s => {
+                const orderInfo = orderMap.get(s.order_id) || null;
+                const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
+                const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
+                const isCancelled = s.status === 'cancelled';
+
+                return {
+                    id: s.id,
+                    order_id: s.order_id,
+                    amount: isCancelled ? 0 : s.amount,
+                    status: s.status,
+                    payment_date: s.payment_date,
+                    created_at: s.created_at,
+                    updated_at: s.updated_at,
+                    order: orderInfo ? {
+                        ...orderInfo,
+                        deceased_name: bugoInfo?.deceased_name || '미등록',
+                        partner_name: partnerInfo?.owner_name || '미등록',
+                        partner_company: partnerInfo?.company_name || '미등록',
+                        bugo_id: orderInfo.bugo_id
+                    } : null
+                };
+            });
 
             return NextResponse.json({
                 success: true,

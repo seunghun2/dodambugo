@@ -12,7 +12,7 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { companyName, contactName, phone, scale, message, type } = body;
+        const { companyName, contactName, phone, scale, message, type, skipDbInsert } = body;
 
         if (!contactName || !phone) {
             return NextResponse.json({ error: '성함과 연락처를 입력해 주세요.' }, { status: 400 });
@@ -20,24 +20,26 @@ export async function POST(request: NextRequest) {
 
         const fullMessage = `[부고온 홈페이지 문의] 구분: ${type || '미선택'} / 규모: ${scale || '미선택'}\n\n${message || '내용 없음'}`;
 
-        const { error } = await supabase.from('inquiries').insert({
-            name: String(contactName).slice(0, 50),
-            phone: String(phone).slice(0, 20),
-            company: companyName ? String(companyName).slice(0, 100) : null,
-            email: '',
-            inquiry_type: '부고온 제휴문의',
-            message: fullMessage.slice(0, 2000),
-        });
+        if (!skipDbInsert) {
+            const { error } = await supabase.from('inquiries').insert({
+                name: String(contactName).slice(0, 50),
+                phone: String(phone).slice(0, 20),
+                company: companyName ? String(companyName).slice(0, 100) : null,
+                email: '',
+                inquiry_type: '부고온 제휴문의',
+                message: fullMessage.slice(0, 2000),
+            });
 
-        if (error) {
-            console.error('부고온 문의 DB 저장 실패:', error);
-            return NextResponse.json({ error: '문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 500 });
+            if (error) {
+                console.error('부고온 문의 DB 저장 실패:', error);
+                return NextResponse.json({ error: '문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 500 });
+            }
         }
 
         // 슬랙 알림 (실패해도 접수는 완료)
         try {
             await sendSimpleNotification(
-                `🏢 *[부고온 홈페이지 문의]*\n• 구분: ${type || '-'}\n• 소속: ${companyName || '-'}\n• 담당자: ${contactName}\n• 연락처: ${phone}\n• 규모: ${scale || '-'}\n• 내용: ${message || '내용 없음'}`
+                `🏢 *[부고온 문의 접수]*\n• 구분: ${type || '-'}\n• 소속: ${companyName || '-'}\n• 담당자: ${contactName}\n• 연락처: ${phone}\n• 규모: ${scale || '-'}\n• 내용: ${message || '내용 없음'}`
             );
         } catch (slackErr) {
             console.error('슬랙 알림 전송 오류:', slackErr);

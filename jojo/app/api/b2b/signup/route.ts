@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
             console.error('슬랙 신규가입 알림 전송 실패:', slackErr);
         }
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             token,
             user: {
@@ -260,6 +260,16 @@ export async function POST(request: NextRequest) {
                 account_holder: account_holder || null,
             },
         });
+
+        // iOS/Android WebView localStorage 초기화 대응: 회원가입 직후에도 쿠키(30일) 동시 설정
+        response.cookies.set('b2b_token', token, {
+            httpOnly: false,
+            path: '/',
+            maxAge: 30 * 24 * 60 * 60,
+            sameSite: 'lax',
+        });
+
+        return response;
     } catch (error) {
         console.error('회원가입 오류:', error);
         return NextResponse.json(

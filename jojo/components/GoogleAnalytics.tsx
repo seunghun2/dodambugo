@@ -114,5 +114,11 @@ export const gaEvents = {
     clickOverlayCondolence: (bugoNumber: string) => trackEvent('오버레이_부의금클릭', '발인후CTA', bugoNumber),
     clickOverlayGift: (bugoNumber: string) => trackEvent('오버레이_답례품클릭', '발인후CTA', bugoNumber),
     clickOverlayFacility: (bugoNumber: string) => trackEvent('오버레이_장지비교클릭', '발인후CTA', bugoNumber),
+
+    // ========== B2B 부고온플러스 파트너 전환 ==========
+    b2bSignupStart: (refCode?: string) => trackEvent('B2B_회원가입시작', 'B2B_전환', refCode || 'direct'),
+    b2bSignupComplete: (myCode?: string) => trackEvent('B2B_회원가입완료', 'B2B_전환', myCode || 'complete', 1),
+    b2bInquirySubmit: (inquiryType?: string) => trackEvent('B2B_도입문의접수', 'B2B_전환', inquiryType || '문의', 1),
 };
+
 

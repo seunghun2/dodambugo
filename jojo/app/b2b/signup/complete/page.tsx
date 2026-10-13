@@ -1,13 +1,19 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { gaEvents } from '@/components/GoogleAnalytics';
 import styles from './complete.module.css';
 
 function CompleteContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const code = searchParams.get('code') || '';
+
+    useEffect(() => {
+        gaEvents.b2bSignupComplete(code);
+    }, [code]);
+
     const name = (() => {
         try {
             const u = localStorage.getItem('b2b_user');

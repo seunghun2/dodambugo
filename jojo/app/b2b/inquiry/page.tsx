@@ -133,6 +133,20 @@ export default function B2BInquiryPage() {
 
       if (error) throw error;
 
+      // 관리자 슬랙 채널 실시간 알림 비동기 발송
+      fetch('/api/b2b/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: `1:1문의(${inquiryType})`,
+          companyName: user.company_name || '개인 파트너',
+          contactName: user.owner_name || '파트너',
+          phone: user.phone,
+          message: fullMessage,
+          skipDbInsert: true,
+        }),
+      }).catch(() => {});
+
       alert('문의가 정상적으로 등록되었습니다.');
       // 폼 초기화
       setTitle('');

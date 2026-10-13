@@ -44,19 +44,23 @@ export async function GET(request: NextRequest) {
 
         if (inqError) throw inqError;
 
-        // 3. 문의글의 phone을 B2B 유저 목록과 매칭하여 B2B 문의만 필터링
+        // 3. B2B 가입 회원 문의 + 비회원 부고온 도입/제휴 문의까지 모두 포함하여 필터링
         const b2bInquiries = inquiries?.filter(inq => {
-            const cleanInqPhone = inq.phone.replace(/-/g, '');
-            return b2bUserMap.has(cleanInqPhone) || b2bUserMap.has(inq.phone);
+            const cleanInqPhone = (inq.phone || '').replace(/-/g, '');
+            const isB2BUser = b2bUserMap.has(cleanInqPhone) || b2bUserMap.has(inq.phone);
+            const isB2BIntroInquiry =
+                inq.inquiry_type?.includes('부고온') ||
+                inq.message?.includes('[부고온');
+            return isB2BUser || isB2BIntroInquiry;
         }) || [];
 
         // 4. 문의글에 B2B 회사명 및 오너명 매핑
         const formattedInquiries = b2bInquiries.map(inq => {
-            const cleanInqPhone = inq.phone.replace(/-/g, '');
+            const cleanInqPhone = (inq.phone || '').replace(/-/g, '');
             const b2bUser = b2bUserMap.get(cleanInqPhone) || b2bUserMap.get(inq.phone);
             return {
                 ...inq,
-                company: b2bUser?.company_name || inq.company || '알 수 없음',
+                company: b2bUser?.company_name || inq.company || '비회원 도입문의',
                 name: b2bUser?.owner_name || inq.name || '알 수 없음',
             };
         });

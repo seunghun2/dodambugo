@@ -278,9 +278,16 @@ function SignupInner() {
 
     const searchParams = useSearchParams();
     useEffect(() => {
-        const urlRef = searchParams.get('ref') || searchParams.get('code');
+        const urlRef =
+            searchParams.get('ref') ||
+            searchParams.get('code') ||
+            (typeof window !== 'undefined' ? sessionStorage.getItem('b2b_ref') : null);
         if (urlRef && urlRef.trim().length >= 4) {
-            checkReferral(urlRef.trim());
+            const cleanRef = urlRef.trim();
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('b2b_ref', cleanRef);
+            }
+            checkReferral(cleanRef);
         }
     }, [searchParams]);
 
@@ -327,7 +334,8 @@ function SignupInner() {
     const prevStep = () => {
         setError('');
         if (step === 1) {
-            router.push('/b2b/login');
+            const qs = searchParams.toString();
+            router.push(`/b2b/login${qs ? `?${qs}` : ''}`);
         } else {
             setStep((prev) => (prev - 1) as Step);
         }

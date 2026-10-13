@@ -219,7 +219,7 @@ export async function PATCH(request: NextRequest) {
  
 이제 파트너 앱에 로그인하여 모바일 부고장 개설 및 수당 적립 혜택을 이용하실 수 있습니다.
  
-■ 파트너 로그인: https://bugoon.co.kr/b2b/login
+■ 파트너 로그인: https://bugoon.maeumbugo.co.kr/login
 ■ 추천 코드: ${data.my_referral_code}
  
 이용해주셔서 감사합니다.`;
