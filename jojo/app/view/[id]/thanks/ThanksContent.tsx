@@ -157,12 +157,15 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
 
     // 공유 URL (card 페이지로 - DB의 thanks_religion 사용)
     const getShareUrl = () => {
+        if (isB2b) {
+            return `https://bugoon.maeumbugo.co.kr/view/${bugoId}/thanks/card`;
+        }
         if (typeof window !== 'undefined') {
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const domain = isLocal ? 'https://bugoon.maeumbugo.co.kr' : window.location.origin;
+            const domain = isLocal ? 'https://maeumbugo.co.kr' : window.location.origin;
             return `${domain}/view/${bugoId}/thanks/card`;
         }
-        return `https://bugoon.maeumbugo.co.kr/view/${bugoId}/thanks/card`;
+        return `https://maeumbugo.co.kr/view/${bugoId}/thanks/card`;
     };
 
     // 카카오 공유
@@ -181,7 +184,9 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
                 content: {
                     title: `故${bugo.deceased_name}님 감사장`,
                     description: '감사의 마음을 전합니다.',
-                    imageUrl: 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                    imageUrl: isB2b
+                        ? 'https://bugoon.maeumbugo.co.kr/og-bugoon.png?v=2'
+                        : 'https://maeumbugo.co.kr/og-bugo-v3.png',
                     link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
                 buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]

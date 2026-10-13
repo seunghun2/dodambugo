@@ -25,6 +25,7 @@ interface BugoData {
 interface CardContentProps {
     bugo: BugoData;
     bugoId: string;
+    isB2bPage?: boolean;
 }
 
 // 종교별 심볼 이미지
@@ -82,8 +83,9 @@ const parseCustomMessages = (thanksMessage: string | ThanksMessages | undefined)
     }
 };
 
-export default function CardContent({ bugo, bugoId }: CardContentProps) {
-    const isB2b = useIsB2b();
+export default function CardContent({ bugo, bugoId, isB2bPage }: CardContentProps) {
+    const hookIsB2b = useIsB2b();
+    const isB2b = isB2bPage !== undefined ? isB2bPage : hookIsB2b;
     // thanks_religion이 저장되어 있으면 그걸 사용
     const religionType = (bugo.thanks_religion as ReligionType) || getReligionType(bugo.religion);
     const customMessages = parseCustomMessages(bugo.thanks_message);
@@ -147,7 +149,7 @@ export default function CardContent({ bugo, bugoId }: CardContentProps) {
 
             {/* 푸터 */}
             <footer className="card-site-footer">
-                <p>©maeumbugo.co.kr, all rights reserved</p>
+                <p>{isB2b ? '© 부고온, all rights reserved' : '©maeumbugo.co.kr, all rights reserved'}</p>
             </footer>
         </div>
     );
