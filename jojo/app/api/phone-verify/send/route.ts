@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendSMS } from '@/lib/solapi';
-import { verificationCodes } from '../store';
+import { saveVerificationCode } from '../store';
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,17 +11,14 @@ export async function POST(request: NextRequest) {
         }
 
         // 전화번호 정리 (하이픈 제거)
-        const cleanPhone = phone.replace(/-/g, '');
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-        // 해외 번호(11자리가 아님)이거나 특정 테스트/데모 번호의 경우 인증 우회 처리
-        const isTestOrForeign = cleanPhone.length !== 11 || cleanPhone === '01012345678' || cleanPhone === '01088889999';
+        // 앱스토어 심사용 데모 번호인 경우에만 고정 인증코드 세팅
+        const isReviewAccount = cleanPhone === '01012345678' || cleanPhone === '01088889999';
 
-        if (isTestOrForeign) {
-            verificationCodes.set(cleanPhone, {
-                code: '123456',
-                expires: Date.now() + 30 * 60 * 1000, // 30분 유효
-            });
-            console.log(`📱 [TEST MOCK] 해외 또는 데모 번호 인증코드 강제 세팅: ${cleanPhone} → 123456`);
+        if (isReviewAccount) {
+            await saveVerificationCode(cleanPhone, '123456', 30 * 60 * 1000);
+            console.log(`📱 [TEST MOCK] 심사용 데모 번호 인증코드 세팅: ${cleanPhone} → 123456`);
             return NextResponse.json({ success: true, message: '인증번호가 발송되었습니다' });
         }
 
@@ -32,11 +29,8 @@ export async function POST(request: NextRequest) {
         // 6자리 인증번호 생성
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // 3분 유효
-        verificationCodes.set(cleanPhone, {
-            code,
-            expires: Date.now() + 3 * 60 * 1000,
-        });
+        // 3분 유효 (DB + 인메모리 저장)
+        await saveVerificationCode(cleanPhone, code, 3 * 60 * 1000);
 
         // B2B 분기 처리 (헤더나 레퍼러 분석)
         const referer = request.headers.get('referer') || '';

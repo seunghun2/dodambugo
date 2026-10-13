@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
                 my_referral_code,
                 status: 'approved' // 본사 발급 계정은 즉시 승인
             })
-            .select()
+            .select('id, phone, owner_name, company_name, company_id, my_referral_code, status, created_at')
             .single();
 
         if (insertError) {
@@ -190,7 +190,7 @@ export async function PUT(request: NextRequest) {
             .from('b2b_users')
             .update(updateData)
             .eq('id', userId)
-            .select()
+            .select('id, phone, owner_name, company_name, company_id, my_referral_code, status, created_at')
             .single();
 
         if (error) {

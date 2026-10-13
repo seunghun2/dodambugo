@@ -55,11 +55,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '복제할 부고 번호가 필요합니다.' }, { status: 400 });
         }
 
-        // 1. 원본 부고 조회
+        // 1. 원본 부고 조회 (본인 소유 부고인지 함께 검증)
         const { data: originalBugo, error: fetchError } = await supabase
             .from('bugo')
             .select('*')
             .eq('bugo_number', bugo_number)
+            .eq('b2b_user_id', userId)
+            .is('deleted_at', null)
             .maybeSingle();
 
         if (fetchError || !originalBugo) {
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
         const newBugoNumber = await generateBugoNumber();
         const newOwnerToken = generateOwnerToken();
 
-        // 3. 복제할 객체 생성 (id 및 타임스탬프 삭제/갱신)
+        // 3. 복제할 객체 생성 (id, 타임스탬프 및 조회/발송 이력 초기화)
         const { id, created_at, updated_at, ...cleanData } = originalBugo;
 
         const duplicatedBugo = {
@@ -79,6 +81,13 @@ export async function POST(request: NextRequest) {
             owner_token: newOwnerToken,
             b2b_user_id: userId,
             deceased_name: originalBugo.deceased_name,
+            view_count: 0,
+            share_count: 0,
+            owner_token_used: false,
+            share_reminder_sent: false,
+            review_notify_sent: false,
+            thanks_sent: false,
+            deleted_at: null,
             created_at: new Date().toISOString(),
         };
 

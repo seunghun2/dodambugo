@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { sendSMS } from '@/lib/solapi';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// 글로벌 인메모리 인증번호 저장소 (DB 테이블 미존재 시에도 100% 보장)
-const smsStore = (global as any)._b2bSmsStore || ((global as any)._b2bSmsStore = new Map<string, { code: string; expiresAt: number }>());
+import { saveVerificationCode } from '@/app/api/phone-verify/store';
 
 // POST: 본인인증 6자리 SMS 실발송
 export async function POST(request: NextRequest) {
@@ -20,12 +12,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '올바른 휴대폰 번호를 입력해주세요.' }, { status: 400 });
         }
 
-        // 6자리 난수 생성
+        // 6자리 난수 생성 (3분 유효, DB + 인메모리 적재)
         const code = String(Math.floor(100000 + Math.random() * 900000));
-        const expiresAt = Date.now() + 3 * 60 * 1000; // 3분 유효
-
-        // 글로벌 맵에 적재
-        smsStore.set(cleanPhone, { code, expiresAt });
+        await saveVerificationCode(cleanPhone, code, 3 * 60 * 1000);
 
         // SOLAPI를 통해 실제 문자(SMS) 발송
         const smsMessage = `[부고온] 본인확인 인증번호는 [${code}] 입니다. (3분 이내 입력)`;
