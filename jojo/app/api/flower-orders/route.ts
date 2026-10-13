@@ -126,6 +126,37 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase();
         const body = await request.json();
 
+        // 서버 사이드 상품 가격 위변조 검증 (최소 기준가 미만 차단)
+        const submittedPrice = Number(body.product_price);
+        if (!Number.isFinite(submittedPrice) || submittedPrice < 50000) {
+            return NextResponse.json({ error: '상품 금액이 올바르지 않습니다.' }, { status: 400 });
+        }
+
+        if (body.product_id !== undefined || body.product_name) {
+            let prodQuery = supabase
+                .from('flower_products')
+                .select('name, price, discount_price, b2b_price');
+
+            if (typeof body.product_id === 'number' || /^\d+$/.test(String(body.product_id || ''))) {
+                prodQuery = prodQuery.eq('sort_order', Number(body.product_id));
+            } else if (body.product_name) {
+                prodQuery = prodQuery.eq('name', String(body.product_name).trim());
+            }
+
+            const { data: prodRows } = await prodQuery.limit(1);
+            const prod = prodRows?.[0];
+            if (prod) {
+                const validBasePrices = [prod.price, prod.discount_price, prod.b2b_price]
+                    .map(Number)
+                    .filter(p => Number.isFinite(p) && p > 0);
+                const minValidPrice = validBasePrices.length > 0 ? Math.min(...validBasePrices) : 50000;
+                // 지역/특수 추가금은 양수이므로 최종 결제 금액은 최소 기준가보다 작을 수 없음
+                if (submittedPrice < minValidPrice) {
+                    return NextResponse.json({ error: '상품 금액이 올바르지 않습니다.' }, { status: 400 });
+                }
+            }
+        }
+
         // 주문번호 생성 (B2B는 BF 접두사로 PG 구분)
         const isB2B = body.source === 'b2b';
         const orderPrefix = isB2B ? 'BF' : 'MG';
