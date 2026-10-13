@@ -1071,6 +1071,217 @@ export default function RitualDetailPage() {
     printWindow.document.close();
   };
 
+  const loadSvgImage = (svgHtml: string): Promise<HTMLImageElement | null> => {
+    return new Promise((resolve) => {
+      const trimmed = svgHtml.trim();
+      if (!trimmed) {
+        resolve(null);
+        return;
+      }
+      const withXmlns = trimmed.includes('xmlns=')
+        ? trimmed
+        : trimmed.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(withXmlns)}`;
+    });
+  };
+
+  const handleSaveImage = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const scale = 3;
+    const fontFamily = "'Batang', 'Nanum Myeongjo', 'AppleMyungjo', Georgia, serif";
+
+    if (activeTab === 'chukmun') {
+      if (religion === 'christian' || religion === 'catholic') return;
+      const baseW = 270;
+      const baseH = 382;
+      canvas.width = baseW * scale;
+      canvas.height = baseH * scale;
+      ctx.save();
+      ctx.scale(scale, scale);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, baseW, baseH);
+      ctx.strokeStyle = '#d4c9a8';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0.5, 0.5, baseW - 1, baseH - 1);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      if (chukmunTextType === 'hanja') {
+        const lines = chukmunResult.lines;
+        const readingLines = chukmunResult.readingLines || [];
+        const colCount = lines.length;
+        const colGap = 24;
+        const totalWidth = (colCount - 1) * colGap;
+        const startX = baseW / 2 + totalWidth / 2;
+
+        lines.forEach((line, cIdx) => {
+          const colX = startX - cIdx * colGap;
+          const chars = line.split('');
+          const readings = (readingLines[cIdx] || '').split('');
+          const startY = 34;
+          const rowStep = 16;
+
+          chars.forEach((ch, rIdx) => {
+            if (ch === ' ') return;
+            const y = startY + rIdx * rowStep;
+            ctx.font = `bold 11px ${fontFamily}`;
+            ctx.fillStyle = '#111111';
+            ctx.fillText(ch, colX - 4, y);
+
+            const rd = readings[rIdx] || '';
+            if (rd && rd !== ch) {
+              ctx.font = `500 8px ${fontFamily}`;
+              ctx.fillStyle = '#666666';
+              ctx.fillText(rd, colX + 6, y);
+            }
+          });
+        });
+      } else {
+        const kLines = chukmunResult.koreanLines;
+        const lineHeight = 22;
+        const totalH = kLines.length * lineHeight;
+        const startY = (baseH - totalH) / 2 + lineHeight / 2;
+        ctx.font = `500 11px ${fontFamily}`;
+        ctx.fillStyle = '#1a1a1a';
+        kLines.forEach((line, idx) => {
+          ctx.fillText(line, baseW / 2, startY + idx * lineHeight);
+        });
+      }
+
+      ctx.restore();
+    } else {
+      const baseW = jibangSize === 'honbaek' ? 60 : jibangSize === 'christian_catholic' ? 105 : 140;
+      const baseH = jibangSize === 'honbaek' ? 320 : jibangSize === 'christian_catholic' ? 333 : 370;
+      canvas.width = baseW * scale;
+      canvas.height = baseH * scale;
+      ctx.save();
+      ctx.scale(scale, scale);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, baseW, baseH);
+
+      const skinToUse = jibangSize === 'honbaek' ? 'none' : borderSkin;
+      if (skinToUse !== 'none') {
+        const borderImg = await loadSvgImage(getBorderSvgString(baseW, baseH, skinToUse));
+        if (borderImg) {
+          ctx.drawImage(borderImg, 0, 0, baseW, baseH);
+        }
+      } else {
+        ctx.strokeStyle = '#1a1311';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, baseW - 1, baseH - 1);
+      }
+
+      const cols = buildTabletColumns(true);
+      const centerCols = cols.filter((c: any) => c.type !== 'phrase');
+      const phraseCols = cols.filter((c: any) => c.type === 'phrase');
+      const religionImg = await loadSvgImage(RELIGION_SVGS[religion] || '');
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // 좌우 기도문 열 렌더링
+      phraseCols.forEach((col: any) => {
+        const isLeft = col.side === 'left';
+        const isCatholicSize = jibangSize === 'christian_catholic';
+        const offsetPx = isCatholicSize ? 18 : 22;
+        const x = isLeft ? offsetPx : baseW - offsetPx;
+        const fontSize = isCatholicSize ? 9 : 11;
+        const stepY = fontSize * 1.35;
+        const totalH = col.chars.length * stepY;
+        const startY = (baseH - totalH) / 2 + stepY / 2;
+
+        ctx.font = `500 ${fontSize}px ${fontFamily}`;
+        ctx.fillStyle = '#333333';
+        col.chars.forEach((ch: string, idx: number) => {
+          ctx.fillText(ch, x, startY + idx * stepY);
+        });
+      });
+
+      // 중앙 열(name, main, hanja) 렌더링
+      const colSpacing = centerCols.length > 1 ? 30 : 0;
+      const startCenterX = baseW / 2 - ((centerCols.length - 1) * colSpacing) / 2;
+
+      centerCols.forEach((col: any, idx: number) => {
+        const x = startCenterX + idx * colSpacing;
+        if (col.type === 'name') {
+          const nameFontSize = jibangSize === 'honbaek' ? 12 : jibangSize === 'christian_catholic' ? 18 : 22;
+          const stepY = nameFontSize + 5;
+          const totalNameH = col.chars.length * stepY + 38;
+          const startY = (baseH - totalNameH) / 2 + nameFontSize / 2;
+
+          ctx.font = `700 ${nameFontSize}px ${fontFamily}`;
+          ctx.fillStyle = '#1a1311';
+          col.chars.forEach((ch: string, cIdx: number) => {
+            ctx.fillText(ch, x, startY + cIdx * stepY);
+          });
+
+          const goinStartY = startY + col.chars.length * stepY + 8;
+          ctx.font = `600 13px ${fontFamily}`;
+          ctx.fillStyle = '#666666';
+          ctx.fillText('고', x, goinStartY);
+          ctx.fillText('인', x, goinStartY + 16);
+        } else if (col.type === 'main' || col.type === 'hanja') {
+          const charFontSize = jibangSize === 'honbaek' ? 11 : jibangSize === 'christian_catholic' ? 16 : 19;
+          const stepY = charFontSize + 4;
+          const hasIcon = religionImg && (col.type === 'hanja' ? religion === 'buddhism' : (religion === 'christian' || religion === 'catholic'));
+          const iconH = hasIcon ? 28 : 0;
+          const totalColH = iconH + col.chars.length * stepY;
+          let curY = (baseH - totalColH) / 2;
+
+          if (hasIcon && religionImg) {
+            const iconW = religion === 'buddhism' ? 22 : 18;
+            const iconDrawH = religion === 'buddhism' ? 22 : 24;
+            ctx.drawImage(religionImg, x - iconW / 2, curY, iconW, iconDrawH);
+            curY += iconH;
+          }
+
+          ctx.font = `700 ${charFontSize}px ${fontFamily}`;
+          ctx.fillStyle = '#1a1311';
+          col.chars.forEach((ch: string, cIdx: number) => {
+            const drawY = curY + cIdx * stepY + charFontSize / 2;
+            if (ch === '(' || ch === ')') {
+              ctx.save();
+              ctx.translate(x, drawY);
+              ctx.rotate(Math.PI / 2);
+              ctx.fillText(ch, 0, 0);
+              ctx.restore();
+            } else {
+              ctx.fillText(ch, x, drawY);
+            }
+          });
+        }
+      });
+
+      ctx.restore();
+    }
+
+    const docType = activeTab === 'wipae' ? '위패' : '축문';
+    const fileName = `${docType}_故${deceasedName || '고인'}.png`;
+    const dataUrl = canvas.toDataURL('image/png');
+
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setToastMessage(`${docType} 고화질 이미지가 저장되었습니다.`);
+    setTimeout(() => {
+      setToastMessage('');
+    }, 3000);
+  };
+
   const handleSend = () => {
     setIsSendConfirmModalOpen(true);
   };
@@ -1797,6 +2008,19 @@ export default function RitualDetailPage() {
           } : {}}
         >
           A4 인쇄
+        </button>
+        <button 
+          className={styles.btnPrint} 
+          onClick={handleSaveImage}
+          disabled={activeTab === 'chukmun' && (religion === 'christian' || religion === 'catholic')}
+          style={activeTab === 'chukmun' && (religion === 'christian' || religion === 'catholic') ? {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            backgroundColor: '#ccc',
+            borderColor: '#ccc'
+          } : {}}
+        >
+          이미지 저장
         </button>
         <button className={styles.btnSend} onClick={handleSend}>
           보내기

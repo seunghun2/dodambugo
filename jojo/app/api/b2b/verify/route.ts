@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
+import { encryptRRN } from '@/lib/crypto';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -79,12 +80,12 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        // 3. 본인인증 및 신분증 정보 업데이트
+        // 3. 본인인증 및 신분증 정보 업데이트 (주민번호 뒷자리 AES-256-GCM 암호화 저장)
         const updates = {
             identity_verified: true,
             identity_name: trimmedInput || trimmedOwner,
             rrn_front,
-            rrn_back,
+            rrn_back: encryptRRN(rrn_back),
             identity_type,
             id_issue_date: identity_type === '주민등록증' ? id_issue_date : null,
             driver_license_no: identity_type === '운전면허증' ? driver_license_no : null,

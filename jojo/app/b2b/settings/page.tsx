@@ -601,9 +601,10 @@ export default function SettingsPage() {
     // 추천 코드 공유 기능
     const shareCode = async () => {
         if (!user) return;
-        const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/signup?ref=${user.my_referral_code}`;
+        const shareUrl = `https://bugoon.maeumbugo.co.kr/signup?ref=${user.my_referral_code}`;
+        const playStoreUrl = `https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon`;
         const appStoreUrl = `https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225`;
-        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 부고온플러스 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
+        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 50,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
         
         if (navigator.share) {
             try {
@@ -611,7 +612,10 @@ export default function SettingsPage() {
                     title: '부고온 파트너 추천',
                     text: text,
                 });
-            } catch (err) {
+            } catch (err: any) {
+                if (err?.name === 'AbortError') {
+                    return;
+                }
                 console.error('공유 실패:', err);
                 window.location.href = `sms:?body=${encodeURIComponent(text)}`;
             }
@@ -729,7 +733,7 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className={styles.gridCard} onClick={() => router.push('/b2b/faq')}>
+                        <div className={styles.gridCard} onClick={() => router.push('/b2b/notice')}>
                             <span className={styles.gridLabel}>공지{"\n"}사항</span>
                             <div className={styles.gridIcon}>
                                 <B2BIcon name="bell" size={20} className={styles.gridIconSvg} />
@@ -2205,15 +2209,15 @@ const b2bFaqData: FAQItem[] = [
   },
   {
     question: '내 정보에 고유번호는 무엇인가요?',
-    answer: '고유번호는 고객님의 추천코드로 부고온에서 랜덤으로 부여하고 있습니다.\n가입자가 추천인 입력시 회원님의 고유번호 입력 하시면 됩니다.',
+    answer: '고유번호는 회원님의 4자리 추천코드로 가입 시 자동으로 부여됩니다.\n동료 파트너가 개인 파트너로 가입할 때 회원님의 추천코드를 입력하면, 해당 파트너가 제작한 부고장에서 근조화환이 판매될 때마다 추천인(회원님)에게 건당 2,500원의 추천 적립금이 추가로 지급됩니다.',
   },
   {
-    question: '적립금은 언제 지급되나요?',
-    answer: '적립금은 상품 결제 기준 24시간 후에 적립됩니다.',
+    question: '적립금은 얼마씩, 언제 지급되나요?',
+    answer: '개인 파트너 기준으로 제작하신 부고장에서 근조화환 판매 시 건당 기본 50,000원이 적립됩니다.\n결제 완료 후 부정결제 및 취소 확인을 위해 24시간 정산 대기(적립 예정) 후 출금 가능 적립금으로 전환됩니다.',
   },
   {
     question: '환급신청을 했는데 언제 지급되나요?',
-    answer: '적립금(포인트) 환급은 당일 지급을 원칙으로 하고 있습니다.\n자세한 내용은 부고온 공지사항을 참조하시길 바랍니다.',
+    answer: '출금 가능 적립금이 5,000원 이상일 때 신청하실 수 있으며, 본인인증 및 정산계좌 등록이 완료된 파트너는 신청 즉시 실시간 자동 계좌이체(3.3% 원천징수 공제 후 실수령액)로 당일 입금됩니다.\n(매일 23:30 ~ 00:30 은행 점검 시간 제외)',
   },
   {
     question: '환급신청 시 인증 과정에서 오류가 나요',

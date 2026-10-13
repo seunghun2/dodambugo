@@ -2,6 +2,7 @@ import { verifyAdmin } from '@/lib/admin-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendLMS } from '@/lib/solapi';
+import { encryptRRN, decryptRRN } from '@/lib/crypto';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -124,13 +125,23 @@ export async function GET(request: NextRequest) {
             verification_status: p.verification_status || (p.identity_verified ? 'verified' : 'unverified'),
             identity_name: p.identity_name || p.owner_name,
             rrn_front: p.rrn_front || '',
-            rrn_back: p.rrn_back || '',
+            rrn_back: decryptRRN(p.rrn_back),
             identity_type: p.identity_type || '',
             id_issue_date: p.id_issue_date || '',
             identity_phone: p.identity_phone || p.phone,
             id_card_url: p.id_card_url || '',
             auto_payout_enabled: p.auto_payout_enabled ?? true
         }));
+
+        // 기존 평문 주민번호 뒷자리(rrn_back) 레코드 자동 암호화 마이그레이션
+        for (const p of partners || []) {
+            if (p.rrn_back && !String(p.rrn_back).startsWith('enc:')) {
+                await supabase
+                    .from('b2b_users')
+                    .update({ rrn_back: encryptRRN(p.rrn_back) })
+                    .eq('id', p.id);
+            }
+        }
 
         // 신분증 이미지 서명 URL 일괄 생성 (비공개 버킷에서도 100% 렌더링)
         for (const partner of formattedPartners) {

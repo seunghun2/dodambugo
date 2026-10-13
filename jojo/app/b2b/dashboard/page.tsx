@@ -134,9 +134,10 @@ export default function DashboardPage() {
 
   const shareCode = async () => {
     if (!user) return;
-    const shareUrl = `https://bugoon.maeumbugo.co.kr/b2b/signup?ref=${user.my_referral_code}`;
+    const shareUrl = `https://bugoon.maeumbugo.co.kr/signup?ref=${user.my_referral_code}`;
+    const playStoreUrl = `https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon`;
     const appStoreUrl = `https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225`;
-    const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 부고온플러스 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
+    const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 50,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
     
     if (navigator.share) {
       try {

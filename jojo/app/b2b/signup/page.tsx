@@ -305,9 +305,9 @@ function SignupInner() {
                     password: form.password,
                     company_name: form.companyName,
                     owner_name: form.ownerName,
-                    bank_name: form.bankName || null,
-                    account_no: form.accountNo || null,
-                    account_holder: form.accountHolder || null,
+                    bank_name: form.accountVerified ? (form.bankName || null) : null,
+                    account_no: form.accountVerified ? (form.accountNo || null) : null,
+                    account_holder: form.accountVerified ? (form.accountHolder || null) : null,
                     referral_code: form.referralCode || null,
                 }),
             });
@@ -637,8 +637,10 @@ function SignupInner() {
             {/* Step 4: 정산 계좌 */}
             {step === 4 && (
                 <div className={styles.stepContent}>
-                    <h2 className={styles.stepTitle}>정산 계좌 등록</h2>
-                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌를 등록해 주세요.</p>
+                    <h2 className={styles.stepTitle}>
+                        정산 계좌 등록<span className={styles.stepTitleSub}>(선택)</span>
+                    </h2>
+                    <p className={styles.stepDesc}>화환 판매 수익이 입금될 계좌입니다. 가입 후 내정보에서 언제든 등록하실 수 있습니다.</p>
 
                     <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>은행</label>
@@ -708,7 +710,25 @@ function SignupInner() {
                         <button className={styles.prevBtn} onClick={prevStep}>뒤로가기</button>
                         <button className={styles.nextBtn} onClick={nextStep} disabled={!form.accountVerified}>다음</button>
                     </div>
-                    <p className={styles.skipLink} onClick={nextStep}>나중에 등록할게요</p>
+                    <button
+                        type="button"
+                        className={styles.subBtn}
+                        style={{ marginTop: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569' }}
+                        onClick={() => {
+                            if (!form.accountVerified) {
+                                setForm((prev) => ({
+                                    ...prev,
+                                    bankName: '',
+                                    accountNo: '',
+                                    accountHolder: prev.ownerName || '',
+                                    accountVerified: false,
+                                }));
+                            }
+                            nextStep();
+                        }}
+                    >
+                        나중에 등록할게요 (건너뛰기)
+                    </button>
                 </div>
             )}
 
