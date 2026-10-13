@@ -352,30 +352,8 @@ export async function POST(request: NextRequest) {
         }
 
 
-        // 📱 알림톡 발송 (입금 완료)
-        if (orderData?.sender_phone) {
-            const phoneNumber = orderData.sender_phone.replace(/-/g, '');
-            const isB2B = !!orderData?.bugo?.b2b_user_id;
-            sendAlimtalk(
-                phoneNumber,
-                'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
-                {
-                    '상품명': orderData.product_name || '',
-                    '금액': Number(amt).toLocaleString(),
-                    '주문번호': orderData.order_number || moid,
-                    '받는분': orderData.recipient_name || '',
-                    '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
-                },
-                undefined,
-                isB2B
-            ).then(() => {
-                console.log('✅ 가상계좌 입금완료 알림톡 발송:', phoneNumber);
-            }).catch(err => console.error('❌ 가상계좌 입금완료 알림톡 실패:', err));
-        }
-
-        // 🔔 슬랙 알림 발송
+        // 🔔 부고 데이터 조회 후 알림톡 및 슬랙 알림 발송
         if (orderData) {
-            // 부고 데이터 조회 (대표상주, 주소 포함)
             let bugoData: any = null;
             if (orderData.bugo_id) {
                 const { data } = await supabase
@@ -384,6 +362,29 @@ export async function POST(request: NextRequest) {
                     .eq('id', orderData.bugo_id)
                     .single();
                 bugoData = data;
+            }
+
+            const isB2B = !!(bugoData?.b2b_user_id || orderData.source === 'b2b' || orderData.partner_data?.b2b_user_id);
+
+            // 📱 알림톡 발송 (입금 완료)
+            if (orderData.sender_phone) {
+                const phoneNumber = orderData.sender_phone.replace(/-/g, '');
+                sendAlimtalk(
+                    phoneNumber,
+                    'KA01TP2601311316586435pxsJOWuWbz',  // 화환 결제완료 템플릿
+                    {
+                        '상품명': orderData.product_name || '',
+                        '금액': Number(amt).toLocaleString(),
+                        '주문번호': orderData.order_number || moid,
+                        '받는분': orderData.recipient_name || '',
+                        '장례식장': `${orderData.funeral_home || ''} ${orderData.room || ''}`.trim(),
+                        '부고번호': String(bugoData?.bugo_number || ''),
+                    },
+                    undefined,
+                    isB2B
+                ).then(() => {
+                    console.log('✅ 가상계좌 입금완료 알림톡 발송:', phoneNumber);
+                }).catch(err => console.error('❌ 가상계좌 입금완료 알림톡 실패:', err));
             }
 
             // mourners에서 수신자 연락처 매칭
@@ -414,7 +415,7 @@ export async function POST(request: NextRequest) {
                 chief_mourner_name: bugoData?.mourner_name || '',
                 chief_mourner_phone: bugoData?.phone_password || '',
                 view_count: bugoData?.view_count ?? 0,
-            }, !!bugoData?.b2b_user_id).catch(err => console.error('❌ 슬랙 알림 실패:', err));
+            }, isB2B).catch(err => console.error('❌ 슬랙 알림 실패:', err));
         }
 
         return NextResponse.json({ success: true, message: '입금 처리 완료' });

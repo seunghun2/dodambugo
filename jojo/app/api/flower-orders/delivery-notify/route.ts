@@ -35,9 +35,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '주문을 찾을 수 없습니다' }, { status: 404 });
         }
 
-        // 부고에서 고인명 및 B2B 여부 별도 조회
+        // 부고에서 고인명 및 B2B 여부 별도 조회 (직접 발주 시 partner_data 폴백)
         let deceasedName = '';
-        let isB2B = false;
+        let b2bPartnerId: string | null = order.partner_data?.b2b_user_id || null;
+        let isB2B = order.source === 'b2b' || !!b2bPartnerId;
         if (order.bugo_id) {
             const { data: bugo } = await supabase
                 .from('bugo')
@@ -45,7 +46,10 @@ export async function POST(request: NextRequest) {
                 .eq('id', order.bugo_id)
                 .single();
             deceasedName = bugo?.deceased_name || '';
-            isB2B = !!bugo?.b2b_user_id;
+            if (bugo?.b2b_user_id) {
+                isB2B = true;
+                b2bPartnerId = bugo.b2b_user_id;
+            }
         }
 
         const phone = order.sender_phone?.replace(/-/g, '');
@@ -102,31 +106,25 @@ export async function POST(request: NextRequest) {
         }
 
         // 📱 [B2B] 파트너에게 화환 배송 완료 안내 문자 및 인앱 알람 발송
-        if (type === 'delivered' && order.bugo_id) {
+        if (type === 'delivered' && b2bPartnerId) {
             try {
-                const { data: bugoData } = await supabase
-                    .from('bugo')
-                    .select('b2b_user_id')
-                    .eq('id', order.bugo_id)
-                    .single();
- 
-                if (bugoData?.b2b_user_id) {
+                if (b2bPartnerId) {
                     // 1. 인앱 알림 적재
                     try {
                         const { insertInAppAlarm } = await import('@/lib/partner-notification');
                         const alarmTitle = '화환 배송 완료';
-                        const alarmBody = `故 ${deceasedName || ''}님 빈소로 주문된 화환 배송이 완료되었습니다. (${order.product_name || ''})`;
+                        const alarmBody = `故 ${deceasedName || order.recipient_name || ''}님 빈소로 주문된 화환 배송이 완료되었습니다. (${order.product_name || ''})`;
                         const alarmUrl = `/b2b/order/${order.id}`;
                         
                         await insertInAppAlarm(
-                            bugoData.b2b_user_id,
+                            b2bPartnerId,
                             'flower_delivery_completed',
                             alarmTitle,
                             alarmBody,
                             alarmUrl,
                             'alarm_order'
                         );
-                        console.log(`🔔 [B2B] 파트너 화환 배송 완료 인앱 알람 적재 완료: ${bugoData.b2b_user_id}`);
+                        console.log(`🔔 [B2B] 파트너 화환 배송 완료 인앱 알람 적재 완료: ${b2bPartnerId}`);
                     } catch (inAppErr) {
                         console.error('❌ [B2B] 파트너 화환 배송 완료 인앱 알람 적재 실패:', inAppErr);
                     }
@@ -135,7 +133,7 @@ export async function POST(request: NextRequest) {
                     const { data: partnerUser } = await supabase
                         .from('b2b_users')
                         .select('phone, company_name, owner_name')
-                        .eq('id', bugoData.b2b_user_id)
+                        .eq('id', b2bPartnerId)
                         .single();
  
                     if (partnerUser?.phone) {

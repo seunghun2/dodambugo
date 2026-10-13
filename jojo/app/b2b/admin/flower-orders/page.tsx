@@ -274,6 +274,43 @@ export default function FlowerOrdersPage() {
         return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     };
 
+    const formatFlowerAddress = (address?: string, funeralHall?: string, room?: string) => {
+        const hallAndRoom = `${funeralHall || ''} ${room || ''}`.trim();
+        if (!address) {
+            return { sidoGungu: '', detailAddress: hallAndRoom || '' };
+        }
+        const tokens = address.trim().split(/\s+/);
+        let splitIdx = 2;
+        if (tokens[0]?.includes('세종')) {
+            splitIdx = 1;
+        } else if (tokens.length >= 3) {
+            const third = tokens[2];
+            if (third.endsWith('구') || third.endsWith('군')) {
+                splitIdx = 3;
+            }
+        }
+        const sidoGungu = tokens.slice(0, splitIdx).join(' ');
+        const restAddress = tokens.slice(splitIdx).join(' ');
+        let detailAddress = restAddress;
+        if (hallAndRoom) {
+            if (detailAddress && !detailAddress.includes(hallAndRoom)) {
+                detailAddress = `${detailAddress} ${hallAndRoom}`.trim();
+            } else if (!detailAddress) {
+                detailAddress = hallAndRoom;
+            }
+        }
+        return {
+            sidoGungu: sidoGungu ? `${sidoGungu} ` : '',
+            detailAddress: detailAddress || '',
+        };
+    };
+
+    const copyText = (text: string, label: string) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        addNotifyLog(`[복사] ${label}: ${text}`, 'success');
+    };
+
     const getStatusLabel = (status: string) => {
         switch (status) {
             case 'pending': return '주문접수';
@@ -520,14 +557,36 @@ export default function FlowerOrdersPage() {
                                 </div>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>연락처</span>
-                                    <span className={styles.detailValue}>{selectedOrder.sender_phone}</span>
+                                    <span className={styles.detailValue} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {selectedOrder.sender_phone}
+                                        {selectedOrder.sender_phone && (
+                                            <button
+                                                type="button"
+                                                onClick={() => copyText(selectedOrder.sender_phone, '주문자전화')}
+                                                style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                            >
+                                                복사
+                                            </button>
+                                        )}
+                                    </span>
                                 </div>
                             </div>
 
                             <div className={styles.detailGroup}>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>받는 상주</span>
-                                    <span className={styles.detailValue}>{selectedOrder.recipient_name}</span>
+                                    <span className={styles.detailValue} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {selectedOrder.recipient_name}
+                                        {selectedOrder.recipient_name && (
+                                            <button
+                                                type="button"
+                                                onClick={() => copyText(selectedOrder.recipient_name, '받는분')}
+                                                style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                            >
+                                                복사
+                                            </button>
+                                        )}
+                                    </span>
                                 </div>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>장례식장</span>
@@ -535,22 +594,71 @@ export default function FlowerOrdersPage() {
                                         {selectedOrder.funeral_home} ({selectedOrder.room})
                                     </span>
                                 </div>
-                                <div className={styles.detailRow} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                                    <span className={styles.detailLabel}>배송 주소</span>
-                                    <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500', textAlign: 'left' }}>
-                                        {selectedOrder.address}
-                                    </span>
-                                </div>
+                                {(() => {
+                                    const { sidoGungu, detailAddress } = formatFlowerAddress(selectedOrder.address, selectedOrder.funeral_home, selectedOrder.room);
+                                    return (
+                                        <>
+                                            <div className={styles.detailRow}>
+                                                <span className={styles.detailLabel}>주소1 (시/구)</span>
+                                                <span className={styles.detailValue} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    {sidoGungu || '-'}
+                                                    {sidoGungu && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => copyText(sidoGungu, '주소1')}
+                                                            style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                                        >
+                                                            복사
+                                                        </button>
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className={styles.detailRow} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                                                <span className={styles.detailLabel}>주소2 (상세)</span>
+                                                <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+                                                    <span>{detailAddress || '-'}</span>
+                                                    {detailAddress && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => copyText(detailAddress, '주소2')}
+                                                            style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                                        >
+                                                            복사
+                                                        </button>
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
 
                             <div className={styles.detailGroup} style={{ borderBottom: 'none' }}>
                                 <span className={styles.detailLabel}>리본 문구</span>
                                 <div className={styles.ribbonBox}>
-                                    <div style={{ fontWeight: '700', color: '#0f172a' }}>
-                                        {selectedOrder.ribbon_text2 || '(경조사어 없음)'}
+                                    <div style={{ fontWeight: '700', color: '#0f172a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                        <span>[우] {selectedOrder.ribbon_text2 || '(경조사어 없음)'}</span>
+                                        {selectedOrder.ribbon_text2 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => copyText(selectedOrder.ribbon_text2, '경조사어(우)')}
+                                                style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                            >
+                                                복사
+                                            </button>
+                                        )}
                                     </div>
-                                    <div style={{ color: '#475569', marginTop: '4px', fontSize: '12px' }}>
-                                        {selectedOrder.ribbon_text1 || '(보내는 이 없음)'}
+                                    <div style={{ color: '#475569', marginTop: '6px', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                        <span>[좌] {selectedOrder.ribbon_text1 || '(보내는 이 없음)'}</span>
+                                        {selectedOrder.ribbon_text1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => copyText(selectedOrder.ribbon_text1, '보내는분(좌)')}
+                                                style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                            >
+                                                복사
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -50,6 +50,8 @@ export default function OrderCompletePage() {
                 return `${year}.${month}.${day} ${hour}:${minute}`;
             };
 
+            const parsedPayment = storedPayment ? JSON.parse(storedPayment) : null;
+
             // DB에서 최신 주문 정보 가져오기
             try {
                 const response = await fetch(`/api/flower-orders?bugo_id=${bugoId}&limit=1`);
@@ -57,23 +59,24 @@ export default function OrderCompletePage() {
                     const result = await response.json();
                     if (result.orders && result.orders.length > 0) {
                         const latestOrder = result.orders[0];
+                        const price = latestOrder.product_price ?? latestOrder.amount ?? 0;
                         setOrderData({
                             senderName: latestOrder.sender_name,
                             senderPhone: latestOrder.sender_phone,
                             productName: latestOrder.product_name,
-                            productPrice: latestOrder.amount,
+                            productPrice: price,
                             recipientName: latestOrder.recipient_name,
                             funeralHome: latestOrder.funeral_home,
                             room: latestOrder.room || '',
                             address: latestOrder.address || '',
-                            ribbonText: latestOrder.ribbon_text,
-                            ribbonText1: latestOrder.ribbon_text,
-                            ribbonText2: latestOrder.ribbon_from,
+                            ribbonText: latestOrder.ribbon_text1 ?? latestOrder.ribbon_text,
+                            ribbonText1: latestOrder.ribbon_text1 ?? latestOrder.ribbon_text,
+                            ribbonText2: latestOrder.ribbon_text2 ?? latestOrder.ribbon_from,
                             orderNumber: latestOrder.order_number || `MG${latestOrder.id}`,
                             orderDate: formatDateTime(latestOrder.approved_at || latestOrder.created_at),
-                            receiptUrl: latestOrder.receipt_url,
+                            receiptUrl: latestOrder.receipt_url || parsedPayment?.receiptUrl,
                         });
-                        gaEvents.completeFlowerOrder(latestOrder.order_number || `MG${latestOrder.id}`, latestOrder.amount || 0);
+                        gaEvents.completeFlowerOrder(latestOrder.order_number || `MG${latestOrder.id}`, price);
                         return;
                     }
                 }

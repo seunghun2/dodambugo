@@ -236,9 +236,48 @@ export default function AdminFlowerOrdersPage() {
         return price?.toLocaleString() + '원';
     };
 
+    // 꽃톡체인 규격 주소 2줄 분리 헬퍼
+    const formatFlowerAddress = (address?: string, funeralHall?: string, room?: string) => {
+        const hallAndRoom = `${funeralHall || ''} ${room || ''}`.trim();
+        if (!address) {
+            return { sidoGungu: '', detailAddress: hallAndRoom || '' };
+        }
+        const tokens = address.trim().split(/\s+/);
+        let splitIdx = 2;
+        if (tokens[0]?.includes('세종')) {
+            splitIdx = 1;
+        } else if (tokens.length >= 3) {
+            const third = tokens[2];
+            if (third.endsWith('구') || third.endsWith('군')) {
+                splitIdx = 3;
+            }
+        }
+        const sidoGungu = tokens.slice(0, splitIdx).join(' ');
+        const restAddress = tokens.slice(splitIdx).join(' ');
+        let detailAddress = restAddress;
+        if (hallAndRoom) {
+            if (detailAddress && !detailAddress.includes(hallAndRoom)) {
+                detailAddress = `${detailAddress} ${hallAndRoom}`.trim();
+            } else if (!detailAddress) {
+                detailAddress = hallAndRoom;
+            }
+        }
+        return {
+            sidoGungu: sidoGungu ? `${sidoGungu} ` : '',
+            detailAddress: detailAddress || '',
+        };
+    };
+
+    const copyText = (text: string, label: string) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        addNotifyLog(`[복사] ${label}: ${text}`, 'success');
+    };
+
     const getStatusLabel = (status: string) => {
         switch (status) {
-            case 'pending': return '주문접수';
+            case 'completed': return '결제완료';
+            case 'pending': return '결제대기(미결제)';
             case 'confirmed': return '주문확인';
             case 'preparing': return '제작중';
             case 'delivering': return '배송중';
@@ -250,6 +289,7 @@ export default function AdminFlowerOrdersPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
+            case 'completed': return '#2563eb';
             case 'pending': return '#f59e0b';
             case 'confirmed': return '#3b82f6';
             case 'preparing': return '#8b5cf6';
@@ -260,9 +300,10 @@ export default function AdminFlowerOrdersPage() {
         }
     };
 
+    // 기본 전체 보기('')에서는 결제창만 열었다 닫은 미결제(pending) 건을 제외하여 실결제 건만 노출
     const filteredOrders = statusFilter
         ? orders.filter(o => o.status === statusFilter)
-        : orders;
+        : orders.filter(o => o.status !== 'pending');
 
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
     const paginatedOrders = filteredOrders.slice(
@@ -284,13 +325,14 @@ export default function AdminFlowerOrdersPage() {
                             onChange={(e) => setStatusFilter(e.target.value)}
                             style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
                         >
-                            <option value="">전체 상태</option>
-                            <option value="pending">주문접수</option>
+                            <option value="">전체 (실결제/취소)</option>
+                            <option value="completed">결제완료 (발송대기)</option>
                             <option value="confirmed">주문확인</option>
                             <option value="preparing">제작중</option>
                             <option value="delivering">배송중</option>
                             <option value="delivered">배송완료</option>
                             <option value="cancelled">취소</option>
+                            <option value="pending">결제대기 (미결제)</option>
                         </select>
                         <span className="total-count">총 {filteredOrders.length}건</span>
                         <button onClick={fetchOrders} className="btn-refresh">
@@ -435,12 +477,13 @@ export default function AdminFlowerOrdersPage() {
                                                     fontWeight: 600
                                                 }}
                                             >
-                                                <option value="pending">주문접수</option>
+                                                <option value="completed">결제완료</option>
                                                 <option value="confirmed">주문확인</option>
                                                 <option value="preparing">제작중</option>
                                                 <option value="delivering">배송중</option>
                                                 <option value="delivered">배송완료</option>
                                                 <option value="cancelled">취소</option>
+                                                <option value="pending">결제대기(미결제)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -504,31 +547,104 @@ export default function AdminFlowerOrdersPage() {
                                             <span>{selectedOrder.sender_name}</span>
                                         </div>
                                         <div className="detail-row">
-                                            <label>연락처</label>
-                                            <span>{selectedOrder.sender_phone}</span>
+                                            <label>주문자전화</label>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                {selectedOrder.sender_phone}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyText(selectedOrder.sender_phone, '주문자전화')}
+                                                    style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                                >
+                                                    복사
+                                                </button>
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="detail-section">
                                         <div className="detail-row">
                                             <label>받는 분</label>
-                                            <span>{selectedOrder.recipient_name}</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                {selectedOrder.recipient_name}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyText(selectedOrder.recipient_name, '받는분')}
+                                                    style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                                >
+                                                    복사
+                                                </button>
+                                            </span>
                                         </div>
                                         <div className="detail-row">
                                             <label>장례식장</label>
                                             <span>{selectedOrder.funeral_home} {selectedOrder.room}</span>
                                         </div>
-                                        <div className="detail-row">
-                                            <label>주소</label>
-                                            <span>{selectedOrder.address}</span>
-                                        </div>
+                                        {(() => {
+                                            const { sidoGungu, detailAddress } = formatFlowerAddress(selectedOrder.address, selectedOrder.funeral_home, selectedOrder.room);
+                                            return (
+                                                <>
+                                                    <div className="detail-row">
+                                                        <label>주소1 (시/구)</label>
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            {sidoGungu || '-'}
+                                                            {sidoGungu && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => copyText(sidoGungu, '주소1')}
+                                                                    style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer' }}
+                                                                >
+                                                                    복사
+                                                                </button>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <label>주소2 (상세)</label>
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', textAlign: 'right' }}>
+                                                            {detailAddress || '-'}
+                                                            {detailAddress && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => copyText(detailAddress, '주소2')}
+                                                                    style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                                                >
+                                                                    복사
+                                                                </button>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
 
                                     <div className="detail-section">
                                         <label>리본 문구</label>
                                         <div className="message-box">
-                                            <div>{selectedOrder.ribbon_text2}</div>
-                                            <div style={{ color: '#64748b', marginTop: '4px' }}>{selectedOrder.ribbon_text1}</div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                                <span>[우] {selectedOrder.ribbon_text2 || '-'}</span>
+                                                {selectedOrder.ribbon_text2 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => copyText(selectedOrder.ribbon_text2, '경조사어(우)')}
+                                                        style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                                    >
+                                                        복사
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div style={{ color: '#64748b', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                                <span>[좌] {selectedOrder.ribbon_text1 || '-'}</span>
+                                                {selectedOrder.ribbon_text1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => copyText(selectedOrder.ribbon_text1, '보내는분(좌)')}
+                                                        style={{ padding: '2px 6px', fontSize: '11px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#334155', cursor: 'pointer', flexShrink: 0 }}
+                                                    >
+                                                        복사
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 

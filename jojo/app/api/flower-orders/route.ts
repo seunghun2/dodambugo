@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status');
         const bugoId = searchParams.get('bugo_id');
         const limit = parseInt(searchParams.get('limit') || '500');
-        const offset = parseInt(searchParams.get('offset') || '0');
 
         // 고객 주문완료 화면(bugo_id 지정 + limit=1 단건 조회) 외 전체 목록 조회는 관리자 인증 필수
         const isCustomerSingleLookup = !!bugoId && limit === 1;
@@ -34,18 +33,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        let query = supabase
-            .from('flower_orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (status) {
-            query = query.eq('status', status);
-        }
+        let resolvedBugoId: string | null = null;
         if (bugoId) {
             const isUUID = bugoId.includes('-') && bugoId.length > 10;
             if (isUUID) {
-                query = query.eq('bugo_id', bugoId);
+                resolvedBugoId = bugoId;
             } else {
                 // 부고번호로 부고 조회하여 실제 UUID(id) 가져오기
                 const { data: bugoData } = await supabase
@@ -56,32 +48,73 @@ export async function GET(request: NextRequest) {
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
-                if (bugoData) {
-                    query = query.eq('bugo_id', bugoData.id);
-                } else {
-                    // 없는 부고 번호인 경우 빈 결과 유도
-                    query = query.eq('bugo_id', '00000000-0000-0000-0000-000000000000');
-                }
+                resolvedBugoId = bugoData?.id || '00000000-0000-0000-0000-000000000000';
             }
         }
-        // B2B 부고장의 화환은 제외 (B2C 전용 어드민)
-        const { data: b2bBugoIds } = await supabase
-            .from('bugo')
-            .select('id')
-            .not('b2b_user_id', 'is', null);
 
-        if (b2bBugoIds && b2bBugoIds.length > 0) {
-            const excludeIds = b2bBugoIds.map((b: any) => b.id);
-            query = query.not('bugo_id', 'in', `(${excludeIds.join(',')})`);
+        if (isCustomerSingleLookup && resolvedBugoId) {
+            // 결제완료된 최신 주문을 우선 조회 (미결제 pending 제외)
+            const { data: paidData, error: paidError } = await supabase
+                .from('flower_orders')
+                .select('*, bugo(id, deceased_name, bugo_number, b2b_user_id)')
+                .eq('bugo_id', resolvedBugoId)
+                .neq('status', 'pending')
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (paidError) {
+                return NextResponse.json({ error: paidError.message }, { status: 500 });
+            }
+            if (paidData && paidData.length > 0) {
+                return NextResponse.json({ orders: paidData, count: paidData.length });
+            }
+
+            // 가상계좌 채번 직후 등 pending만 있는 경우 최신 1건 폴백
+            const { data: fallbackData, error: fallbackError } = await supabase
+                .from('flower_orders')
+                .select('*, bugo(id, deceased_name, bugo_number, b2b_user_id)')
+                .eq('bugo_id', resolvedBugoId)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (fallbackError) {
+                return NextResponse.json({ error: fallbackError.message }, { status: 500 });
+            }
+            return NextResponse.json({ orders: fallbackData || [], count: fallbackData?.length || 0 });
         }
 
-        const { data, error, count } = await query;
+        let query = supabase
+            .from('flower_orders')
+            .select('*, bugo(id, deceased_name, bugo_number, b2b_user_id)')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (status) {
+            query = query.eq('status', status);
+        }
+        if (resolvedBugoId) {
+            query = query.eq('bugo_id', resolvedBugoId);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ orders: data, count });
+        // B2C 전용 어드민: B2B 부고장 화환 및 B2B 직접 발주 건 제외 (SQL NOT IN 사용 시 NULL 증발 및 URL 길이 초과 방지)
+        const filteredOrders = (data || []).filter((o: any) => {
+            const bugoObj = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;
+            if (o.source === 'b2b') return false;
+            if (bugoObj?.b2b_user_id) return false;
+            if (o.partner_data?.b2b_user_id) return false;
+            return true;
+        }).map((o: any) => ({
+            ...o,
+            bugo: Array.isArray(o.bugo) ? o.bugo[0] : o.bugo,
+        }));
+
+        return NextResponse.json({ orders: filteredOrders, count: filteredOrders.length });
     } catch (err) {
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }

@@ -19,6 +19,7 @@ interface FlowerProduct {
   regional_prices?: Record<string, number> | null;
   special_surcharges?: Record<string, number> | null;
   exclude_regions?: string[] | null;
+  exclude_facilities?: string[] | null;
 }
 
 interface B2BUser {

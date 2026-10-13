@@ -19,7 +19,7 @@ export async function GET(
 
     try {
         // MG 또는 BF(B2B)로 시작하면 order_number로 검색, 아니면 id로 검색
-        let query = supabase.from('flower_orders').select('*');
+        let query = supabase.from('flower_orders').select('*, bugo(bugo_number)');
 
         if (orderId.startsWith('MG') || orderId.startsWith('BF')) {
             query = query.eq('order_number', orderId);
@@ -34,7 +34,11 @@ export async function GET(
             return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
         }
 
-        return NextResponse.json(data);
+        const bugoObj = Array.isArray(data.bugo) ? data.bugo[0] : data.bugo;
+        return NextResponse.json({
+            ...data,
+            bugo_number: bugoObj?.bugo_number || data.bugo_number || null,
+        });
     } catch (err) {
         console.error('주문 조회 오류:', err);
         return NextResponse.json({ error: '서버 오류' }, { status: 500 });

@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
 
     try {
-        // 1. B2B 파트너와 연계된 결제 완료 이상 상태인 화환 주문 inner join 조회
-        let query = supabase
+        // 1. 결제 완료 이상 상태인 화환 주문 조회 (부고 연결건 및 B2B 직접 발주건 모두 포함)
+        const query = supabase
             .from('flower_orders')
             .select(`
                 id,
@@ -37,8 +37,11 @@ export async function GET(request: NextRequest) {
                 sender_phone,
                 ribbon_text1,
                 ribbon_text2,
-                bugo!inner (
+                source,
+                partner_data,
+                bugo (
                     id,
+                    bugo_number,
                     deceased_name,
                     mourners,
                     b2b_user_id,
@@ -46,15 +49,17 @@ export async function GET(request: NextRequest) {
                 )
             `)
             .neq('status', 'pending')
-            .not('bugo.b2b_user_id', 'is', null);
+            .order('created_at', { ascending: false });
 
-        // 1~2. 화환 주문 및 상조회사 목록 병렬 조회 (초고속화)
+        // 1~2. 화환 주문, 상조회사 목록, B2B 파트너 목록 병렬 조회
         const [
-            { data: ordersData, error: ordersError },
-            { data: b2bCompanies, error: compError }
+            { data: rawOrdersData, error: ordersError },
+            { data: b2bCompanies, error: compError },
+            { data: b2bUsersList }
         ] = await Promise.all([
             query,
-            supabase.from('b2b_companies').select('id, name')
+            supabase.from('b2b_companies').select('id, name'),
+            supabase.from('b2b_users').select('id, company_name, owner_name, company_id')
         ]);
 
         if (ordersError) throw ordersError;
@@ -63,44 +68,61 @@ export async function GET(request: NextRequest) {
         const companyMap = new Map<string, string>();
         b2bCompanies?.forEach((c: any) => companyMap.set(c.id, c.name));
 
-        if (!ordersData || ordersData.length === 0) {
+        const b2bUserMap = new Map<string, any>();
+        b2bUsersList?.forEach((u: any) => b2bUserMap.set(u.id, u));
+
+        // B2B 주문만 필터링 (부고 b2b_user_id 존재 또는 source='b2b' 또는 partner_data.b2b_user_id 존재)
+        const ordersData = (rawOrdersData || []).filter((o: any) => {
+            const bugo = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;
+            return !!(bugo?.b2b_user_id || o.source === 'b2b' || o.partner_data?.b2b_user_id);
+        });
+
+        if (ordersData.length === 0) {
             return NextResponse.json({ success: true, orders: [] });
         }
 
         const orderIds = ordersData.map(o => o.id);
+        const orderNumbers = ordersData.map(o => o.order_number).filter(Boolean);
+        const lookupKeys = Array.from(new Set([...orderIds, ...orderNumbers]));
 
         // 3. 해당 주문들에 매칭된 예치금 거래 내역(수당 적립액 확인용) 조회
         const { data: txData, error: txError } = await supabase
             .from('deposit_transactions')
             .select('related_order_id, amount, type')
-            .in('related_order_id', orderIds);
+            .in('related_order_id', lookupKeys);
 
         if (txError) throw txError;
 
-        // 4. 거래 내역을 주문 ID 기준으로 매핑 (wreath_reward 및 referral_bonus)
+        // 4. 거래 내역을 주문 ID 및 주문번호 기준으로 매핑 (wreath_reward 및 referral_bonus)
         const txMap: Record<string, { reward: number; bonus: number }> = {};
-        orderIds.forEach(id => {
-            txMap[id] = { reward: 0, bonus: 0 };
+        lookupKeys.forEach(k => {
+            txMap[k] = { reward: 0, bonus: 0 };
         });
 
         txData?.forEach(tx => {
-            const orderId = tx.related_order_id;
-            if (orderId && txMap[orderId]) {
+            const key = tx.related_order_id;
+            if (key && txMap[key]) {
                 if (tx.type === 'wreath_reward' || tx.type === 'flower_reward') {
-                    txMap[orderId].reward = tx.amount;
+                    txMap[key].reward = tx.amount;
                 } else if (tx.type === 'referral_bonus') {
-                    txMap[orderId].bonus = tx.amount;
+                    txMap[key].bonus = tx.amount;
                 }
             }
         });
 
         // 5. 최종 결과 가공
-        const formattedOrders = ordersData.map(o => {
+        let formattedOrders = ordersData.map((o: any) => {
             const price = Number(o.product_price) || 0;
-            const txInfo = txMap[o.id] || { reward: 0, bonus: 0 };
+            const txById = txMap[o.id] || { reward: 0, bonus: 0 };
+            const txByNum = (o.order_number && txMap[o.order_number]) || { reward: 0, bonus: 0 };
+            const rewardAmount = txById.reward || txByNum.reward || 0;
+            const bonusAmount = txById.bonus || txByNum.bonus || 0;
 
             const bugo = Array.isArray(o.bugo) ? o.bugo[0] : o.bugo;
-            const b2bUser = bugo ? (Array.isArray(bugo.b2b_users) ? bugo.b2b_users[0] : bugo.b2b_users) : null;
+            const fallbackPartnerId = o.partner_data?.b2b_user_id;
+            const b2bUser = bugo
+                ? (Array.isArray(bugo.b2b_users) ? bugo.b2b_users[0] : bugo.b2b_users)
+                : (fallbackPartnerId ? b2bUserMap.get(fallbackPartnerId) : null);
             const displayCompanyName = (b2bUser?.company_id && companyMap.get(b2bUser.company_id)) || b2bUser?.company_name || '개인';
 
             // 상주 정보에서 대표 상주 성함 파싱
@@ -134,13 +156,28 @@ export async function GET(request: NextRequest) {
                 sender_phone: o.sender_phone || '',
                 ribbon_text1: o.ribbon_text1 || '',
                 ribbon_text2: o.ribbon_text2 || '',
-                deceased_name: bugo?.deceased_name || '알 수 없음',
+                bugo_number: bugo?.bugo_number || '',
+                deceased_name: bugo?.deceased_name || (o.source === 'b2b' ? '직접발주' : '알 수 없음'),
                 company_name: displayCompanyName,
                 owner_name: b2bUser?.owner_name || '알 수 없음',
-                reward_amount: txInfo.reward,
-                bonus_amount: txInfo.bonus
+                reward_amount: rewardAmount,
+                bonus_amount: bonusAmount
             };
         });
+
+        if (search.trim()) {
+            const q = search.trim().toLowerCase();
+            formattedOrders = formattedOrders.filter(o =>
+                o.product_name?.toLowerCase().includes(q) ||
+                o.company_name?.toLowerCase().includes(q) ||
+                o.owner_name?.toLowerCase().includes(q) ||
+                o.funeral_home?.toLowerCase().includes(q) ||
+                o.recipient_name?.toLowerCase().includes(q) ||
+                o.deceased_name?.toLowerCase().includes(q) ||
+                o.sender_name?.toLowerCase().includes(q) ||
+                o.order_number?.toLowerCase().includes(q)
+            );
+        }
 
         return NextResponse.json({ success: true, orders: formattedOrders });
     } catch (error: any) {

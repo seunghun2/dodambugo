@@ -116,9 +116,11 @@ export async function POST(request: NextRequest) {
             console.error('취소 사유 저장 실패 (무시):', e);
         }
 
-        // 4. 부고 정보 조회 (부고번호 및 B2B 파트너 ID 조회)
+        const wasUnpaidPending = order.status === 'pending' && !order.tid;
+
+        // 4. 부고 정보 조회 (부고번호 및 B2B 파트너 ID 조회, 직접발주 시 partner_data 폴백)
         let bugoNumber = '';
-        let partnerId = null;
+        let partnerId: string | null = order.partner_data?.b2b_user_id || null;
         console.log('🔍 부고 조회:', { bugo_id: order.bugo_id });
         if (order.bugo_id) {
             const { data: bugoData, error: bugoError } = await supabase
@@ -128,13 +130,16 @@ export async function POST(request: NextRequest) {
                 .single();
             console.log('🔍 부고 조회 결과:', { bugoData, bugoError });
             bugoNumber = bugoData?.bugo_number || '';
-            partnerId = bugoData?.b2b_user_id || null;
+            if (bugoData?.b2b_user_id) {
+                partnerId = bugoData.b2b_user_id;
+            }
         }
 
-        // B2B 수당 회수 로직 추가
+        // B2B 수당 회수 로직 (실제 적립 내역이 존재하는 경우에만 회수)
         let recommenderIdToNotify: string | null = null;
         let bonusAmountToNotify = 0;
         let partnerUserOwnerName = '';
+        let rewardClawedBack = false;
 
         if (partnerId) {
             try {
@@ -146,7 +151,7 @@ export async function POST(request: NextRequest) {
                     .single();
                 partnerUserOwnerName = partnerUser?.owner_name || '';
 
-                const cancelOrderKeys = [order.id, order.order_number].filter(Boolean);
+                const cancelOrderKeys = [String(order.id), order.order_number].filter(Boolean);
 
                 // 1. 해당 주문으로 실제 적립되었던 수당 거래 내역 조회 (정확한 회수금액 확보)
                 const { data: originalRewardTx } = await supabase
@@ -156,38 +161,42 @@ export async function POST(request: NextRequest) {
                     .in('type', ['wreath_reward', 'flower_reward'])
                     .maybeSingle();
 
-                const rewardAmount = originalRewardTx?.amount ? Math.abs(originalRewardTx.amount) : 20000;
+                const rewardAmount = originalRewardTx?.amount ? Math.abs(originalRewardTx.amount) : 0;
 
-                // 2. 현재 잔액 조회
-                const { data: currentDeposit } = await supabase
-                    .from('deposits')
-                    .select('balance')
-                    .eq('user_id', partnerId)
-                    .single();
-
-                if (currentDeposit) {
-                    const newBalance = Math.max(0, (currentDeposit.balance || 0) - rewardAmount);
-                    // 3. 잔액 차감
-                    await supabase
+                if (rewardAmount > 0) {
+                    rewardClawedBack = true;
+                    // 2. 현재 잔액 조회
+                    const { data: currentDeposit } = await supabase
                         .from('deposits')
-                        .update({
-                            balance: newBalance,
-                            updated_at: new Date().toISOString(),
-                        })
-                        .eq('user_id', partnerId);
-                    
-                    console.log(`📉 B2B 수당 회수 성공: Partner=${partnerId}, Amount=-${rewardAmount}, NewBalance=${newBalance}`);
-                }
+                        .select('balance')
+                        .eq('user_id', partnerId)
+                        .single();
 
-                // 4. 회수 트랜잭션 기록
-                await supabase
-                    .from('deposit_transactions')
-                    .insert({
-                        user_id: partnerId,
-                        amount: -rewardAmount,
-                        type: 'reward_cancel',
-                        description: `화환 주문 취소로 인한 수당 회수 (${order.order_number})`,
-                    });
+                    if (currentDeposit) {
+                        const newBalance = Math.max(0, (currentDeposit.balance || 0) - rewardAmount);
+                        // 3. 잔액 차감
+                        await supabase
+                            .from('deposits')
+                            .update({
+                                balance: newBalance,
+                                updated_at: new Date().toISOString(),
+                            })
+                            .eq('user_id', partnerId);
+                        
+                        console.log(`📉 B2B 수당 회수 성공: Partner=${partnerId}, Amount=-${rewardAmount}, NewBalance=${newBalance}`);
+                    }
+
+                    // 4. 회수 트랜잭션 기록
+                    await supabase
+                        .from('deposit_transactions')
+                        .insert({
+                            user_id: partnerId,
+                            amount: -rewardAmount,
+                            type: 'reward_cancel',
+                            related_order_id: String(order.id),
+                            description: `화환 주문 취소로 인한 수당 회수 (${order.order_number})`,
+                        });
+                }
 
                 // 5. 해당 주문에 매칭된 추천인 수당(referral_bonus)이 있다면 추천인 수당도 함께 회수
                 const { data: refTx } = await supabase
@@ -228,6 +237,7 @@ export async function POST(request: NextRequest) {
                             user_id: recommenderId,
                             amount: -bonusAmount,
                             type: 'reward_cancel',
+                            related_order_id: String(order.id),
                             description: `화환 주문 취소로 인한 추천 수당 회수 (${order.order_number})`,
                         });
                 }
@@ -242,31 +252,33 @@ export async function POST(request: NextRequest) {
                 console.error('❌ B2B 수당 회수 처리 중 에러:', err);
             }
 
-            // 인앱 알람: 화환 환불 알림 (비동기)
-            import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
-                // 1. 화환 수주 파트너(김미연) 알림
-                insertInAppAlarm(
-                    partnerId!, 'flower_refund',
-                    '화환 주문이 취소되었습니다',
-                    `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''}`,
-                    '/b2b/wallet', 'alarm_order'
-                );
-
-                // 2. 상위 추천인 파트너(백승훈) 알림
-                if (recommenderIdToNotify && bonusAmountToNotify > 0) {
-                    const sellerTitle = partnerUserOwnerName ? `${partnerUserOwnerName} 장례지도사님` : '추천 파트너';
+            // 인앱 알람: 화환 환불 알림 (실제 결제/수당 적립 건인 경우에만 발송)
+            if (rewardClawedBack || !wasUnpaidPending) {
+                import('@/lib/partner-notification').then(({ insertInAppAlarm }) => {
+                    // 1. 화환 수주 파트너 알림
                     insertInAppAlarm(
-                        recommenderIdToNotify, 'flower_refund',
-                        '추천 수당 회수 안내',
-                        `추천 수당 ${bonusAmountToNotify.toLocaleString()}원이 회수되었습니다 (${sellerTitle}의 화환 주문 취소)`,
-                        '/b2b/wallet', 'alarm_reward'
+                        partnerId!, 'flower_refund',
+                        '화환 주문이 취소되었습니다',
+                        `${order.product_name || '화환'} | 주문자: ${order.sender_name || ''}`,
+                        '/b2b/wallet', 'alarm_order'
                     );
-                }
-            });
+
+                    // 2. 상위 추천인 파트너 알림
+                    if (recommenderIdToNotify && bonusAmountToNotify > 0) {
+                        const sellerTitle = partnerUserOwnerName ? `${partnerUserOwnerName} 장례지도사님` : '추천 파트너';
+                        insertInAppAlarm(
+                            recommenderIdToNotify, 'flower_refund',
+                            '추천 수당 회수 안내',
+                            `추천 수당 ${bonusAmountToNotify.toLocaleString()}원이 회수되었습니다 (${sellerTitle}의 화환 주문 취소)`,
+                            '/b2b/wallet', 'alarm_reward'
+                        );
+                    }
+                });
+            }
         }
 
-        // 5. 알림톡 발송 (고객에게)
-        if (order.sender_phone) {
+        // 5. 알림톡 발송 (실제 결제된 주문 취소 시에만 고객에게 환불 알림톡 발송)
+        if (order.sender_phone && !wasUnpaidPending) {
             try {
                 const phoneNumber = order.sender_phone.replace(/-/g, '');
                 // 결제수단 한글 변환
@@ -277,7 +289,7 @@ export async function POST(request: NextRequest) {
                     'virtual': '가상계좌',
                 };
 
-                const isB2B = !!partnerId;
+                const isB2B = !!(partnerId || order.source === 'b2b');
                 await sendAlimtalk(
                     phoneNumber,
                     'KA01TP260128002330965AMneEQhHRIM',  // 화환 구매 취소 템플릿
@@ -297,7 +309,7 @@ export async function POST(request: NextRequest) {
 
         // 6. 슬랙 알림
         try {
-            const isB2BOrder = !!partnerId;
+            const isB2BOrder = !!(partnerId || order.source === 'b2b');
             const slackWebhookUrl = isB2BOrder
                 ? (process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_FLOWER)
                 : process.env.SLACK_WEBHOOK_FLOWER;
