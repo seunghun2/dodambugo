@@ -257,116 +257,8 @@ export default function HomeContent() {
     alert(`${template} 템플릿 미리보기 준비 중`);
   };
 
-  // Schema.org JSON-LD 데이터
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://maeumbugo.co.kr/#organization",
-        "name": "마음부고",
-        "url": "https://maeumbugo.co.kr",
-        "logo": "https://maeumbugo.co.kr/images/logo.png",
-        "sameAs": [],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "customer service",
-          "url": "https://maeumbugo.co.kr/contact"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "서울특별시",
-          "addressRegion": "강남구",
-          "streetAddress": "압구정로 306",
-          "addressCountry": "KR"
-        }
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://maeumbugo.co.kr/#website",
-        "url": "https://maeumbugo.co.kr",
-        "name": "마음부고",
-        "description": "3분 만에 만드는 품격있는 무료 모바일 부고장",
-        "publisher": {
-          "@id": "https://maeumbugo.co.kr/#organization"
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://maeumbugo.co.kr/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        },
-        "inLanguage": "ko-KR"
-      },
-      {
-        "@type": "WebApplication",
-        "name": "마음부고",
-        "url": "https://maeumbugo.co.kr",
-        "description": "3분 만에 만드는 품격있는 무료 모바일 부고장 서비스. 4가지 템플릿, 완전 무료, 광고 없음, 간편한 공유.",
-        "applicationCategory": "LifestyleApplication",
-        "operatingSystem": "Web",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "KRW"
-        },
-        "featureList": [
-          "무료 모바일 부고장 생성",
-          "4가지 템플릿 제공",
-          "카카오톡/문자 공유",
-          "QR코드 생성",
-          "지도 연동",
-          "회원가입 불필요"
-        ],
-        "inLanguage": "ko-KR"
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "정말 무료인가요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "네, 마음부고의 모든 기능은 완전히 무료입니다. 숨겨진 비용이나 유료 업그레이드도 없습니다."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "부고장은 얼마나 유지되나요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "생성된 부고장은 영구적으로 유지됩니다. 언제든지 링크를 통해 조회할 수 있습니다."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "수정은 가능한가요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "네, 작성 시 입력한 비밀번호(휴대번호 뒷자리)로 언제든지 수정하실 수 있습니다."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "개인정보는 안전한가요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "입력하신 정보는 부고장 표시 목적으로만 사용되며, 별도로 수집하거나 제3자에게 제공하지 않습니다."
-            }
-          }
-        ]
-      }
-    ]
-  };
-
   return (
     <>
-      {/* Schema.org JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
       {/* 상단 네비게이션 - 다른 페이지와 동일 */}
       <nav className="nav" id="nav">
         <div className="nav-container">
@@ -477,26 +369,36 @@ export default function HomeContent() {
           )}
         </div>
 
-        {/* 액션 카드 */}
+        {/* 액션 카드 (크롤러가 따라갈 수 있도록 Link 태그 사용) */}
         <div className="xd-action-cards">
-          <button className="xd-action-card" onClick={checkDraftBeforeCreate}>
+          <Link
+            href="/create"
+            className="xd-action-card"
+            onClick={(e) => {
+              gaEvents.clickMainCTA();
+              if (hasDraft && draftTemplateId) {
+                e.preventDefault();
+                setDraftModalOpen(true);
+              }
+            }}
+          >
             <div className="xd-action-icon-circle">
               <EditNoteIcon size={24} />
             </div>
             <span className="xd-action-title">부고장 만들기</span>
-          </button>
-          <button className="xd-action-card" onClick={() => router.push('/search')}>
+          </Link>
+          <Link href="/search" className="xd-action-card">
             <div className="xd-action-icon-circle">
               <SearchIcon size={24} />
             </div>
             <span className="xd-action-title">부고 검색</span>
-          </button>
-          <button className="xd-action-card xd-action-faq" onClick={() => { gaEvents.clickFAQ(); router.push('/faq'); }}>
+          </Link>
+          <Link href="/faq" className="xd-action-card xd-action-faq" onClick={() => gaEvents.clickFAQ()}>
             <div className="xd-action-icon-circle">
               <HelpIcon size={24} />
             </div>
             <span className="xd-action-title">자주 묻는 질문</span>
-          </button>
+          </Link>
         </div>
 
         {/* 부고장 작성방법 */}
@@ -507,6 +409,17 @@ export default function HomeContent() {
               고인 정보와 상주 연락처, 장례 일정만 입력하면 정중한 모바일 부고장이 완성됩니다.
               카카오톡, 문자, 밴드로 간편하게 전달하세요.
             </p>
+            <div style={{ marginTop: '12px', display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '13px' }}>
+              <Link href="/guide/mobile-bugo" style={{ color: '#364F6B', fontWeight: 600, textDecoration: 'underline' }}>
+                모바일 부고장 작성 가이드 →
+              </Link>
+              <Link href="/guide/funeral-home" style={{ color: '#364F6B', fontWeight: 600, textDecoration: 'underline' }}>
+                전국 장례식장 찾기 →
+              </Link>
+              <Link href="/guide" style={{ color: '#364F6B', fontWeight: 600, textDecoration: 'underline' }}>
+                장례 절차·비용·예절 안내 →
+              </Link>
+            </div>
           </div>
         </section>
       </div>

@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import MobileBugoContent from './MobileBugoContent';
 
 export const metadata: Metadata = {
-    title: '모바일 부고장 무료 제작 - 3분 완성, 카카오톡 공유 | 마음부고',
-    description: '모바일 부고장을 무료로 만드세요. 회원가입 없이 3분이면 완성. 4가지 품격 있는 템플릿, 카카오톡 간편 공유, 광고 없음. 무빈소·가족장에도 사용 가능한 모바일 부고장 서비스.',
-    keywords: '모바일 부고장, 모바일부고장, 모바일부고, 부고장 만들기, 무료 부고장, 온라인 부고장, 카카오톡 부고장, 부고문자, 모바일 부고, 디지털 부고장',
+    title: '부고장·모바일 부고장 무료 제작 - 3분 완성, 카카오톡 공유 | 마음부고',
+    description: '부고장, 모바일 부고장을 무료로 만드세요. 회원가입 없이 3분이면 완성. 4가지 품격 있는 부고장 양식 템플릿, 카카오톡 간편 공유, 광고 없음. 무빈소·가족장에도 사용 가능한 디지털 부고장 서비스.',
+    keywords: '부고장, 모바일 부고장, 모바일부고장, 모바일부고, 부고장 만들기, 부고장 양식, 부고장 예시, 무료 부고장, 온라인 부고장, 카카오톡 부고장, 부고문자, 모바일 부고, 디지털 부고장',
     alternates: {
         canonical: 'https://maeumbugo.co.kr/guide/mobile-bugo',
     },

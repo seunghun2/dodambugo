@@ -133,12 +133,12 @@ export default function MobileBugoContent() {
                         </div>
                     </div>
 
-                    <button
+                    <Link
+                        href="/create"
                         className="mobile-bugo-cta"
-                        onClick={() => router.push('/create')}
                     >
                         무료로 모바일 부고장 만들기
-                    </button>
+                    </Link>
                 </section>
 
                 {/* 마음부고 특징 */}
@@ -228,12 +228,12 @@ export default function MobileBugoContent() {
                 </section>
 
                 {/* 하단 CTA */}
-                <button
+                <Link
+                    href="/create"
                     className="mobile-bugo-cta"
-                    onClick={() => router.push('/create')}
                 >
                     지금 무료로 모바일 부고장 만들기
-                </button>
+                </Link>
 
             </div>
         </div>

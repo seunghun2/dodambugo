@@ -6635,6 +6635,7 @@ mark {
     border: 1px solid #CAD4DE;
     border-radius: 8px;
     cursor: pointer;
+    text-decoration: none;
     transition: all 0.2s;
 }
 

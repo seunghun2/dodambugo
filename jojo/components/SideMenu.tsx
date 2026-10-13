@@ -38,6 +38,10 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                         <span className="material-symbols-outlined">help</span>
                         <span>자주 묻는 질문</span>
                     </Link>
+                    <Link href="/guide/mobile-bugo" className="side-menu-item" onClick={onClose}>
+                        <span className="material-symbols-outlined">smartphone</span>
+                        <span>모바일 부고장 안내</span>
+                    </Link>
                     <Link href="/guide" className="side-menu-item" onClick={onClose}>
                         <span className="material-symbols-outlined">menu_book</span>
                         <span>장례가이드</span>
