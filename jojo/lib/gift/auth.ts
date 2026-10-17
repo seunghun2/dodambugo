@@ -90,11 +90,24 @@ function signingKey(): Buffer {
     return crypto.createHash('sha256').update('gift-auth:' + secret).digest();
 }
 
-interface SessionPayload {
+export interface SessionPayload {
     b: string; // bugo_number
     n: string; // 인증한 상주 이름
     o: boolean; // 대표상주 여부
     exp: number; // 만료(epoch sec)
+}
+
+/**
+ * 상주 확인(이름+뒷4자리) 요구 여부.
+ * 기본은 열려 있음(조의금/화환 목록을 바로 보여줌). 실결제를 붙이기 전에 GIFT_REQUIRE_AUTH=true 로 다시 잠글 수 있다.
+ */
+export function isAuthRequired(): boolean {
+    return process.env.GIFT_REQUIRE_AUTH === 'true';
+}
+
+/** 인증이 필요 없는 모드에서 쓰는 세션: 대표상주 권한으로 취급 */
+export function openSession(bugo: Pick<GiftBugo, 'bugo_number' | 'mourner_name'>): SessionPayload {
+    return { b: bugo.bugo_number, n: (bugo.mourner_name || '상주').trim(), o: true, exp: Math.floor(Date.now() / 1000) + 60 };
 }
 
 export function createSessionToken(bugo: GiftBugo, name: string, isOwner: boolean): string {

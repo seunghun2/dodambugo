@@ -14,7 +14,7 @@ import {
 } from '@/lib/gift/thanks-messages';
 import ProductPicker, { ProductThumb } from './ProductPicker';
 import RecipientPanel from './RecipientPanel';
-import { AuthModal, ConfirmModal, DoneModal, PreviewModal, ShareSheet } from './Modals';
+import { AuthModal, ConfirmModal, DoneModal, PreviewModal } from './Modals';
 import { won, type GiftProduct, type RecipientItem } from './types';
 
 interface Props {
@@ -30,7 +30,7 @@ interface Props {
 
 const TAB_KEYS = RELIGION_TABS.map((t) => t.key);
 
-export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
+export default function GiftSendContent({ bugoId, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
     const router = useRouter();
 
     // ----- 카드 / 문구 -----
@@ -48,9 +48,12 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
         setTab(k);
         setCardId((prev) => (prev === 'none' ? prev : k));
     };
+    const pickCard = (id: CardId) => {
+        setCardId(id);
+        if (id !== 'none') setTab(id); // 카드를 고르면 같은 종류의 문구 탭으로 맞춰준다
+    };
 
-    // ----- 모드 / 상품 / 받는 사람 -----
-    const [mode, setMode] = useState<'gift' | 'card'>('gift');
+    // ----- 상품 / 받는 사람 -----
     const [products, setProducts] = useState<GiftProduct[]>([]);
     const [live, setLive] = useState<boolean | null>(null);
     const [productError, setProductError] = useState(false);
@@ -59,8 +62,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
 
     // ----- 오버레이 -----
     const [pickerOpen, setPickerOpen] = useState(false);
-    const [preview, setPreview] = useState<null | 'card' | 'full'>(null);
-    const [shareOpen, setShareOpen] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
     const [authOpen, setAuthOpen] = useState(false);
@@ -94,7 +96,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
     }, []);
 
     // 오버레이가 열려 있으면 뒤 화면 스크롤 잠금
-    const anyOverlay = pickerOpen || !!preview || shareOpen || confirmOpen || helpOpen || authOpen || !!done;
+    const anyOverlay = pickerOpen || previewOpen || confirmOpen || helpOpen || authOpen || !!done;
     useEffect(() => {
         document.body.style.overflow = anyOverlay ? 'hidden' : '';
         return () => {
@@ -102,7 +104,9 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
         };
     }, [anyOverlay]);
 
-    // ----- 상주 확인 (필요할 때만 모달) -----
+    // ----- 상주 확인 -----
+    // 서버가 상주 확인을 요구하지 않으면(기본) 바로 통과하고 모달은 뜨지 않는다.
+    // 서버에서 GIFT_REQUIRE_AUTH=true 로 다시 잠그면 그때만 모달이 열린다.
     const ensureAuth = useCallback(async (): Promise<boolean> => {
         try {
             const r = await fetch(`/api/gift/auth?bugoId=${encodeURIComponent(bugoId)}`, { cache: 'no-store' });
@@ -120,32 +124,6 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
         setAuthOpen(false);
         authResolver.current?.(ok);
         authResolver.current = null;
-    };
-
-    // ----- 문구 편집 -----
-    const pickCard = (id: CardId) => {
-        setCardId(id);
-        if (id !== 'none') setTab(id); // 카드를 고르면 같은 종류의 문구 탭으로 맞춰준다
-    };
-
-    // ----- 카드만 공유: 기존 감사장 API 로 문구/종교를 저장해야 카드 페이지에 반영된다 -----
-    const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/view/${bugoId}/thanks/card` : '';
-    const startCardShare = async () => {
-        if (cardId === 'none') return notify('공유할 카드 디자인을 선택해주세요.');
-        if (hideMessage) notify('문구 숨기기는 카드 공유 화면에는 적용되지 않아요.');
-        setBusy(true);
-        try {
-            const custom = { ...parseCustomMessages(thanksMessage), [cardId]: message };
-            const post = (path: string, body: unknown) =>
-                fetch(`/api/bugo/${bugoUuid}/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            const [a, b] = await Promise.all([post('thanks-message', { message: custom }), post('thanks-religion', { religion: cardId })]);
-            if (!a.ok || !b.ok) throw new Error('save failed');
-            setShareOpen(true);
-        } catch {
-            notify('카드를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.');
-        } finally {
-            setBusy(false);
-        }
     };
 
     // ----- 결제(주문) -----
@@ -209,7 +187,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                         <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <h1>{mode === 'gift' ? '답례품과 함께 보내기' : '답례글 보내기'}</h1>
+                <h1>답례품과 함께 보내기</h1>
                 <span className="gs-header-spacer" />
             </header>
 
@@ -242,108 +220,95 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                             </button>
                         ))}
                     </div>
-                    {!hideMessage && (
-                        <p className="gs-count gs-count-top" aria-live="polite">
-                            {message.length}/{MESSAGE_MAX}
-                        </p>
-                    )}
                     <div className={`gs-msgbox ${hideMessage ? 'hidden' : ''}`}>
-                        <button className="gs-viewcard" onClick={() => setPreview('card')}>
+                        <button className="gs-viewcard" onClick={() => setPreviewOpen(true)}>
                             카드 보기
                         </button>
                         {hideMessage ? (
                             <p className="gs-msg-hidden">문구가 숨겨졌습니다. 카드만 전달돼요.</p>
                         ) : (
-                            <textarea
-                                value={message}
-                                onChange={(e) => setMessages((prev) => ({ ...prev, [tab]: e.target.value.slice(0, MESSAGE_MAX) }))}
-                                rows={11}
-                                aria-label="답례 문구"
-                            />
+                            <>
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessages((prev) => ({ ...prev, [tab]: e.target.value.slice(0, MESSAGE_MAX) }))}
+                                    rows={10}
+                                    aria-label="답례 문구"
+                                />
+                                <span className="gs-count-in" aria-live="polite">
+                                    {message.length}/{MESSAGE_MAX}
+                                </span>
+                            </>
                         )}
                     </div>
                 </section>
 
-                {mode === 'gift' && (
-                    <>
-                        {/* 선물하기 */}
-                        <section className="gs-section">
-                            <div className="gs-row-between">
-                                <h3 className="gs-h3">
-                                    선물하기{' '}
-                                    <button className="gs-help" onClick={() => setHelpOpen(true)} aria-label="선물하기 안내">
-                                        ?
+                {/* 선물하기 */}
+                <section className="gs-section">
+                    <div className="gs-row-between">
+                        <h3 className="gs-h3">
+                            선물하기{' '}
+                            <button className="gs-help" onClick={() => setHelpOpen(true)} aria-label="선물하기 안내">
+                                ?
+                            </button>
+                        </h3>
+                    </div>
+                    {productError ? (
+                        <p className="gs-empty">상품을 불러오지 못했습니다. 새로고침해주세요.</p>
+                    ) : (
+                        <>
+                            <div className="gs-strip">
+                                {strip.map((p) => (
+                                    <button key={p.id} className={`gs-strip-item ${product?.id === p.id ? 'active' : ''}`} onClick={() => setProduct(p)} aria-label={p.name}>
+                                        <ProductThumb product={p} size="sm" />
                                     </button>
-                                </h3>
+                                ))}
                             </div>
-                            {productError ? (
-                                <p className="gs-empty">상품을 불러오지 못했습니다. 새로고침해주세요.</p>
-                            ) : (
-                                <>
-                                    <div className="gs-strip">
-                                        {strip.map((p) => (
-                                            <button key={p.id} className={`gs-strip-item ${product?.id === p.id ? 'active' : ''}`} onClick={() => setProduct(p)} aria-label={p.name}>
-                                                <ProductThumb product={p} size="sm" />
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="gs-selected">
-                                        {product ? (
-                                            <>
-                                                <ProductThumb product={product} size="sm" />
-                                                <div className="gs-selected-info">
-                                                    <p>
-                                                        [{product.brand}] {product.name}
-                                                    </p>
-                                                    <strong>{won(product.sale_price)}</strong>
-                                                </div>
-                                                <button className="gs-btn-outline" onClick={() => setPickerOpen(true)}>
-                                                    변경
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="gs-placeholder">답례품을 선택해주세요.</span>
-                                                <button className="gs-btn-outline" onClick={() => setPickerOpen(true)} disabled={products.length === 0}>
-                                                    선택
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </section>
+                            <div className="gs-selected">
+                                {product ? (
+                                    <>
+                                        <ProductThumb product={product} size="sm" />
+                                        <div className="gs-selected-info">
+                                            <p>
+                                                [{product.brand}] {product.name}
+                                            </p>
+                                            <strong>{won(product.sale_price)}</strong>
+                                        </div>
+                                        <button className="gs-btn-outline" onClick={() => setPickerOpen(true)}>
+                                            변경
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="gs-placeholder">답례품을 선택해주세요.</span>
+                                        <button className="gs-btn-outline" onClick={() => setPickerOpen(true)} disabled={products.length === 0}>
+                                            선택
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                            <p className="gs-hint">선택한 답례품은 받는 분께 모바일 쿠폰으로 자동 발송돼요.</p>
+                        </>
+                    )}
+                </section>
 
-                        <RecipientPanel items={items} setItems={(u) => setItems(u)} bugoId={bugoId} ensureAuth={ensureAuth} notify={notify} />
+                <RecipientPanel items={items} setItems={(u) => setItems(u)} bugoId={bugoId} ensureAuth={ensureAuth} notify={notify} />
 
-                        {product && items.length > 0 && (
-                            <p className="gs-total">
-                                {items.length}명 × {won(product.sale_price)} = <strong>{won(total)}</strong>
-                            </p>
-                        )}
-                    </>
+                {product && items.length > 0 && (
+                    <p className="gs-total">
+                        {items.length}명 × {won(product.sale_price)} = <strong>{won(total)}</strong>
+                    </p>
                 )}
             </main>
 
-            {/* 하단 버튼 */}
-            <nav className="gs-bottom">
-                <button onClick={() => setPreview('full')}>미리보기</button>
-                {mode === 'gift' ? (
-                    <>
-                        <button onClick={() => setMode('card')}>카드만공유</button>
-                        <button className={canPay ? '' : 'disabled'} onClick={startPay} aria-disabled={!canPay}>
-                            결제하기
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button onClick={() => setMode('gift')}>답례품보내기</button>
-                        <button onClick={startCardShare} disabled={busy}>
-                            공유하기
-                        </button>
-                    </>
-                )}
-            </nav>
+            {/* 하단 바: 기존 감사장 화면(문구 수정 | 감사장 전달하기)과 같은 디자인, 미리보기 | 결제하기 반반 */}
+            <div className="gs-bottom">
+                <button className="gs-bottom-btn" onClick={() => setPreviewOpen(true)}>
+                    미리보기
+                </button>
+                <button className={`gs-bottom-cta ${canPay ? '' : 'disabled'}`} onClick={startPay} aria-disabled={!canPay}>
+                    결제하기
+                </button>
+            </div>
 
             {/* 오버레이 */}
             {pickerOpen && (
@@ -357,18 +322,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                     onClose={() => setPickerOpen(false)}
                 />
             )}
-            {preview && (
-                <PreviewModal
-                    cardId={cardId}
-                    message={message}
-                    hideMessage={hideMessage}
-                    align="center"
-                    mournerName={mournerName}
-                    product={preview === 'full' && mode === 'gift' ? product : null}
-                    onClose={() => setPreview(null)}
-                />
-            )}
-            {shareOpen && <ShareSheet shareUrl={shareUrl} deceasedName={deceasedName} mournerName={mournerName} onClose={() => setShareOpen(false)} notify={notify} />}
+            {previewOpen && <PreviewModal cardId={cardId} message={message} hideMessage={hideMessage} mournerName={mournerName} onClose={() => setPreviewOpen(false)} />}
             {authOpen && <AuthModal bugoId={bugoId} defaultName={mournerName} onSuccess={() => closeAuth(true)} onClose={() => closeAuth(false)} />}
             {confirmOpen && product && (
                 <ConfirmModal
@@ -388,7 +342,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                         <h3 className="gs-h3">답례품은 이렇게 전달돼요</h3>
                         <ol className="gs-help-list">
                             <li>카드와 문구를 정하고 답례품을 고릅니다.</li>
-                            <li>받는 분을 연락처·엑셀·직접 입력·조의금/화환 목록에서 추가합니다.</li>
+                            <li>받는 분을 조의금·화환 목록, 직접 입력, 엑셀 등으로 추가합니다.</li>
                             <li>결제하면 받는 분께 모바일 쿠폰이 문자(MMS)나 알림톡으로 전달됩니다.</li>
                         </ol>
                         <div className="gs-dialog-btns">

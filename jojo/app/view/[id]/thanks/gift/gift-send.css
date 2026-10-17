@@ -69,10 +69,13 @@
 
 /* ---------- 본문 ---------- */
 .gs-main {
-    padding: 14px 16px 180px;
+    padding: 12px 16px 104px;
 }
+/* 섹션 사이는 여백만 두지 않고 구분선으로 나눈다 */
 .gs-section {
-    margin-top: 22px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #ececec;
 }
 .gs-row-between {
     display: flex;
@@ -127,9 +130,9 @@
 /* ---------- 카드 선택 ---------- */
 .gs-cards {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     overflow-x: auto;
-    padding: 4px 2px 8px;
+    padding: 2px 2px 4px;
     scrollbar-width: none;
 }
 .gs-cards::-webkit-scrollbar {
@@ -179,7 +182,7 @@
 .gs-chips {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 .gs-chips-scroll {
     overflow-x: auto;
@@ -206,7 +209,7 @@
 /* ---------- 메시지 ---------- */
 .gs-msgbox {
     position: relative;
-    margin-top: 12px;
+    margin-top: 8px;
     border: 1px solid #ccc;
     border-radius: 10px;
     padding: 44px 12px 12px;
@@ -216,6 +219,7 @@
     background: #f6f6f6;
 }
 .gs-msgbox textarea {
+    display: block;
     width: 100%;
     border: 0;
     outline: 0;
@@ -224,6 +228,15 @@
     font-size: 15px;
     line-height: 1.7;
     background: transparent;
+    padding-bottom: 22px; /* 글자 수 표시 자리 */
+}
+.gs-count-in {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    font-size: 12px;
+    color: var(--gs-sub);
+    pointer-events: none;
 }
 .gs-msg-hidden {
     margin: 36px 0;
@@ -245,13 +258,6 @@
 .gs-count {
     font-size: 12px;
     color: var(--gs-sub);
-}
-.gs-count-top {
-    margin: 12px 2px 0;
-    text-align: right;
-}
-.gs-count-top + .gs-msgbox {
-    margin-top: 4px;
 }
 .gs-mini {
     padding: 5px 10px;
@@ -556,7 +562,7 @@
     padding: 10px 2px;
 }
 
-/* ---------- 하단 고정 버튼 ---------- */
+/* ---------- 하단 고정 바 (기존 감사장 화면의 [문구 수정][감사장 전달하기]와 같은 디자인) ---------- */
 .gs-bottom {
     position: fixed;
     left: 50%;
@@ -566,25 +572,39 @@
     max-width: 430px;
     z-index: 30;
     display: flex;
-    background: var(--gs-yellow);
-    padding-bottom: env(safe-area-inset-bottom);
+    gap: 12px;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+    background: #fff;
 }
-.gs-bottom button {
+.gs-bottom-btn,
+.gs-bottom-cta {
     flex: 1;
-    height: 56px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.gs-bottom-btn {
+    border: 1px solid #ddd;
+    background: #fff;
+    font-weight: 600;
+    color: #000;
+}
+.gs-bottom-btn:active {
+    background: #f5f5f5;
+}
+.gs-bottom-cta {
     border: 0;
-    border-right: 1px solid rgba(255, 255, 255, 0.7);
-    background: transparent;
-    font-size: 17px;
+    background: #ffcc45;
     font-weight: 700;
-    color: #222;
+    color: #000;
 }
-.gs-bottom button:last-child {
-    border-right: 0;
+.gs-bottom-cta:active {
+    background: #e6b83d;
 }
-.gs-bottom button.disabled,
-.gs-bottom button:disabled {
-    color: rgba(0, 0, 0, 0.3);
+.gs-bottom-cta.disabled {
+    background: #f1e2b3;
+    color: rgba(0, 0, 0, 0.4);
 }
 
 /* ---------- 오버레이 공통 ---------- */
@@ -705,7 +725,7 @@
 .gs-toast {
     position: fixed;
     left: 50%;
-    bottom: 84px;
+    bottom: 96px;
     transform: translateX(-50%);
     z-index: 200;
     width: calc(100% - 32px);
@@ -805,54 +825,55 @@
     font-size: 16px;
 }
 
-/* ---------- 미리보기 ---------- */
-.gs-preview-wrap {
-    background: #f1ede6;
-}
-.gs-preview-body {
-    padding: 16px 16px 40px;
-}
-.gs-preview-card {
-    border-radius: 14px;
-    background: #fff center top / cover no-repeat;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-.gs-preview-inner {
-    padding: 28px 22px 26px;
-    background: rgba(255, 255, 255, 0.78);
-    min-height: 360px;
-}
-.gs-preview-inner h4 {
-    margin: 0 0 18px;
-    text-align: center;
-    font-size: 18px;
-}
-.gs-preview-text p {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.8;
-}
-.gs-preview-sign {
-    margin: 22px 0 0;
-    text-align: center;
-    font-size: 13px;
-    color: #555;
-    line-height: 1.6;
-}
-.gs-preview-gift {
-    margin-top: 16px;
-    padding: 16px;
-    border-radius: 14px;
-    background: #fff;
-    text-align: center;
-}
-.gs-preview-gift-title {
-    margin: 0 0 12px;
-    font-size: 14px;
-    font-weight: 700;
-}
-.gs-preview-gift .gs-thumb-md {
-    max-width: 200px;
+/* ---------- 미리보기: 기존 감사장 카드와 동일 (배경 이미지 위에 글씨만) ---------- */
+.gs-pv {
+    max-width: 430px;
     margin: 0 auto;
+    overflow-y: auto;
+    background: #ececec;
+}
+.gs-pv-card {
+    min-height: 100%;
+    padding: 210px 23px 130px;
+    text-align: center;
+    background: #ececec center top / cover no-repeat;
+}
+.gs-pv-title {
+    margin: 0 0 20px;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #333;
+}
+.gs-pv-body {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.8;
+    letter-spacing: -1px;
+    color: #333;
+}
+.gs-pv-body p {
+    margin: 0 0 16px;
+}
+.gs-pv-body p:last-child {
+    margin-bottom: 0;
+}
+.gs-pv-foot {
+    margin-top: 40px;
+    font-family: 'Nanum Myeongjo', serif;
+}
+.gs-pv-foot p {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: #666;
+}
+.gs-pv-foot strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+.gs-pv .gs-bottom {
+    left: 50%;
 }

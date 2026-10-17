@@ -4,6 +4,7 @@ import {
     clientIp,
     createSessionToken,
     findBugo,
+    isAuthRequired,
     isLockedOut,
     readSession,
     recordAuthFailure,
@@ -13,13 +14,14 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-// GET: 현재 상주 인증 상태
+// GET: 현재 상주 인증 상태 (상주 확인을 요구하지 않는 모드에서는 항상 통과)
 export async function GET(req: NextRequest) {
     const bugoId = req.nextUrl.searchParams.get('bugoId');
     if (!bugoId) return NextResponse.json({ authenticated: false });
     const bugo = await findBugo(bugoId);
     if (!bugo) return NextResponse.json({ authenticated: false });
     const s = readSession(req, bugo.bugo_number);
+    if (!s && !isAuthRequired()) return NextResponse.json({ authenticated: true, open: true, name: null, isOwner: true });
     return NextResponse.json({ authenticated: !!s, name: s?.n ?? null, isOwner: s?.o ?? false });
 }
 
