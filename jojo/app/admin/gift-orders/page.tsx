@@ -190,7 +190,7 @@ export default function AdminGiftOrdersPage() {
             const res = await fetch('/api/admin/gift-orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'dispatch_due' }),
+                body: JSON.stringify({ action: 'dispatch-due' }),
             });
             const json = await res.json();
             if (!res.ok || !json.ok) {

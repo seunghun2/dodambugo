@@ -91,8 +91,16 @@ export async function dispatchGiftOrder(
         };
     }
 
-    // 발송 중 상태로 전환
-    await sb.from('gift_orders').update({ status: 'sending', updated_at: new Date().toISOString() }).eq('id', order.id);
+    // 발송 중 상태로 전환 (원자적 선점: 크론/어드민 동시 실행 시 중복 발송 방지)
+    const { data: claimed } = await sb
+        .from('gift_orders')
+        .update({ status: 'sending', updated_at: new Date().toISOString() })
+        .eq('id', order.id)
+        .in('status', ['paid', 'test_paid', 'partial', 'failed'])
+        .select('id');
+    if (!claimed || claimed.length === 0) {
+        return { ok: false, error: '이미 발송 중이거나 처리된 주문입니다.', totalRecipients: allRecipients.length, sentCount: 0, failedCount: 0, status: order.status };
+    }
 
     const issuer = getIssuer();
     const isTestOrder = Boolean(order.is_test);
