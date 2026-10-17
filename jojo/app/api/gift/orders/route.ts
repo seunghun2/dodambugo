@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/gift/auth';
+import { getSupabase, resolveMournerPhone } from '@/lib/gift/auth';
 import { GIFT_GRACE_MINUTES, dispatchDueGiftOrders } from '@/lib/gift/dispatcher';
 import { isResponse, requireMourner } from '@/lib/gift/guard';
 import { GiftNotReadyError, getIssuer, isLiveMode } from '@/lib/gift/issuer';
@@ -26,13 +26,12 @@ function newOrderNumber(): string {
     return `GF${ymd}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
-// POST: 답례품 주문 생성 (결제 완료 후 10분 유예 뒤 발송되는 대기 상태로 저장)
-//  - 상품 가격, 받는 사람 전화번호(조의금/화환 목록)는 반드시 서버가 DB에서 다시 조회한다.
-//  - 결제 즉시 발송하지 않고 status = 'paid'(또는 'test_paid'), 수신자 send_status = 'pending'으로 저장하여
-//    10분 이내 취소 가능 유예 시간을 보장하고, 200명 대량 주문 시에도 응답 지연을 없앤다.
+// POST: 답례품 주문 생성
+//  - 테스트 모드(!live): 즉시 test_paid(10분 유예 발송대기)로 저장 후 /order/{orderNumber} 로 이동
+//  - 실결제 모드(live): pending(결제대기)로 저장 후 이노페이 결제창 호출 → 승인 완료 시 paid(10분 유예 발송대기)로 전환
 export async function POST(req: NextRequest) {
     try {
-        // 기존 주문 중 10분 경과된 대기 건이 있으면 비동기로 발송 트리거
+        // 기존 주문 중 10분 경과된 대기 건 또는 멈춘 sending 건 비동기 발송 트리거
         dispatchDueGiftOrders().catch((err) => console.error('[gift/orders due dispatch]', err));
 
         const body = await req.json();
@@ -103,7 +102,12 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // 4) 주문 저장 (10분 유예 발송 대기 상태: paid / test_paid)
+        const buyerName = String(body.buyerName || session.n || bugo.mourner_name || '상주').trim();
+        const buyerPhone = normalizePhone(body.buyerPhone) || resolveMournerPhone(bugo, buyerName);
+        const fullProductName = `[${product.brand}] ${product.name}`;
+        const nowIso = new Date().toISOString();
+
+        // 4) 주문 저장 (실결제 모드: pending으로 생성 후 이노페이 승인 시 paid 전환 / 테스트 모드: 즉시 test_paid)
         let order: { id: string; order_number: string } | null = null;
         for (let i = 0; i < 2 && !order; i++) {
             const { data, error } = await supabase
@@ -112,15 +116,18 @@ export async function POST(req: NextRequest) {
                     order_number: newOrderNumber(),
                     bugo_id: bugo.id,
                     bugo_number: bugo.bugo_number,
-                    buyer_name: session.n,
+                    buyer_name: buyerName,
+                    buyer_phone: buyerPhone || null,
                     product_id: product.id,
-                    product_name: `[${product.brand}] ${product.name}`,
+                    product_name: fullProductName,
                     unit_price: product.sale_price,
                     quantity: valid.length,
                     total_amount: total,
                     card_id: cardId,
                     message,
-                    status: live ? 'paid' : 'test_paid',
+                    payment_method: live ? '신용카드' : '테스트결제',
+                    status: live ? 'pending' : 'test_paid',
+                    approved_at: live ? null : nowIso,
                     is_test: !live,
                 })
                 .select('id, order_number')
@@ -148,7 +155,11 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
+            orderId: order.id,
             orderNumber: order.order_number,
+            buyerName,
+            buyerPhone,
+            productName: fullProductName,
             total,
             count: valid.length,
             graceMinutes: GIFT_GRACE_MINUTES,

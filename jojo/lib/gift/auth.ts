@@ -28,6 +28,7 @@ export interface GiftBugo {
     deceased_name: string | null;
     mourner_name: string | null;
     phone_password: string | null;
+    applicant_phone?: string | null;
     mourners: unknown;
     religion: string | null;
     thanks_message: unknown;
@@ -36,7 +37,7 @@ export interface GiftBugo {
 }
 
 const BUGO_COLUMNS =
-    'id, bugo_number, deceased_name, mourner_name, phone_password, mourners, religion, thanks_message, thanks_religion, b2b_user_id';
+    'id, bugo_number, deceased_name, mourner_name, phone_password, applicant_phone, mourners, religion, thanks_message, thanks_religion, b2b_user_id';
 
 /** UUID 또는 부고번호로 부고 조회 (삭제된 부고 제외) */
 export async function findBugo(idOrNumber: string): Promise<GiftBugo | null> {
@@ -62,6 +63,23 @@ function parseMourners(raw: unknown): Array<{ name?: string; contact?: string }>
 }
 
 const digits = (s: string | null | undefined) => String(s ?? '').replace(/\D/g, '');
+
+/** 상주 이름 또는 대표상주 연락처에서 휴대폰 번호(숫자 10~11자리) 추출 */
+export function resolveMournerPhone(bugo: GiftBugo, mournerName?: string | null): string {
+    const targetName = (mournerName || '').trim();
+    if (targetName) {
+        const hit = parseMourners(bugo.mourners).find(
+            (m) => (m.name || '').trim() === targetName && digits(m.contact).startsWith('010')
+        );
+        if (hit) return digits(hit.contact);
+    }
+    const primary = digits(bugo.applicant_phone) || digits(bugo.phone_password);
+    if (primary.startsWith('010') && (primary.length === 10 || primary.length === 11)) {
+        return primary;
+    }
+    const firstMourner = parseMourners(bugo.mourners).find((m) => digits(m.contact).startsWith('010'));
+    return firstMourner ? digits(firstMourner.contact) : '';
+}
 
 /** 상주(대표/추가) 본인 확인. 일치하면 이름과 대표상주 여부 반환 */
 export function verifyMourner(

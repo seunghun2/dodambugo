@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 import {
     CARD_OPTIONS,
     MESSAGE_MAX,
@@ -211,11 +212,63 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 return notify(data.error || '주문에 실패했습니다.');
             }
             setConfirmOpen(false);
-            setDone({ orderNumber: data.orderNumber, count: data.count, total: data.total, isTest: !!data.isTest });
+
+            // 실결제(이노페이) 모드일 경우 이노페이 결제창 호출 → 콜백 승인 후 /order/[orderNumber] 이동
+            if (!data.isTest) {
+                if (typeof window === 'undefined' || !window.innopay) {
+                    return notify('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                }
+                try {
+                    sessionStorage.setItem(
+                        `payment_${bugoId}`,
+                        JSON.stringify({
+                            orderId: data.orderId,
+                            orderNumber: data.orderNumber,
+                            moid: data.orderNumber,
+                            paymentType: 'gift',
+                        })
+                    );
+                } catch {}
+
+                const dynamicPrefix =
+                    typeof window !== 'undefined' &&
+                    (window.location.port === '3001' ||
+                        window.location.hostname.includes('partner') ||
+                        window.location.hostname.includes('b2b') ||
+                        window.location.hostname.includes('bugoon') ||
+                        window.location.pathname.startsWith('/b2b'))
+                        ? '/b2b'
+                        : '';
+
+                window.innopay.goPay({
+                    payMethod: 'CARD',
+                    mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
+                    moid: data.orderNumber,
+                    goodsName: data.productName || `[${product.brand}] ${product.name}`,
+                    goodsCnt: String(data.count || items.length),
+                    amt: String(data.total || total),
+                    taxFreeAmt: '0',
+                    buyerName: data.buyerName || mournerName || '상주',
+                    buyerTel: String(data.buyerPhone || '01000000000').replace(/\D/g, ''),
+                    buyerEmail: 'order@maeumbugo.co.kr',
+                    returnUrl: `${window.location.origin}${dynamicPrefix}/view/${bugoId}/payment/callback`,
+                    currency: 'KRW',
+                    mallReserved: JSON.stringify({
+                        type: 'gift',
+                        bugoId,
+                        orderId: data.orderId,
+                        orderNumber: data.orderNumber,
+                    }),
+                });
+                return;
+            }
+
+            // 테스트 모드: 임시저장 정리 후 주문내역(10분 내 취소 가능) 페이지로 바로 이동
             setItems([]);
             try {
                 window.localStorage.removeItem(draftStorageKey);
             } catch {}
+            router.push(`/order/${data.orderNumber}`);
         } catch {
             setConfirmOpen(false);
             notify('네트워크 오류가 발생했습니다.');
@@ -226,6 +279,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
 
     return (
         <div className="gs-page">
+            <Script src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js" strategy="lazyOnload" />
             <header className="gs-header">
                 <button className="gs-icon-btn" onClick={() => router.push(`/view/${bugoId}/gift/${product.id}`)} aria-label="뒤로">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

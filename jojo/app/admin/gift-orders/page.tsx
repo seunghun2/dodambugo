@@ -382,7 +382,17 @@ export default function AdminGiftOrdersPage() {
                                     <div className="detail-section">
                                         <div className="detail-row">
                                             <label>주문번호</label>
-                                            <span className="bugo-num">{selectedOrder.order_number}</span>
+                                            <span className="bugo-num">
+                                                {selectedOrder.order_number}{' '}
+                                                <a
+                                                    href={`/order/${selectedOrder.order_number}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ fontSize: '11px', color: '#2563eb', marginLeft: '6px', textDecoration: 'underline' }}
+                                                >
+                                                    주문내역 보기 ↗
+                                                </a>
+                                            </span>
                                         </div>
                                         <div className="detail-row">
                                             <label>상태</label>
@@ -427,7 +437,12 @@ export default function AdminGiftOrdersPage() {
                                     <div className="detail-section">
                                         <div className="detail-row">
                                             <label>발신 상주</label>
-                                            <span>{selectedOrder.buyer_name || '상주'}</span>
+                                            <span>
+                                                {selectedOrder.buyer_name || '상주'}
+                                                {(selectedOrder as any).buyer_phone
+                                                    ? ` (${formatPhoneDisplay((selectedOrder as any).buyer_phone)})`
+                                                    : ''}
+                                            </span>
                                         </div>
                                         <div className="detail-row">
                                             <label>주문일시</label>

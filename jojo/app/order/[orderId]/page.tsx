@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { gaEvents } from '@/components/GoogleAnalytics';
@@ -47,28 +47,88 @@ interface CondolenceOrderData {
     created_at: string;
 }
 
+interface GiftOrderRecipientItem {
+    id: string;
+    name: string;
+    masked_phone: string;
+    source: string;
+    send_status: string;
+    sent_at: string | null;
+}
+
+interface GiftOrderData {
+    id: string;
+    order_number: string;
+    bugo_id: string | null;
+    bugo_number: string;
+    buyer_name: string;
+    buyer_phone_masked: string | null;
+    product_id: string;
+    product_name: string;
+    unit_price: number;
+    quantity: number;
+    total_amount: number;
+    card_id: string;
+    message: string;
+    payment_method: string;
+    status: string;
+    is_test: boolean;
+    tid: string | null;
+    receipt_url: string | null;
+    created_at: string;
+    approved_at: string;
+    sent_at: string | null;
+    cancelled_at: string | null;
+    cancel_reason: string | null;
+    can_cancel: boolean;
+    remaining_cancel_seconds: number;
+    cancel_deadline_at: string;
+    recipients: GiftOrderRecipientItem[];
+}
+
 export default function OrderDetailPage() {
     const params = useParams();
     const orderId = params.orderId as string;
     const [order, setOrder] = useState<OrderData | null>(null);
     const [condolenceOrder, setCondolenceOrder] = useState<CondolenceOrderData | null>(null);
+    const [giftOrder, setGiftOrder] = useState<GiftOrderData | null>(null);
+    const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
+    const [cancellingGift, setCancellingGift] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isExpanded, setIsExpanded] = useState({
         productInfo: false,
         refund: false,
         withdrawal: false,
+        recipients: false,
     });
 
-    const isCondolence = orderId?.startsWith('CO') || orderId?.startsWith('DO') || orderId?.startsWith('COND_') || orderId?.startsWith('BCOND_');
+    const isCondolence =
+        orderId?.startsWith('CO') ||
+        orderId?.startsWith('DO') ||
+        orderId?.startsWith('COND_') ||
+        orderId?.startsWith('BCOND_');
+    const isGift = orderId?.startsWith('GF');
+
+    const fetchGiftOrder = useCallback(async () => {
+        const res = await fetch(`/api/gift/orders/${orderId}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('주문을 찾을 수 없습니다.');
+        const data = await res.json();
+        if (!data.success || !data.order) throw new Error('주문을 찾을 수 없습니다.');
+        setGiftOrder(data.order);
+        setRemainingSeconds(data.order.remaining_cancel_seconds || 0);
+    }, [orderId]);
 
     useEffect(() => {
         async function fetchOrder() {
             try {
+                if (isGift) {
+                    await fetchGiftOrder();
+                    return;
+                }
                 if (isCondolence) {
                     // 부의금 주문 조회 (DB 커밋 타이밍 이슈 대비 재시도)
                     let retries = 3;
-                    let lastError = '';
                     while (retries > 0) {
                         const res = await fetch(`/api/condolence/orders/${orderId}`);
                         if (res.ok) {
@@ -80,7 +140,7 @@ export default function OrderDetailPage() {
                         }
                         retries--;
                         if (retries > 0) {
-                            await new Promise(r => setTimeout(r, 1500));
+                            await new Promise((r) => setTimeout(r, 1500));
                         }
                     }
                     throw new Error('주문을 찾을 수 없습니다.');
@@ -101,8 +161,31 @@ export default function OrderDetailPage() {
         if (orderId) {
             fetchOrder();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orderId, isCondolence]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orderId, isCondolence, isGift]);
+
+    // 답례품 10분 유예 카운트다운 타이머
+    useEffect(() => {
+        if (!giftOrder) return;
+        const isWaiting = giftOrder.status === 'paid' || giftOrder.status === 'test_paid';
+        if (!isWaiting || !giftOrder.cancel_deadline_at) {
+            setRemainingSeconds(0);
+            return;
+        }
+
+        const deadlineMs = new Date(giftOrder.cancel_deadline_at).getTime();
+        const tick = () => {
+            const left = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000));
+            setRemainingSeconds(left);
+            if (left === 0) {
+                // 10분 경과 시 서버에 발송 트리거 및 최신 상태 갱신
+                fetchGiftOrder().catch(() => {});
+            }
+        };
+        tick();
+        const timer = setInterval(tick, 1000);
+        return () => clearInterval(timer);
+    }, [giftOrder, fetchGiftOrder]);
 
     // GA 이벤트 & Google Ads 전환 추적 (한 번만 실행)
     const trackedRef = useRef(false);
@@ -111,33 +194,29 @@ export default function OrderDetailPage() {
 
         if (isCondolence && condolenceOrder) {
             trackedRef.current = true;
-            // 부의금 결제 완료 GA 이벤트
             gaEvents.completeCondolence(condolenceOrder.amount || 0);
-            // Google Ads 전환 추적
             if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'conversion', {
-                    'send_to': 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
-                    'value': condolenceOrder.total_amount || 0,
-                    'currency': 'KRW'
+                    send_to: 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
+                    value: condolenceOrder.total_amount || 0,
+                    currency: 'KRW',
                 });
             }
-        } else if (!isCondolence && order) {
+        } else if (!isCondolence && !isGift && order) {
             trackedRef.current = true;
-            // 화환 결제 완료 GA 이벤트
             gaEvents.completeFlowerOrder(order.order_number, order.product_price || 0);
-            // Google Ads 전환 추적
             if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'conversion', {
-                    'send_to': 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
-                    'value': order.product_price || 0,
-                    'currency': 'KRW'
+                    send_to: 'AW-17911391889/lh3xCPb08IYcEJHN6NxC',
+                    value: order.product_price || 0,
+                    currency: 'KRW',
                 });
             }
         }
-    }, [isCondolence, condolenceOrder, order]);
+    }, [isCondolence, isGift, condolenceOrder, order]);
 
     // 날짜 포맷 함수
-    const formatDateTime = (date?: string) => {
+    const formatDateTime = (date?: string | null) => {
         if (!date) return '-';
         const d = new Date(date);
         const year = d.getFullYear();
@@ -148,6 +227,49 @@ export default function OrderDetailPage() {
         return `${year}.${month}.${day} ${hour}:${minute}`;
     };
 
+    const formatRemainMMSS = (sec: number) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}분 ${String(s).padStart(2, '0')}초`;
+    };
+
+    const handleCancelGiftOrder = async () => {
+        if (!giftOrder || cancellingGift) return;
+        const canNow =
+            (giftOrder.status === 'paid' || giftOrder.status === 'test_paid') && remainingSeconds > 0;
+        if (!canNow) {
+            alert('결제 후 10분이 경과하여 주문이 확정되었으므로 취소할 수 없습니다.');
+            return;
+        }
+        if (
+            !confirm(
+                `답례품 주문(${giftOrder.product_name} · ${giftOrder.quantity}명)을 취소하시겠습니까?\n\n결제 금액(${giftOrder.total_amount.toLocaleString()}원)이 전액 취소되며 감사장과 모바일 쿠폰이 발송되지 않습니다.`
+            )
+        ) {
+            return;
+        }
+
+        setCancellingGift(true);
+        try {
+            const res = await fetch(`/api/gift/orders/${giftOrder.order_number}/cancel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: '주문자 직접 취소 (10분 이내)' }),
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) {
+                alert(json.error || '주문을 취소할 수 없습니다.');
+                await fetchGiftOrder().catch(() => {});
+            } else {
+                await fetchGiftOrder();
+            }
+        } catch (e: any) {
+            alert(e?.message || '취소 처리 중 오류가 발생했습니다.');
+        } finally {
+            setCancellingGift(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="order-page">
@@ -156,7 +278,7 @@ export default function OrderDetailPage() {
         );
     }
 
-    if (error || (!order && !condolenceOrder)) {
+    if (error || (!order && !condolenceOrder && !giftOrder)) {
         return (
             <div className="order-page">
                 <div className="order-body" style={{ textAlign: 'center', paddingTop: '120px', paddingLeft: '24px', paddingRight: '24px' }}>
@@ -166,6 +288,307 @@ export default function OrderDetailPage() {
                     <Link href="/" className="btn-payment" style={{ marginTop: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', background: '#FFD43B', color: '#1A1A1A', fontWeight: '600', height: '52px', borderRadius: '12px' }}>
                         홈으로
                     </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // ===== 답례품 주문내역 / 결제완료 화면 (화환·부의금 결제완료와 동일한 디자인) =====
+    if (isGift && giftOrder) {
+        const isCancelled = giftOrder.status === 'cancelled';
+        const isSent = giftOrder.status === 'sent' || giftOrder.status === 'partial';
+        const isWaiting = giftOrder.status === 'paid' || giftOrder.status === 'test_paid';
+        const canCancelNow = isWaiting && remainingSeconds > 0;
+        const firstRecipient = giftOrder.recipients?.[0];
+        const recipientSummary = firstRecipient
+            ? giftOrder.quantity > 1
+                ? `${firstRecipient.name} (${firstRecipient.masked_phone}) 외 ${giftOrder.quantity - 1}명`
+                : `${firstRecipient.name} (${firstRecipient.masked_phone})`
+            : `${giftOrder.quantity}명`;
+
+        return (
+            <div className="order-page">
+                <header className="order-header" style={{ justifyContent: 'center' }}>
+                    <h1>{isCancelled ? '주문 취소 완료' : '주문내역'}</h1>
+                </header>
+
+                <div className="order-body complete-body">
+                    <div className="complete-banner">
+                        {isCancelled ? (
+                            <>
+                                <div
+                                    style={{
+                                        width: 64,
+                                        height: 64,
+                                        borderRadius: '50%',
+                                        background: '#FEE2E2',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        margin: '0 auto 18px',
+                                    }}
+                                >
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </div>
+                                <h2>주문이 정상적으로 취소<br />되었습니다.</h2>
+                                <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
+                                    감사장과 모바일 쿠폰이 발송되지 않으며 결제 금액이 환불 처리됩니다.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="#FFD43B" style={{ marginBottom: '20px' }}>
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                </svg>
+                                <h2>
+                                    {isSent ? (
+                                        <>답례품과 감사장이<br />전달되었습니다.</>
+                                    ) : (
+                                        <>답례품 주문이 정상적으로<br />완료되었습니다.</>
+                                    )}
+                                </h2>
+                                <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
+                                    {isSent
+                                        ? '받으시는 분들께 감사장 문자와 모바일 쿠폰이 발송되었습니다.'
+                                        : '결제 완료 10분 후 감사장 문자와 모바일 쿠폰이 순차 발송됩니다.'}
+                                </p>
+                            </>
+                        )}
+                    </div>
+
+                    {/* 상세 안내 */}
+                    <section className="order-section">
+                        <h2 className="section-title">상세 안내</h2>
+
+                        <div className="detail-row">
+                            <span className="label">주문번호</span>
+                            <span className="value">{giftOrder.order_number}</span>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">발송 상태</span>
+                            <span
+                                className="value"
+                                style={{
+                                    fontWeight: 700,
+                                    color: isCancelled
+                                        ? '#DC2626'
+                                        : isSent
+                                          ? '#16A34A'
+                                          : '#2563EB',
+                                }}
+                            >
+                                {isCancelled
+                                    ? '주문 취소됨'
+                                    : isSent
+                                      ? '발송 완료'
+                                      : giftOrder.status === 'sending'
+                                        ? '발송 진행 중'
+                                        : '발송 대기 (결제 10분 후 자동 발송)'}
+                            </span>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">보내시는 분</span>
+                            <span className="value">
+                                {giftOrder.buyer_name}
+                                {giftOrder.buyer_phone_masked ? ` / ${giftOrder.buyer_phone_masked}` : ''}
+                            </span>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">받으시는 분</span>
+                            <div className="value">
+                                <div>{recipientSummary}</div>
+                                {giftOrder.recipients?.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsExpanded((prev) => ({ ...prev, recipients: !prev.recipients }))
+                                        }
+                                        style={{
+                                            marginTop: 6,
+                                            padding: '3px 8px',
+                                            fontSize: 12,
+                                            borderRadius: 4,
+                                            border: '1px solid #DDD',
+                                            background: '#F8F9FA',
+                                            color: '#555',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {isExpanded.recipients ? '명단 접기' : `전체 ${giftOrder.quantity}명 보기`}
+                                    </button>
+                                )}
+                                {isExpanded.recipients && (
+                                    <div style={{ marginTop: 8, fontSize: 12, color: '#666', lineHeight: 1.7 }}>
+                                        {giftOrder.recipients.map((r) => (
+                                            <div key={r.id}>
+                                                {r.name} ({r.masked_phone})
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">상품명</span>
+                            <span className="value">{giftOrder.product_name}</span>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">단가 × 수량</span>
+                            <span className="value">
+                                {giftOrder.unit_price?.toLocaleString()}원 × {giftOrder.quantity}명
+                            </span>
+                        </div>
+
+                        <div className="detail-row total">
+                            <span className="label">총 결제 금액</span>
+                            <span className="value highlight">{giftOrder.total_amount?.toLocaleString()}원</span>
+                        </div>
+
+                        <div className="detail-row">
+                            <span className="label">구매 일시</span>
+                            <span className="value">{formatDateTime(giftOrder.approved_at || giftOrder.created_at)}</span>
+                        </div>
+
+                        {isCancelled && giftOrder.cancelled_at && (
+                            <div className="detail-row">
+                                <span className="label">취소 일시</span>
+                                <span className="value" style={{ color: '#DC2626' }}>
+                                    {formatDateTime(giftOrder.cancelled_at)}
+                                </span>
+                            </div>
+                        )}
+
+                        <div className="detail-row">
+                            <span className="label">결제 정보</span>
+                            <span className="value">
+                                {giftOrder.payment_method}
+                                {giftOrder.tid && (
+                                    <a
+                                        href={
+                                            giftOrder.receipt_url ||
+                                            `https://pg.innopay.co.kr/pay/issue/TransIssue.jsp?TID=${giftOrder.tid}`
+                                        }
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="receipt-btn"
+                                        style={{ color: '#1A1A1A', marginLeft: '10px' }}
+                                    >
+                                        영수증 보기
+                                    </a>
+                                )}
+                            </span>
+                        </div>
+                    </section>
+
+                    {/* 10분 이내 주문 취소 제어 영역 */}
+                    {!isCancelled && (
+                        <section className="order-section" style={{ marginTop: 12 }}>
+                            <h2 className="section-title">주문 취소 안내</h2>
+                            {canCancelNow ? (
+                                <div>
+                                    <p style={{ fontSize: 13, color: '#444', lineHeight: 1.6, marginBottom: 14 }}>
+                                        • 답례품은 결제 완료 <strong>10분 후</strong> 감사장과 함께 자동 발송됩니다.
+                                        <br />• 발송 전 남은 시간 동안 아래 버튼으로 주문을 즉시 취소하실 수 있습니다.
+                                        <br />• 취소 가능 남은 시간:{' '}
+                                        <strong style={{ color: '#DC2626' }}>{formatRemainMMSS(remainingSeconds)}</strong>
+                                    </p>
+                                    <button
+                                        type="button"
+                                        disabled={cancellingGift}
+                                        onClick={handleCancelGiftOrder}
+                                        style={{
+                                            width: '100%',
+                                            height: 48,
+                                            borderRadius: 10,
+                                            border: '1px solid #FCA5A5',
+                                            background: '#FEF2F2',
+                                            color: '#DC2626',
+                                            fontSize: 15,
+                                            fontWeight: 700,
+                                            cursor: cancellingGift ? 'wait' : 'pointer',
+                                        }}
+                                    >
+                                        {cancellingGift
+                                            ? '취소 처리 중...'
+                                            : `주문 취소하기 (${formatRemainMMSS(remainingSeconds)} 남음)`}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <p style={{ fontSize: 13, color: '#888', lineHeight: 1.6, marginBottom: 12 }}>
+                                        • 결제 후 10분이 경과하여 답례품 및 감사장 발송이 확정되었으므로 취소가 불가합니다.
+                                        <br />• 모바일 쿠폰 특성상 발송 완료 후에는 교환·연장·환불이 불가합니다.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        disabled
+                                        style={{
+                                            width: '100%',
+                                            height: 48,
+                                            borderRadius: 10,
+                                            border: '1px solid #E5E7EB',
+                                            background: '#F3F4F6',
+                                            color: '#9CA3AF',
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: 'not-allowed',
+                                        }}
+                                    >
+                                        주문 완료 (10분 경과로 취소 불가)
+                                    </button>
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* 안내사항 아코디언 */}
+                    <section className="info-accordion">
+                        <div
+                            className={`accordion-item ${isExpanded.refund ? 'expanded' : ''}`}
+                            onClick={() => setIsExpanded({ ...isExpanded, refund: !isExpanded.refund })}
+                        >
+                            <div className="accordion-header">
+                                <span>발송 및 취소/환불 안내</span>
+                                <span className="material-symbols-outlined">
+                                    {isExpanded.refund ? 'expand_less' : 'expand_more'}
+                                </span>
+                            </div>
+                            {isExpanded.refund && (
+                                <div className="accordion-content">
+                                    <p>• 결제 완료 후 10분 이내에는 본 주문내역 페이지에서 직접 주문을 취소하실 수 있습니다.</p>
+                                    <p>• 결제 후 10분이 경과하면 받으시는 분께 감사장 문자(LMS)와 모바일 쿠폰(MMS)이 발송되며 이후에는 취소가 불가합니다.</p>
+                                    <p>• 모바일 쿠폰의 유효기간은 발송일로부터 30일이며, 기간 만료 후 연장 및 환불은 불가합니다.</p>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                </div>
+
+                <div className="order-footer">
+                    {giftOrder.bugo_number ? (
+                        <Link
+                            href={`/view/${giftOrder.bugo_number}`}
+                            className="btn-payment"
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            부고 페이지로 돌아가기
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/"
+                            className="btn-payment"
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            홈으로 돌아가기
+                        </Link>
+                    )}
                 </div>
             </div>
         );
@@ -275,9 +698,9 @@ export default function OrderDetailPage() {
 
     // 결제방법 한글 변환
     const paymentText: Record<string, string> = {
-        'card': '신용/체크카드',
-        'easy': '간편결제',
-        'virtual': '가상계좌',
+        card: '신용/체크카드',
+        easy: '간편결제',
+        virtual: '가상계좌',
     };
 
     if (!order) return null;

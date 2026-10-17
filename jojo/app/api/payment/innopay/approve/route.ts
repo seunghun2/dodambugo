@@ -221,16 +221,19 @@ export async function POST(request: NextRequest) {
         // INNOPAY 응답에서 영수증 URL 추출
         const receiptUrl = approveResult.data?.receiptUrl || '';
 
-        // mallReserved에서 orderId, bugoId 추출 (INNOPAY 응답에서 가져옴)
+        // mallReserved에서 orderId, bugoId, type 추출 (INNOPAY 응답에서 가져옴)
         let actualOrderId = '';
         let bugoNumber = '';
+        let reservedType = '';
         try {
             const mallReserved = approveResult.data?.etc?.mallReserved;
             if (mallReserved) {
-                const parsed = JSON.parse(mallReserved);
+                const decoded = mallReserved.startsWith('%') ? decodeURIComponent(mallReserved) : mallReserved;
+                const parsed = JSON.parse(decoded);
                 actualOrderId = parsed.orderId || '';
                 bugoNumber = parsed.bugoId || '';
-                console.log('📦 mallReserved 추출:', { orderId: actualOrderId, bugoNumber });
+                reservedType = parsed.type || '';
+                console.log('📦 mallReserved 추출:', { orderId: actualOrderId, bugoNumber, reservedType });
 
                 // bugoId가 UUID 형태면 실제 bugo_number 조회
                 if (bugoNumber && bugoNumber.includes('-') && bugoNumber.length > 10) {
@@ -257,6 +260,81 @@ export async function POST(request: NextRequest) {
         let orderData: any = null;
         // TID: INNOPAY 응답에서 가져오거나, 없으면 콜백에서 받은 원래 tid 사용
         const transactionId = approveResult.data?.tid || tid || '';
+
+        // 🎁 답례품(Gift) 결제 승인 처리 (moid가 GF로 시작하거나 reservedType === 'gift')
+        const isGiftOrder = reservedType === 'gift' || (!!moid && String(moid).startsWith('GF'));
+        if (isGiftOrder) {
+            const giftOrderKey = actualOrderId || orderId || '';
+            const query = supabase.from('gift_orders').select('*');
+            const { data: existingGift } = await (giftOrderKey
+                ? query.eq('id', giftOrderKey).maybeSingle()
+                : query.eq('order_number', String(moid)).maybeSingle());
+
+            if (!existingGift) {
+                return NextResponse.json({ success: false, error: '답례품 주문 정보를 찾을 수 없습니다.' }, { status: 404 });
+            }
+
+            if (existingGift.status === 'paid' || existingGift.status === 'sent' || existingGift.status === 'sending') {
+                return NextResponse.json({
+                    success: true,
+                    message: '이미 결제 처리가 완료된 답례품 주문입니다.',
+                    data: {
+                        tid: transactionId,
+                        moid: existingGift.order_number,
+                        amt,
+                        receiptUrl,
+                        orderNumber: existingGift.order_number,
+                        paymentType: 'gift',
+                        approvedAt: existingGift.approved_at || new Date().toISOString(),
+                    },
+                });
+            }
+
+            const nowIso = new Date().toISOString();
+            const detailedMethod = getDetailedPaymentMethod(
+                approveResult.data?.payMethod || payMethod || 'CARD',
+                approveResult.data
+            );
+            const buyerTel = String(approveResult.data?.buyer?.tel || existingGift.buyer_phone || '').replace(/\D/g, '');
+
+            const { data: updatedGift } = await supabase
+                .from('gift_orders')
+                .update({
+                    status: 'paid',
+                    tid: transactionId,
+                    payment_method: detailedMethod,
+                    receipt_url: receiptUrl || null,
+                    buyer_phone: buyerTel || existingGift.buyer_phone || null,
+                    approved_at: nowIso,
+                    updated_at: nowIso,
+                })
+                .eq('id', existingGift.id)
+                .select('*')
+                .single();
+
+            // 결제 완료 안내(주문내역 + 10분 내 취소 링크 포함) 발송
+            try {
+                const { sendGiftOrderCompleteNotify } = await import('@/lib/gift/dispatcher');
+                await sendGiftOrderCompleteNotify(updatedGift || existingGift);
+            } catch (notifyErr) {
+                console.error('[gift/approve] 결제완료 알림 발송 실패:', notifyErr);
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: '답례품 결제 승인 완료',
+                data: {
+                    ...approveResult.data,
+                    tid: transactionId,
+                    moid: existingGift.order_number,
+                    amt,
+                    receiptUrl,
+                    orderNumber: existingGift.order_number,
+                    paymentType: 'gift',
+                    approvedAt: nowIso,
+                },
+            });
+        }
 
         if (actualOrderId) {
             // 🛡️ 1. 중복 승인 방지 (이미 처리된 주문인 경우 중복 수당 적립 및 중복 알림 방지)
