@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/gift/auth';
 import { isResponse, requireMourner } from '@/lib/gift/guard';
-import { isValidMobile, maskPhone, normalizePhone } from '@/lib/gift/phone';
+import { isValidMobile, maskPhone, normalizePhone, phoneDedupeKey } from '@/lib/gift/phone';
 import { CONDOLENCE_OK, FLOWER_OK } from '@/lib/gift/recipient-source';
 
 export const dynamic = 'force-dynamic';
 
 interface Row {
     ref: string;
+    dedupeKey?: string;
     name: string;
     maskedPhone: string;
     summary: string;
@@ -17,6 +18,7 @@ interface Row {
 
 // GET: 받는 사람 후보 목록 (조의금 낸 사람 / 화환 보낸 사람)
 // 전화번호는 마스킹해서 내려주고, 실제 번호는 주문 생성 시 서버가 ref 로 다시 조회한다.
+// 단, 조의금과 화환을 둘 다 보낸 동일인이 중복 선택될 때 자동으로 하나로 합쳐지도록 dedupeKey(단방향 해시)를 내려준다.
 export async function GET(req: NextRequest) {
     const guarded = await requireMourner(req, req.nextUrl.searchParams.get('bugoId'));
     if (isResponse(guarded)) return guarded;
@@ -49,6 +51,7 @@ export async function GET(req: NextRequest) {
             } else {
                 byPhone.set(key, {
                     ref: `c:${o.id}`,
+                    dedupeKey: phone ? phoneDedupeKey(phone) : undefined,
                     name: (o.buyer_name || '').trim(),
                     maskedPhone: phone ? maskPhone(phone) : '번호 없음',
                     summary: `조의금 ${(o.amount || 0).toLocaleString('ko-KR')}원`,
@@ -77,6 +80,7 @@ export async function GET(req: NextRequest) {
             }
             byPhone.set(key, {
                 ref: `f:${o.id}`,
+                dedupeKey: phone ? phoneDedupeKey(phone) : undefined,
                 name: (o.sender_name || '').trim(),
                 maskedPhone: phone ? maskPhone(phone) : '번호 없음',
                 summary: o.product_name || '근조화환',
@@ -91,6 +95,7 @@ export async function GET(req: NextRequest) {
 
     const items: Row[] = [...byPhone.values()].map((v) => ({
         ref: v.ref,
+        dedupeKey: v.dedupeKey,
         name: v.name,
         maskedPhone: v.maskedPhone,
         summary: v.summary,

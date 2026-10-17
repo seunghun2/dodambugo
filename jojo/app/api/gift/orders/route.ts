@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/gift/auth';
+import { GIFT_GRACE_MINUTES, dispatchDueGiftOrders } from '@/lib/gift/dispatcher';
 import { isResponse, requireMourner } from '@/lib/gift/guard';
 import { GiftNotReadyError, getIssuer, isLiveMode } from '@/lib/gift/issuer';
 import { dedupeRecipients, normalizePhone, type GiftRecipient } from '@/lib/gift/phone';
@@ -25,21 +26,23 @@ function newOrderNumber(): string {
     return `GF${ymd}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
-// POST: 답례품 주문 생성
-//  - 상품 가격, 받는 사람 전화번호(조의금/화환 목록)는 반드시 서버가 DB에서 다시 조회한다. (클라이언트 값 불신)
-//  - 테스트 모드(GIFT_LIVE_MODE !== 'true'): 실결제/실발송 없이 MockIssuer 로 흐름만 검증한다.
-//  - live 모드: 다우 발행기가 연결되기 전까지 GiftNotReadyError 로 주문 자체를 거부한다.
+// POST: 답례품 주문 생성 (결제 완료 후 10분 유예 뒤 발송되는 대기 상태로 저장)
+//  - 상품 가격, 받는 사람 전화번호(조의금/화환 목록)는 반드시 서버가 DB에서 다시 조회한다.
+//  - 결제 즉시 발송하지 않고 status = 'paid'(또는 'test_paid'), 수신자 send_status = 'pending'으로 저장하여
+//    10분 이내 취소 가능 유예 시간을 보장하고, 200명 대량 주문 시에도 응답 지연을 없앤다.
 export async function POST(req: NextRequest) {
     try {
+        // 기존 주문 중 10분 경과된 대기 건이 있으면 비동기로 발송 트리거
+        dispatchDueGiftOrders().catch((err) => console.error('[gift/orders due dispatch]', err));
+
         const body = await req.json();
         const guarded = await requireMourner(req, body.bugoId ?? null);
         if (isResponse(guarded)) return guarded;
         const { bugo, session } = guarded;
 
         // 발행기 확인 (live 인데 준비 전이면 여기서 거부)
-        let issuer;
         try {
-            issuer = getIssuer();
+            getIssuer();
         } catch (e) {
             if (e instanceof GiftNotReadyError) {
                 return NextResponse.json({ error: e.message, code: 'NOT_READY' }, { status: 503 });
@@ -100,7 +103,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // 4) 주문 저장 (order_number 충돌 시 1회 재시도)
+        // 4) 주문 저장 (10분 유예 발송 대기 상태: paid / test_paid)
         let order: { id: string; order_number: string } | null = null;
         for (let i = 0; i < 2 && !order; i++) {
             const { data, error } = await supabase
@@ -117,7 +120,7 @@ export async function POST(req: NextRequest) {
                     total_amount: total,
                     card_id: cardId,
                     message,
-                    status: live ? 'pending' : 'test_paid',
+                    status: live ? 'paid' : 'test_paid',
                     is_test: !live,
                 })
                 .select('id, order_number')
@@ -127,48 +130,28 @@ export async function POST(req: NextRequest) {
         }
         if (!order) return NextResponse.json({ error: '주문 번호 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 });
 
-        const { data: recRows, error: recErr } = await supabase
+        const { error: recErr } = await supabase
             .from('gift_order_recipients')
-            .insert(valid.map((r) => ({ order_id: order!.id, name: r.name || null, phone: r.phone, source: r.source })))
-            .select('id, name, phone');
-        if (recErr || !recRows) {
+            .insert(
+                valid.map((r) => ({
+                    order_id: order!.id,
+                    name: r.name || null,
+                    phone: r.phone,
+                    source: r.source,
+                    send_status: 'pending',
+                }))
+            );
+        if (recErr) {
             await supabase.from('gift_orders').update({ status: 'failed' }).eq('id', order.id);
-            throw recErr || new Error('recipient insert failed');
+            throw recErr;
         }
-
-        // 5) 발행 (테스트 모드는 Mock). live + 결제 연동은 다우 연결 단계에서 추가한다.
-        let sent = 0;
-        for (let idx = 0; idx < recRows.length; idx++) {
-            const r = recRows[idx];
-            const res = await issuer.issue({
-                orderNumber: order.order_number,
-                seq: idx + 1,
-                senderName: session.n,
-                recipientName: r.name || '',
-                recipientPhone: r.phone,
-                goodsName: `[${product.brand}] ${product.name}`,
-                daouGoodsCode: product.daou_goods_code,
-                message,
-            });
-            await supabase
-                .from('gift_order_recipients')
-                .update(
-                    res.ok
-                        ? { send_status: 'sent', coupon_ref: res.couponRef ?? null, sent_at: new Date().toISOString() }
-                        : { send_status: 'failed', error: (res.error || '').slice(0, 200) }
-                )
-                .eq('id', r.id);
-            if (res.ok) sent++;
-        }
-        const finalStatus = sent === recRows.length ? 'sent' : sent === 0 ? 'failed' : 'partial';
-        await supabase.from('gift_orders').update({ status: finalStatus, updated_at: new Date().toISOString() }).eq('id', order.id);
 
         return NextResponse.json({
             success: true,
             orderNumber: order.order_number,
             total,
             count: valid.length,
-            sent,
+            graceMinutes: GIFT_GRACE_MINUTES,
             isTest: !live,
         });
     } catch (e) {

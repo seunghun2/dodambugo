@@ -1,10 +1,10 @@
-// 답례품 쿠폰 발행기
+// 답례품 쿠폰 발행기 & 폐기(취소) 처리기
 //
 // 다우기술 API 연동(계약·테스트 계정 발급 후)이 끝나기 전까지는 MockIssuer 만 동작한다.
-// 다우 연동 시 DaouIssuer 를 구현해 getIssuer() 에서 반환하면 주문 흐름은 그대로 쓸 수 있다.
-//
-// 안전장치: GIFT_LIVE_MODE 환경변수가 'true' 가 아니면 항상 테스트 모드(실결제 없음, 실발송 없음).
-//           live 인데 발행기가 없으면 주문 자체를 거부한다 (결제만 받고 쿠폰을 못 보내는 상황 방지).
+// 안전장치:
+// 1) GIFT_LIVE_MODE 환경변수가 'true' 가 아니면 항상 테스트 모드(실결제 없음, 실발송 없음).
+// 2) 다우 SEND_MSG E000021(80byte 초과 거절) 방지: 전체 감사장(500자+카드 링크)은 별도 감사장 문자/알림톡으로 발송하고,
+//    다우 쿠폰 전문의 SEND_MSG 는 EUC-KR 기준 76byte 이내로 안전하게 자동 절삭한다.
 
 export interface IssueRequest {
     orderNumber: string;
@@ -27,9 +27,34 @@ export interface IssueResult {
     error?: string;
 }
 
+export interface CancelResult {
+    ok: boolean;
+    rtCode?: string;
+    error?: string;
+}
+
 export interface GiftIssuer {
     readonly name: string;
     issue(req: IssueRequest): Promise<IssueResult>;
+    cancel(couponRef: string, orderNumber: string): Promise<CancelResult>;
+}
+
+/**
+ * EUC-KR 바이트 기준 안전 절삭 (한글/비ASCII = 2byte, ASCII = 1byte).
+ * 다우 E000021("메시지가 80byte를 초과합니다") 거절을 원천 차단한다.
+ */
+export function truncateEucKrBytes(input: string, maxBytes = 76): string {
+    const clean = (input || '').replace(/\r\n/g, '\n').trim();
+    let bytes = 0;
+    let out = '';
+    for (const ch of clean) {
+        const code = ch.charCodeAt(0);
+        const charBytes = code <= 0x7f ? 1 : 2;
+        if (bytes + charBytes > maxBytes) break;
+        bytes += charBytes;
+        out += ch;
+    }
+    return out;
 }
 
 /** 실제 발송 없이 성공만 돌려주는 테스트용 발행기 */
@@ -42,6 +67,9 @@ class MockIssuer implements GiftIssuer {
             couponRef: `MOCK-${req.orderNumber}-${suffix}`,
             rtCode: 'S000001',
         };
+    }
+    async cancel(): Promise<CancelResult> {
+        return { ok: true, rtCode: 'S000001' };
     }
 }
 
@@ -56,11 +84,9 @@ function extractXmlTag(xml: string, tag: string): string {
 }
 
 /**
- * 다우기술 B2C 모바일쿠폰 API V3.9 발행기
- * - 전문: CI102_ISSUECPN_TITLE_WITHPAY (2.1 MMS/LMS/알림톡(TITLE 포함) 쿠폰발행)
- * - 고정 IP(49.50.139.204) 프록시(DAOU_PROXY_URL) 또는 직접 호출(DAOU_API_URL) 지원
- * - 주의(규격서 p.12 vs p.47): 표에는 SEND_MSG 500byte로 기재되어 있으나 오류코드 E000021에
- *   "메시지가 80byte를 초과합니다"가 존재하므로 검수 시 80byte 제한 여부를 반드시 확인해야 함.
+ * 다우기술 B2C 모바일쿠폰 API V3.9 발행/폐기기
+ * - 발행: CI102_ISSUECPN_TITLE_WITHPAY
+ * - 폐기(취소): CI104_DISUSECPN_WITHPAY
  */
 class DaouIssuer implements GiftIssuer {
     readonly name = 'daou';
@@ -82,8 +108,13 @@ class DaouIssuer implements GiftIssuer {
         }
 
         const seqStr = String(req.seq ?? 1).padStart(3, '0');
-        // COOPER_ORDER: 50byte 이내, 1회 요청당 1건(ISSUE_COUNT=1)이므로 수신자별 고유값 필수 (중복 시 E000025)
         const cooperOrder = `${req.orderNumber}-${seqStr}`.slice(0, 50);
+
+        // 다우 SEND_MSG 80byte 제한 방어: EUC-KR 76byte 이내로 안전 절삭 (전체 문구는 감사장 문자로 별도 발송됨)
+        const safeShortMsg = truncateEucKrBytes(
+            req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`,
+            76
+        );
 
         const payload: Record<string, string> = {
             ACTION: 'CI102_ISSUECPN_TITLE_WITHPAY',
@@ -94,25 +125,23 @@ class DaouIssuer implements GiftIssuer {
             COOPER_ORDER: cooperOrder,
             ISSUE_COUNT: '1',
             CALL_CTN: this.config.senderPhone.replace(/[^0-9]/g, '').slice(0, 20),
-            SENDER: (req.senderName || '마음부고').slice(0, 30),
+            SENDER: truncateEucKrBytes(req.senderName || '마음부고', 28),
             RCV_CTN: req.recipientPhone.replace(/[^0-9]/g, '').slice(0, 20),
-            RECEIVER: (req.recipientName || '').slice(0, 30),
-            SEND_MSG: req.message || '',
+            RECEIVER: truncateEucKrBytes(req.recipientName || '', 28),
+            SEND_MSG: safeShortMsg,
             VALID_START: formatKstYmd(0),
             VALID_END: formatKstYmd(30),
             PAY_ID: '0',
             BOOKING_NO: '0',
             SITE_URL: 'https://maeumbugo.co.kr',
-            TITLE: (req.title || '[마음부고] 감사 답례품이 도착했습니다').slice(0, 25),
+            TITLE: truncateEucKrBytes(req.title || '[마음부고] 감사 답례품', 24),
         };
         if (req.sendType) {
             payload.SEND_TYPE = req.sendType;
         }
 
         try {
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-            };
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
             if (this.config.proxySecret) {
                 headers['x-proxy-secret'] = this.config.proxySecret;
             }
@@ -148,6 +177,40 @@ class DaouIssuer implements GiftIssuer {
                 ok: false,
                 error: err instanceof Error && err.message ? err.message : '다우 프록시 통신 오류',
             };
+        }
+    }
+
+    async cancel(couponRef: string, orderNumber: string): Promise<CancelResult> {
+        const [noCpn] = (couponRef || '').split('|');
+        if (!noCpn) return { ok: false, error: '쿠폰 번호(NO_CPN)가 없습니다.' };
+
+        const payload: Record<string, string> = {
+            ACTION: 'CI104_DISUSECPN_WITHPAY',
+            COOPER_ID: this.config.cooperId,
+            COOPER_PW: this.config.cooperPw,
+            SITE_ID: this.config.siteId,
+            NO_CPN: noCpn,
+            REQUEST_ID: `CANCEL-${orderNumber}`.slice(0, 30),
+            DISUSE_REASON: '구매자 취소',
+        };
+
+        try {
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (this.config.proxySecret) {
+                headers['x-proxy-secret'] = this.config.proxySecret;
+            }
+            const res = await fetch(this.config.endpointUrl, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload),
+            });
+            const text = await res.text();
+            const rt = extractXmlTag(text, 'RT');
+            const rtMsg = extractXmlTag(text, 'RTMSG');
+            if (rt === 'S000001') return { ok: true, rtCode: rt };
+            return { ok: false, rtCode: rt || undefined, error: `[${rt}] ${rtMsg || '쿠폰 폐기 실패'}` };
+        } catch (err: unknown) {
+            return { ok: false, error: err instanceof Error ? err.message : '다우 폐기 통신 오류' };
         }
     }
 }

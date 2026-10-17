@@ -17,6 +17,7 @@ export interface RecipientItem {
     name: string;
     phone?: string; // contact / excel / manual 만 보유 (숫자만)
     ref?: string; // condolence / flower 는 ref 만 보유 (번호는 서버에서 조회)
+    dedupeKey?: string; // 동일 전화번호 중복 통합용 해시키 (조의금+화환+직접입력 통합)
     maskedPhone: string;
     source: GiftRecipient['source'];
     note?: string; // 조의금 50,000원 같은 부가 설명

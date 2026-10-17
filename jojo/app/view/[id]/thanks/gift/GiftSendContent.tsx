@@ -35,6 +35,7 @@ const TAB_KEYS = RELIGION_TABS.map((t) => t.key);
 
 export default function GiftSendContent({ bugoId, initialProduct, live, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
     const router = useRouter();
+    const draftStorageKey = `maeum_gift_draft_${bugoId}`;
 
     // ----- 카드 / 문구 -----
     const initialTab: ReligionType = TAB_KEYS.includes(thanksReligion as ReligionType) ? (thanksReligion as ReligionType) : getReligionType(religion);
@@ -45,20 +46,82 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
         return Object.fromEntries(TAB_KEYS.map((k) => [k, buildMessage(k, deceasedName, custom)])) as Record<ReligionType, string>;
     });
     const message = messages[tab];
-    // 문구 탭을 바꾸면 카드도 같은 종류로 맞춘다 (카드 '없음'은 유지) — 카드와 문구가 따로 놀지 않게
+
     const selectTab = (k: ReligionType) => {
         setTab(k);
         setCardId((prev) => (prev === 'none' ? prev : k));
     };
     const pickCard = (id: CardId) => {
         setCardId(id);
-        if (id !== 'none') setTab(id); // 카드를 고르면 같은 종류의 문구 탭으로 맞춰준다
+        if (id !== 'none') setTab(id);
     };
 
     // ----- 상품 / 받는 사람 -----
-    const product = initialProduct; // 상품 상세에서 고른 상품으로 고정 (바꾸려면 목록으로 돌아간다)
+    const product = initialProduct;
     const [items, setItems] = useState<RecipientItem[]>([]);
     const [agree, setAgree] = useState(false);
+    const [draftRestored, setDraftRestored] = useState(false);
+
+    // ----- 초안 복원 (카톡→크롬 이동 시 URL ?draft= 파라미터 또는 상품 변경 시 localStorage) -----
+    useEffect(() => {
+        try {
+            const url = new URL(window.location.href);
+            const urlDraft = url.searchParams.get('draft');
+            let parsed: any = null;
+
+            if (urlDraft) {
+                const jsonStr = decodeURIComponent(escape(window.atob(urlDraft)));
+                parsed = JSON.parse(jsonStr);
+                url.searchParams.delete('draft');
+                window.history.replaceState({}, '', url.toString());
+            } else {
+                const saved = window.localStorage.getItem(draftStorageKey);
+                if (saved) parsed = JSON.parse(saved);
+            }
+
+            if (parsed) {
+                if (parsed.tab && TAB_KEYS.includes(parsed.tab)) setTab(parsed.tab);
+                if (parsed.cardId) setCardId(parsed.cardId);
+                if (parsed.messages && typeof parsed.messages === 'object') {
+                    setMessages((prev) => ({ ...prev, ...parsed.messages }));
+                }
+                if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+                    setItems(parsed.items);
+                }
+            }
+        } catch {
+            /* 파싱 오류 무시 */
+        } finally {
+            setDraftRestored(true);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [draftStorageKey]);
+
+    // ----- 초안 자동 저장 (localStorage) -----
+    useEffect(() => {
+        if (!draftRestored) return;
+        try {
+            window.localStorage.setItem(
+                draftStorageKey,
+                JSON.stringify({ tab, cardId, messages, items })
+            );
+        } catch {
+            /* 용량 초과 등 무시 */
+        }
+    }, [draftRestored, draftStorageKey, tab, cardId, messages, items]);
+
+    // 카톡 인앱 → 크롬 이동 시 현재 작성 중인 문구·명단을 URL에 실어 넘긴다
+    const buildShareableDraftUrl = useCallback(() => {
+        try {
+            const url = new URL(window.location.href);
+            const payload = JSON.stringify({ tab, cardId, messages, items });
+            const encoded = window.btoa(unescape(encodeURIComponent(payload)));
+            url.searchParams.set('draft', encoded);
+            return url.toString();
+        } catch {
+            return window.location.href;
+        }
+    }, [tab, cardId, messages, items]);
 
     // ----- 오버레이 -----
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -88,8 +151,6 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     }, [anyOverlay]);
 
     // ----- 상주 확인 -----
-    // 서버가 상주 확인을 요구하지 않으면(기본) 바로 통과하고 모달은 뜨지 않는다.
-    // 서버에서 GIFT_REQUIRE_AUTH=true 로 다시 잠그면 그때만 모달이 열린다.
     const ensureAuth = useCallback(async (): Promise<boolean> => {
         try {
             const r = await fetch(`/api/gift/auth?bugoId=${encodeURIComponent(bugoId)}`, { cache: 'no-store' });
@@ -152,6 +213,9 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
             setConfirmOpen(false);
             setDone({ orderNumber: data.orderNumber, count: data.count, total: data.total, isTest: !!data.isTest });
             setItems([]);
+            try {
+                window.localStorage.removeItem(draftStorageKey);
+            } catch {}
         } catch {
             setConfirmOpen(false);
             notify('네트워크 오류가 발생했습니다.');
@@ -242,7 +306,14 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     </p>
                 </section>
 
-                <RecipientPanel items={items} setItems={(u) => setItems(u)} bugoId={bugoId} ensureAuth={ensureAuth} notify={notify} />
+                <RecipientPanel
+                    items={items}
+                    setItems={(u) => setItems(u)}
+                    bugoId={bugoId}
+                    ensureAuth={ensureAuth}
+                    notify={notify}
+                    buildShareableDraftUrl={buildShareableDraftUrl}
+                />
 
                 {items.length > 0 && (
                     <p className="gs-total">
@@ -288,7 +359,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         <ol className="gs-help-list">
                             <li>카드와 문구를 정하고 답례품을 고릅니다.</li>
                             <li>받는 분을 조의금·화환 목록, 직접 입력, 엑셀 등으로 추가합니다.</li>
-                            <li>결제하면 받는 분께 모바일 쿠폰이 문자(MMS)나 알림톡으로 전달됩니다.</li>
+                            <li>결제 완료 10분 후 받는 분께 감사장과 모바일 쿠폰이 함께 발송됩니다.</li>
                         </ol>
                         <div className="gs-dialog-btns">
                             <button className="gs-btn-dark" onClick={() => setHelpOpen(false)}>

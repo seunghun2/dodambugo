@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { isValidMobile, maskPhone, normalizePhone } from '@/lib/gift/phone';
+import { formatPhoneInput, isValidMobile, maskPhone, normalizePhone, phoneDedupeKey } from '@/lib/gift/phone';
 import type { RecipientItem } from './types';
 
 export const MAX_RECIPIENTS = 200;
@@ -23,6 +23,7 @@ interface ContactsNavigator {
 
 interface Candidate {
     ref: string;
+    dedupeKey?: string;
     name: string;
     maskedPhone: string;
     summary: string;
@@ -45,9 +46,9 @@ function detectPlatform(): Platform {
     return isChrome ? 'android-chrome' : 'android-other';
 }
 
-/** 현재 페이지를 크롬으로 다시 연다 (크롬 미설치 시 현재 주소 유지) */
-function openInChrome() {
-    const url = window.location.href;
+/** 현재 페이지를 크롬으로 다시 연다 (작성 중인 초안 데이터를 URL에 실어 전달) */
+function openInChrome(targetUrl?: string) {
+    const url = targetUrl || window.location.href;
     if (/KAKAOTALK/i.test(navigator.userAgent)) {
         window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`;
         return;
@@ -62,12 +63,14 @@ export default function RecipientPanel({
     bugoId,
     ensureAuth,
     notify,
+    buildShareableDraftUrl,
 }: {
     items: RecipientItem[];
     setItems: (updater: (prev: RecipientItem[]) => RecipientItem[]) => void;
     bugoId: string;
     ensureAuth: () => Promise<boolean>;
     notify: (msg: string) => void;
+    buildShareableDraftUrl?: () => string;
 }) {
     const fileRef = useRef<HTMLInputElement>(null);
     const [directOpen, setDirectOpen] = useState(true); // 입력창을 처음부터 보여줘서 바로 넣을 수 있게
@@ -84,37 +87,63 @@ export default function RecipientPanel({
         itemsRef.current = items;
     }, [items]);
 
-    /** 중복(번호/ref 기준)·번호 오류·최대 인원을 걸러서 추가하고 결과를 토스트로 알린다 */
+    /**
+     * 중복(번호/ref/dedupeKey 기준) 자동 통합·번호 오류·최대 인원을 걸러서 추가하고 결과를 토스트로 알린다.
+     * 조의금과 화환을 모두 보낸 동일인을 둘 다 체크하면 2명이 아니라 1명으로 합쳐지고 메모만 병합된다.
+     */
     const addItems = (incoming: RecipientItem[], invalidCount = 0) => {
-        // 집계는 setState updater 밖에서 한다. (updater 안에서 하면 StrictMode 2회 실행으로 숫자가 두 배가 됨)
         const next = [...itemsRef.current];
-        const phones = new Set(next.map((i) => i.phone).filter(Boolean) as string[]);
-        const refs = new Set(next.map((i) => i.ref).filter(Boolean) as string[]);
         let added = 0;
-        let dup = 0;
+        let merged = 0;
         let over = 0;
-        for (const it of incoming) {
-            if ((it.phone && phones.has(it.phone)) || (it.ref && refs.has(it.ref))) {
-                dup++;
+
+        for (const raw of incoming) {
+            const dk = raw.dedupeKey || (raw.phone ? phoneDedupeKey(raw.phone) : undefined);
+            const it: RecipientItem = { ...raw, dedupeKey: dk };
+
+            const existingIdx = next.findIndex(
+                (ex) =>
+                    (dk && ex.dedupeKey && ex.dedupeKey === dk) ||
+                    (it.phone && ex.phone && ex.phone === it.phone) ||
+                    (it.ref && ex.ref && ex.ref === it.ref)
+            );
+
+            if (existingIdx >= 0) {
+                // 이미 담긴 동일인이면 인원수는 늘리지 않고(1명 유지) 부가 메모/이름만 보강
+                const prev = next[existingIdx];
+                const combinedNote =
+                    prev.note && it.note && !prev.note.includes(it.note)
+                        ? `${prev.note} · ${it.note}`
+                        : prev.note || it.note;
+                next[existingIdx] = {
+                    ...prev,
+                    name: prev.name || it.name,
+                    phone: prev.phone || it.phone,
+                    ref: prev.ref || it.ref,
+                    dedupeKey: prev.dedupeKey || dk,
+                    note: combinedNote,
+                };
+                merged++;
                 continue;
             }
+
             if (next.length >= MAX_RECIPIENTS) {
                 over++;
                 continue;
             }
             next.push(it);
-            if (it.phone) phones.add(it.phone);
-            if (it.ref) refs.add(it.ref);
             added++;
         }
+
         itemsRef.current = next;
         setItems(() => next);
 
-        const parts = [`${added}명 추가`];
-        if (dup) parts.push(`중복 ${dup}명 제외`);
+        const parts: string[] = [];
+        if (added > 0) parts.push(`${added}명 추가`);
+        if (merged > 0) parts.push(`동일인 ${merged}건은 1명으로 통합`);
         if (invalidCount) parts.push(`번호 오류 ${invalidCount}명 제외`);
         if (over) parts.push(`최대 ${MAX_RECIPIENTS}명 초과 ${over}명 제외`);
-        notify(parts.join(' · '));
+        if (parts.length > 0) notify(parts.join(' · '));
     };
 
     // ---------- 연락처 (Contact Picker API: 안드로이드 크롬 전용) ----------
@@ -151,12 +180,18 @@ export default function RecipientPanel({
                     invalid++;
                     continue;
                 }
-                out.push({ key: nextKey(), name: (c.name?.[0] || '').trim().slice(0, 20), phone, maskedPhone: maskPhone(phone), source: 'contact' });
+                out.push({
+                    key: nextKey(),
+                    name: (c.name?.[0] || '').trim().slice(0, 20),
+                    phone,
+                    dedupeKey: phoneDedupeKey(phone),
+                    maskedPhone: maskPhone(phone),
+                    source: 'contact',
+                });
             }
             if (picked.length) addItems(out, invalid);
         } catch (e) {
             const name = (e as { name?: string })?.name;
-            // 사용자가 선택 창을 닫은 경우(AbortError)는 안내하지 않는다
             if (name === 'AbortError') return;
             if (name === 'SecurityError') notify('연락처 접근이 막혀 있어요. 크롬 앱의 사이트 설정에서 확인해주세요.');
             else notify(`연락처를 불러오지 못했습니다.${name ? ` (${name})` : ''}`);
@@ -177,7 +212,6 @@ export default function RecipientPanel({
             for (const row of rows.slice(0, 1000)) {
                 const cells = row.map((c) => (c == null ? '' : String(c).trim()));
                 if (cells.every((c) => !c)) continue;
-                // 헤더는 첫 번째 비어있지 않은 행만 허용 (데이터 행의 "번호없음" 같은 이름이 헤더로 오인되지 않도록)
                 const isFirstRow = !seenFirstRow;
                 seenFirstRow = true;
                 if (isFirstRow && cells.some((c) => HEADER_WORDS.test(c)) && !cells.some((c) => isValidMobile(normalizePhone(c)))) continue;
@@ -188,7 +222,14 @@ export default function RecipientPanel({
                 }
                 const phone = normalizePhone(cells[phoneIdx]);
                 const name = cells.find((c, i) => i !== phoneIdx && c && !/^[\d\s\-+().]+$/.test(c)) || '';
-                out.push({ key: nextKey(), name: name.slice(0, 20), phone, maskedPhone: maskPhone(phone), source: 'excel' });
+                out.push({
+                    key: nextKey(),
+                    name: name.slice(0, 20),
+                    phone,
+                    dedupeKey: phoneDedupeKey(phone),
+                    maskedPhone: maskPhone(phone),
+                    source: 'excel',
+                });
             }
             if (!out.length && !invalid) return notify('읽을 수 있는 행이 없습니다. 이름, 휴대폰번호 두 열로 작성해주세요.');
             addItems(out, invalid);
@@ -199,11 +240,20 @@ export default function RecipientPanel({
         }
     };
 
-    // ---------- 직접 입력 ----------
+    // ---------- 직접 입력 (숫자만, 11자리 제한, 하이픈 자동 포맷) ----------
     const addDirect = () => {
         const phone = normalizePhone(dPhone);
-        if (!isValidMobile(phone)) return notify('휴대폰 번호를 정확히 입력해주세요. (예: 010-1234-5678)');
-        addItems([{ key: nextKey(), name: dName.trim().slice(0, 20), phone, maskedPhone: maskPhone(phone), source: 'manual' }]);
+        if (!isValidMobile(phone)) return notify('휴대폰 번호 11자리를 정확히 입력해주세요. (예: 010-1234-5678)');
+        addItems([
+            {
+                key: nextKey(),
+                name: dName.trim().slice(0, 20),
+                phone,
+                dedupeKey: phoneDedupeKey(phone),
+                maskedPhone: maskPhone(phone),
+                source: 'manual',
+            },
+        ]);
         setDName('');
         setDPhone('');
     };
@@ -241,6 +291,7 @@ export default function RecipientPanel({
                 key: nextKey(),
                 name: c.name,
                 ref: c.ref,
+                dedupeKey: c.dedupeKey,
                 maskedPhone: c.maskedPhone,
                 source: listOpen,
                 note: c.summary,
@@ -290,9 +341,9 @@ export default function RecipientPanel({
                     <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="이름 (선택)" maxLength={20} aria-label="받는 사람 이름" />
                     <input
                         value={dPhone}
-                        onChange={(e) => setDPhone(e.target.value)}
-                        placeholder="휴대폰 번호"
-                        inputMode="tel"
+                        onChange={(e) => setDPhone(formatPhoneInput(e.target.value))}
+                        placeholder="010-0000-0000"
+                        inputMode="numeric"
                         maxLength={13}
                         aria-label="받는 사람 휴대폰 번호"
                         onKeyDown={(e) => e.key === 'Enter' && addDirect()}
@@ -342,7 +393,7 @@ export default function RecipientPanel({
                                 className="gs-btn-dark"
                                 onClick={() => {
                                     setChromeAsk(false);
-                                    openInChrome();
+                                    openInChrome(buildShareableDraftUrl?.());
                                 }}
                             >
                                 확인
@@ -396,31 +447,38 @@ export default function RecipientPanel({
                                     전체 선택 ({selectable.length}명)
                                 </label>
                                 <ul className="gs-cand">
-                                    {candidates.map((c) => (
-                                        <li key={c.ref} className={c.valid ? '' : 'disabled'}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    disabled={!c.valid}
-                                                    checked={checked.has(c.ref)}
-                                                    onChange={(e) =>
-                                                        setChecked((prev) => {
-                                                            const n = new Set(prev);
-                                                            if (e.target.checked) n.add(c.ref);
-                                                            else n.delete(c.ref);
-                                                            return n;
-                                                        })
-                                                    }
-                                                />
-                                                <div className="gs-rec-main">
-                                                    <strong>{c.name || '이름 없음'}</strong>
-                                                    <span>
-                                                        {c.maskedPhone} · {c.summary}
-                                                    </span>
-                                                </div>
-                                            </label>
-                                        </li>
-                                    ))}
+                                    {candidates.map((c) => {
+                                        const alreadyAdded =
+                                            !!c.dedupeKey && items.some((ex) => ex.dedupeKey && ex.dedupeKey === c.dedupeKey);
+                                        return (
+                                            <li key={c.ref} className={c.valid ? '' : 'disabled'}>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        disabled={!c.valid}
+                                                        checked={checked.has(c.ref)}
+                                                        onChange={(e) =>
+                                                            setChecked((prev) => {
+                                                                const n = new Set(prev);
+                                                                if (e.target.checked) n.add(c.ref);
+                                                                else n.delete(c.ref);
+                                                                return n;
+                                                            })
+                                                        }
+                                                    />
+                                                    <div className="gs-rec-main">
+                                                        <strong>
+                                                            {c.name || '이름 없음'}
+                                                            {alreadyAdded ? ' (이미 선택됨)' : ''}
+                                                        </strong>
+                                                        <span>
+                                                            {c.maskedPhone} · {c.summary}
+                                                        </span>
+                                                    </div>
+                                                </label>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </>
                         )}

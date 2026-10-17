@@ -17,6 +17,35 @@ export function normalizePhone(raw: string | null | undefined): string {
     return digits;
 }
 
+/** 직접 입력창용: 숫자만 허용, 최대 11자리 제한, 자동 하이픈(010-1234-5678) 포맷 */
+export function formatPhoneInput(raw: string | null | undefined): string {
+    const digits = String(raw ?? '')
+        .replace(/\D/g, '')
+        .slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+}
+
+/**
+ * 클라이언트/서버 공용 전화번호 중복 통합 키 (원본 번호 노출 없이 조의금·화환·직접입력 동일인 판별)
+ */
+export function phoneDedupeKey(rawPhone: string | null | undefined): string {
+    const p = normalizePhone(rawPhone);
+    if (!p) return '';
+    const salted = `maeum-gift-dedupe-v1:${p}`;
+    let h1 = 0x811c9dc5;
+    let h2 = 0x01000193;
+    for (let i = 0; i < salted.length; i++) {
+        const c = salted.charCodeAt(i);
+        h1 ^= c;
+        h1 = Math.imul(h1, 0x01000193);
+        h2 ^= c + i;
+        h2 = Math.imul(h2, 0x811c9dc5);
+    }
+    return `dk_${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
+}
+
 /** 휴대폰 번호만 허용 (010/011/016/017/018/019, 10~11자리) */
 export function isValidMobile(phone: string): boolean {
     return /^01[016789]\d{7,8}$/.test(phone);

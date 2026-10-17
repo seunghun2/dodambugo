@@ -172,7 +172,7 @@ export function ConfirmModal({
                 <p className="gs-confirm-line">
                     {count}명 × {won(product.sale_price)} = <strong>{won(product.sale_price * count)}</strong>
                 </p>
-                {hasRefs && <p className="gs-hint">조의금/화환 목록과 번호가 겹치는 분은 주문 시 한 번만 포함되어 금액이 줄 수 있어요.</p>}
+                <p className="gs-hint">결제 완료 10분 후 감사장과 모바일 쿠폰이 함께 발송됩니다. (10분 이내 취소 가능)</p>
                 {isTest && <p className="gs-test-note">테스트 모드입니다. 실제 결제와 발송은 이루어지지 않습니다.</p>}
                 <div className="gs-dialog-btns">
                     <button className="gs-btn-light" onClick={onClose} disabled={busy}>
@@ -208,6 +208,7 @@ export function DoneModal({
                     {count}명 · {won(total)}
                 </p>
                 <p className="gs-hint">주문번호 {orderNumber}</p>
+                <p className="gs-hint">결제 후 10분 뒤 감사장과 모바일 쿠폰이 자동 발송됩니다.</p>
                 {isTest && <p className="gs-test-note">실제 결제·발송은 이루어지지 않았습니다.</p>}
                 <div className="gs-dialog-btns">
                     <button className="gs-btn-dark" onClick={onClose}>
