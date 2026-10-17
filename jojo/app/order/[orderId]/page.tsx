@@ -227,10 +227,12 @@ export default function OrderDetailPage() {
         return `${year}.${month}.${day} ${hour}:${minute}`;
     };
 
-    const formatRemainMMSS = (sec: number) => {
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        return `${String(m).padStart(2, '0')}분 ${String(s).padStart(2, '0')}초`;
+    const formatDispatchTime = (deadlineAt?: string | null) => {
+        if (!deadlineAt) return '';
+        const d = new Date(deadlineAt);
+        const hour = d.getHours();
+        const minute = String(d.getMinutes()).padStart(2, '0');
+        return `${hour}시 ${minute}분`;
     };
 
     const handleCancelGiftOrder = async () => {
@@ -238,7 +240,7 @@ export default function OrderDetailPage() {
         const canNow =
             (giftOrder.status === 'paid' || giftOrder.status === 'test_paid') && remainingSeconds > 0;
         if (!canNow) {
-            alert('결제 후 10분이 경과하여 주문이 확정되었으므로 취소할 수 없습니다.');
+            alert('결제 후 1시간이 경과하여 주문이 확정되었으므로 취소할 수 없습니다.');
             return;
         }
         if (
@@ -254,7 +256,7 @@ export default function OrderDetailPage() {
             const res = await fetch(`/api/gift/orders/${giftOrder.order_number}/cancel`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reason: '주문자 직접 취소 (10분 이내)' }),
+                body: JSON.stringify({ reason: '주문자 직접 취소 (1시간 이내)' }),
             });
             const json = await res.json();
             if (!res.ok || !json.success) {
@@ -352,7 +354,7 @@ export default function OrderDetailPage() {
                                 <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
                                     {isSent
                                         ? '받으시는 분들께 감사장 문자와 모바일 쿠폰이 발송되었습니다.'
-                                        : '결제 완료 10분 후 감사장 문자와 모바일 쿠폰이 순차 발송됩니다.'}
+                                        : '결제 완료 1시간 후 감사장 문자와 모바일 쿠폰이 순차 발송됩니다.'}
                                 </p>
                             </>
                         )}
@@ -377,16 +379,16 @@ export default function OrderDetailPage() {
                                         ? '#DC2626'
                                         : isSent
                                           ? '#16A34A'
-                                          : '#2563EB',
+                                          : '#1A1A1A',
                                 }}
                             >
                                 {isCancelled
                                     ? '주문 취소됨'
                                     : isSent
-                                      ? '발송 완료'
+                                      ? '발송완료'
                                       : giftOrder.status === 'sending'
                                         ? '발송 진행 중'
-                                        : '발송 대기 (결제 10분 후 자동 발송)'}
+                                        : `발송대기(${formatDispatchTime(giftOrder.cancel_deadline_at)} 발송 예정)`}
                             </span>
                         </div>
 
@@ -440,9 +442,9 @@ export default function OrderDetailPage() {
                         </div>
 
                         <div className="detail-row">
-                            <span className="label">단가 × 수량</span>
+                            <span className="label">상품수량</span>
                             <span className="value">
-                                {giftOrder.unit_price?.toLocaleString()}원 × {giftOrder.quantity}명
+                                {giftOrder.quantity}개
                             </span>
                         </div>
 
@@ -487,17 +489,15 @@ export default function OrderDetailPage() {
                         </div>
                     </section>
 
-                    {/* 10분 이내 주문 취소 제어 영역 */}
+                    {/* 1시간 이내 주문 취소 제어 영역 */}
                     {!isCancelled && (
                         <section className="order-section" style={{ marginTop: 12 }}>
                             <h2 className="section-title">주문 취소 안내</h2>
                             {canCancelNow ? (
                                 <div>
                                     <p style={{ fontSize: 13, color: '#444', lineHeight: 1.6, marginBottom: 14 }}>
-                                        • 답례품은 결제 완료 <strong>10분 후</strong> 감사장과 함께 자동 발송됩니다.
-                                        <br />• 발송 전 남은 시간 동안 아래 버튼으로 주문을 즉시 취소하실 수 있습니다.
-                                        <br />• 취소 가능 남은 시간:{' '}
-                                        <strong style={{ color: '#DC2626' }}>{formatRemainMMSS(remainingSeconds)}</strong>
+                                        • 답례품은 결제 완료 <strong>1시간 후 ({formatDispatchTime(giftOrder.cancel_deadline_at)} 예정)</strong> 감사장과 함께 자동 발송됩니다.
+                                        <br />• 발송 전까지 아래 버튼으로 주문을 즉시 취소하실 수 있습니다.
                                     </p>
                                     <button
                                         type="button"
@@ -505,25 +505,24 @@ export default function OrderDetailPage() {
                                         onClick={handleCancelGiftOrder}
                                         style={{
                                             width: '100%',
-                                            height: 48,
-                                            borderRadius: 10,
-                                            border: '1px solid #FCA5A5',
-                                            background: '#FEF2F2',
-                                            color: '#DC2626',
-                                            fontSize: 15,
-                                            fontWeight: 700,
+                                            height: 42,
+                                            borderRadius: 8,
+                                            border: '1px solid #E5E7EB',
+                                            background: '#FFFFFF',
+                                            color: '#6B7280',
+                                            fontSize: 14,
+                                            fontWeight: 500,
                                             cursor: cancellingGift ? 'wait' : 'pointer',
+                                            transition: 'all 0.15s ease',
                                         }}
                                     >
-                                        {cancellingGift
-                                            ? '취소 처리 중...'
-                                            : `주문 취소하기 (${formatRemainMMSS(remainingSeconds)} 남음)`}
+                                        {cancellingGift ? '취소 처리 중...' : '주문 취소하기'}
                                     </button>
                                 </div>
                             ) : (
                                 <div>
                                     <p style={{ fontSize: 13, color: '#888', lineHeight: 1.6, marginBottom: 12 }}>
-                                        • 결제 후 10분이 경과하여 답례품 및 감사장 발송이 확정되었으므로 취소가 불가합니다.
+                                        • 결제 후 1시간이 경과하여 답례품 및 감사장 발송이 확정되었으므로 취소가 불가합니다.
                                         <br />• 모바일 쿠폰 특성상 발송 완료 후에는 교환·연장·환불이 불가합니다.
                                     </p>
                                     <button
@@ -541,7 +540,7 @@ export default function OrderDetailPage() {
                                             cursor: 'not-allowed',
                                         }}
                                     >
-                                        주문 완료 (10분 경과로 취소 불가)
+                                        주문 완료 (1시간 경과로 취소 불가)
                                     </button>
                                 </div>
                             )}
@@ -562,8 +561,8 @@ export default function OrderDetailPage() {
                             </div>
                             {isExpanded.refund && (
                                 <div className="accordion-content">
-                                    <p>• 결제 완료 후 10분 이내에는 본 주문내역 페이지에서 직접 주문을 취소하실 수 있습니다.</p>
-                                    <p>• 결제 후 10분이 경과하면 받으시는 분께 감사장 문자(LMS)와 모바일 쿠폰(MMS)이 발송되며 이후에는 취소가 불가합니다.</p>
+                                    <p>• 결제 완료 후 1시간 이내에는 본 주문내역 페이지에서 직접 주문을 취소하실 수 있습니다.</p>
+                                    <p>• 결제 후 1시간이 경과하면 받으시는 분께 감사장 문자(LMS)와 모바일 쿠폰(MMS)이 발송되며 이후에는 취소가 불가합니다.</p>
                                     <p>• 모바일 쿠폰의 유효기간은 발송일로부터 30일이며, 기간 만료 후 연장 및 환불은 불가합니다.</p>
                                 </div>
                             )}

@@ -153,6 +153,18 @@ export async function POST(req: NextRequest) {
             throw recErr;
         }
 
+        // 조문객이 /view/[id]/thanks/card 링크를 열었을 때 상주가 선택한 종교 카드와 감사 문구가 동일하게 보이도록 동기화
+        if (cardId !== 'none' && message) {
+            await supabase
+                .from('bugo')
+                .update({
+                    thanks_religion: cardId,
+                    thanks_message: { [cardId]: message },
+                })
+                .eq('id', bugo.id)
+                .then(() => {}, (err) => console.error('[gift/orders] bugo thanks sync warn:', err));
+        }
+
         return NextResponse.json({
             success: true,
             orderId: order.id,

@@ -17,7 +17,7 @@ export async function POST(
         }
 
         const body = await req.json().catch(() => ({}));
-        const reason = String(body?.reason || '주문자 직접 취소 (10분 이내)').trim();
+        const reason = String(body?.reason || '주문자 직접 취소 (1시간 이내)').trim();
 
         const sb = getSupabase();
         const isUuid = orderNumber.includes('-') && orderNumber.length > 20;

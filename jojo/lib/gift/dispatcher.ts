@@ -7,7 +7,7 @@ import { getSupabase } from './auth';
 import { getIssuer } from './issuer';
 import { sendAlimtalk, sendLMS } from '@/lib/solapi';
 
-export const GIFT_GRACE_MINUTES = 10;
+export const GIFT_GRACE_MINUTES = 60;
 export const GIFT_GRACE_MS = GIFT_GRACE_MINUTES * 60 * 1000;
 export const STUCK_SENDING_MS = 3 * 60 * 1000; // sending 상태에서 3분 이상 멈춘 경우 자동 재시도
 const BATCH_CONCURRENCY = 10;
@@ -108,8 +108,8 @@ export async function sendGiftOrderCompleteNotify(order: {
         `- 수량: ${order.quantity}명`,
         `- 결제금액: ${(order.total_amount || 0).toLocaleString()}원`,
         ``,
-        `※ 결제 완료 10분 후 감사장과 모바일 쿠폰이 자동 발송됩니다.`,
-        `※ 발송 전(결제 후 10분 이내)에는 아래 주문내역에서 직접 취소하실 수 있습니다.`,
+        `※ 결제 완료 1시간 후 감사장과 모바일 쿠폰이 자동 발송됩니다.`,
+        `※ 발송 전(결제 후 1시간 이내)에는 아래 주문내역에서 직접 취소하실 수 있습니다.`,
         ``,
         `▼ 주문내역 확인 및 취소하기`,
         orderUrl,
@@ -225,7 +225,7 @@ export async function dispatchGiftOrder(
     const issuer = getIssuer();
     const isTestOrder = Boolean(order.is_test);
     const hasThanksCard = order.card_id && order.card_id !== 'none';
-    const thanksUrl = `https://maeumbugo.co.kr/view/${order.bugo_number}/thanks`;
+    const thanksUrl = `https://maeumbugo.co.kr/view/${order.bugo_number}/thanks/card`;
     const fullThanksText = hasThanksCard
         ? `${order.message || ''}\n\n▼ 감사장 보기\n${thanksUrl}`.trim()
         : String(order.message || '').trim();
@@ -386,7 +386,7 @@ export async function cancelGiftOrder(
         if (!canCancel) {
             return {
                 ok: false,
-                error: '결제 후 10분이 경과하여 주문이 확정·발송되었으므로 취소할 수 없습니다.',
+                error: '결제 후 1시간이 경과하여 주문이 확정·발송되었으므로 취소할 수 없습니다.',
                 cancelledCoupons: 0,
             };
         }
@@ -494,19 +494,44 @@ export async function cancelGiftOrder(
         })
         .eq('id', orderId);
 
-    // 4) 실결제 취소 시 상주에게 결제 취소 완료 알림톡 발송 (기존 검수완료 취소 템플릿 활용)
+    // 4) 실결제 취소 시 상주에게 결제 취소 완료 알림 발송 (GIFT_CANCEL_TEMPLATE_ID 우선, 미설정/실패 시 LMS 폴백)
     if (!order.is_test && order.buyer_phone) {
-        try {
-            const cleanPhone = String(order.buyer_phone).replace(/\D/g, '');
-            if (cleanPhone.startsWith('010')) {
-                await sendAlimtalk(cleanPhone, 'KA01TP260128002330965AMneEQhHRIM', {
-                    주문자명: order.buyer_name || '상주',
-                    환불금액: (order.total_amount || 0).toLocaleString(),
-                    결제수단: order.payment_method || '신용카드',
-                });
+        const cleanPhone = String(order.buyer_phone).replace(/\D/g, '');
+        if (cleanPhone.startsWith('010')) {
+            const cancelTemplateId = process.env.GIFT_CANCEL_TEMPLATE_ID;
+            let sentAlim = false;
+            if (cancelTemplateId) {
+                try {
+                    const res = await sendAlimtalk(cleanPhone, cancelTemplateId, {
+                        주문번호: order.order_number,
+                        상품명: order.product_name,
+                        수량: `${order.quantity}명`,
+                        환불금액: (order.total_amount || 0).toLocaleString(),
+                        결제수단: order.payment_method || '신용카드',
+                    });
+                    if (!res?.statusCode || res.statusCode === '2000') sentAlim = true;
+                } catch (alimErr) {
+                    console.error('[gift/cancel] 취소 알림톡 실패, LMS 대체 발송:', alimErr);
+                }
             }
-        } catch (alimErr) {
-            console.error('[gift/cancel] 취소 알림톡 발송 오류:', alimErr);
+            if (!sentAlim) {
+                const cancelLms = [
+                    `[마음부고] 답례품 주문이 정상적으로 취소되었습니다.`,
+                    ``,
+                    `◼ 취소 내역`,
+                    `- 주문번호: ${order.order_number}`,
+                    `- 상품명: ${order.product_name}`,
+                    `- 취소수량: ${order.quantity}명`,
+                    `- 환불금액: ${(order.total_amount || 0).toLocaleString()}원`,
+                    `- 결제수단: ${order.payment_method || '신용카드'}`,
+                    ``,
+                    `※ 결제 승인 취소는 카드사 정책에 따라 영업일 기준 2~3일 소요될 수 있습니다.`,
+                    `※ 감사장과 모바일 쿠폰은 발송되지 않습니다.`,
+                ].join('\n');
+                await sendLMS(cleanPhone, '[마음부고] 답례품 주문 취소 안내', cancelLms).catch((err) =>
+                    console.error('[gift/cancel] 취소 LMS 발송 오류:', err)
+                );
+            }
         }
     }
 

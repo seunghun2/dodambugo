@@ -186,7 +186,7 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
                     description: '감사의 마음을 전합니다.',
                     imageUrl: isB2b
                         ? 'https://bugoon.maeumbugo.co.kr/og-bugoon.png?v=2'
-                        : 'https://maeumbugo.co.kr/og-bugo-v3.png',
+                        : 'https://maeumbugo.co.kr/og-thanks-v1.png',
                     link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
                 },
                 buttons: [{ title: '감사장 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }]
