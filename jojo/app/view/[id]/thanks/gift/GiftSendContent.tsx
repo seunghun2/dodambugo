@@ -22,7 +22,8 @@ interface Props {
     bugoId: string;
     bugoUuid: string;
     bugoNumber: string;
-    initialProductId: string | null;
+    initialProduct: GiftProduct;
+    live: boolean;
     deceasedName: string;
     mournerName: string;
     religion: string | null;
@@ -32,7 +33,7 @@ interface Props {
 
 const TAB_KEYS = RELIGION_TABS.map((t) => t.key);
 
-export default function GiftSendContent({ bugoId, initialProductId, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
+export default function GiftSendContent({ bugoId, initialProduct, live, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
     const router = useRouter();
 
     // ----- 카드 / 문구 -----
@@ -55,9 +56,7 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
     };
 
     // ----- 상품 / 받는 사람 -----
-    const [live, setLive] = useState<boolean | null>(null);
-    const [productError, setProductError] = useState(false);
-    const [product, setProduct] = useState<GiftProduct | null>(null);
+    const product = initialProduct; // 상품 상세에서 고른 상품으로 고정 (바꾸려면 목록으로 돌아간다)
     const [items, setItems] = useState<RecipientItem[]>([]);
     const [agree, setAgree] = useState(false);
 
@@ -78,25 +77,6 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
         if (toastTimer.current) clearTimeout(toastTimer.current);
         toastTimer.current = setTimeout(() => setToast(null), 2800);
     }, []);
-
-    // ----- 상품 로드: 상품 상세에서 [구매하기]로 넘어온 상품(?product=)을 고정한다 -----
-    // 상품 없이 직접 들어오면 목록(→ 상세 고지)으로 보낸다. 고지 화면을 건너뛰고 결제로 들어올 수 없게 하기 위함.
-    useEffect(() => {
-        let alive = true;
-        fetch('/api/gift/products')
-            .then((r) => r.json())
-            .then((d) => {
-                if (!alive) return;
-                setLive(!!d.live);
-                const found = initialProductId ? (d.products || []).find((p: GiftProduct) => p.id === initialProductId) : null;
-                if (found) setProduct(found);
-                else router.replace(`/view/${bugoId}/gift`);
-            })
-            .catch(() => alive && setProductError(true));
-        return () => {
-            alive = false;
-        };
-    }, [bugoId, initialProductId, router]);
 
     // 오버레이가 열려 있으면 뒤 화면 스크롤 잠금
     const anyOverlay = previewOpen || confirmOpen || helpOpen || authOpen || !!done;
@@ -132,10 +112,9 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
     // ----- 결제(주문) -----
     const total = product ? product.sale_price * items.length : 0;
     const hasRefs = items.some((i) => i.ref);
-    const canPay = !!product && items.length > 0 && agree;
+    const canPay = items.length > 0 && agree;
 
     const startPay = async () => {
-        if (!product) return notify('답례품을 선택해주세요.');
         if (items.length === 0) return notify('받는 사람을 선택해주세요.');
         if (!agree) return notify('상품 안내를 확인하고 동의해주세요.');
         if (!(await ensureAuth())) return;
@@ -143,7 +122,7 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
     };
 
     const submitOrder = async (retried = false): Promise<void> => {
-        if (!product || busy) return;
+        if (busy) return;
         setBusy(true);
         try {
             const res = await fetch('/api/gift/orders', {
@@ -184,7 +163,7 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
     return (
         <div className="gs-page">
             <header className="gs-header">
-                <button className="gs-icon-btn" onClick={() => router.push(product ? `/view/${bugoId}/gift/${product.id}` : `/view/${bugoId}/gift`)} aria-label="뒤로">
+                <button className="gs-icon-btn" onClick={() => router.push(`/view/${bugoId}/gift/${product.id}`)} aria-label="뒤로">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -193,7 +172,7 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
                 <span className="gs-header-spacer" />
             </header>
 
-            {live === false && <div className="gs-banner">테스트 모드 — 실제 결제와 발송은 이루어지지 않습니다.</div>}
+            {!live && <div className="gs-banner">테스트 모드 — 실제 결제와 발송은 이루어지지 않습니다.</div>}
 
             <main className="gs-main">
                 {/* 카드 선택 */}
@@ -243,48 +222,38 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
                             </button>
                         </h3>
                     </div>
-                    {productError ? (
-                        <p className="gs-empty">상품을 불러오지 못했습니다. 새로고침해주세요.</p>
-                    ) : product ? (
-                        <>
-                            <div className="gs-selected">
-                                <ProductThumb product={product} size="sm" />
-                                <div className="gs-selected-info">
-                                    <p>
-                                        [{product.brand}] {product.name}
-                                    </p>
-                                    <strong>{won(product.sale_price)}</strong>
-                                </div>
-                                <button className="gs-btn-outline" onClick={() => router.push(`/view/${bugoId}/gift`)}>
-                                    변경
-                                </button>
-                            </div>
-                            <p className="gs-hint">
-                                모바일 쿠폰은 받는 분께 자동 발송돼요 · 유효기간 발송일로부터 {GIFT_VALID_DAYS}일, 만료 후 연장·환불 불가{' '}
-                                <a className="gs-detail-link" href={`/view/${bugoId}/gift/${product.id}`}>
-                                    상품 안내 보기
-                                </a>
+                    <div className="gs-selected">
+                        <ProductThumb product={product} size="sm" />
+                        <div className="gs-selected-info">
+                            <p>
+                                [{product.brand}] {product.name}
                             </p>
-                        </>
-                    ) : (
-                        <p className="gs-empty">상품을 불러오는 중…</p>
-                    )}
+                            <strong>{won(product.sale_price)}</strong>
+                        </div>
+                        <button className="gs-btn-outline" onClick={() => router.push(`/view/${bugoId}/gift`)}>
+                            변경
+                        </button>
+                    </div>
+                    <p className="gs-hint">
+                        모바일 쿠폰은 받는 분께 자동 발송돼요 · 유효기간 발송일로부터 {GIFT_VALID_DAYS}일, 만료 후 연장·환불 불가{' '}
+                        <a className="gs-detail-link" href={`/view/${bugoId}/gift/${product.id}`}>
+                            상품 안내 보기
+                        </a>
+                    </p>
                 </section>
 
                 <RecipientPanel items={items} setItems={(u) => setItems(u)} bugoId={bugoId} ensureAuth={ensureAuth} notify={notify} />
 
-                {product && items.length > 0 && (
+                {items.length > 0 && (
                     <p className="gs-total">
                         {items.length}명 × {won(product.sale_price)} = <strong>{won(total)}</strong>
                     </p>
                 )}
 
-                {product && (
-                    <label className="gs-agree">
-                        <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-                        <span>{AGREE_TEXT}</span>
-                    </label>
-                )}
+                <label className="gs-agree">
+                    <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+                    <span>{AGREE_TEXT}</span>
+                </label>
             </main>
 
             {/* 하단 바: 기존 감사장 화면(문구 수정 | 감사장 전달하기)과 같은 디자인, 미리보기 | 결제하기 반반 */}
@@ -304,7 +273,7 @@ export default function GiftSendContent({ bugoId, initialProductId, deceasedName
                 <ConfirmModal
                     product={product}
                     count={items.length}
-                    isTest={live !== true}
+                    isTest={!live}
                     hasRefs={hasRefs}
                     busy={busy}
                     onConfirm={() => submitOrder()}

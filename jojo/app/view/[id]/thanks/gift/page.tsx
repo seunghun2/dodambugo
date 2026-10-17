@@ -1,6 +1,7 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getSupabase } from '@/lib/gift/auth';
+import { isLiveMode } from '@/lib/gift/issuer';
 import GiftSendContent from './GiftSendContent';
 import './gift-send.css';
 
@@ -21,6 +22,18 @@ export default async function GiftSendPage({
     const { id } = await params;
     const { product } = await searchParams;
     const supabase = getSupabase();
+
+    // 상품 상세(고지)를 거치지 않은 직접 접근은 서버에서 바로 목록으로 보낸다. (클라이언트에서 돌리면 화면이 잠깐 보였다 사라짐)
+    const { data: productRow } = product
+        ? await supabase
+              .from('gift_products')
+              .select('id, brand, name, category, list_price, sale_price, image_url, badge')
+              .eq('id', product)
+              .eq('is_active', true)
+              .maybeSingle()
+        : { data: null };
+    if (!productRow) redirect(`/view/${id}/gift`);
+
     const isUUID = id.includes('-') && id.length > 10;
 
     // 화면에 필요한 최소 컬럼만 조회한다. (phone_password / mourners 등 연락처 컬럼은 클라이언트로 내려보내지 않음)
@@ -37,7 +50,8 @@ export default async function GiftSendPage({
             bugoId={id}
             bugoUuid={bugo.id}
             bugoNumber={bugo.bugo_number}
-            initialProductId={typeof product === 'string' ? product : null}
+            initialProduct={productRow}
+            live={isLiveMode()}
             deceasedName={bugo.deceased_name || ''}
             mournerName={bugo.mourner_name || ''}
             religion={bugo.religion || null}

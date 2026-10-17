@@ -356,32 +356,6 @@
     color: #888;
     font-size: 14px;
 }
-.brand-chips {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-.brand-chips::-webkit-scrollbar {
-    display: none;
-}
-.brand-chip {
-    flex: 0 0 auto;
-    padding: 7px 14px;
-    border: 1px solid #ddd;
-    border-radius: 999px;
-    background: #fff;
-    font-size: 13px;
-    color: #555;
-    cursor: pointer;
-}
-.brand-chip.active {
-    background: #333;
-    border-color: #333;
-    color: #fff;
-    font-weight: 600;
-}
 .brand-tile {
     width: 100%;
     height: 100%;
@@ -441,4 +415,100 @@
     font-size: 12px;
     font-weight: 700;
     color: #777;
+}
+
+/* ---- 상단 썸네일 ---- */
+.gift-hero {
+    position: relative;
+    background: #fbf3e6;
+    overflow: hidden;
+}
+.gift-hero img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+}
+.gift-hero-text {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #4a3b28;
+    letter-spacing: -0.03em;
+}
+.gift-hero-text b {
+    font-weight: 800;
+}
+
+/* ---- 검색 / 정렬 / 가격 필터 (주문 화면의 선물하기 필터와 같은 구성) ---- */
+.gift-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.gift-search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+.gift-search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 38px 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    font: inherit;
+    font-size: 14px;
+}
+.gift-search input:focus {
+    outline: none;
+    border-color: #ffcc45;
+    background: #fff;
+}
+.gift-search svg {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.gift-sort {
+    flex: 0 0 auto;
+    border: 0;
+    background: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: #777;
+    cursor: pointer;
+}
+.gift-chips {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.gift-chips::-webkit-scrollbar {
+    display: none;
+}
+.gift-chip {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+}
+.gift-chip.active {
+    border-color: #ffcc45;
+    background: #fff3cc;
+    color: #222;
+    font-weight: 600;
 }
