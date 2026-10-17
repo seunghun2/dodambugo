@@ -21,7 +21,7 @@ type SortKey = 'recommend' | 'low' | 'high';
 
 // 구간이 끊기지 않게 이어 붙인다. (5만원권처럼 딱 떨어지는 가격이 어느 구간에도 안 걸려 사라지는 것을 막기 위해)
 const PRICE_FILTERS: { label: string; test: (p: number) => boolean }[] = [
-    { label: '전체', test: () => true },
+    { label: '추천', test: () => true },
     { label: '~1만원', test: (p) => p < 10000 },
     { label: '1~2만원', test: (p) => p >= 10000 && p < 20000 },
     { label: '2~3만원', test: (p) => p >= 20000 && p < 30000 },

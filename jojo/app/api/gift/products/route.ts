@@ -17,5 +17,5 @@ export async function GET() {
         console.error('[gift/products]', error);
         return NextResponse.json({ error: '상품을 불러오지 못했습니다.' }, { status: 500 });
     }
-    return NextResponse.json({ products: data ?? [], live: isLiveMode() }, { headers: { 'Cache-Control': 'public, max-age=30' } });
+    return NextResponse.json({ products: data ?? [], live: isLiveMode() }, { headers: { 'Cache-Control': 'no-store' } });
 }

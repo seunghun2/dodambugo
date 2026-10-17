@@ -11,6 +11,7 @@ const navItems = [
     { href: '/admin/burial-reviews', icon: 'rate_review', label: '장지 후기' },
     { href: '/admin/facilities', icon: 'apartment', label: '장례식장 정보' },
     { href: '/admin/products', icon: 'inventory_2', label: '상품 등록' },
+    { href: '/admin/gift-products', icon: 'redeem', label: '답례품 관리' },
     { href: '/admin/condolence-settings', icon: 'credit_card', label: '조의금 설정' },
     { href: '/admin/marketing', icon: 'bar_chart', label: '마케팅/광고비' },
     { href: '/admin/inquiries', icon: 'mail', label: '문의 관리' },
@@ -21,9 +22,9 @@ const navItems = [
 const mobileNavItems = [
     { href: '/admin/bugo', icon: 'description', label: '부고' },
     { href: '/admin/flower-orders', icon: 'local_florist', label: '화환' },
+    { href: '/admin/gift-products', icon: 'redeem', label: '답례품' },
     { href: '/admin/condolence-orders', icon: 'payments', label: '부의금' },
     { href: '/admin/inquiries', icon: 'mail', label: '문의' },
-    { href: '/admin/blocked-ips', icon: 'block', label: 'IP' },
 ];
 
 export default function AdminSidebar() {
