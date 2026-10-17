@@ -1,9 +1,13 @@
 /* 답례품 페이지 스타일 */
 
 .gift-page {
+    max-width: 430px;
+    margin: 0 auto;
     min-height: 100vh;
     background: #fff;
     padding-bottom: 40px;
+    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    letter-spacing: -0.02em;
 }
 
 .gift-page.loading {
@@ -64,7 +68,7 @@
 
 /* 상단 배너 */
 .gift-banner {
-    background: linear-gradient(135deg, #fce7e7, #fdf2f2);
+    background: #fff8e1;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -78,7 +82,7 @@
 .gift-banner .banner-text {
     font-size: 15px;
     font-weight: 600;
-    color: #be123c;
+    color: #6b5a1e;
     line-height: 1.5;
 }
 
@@ -337,4 +341,104 @@
     .product-name {
         font-size: 12px;
     }
+}
+/* ---- 목록: 브랜드 탭 / 타일 / 배지 / 안내 ---- */
+.gift-test-banner {
+    background: #fff3cd;
+    color: #7a5b00;
+    font-size: 12px;
+    text-align: center;
+    padding: 8px 12px;
+}
+.gift-empty {
+    margin: 40px 0;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
+.brand-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.brand-chips::-webkit-scrollbar {
+    display: none;
+}
+.brand-chip {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+}
+.brand-chip.active {
+    background: #333;
+    border-color: #333;
+    color: #fff;
+    font-weight: 600;
+}
+.brand-tile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    word-break: keep-all;
+}
+.product-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #333;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+.product-card .product-brand {
+    margin: 0 0 3px;
+}
+.product-card .product-name {
+    margin: 0 0 6px;
+    font-size: 13px;
+    word-break: keep-all;
+}
+.product-price .sale {
+    font-size: 15px;
+}
+.gift-notice h3 {
+    margin: 0 0 10px;
+}
+.gift-notice ul {
+    margin: 0;
+}
+
+/* ---- 판매자 정보 ---- */
+.seller-info {
+    margin-top: 8px;
+    padding: 20px;
+    background: #f7f7f7;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #999;
+}
+.seller-info p {
+    margin: 0;
+}
+.seller-info .seller-name {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #777;
 }

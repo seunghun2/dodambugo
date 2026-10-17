@@ -11,8 +11,15 @@ export const metadata: Metadata = {
     robots: { index: false, follow: false },
 };
 
-export default async function GiftSendPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function GiftSendPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ product?: string }>;
+}) {
     const { id } = await params;
+    const { product } = await searchParams;
     const supabase = getSupabase();
     const isUUID = id.includes('-') && id.length > 10;
 
@@ -30,6 +37,7 @@ export default async function GiftSendPage({ params }: { params: Promise<{ id: s
             bugoId={id}
             bugoUuid={bugo.id}
             bugoNumber={bugo.bugo_number}
+            initialProductId={typeof product === 'string' ? product : null}
             deceasedName={bugo.deceased_name || ''}
             mournerName={bugo.mourner_name || ''}
             religion={bugo.religion || null}

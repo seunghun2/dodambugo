@@ -1,209 +1,128 @@
 'use client';
 
-import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { GIFT_VALID_DAYS } from '@/lib/gift/notices';
+import BrandTile from './BrandTile';
+import SellerInfo from './SellerInfo';
 import './gift.css';
 
 interface GiftProduct {
     id: string;
+    brand: string;
     name: string;
-    price: number;
-    discount_price?: number;
-    image: string;
-    description?: string;
+    list_price: number;
+    sale_price: number;
+    image_url: string | null;
+    badge: string | null;
 }
 
-interface BugoInfo {
-    deceased_name: string;
-    mourner_name: string;
-}
+const won = (n: number) => `${n.toLocaleString('ko-KR')}원`;
 
-// 샘플 답례품 데이터 (나중에 DB로 교체)
-const SAMPLE_GIFTS: GiftProduct[] = [
-    {
-        id: 'gift-1',
-        name: '프리미엄 한우 세트',
-        price: 150000,
-        discount_price: 129000,
-        image: '/images/gift-hanwoo.jpg',
-        description: '1++ 등급 한우 선물세트'
-    },
-    {
-        id: 'gift-2',
-        name: '고급 과일 선물세트',
-        price: 80000,
-        discount_price: 69000,
-        image: '/images/gift-fruit.jpg',
-        description: '제철 과일 프리미엄 세트'
-    },
-    {
-        id: 'gift-3',
-        name: '홍삼 선물세트',
-        price: 100000,
-        discount_price: 89000,
-        image: '/images/gift-ginseng.jpg',
-        description: '6년근 홍삼 정과 세트'
-    },
-    {
-        id: 'gift-4',
-        name: '명품 수건 세트',
-        price: 50000,
-        discount_price: 45000,
-        image: '/images/gift-towel.jpg',
-        description: '호텔식 명품 타월 세트'
-    },
-    {
-        id: 'gift-5',
-        name: '참기름 선물세트',
-        price: 60000,
-        image: '/images/gift-oil.jpg',
-        description: '국산 100% 참기름·들기름 세트'
-    },
-    {
-        id: 'gift-6',
-        name: '꿀 선물세트',
-        price: 70000,
-        discount_price: 59000,
-        image: '/images/gift-honey.jpg',
-        description: '국산 천연 벌꿀 세트'
-    },
-];
-
-export default function GiftPage() {
+/** 답례품 목록 → 상품을 누르면 상품 상세(고지) → 구매하기 → 문구/받는 분/결제 */
+export default function GiftListPage() {
     const params = useParams();
     const router = useRouter();
-    const pathname = usePathname();
-    const isB2b = pathname.startsWith('/b2b');
-    const pathPrefix = isB2b ? '/b2b' : '';
     const bugoId = params?.id as string;
 
-    const [bugoInfo, setBugoInfo] = useState<BugoInfo | null>(null);
+    const [products, setProducts] = useState<GiftProduct[]>([]);
+    const [live, setLive] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [brand, setBrand] = useState('전체');
 
     useEffect(() => {
-        if (bugoId) {
-            fetchBugoInfo();
-        }
-    }, [bugoId]);
+        let alive = true;
+        fetch('/api/gift/products')
+            .then((r) => r.json())
+            .then((d) => {
+                if (!alive) return;
+                setProducts(d.products || []);
+                setLive(!!d.live);
+            })
+            .catch(() => alive && setError(true))
+            .finally(() => alive && setLoading(false));
+        return () => {
+            alive = false;
+        };
+    }, []);
 
-    const fetchBugoInfo = async () => {
-        setLoading(true);
-        try {
-            const isUUID = bugoId.includes('-') && bugoId.length > 10;
-            const query = supabase.from('bugo').select('deceased_name, mourner_name').is('deleted_at', null);
-            const { data } = isUUID
-                ? await query.eq('id', bugoId).single()
-                : await query.eq('bugo_number', bugoId).single();
-
-            if (data) {
-                setBugoInfo(data);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-        setLoading(false);
-    };
-
-    const handleSelectProduct = (product: GiftProduct) => {
-        router.push(`${pathPrefix}/view/${bugoId}/gift/${product.id}`);
-    };
-
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('ko-KR').format(price);
-    };
-
-    if (loading) {
-        return (
-            <div className="gift-page loading">
-                <div className="spinner"></div>
-            </div>
-        );
-    }
+    const brands = useMemo(() => ['전체', ...Array.from(new Set(products.map((p) => p.brand)))], [products]);
+    const list = useMemo(() => products.filter((p) => brand === '전체' || p.brand === brand), [products, brand]);
 
     return (
         <div className="gift-page">
-            {/* 헤더 */}
             <header className="gift-header">
-                <button className="back-btn" onClick={() => router.back()}>
+                <button className="back-btn" onClick={() => router.back()} aria-label="뒤로">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <h1>감사답례품 신청하기</h1>
+                <h1>답례품 선택</h1>
             </header>
 
-            {/* 상단 배너 */}
+            {live === false && <div className="gift-test-banner">테스트 모드 — 실제 결제와 발송은 이루어지지 않습니다.</div>}
+
             <div className="gift-banner">
                 <div className="banner-content">
                     <p className="banner-text">
-                        조문해 주신 분들께<br />
+                        조문해 주신 분들께
+                        <br />
                         감사의 마음을 전해보세요.
                     </p>
                 </div>
-                <div className="gift-icon">
-                    <img src="/images/gift-banner-icon.png" alt="선물" />
-                </div>
-            </div>
-            <div className="gift-products">
-                {/* 상품 그리드 */}
-                <div className="product-grid">
-                    {SAMPLE_GIFTS.map((product) => (
-                        <div
-                            key={product.id}
-                            className="product-card"
-                            onClick={() => handleSelectProduct(product)}
-                        >
-                            <div className="product-image">
-                                <div className="placeholder">
-                                    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-                                        <rect x="8" y="20" width="32" height="22" rx="2" fill="#E5E7EB" />
-                                        <rect x="6" y="14" width="36" height="8" rx="2" fill="#D1D5DB" />
-                                        <rect x="22" y="14" width="4" height="28" fill="#9CA3AF" />
-                                        <path d="M24 14C24 14 20 9 17 9C14 9 12 11 12 13C12 15 14 16 17 16C20 16 24 14 24 14Z" fill="#9CA3AF" />
-                                        <path d="M24 14C24 14 28 9 31 9C34 9 36 11 36 13C36 15 34 16 31 16C28 16 24 14 24 14Z" fill="#9CA3AF" />
-                                    </svg>
-                                </div>
-                                {product.discount_price && (
-                                    <span className="discount-badge">
-                                        {Math.round((1 - product.discount_price / product.price) * 100)}%
-                                    </span>
-                                )}
-                            </div>
-                            <div className="product-info">
-                                <h3 className="product-name">{product.name}</h3>
-                                <p className="product-desc">{product.description}</p>
-                                <div className="product-price">
-                                    {product.discount_price ? (
-                                        <>
-                                            <span className="original">{formatPrice(product.price)}원</span>
-                                            <span className="sale">{formatPrice(product.discount_price)}원</span>
-                                        </>
-                                    ) : (
-                                        <span className="sale">{formatPrice(product.price)}원</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
             </div>
 
-            {/* 안내 */}
+            <div className="gift-products">
+                {loading ? (
+                    <p className="gift-empty">상품을 불러오는 중…</p>
+                ) : error ? (
+                    <p className="gift-empty">상품을 불러오지 못했습니다. 새로고침해주세요.</p>
+                ) : (
+                    <>
+                        <div className="brand-chips" role="tablist" aria-label="브랜드">
+                            {brands.map((b) => (
+                                <button key={b} role="tab" aria-selected={b === brand} className={`brand-chip ${b === brand ? 'active' : ''}`} onClick={() => setBrand(b)}>
+                                    {b}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="product-grid">
+                            {list.map((p) => {
+                                const discount = p.list_price > p.sale_price ? Math.round((1 - p.sale_price / p.list_price) * 100) : 0;
+                                return (
+                                    <div key={p.id} className="product-card" role="link" tabIndex={0} onClick={() => router.push(`/view/${bugoId}/gift/${p.id}`)} onKeyDown={(e) => e.key === 'Enter' && router.push(`/view/${bugoId}/gift/${p.id}`)}>
+                                        <div className="product-image">
+                                            <BrandTile brand={p.brand} name={p.name} imageUrl={p.image_url} />
+                                            {p.badge && <span className="product-badge">{p.badge}</span>}
+                                        </div>
+                                        <div className="product-info">
+                                            <p className="product-brand">{p.brand}</p>
+                                            <h3 className="product-name">{p.name}</h3>
+                                            <div className="product-price">
+                                                {discount > 0 && <span className="discount-percent">{discount}%</span>}
+                                                <span className="sale">{won(p.sale_price)}</span>
+                                                {discount > 0 && <span className="original">{won(p.list_price)}</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+            </div>
+
             <div className="gift-notice">
-                <h3>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" />
-                        <path d="M12 16V12M12 8H12.01" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    안내사항
-                </h3>
+                <h3>안내사항</h3>
                 <ul>
-                    <li>답례품은 입력하신 주소로 배송됩니다</li>
-                    <li>배송은 신청 후 2-3일 내 출고됩니다</li>
-                    <li>배송 관련 문의는 고객센터로 연락해 주세요</li>
+                    <li>답례품은 받는 분 휴대폰으로 모바일 쿠폰이 문자로 발송됩니다.</li>
+                    <li>쿠폰 유효기간은 발송일로부터 {GIFT_VALID_DAYS}일이며, 만료 후 연장 및 환불이 불가합니다.</li>
+                    <li>상품별 이용 안내는 상품 상세에서 확인하실 수 있습니다.</li>
                 </ul>
             </div>
+
+            <SellerInfo />
         </div>
     );
 }

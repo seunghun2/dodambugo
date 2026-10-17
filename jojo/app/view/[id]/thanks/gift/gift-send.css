@@ -889,3 +889,32 @@
     font-weight: 700;
     color: #333;
 }
+
+/* 결제 전 상품 안내 동의 */
+.gs-agree {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 14px 0 0;
+    padding: 14px 12px;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background: #fafafa;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #444;
+    cursor: pointer;
+}
+.gs-agree input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: #ffcc45;
+}
+.gs-detail-link {
+    margin-left: 4px;
+    color: #b58a00;
+    font-weight: 600;
+    text-decoration: underline;
+}

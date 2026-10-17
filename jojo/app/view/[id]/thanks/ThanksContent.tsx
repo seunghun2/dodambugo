@@ -382,7 +382,7 @@ ${mournerName} 배상`;
                 다우기술 연동 전에는 실제 발송이 없으므로, NEXT_PUBLIC_GIFT_ENTRY=true 일 때만 노출한다. */}
             {!isB2b && process.env.NEXT_PUBLIC_GIFT_ENTRY === 'true' && (
                 <div className="thanks-gift-entry">
-                    <button type="button" onClick={() => router.push(`/view/${bugoId}/thanks/gift`)}>
+                    <button type="button" onClick={() => router.push(`/view/${bugoId}/gift`)}>
                         <span>🎁 답례품과 함께 보내기</span>
                         <small>감사장에 커피·케이크 쿠폰을 함께 전달해요</small>
                     </button>
