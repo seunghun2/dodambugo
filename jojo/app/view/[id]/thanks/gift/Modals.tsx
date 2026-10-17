@@ -80,19 +80,18 @@ export function AuthModal({
 }
 
 // ---------------------------------------------------------------------------
-// 미리보기 — 받는 분이 보게 될 감사장 카드 (기존 감사장 카드 화면과 같은 디자인)
-//  배경 이미지 위에 글씨만 얹는다. 흰 박스·그림자 없음. 상품은 보여주지 않는다(쿠폰은 별도로 자동 발송).
+// 미리보기 — 받는 분이 보게 될 감사장 카드.
+//  기존 감사장 화면(thanks)과 같은 구조/치수: 카드 좌우 20px 안쪽, 안쪽 여백 200px 20px 80px, 배경 이미지 위에 글씨만.
+//  상품은 보여주지 않는다(쿠폰은 별도로 자동 발송).
 // ---------------------------------------------------------------------------
 export function PreviewModal({
     cardId,
     message,
-    hideMessage,
     mournerName,
     onClose,
 }: {
     cardId: CardId;
     message: string;
-    hideMessage: boolean;
     mournerName: string;
     onClose: () => void;
 }) {
@@ -102,25 +101,36 @@ export function PreviewModal({
 
     return (
         <div className="gs-overlay gs-pv" role="dialog" aria-modal="true" aria-label="미리보기">
-            <div className="gs-pv-card" style={card?.image ? { backgroundImage: `url(${card.image})` } : undefined}>
-                <h2 className="gs-pv-title">삼가 감사 인사 드립니다</h2>
-                {!hideMessage && (
-                    <div className="gs-pv-body">
-                        {message.split('\n\n').map((para, i) => (
-                            <p key={i}>
-                                {para.split('\n').map((line, j, arr) => (
-                                    <Fragment key={j}>
-                                        {line || '\u00A0'}
-                                        {j < arr.length - 1 && <br />}
-                                    </Fragment>
-                                ))}
-                            </p>
-                        ))}
+            <header className="gs-header">
+                <button className="gs-icon-btn" onClick={onClose} aria-label="닫기">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+                <h1>미리보기</h1>
+                <span className="gs-header-spacer" />
+            </header>
+            <div className="gs-pv-wrap" style={card?.image ? { backgroundImage: `url(${card.image})` } : undefined}>
+                <div className="gs-pv-content">
+                    <div className="gs-pv-card">
+                        <h2 className="gs-pv-title">삼가 감사 인사 드립니다</h2>
+                        <div className="gs-pv-body">
+                            {message.split('\n\n').map((para, i) => (
+                                <p key={i}>
+                                    {para.split('\n').map((line, j, arr) => (
+                                        <Fragment key={j}>
+                                            {line || '\u00A0'}
+                                            {j < arr.length - 1 && <br />}
+                                        </Fragment>
+                                    ))}
+                                </p>
+                            ))}
+                        </div>
+                        <div className="gs-pv-foot">
+                            <p>{dateText}</p>
+                            <strong>{mournerName || '상주'} 배상</strong>
+                        </div>
                     </div>
-                )}
-                <div className="gs-pv-foot">
-                    <p>{dateText}</p>
-                    <strong>{mournerName || '상주'} 배상</strong>
                 </div>
             </div>
             <div className="gs-bottom">

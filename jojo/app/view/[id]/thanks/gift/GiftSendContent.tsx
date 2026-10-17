@@ -41,7 +41,6 @@ export default function GiftSendContent({ bugoId, deceasedName, mournerName, rel
         const custom = parseCustomMessages(thanksMessage);
         return Object.fromEntries(TAB_KEYS.map((k) => [k, buildMessage(k, deceasedName, custom)])) as Record<ReligionType, string>;
     });
-    const [hideMessage, setHideMessage] = useState(false);
     const message = messages[tab];
     // 문구 탭을 바꾸면 카드도 같은 종류로 맞춘다 (카드 '없음'은 유지) — 카드와 문구가 따로 놀지 않게
     const selectTab = (k: ReligionType) => {
@@ -149,7 +148,7 @@ export default function GiftSendContent({ bugoId, deceasedName, mournerName, rel
                     bugoId,
                     productId: product.id,
                     cardId,
-                    message: hideMessage ? '' : message,
+                    message,
                     recipients: items.map((i) =>
                         i.ref ? { ref: i.ref, name: i.name, source: i.source } : { name: i.name, phone: i.phone, source: i.source }
                     ),
@@ -207,12 +206,7 @@ export default function GiftSendContent({ bugoId, deceasedName, mournerName, rel
 
                 {/* 메시지 */}
                 <section className="gs-section">
-                    <div className="gs-row-between">
-                        <h3 className="gs-h3">메시지 입력</h3>
-                        <button className="gs-link" onClick={() => setHideMessage((v) => !v)}>
-                            {hideMessage ? '문구 보이기' : '문구 숨기기'}
-                        </button>
-                    </div>
+                    <h3 className="gs-h3">메시지 입력</h3>
                     <div className="gs-chips gs-chips-scroll">
                         {RELIGION_TABS.map((t) => (
                             <button key={t.key} className={`gs-chip ${tab === t.key ? 'active' : ''}`} onClick={() => selectTab(t.key)}>
@@ -220,25 +214,19 @@ export default function GiftSendContent({ bugoId, deceasedName, mournerName, rel
                             </button>
                         ))}
                     </div>
-                    <div className={`gs-msgbox ${hideMessage ? 'hidden' : ''}`}>
+                    <div className="gs-msgbox">
                         <button className="gs-viewcard" onClick={() => setPreviewOpen(true)}>
                             카드 보기
                         </button>
-                        {hideMessage ? (
-                            <p className="gs-msg-hidden">문구가 숨겨졌습니다. 카드만 전달돼요.</p>
-                        ) : (
-                            <>
-                                <textarea
-                                    value={message}
-                                    onChange={(e) => setMessages((prev) => ({ ...prev, [tab]: e.target.value.slice(0, MESSAGE_MAX) }))}
-                                    rows={10}
-                                    aria-label="답례 문구"
-                                />
-                                <span className="gs-count-in" aria-live="polite">
-                                    {message.length}/{MESSAGE_MAX}
-                                </span>
-                            </>
-                        )}
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessages((prev) => ({ ...prev, [tab]: e.target.value.slice(0, MESSAGE_MAX) }))}
+                            rows={10}
+                            aria-label="답례 문구"
+                        />
+                        <span className="gs-count-in" aria-live="polite">
+                            {message.length}/{MESSAGE_MAX}
+                        </span>
                     </div>
                 </section>
 
@@ -322,7 +310,7 @@ export default function GiftSendContent({ bugoId, deceasedName, mournerName, rel
                     onClose={() => setPickerOpen(false)}
                 />
             )}
-            {previewOpen && <PreviewModal cardId={cardId} message={message} hideMessage={hideMessage} mournerName={mournerName} onClose={() => setPreviewOpen(false)} />}
+            {previewOpen && <PreviewModal cardId={cardId} message={message} mournerName={mournerName} onClose={() => setPreviewOpen(false)} />}
             {authOpen && <AuthModal bugoId={bugoId} defaultName={mournerName} onSuccess={() => closeAuth(true)} onClose={() => closeAuth(false)} />}
             {confirmOpen && product && (
                 <ConfirmModal

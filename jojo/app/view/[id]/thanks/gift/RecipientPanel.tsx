@@ -70,7 +70,7 @@ export default function RecipientPanel({
     notify: (msg: string) => void;
 }) {
     const fileRef = useRef<HTMLInputElement>(null);
-    const [directOpen, setDirectOpen] = useState(false);
+    const [directOpen, setDirectOpen] = useState(true); // 입력창을 처음부터 보여줘서 바로 넣을 수 있게
     const [dName, setDName] = useState('');
     const [dPhone, setDPhone] = useState('');
     const [listOpen, setListOpen] = useState<null | 'condolence' | 'flower'>(null);
@@ -255,7 +255,7 @@ export default function RecipientPanel({
         <section className="gs-section">
             <div className="gs-row-between">
                 <h3 className="gs-h3">
-                    받는 사람 <small>(선택 {items.length} 명)</small>
+                    받는 사람 <small>({items.length}명)</small>
                 </h3>
                 {items.length > 0 && (
                     <button className="gs-link" onClick={() => setItems(() => [])}>
@@ -304,20 +304,20 @@ export default function RecipientPanel({
             )}
 
             {items.length === 0 && (
-                <div className="gs-recv-empty">
-                    <strong>아직 받는 분이 없어요</strong>
-                    <p>위에서 추가 방법을 골라주세요. 조의금·화환 목록은 상주 확인 후 불러올 수 있어요.</p>
-                    <ul>
-                        <li>한 번에 최대 {MAX_RECIPIENTS}명까지 보낼 수 있어요.</li>
-                        <li>같은 번호는 자동으로 한 번만 담겨요.</li>
-                        <li>
-                            엑셀은 <b>이름, 휴대폰번호</b> 두 열로 작성해주세요.{' '}
-                            <a href="/samples/gift-recipients-sample.xlsx" download>
-                                엑셀 양식 받기
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <ul className="gs-tips">
+                    <li>
+                        <b>조의금·화환 목록</b> 조문·화환 보내주신 분을 한 번에 선택해요
+                    </li>
+                    <li>
+                        <b>엑셀</b> 이름, 휴대폰번호 두 열로 작성{' '}
+                        <a href="/samples/gift-recipients-sample.xlsx" download>
+                            양식 받기
+                        </a>
+                    </li>
+                    <li>
+                        <b>최대 {MAX_RECIPIENTS}명</b> · 같은 번호는 한 번만 담겨요
+                    </li>
+                </ul>
             )}
 
             {chromeAsk && (

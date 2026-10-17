@@ -72,9 +72,10 @@
     padding: 12px 16px 104px;
 }
 /* 섹션 사이는 여백만 두지 않고 구분선으로 나눈다 */
+/* 전역 section { padding: 40px 0 } 을 덮어쓴다 (이게 간격이 벙벙했던 원인) */
 .gs-section {
     margin-top: 16px;
-    padding-top: 16px;
+    padding: 16px 0 0;
     border-top: 1px solid #ececec;
 }
 .gs-row-between {
@@ -215,9 +216,6 @@
     padding: 44px 12px 12px;
     background: #fff;
 }
-.gs-msgbox.hidden {
-    background: #f6f6f6;
-}
 .gs-msgbox textarea {
     display: block;
     width: 100%;
@@ -237,12 +235,6 @@
     font-size: 12px;
     color: var(--gs-sub);
     pointer-events: none;
-}
-.gs-msg-hidden {
-    margin: 36px 0;
-    text-align: center;
-    color: var(--gs-sub);
-    font-size: 14px;
 }
 .gs-viewcard {
     position: absolute;
@@ -267,33 +259,24 @@
     font-size: 12px;
 }
 
-/* 받는 사람 비어 있을 때 안내 */
-.gs-recv-empty {
-    margin-top: 12px;
-    padding: 16px 14px;
-    border: 1px dashed #d8d8d8;
-    border-radius: 12px;
-    background: #fafafa;
-}
-.gs-recv-empty strong {
-    display: block;
-    font-size: 14px;
-}
-.gs-recv-empty p {
-    margin: 6px 0 10px;
+/* 받는 사람 추가 방법 안내 (비어 있을 때) */
+.gs-tips {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
     font-size: 12px;
-    line-height: 1.5;
-    color: var(--gs-sub);
+    line-height: 1.6;
+    color: #777;
 }
-.gs-recv-empty ul {
-    margin: 0;
-    padding-left: 16px;
-    font-size: 12px;
-    line-height: 1.7;
-    color: #666;
+.gs-tips li {
+    padding: 3px 0;
 }
-.gs-recv-empty a {
-    margin-left: 4px;
+.gs-tips b {
+    margin-right: 6px;
+    color: #444;
+    font-weight: 600;
+}
+.gs-tips a {
     color: #b58a00;
     font-weight: 600;
     text-decoration: underline;
@@ -450,24 +433,23 @@
 
 /* ---------- 받는 사람 ---------- */
 .gs-add-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 10px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-}
-.gs-add-row::-webkit-scrollbar {
-    display: none;
 }
 .gs-add {
-    flex: 0 0 auto;
-    padding: 11px 14px;
-    border: 1px solid #ccc;
+    padding: 13px 8px;
+    border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
     font-size: 14px;
+    font-weight: 600;
     white-space: nowrap;
+}
+/* 버튼이 홀수 개일 때 마지막 버튼은 한 줄 전체 (마지막 자식은 숨김 file input) */
+.gs-add:nth-last-child(2):nth-child(odd) {
+    grid-column: 1 / -1;
 }
 .gs-add.on {
     border-color: var(--gs-yellow);
@@ -477,18 +459,36 @@
     display: flex;
     gap: 8px;
     margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px solid #eee;
 }
 .gs-direct input {
     min-width: 0;
     flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
+    height: 46px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
     border-radius: 8px;
+    background: #fff;
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
 }
 .gs-direct input:first-child {
-    flex: 0 0 34%;
+    flex: 0 0 30%;
+}
+.gs-direct input::placeholder {
+    color: #aaa;
+}
+.gs-direct .gs-btn-dark {
+    flex: 0 0 auto;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--gs-yellow);
+    color: #000;
+    font-size: 15px;
 }
 .gs-recipients {
     list-style: none;
@@ -825,18 +825,32 @@
     font-size: 16px;
 }
 
-/* ---------- 미리보기: 기존 감사장 카드와 동일 (배경 이미지 위에 글씨만) ---------- */
+/* ---------- 미리보기: 기존 감사장(thanks) 화면과 같은 구조·치수 ---------- */
 .gs-pv {
     max-width: 430px;
     margin: 0 auto;
     overflow-y: auto;
-    background: #ececec;
+    background: #f5f5f5;
 }
-.gs-pv-card {
-    min-height: 100%;
-    padding: 210px 23px 130px;
-    text-align: center;
+.gs-pv .gs-header {
+    position: sticky;
+    top: 0;
+}
+/* thanks-card-wrapper: 좌우 20px 안쪽 + 배경 이미지 */
+.gs-pv-wrap {
+    position: relative;
+    margin: 0 20px 112px;
+    min-height: calc(100vh - 52px - 96px);
     background: #ececec center top / cover no-repeat;
+}
+/* thanks-content: padding 200px 20px 80px */
+.gs-pv-content {
+    padding: 200px 20px 80px;
+}
+/* thanks-card / title / body / footer 와 같은 값 */
+.gs-pv-card {
+    padding: 24px 3px;
+    text-align: center;
 }
 .gs-pv-title {
     margin: 0 0 20px;
@@ -861,7 +875,8 @@
     margin-bottom: 0;
 }
 .gs-pv-foot {
-    margin-top: 40px;
+    margin-top: 24px;
+    padding-top: 16px;
     font-family: 'Nanum Myeongjo', serif;
 }
 .gs-pv-foot p {
@@ -873,7 +888,4 @@
     font-size: 18px;
     font-weight: 700;
     color: #333;
-}
-.gs-pv .gs-bottom {
-    left: 50%;
 }
