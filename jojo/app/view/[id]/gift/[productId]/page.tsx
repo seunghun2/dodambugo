@@ -87,6 +87,7 @@ export default function GiftDetailPage() {
 
             <div className="gd-visual">
                 <BrandTile brand={product.brand} name={product.name} imageUrl={product.image_url} />
+                {product.badge && <span className="product-badge">{product.badge}</span>}
             </div>
 
             <section className="gd-summary">
