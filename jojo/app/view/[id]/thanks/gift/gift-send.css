@@ -242,15 +242,16 @@
     background: #fff;
     font-size: 13px;
 }
-.gs-msg-tools {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 8px;
-}
 .gs-count {
     font-size: 12px;
     color: var(--gs-sub);
+}
+.gs-count-top {
+    margin: 12px 2px 0;
+    text-align: right;
+}
+.gs-count-top + .gs-msgbox {
+    margin-top: 4px;
 }
 .gs-mini {
     padding: 5px 10px;
@@ -259,29 +260,70 @@
     background: #fff;
     font-size: 12px;
 }
-.gs-mini.dark {
-    background: #666;
-    border-color: #666;
-    color: #fff;
+
+/* 받는 사람 비어 있을 때 안내 */
+.gs-recv-empty {
+    margin-top: 12px;
+    padding: 16px 14px;
+    border: 1px dashed #d8d8d8;
+    border-radius: 12px;
+    background: #fafafa;
 }
-.gs-align {
-    display: flex;
-    gap: 6px;
+.gs-recv-empty strong {
+    display: block;
+    font-size: 14px;
 }
-.gs-align button {
-    width: 34px;
-    height: 26px;
-    display: flex;
+.gs-recv-empty p {
+    margin: 6px 0 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--gs-sub);
+}
+.gs-recv-empty ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #666;
+}
+.gs-recv-empty a {
+    margin-left: 4px;
+    color: #b58a00;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* 크롬 이동 안내 */
+.gs-ask {
+    text-align: center;
+    padding: 28px 20px 18px;
+}
+.gs-ask-icon {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #333;
-    border-radius: 6px;
-    background: #fff;
-    color: #333;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #f8e6b0;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
 }
-.gs-align button.on {
-    background: var(--gs-yellow);
-    border-color: var(--gs-yellow);
+.gs-ask .gs-h3 {
+    margin-top: 14px;
+    font-size: 20px;
+}
+.gs-ask p {
+    margin: 12px 0 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #444;
+}
+.gs-ask .gs-btn-dark {
+    background: var(--gs-yellow, #ffcc45);
+    border-color: var(--gs-yellow, #ffcc45);
+    color: #222;
 }
 
 /* ---------- 선물하기 ---------- */

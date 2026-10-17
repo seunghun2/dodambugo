@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { isValidMobile, maskPhone, normalizePhone } from '@/lib/gift/phone';
 import type { RecipientItem } from './types';
 
@@ -31,6 +31,30 @@ interface Candidate {
 
 let seq = 0;
 const nextKey = () => `r${Date.now().toString(36)}${seq++}`;
+
+type Platform = 'android-chrome' | 'android-other' | 'other';
+
+/** 연락처 불러오기는 안드로이드 크롬만 가능. iOS·PC 는 버튼 자체를 숨긴다. */
+function detectPlatform(): Platform {
+    const ua = navigator.userAgent || '';
+    if (!/Android/i.test(ua)) return 'other';
+    // 크롬 본체만 통과: WebView(; wv), 삼성/웨일/네이버/카카오 등 'Chrome' 문자열을 흉내 내는 브라우저는 제외
+    const isChrome =
+        /Chrome\/\d+/.test(ua) &&
+        !/; wv\)|Version\/\d|SamsungBrowser|EdgA|OPR\/|OPT\/|Whale|NAVER|KAKAOTALK|DuckDuckGo|Firefox|UCBrowser|MiuiBrowser|FBAN|FBAV|Instagram|Line\//i.test(ua);
+    return isChrome ? 'android-chrome' : 'android-other';
+}
+
+/** 현재 페이지를 크롬으로 다시 연다 (크롬 미설치 시 현재 주소 유지) */
+function openInChrome() {
+    const url = window.location.href;
+    if (/KAKAOTALK/i.test(navigator.userAgent)) {
+        window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`;
+        return;
+    }
+    const u = new URL(url);
+    window.location.href = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=${u.protocol.replace(':', '')};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+}
 
 export default function RecipientPanel({
     items,
@@ -94,9 +118,26 @@ export default function RecipientPanel({
     };
 
     // ---------- 연락처 (Contact Picker API: 안드로이드 크롬 전용) ----------
+    // 서버 렌더에서는 'other'(버튼 숨김), 클라이언트에서만 실제 기기를 판별 → 하이드레이션 불일치 없음
+    const platform = useSyncExternalStore<Platform>(
+        () => () => {},
+        detectPlatform,
+        () => 'other'
+    );
+    const [chromeAsk, setChromeAsk] = useState(false);
+
     const pickContacts = async () => {
+        // 안드로이드인데 크롬이 아니면 크롬으로 이동할지 먼저 물어본다
+        if (platform === 'android-other') {
+            setChromeAsk(true);
+            return;
+        }
+        if (!window.isSecureContext) {
+            notify('연락처 불러오기는 https 보안 연결에서만 쓸 수 있어요. 엑셀 업로드·직접 입력을 이용해주세요.');
+            return;
+        }
         if (!('contacts' in navigator) || !('ContactsManager' in window)) {
-            notify('이 브라우저는 연락처 불러오기를 지원하지 않습니다. 안드로이드 크롬에서 쓰거나, 엑셀 업로드·직접 입력을 이용해주세요.');
+            notify('이 기기에서는 연락처 불러오기를 지원하지 않아요. 엑셀 업로드·직접 입력을 이용해주세요.');
             return;
         }
         try {
@@ -114,8 +155,11 @@ export default function RecipientPanel({
             }
             if (picked.length) addItems(out, invalid);
         } catch (e) {
+            const name = (e as { name?: string })?.name;
             // 사용자가 선택 창을 닫은 경우(AbortError)는 안내하지 않는다
-            if ((e as { name?: string })?.name !== 'AbortError') notify('연락처를 불러오지 못했습니다.');
+            if (name === 'AbortError') return;
+            if (name === 'SecurityError') notify('연락처 접근이 막혀 있어요. 크롬 앱의 사이트 설정에서 확인해주세요.');
+            else notify(`연락처를 불러오지 못했습니다.${name ? ` (${name})` : ''}`);
         }
     };
 
@@ -221,12 +265,11 @@ export default function RecipientPanel({
             </div>
 
             <div className="gs-add-row">
-                <button className="gs-add" onClick={pickContacts}>
-                    + 연락처
-                </button>
-                <button className="gs-add" onClick={() => fileRef.current?.click()}>
-                    + 엑셀 업로드
-                </button>
+                {platform !== 'other' && (
+                    <button className="gs-add" onClick={pickContacts}>
+                        + 연락처 불러오기
+                    </button>
+                )}
                 <button className={`gs-add ${directOpen ? 'on' : ''}`} onClick={() => setDirectOpen((v) => !v)}>
                     + 직접 입력
                 </button>
@@ -235,6 +278,9 @@ export default function RecipientPanel({
                 </button>
                 <button className="gs-add" onClick={() => openList('flower')}>
                     + 화환 목록
+                </button>
+                <button className="gs-add" onClick={() => fileRef.current?.click()}>
+                    + 엑셀 업로드
                 </button>
                 <input ref={fileRef} type="file" accept=".xlsx" hidden onChange={(e) => onFile(e.target.files?.[0])} />
             </div>
@@ -256,7 +302,55 @@ export default function RecipientPanel({
                     </button>
                 </div>
             )}
-            <p className="gs-hint">엑셀은 이름, 휴대폰번호 두 열로 작성해주세요. 중복 번호는 자동으로 제외됩니다.</p>
+
+            {items.length === 0 && (
+                <div className="gs-recv-empty">
+                    <strong>아직 받는 분이 없어요</strong>
+                    <p>위에서 추가 방법을 골라주세요. 조의금·화환 목록은 상주 확인 후 불러올 수 있어요.</p>
+                    <ul>
+                        <li>한 번에 최대 {MAX_RECIPIENTS}명까지 보낼 수 있어요.</li>
+                        <li>같은 번호는 자동으로 한 번만 담겨요.</li>
+                        <li>
+                            엑셀은 <b>이름, 휴대폰번호</b> 두 열로 작성해주세요.{' '}
+                            <a href="/samples/gift-recipients-sample.xlsx" download>
+                                엑셀 양식 받기
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            )}
+
+            {chromeAsk && (
+                <div className="gs-overlay gs-center-wrap" onClick={() => setChromeAsk(false)}>
+                    <div className="gs-dialog gs-ask" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="연락처 불러오기">
+                        <span className="gs-ask-icon" aria-hidden="true">
+                            !
+                        </span>
+                        <h3 className="gs-h3">연락처 불러오기</h3>
+                        <p>
+                            간편하게 선물을 보내실 수 있는
+                            <br />
+                            연락처 불러오기 기능은 구글 크롬(Chrome)
+                            <br />
+                            브라우저에서만 가능합니다. 이동하시겠습니까?
+                        </p>
+                        <div className="gs-dialog-btns">
+                            <button className="gs-btn-light" onClick={() => setChromeAsk(false)}>
+                                취소
+                            </button>
+                            <button
+                                className="gs-btn-dark"
+                                onClick={() => {
+                                    setChromeAsk(false);
+                                    openInChrome();
+                                }}
+                            >
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {items.length > 0 && (
                 <ul className="gs-recipients">

@@ -14,7 +14,7 @@ import {
 } from '@/lib/gift/thanks-messages';
 import ProductPicker, { ProductThumb } from './ProductPicker';
 import RecipientPanel from './RecipientPanel';
-import { AuthModal, ConfirmModal, DoneModal, PreviewModal, ShareSheet, type Align } from './Modals';
+import { AuthModal, ConfirmModal, DoneModal, PreviewModal, ShareSheet } from './Modals';
 import { won, type GiftProduct, type RecipientItem } from './types';
 
 interface Props {
@@ -42,8 +42,12 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
         return Object.fromEntries(TAB_KEYS.map((k) => [k, buildMessage(k, deceasedName, custom)])) as Record<ReligionType, string>;
     });
     const [hideMessage, setHideMessage] = useState(false);
-    const [align, setAlign] = useState<Align>('center');
     const message = messages[tab];
+    // 문구 탭을 바꾸면 카드도 같은 종류로 맞춘다 (카드 '없음'은 유지) — 카드와 문구가 따로 놀지 않게
+    const selectTab = (k: ReligionType) => {
+        setTab(k);
+        setCardId((prev) => (prev === 'none' ? prev : k));
+    };
 
     // ----- 모드 / 상품 / 받는 사람 -----
     const [mode, setMode] = useState<'gift' | 'card'>('gift');
@@ -119,14 +123,6 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
     };
 
     // ----- 문구 편집 -----
-    const copyMessage = async () => {
-        try {
-            await navigator.clipboard.writeText(message);
-            notify('답례글이 복사되었습니다.');
-        } catch {
-            notify('복사에 실패했습니다.');
-        }
-    };
     const pickCard = (id: CardId) => {
         setCardId(id);
         if (id !== 'none') setTab(id); // 카드를 고르면 같은 종류의 문구 탭으로 맞춰준다
@@ -241,11 +237,16 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                     </div>
                     <div className="gs-chips gs-chips-scroll">
                         {RELIGION_TABS.map((t) => (
-                            <button key={t.key} className={`gs-chip ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+                            <button key={t.key} className={`gs-chip ${tab === t.key ? 'active' : ''}`} onClick={() => selectTab(t.key)}>
                                 {t.label}
                             </button>
                         ))}
                     </div>
+                    {!hideMessage && (
+                        <p className="gs-count gs-count-top" aria-live="polite">
+                            {message.length}/{MESSAGE_MAX}
+                        </p>
+                    )}
                     <div className={`gs-msgbox ${hideMessage ? 'hidden' : ''}`}>
                         <button className="gs-viewcard" onClick={() => setPreview('card')}>
                             카드 보기
@@ -256,30 +257,10 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                             <textarea
                                 value={message}
                                 onChange={(e) => setMessages((prev) => ({ ...prev, [tab]: e.target.value.slice(0, MESSAGE_MAX) }))}
-                                style={{ textAlign: align }}
-                                rows={9}
+                                rows={11}
                                 aria-label="답례 문구"
                             />
                         )}
-                    </div>
-                    <div className="gs-msg-tools">
-                        <button className="gs-mini dark" onClick={copyMessage}>
-                            답례글 복사
-                        </button>
-                        <div className="gs-align" role="group" aria-label="정렬">
-                            {(['left', 'center', 'right'] as Align[]).map((a) => (
-                                <button key={a} className={align === a ? 'on' : ''} onClick={() => setAlign(a)} aria-label={`${a} 정렬`}>
-                                    <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                                        {a === 'left' && <path d="M1 2h16M1 7h10M1 12h14" />}
-                                        {a === 'center' && <path d="M1 2h16M4 7h10M2 12h14" />}
-                                        {a === 'right' && <path d="M1 2h16M7 7h10M3 12h14" />}
-                                    </svg>
-                                </button>
-                            ))}
-                        </div>
-                        <span className="gs-count">
-                            {message.length}/{MESSAGE_MAX}
-                        </span>
                     </div>
                 </section>
 
@@ -381,7 +362,7 @@ export default function GiftSendContent({ bugoId, bugoUuid, deceasedName, mourne
                     cardId={cardId}
                     message={message}
                     hideMessage={hideMessage}
-                    align={align}
+                    align="center"
                     mournerName={mournerName}
                     product={preview === 'full' && mode === 'gift' ? product : null}
                     onClose={() => setPreview(null)}

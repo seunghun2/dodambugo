@@ -143,10 +143,10 @@ class DaouIssuer implements GiftIssuer {
                 rtCode: rt || undefined,
                 error: rt ? `[${rt}] ${rtMsg || '발행 실패'}` : `다우 응답 오류 (HTTP ${res.status})`,
             };
-        } catch (err: any) {
+        } catch (err: unknown) {
             return {
                 ok: false,
-                error: err?.message || '다우 프록시 통신 오류',
+                error: err instanceof Error && err.message ? err.message : '다우 프록시 통신 오류',
             };
         }
     }
