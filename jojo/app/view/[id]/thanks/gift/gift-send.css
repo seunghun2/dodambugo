@@ -1,0 +1,816 @@
+/* 답례품과 함께 보내기 — 모바일 우선, 최대 폭 430px (기존 감사장 페이지와 동일) */
+
+.gs-page {
+    --gs-yellow: #ffcc45;
+    --gs-yellow-bg: #fff8e1;
+    --gs-ink: #222;
+    --gs-sub: #888;
+    --gs-line: #e6e6e6;
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #fff;
+    color: var(--gs-ink);
+    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    letter-spacing: -0.02em;
+    position: relative;
+}
+.gs-page *,
+.gs-overlay * {
+    box-sizing: border-box;
+}
+.gs-page button,
+.gs-overlay button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* ---------- 헤더 ---------- */
+.gs-header,
+.gs-picker-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+.gs-header h1,
+.gs-picker-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+.gs-icon-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 0;
+    color: #333;
+    font-size: 18px;
+}
+.gs-header-spacer {
+    width: 40px;
+}
+.gs-banner {
+    background: #fff3cd;
+    color: #7a5b00;
+    font-size: 12px;
+    text-align: center;
+    padding: 8px 12px;
+}
+
+/* ---------- 본문 ---------- */
+.gs-main {
+    padding: 14px 16px 180px;
+}
+.gs-section {
+    margin-top: 22px;
+}
+.gs-row-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.gs-h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+.gs-h3 small {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gs-sub);
+}
+.gs-link {
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--gs-sub);
+    text-decoration: underline;
+}
+.gs-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--gs-sub);
+    line-height: 1.5;
+}
+.gs-empty {
+    margin: 24px 0;
+    text-align: center;
+    color: var(--gs-sub);
+    font-size: 14px;
+}
+.gs-error {
+    margin: 8px 0 0;
+    color: #d93025;
+    font-size: 13px;
+}
+.gs-test-note {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #fff3cd;
+    color: #7a5b00;
+    font-size: 12px;
+}
+
+/* ---------- 카드 선택 ---------- */
+.gs-cards {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+    scrollbar-width: none;
+}
+.gs-cards::-webkit-scrollbar {
+    display: none;
+}
+.gs-cardopt {
+    flex: 0 0 76px;
+    height: 76px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: #f4f4f4;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #666;
+}
+.gs-cardopt img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 6%; /* 배경 이미지는 위쪽에만 문양이 있다 */
+}
+.gs-cardopt {
+    position: relative;
+}
+.gs-cardlabel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 3px 0;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    text-align: center;
+}
+.gs-cardopt.active {
+    border-color: var(--gs-yellow);
+    box-shadow: 0 0 0 2px var(--gs-yellow-bg);
+}
+
+/* ---------- 칩 ---------- */
+.gs-chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.gs-chips-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.gs-chips-scroll::-webkit-scrollbar {
+    display: none;
+}
+.gs-chip {
+    flex: 0 0 auto;
+    padding: 7px 16px;
+    border: 1px solid #ccc;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 14px;
+    color: #333;
+}
+.gs-chip.active {
+    background: var(--gs-yellow-bg);
+    border-color: var(--gs-yellow);
+    font-weight: 600;
+}
+
+/* ---------- 메시지 ---------- */
+.gs-msgbox {
+    position: relative;
+    margin-top: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 44px 12px 12px;
+    background: #fff;
+}
+.gs-msgbox.hidden {
+    background: #f6f6f6;
+}
+.gs-msgbox textarea {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    resize: none;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.7;
+    background: transparent;
+}
+.gs-msg-hidden {
+    margin: 36px 0;
+    text-align: center;
+    color: var(--gs-sub);
+    font-size: 14px;
+}
+.gs-viewcard {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+}
+.gs-msg-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+.gs-count {
+    font-size: 12px;
+    color: var(--gs-sub);
+}
+.gs-mini {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 12px;
+}
+.gs-mini.dark {
+    background: #666;
+    border-color: #666;
+    color: #fff;
+}
+.gs-align {
+    display: flex;
+    gap: 6px;
+}
+.gs-align button {
+    width: 34px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+}
+.gs-align button.on {
+    background: var(--gs-yellow);
+    border-color: var(--gs-yellow);
+}
+
+/* ---------- 선물하기 ---------- */
+.gs-help {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1.5px solid #555;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+}
+.gs-help-list {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.gs-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-top: 10px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.gs-strip::-webkit-scrollbar {
+    display: none;
+}
+.gs-strip-item {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: none;
+}
+.gs-strip-item.active {
+    border-color: var(--gs-yellow);
+}
+.gs-thumb {
+    display: block;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.gs-thumb-sm {
+    width: 64px;
+    height: 64px;
+}
+.gs-thumb-md {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+.gs-thumb-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px;
+}
+.gs-thumb-sm.gs-thumb-fallback {
+    font-size: 11px;
+}
+.gs-thumb-md.gs-thumb-fallback {
+    font-size: 18px;
+}
+.gs-selected {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f6f6f6;
+}
+.gs-selected-info {
+    flex: 1;
+    min-width: 0;
+}
+.gs-selected-info p {
+    margin: 0 0 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+.gs-selected-info strong {
+    font-size: 15px;
+}
+.gs-placeholder {
+    flex: 1;
+    color: #aaa;
+    font-size: 14px;
+}
+.gs-btn-outline {
+    flex: 0 0 auto;
+    padding: 9px 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+.gs-btn-outline:disabled {
+    opacity: 0.5;
+}
+.gs-total {
+    margin: 18px 0 0;
+    text-align: right;
+    font-size: 14px;
+}
+.gs-total strong {
+    font-size: 17px;
+}
+
+/* ---------- 받는 사람 ---------- */
+.gs-add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.gs-add-row::-webkit-scrollbar {
+    display: none;
+}
+.gs-add {
+    flex: 0 0 auto;
+    padding: 11px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.gs-add.on {
+    border-color: var(--gs-yellow);
+    background: var(--gs-yellow-bg);
+}
+.gs-direct {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.gs-direct input {
+    min-width: 0;
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+}
+.gs-direct input:first-child {
+    flex: 0 0 34%;
+}
+.gs-recipients {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    border: 1px solid var(--gs-line);
+    border-radius: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.gs-recipients li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.gs-recipients li:last-child {
+    border-bottom: 0;
+}
+.gs-tag {
+    flex: 0 0 auto;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #f1f1f1;
+    font-size: 11px;
+    color: #666;
+}
+.gs-rec-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.gs-rec-main strong {
+    font-size: 14px;
+}
+.gs-rec-main span {
+    font-size: 12px;
+    color: var(--gs-sub);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gs-check-all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.gs-cand {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    max-height: 46vh;
+    overflow-y: auto;
+}
+.gs-cand li {
+    border-bottom: 1px solid #f0f0f0;
+}
+.gs-cand li.disabled {
+    opacity: 0.45;
+}
+.gs-cand label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px;
+}
+
+/* ---------- 하단 고정 버튼 ---------- */
+.gs-bottom {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    z-index: 30;
+    display: flex;
+    background: var(--gs-yellow);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.gs-bottom button {
+    flex: 1;
+    height: 56px;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
+    font-size: 17px;
+    font-weight: 700;
+    color: #222;
+}
+.gs-bottom button:last-child {
+    border-right: 0;
+}
+.gs-bottom button.disabled,
+.gs-bottom button:disabled {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- 오버레이 공통 ---------- */
+.gs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    letter-spacing: -0.02em;
+    color: #222;
+}
+.gs-fullscreen {
+    background: #fff;
+    overflow-y: auto;
+    max-width: 430px;
+    margin: 0 auto;
+}
+.gs-center-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.55);
+}
+.gs-sheet-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+}
+.gs-sheet {
+    width: 100%;
+    max-width: 430px;
+    padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+    border-radius: 16px 16px 0 0;
+    background: #fff;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.gs-dialog {
+    width: 100%;
+    max-width: 340px;
+    padding: 22px 20px 18px;
+    border-radius: 14px;
+    background: #fff;
+}
+.gs-dialog-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+}
+.gs-btn-dark,
+.gs-btn-light {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    font-size: 15px;
+    font-weight: 700;
+}
+.gs-btn-dark {
+    background: #222;
+    color: #fff;
+}
+.gs-btn-light {
+    background: #fff;
+    color: #222;
+    border-color: #ccc;
+}
+.gs-btn-dark:disabled,
+.gs-btn-light:disabled {
+    opacity: 0.5;
+}
+.gs-cta {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--gs-yellow, #ffcc45);
+    font-size: 16px;
+    font-weight: 700;
+}
+.gs-cta:disabled {
+    background: #e5e5e5;
+    color: #aaa;
+}
+.gs-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.gs-field input {
+    padding: 11px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+}
+.gs-confirm-line {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.gs-share-opt {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    border: 1px solid var(--gs-line);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 15px;
+    text-align: left;
+}
+.gs-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 84px;
+    transform: translateX(-50%);
+    z-index: 200;
+    width: calc(100% - 32px);
+    max-width: 398px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(40, 40, 40, 0.92);
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ---------- 상품 선택 화면 ---------- */
+.gs-picker-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 0;
+}
+.gs-search {
+    flex: 1;
+}
+.gs-search input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+}
+.gs-sort {
+    flex: 0 0 auto;
+    border: 0;
+    background: none;
+    font-size: 13px;
+    color: #888;
+}
+.gs-overlay .gs-chips {
+    padding: 0 16px;
+    margin-bottom: 12px;
+}
+.gs-grid {
+    list-style: none;
+    margin: 0;
+    padding: 4px 16px 32px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+.gs-card {
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    text-align: left;
+}
+.gs-card.selected {
+    border-color: var(--gs-yellow, #ffcc45);
+    box-shadow: 0 0 0 2px #fff3cc;
+}
+.gs-card-img {
+    position: relative;
+}
+.gs-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1d3557;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+.gs-card-name {
+    margin: 8px 0 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: keep-all;
+    min-height: 36px;
+}
+.gs-card-price s {
+    display: block;
+    font-size: 11px;
+    color: #aaa;
+}
+.gs-card-price em {
+    margin-right: 4px;
+    font-style: normal;
+    font-weight: 700;
+    color: #e5484d;
+}
+.gs-card-price strong {
+    font-size: 16px;
+}
+
+/* ---------- 미리보기 ---------- */
+.gs-preview-wrap {
+    background: #f1ede6;
+}
+.gs-preview-body {
+    padding: 16px 16px 40px;
+}
+.gs-preview-card {
+    border-radius: 14px;
+    background: #fff center top / cover no-repeat;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+.gs-preview-inner {
+    padding: 28px 22px 26px;
+    background: rgba(255, 255, 255, 0.78);
+    min-height: 360px;
+}
+.gs-preview-inner h4 {
+    margin: 0 0 18px;
+    text-align: center;
+    font-size: 18px;
+}
+.gs-preview-text p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.8;
+}
+.gs-preview-sign {
+    margin: 22px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+}
+.gs-preview-gift {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #fff;
+    text-align: center;
+}
+.gs-preview-gift-title {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+.gs-preview-gift .gs-thumb-md {
+    max-width: 200px;
+    margin: 0 auto;
+}

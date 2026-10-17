@@ -26,7 +26,12 @@ export default function PrivacyThirdPartyPage() {
                         <li><strong>화환 및 조화 배송 업체:</strong> 전국 제휴 화원</li>
                         <li><strong>결제 대행 업체:</strong> 이노페이(INNOPAY)</li>
                         <li><strong>알림톡 발송 대행:</strong> 카카오</li>
+                        <li><strong>답례품(모바일 쿠폰) 발행·발송 업체:</strong> 다우기술(주)</li>
                     </ul>
+                    <p>
+                        답례품 서비스에서 받는 분(조문객)의 이름과 휴대폰 번호는 답례품을 보내는 이용자가 직접 입력하거나 불러온 정보이며,
+                        쿠폰 발송 외의 다른 목적으로 이용하지 않습니다.
+                    </p>
                 </section>
 
                 <section className="terms-section">
@@ -35,6 +40,7 @@ export default function PrivacyThirdPartyPage() {
                         <li><strong>화환 및 조화 배송 업체:</strong> 주문한 상품의 배송</li>
                         <li><strong>결제 대행 업체:</strong> 결제 처리 및 결제 도용 방지</li>
                         <li><strong>알림톡 발송 대행:</strong> 주문 및 배송 알림 발송</li>
+                        <li><strong>답례품(모바일 쿠폰) 발행·발송 업체:</strong> 모바일 쿠폰 발행 및 문자(MMS)·알림톡 발송</li>
                     </ul>
                 </section>
 
@@ -44,6 +50,7 @@ export default function PrivacyThirdPartyPage() {
                         <li><strong>화환 및 조화 배송 업체:</strong> 수령인 이름, 배송지 주소, 연락처, 리본 문구</li>
                         <li><strong>결제 대행 업체:</strong> 이름, 결제 정보, 휴대폰 번호</li>
                         <li><strong>알림톡 발송 대행:</strong> 휴대폰 번호, 주문 정보</li>
+                        <li><strong>답례품(모바일 쿠폰) 발행·발송 업체:</strong> 받는 분의 휴대폰 번호, 이름(입력한 경우), 쿠폰 상품 정보</li>
                     </ul>
                 </section>
 
@@ -57,6 +64,7 @@ export default function PrivacyThirdPartyPage() {
                         <li><strong>화환 및 조화 배송 업체:</strong> 배송 완료 후 3개월</li>
                         <li><strong>결제 대행 업체:</strong> 전자상거래 등에서의 소비자 보호에 관한 법률에 따라 5년</li>
                         <li><strong>알림톡 발송 대행:</strong> 발송 완료 후 3개월</li>
+                        <li><strong>답례품(모바일 쿠폰) 발행·발송 업체:</strong> 이용 목적 달성 후 지체 없이 파기 (쿠폰 유효기간 및 관계 법령에 따른 보존 기간 제외)</li>
                     </ul>
                 </section>
 
@@ -70,6 +78,7 @@ export default function PrivacyThirdPartyPage() {
                         <li>화환 및 조화 배송 서비스 이용 불가</li>
                         <li>결제 서비스 이용 불가</li>
                         <li>주문 알림 서비스 이용 불가</li>
+                        <li>답례품(모바일 쿠폰) 발송 서비스 이용 불가</li>
                     </ul>
                 </section>
 
