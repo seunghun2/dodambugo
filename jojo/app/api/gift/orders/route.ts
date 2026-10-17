@@ -93,6 +93,12 @@ export async function POST(req: NextRequest) {
 
         const total = product.sale_price * valid.length;
         const live = isLiveMode();
+        if (live && !product.daou_goods_code) {
+            return NextResponse.json(
+                { error: '선택하신 상품의 발송 코드(NO_REQ)가 아직 연결되지 않았습니다.', code: 'NOT_READY' },
+                { status: 503 }
+            );
+        }
 
         // 4) 주문 저장 (order_number 충돌 시 1회 재시도)
         let order: { id: string; order_number: string } | null = null;
@@ -132,9 +138,12 @@ export async function POST(req: NextRequest) {
 
         // 5) 발행 (테스트 모드는 Mock). live + 결제 연동은 다우 연결 단계에서 추가한다.
         let sent = 0;
-        for (const r of recRows) {
+        for (let idx = 0; idx < recRows.length; idx++) {
+            const r = recRows[idx];
             const res = await issuer.issue({
                 orderNumber: order.order_number,
+                seq: idx + 1,
+                senderName: session.n,
                 recipientName: r.name || '',
                 recipientPhone: r.phone,
                 goodsName: `[${product.brand}] ${product.name}`,
