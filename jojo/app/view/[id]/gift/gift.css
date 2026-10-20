@@ -5,9 +5,15 @@
     margin: 0 auto;
     min-height: 100vh;
     background: #fff;
+    color: #222;
     padding-bottom: 40px;
     font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
     letter-spacing: -0.02em;
+}
+
+.gift-page button {
+    font-family: inherit;
+    color: #222;
 }
 
 .gift-page.loading {

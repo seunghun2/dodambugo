@@ -22,6 +22,7 @@
 .gs-page button,
 .gs-overlay button {
     font-family: inherit;
+    color: var(--gs-ink, #222);
     cursor: pointer;
 }
 
@@ -245,6 +246,7 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     background: #fff;
+    color: #333;
     font-size: 13px;
 }
 .gs-count {
@@ -256,6 +258,7 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     background: #fff;
+    color: #333;
     font-size: 12px;
 }
 
@@ -323,6 +326,7 @@
     border: 1.5px solid #555;
     border-radius: 50%;
     background: #fff;
+    color: #555;
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
@@ -416,6 +420,7 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     background: #fff;
+    color: #222;
     font-size: 14px;
     font-weight: 600;
 }
@@ -443,6 +448,7 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
+    color: #222;
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
@@ -684,6 +690,7 @@
     border: 0;
     border-radius: 10px;
     background: var(--gs-yellow, #ffcc45);
+    color: #000;
     font-size: 16px;
     font-weight: 700;
 }
