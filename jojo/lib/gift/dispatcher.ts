@@ -81,7 +81,7 @@ export async function sendGiftOrderCompleteNotify(order: {
     if (!cleanPhone.startsWith('010')) return;
 
     const orderUrl = `https://maeumbugo.co.kr/order/${order.order_number}`;
-    const templateId = process.env.GIFT_PAYMENT_TEMPLATE_ID;
+    const templateId = process.env.GIFT_PAYMENT_TEMPLATE_ID || 'KA01TP261020132835419ZOxQt2Dto3W';
 
     if (templateId) {
         try {
@@ -503,11 +503,12 @@ export async function cancelGiftOrder(
     if (!order.is_test && order.buyer_phone) {
         const cleanPhone = String(order.buyer_phone).replace(/\D/g, '');
         if (cleanPhone.startsWith('010')) {
-            const cancelTemplateId = process.env.GIFT_CANCEL_TEMPLATE_ID;
+            const cancelTemplateId = process.env.GIFT_CANCEL_TEMPLATE_ID || 'KA01TP260128002330965AMneEQhHRIM';
             let sentAlim = false;
             if (cancelTemplateId) {
                 try {
                     const res = await sendAlimtalk(cleanPhone, cancelTemplateId, {
+                        주문자명: order.buyer_name || '상주',
                         주문번호: order.order_number,
                         상품명: order.product_name,
                         수량: `${order.quantity}명`,
