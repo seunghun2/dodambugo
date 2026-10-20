@@ -19,8 +19,7 @@
 .gs-overlay * {
     box-sizing: border-box;
 }
-.gs-page button,
-.gs-overlay button {
+:where(.gs-page, .gs-overlay) button {
     font-family: inherit;
     color: var(--gs-ink, #222);
     cursor: pointer;
@@ -672,8 +671,9 @@
     font-weight: 700;
 }
 .gs-btn-dark {
-    background: #222;
-    color: #fff;
+    background: var(--gs-yellow, #ffcc45);
+    border-color: var(--gs-yellow, #ffcc45);
+    color: #222;
 }
 .gs-btn-light {
     background: #fff;

@@ -11,7 +11,7 @@
     letter-spacing: -0.02em;
 }
 
-.gift-page button {
+:where(.gift-page) button {
     font-family: inherit;
     color: #222;
 }

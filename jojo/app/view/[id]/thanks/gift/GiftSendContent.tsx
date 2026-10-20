@@ -413,7 +413,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         <ol className="gs-help-list">
                             <li>카드와 문구를 정하고 답례품을 고릅니다.</li>
                             <li>받는 분을 조의금·화환 목록, 직접 입력, 엑셀 등으로 추가합니다.</li>
-                            <li>결제 완료 10분 후 받는 분께 감사장과 모바일 쿠폰이 함께 발송됩니다.</li>
+                            <li>결제 완료 1시간 후 받는 분께 감사장과 모바일 쿠폰이 함께 발송됩니다.</li>
                         </ol>
                         <div className="gs-dialog-btns">
                             <button className="gs-btn-dark" onClick={() => setHelpOpen(false)}>
