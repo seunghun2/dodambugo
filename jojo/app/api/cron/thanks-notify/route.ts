@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendAlimtalk } from '@/lib/solapi';
+import { sendAlimtalk, resolveThanksTemplateId } from '@/lib/solapi';
 
 // Cron Job: 매일 오전 10시 (한국시간) 실행
 // "0 1 * * *" = UTC 01:00 = KST 10:00
@@ -94,9 +94,10 @@ export async function GET(request: NextRequest) {
             try {
                 // 감사장 알림톡 발송 (상주당 1회)
                 const isB2B = !!primaryBugo.b2b_user_id;
+                const templateId = await resolveThanksTemplateId(isB2B);
                 await sendAlimtalk(
                     phoneNumber,
-                    'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2 - 께서 제거)
+                    templateId,
                     {
                         '상주명': primaryBugo.mourner_name || '',
                         '고인명': primaryBugo.deceased_name || '',

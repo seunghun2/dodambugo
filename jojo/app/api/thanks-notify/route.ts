@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendAlimtalk } from '@/lib/solapi';
+import { sendAlimtalk, resolveThanksTemplateId } from '@/lib/solapi';
 
 function getSupabase() {
     return createClient(
@@ -40,9 +40,10 @@ export async function POST(request: NextRequest) {
 
         // 감사장 알림톡 발송
         const isB2B = !!bugo.b2b_user_id;
+        const templateId = await resolveThanksTemplateId(isB2B);
         await sendAlimtalk(
             phoneNumber,
-            'KA01TP2603110816428720O999vVNBCV',  // 감사장 알림톡 템플릿 (v2)
+            templateId,
             {
                 '상주명': bugo.mourner_name || '',
                 '고인명': bugo.deceased_name || '',

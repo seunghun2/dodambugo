@@ -135,7 +135,8 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     // 1. 부고장 생성 완료 (상주용) — 2026-08-20 새 템플릿 교체 (?m= 파라미터 포함 맞춤 링크)
     'KA01TP2602070138097871zexjvolnSU': 'KA01TP26080907213286667y3LSdpjeU', // b2b_부고장 생성
     // 2. 감사장 안내 (상주용)
-    'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내
+    'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내 (구버전 1버튼)
+    'KA01TP261020144548548T40f3Xuc1h4': 'KA01TP261020144549419wtsS3DtoDm5', // b2b_감사장 및 답례품 안내 (신규 2버튼)
     // 3. 화환 결제 완료 (조문객용)
     'KA01TP2601311316586435pxsJOWuWbz': 'KA01TP260714224254339AmgosqXieKb', // b2b_01-화환 결제 완료
     // 4. 화환 배송 완료 (조문객용)
@@ -154,6 +155,27 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     // 10. 부의금 전달 완료 (조문객용)
     'KA01TP260128002838240ioiYHpImLDY': 'KA01TP260714224630629Z7tOdxnlNNK', // b2b_03-상품결제 완료
 };
+
+// 신규 감사장+답례품 2버튼 템플릿이 카카오 검수 승인(APPROVED)되면 자동 전환, 검수 중이면 기존 승인 템플릿 폴백
+export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> {
+    const checkId = isB2B
+        ? 'KA01TP261020144549419wtsS3DtoDm5'
+        : 'KA01TP261020144548548T40f3Xuc1h4';
+    try {
+        const res = await fetch(`${SOLAPI_URL}/kakao/v2/templates/${checkId}`, {
+            headers: getAuthHeader(),
+        });
+        if (res.ok) {
+            const tpl = await res.json();
+            if (tpl?.status === 'APPROVED') {
+                return 'KA01TP261020144548548T40f3Xuc1h4';
+            }
+        }
+    } catch {
+        // 조회 실패 시 기존 승인 템플릿 폴백
+    }
+    return 'KA01TP2603110816428720O999vVNBCV';
+}
 
 // 알림톡 발송 (예약 발송 지원)
 export async function sendAlimtalk(
