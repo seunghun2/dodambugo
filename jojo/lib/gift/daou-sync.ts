@@ -13,12 +13,16 @@ export interface DaouGoodsItem {
     noGoods: string;     // NO_GOODS (다우 관리 상품번호)
     nmGoods: string;     // NM_GOODS (상품명)
     brandName: string;   // NM_GOODS_COMPANY (상품제휴처 명)
+    category: string;    // CATEGORY
     goodsPrice: number;  // GOODS_PRICE (상품정가)
     cpnPrice: number;    // CPN_PRICE (쿠폰금액)
     goodsImage: string;  // GOODS_IMAGE (상품 이미지 URL)
     sendType: string;    // SEND_TYPE (10004001:MMS, 10004005:LMS, 10004006:알림톡, 10004008:연동업체지정)
     validType: string;   // CPN_VALID_TYPE (Y/M/D/C/E/F)
     validTerm: string;   // CPN_VALID_TERM
+    commonCaution: string;     // COMMON_CAUTION (상세 이미지 URL 또는 텍스트)
+    additionalCaution: string; // ADDITIONAL_CAUTION
+    usageGuide: string;        // USAGE_GUIDE
 }
 
 function extractTag(block: string, tag: string): string {
@@ -43,12 +47,16 @@ export function parseDaouGoodsListXml(xml: string): {
         noGoods: extractTag(b, 'NO_GOODS'),
         nmGoods: extractTag(b, 'NM_GOODS'),
         brandName: extractTag(b, 'NM_GOODS_COMPANY'),
+        category: extractTag(b, 'CATEGORY'),
         goodsPrice: Number(extractTag(b, 'GOODS_PRICE') || '0'),
         cpnPrice: Number(extractTag(b, 'CPN_PRICE') || '0'),
         goodsImage: extractTag(b, 'GOODS_IMAGE'),
         sendType: extractTag(b, 'SEND_TYPE').replace(/>$/, ''), // 규격서 예제 오타(10004001>) 방어
         validType: extractTag(b, 'CPN_VALID_TYPE'),
         validTerm: extractTag(b, 'CPN_VALID_TERM'),
+        commonCaution: extractTag(b, 'COMMON_CAUTION'),
+        additionalCaution: extractTag(b, 'ADDITIONAL_CAUTION'),
+        usageGuide: extractTag(b, 'USAGE_GUIDE'),
     }));
 
     return { rt, rtMsg, listCount, items };
@@ -127,9 +135,16 @@ export async function syncDaouCatalogToSupabase(): Promise<{
         }
         const updatePayload: Record<string, unknown> = {
             daou_goods_code: hit.noReq,
+            valid_days: Number(hit.validTerm) || 59,
+            common_caution: hit.commonCaution || null,
+            additional_caution: hit.additionalCaution || null,
+            usage_guide: hit.usageGuide || null,
         };
         if (hit.goodsImage) {
             updatePayload.image_url = hit.goodsImage;
+        }
+        if (hit.goodsPrice > 0) {
+            updatePayload.list_price = hit.goodsPrice;
         }
         const { error: upErr } = await supabase
             .from('gift_products')

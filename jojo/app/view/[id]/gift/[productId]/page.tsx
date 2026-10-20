@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { GIFT_NOTICES, ORDER_INFO } from '@/lib/gift/notices';
+import { GIFT_NOTICES, GIFT_VALID_DAYS, ORDER_INFO } from '@/lib/gift/notices';
 import BrandTile from '../BrandTile';
 import SellerInfo from '../SellerInfo';
 import '../gift.css';
@@ -16,9 +16,64 @@ interface GiftProduct {
     sale_price: number;
     image_url: string | null;
     badge: string | null;
+    valid_days?: number | null;
+    common_caution?: string | null;
+    additional_caution?: string | null;
+    usage_guide?: string | null;
 }
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`;
+
+const IMAGE_URL_RE = /^(?:-\s*)?(https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp))(?:\?\S*)?$/i;
+const LINK_URL_RE = /(https?:\/\/\S+)/g;
+
+function renderDaouNoticeContent(raw?: string | null) {
+    if (!raw || !raw.trim()) return null;
+    const lines = raw
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+    return (
+        <div className="gd-daou-caution">
+            {lines.map((line, idx) => {
+                const imgMatch = line.match(IMAGE_URL_RE);
+                if (imgMatch) {
+                    return (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            key={idx}
+                            src={imgMatch[1]}
+                            alt="상품 상세 안내"
+                            className="gd-caution-img"
+                            loading="lazy"
+                        />
+                    );
+                }
+                const parts = line.split(LINK_URL_RE);
+                return (
+                    <p key={idx} className="gd-caution-line">
+                        {parts.map((part, pIdx) =>
+                            /^https?:\/\/\S+$/i.test(part) ? (
+                                <a
+                                    key={pIdx}
+                                    href={part}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="gd-caution-link"
+                                >
+                                    {part}
+                                </a>
+                            ) : (
+                                <span key={pIdx}>{part}</span>
+                            )
+                        )}
+                    </p>
+                );
+            })}
+        </div>
+    );
+}
 
 /** 상품 상세: 유효기간·이용안내·유의사항을 고지하고, [구매하기]로 문구/받는 분/결제 화면으로 넘어간다 */
 export default function GiftDetailPage() {
@@ -73,6 +128,13 @@ export default function GiftDetailPage() {
     }
 
     const discount = product.list_price > product.sale_price ? Math.round((1 - product.sale_price / product.list_price) * 100) : 0;
+    const validDays = product.valid_days && product.valid_days > 0 ? product.valid_days : GIFT_VALID_DAYS;
+    const orderInfoRows = ORDER_INFO.map((r) =>
+        r.label === '유효기간' ? { ...r, text: `발송일로부터 ${validDays}일` } : r
+    );
+    const hasDaouCaution = Boolean(
+        product.usage_guide?.trim() || product.common_caution?.trim() || product.additional_caution?.trim()
+    );
 
     return (
         <div className="gift-page gd-page">
@@ -111,16 +173,33 @@ export default function GiftDetailPage() {
 
             <section className="gd-panel">
                 {tab === 'order' ? (
-                    <dl className="gd-info">
-                        {ORDER_INFO.map((r) => (
-                            <div key={r.label}>
-                                <dt>{r.label}</dt>
-                                <dd>{r.text}</dd>
+                    <>
+                        <dl className="gd-info">
+                            {orderInfoRows.map((r) => (
+                                <div key={r.label}>
+                                    <dt>{r.label}</dt>
+                                    <dd>{r.text}</dd>
+                                </div>
+                            ))}
+                        </dl>
+                        {hasDaouCaution && (
+                            <div className="gd-daou-section">
+                                {renderDaouNoticeContent(product.usage_guide)}
+                                {renderDaouNoticeContent(product.common_caution)}
+                                {renderDaouNoticeContent(product.additional_caution)}
                             </div>
-                        ))}
-                    </dl>
+                        )}
+                    </>
                 ) : (
                     <>
+                        {hasDaouCaution && (
+                            <div className="gd-daou-section gd-daou-section-top">
+                                <p className="gd-notice-title">&lt;상품별 이용안내 및 유의사항&gt;</p>
+                                {renderDaouNoticeContent(product.usage_guide)}
+                                {renderDaouNoticeContent(product.common_caution)}
+                                {renderDaouNoticeContent(product.additional_caution)}
+                            </div>
+                        )}
                         <p className="gd-notice-title">&lt;모바일 쿠폰 유의사항&gt;</p>
                         <ul className="gd-notice">
                             {GIFT_NOTICES.map((t) => (

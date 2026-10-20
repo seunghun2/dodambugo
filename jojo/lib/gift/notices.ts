@@ -3,8 +3,8 @@
 // 주의: 아래는 공통 고지입니다. 브랜드별 상세 유의사항(교환 가능 매장, 잔액 처리 등)은
 //       다우기술 상품정보(CC011) 연동 후 상품별로 추가해야 합니다.
 
-/** 쿠폰 유효기간(일). 다우 발행 요청의 VALID_END(+30일)와 반드시 같은 값이어야 한다. (lib/gift/issuer.ts) */
-export const GIFT_VALID_DAYS = 30;
+/** 쿠폰 유효기간(일). 다우 발행 요청의 VALID_END(+59일)와 반드시 같은 값이어야 한다. (lib/gift/issuer.ts) */
+export const GIFT_VALID_DAYS = 59;
 
 export const ORDER_INFO: { label: string; text: string }[] = [
     { label: '유효기간', text: `발송일로부터 ${GIFT_VALID_DAYS}일` },

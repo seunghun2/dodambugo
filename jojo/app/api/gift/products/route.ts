@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     const { data, error } = await getSupabase()
         .from('gift_products')
-        .select('id, brand, name, category, list_price, sale_price, image_url, badge')
+        .select('id, brand, name, category, list_price, sale_price, image_url, badge, valid_days, common_caution, additional_caution, usage_guide')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
