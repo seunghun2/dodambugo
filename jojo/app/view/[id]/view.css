@@ -764,6 +764,9 @@
     font-weight: 600;
     /* 조금 더 두껍게 */
     color: #111111;
+    word-break: keep-all;
+    white-space: pre-line;
+    line-height: 1.45;
 }
 
 /* 구분선 */
@@ -771,6 +774,7 @@
     margin: 0 12px;
     color: #DDDDDD;
     font-weight: 300;
+    flex-shrink: 0;
 }
 
 /* 호실 - Bold 16px 도담 브랜드 컬러 (네이비) */
@@ -779,6 +783,8 @@
     font-size: 16px;
     font-weight: 700;
     color: #2C3E50;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* 장례식장 전화하기 버튼 */

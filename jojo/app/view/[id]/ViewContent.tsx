@@ -854,7 +854,11 @@ ${url}
             {shouldShowFuneralHomeBox({ funeralType: bugo.funeral_type, funeralHome: bugo.funeral_home }) && (
                 <>
                     <div className="funeral-box funeral-box-inline funeral-box-top">
-                        <span className="funeral-name">{bugo.funeral_home}</span>
+                        <span className="funeral-name">
+                            {bugo.funeral_home && bugo.funeral_home.length >= 16 && bugo.funeral_home.includes(' ')
+                                ? bugo.funeral_home.replace(' ', '\n')
+                                : bugo.funeral_home}
+                        </span>
                         {bugo.room_number && (
                             <>
                                 <span className="funeral-divider">|</span>
