@@ -23,7 +23,8 @@ export interface DaouGoodsItem {
 
 function extractTag(block: string, tag: string): string {
     const m = block.match(new RegExp(`<${tag}>\\s*([\\s\\S]*?)\\s*</${tag}>`, 'i'));
-    return m ? m[1].trim() : '';
+    if (!m) return '';
+    return m[1].trim().replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/i, '$1').trim();
 }
 
 export function parseDaouGoodsListXml(xml: string): {
@@ -65,29 +66,33 @@ export async function syncDaouCatalogToSupabase(): Promise<{
     matched: number;
     unmatchedProductNames: string[];
 }> {
-    const cooperId = process.env.DAOU_COOPER_ID?.trim();
-    const cooperPw = process.env.DAOU_COOPER_PW?.trim();
-    const siteId = process.env.DAOU_SITE_ID?.trim();
-    const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || '').trim();
+    const cooperId = (process.env.DAOU_COOPER_ID || 'SC2859').trim();
+    const cooperPw = (process.env.DAOU_COOPER_PW || 'eqph04@@').trim();
+    const siteId = (process.env.DAOU_SITE_ID || '10004255').trim();
+    const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || 'http://49.50.139.204/proxy/daou').trim();
 
     if (!cooperId || !cooperPw || !siteId || !endpointUrl) {
         throw new Error('DAOU_COOPER_ID, DAOU_COOPER_PW, DAOU_SITE_ID, DAOU_PROXY_URL 환경변수가 필요합니다.');
     }
 
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    };
     if (process.env.DAOU_PROXY_SECRET) {
         headers['x-proxy-secret'] = process.env.DAOU_PROXY_SECRET.trim();
     }
 
+    const formBody = new URLSearchParams({
+        ACTION: 'CC011_DOWN_ALL_GOODSINFO',
+        COOPER_ID: cooperId,
+        COOPER_PW: cooperPw,
+        SITE_ID: siteId,
+    }).toString();
+
     const res = await fetch(endpointUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-            ACTION: 'CC011_DOWN_ALL_GOODSINFO',
-            COOPER_ID: cooperId,
-            COOPER_PW: cooperPw,
-            SITE_ID: siteId,
-        }),
+        body: formBody,
     });
 
     const xml = await res.text();

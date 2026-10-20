@@ -80,13 +80,14 @@ function formatKstYmd(offsetDays = 0): string {
 
 function extractXmlTag(xml: string, tag: string): string {
     const m = xml.match(new RegExp(`<${tag}>\\s*([\\s\\S]*?)\\s*</${tag}>`, 'i'));
-    return m ? m[1].trim() : '';
+    if (!m) return '';
+    return m[1].trim().replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/i, '$1').trim();
 }
 
 /**
  * 다우기술 B2C 모바일쿠폰 API V3.9 발행/폐기기
  * - 발행: CI102_ISSUECPN_TITLE_WITHPAY
- * - 폐기(취소): CI104_DISUSECPN_WITHPAY
+ * - 폐기(취소): CI104_DISUSECPN
  */
 class DaouIssuer implements GiftIssuer {
     readonly name = 'daou';
@@ -130,26 +131,27 @@ class DaouIssuer implements GiftIssuer {
             RECEIVER: truncateEucKrBytes(req.recipientName || '', 28),
             SEND_MSG: safeShortMsg,
             VALID_START: formatKstYmd(0),
-            VALID_END: formatKstYmd(30),
+            VALID_END: formatKstYmd(59),
             PAY_ID: '0',
             BOOKING_NO: '0',
             SITE_URL: 'https://maeumbugo.co.kr',
             TITLE: truncateEucKrBytes(req.title || '[마음부고] 감사 답례품', 24),
+            SEND_TYPE: req.sendType || '1001', // 연동업체지정(10004008) 캠페인 필수값 (1001: MMS 기본)
         };
-        if (req.sendType) {
-            payload.SEND_TYPE = req.sendType;
-        }
 
         try {
-            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            };
             if (this.config.proxySecret) {
                 headers['x-proxy-secret'] = this.config.proxySecret;
             }
 
+            const formBody = new URLSearchParams(payload).toString();
             const res = await fetch(this.config.endpointUrl, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(payload),
+                body: formBody,
             });
 
             const text = await res.text();
@@ -185,24 +187,27 @@ class DaouIssuer implements GiftIssuer {
         if (!noCpn) return { ok: false, error: '쿠폰 번호(NO_CPN)가 없습니다.' };
 
         const payload: Record<string, string> = {
-            ACTION: 'CI104_DISUSECPN_WITHPAY',
+            ACTION: 'CI104_DISUSECPN',
             COOPER_ID: this.config.cooperId,
             COOPER_PW: this.config.cooperPw,
             SITE_ID: this.config.siteId,
             NO_CPN: noCpn,
             REQUEST_ID: `CANCEL-${orderNumber}`.slice(0, 30),
-            DISUSE_REASON: '구매자 취소',
+            REASON: '구매자 취소',
         };
 
         try {
-            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            };
             if (this.config.proxySecret) {
                 headers['x-proxy-secret'] = this.config.proxySecret;
             }
+            const formBody = new URLSearchParams(payload).toString();
             const res = await fetch(this.config.endpointUrl, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(payload),
+                body: formBody,
             });
             const text = await res.text();
             const rt = extractXmlTag(text, 'RT');
@@ -229,10 +234,10 @@ export class GiftNotReadyError extends Error {
 export function getIssuer(): GiftIssuer {
     if (!isLiveMode()) return new MockIssuer();
 
-    const cooperId = process.env.DAOU_COOPER_ID?.trim();
-    const cooperPw = process.env.DAOU_COOPER_PW?.trim();
-    const siteId = process.env.DAOU_SITE_ID?.trim();
-    const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || '').trim();
+    const cooperId = (process.env.DAOU_COOPER_ID || 'SC2859').trim();
+    const cooperPw = (process.env.DAOU_COOPER_PW || 'eqph04@@').trim();
+    const siteId = (process.env.DAOU_SITE_ID || '10004255').trim();
+    const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || 'http://49.50.139.204/proxy/daou').trim();
     const senderPhone = (process.env.DAOU_SENDER_PHONE || '01048375076').trim();
 
     if (!cooperId || !cooperPw || !siteId || !endpointUrl) {
