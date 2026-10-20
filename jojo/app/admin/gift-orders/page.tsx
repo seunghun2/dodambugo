@@ -68,9 +68,9 @@ export default function AdminGiftOrdersPage() {
     const getStatusLabel = (status: string) => {
         switch (status) {
             case 'paid':
-                return '발송대기 (10분유예)';
+                return '발송대기 (1시간유예)';
             case 'test_paid':
-                return '발송대기 (테스트·10분유예)';
+                return '발송대기 (테스트·1시간유예)';
             case 'sending':
                 return '발송중';
             case 'sent':
@@ -112,7 +112,7 @@ export default function AdminGiftOrdersPage() {
     const getRecipientStatusLabel = (st: string) => {
         switch (st) {
             case 'pending':
-                return '대기 (10분유예)';
+                return '대기 (1시간유예)';
             case 'sent':
                 return '발송완료';
             case 'failed':
@@ -268,7 +268,7 @@ export default function AdminGiftOrdersPage() {
                             style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
                         >
                             <option value="">전체 상태</option>
-                            <option value="waiting">발송대기 (10분 유예)</option>
+                            <option value="waiting">발송대기 (1시간 유예)</option>
                             <option value="sent">발송완료</option>
                             <option value="partial">일부실패</option>
                             <option value="failed">발송실패</option>
@@ -282,7 +282,7 @@ export default function AdminGiftOrdersPage() {
                             style={{ background: '#1e293b', color: '#fff', borderColor: '#1e293b' }}
                         >
                             <span className="material-symbols-outlined">send</span>
-                            10분경과 일괄발송
+                            1시간경과 일괄발송
                         </button>
                         <button onClick={() => fetchOrders()} className="btn-refresh" disabled={processing}>
                             <span className="material-symbols-outlined">refresh</span>
