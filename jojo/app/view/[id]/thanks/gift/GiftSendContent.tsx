@@ -240,11 +240,17 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         ? '/b2b'
                         : '';
 
+                const safeGoodsName = String(data.productName || `[${product.brand}] ${product.name}`)
+                    .replace(/[+&%"'\\]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .slice(0, 20);
+
                 window.innopay.goPay({
                     payMethod: 'CARD',
                     mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
                     moid: data.orderNumber,
-                    goodsName: data.productName || `[${product.brand}] ${product.name}`,
+                    goodsName: safeGoodsName,
                     goodsCnt: String(data.count || items.length),
                     amt: String(data.total || total),
                     taxFreeAmt: '0',
