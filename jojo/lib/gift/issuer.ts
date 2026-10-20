@@ -238,7 +238,7 @@ export function getIssuer(): GiftIssuer {
     const cooperPw = (process.env.DAOU_COOPER_PW || 'eqph04@@').trim();
     const siteId = (process.env.DAOU_SITE_ID || '10004255').trim();
     const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || 'http://49.50.139.204/proxy/daou').trim();
-    const senderPhone = (process.env.DAOU_SENDER_PHONE || '01048375076').trim();
+    const senderPhone = (process.env.DAOU_SENDER_PHONE || '15996567').trim();
 
     if (!cooperId || !cooperPw || !siteId || !endpointUrl) {
         throw new GiftNotReadyError();
