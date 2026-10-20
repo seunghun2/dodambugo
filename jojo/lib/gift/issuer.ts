@@ -9,6 +9,7 @@
 export interface IssueRequest {
     orderNumber: string;
     seq?: number; // 주문 내 순번 (1..N) — 다우 COOPER_ORDER 유일성 보장용
+    bugoNumber?: string; // 감사장 단축링크(/t/[bugoNumber]) 생성용
     senderName?: string;
     recipientName: string;
     recipientPhone: string; // 숫자만
@@ -43,6 +44,14 @@ export interface GiftIssuer {
  * EUC-KR 바이트 기준 안전 절삭 (한글/비ASCII = 2byte, ASCII = 1byte).
  * 다우 E000021("메시지가 80byte를 초과합니다") 거절을 원천 차단한다.
  */
+export function calcEucKrBytes(input: string): number {
+    let bytes = 0;
+    for (const ch of input || '') {
+        bytes += ch.charCodeAt(0) <= 0x7f ? 1 : 2;
+    }
+    return bytes;
+}
+
 export function truncateEucKrBytes(input: string, maxBytes = 76): string {
     const clean = (input || '').replace(/\r\n/g, '\n').trim();
     let bytes = 0;
@@ -111,11 +120,17 @@ class DaouIssuer implements GiftIssuer {
         const seqStr = String(req.seq ?? 1).padStart(3, '0');
         const cooperOrder = `${req.orderNumber}-${seqStr}`.slice(0, 50);
 
-        // 다우 SEND_MSG 80byte 제한 방어: EUC-KR 76byte 이내로 안전 절삭 (전체 문구는 감사장 문자로 별도 발송됨)
-        const safeShortMsg = truncateEucKrBytes(
-            req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`,
-            76
-        );
+        // 다우 SEND_MSG 80byte 제한 내에서 인사말 + 모바일 감사장 단축링크(/t/[bugoNumber]) 결합
+        const shortUrlSuffix = req.bugoNumber
+            ? `\n▼감사장 보기\nhttps://maeumbugo.co.kr/t/${req.bugoNumber}`
+            : '';
+        const suffixBytes = calcEucKrBytes(shortUrlSuffix);
+        const safeShortMsg = shortUrlSuffix
+            ? `${truncateEucKrBytes('조문해 주셔서 감사드립니다.', Math.max(10, 78 - suffixBytes))}${shortUrlSuffix}`
+            : truncateEucKrBytes(
+                  req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`,
+                  76
+              );
 
         const payload: Record<string, string> = {
             ACTION: 'CI102_ISSUECPN_TITLE_WITHPAY',

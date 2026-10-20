@@ -224,7 +224,8 @@ export async function dispatchGiftOrder(
 
     const issuer = getIssuer();
     const isTestOrder = Boolean(order.is_test);
-    const hasThanksCard = order.card_id && order.card_id !== 'none';
+    const hasThanksCard = Boolean(order.card_id && order.card_id !== 'none');
+    const useSeparateThanksLms = process.env.GIFT_SEPARATE_THANKS_LMS === 'true';
     const thanksUrl = `https://maeumbugo.co.kr/view/${order.bugo_number}/thanks/card`;
     const fullThanksText = hasThanksCard
         ? `${order.message || ''}\n\n▼ 감사장 보기\n${thanksUrl}`.trim()
@@ -234,8 +235,9 @@ export async function dispatchGiftOrder(
         const cleanRecipientPhone = String(r.phone || '').replace(/\D/g, '');
         let lmsSentAt: string | null = r.lms_sent_at || null;
 
-        // 1) 감사장 LMS 발송 (1번째 메시지 — 아직 LMS가 안 나간 수신자에게만 발송하여 재시도 시 중복 발송 방지)
-        if (!lmsSentAt && fullThanksText) {
+        // 1) 기본적으로 다우 쿠폰 MMS 본문에 감사장 단축링크(/t/[bugo_number])를 포함해 1통(다우 발신번호 1599-6567)으로 통합 발송.
+        //    GIFT_SEPARATE_THANKS_LMS='true' 인 경우에만 솔라피 별도 LMS 발송.
+        if (useSeparateThanksLms && !lmsSentAt && fullThanksText) {
             if (isTestOrder) {
                 lmsSentAt = new Date().toISOString();
             } else {
@@ -250,12 +252,15 @@ export async function dispatchGiftOrder(
                     console.error('[gift/dispatcher] 감사장 문자 발송 오류:', lmsErr);
                 }
             }
+        } else if (!lmsSentAt) {
+            lmsSentAt = new Date().toISOString();
         }
 
-        // 2) 모바일 쿠폰 발행 (2번째 메시지)
+        // 2) 모바일 쿠폰 발행 (인사말 + 감사장 단축링크 통합 MMS)
         const res = await issuer.issue({
             orderNumber: order.order_number,
             seq: idx + 1,
+            bugoNumber: hasThanksCard ? String(order.bugo_number) : undefined,
             senderName: order.buyer_name || '상주',
             recipientName: r.name || '',
             recipientPhone: cleanRecipientPhone,
