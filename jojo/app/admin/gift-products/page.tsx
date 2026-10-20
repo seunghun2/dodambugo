@@ -907,7 +907,7 @@ export default function AdminGiftProductsPage() {
                                             </div>
                                         </div>
                                         <div className="gp-tag-list" style={{ marginBottom: '12px' }}>
-                                            {[0, 3, 5, 7, 10].map((pct) => {
+                                            {[0, 1, 3, 5, 7, 10].map((pct) => {
                                                 const curPct = calcDiscountPct(editForm.list_price, editForm.sale_price);
                                                 return (
                                                     <button

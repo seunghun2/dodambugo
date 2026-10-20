@@ -107,17 +107,26 @@ export async function PATCH(request: NextRequest) {
         const sb = getSupabase();
         const now = new Date().toISOString();
 
-        // 0) 전체/브랜드별 일괄 할인율(%) 적용
+        // 0) 전체/브랜드별/유형별 일괄 할인율(%) 적용
         if (typeof body.bulkDiscountPercent === 'number') {
             const pct = Math.max(0, Math.min(90, Number(body.bulkDiscountPercent) || 0));
-            let q = sb.from('gift_products').select('id, list_price, sale_price');
+            const targetType = String(body.targetType || 'all'); // 'all' | 'goods' | 'voucher'
+            let q = sb.from('gift_products').select('id, name, category, daou_sheet, list_price, sale_price');
             if (body.brand && body.brand !== '전체') {
                 q = q.eq('brand', String(body.brand));
             }
             const { data: rows, error: selErr } = await q;
             if (selErr) return NextResponse.json({ error: selErr.message }, { status: 500 });
 
-            const targets = rows || [];
+            const isVoucher = (r: any) =>
+                /금액권|상품권|지류/.test(String(r.category || '') + String(r.daou_sheet || '')) ||
+                /원권|상품권|금액권|교환권/.test(String(r.name || ''));
+
+            const targets = (rows || []).filter((r) => {
+                if (targetType === 'voucher') return isVoucher(r);
+                if (targetType === 'goods') return !isVoucher(r);
+                return true;
+            });
             await Promise.all(
                 targets.map((r) => {
                     const base = Number(r.list_price) > 0 ? Number(r.list_price) : Number(r.sale_price) || 0;
