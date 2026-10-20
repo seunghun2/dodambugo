@@ -120,17 +120,14 @@ class DaouIssuer implements GiftIssuer {
         const seqStr = String(req.seq ?? 1).padStart(3, '0');
         const cooperOrder = `${req.orderNumber}-${seqStr}`.slice(0, 50);
 
-        // 다우 SEND_MSG 80byte 제한 내에서 인사말 + 모바일 감사장 단축링크(/t/[bugoNumber]) 결합
-        const shortUrlSuffix = req.bugoNumber
-            ? `\n▼감사장 보기\nhttps://maeumbugo.co.kr/t/${req.bugoNumber}`
+        // 다우 CI102_ISSUECPN_TITLE_WITHPAY 의 SEND_MSG 는 EUC-KR 기준 500byte 까지 허용됨.
+        // 상주가 작성한 감사인사 전문 + 하단 감사장 링크(/view/[bugoNumber]/thanks/card)를 480byte 이내로 합쳐 1통으로 발송.
+        const thanksLinkSuffix = req.bugoNumber
+            ? `\n\n▼ 감사장 보기\nhttps://maeumbugo.co.kr/view/${req.bugoNumber}/thanks/card`
             : '';
-        const suffixBytes = calcEucKrBytes(shortUrlSuffix);
-        const safeShortMsg = shortUrlSuffix
-            ? `${truncateEucKrBytes('조문해 주셔서 감사드립니다.', Math.max(10, 78 - suffixBytes))}${shortUrlSuffix}`
-            : truncateEucKrBytes(
-                  req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`,
-                  76
-              );
+        const suffixBytes = calcEucKrBytes(thanksLinkSuffix);
+        const bodyText = (req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`).trim();
+        const safeShortMsg = `${truncateEucKrBytes(bodyText, Math.max(40, 480 - suffixBytes))}${thanksLinkSuffix}`;
 
         const payload: Record<string, string> = {
             ACTION: 'CI102_ISSUECPN_TITLE_WITHPAY',
