@@ -81,6 +81,8 @@ export default function AdminGiftProductsPage() {
     const [statusFilter, setStatusFilter] = useState('전체');
     const [priceFilterIdx, setPriceFilterIdx] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
+    const [bulkDiscountPct, setBulkDiscountPct] = useState<number>(5);
+    const [applyingDiscount, setApplyingDiscount] = useState(false);
 
     // 드래그 앤 드롭 상태
     const [dragId, setDragId] = useState<string | null>(null);
@@ -375,6 +377,44 @@ export default function AdminGiftProductsPage() {
 
     const formatPrice = (price: number) => new Intl.NumberFormat('ko-KR').format(price || 0);
 
+    const calcDiscountPct = (listPrice?: number, salePrice?: number) => {
+        const l = Number(listPrice) || 0;
+        const s = Number(salePrice) || 0;
+        if (l <= 0 || s <= 0 || l <= s) return 0;
+        return Math.round((1 - s / l) * 100);
+    };
+
+    const calcSaleFromDiscount = (listPrice: number, pct: number) => {
+        const l = Math.max(0, Number(listPrice) || 0);
+        const p = Math.max(0, Math.min(90, Number(pct) || 0));
+        if (l <= 0 || p <= 0) return l;
+        return Math.max(10, Math.round((l * (100 - p)) / 1000) * 10);
+    };
+
+    const handleApplyBulkDiscount = async (pctOverride?: number) => {
+        const pct = Math.max(0, Math.min(90, Number(pctOverride ?? bulkDiscountPct) || 0));
+        const targetLabel = brandFilter === '전체' ? `전체 상품(${products.length}개)` : `[${brandFilter}] 브랜드 상품`;
+        if (!confirm(`${targetLabel}의 판매가를 정가 대비 ${pct}% 할인으로 일괄 변경하시겠습니까?`)) return;
+
+        setApplyingDiscount(true);
+        try {
+            const res = await fetch('/api/admin/gift-products', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bulkDiscountPercent: pct, brand: brandFilter }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || '일괄 변경 실패');
+            setBulkDiscountPct(pct);
+            await fetchProducts();
+            alert(`${data.count || 0}개 상품에 ${pct}% 고객 할인율이 적용되었습니다.`);
+        } catch (err: any) {
+            alert('할인율 적용 오류: ' + (err.message || '오류'));
+        } finally {
+            setApplyingDiscount(false);
+        }
+    };
+
     return (
         <div className="admin-pc">
             <AdminSidebar />
@@ -383,8 +423,73 @@ export default function AdminGiftProductsPage() {
             <main className="admin-main">
                 <header className="admin-top-header">
                     <h1>답례품 관리</h1>
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <span className="total-count">총 {filteredProducts.length}건</span>
+                        <div
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '4px 10px',
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                fontSize: '13px',
+                            }}
+                        >
+                            <span style={{ fontWeight: 600, color: '#334155' }}>
+                                고객할인율({brandFilter === '전체' ? '전체' : brandFilter}):
+                            </span>
+                            <input
+                                type="number"
+                                min={0}
+                                max={90}
+                                value={bulkDiscountPct}
+                                onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(90, parseInt(e.target.value, 10) || 0)))}
+                                style={{
+                                    width: '52px',
+                                    padding: '4px 6px',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '6px',
+                                    textAlign: 'right',
+                                    fontWeight: 700,
+                                }}
+                            />
+                            <span style={{ color: '#64748b' }}>%</span>
+                            <button
+                                type="button"
+                                onClick={() => handleApplyBulkDiscount()}
+                                disabled={applyingDiscount}
+                                style={{
+                                    padding: '5px 10px',
+                                    border: 0,
+                                    borderRadius: '6px',
+                                    background: '#e5484d',
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                {applyingDiscount ? '적용중...' : '일괄 적용'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleApplyBulkDiscount(0)}
+                                disabled={applyingDiscount}
+                                style={{
+                                    padding: '5px 8px',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '6px',
+                                    background: '#fff',
+                                    color: '#475569',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                0%(정가)
+                            </button>
+                        </div>
                         <button onClick={handleCreateNew} className="gp-btn-primary">
                             <span className="material-symbols-outlined">add</span>
                             상품 등록
@@ -554,7 +659,14 @@ export default function AdminGiftProductsPage() {
                                                         <td className="gp-nowrap">{product.brand}</td>
                                                         <td className="name-cell">{product.name}</td>
                                                         <td className="number-cell gp-nowrap">{formatPrice(product.list_price)}원</td>
-                                                        <td className="number-cell gp-nowrap">{formatPrice(product.sale_price)}원</td>
+                                                        <td className="number-cell gp-nowrap">
+                                                            {calcDiscountPct(product.list_price, product.sale_price) > 0 && (
+                                                                <span style={{ color: '#e5484d', fontWeight: 700, marginRight: '6px', fontSize: '12px' }}>
+                                                                    {calcDiscountPct(product.list_price, product.sale_price)}%
+                                                                </span>
+                                                            )}
+                                                            {formatPrice(product.sale_price)}원
+                                                        </td>
                                                         <td className="gp-nowrap" onClick={(e) => e.stopPropagation()}>
                                                             <select
                                                                 className={`gp-badge-select ${product.badge ? 'has-val' : ''}`}
@@ -751,10 +863,35 @@ export default function AdminGiftProductsPage() {
                                                 <input
                                                     type="number"
                                                     value={editForm.list_price || ''}
-                                                    onChange={(e) =>
-                                                        setEditForm({ ...editForm, list_price: parseInt(e.target.value, 10) || 0 })
-                                                    }
+                                                    onChange={(e) => {
+                                                        const nextList = parseInt(e.target.value, 10) || 0;
+                                                        const curDisc = calcDiscountPct(editForm.list_price, editForm.sale_price);
+                                                        setEditForm({
+                                                            ...editForm,
+                                                            list_price: nextList,
+                                                            sale_price: curDisc > 0 ? calcSaleFromDiscount(nextList, curDisc) : nextList,
+                                                        });
+                                                    }}
                                                     placeholder="0"
+                                                />
+                                            </div>
+                                            <div className="gp-form-group">
+                                                <label>고객 할인율 (%)</label>
+                                                <input
+                                                    type="number"
+                                                    min={0}
+                                                    max={90}
+                                                    value={calcDiscountPct(editForm.list_price, editForm.sale_price)}
+                                                    onChange={(e) => {
+                                                        const pct = Math.max(0, Math.min(90, parseInt(e.target.value, 10) || 0));
+                                                        const base = Number(editForm.list_price) || Number(editForm.sale_price) || 0;
+                                                        setEditForm({
+                                                            ...editForm,
+                                                            list_price: base,
+                                                            sale_price: calcSaleFromDiscount(base, pct),
+                                                        });
+                                                    }}
+                                                    placeholder="5"
                                                 />
                                             </div>
                                             <div className="gp-form-group">
@@ -768,6 +905,28 @@ export default function AdminGiftProductsPage() {
                                                     placeholder="0"
                                                 />
                                             </div>
+                                        </div>
+                                        <div className="gp-tag-list" style={{ marginBottom: '12px' }}>
+                                            {[0, 3, 5, 7, 10].map((pct) => {
+                                                const curPct = calcDiscountPct(editForm.list_price, editForm.sale_price);
+                                                return (
+                                                    <button
+                                                        key={pct}
+                                                        type="button"
+                                                        className={`gp-tag-btn ${curPct === pct ? 'active' : ''}`}
+                                                        onClick={() => {
+                                                            const base = Number(editForm.list_price) || Number(editForm.sale_price) || 0;
+                                                            setEditForm({
+                                                                ...editForm,
+                                                                list_price: base,
+                                                                sale_price: calcSaleFromDiscount(base, pct),
+                                                            });
+                                                        }}
+                                                    >
+                                                        {pct === 0 ? '정가(0%)' : `${pct}% 할인`}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
 
                                         <div className="gp-form-group">

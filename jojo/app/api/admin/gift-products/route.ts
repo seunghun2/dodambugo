@@ -107,13 +107,39 @@ export async function PATCH(request: NextRequest) {
         const sb = getSupabase();
         const now = new Date().toISOString();
 
-        // 1) 일괄 업데이트 (위치 배치 / 일괄 노출 / 일괄 뱃지)
+        // 0) 전체/브랜드별 일괄 할인율(%) 적용
+        if (typeof body.bulkDiscountPercent === 'number') {
+            const pct = Math.max(0, Math.min(90, Number(body.bulkDiscountPercent) || 0));
+            let q = sb.from('gift_products').select('id, list_price, sale_price');
+            if (body.brand && body.brand !== '전체') {
+                q = q.eq('brand', String(body.brand));
+            }
+            const { data: rows, error: selErr } = await q;
+            if (selErr) return NextResponse.json({ error: selErr.message }, { status: 500 });
+
+            const targets = rows || [];
+            await Promise.all(
+                targets.map((r) => {
+                    const base = Number(r.list_price) > 0 ? Number(r.list_price) : Number(r.sale_price) || 0;
+                    const nextSale = pct <= 0 ? base : Math.max(10, Math.round((base * (100 - pct)) / 1000) * 10);
+                    return sb
+                        .from('gift_products')
+                        .update({ list_price: base, sale_price: nextSale, updated_at: now })
+                        .eq('id', r.id);
+                })
+            );
+            return NextResponse.json({ ok: true, count: targets.length, discountPercent: pct });
+        }
+
+        // 1) 일괄 업데이트 (위치 배치 / 일괄 노출 / 일괄 뱃지 / 일괄 가격)
         if (Array.isArray(body.bulk)) {
             const items: Array<{
                 id: string;
                 sort_order?: number;
                 is_active?: boolean;
                 badge?: string | null;
+                list_price?: number;
+                sale_price?: number;
             }> = body.bulk;
 
             await Promise.all(
@@ -122,6 +148,8 @@ export async function PATCH(request: NextRequest) {
                     if (typeof item.sort_order === 'number') patch.sort_order = item.sort_order;
                     if (typeof item.is_active === 'boolean') patch.is_active = item.is_active;
                     if (item.badge !== undefined) patch.badge = item.badge ? String(item.badge).trim() : null;
+                    if (typeof item.list_price === 'number') patch.list_price = Math.max(0, item.list_price);
+                    if (typeof item.sale_price === 'number') patch.sale_price = Math.max(0, item.sale_price);
                     return sb.from('gift_products').update(patch).eq('id', item.id);
                 })
             );

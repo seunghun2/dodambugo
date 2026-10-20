@@ -121,7 +121,7 @@ export async function syncDaouCatalogToSupabase(): Promise<{
     const supabase = getSupabase();
     const { data: rows, error } = await supabase
         .from('gift_products')
-        .select('id, brand, name, daou_goods_code');
+        .select('id, brand, name, list_price, sale_price, daou_goods_code');
     if (error || !rows) throw error || new Error('gift_products 조회 실패');
 
     let matched = 0;
@@ -144,7 +144,18 @@ export async function syncDaouCatalogToSupabase(): Promise<{
             updatePayload.image_url = hit.goodsImage;
         }
         if (hit.goodsPrice > 0) {
+            // 기존 상품의 고객 할인율(기본 5%)을 유지하여 정가(list_price)와 판매가(sale_price) 함께 갱신
+            const prevList = Number((row as any).list_price) || 0;
+            const prevSale = Number((row as any).sale_price) || 0;
+            const prevDiscPct =
+                prevList > 0 && prevSale > 0 && prevList > prevSale
+                    ? Math.round((1 - prevSale / prevList) * 100)
+                    : 5;
             updatePayload.list_price = hit.goodsPrice;
+            updatePayload.sale_price =
+                prevDiscPct > 0
+                    ? Math.max(10, Math.round((hit.goodsPrice * (100 - prevDiscPct)) / 1000) * 10)
+                    : hit.goodsPrice;
         }
         const { error: upErr } = await supabase
             .from('gift_products')
