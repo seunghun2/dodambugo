@@ -240,11 +240,14 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         ? '/b2b'
                         : '';
 
-                const safeGoodsName = String(data.productName || `[${product.brand}] ${product.name}`)
+                const rawGoodsName = String(data.productName || `[${product.brand}] ${product.name}`);
+                const prefixedGoodsName = rawGoodsName.startsWith('답례품') ? rawGoodsName : `답례품 ${rawGoodsName}`;
+                const safeGoodsName = prefixedGoodsName
                     .replace(/[+&%"'\\]/g, ' ')
                     .replace(/\s+/g, ' ')
                     .trim()
                     .slice(0, 20);
+                const finalTotalStr = String(data.total || total);
 
                 window.innopay.goPay({
                     payMethod: 'CARD',
@@ -252,8 +255,8 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     moid: data.orderNumber,
                     goodsName: safeGoodsName,
                     goodsCnt: String(data.count || items.length),
-                    amt: String(data.total || total),
-                    taxFreeAmt: '0',
+                    amt: '0', // 모바일 쿠폰(유가증권/상품권)은 부가세 비과세 대상
+                    taxFreeAmt: finalTotalStr, // 전액 비과세(면세) 금액으로 처리
                     buyerName: data.buyerName || mournerName || '상주',
                     buyerTel: String(data.buyerPhone || '01000000000').replace(/\D/g, ''),
                     buyerEmail: 'order@maeumbugo.co.kr',
@@ -264,6 +267,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         bugoId,
                         orderId: data.orderId,
                         orderNumber: data.orderNumber,
+                        originalTaxFreeAmt: finalTotalStr,
                     }),
                 });
                 return;
