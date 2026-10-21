@@ -422,7 +422,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                         <h3 className="gs-h3">답례품은 이렇게 전달돼요</h3>
                         <ol className="gs-help-list">
                             <li>카드와 문구를 정하고 답례품을 고릅니다.</li>
-                            <li>받는 분을 조의금·화환 목록, 직접 입력, 엑셀 등으로 추가합니다.</li>
+                            <li>받는 분을 부고장 조문 내역, 붙여넣기(카톡·메모장·문자·엑셀), 직접 입력 등으로 추가합니다.</li>
                             <li>결제 완료 1시간 후 받는 분께 감사장과 모바일 쿠폰이 함께 발송됩니다.</li>
                         </ol>
                         <div className="gs-dialog-btns">

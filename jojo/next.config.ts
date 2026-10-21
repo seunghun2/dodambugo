@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['192.168.0.46', 'localhost'],
   typescript: { ignoreBuildErrors: true },
   reactCompiler: true,
   serverExternalPackages: ['firebase-admin'],

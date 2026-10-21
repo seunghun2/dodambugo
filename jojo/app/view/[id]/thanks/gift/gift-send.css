@@ -437,37 +437,138 @@
 
 /* ---------- 받는 사람 ---------- */
 .gs-add-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    display: flex;
+    gap: 6px;
     margin-top: 10px;
 }
 .gs-add {
-    padding: 13px 8px;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.25;
+    padding: 10px 4px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
     color: #222;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
-}
-/* 버튼이 홀수 개일 때 마지막 버튼은 한 줄 전체 (마지막 자식은 숨김 file input) */
-.gs-add:nth-last-child(2):nth-child(odd) {
-    grid-column: 1 / -1;
+    letter-spacing: -0.03em;
+    outline: none;
 }
 .gs-add.on {
     border-color: var(--gs-yellow);
     background: var(--gs-yellow-bg);
 }
+/* 조문내역: 맨 앞 + 강조 */
+.gs-add.gs-add-primary {
+    flex: 1.5 1 0;
+    border-color: var(--gs-yellow);
+    background: var(--gs-yellow);
+    color: #000;
+    font-weight: 700;
+}
+.gs-direct-wrap {
+    margin-top: 10px;
+}
 .gs-direct {
     display: flex;
     gap: 8px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px solid #eee;
+}
+.gs-direct-sub {
+    margin: 6px 2px 0;
+    font-size: 12px;
+    color: #666;
+}
+.gs-direct-sub b {
+    color: #222;
+}
+.gs-paste-box {
     margin-top: 10px;
     padding: 12px;
     border-radius: 10px;
     background: #fafafa;
     border: 1px solid #eee;
+}
+.gs-paste-box textarea {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+}
+.gs-paste-box textarea:focus {
+    border-color: var(--gs-yellow);
+}
+.gs-paste-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+.gs-paste-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+}
+.gs-paste-btn {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--gs-yellow);
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+}
+.gs-excel-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #e4e4e4;
+    font-size: 12px;
+    color: #666;
+}
+.gs-excel-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.gs-excel-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #222;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: underline;
+}
+.gs-excel-dl {
+    color: #b58a00;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: underline;
+}
+.gs-excel-sep {
+    color: #ccc;
 }
 .gs-direct input {
     min-width: 0;
