@@ -570,7 +570,7 @@ export default function RecipientPanel({
             {items.length === 0 && (
                 <ul className="gs-tips">
                     <li>
-                        <b>붙여넣기</b> 카톡·메모장·문자·엑셀의 이름·번호를 붙여넣으면 50명도 1초 만에 등록돼요
+                        <b>붙여넣기</b> 카톡·메모장·문자·엑셀의 이름·번호를 붙여넣으면 즉시 등록돼요
                     </li>
                     {(historyCounts?.total ?? 0) > 0 && (
                         <li>
