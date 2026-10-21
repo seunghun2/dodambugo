@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
             console.error('슬랙 알림 실패 (무시):', slackErr);
         }
 
-        // 대대손손 장지 리뷰 자동 동기화 (Non-blocking fire-and-forget)
-        syncReviewToDaedaesonson({
+        // 대대손손 장지 리뷰 자동 동기화 (Vercel 서버리스 조기 종료 방지를 위해 await)
+        await syncReviewToDaedaesonson({
             burialPlace: burialPlace || matched.burial_place,
             mournerName: mournerName || matched.mourner_name,
             rating,

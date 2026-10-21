@@ -41,6 +41,8 @@ const ALIAS_MAP: Record<string, string> = {
     '자하연': 'park-0145',
     // 대전추모공원 — 봉인당/영락원 등 다양한 부속 시설
     '대전추모공원': 'park-0675',
+    // 거제시추모의집 — '시' 생략 통칭
+    '거제추모의집': 'park-0788',
 };
 
 // ── 블랙리스트: 이 키워드만 있으면 매칭 시도 안 함 ──
@@ -80,11 +82,16 @@ function stripDatetime(s: string): string {
 }
 
 // ── Bigram 유사도 (Dice's Coefficient) ──
+function stripAdminSuffix(s: string): string {
+    return s.replace(/^([가-힣]{2,3})(시립|군립|시|군)(?=[가-힣]{2,})/, '$1');
+}
+
 function similarity(a: string, b: string): number {
     const s1 = normalize(a);
     const s2 = normalize(b);
 
     if (s1 === s2) return 1.0;
+    if (stripAdminSuffix(s1) === stripAdminSuffix(s2) && stripAdminSuffix(s1).length >= 4) return 0.95;
     if (s1.length < 2 || s2.length < 2) return 0.0;
 
     // 포함 관계 가산점
