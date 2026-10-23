@@ -21,7 +21,8 @@ import {
     IconAdjustments,
     IconMailOpened,
     IconHistory,
-    IconChartBar
+    IconChartBar,
+    IconGift
 } from '@tabler/icons-react';
 import styles from './B2BAdminSidebar.module.css';
 
@@ -67,6 +68,11 @@ export function B2BAdminSidebar({ onLogout }: B2BAdminSidebarProps) {
             href: '/b2b/admin/condolence-orders',
             label: '조의금 주문 관리',
             icon: <IconCash stroke={1.5} size={22} />
+        },
+        {
+            href: '/b2b/admin/gift-orders',
+            label: 'B2B 답례품 주문',
+            icon: <IconGift stroke={1.5} size={22} />
         },
         {
             href: '/b2b/admin/products',
