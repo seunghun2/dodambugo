@@ -15,6 +15,7 @@ export interface IssueRequest {
     recipientPhone: string; // 숫자만
     goodsName: string;
     daouGoodsCode: string | null;
+    validDays?: number;
     message: string;
     title?: string;
     sendType?: '1001' | '1002' | '1004' | '2100'; // 1001:MMS, 1002:LMS, 1004:알림톡, 2100:온라인
@@ -143,7 +144,7 @@ class DaouIssuer implements GiftIssuer {
             RECEIVER: truncateEucKrBytes(req.recipientName || '', 28),
             SEND_MSG: safeShortMsg,
             VALID_START: formatKstYmd(0),
-            VALID_END: formatKstYmd(59),
+            VALID_END: formatKstYmd(req.validDays && req.validDays > 0 ? req.validDays : 30),
             PAY_ID: '0',
             BOOKING_NO: '0',
             SITE_URL: 'https://maeumbugo.co.kr',

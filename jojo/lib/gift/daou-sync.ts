@@ -135,7 +135,7 @@ export async function syncDaouCatalogToSupabase(): Promise<{
         }
         const updatePayload: Record<string, unknown> = {
             daou_goods_code: hit.noReq,
-            valid_days: Number(hit.validTerm) || 59,
+            valid_days: Number(hit.validTerm) || 30,
             common_caution: hit.commonCaution || null,
             additional_caution: hit.additionalCaution || null,
             usage_guide: hit.usageGuide || null,

@@ -183,15 +183,19 @@ export async function dispatchGiftOrder(
         };
     }
 
-    // 상품의 다우 상품코드 조회
+    // 상품의 다우 상품코드 및 유효기간 조회
     let daouGoodsCode: string | null = null;
+    let validDays = 30;
     if (order.product_id) {
         const { data: prod } = await sb
             .from('gift_products')
-            .select('daou_goods_code')
+            .select('daou_goods_code, valid_days')
             .eq('id', order.product_id)
             .maybeSingle();
         daouGoodsCode = prod?.daou_goods_code || null;
+        if (prod?.valid_days && Number(prod.valid_days) > 0) {
+            validDays = Number(prod.valid_days);
+        }
     }
 
     const { data: allRecipients, error: recErr } = await sb
@@ -266,6 +270,7 @@ export async function dispatchGiftOrder(
             recipientPhone: cleanRecipientPhone,
             goodsName: order.product_name,
             daouGoodsCode,
+            validDays,
             message: order.message || '',
         });
 
