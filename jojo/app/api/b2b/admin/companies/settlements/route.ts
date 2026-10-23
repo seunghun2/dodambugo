@@ -134,9 +134,11 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // 부의금 쉐어 정산 내역 조인 (상조 소속 지도사의 부고장 결제건) 먼저 조회하여 ID 집합 확보
+            // 부의금 & 답례품 쉐어 정산 내역 조인 (상조 소속 지도사의 부고장 결제건) 먼저 조회하여 ID 집합 확보
             let condolenceList: any[] = [];
+            let giftList: any[] = [];
             const condOrderKeySet = new Set<string>();
+            const giftOrderKeySet = new Set<string>();
             const { data: compUsers } = await supabase
                 .from('b2b_users')
                 .select('id, owner_name, company_name')
@@ -154,13 +156,25 @@ export async function GET(request: NextRequest) {
                     const bugoNums = compBugos.map(b => String(b.bugo_number)).filter(Boolean);
                     const allBugoKeys = Array.from(new Set([...bugoIds, ...bugoNums]));
 
-                    const { data: condOrders } = await supabase
-                        .from('condolence_orders')
-                        .select('*')
-                        .in('bugo_number', allBugoKeys)
-                        .gte('created_at', startOfMonth)
-                        .lt('created_at', endOfMonth)
-                        .order('created_at', { ascending: false });
+                    const [
+                        { data: condOrders },
+                        { data: rawGiftOrders }
+                    ] = await Promise.all([
+                        supabase
+                            .from('condolence_orders')
+                            .select('*')
+                            .in('bugo_number', allBugoKeys)
+                            .gte('created_at', startOfMonth)
+                            .lt('created_at', endOfMonth)
+                            .order('created_at', { ascending: false }),
+                        supabase
+                            .from('gift_orders')
+                            .select('*')
+                            .neq('status', 'pending')
+                            .gte('created_at', startOfMonth)
+                            .lt('created_at', endOfMonth)
+                            .order('created_at', { ascending: false })
+                    ]);
 
                     if (condOrders) {
                         condOrders.forEach(c => {
@@ -215,15 +229,82 @@ export async function GET(request: NextRequest) {
                             };
                         });
                     }
+
+                    // 답례품 정산 내역 매핑 (상조 소속 부고장 결제 건)
+                    if (rawGiftOrders) {
+                        const matchedGiftOrders = rawGiftOrders.filter(g =>
+                            compBugos.some(b =>
+                                (g.bugo_id && String(b.id) === String(g.bugo_id)) ||
+                                (g.bugo_number && String(b.bugo_number) === String(g.bugo_number))
+                            )
+                        );
+
+                        matchedGiftOrders.forEach(g => {
+                            if (g.id) {
+                                giftOrderKeySet.add(String(g.id));
+                                giftOrderKeySet.add(`GIFT_${g.id}`);
+                            }
+                            if (g.order_number) giftOrderKeySet.add(String(g.order_number));
+                        });
+
+                        const giftRate = companyData?.gift_company_rate ?? 4.0;
+                        const giftSettlementRecords = settlements.filter(s =>
+                            s.order_id?.startsWith('GIFT_') ||
+                            s.order_id?.startsWith('GF') ||
+                            giftOrderKeySet.has(String(s.order_id))
+                        );
+                        const giftSettleMap = new Map<string, { status: string; payment_date: string | null }>();
+                        giftSettlementRecords.forEach(s =>
+                            giftSettleMap.set(String(s.order_id), { status: s.status, payment_date: s.payment_date || null })
+                        );
+
+                        giftList = matchedGiftOrders.map(g => {
+                            const matchedBugo = compBugos.find(b =>
+                                (g.bugo_id && String(b.id) === String(g.bugo_id)) ||
+                                (g.bugo_number && String(b.bugo_number) === String(g.bugo_number))
+                            );
+                            const matchedUser = compUsers.find(u => u.id === matchedBugo?.b2b_user_id);
+                            const shareAmount = Math.round((g.total_amount || 0) * (giftRate / 100));
+                            const isCancelled = g.status === 'cancelled';
+
+                            const settleInfo =
+                                giftSettleMap.get(String(g.id)) ||
+                                giftSettleMap.get(`GIFT_${g.id}`) ||
+                                (g.order_number ? giftSettleMap.get(String(g.order_number)) : undefined);
+                            const settlementStatus = settleInfo?.status || 'pending';
+
+                            return {
+                                id: g.id,
+                                order_number: g.order_number || `GF_${String(g.id).slice(0, 8)}`,
+                                buyer_name: g.buyer_name || '-',
+                                product_name: g.product_name || '-',
+                                quantity: g.quantity || 1,
+                                amount: g.total_amount || 0,
+                                company_rate: giftRate,
+                                share_amount: isCancelled ? 0 : shareAmount,
+                                partner_name: matchedUser?.owner_name || '미등록',
+                                partner_company: matchedUser?.company_name || '미등록',
+                                deceased_name: matchedBugo?.deceased_name || '미등록',
+                                status: isCancelled ? 'cancelled' : settlementStatus,
+                                settlement_status: isCancelled ? 'cancelled' : settlementStatus,
+                                payment_date: settleInfo?.payment_date || null,
+                                created_at: g.created_at,
+                                bugo_id: matchedBugo?.bugo_number || g.bugo_number
+                            };
+                        });
+                    }
                 }
             }
 
-            // 화환 정산만 필터 (부의금 정산 레코드 제외)
+            // 화환 정산만 필터 (부의금 & 답례품 정산 레코드 제외)
             const wreathSettlements = settlements.filter(s =>
                 !s.order_id?.startsWith('BCOND_') &&
                 !s.order_id?.startsWith('COND_') &&
                 !s.order_id?.startsWith('DO') &&
-                !condOrderKeySet.has(String(s.order_id))
+                !s.order_id?.startsWith('GIFT_') &&
+                !s.order_id?.startsWith('GF') &&
+                !condOrderKeySet.has(String(s.order_id)) &&
+                !giftOrderKeySet.has(String(s.order_id))
             );
 
             const detailedList = wreathSettlements.map(s => {
@@ -254,13 +335,14 @@ export async function GET(request: NextRequest) {
                 success: true,
                 company: companyData || null,
                 settlements: detailedList,
-                condolenceSettlements: condolenceList
+                condolenceSettlements: condolenceList,
+                giftSettlements: giftList
             });
         } else {
             // 전체 대금 정산 월별 요약 목록 조회
             const { data: settlements, error: settleError } = await supabase
                 .from('b2b_company_settlements')
-                .select('amount, status, created_at')
+                .select('order_id, amount, status, created_at')
                 .eq('company_id', companyId);
 
             if (settleError) {
@@ -269,8 +351,10 @@ export async function GET(request: NextRequest) {
 
             // 월별로 그룹화 처리
             const monthlySummaryMap = new Map<string, { pending_amount: number; completed_amount: number; total_count: number }>();
+            const existingOrderIds = new Set<string>();
 
             settlements.forEach(s => {
+                if (s.order_id) existingOrderIds.add(String(s.order_id));
                 const date = new Date(s.created_at);
                 const yyyy = date.getFullYear();
                 const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -288,6 +372,56 @@ export async function GET(request: NextRequest) {
                     current.completed_amount += (s.amount || 0);
                 }
             });
+
+            // b2b_company_settlements에 아직 적재되지 않은 답례품 결제/발송 건도 월별 요약에 반영
+            let extraPendingGiftAmount = 0;
+            let extraGiftCount = 0;
+            const { data: compUsers } = await supabase
+                .from('b2b_users')
+                .select('id')
+                .eq('company_id', companyId);
+
+            if (compUsers && compUsers.length > 0) {
+                const userIds = compUsers.map(u => u.id);
+                const { data: compBugos } = await supabase
+                    .from('bugo')
+                    .select('id, bugo_number')
+                    .in('b2b_user_id', userIds);
+
+                if (compBugos && compBugos.length > 0) {
+                    const { data: rawGiftOrders } = await supabase
+                        .from('gift_orders')
+                        .select('id, order_number, bugo_id, bugo_number, total_amount, status, created_at')
+                        .in('status', ['paid', 'sent', 'partial']);
+
+                    const giftRate = companyData?.gift_company_rate ?? 4.0;
+                    (rawGiftOrders || []).forEach(g => {
+                        const matched = compBugos.some(b =>
+                            (g.bugo_id && String(b.id) === String(g.bugo_id)) ||
+                            (g.bugo_number && String(b.bugo_number) === String(g.bugo_number))
+                        );
+                        if (!matched) return;
+
+                        const alreadyInSettlements =
+                            existingOrderIds.has(String(g.id)) ||
+                            existingOrderIds.has(`GIFT_${g.id}`) ||
+                            (g.order_number && existingOrderIds.has(String(g.order_number)));
+                        if (alreadyInSettlements) return;
+
+                        const shareAmount = Math.round((g.total_amount || 0) * (giftRate / 100));
+                        const date = new Date(g.created_at);
+                        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        if (!monthlySummaryMap.has(key)) {
+                            monthlySummaryMap.set(key, { pending_amount: 0, completed_amount: 0, total_count: 0 });
+                        }
+                        const current = monthlySummaryMap.get(key)!;
+                        current.total_count += 1;
+                        current.pending_amount += shareAmount;
+                        extraPendingGiftAmount += shareAmount;
+                        extraGiftCount += 1;
+                    });
+                }
+            }
 
             // 객체 배열 형태로 변환 및 내림차순 정렬
             let monthlyList = Array.from(monthlySummaryMap.entries()).map(([month, data]) => ({
@@ -308,7 +442,7 @@ export async function GET(request: NextRequest) {
             }
 
             // 전체 정산 통계 도출
-            let pendingTotal = 0;
+            let pendingTotal = extraPendingGiftAmount;
             let completedTotal = 0;
             settlements.forEach(s => {
                 if (s.status === 'pending') pendingTotal += (s.amount || 0);
@@ -321,7 +455,7 @@ export async function GET(request: NextRequest) {
                 summary: {
                     pending_amount: pendingTotal,
                     completed_amount: completedTotal,
-                    total_count: settlements.length
+                    total_count: settlements.length + extraGiftCount
                 },
                 monthlyList
             });
@@ -352,13 +486,14 @@ export async function PATCH(request: NextRequest) {
         const nextYear = month === 12 ? year + 1 : year;
         const nextMonth = month === 12 ? 1 : month + 1;
         const endOfMonth = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01T00:00:00.000Z`;
+        const nowIso = new Date().toISOString();
 
         // 특정 년월 범위 내의 pending 상태 건만 completed로 업데이트
         const { data, error } = await supabase
             .from('b2b_company_settlements')
             .update({
                 status: 'completed',
-                payment_date: new Date().toISOString()
+                payment_date: nowIso
             })
             .eq('company_id', companyId)
             .eq('status', 'pending')
@@ -370,9 +505,72 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
+        // 답례품 주문 중 b2b_company_settlements에 아직 적재되지 않은 건도 함께 completed 적재
+        let insertedGiftCount = 0;
+        const [{ data: rawCompany }, { data: compUsers }, { data: existingMonthSettles }] = await Promise.all([
+            supabase.from('b2b_companies').select('*').eq('id', companyId).maybeSingle(),
+            supabase.from('b2b_users').select('id').eq('company_id', companyId),
+            supabase
+                .from('b2b_company_settlements')
+                .select('order_id')
+                .eq('company_id', companyId)
+                .gte('created_at', startOfMonth)
+                .lt('created_at', endOfMonth)
+        ]);
+
+        if (compUsers && compUsers.length > 0) {
+            const companyData = rawCompany ? normalizeCompanyData(rawCompany) : null;
+            const giftRate = companyData?.gift_company_rate ?? 4.0;
+            const existingOrderIds = new Set((existingMonthSettles || []).map(s => String(s.order_id)));
+            const userIds = compUsers.map(u => u.id);
+            const { data: compBugos } = await supabase
+                .from('bugo')
+                .select('id, bugo_number')
+                .in('b2b_user_id', userIds);
+
+            if (compBugos && compBugos.length > 0) {
+                const { data: rawGiftOrders } = await supabase
+                    .from('gift_orders')
+                    .select('id, order_number, bugo_id, bugo_number, total_amount, status, created_at')
+                    .in('status', ['paid', 'sent', 'partial'])
+                    .gte('created_at', startOfMonth)
+                    .lt('created_at', endOfMonth);
+
+                const toInsert = (rawGiftOrders || [])
+                    .filter(g => {
+                        const matched = compBugos.some(b =>
+                            (g.bugo_id && String(b.id) === String(g.bugo_id)) ||
+                            (g.bugo_number && String(b.bugo_number) === String(g.bugo_number))
+                        );
+                        if (!matched) return false;
+                        return !(
+                            existingOrderIds.has(String(g.id)) ||
+                            existingOrderIds.has(`GIFT_${g.id}`) ||
+                            (g.order_number && existingOrderIds.has(String(g.order_number)))
+                        );
+                    })
+                    .map(g => ({
+                        company_id: companyId,
+                        order_id: g.order_number || `GIFT_${g.id}`,
+                        amount: Math.round((g.total_amount || 0) * (giftRate / 100)),
+                        status: 'completed',
+                        payment_date: nowIso,
+                        created_at: g.created_at
+                    }));
+
+                if (toInsert.length > 0) {
+                    const { data: inserted } = await supabase
+                        .from('b2b_company_settlements')
+                        .insert(toInsert)
+                        .select();
+                    insertedGiftCount = inserted?.length || 0;
+                }
+            }
+        }
+
         return NextResponse.json({
             success: true,
-            updated_count: data?.length || 0
+            updated_count: (data?.length || 0) + insertedGiftCount
         });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || '서버 오류' }, { status: 500 });

@@ -37,6 +37,7 @@ export default function CompanyDashboardPage() {
     const [settleMonthlyList, setSettleMonthlyList] = useState<any[]>([]);
     const [settleDetails, setSettleDetails] = useState<any[]>([]);
     const [condolenceDetails, setCondolenceDetails] = useState<any[]>([]);
+    const [giftDetails, setGiftDetails] = useState<any[]>([]);
     const [settleSelectedMonth, setSettleSelectedMonth] = useState<string | null>(null);
     const [settleLoading, setSettleLoading] = useState(false);
     const [settleDetailLoading, setSettleDetailLoading] = useState(false);
@@ -90,6 +91,7 @@ export default function CompanyDashboardPage() {
                 if (data.success) {
                     setSettleDetails(data.settlements || []);
                     setCondolenceDetails(data.condolenceSettlements || []);
+                    setGiftDetails(data.giftSettlements || []);
                     if (data.company) {
                         setCompanyInfo(data.company);
                     }
@@ -230,7 +232,19 @@ export default function CompanyDashboardPage() {
             c.status === 'pending' ? '정산대기' : '정산완료'
         ]);
 
-        const allRows = [...flowerRows, ...condolenceRows];
+        const giftRows = giftDetails.map(g => [
+            '답례품',
+            new Date(g.created_at).toLocaleString(),
+            g.order_number || '-',
+            g.partner_name || '-',
+            g.deceased_name || '-',
+            `${g.product_name || '답례품'} (${g.quantity || 1}건 / ${g.company_rate}%)`,
+            g.buyer_name || '-',
+            g.share_amount,
+            g.status === 'pending' ? '정산대기' : g.status === 'cancelled' ? '취소' : '정산완료'
+        ]);
+
+        const allRows = [...flowerRows, ...condolenceRows, ...giftRows];
 
         const csvContent = 
             '\ufeff' + 
@@ -335,11 +349,13 @@ export default function CompanyDashboardPage() {
     const flowerCompleted = settleDetails.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
     const condolencePending = condolenceDetails.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
     const condolenceCompleted = condolenceDetails.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
-    const totalPending = flowerPending + condolencePending;
-    const totalCompleted = flowerCompleted + condolenceCompleted;
+    const giftPending = giftDetails.filter(g => g.status === 'pending').reduce((sum, g) => sum + g.share_amount, 0);
+    const giftCompleted = giftDetails.filter(g => g.status === 'completed').reduce((sum, g) => sum + g.share_amount, 0);
+    const totalPending = flowerPending + condolencePending + giftPending;
+    const totalCompleted = flowerCompleted + condolenceCompleted + giftCompleted;
     const totalAmount = totalPending + totalCompleted;
     const isSettled = totalCompleted > 0 && totalPending === 0;
-    const latestPaymentDate = settleDetails[0]?.payment_date || condolenceDetails[0]?.payment_date;
+    const latestPaymentDate = settleDetails[0]?.payment_date || condolenceDetails[0]?.payment_date || giftDetails[0]?.payment_date;
 
     return (
         <div className={styles.appContainer}>
@@ -394,7 +410,7 @@ export default function CompanyDashboardPage() {
                         <div className={`${styles.actionBar} no-print`}>
                             <div>
                                 <h1 className={styles.pageTitle}>본사 정산 명세 조회</h1>
-                                <p className={styles.pageSubtitle}>귀사 소속 파트너를 통한 화환 및 부의금 거래 정산 내역을 통합 조회하고 관리합니다.</p>
+                                <p className={styles.pageSubtitle}>귀사 소속 파트너를 통한 화환, 부의금 및 답례품 거래 정산 내역을 통합 조회하고 관리합니다.</p>
                             </div>
                             <div className={styles.actionButtons}>
                                 <button onClick={handlePrint} className={styles.printBtn}>
@@ -640,6 +656,51 @@ export default function CompanyDashboardPage() {
                                                                     <td style={{ textAlign: 'center' }}>{c.company_rate}%</td>
                                                                     <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{(c.share_amount || 0).toLocaleString()}원</td>
                                                                     <td style={{ textAlign: 'center' }}>{c.status === 'pending' ? '대기' : '완료'}</td>
+                                                                </tr>
+                                                            ))
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* 3. 답례품 세부 정산 내역 목록 */}
+                                        <div style={{ marginTop: '28px' }}>
+                                            <span className={styles.partyLabel}>■ 답례품 정산 세부 내역 명세</span>
+                                            <div className={styles.detailTableWrapper}>
+                                                <table className={styles.detailTable}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>결제 일시</th>
+                                                            <th>주문 번호</th>
+                                                            <th>장례지도사</th>
+                                                            <th>고인명(상가)</th>
+                                                            <th>답례품 상품명 (구매자)</th>
+                                                            <th style={{ textAlign: 'right' }}>실결제액</th>
+                                                            <th style={{ textAlign: 'center' }}>수수료율</th>
+                                                            <th style={{ textAlign: 'right' }}>정산 금액</th>
+                                                            <th style={{ textAlign: 'center' }}>상태</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {settleDetailLoading ? (
+                                                            <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>상세 내역을 불러오는 중...</td></tr>
+                                                        ) : giftDetails.length === 0 ? (
+                                                            <tr><td colSpan={9} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>해당 월에 발생한 답례품 정산 내역이 없습니다.</td></tr>
+                                                        ) : (
+                                                            giftDetails.map(g => (
+                                                                <tr key={g.id}>
+                                                                    <td style={{ textAlign: 'center' }}>
+                                                                        {new Date(g.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                                                    </td>
+                                                                    <td style={{ fontFamily: 'monospace', textAlign: 'center' }}>{g.order_number || '-'}</td>
+                                                                    <td style={{ textAlign: 'center' }}>{g.partner_name || '-'}</td>
+                                                                    <td style={{ fontWeight: 'bold', textAlign: 'center' }}>{g.deceased_name || '-'}</td>
+                                                                    <td>{g.product_name || '-'} ({g.quantity || 1}건) <span style={{ fontSize: '11px', color: '#000000', marginLeft: '4px' }}>({g.buyer_name || '-'})</span></td>
+                                                                    <td style={{ textAlign: 'right' }}>{(g.amount || 0).toLocaleString()}원</td>
+                                                                    <td style={{ textAlign: 'center' }}>{g.company_rate}%</td>
+                                                                    <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{(g.share_amount || 0).toLocaleString()}원</td>
+                                                                    <td style={{ textAlign: 'center' }}>{g.status === 'pending' ? '대기' : g.status === 'cancelled' ? '취소' : '완료'}</td>
                                                                 </tr>
                                                             ))
                                                         )}

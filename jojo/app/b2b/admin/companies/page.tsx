@@ -21,6 +21,7 @@ interface Company {
     referral_company_bonus?: number;
     gift_commission_amount?: number;
     gift_member_commission_amount?: number;
+    gift_company_rate?: number;
     condolence_company_rate?: number;
     created_at: string;
     owner_name?: string;
@@ -55,8 +56,9 @@ export default function CompaniesPage() {
     const [referralMemberBonus, setReferralMemberBonus] = useState('3500');
     const [referralCompanyBonus, setReferralCompanyBonus] = useState('6500');
 
-    const [giftCommission, setGiftCommission] = useState('5000');
-    const [giftMemberCommission, setGiftMemberCommission] = useState('5000');
+    const [giftCommission, setGiftCommission] = useState('0');
+    const [giftMemberCommission, setGiftMemberCommission] = useState('0');
+    const [giftCompanyRate, setGiftCompanyRate] = useState('4.0');
     const [condolenceCompanyRate, setCondolenceCompanyRate] = useState('3.3');
     const [ownerName, setOwnerName] = useState('');
     const [address, setAddress] = useState('');
@@ -113,8 +115,9 @@ export default function CompaniesPage() {
             setWreathVipAmount(String(company.wreath_vip_amount ?? 65000));
             setReferralMemberBonus(String(company.referral_member_bonus ?? 3500));
             setReferralCompanyBonus(String(company.referral_company_bonus ?? 6500));
-            setGiftCommission(String(company.gift_commission_amount ?? 5000));
-            setGiftMemberCommission(String(company.gift_member_commission_amount ?? 5000));
+            setGiftCommission(String(company.gift_commission_amount ?? 0));
+            setGiftMemberCommission(String(company.gift_member_commission_amount ?? 0));
+            setGiftCompanyRate(String(company.gift_company_rate ?? 4.0));
             setCondolenceCompanyRate(String(company.condolence_company_rate ?? 3.3));
             setOwnerName(company.owner_name || '');
             setAddress(company.address || '');
@@ -133,8 +136,9 @@ export default function CompaniesPage() {
             setWreathVipAmount('65000');
             setReferralMemberBonus('3500');
             setReferralCompanyBonus('6500');
-            setGiftCommission('5000');
-            setGiftMemberCommission('5000');
+            setGiftCommission('0');
+            setGiftMemberCommission('0');
+            setGiftCompanyRate('4.0');
             setCondolenceCompanyRate('3.3');
             setOwnerName('');
             setAddress('');
@@ -159,8 +163,9 @@ export default function CompaniesPage() {
         const vipAmount = parseInt(wreathVipAmount);
         const refMemBonus = parseInt(referralMemberBonus);
         const refCompBonus = parseInt(referralCompanyBonus);
-        const giftAmount = parseInt(giftCommission);
-        const giftMemberAmount = parseInt(giftMemberCommission);
+        const giftAmount = parseInt(giftCommission || '0');
+        const giftMemberAmount = parseInt(giftMemberCommission || '0');
+        const giftRate = parseFloat(giftCompanyRate);
         const condRate = parseFloat(condolenceCompanyRate);
 
         if (!name.trim()) {
@@ -179,8 +184,8 @@ export default function CompaniesPage() {
             setError('추천 분할 수당은 0원 이상의 정수로 입력해주세요.');
             return;
         }
-        if (isNaN(giftAmount) || giftAmount < 0 || isNaN(giftMemberAmount) || giftMemberAmount < 0) {
-            setError('답례품 수당은 0원 이상의 정수로 입력해주세요.');
+        if (isNaN(giftRate) || giftRate < 0) {
+            setError('답례품 상조 쉐어 퍼센트는 0% 이상으로 입력해주세요.');
             return;
         }
         if (isNaN(condRate) || condRate < 0) {
@@ -209,6 +214,7 @@ export default function CompaniesPage() {
                     referral_company_bonus: refCompBonus,
                     gift_commission_amount: giftAmount,
                     gift_member_commission_amount: giftMemberAmount,
+                    gift_company_rate: giftRate,
                     condolence_company_rate: condRate,
                     owner_name: ownerName,
                     address,
@@ -455,6 +461,9 @@ export default function CompaniesPage() {
                                             </span>
                                             <span style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '2px' }}>
                                                 (바구니 {(c.wreath_basket_amount ?? 30000) / 10000}만 ~ 4단 {(c.wreath_vip_amount ?? 65000) / 10000}만)
+                                            </span>
+                                            <span style={{ color: '#047857', fontSize: '11px', fontWeight: '600', display: 'block', marginTop: '2px' }}>
+                                                부의금: {c.condolence_company_rate ?? 3.3}% / 답례품: {c.gift_company_rate ?? 4.0}%
                                             </span>
                                         </td>
                                         <td className={styles.td}>
@@ -789,33 +798,21 @@ export default function CompaniesPage() {
                                     </div>
 
                                     <div className={styles.formGroup}>
-                                        <label className={styles.label}>답례품 본사 / 지도사 수당 *</label>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <div className={styles.inputWrapper} style={{ flex: 1 }}>
-                                                <input
-                                                    type="number"
-                                                    className={`${styles.input} ${styles.inputWithUnit}`}
-                                                    value={giftCommission}
-                                                    onChange={(e) => setGiftCommission(e.target.value)}
-                                                    placeholder="본사: 5000"
-                                                    required
-                                                />
-                                                <span className={styles.unit}>원</span>
-                                            </div>
-                                            <div className={styles.inputWrapper} style={{ flex: 1 }}>
-                                                <input
-                                                    type="number"
-                                                    className={`${styles.input} ${styles.inputWithUnit}`}
-                                                    value={giftMemberCommission}
-                                                    onChange={(e) => setGiftMemberCommission(e.target.value)}
-                                                    placeholder="지도사: 5000"
-                                                    required
-                                                />
-                                                <span className={styles.unit}>원</span>
-                                            </div>
+                                        <label className={styles.label}>답례품 상조회사 쉐어 비율 *</label>
+                                        <div className={styles.inputWrapper}>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                className={`${styles.input} ${styles.inputWithUnit}`}
+                                                value={giftCompanyRate}
+                                                onChange={(e) => setGiftCompanyRate(e.target.value)}
+                                                placeholder="4.0"
+                                                required
+                                            />
+                                            <span className={styles.unit}>%</span>
                                         </div>
                                         <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                                            답례품 판매 시 본사 적립금 / 지도사 지갑 적립 수당
+                                            모바일 답례품 실결제액 대비 상조회사 본사 몫으로 정산할 쉐어 비율 (%) (계약서: 최대 4%)
                                         </p>
                                     </div>
                                 </div>

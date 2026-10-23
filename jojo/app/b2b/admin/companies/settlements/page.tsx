@@ -51,6 +51,22 @@ interface CondolenceSettlementDetail {
     partner_name: string;
 }
 
+interface GiftSettlementDetail {
+    id: string;
+    order_number: string;
+    product_name: string;
+    quantity: number;
+    amount: number;
+    share_amount: number;
+    company_rate: number;
+    status: 'pending' | 'completed' | 'cancelled';
+    payment_date: string | null;
+    created_at: string;
+    buyer_name: string;
+    deceased_name: string;
+    partner_name: string;
+}
+
 interface SettleSummary {
     pending_amount: number;
     completed_amount: number;
@@ -78,6 +94,7 @@ function SettlementsContent() {
     const [monthlyList, setMonthlyList] = useState<MonthlySummary[]>([]);
     const [settlements, setSettlements] = useState<SettlementDetail[]>([]);
     const [condolenceSettlements, setCondolenceSettlements] = useState<CondolenceSettlementDetail[]>([]);
+    const [giftSettlements, setGiftSettlements] = useState<GiftSettlementDetail[]>([]);
     const [selectedYearMonth, setSelectedYearMonth] = useState<string | null>(null);
     const [summary, setSummary] = useState<SettleSummary>({ pending_amount: 0, completed_amount: 0, total_count: 0 });
     const [loading, setLoading] = useState(true);
@@ -140,6 +157,7 @@ function SettlementsContent() {
             if (data.success) {
                 setSettlements(data.settlements || []);
                 setCondolenceSettlements(data.condolenceSettlements || []);
+                setGiftSettlements(data.giftSettlements || []);
                 if (data.company) {
                     setCompanyInfo(data.company);
                 }
@@ -290,6 +308,17 @@ function SettlementsContent() {
                 c.buyer_name || '-',
                 c.share_amount,
                 c.status === 'completed' || c.status === 'transferred' ? '정산완료' : c.status === 'cancelled' ? '취소' : '정산대기'
+            ]),
+            ...giftSettlements.map(g => [
+                '답례품',
+                new Date(g.created_at).toLocaleString(),
+                g.order_number || '-',
+                g.partner_name || '-',
+                g.deceased_name || '-',
+                `${g.product_name || '답례품'} (${g.quantity || 1}건 / ${g.company_rate}%)`,
+                g.buyer_name || '-',
+                g.share_amount,
+                g.status === 'completed' ? '정산완료' : g.status === 'cancelled' ? '취소' : '정산대기'
             ])
         ];
 
@@ -322,12 +351,14 @@ function SettlementsContent() {
     const flowerCompleted = settlements.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.amount, 0);
     const condolencePending = condolenceSettlements.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.share_amount, 0);
     const condolenceCompleted = condolenceSettlements.filter(c => c.status === 'completed').reduce((sum, c) => sum + c.share_amount, 0);
+    const giftPending = giftSettlements.filter(g => g.status === 'pending').reduce((sum, g) => sum + g.share_amount, 0);
+    const giftCompleted = giftSettlements.filter(g => g.status === 'completed').reduce((sum, g) => sum + g.share_amount, 0);
 
-    const totalPending = flowerPending + condolencePending;
-    const totalCompleted = flowerCompleted + condolenceCompleted;
+    const totalPending = flowerPending + condolencePending + giftPending;
+    const totalCompleted = flowerCompleted + condolenceCompleted + giftCompleted;
     const grandTotal = totalPending + totalCompleted;
     const isSettled = totalCompleted > 0 && totalPending === 0;
-    const latestPaymentDate = settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date;
+    const latestPaymentDate = settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date || giftSettlements[0]?.payment_date;
 
     return (
         <div className={styles.container}>
@@ -651,6 +682,81 @@ function SettlementsContent() {
                                             </td>
                                             <td>
                                                 {c.status === 'completed' || c.status === 'transferred' ? '완료' : c.status === 'cancelled' ? '취소' : '대기'}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* 답례품 상세 내역 테이블 */}
+                    <div className={styles.invoiceBody} style={{ marginTop: '24px' }}>
+                        <h3 className={styles.invoiceTableTitle}>■ 답례품 정산 세부 내역 명세</h3>
+                        <table className={styles.invoiceTable}>
+                            <thead>
+                                <tr>
+                                    <th>결제 일시</th>
+                                    <th>주문 번호</th>
+                                    <th>장례지도사명</th>
+                                    <th>고인명</th>
+                                    <th>답례품 상품명 (구매자)</th>
+                                    <th style={{ textAlign: 'right' }}>실결제액</th>
+                                    <th>수수료율 (%)</th>
+                                    <th style={{ textAlign: 'right' }}>정산 금액</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailLoading ? (
+                                    <tr>
+                                        <td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            정산 상세 내역을 불러오는 중...
+                                        </td>
+                                    </tr>
+                                ) : giftSettlements.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={9} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                                            해당 월에 발생한 답례품 정산 내역이 없습니다. (0건 / 0원)
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    giftSettlements.map((g) => (
+                                        <tr key={g.id}>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {new Date(g.created_at).toLocaleDateString('ko-KR', {
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </td>
+                                            <td style={{ fontFamily: 'monospace', textAlign: 'center' }}>
+                                                {g.order_number || '-'}
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {g.partner_name || '-'}
+                                            </td>
+                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>
+                                                {g.deceased_name || '-'}
+                                            </td>
+                                            <td>
+                                                <div>{g.product_name || '-'} ({g.quantity || 1}건)</div>
+                                                <div style={{ fontSize: '11px', color: '#000000' }}>
+                                                    (구매자: {g.buyer_name || '-'})
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                {(g.amount || 0).toLocaleString()}원
+                                            </td>
+                                            <td style={{ fontWeight: 'bold', color: '#059669' }}>
+                                                {g.company_rate}%
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                                {(g.share_amount || 0).toLocaleString()}원
+                                            </td>
+                                            <td>
+                                                {g.status === 'completed' ? '완료' : g.status === 'cancelled' ? '취소' : '대기'}
                                             </td>
                                         </tr>
                                     ))

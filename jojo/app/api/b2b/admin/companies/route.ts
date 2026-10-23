@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
             wreath_basket_amount, wreath_objet_amount, wreath_basic_amount,
             wreath_deluxe_amount, wreath_premium_amount, wreath_vip_amount,
             referral_member_bonus, referral_company_bonus,
-            gift_commission_amount, gift_member_commission_amount,
+            gift_commission_amount, gift_member_commission_amount, gift_company_rate,
             owner_name, address, business_type, business_item,
             condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
         } = body;
@@ -65,8 +65,9 @@ export async function POST(request: NextRequest) {
             wreath_vip_amount: wreath_vip_amount !== undefined ? parseInt(wreath_vip_amount, 10) : 65000,
             referral_member_bonus: referral_member_bonus !== undefined ? parseInt(referral_member_bonus, 10) : 3500,
             referral_company_bonus: referral_company_bonus !== undefined ? parseInt(referral_company_bonus, 10) : 6500,
-            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
-            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
+            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 0,
+            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 0,
+            gift_company_rate: gift_company_rate !== undefined ? parseFloat(gift_company_rate) : 4.0,
         };
         if (owner_name !== undefined) insertPayload.owner_name = owner_name;
         if (address !== undefined) insertPayload.address = address;
@@ -130,7 +131,7 @@ export async function PUT(request: NextRequest) {
             wreath_basket_amount, wreath_objet_amount, wreath_basic_amount,
             wreath_deluxe_amount, wreath_premium_amount, wreath_vip_amount,
             referral_member_bonus, referral_company_bonus,
-            gift_commission_amount, gift_member_commission_amount,
+            gift_commission_amount, gift_member_commission_amount, gift_company_rate,
             owner_name, address, business_type, business_item,
             condolence_fee_rate, condolence_company_rate, condolence_pg_rate, condolence_platform_rate, condolence_vat_enabled
         } = body;
@@ -152,8 +153,9 @@ export async function PUT(request: NextRequest) {
             wreath_vip_amount: wreath_vip_amount !== undefined ? parseInt(wreath_vip_amount, 10) : 65000,
             referral_member_bonus: referral_member_bonus !== undefined ? parseInt(referral_member_bonus, 10) : 3500,
             referral_company_bonus: referral_company_bonus !== undefined ? parseInt(referral_company_bonus, 10) : 6500,
-            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 5000,
-            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 5000,
+            gift_commission_amount: gift_commission_amount !== undefined ? parseInt(gift_commission_amount, 10) : 0,
+            gift_member_commission_amount: gift_member_commission_amount !== undefined ? parseInt(gift_member_commission_amount, 10) : 0,
+            gift_company_rate: gift_company_rate !== undefined ? parseFloat(gift_company_rate) : 4.0,
         };
         if (owner_name !== undefined) updatePayload.owner_name = owner_name;
         if (address !== undefined) updatePayload.address = address;

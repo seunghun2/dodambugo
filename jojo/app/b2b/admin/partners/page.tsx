@@ -686,7 +686,7 @@ export default function PartnersPage() {
                                                 </div>
                                                 <div>• <strong>추천 분할 수당:</strong> 지도사 {(comp.referral_member_bonus ?? 3500).toLocaleString()}원 + 본사 {(comp.referral_company_bonus ?? 6500).toLocaleString()}원</div>
                                                 <div>• <strong>부의금 상조 쉐어:</strong> <span style={{ color: '#047857', fontWeight: 'bold' }}>{comp.condolence_company_rate ?? 3.3}%</span></div>
-                                                <div>• <strong>답례품 수당 (본사/지도사):</strong> {(comp.gift_commission_amount ?? 5000).toLocaleString()}원 / {(comp.gift_member_commission_amount ?? 5000).toLocaleString()}원</div>
+                                                <div>• <strong>답례품 상조 쉐어:</strong> <span style={{ color: '#047857', fontWeight: 'bold' }}>{comp.gift_company_rate ?? 4.0}%</span></div>
                                             </div>
                                         </div>
                                     );
