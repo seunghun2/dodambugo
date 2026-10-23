@@ -1,0 +1,472 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: calc(100vh - 120px);
+}
+
+.titleArea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.totalCount {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.refreshBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.refreshBtn:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.excelBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #2e7238;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.excelBtn:hover {
+    background-color: #23582b;
+}
+
+.contentArea {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* 패널 공통 */
+.listPanel {
+    flex: 3;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.detailPanel {
+    flex: 2;
+    min-width: 380px;
+    max-width: 460px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panelHeader {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    background-color: #ffffff;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    padding: 4px;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeBtn:hover {
+    color: #64748b;
+}
+
+/* 테이블 영역 */
+.tableWrapper {
+    flex: 1;
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f8fafc;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table td {
+    padding: 16px 18px;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.table tr.selected td {
+    background-color: #eff6ff;
+}
+
+.nameCell {
+    font-weight: 600;
+}
+
+.companyCell {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.phoneCell {
+    color: #64748b;
+}
+
+.dateCell {
+    color: #64748b;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.arrowCell {
+    color: #cbd5e1;
+    width: 32px;
+    text-align: center;
+}
+
+.emptyCell {
+    text-align: center;
+    padding: 60px 20px !important;
+    color: #94a3b8;
+}
+
+/* 로딩 & 비어있음 */
+.panelLoading,
+.panelEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    gap: 12px;
+    flex: 1;
+}
+
+.panelEmpty p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* 상세 컨텐츠 */
+.detailContent {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.detailSection {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 20px;
+}
+
+.detailSection:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.sectionLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.detailRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.detailRow label {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.detailRow span,
+.detailRow a {
+    font-size: 14px;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.detailRow a {
+    color: #d4a84b;
+    text-decoration: none;
+}
+
+.detailRow a:hover {
+    text-decoration: underline;
+}
+
+.messageBox {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    border: 1px solid #e2e8f0;
+}
+
+.detailActions {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding: 16px 24px 24px;
+    border-top: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
+
+.btnAction {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnAction:hover {
+    background-color: #e2e8f0;
+}
+
+.btnAction.primary {
+    background-color: #d4a84b;
+    color: white;
+}
+
+.btnAction.primary:hover {
+    background-color: #c5973b;
+}
+
+/* 메모 섹션 */
+.memoSection {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.memoTextarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    color: #0f172a;
+    resize: none;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.memoTextarea:focus {
+    border-color: #d4a84b;
+}
+
+.btnSaveMemo {
+    align-self: flex-end;
+    padding: 8px 16px;
+    background-color: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnSaveMemo:hover:not(:disabled) {
+    background-color: #0f172a;
+}
+
+.btnSaveMemo:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnSaveMemo.saved {
+    background-color: #10b981;
+}
+
+.typeBadge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+}
+
+/* 페이지네이션 */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px;
+    border-top: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
+
+.pageBtn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #d4a84b;
+    color: #d4a84b;
+}
+
+.pageBtn.active {
+    background-color: #d4a84b;
+    border-color: #d4a84b;
+    color: white;
+}
+
+.pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    margin-left: 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+    .contentArea {
+        flex-direction: column;
+    }
+    
+    .detailPanel {
+        max-width: none;
+        min-width: 0;
+    }
+}

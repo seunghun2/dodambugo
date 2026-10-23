@@ -1,0 +1,500 @@
+.container {
+  padding: 8px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* 헤더 영역 */
+.headerArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+.backBtn:hover {
+  background-color: #f1f5f9;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.actionBtn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.actionBtn:disabled {
+  background-color: #f8fafc;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* 정산 요약 리포트 카드 */
+.summaryBox {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  flex: 1;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.summaryValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* 섹션 타이틀 */
+.section {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  padding: 14px 20px;
+  margin: 0;
+  border-bottom: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.tableCard {
+  overflow-x: auto;
+}
+
+/* 테이블 공통 */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.table td {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #000000;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.selectedRow {
+  background-color: #f8fafc !important;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.badgePending {
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.badgeCompleted {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+}
+
+.viewDetailBtn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.viewDetailBtn:hover {
+  background-color: #f1f5f9;
+}
+
+/* 📄 격조 높은 기업용 정산 영수 장부 시트 */
+.invoiceSheet {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  padding: 40px;
+  border-radius: 0;
+  margin-top: 16px;
+  position: relative;
+}
+
+.invoiceHeader {
+  border-bottom: 2px solid #000000;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.invoiceTitleContainer {
+  text-align: center;
+}
+
+.invoiceMainTitle {
+  font-size: 36px;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 16px;
+  margin: 0 0 12px 0;
+}
+
+.invoiceSubText {
+  font-size: 12px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 정식 사업자 정보 블록 (양옆 병렬 5:5 배치) */
+.businessContainer,
+.businessSection {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.businessBox,
+.businessCard {
+  flex: 1 1 50% !important;
+  width: calc(50% - 10px) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.businessSideTitle,
+.businessTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
+}
+
+.businessTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.businessTable td {
+  border: 1px solid #000000;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #000000;
+}
+
+.businessLabel {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  width: 100px;
+  text-align: center;
+}
+
+.businessValue {
+  background-color: #ffffff;
+}
+
+/* 정산 정보 간이 요약 */
+.invoiceInfoSection {
+  margin-bottom: 24px;
+}
+
+.infoTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.infoTable td {
+  border: 1px solid #000000;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #000000;
+}
+
+.infoLabel {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  width: 110px;
+  text-align: center;
+}
+
+.infoValue {
+  background-color: #ffffff;
+}
+
+/* 정산 상세 테이블 */
+.invoiceBody {
+  margin-bottom: 30px;
+}
+
+.invoiceTableTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoiceTable th {
+  border: 1px solid #000000;
+  background-color: #f1f5f9;
+  color: #000000;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 8px;
+  text-align: center;
+}
+
+.invoiceTable td {
+  border: 1px solid #000000;
+  font-size: 11px;
+  padding: 8px;
+  color: #000000;
+  text-align: center;
+}
+
+/* 하단 마감 */
+.invoiceFooter {
+  border-top: 2px solid #000000;
+  padding-top: 16px;
+}
+
+.invoiceTotalBlock {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 13px;
+  color: #000000;
+}
+
+.completeBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.completeBtn:hover {
+  background-color: #334155;
+  border-color: #334155;
+}
+/* 🖨️ 인쇄 전용 @media print CSS 설계 (인쇄 시 완벽 정산서 폼 변환) */
+/* 전역 셀렉터(body, aside 등)는 settlements-print.css */
+/* 상단 날짜 및 정산 관리 컨트롤 바 */
+.filterBar {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.monthNavBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 6px 16px;
+  border-radius: 8px;
+}
+
+.monthNavBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.monthNavBtn:hover {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.monthDisplayText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 110px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.completeActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.completeActionBtn:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+}
+
+.settledBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.emptyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* 인쇄 스타일 */
+@media print {
+  /* 뒤로가기 버튼, 탑바, 사이드바 등 웹 요소 완전 숨김 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 정산서 테두리 및 여백 제어 */
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .invoiceSheet {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .invoiceMainTitle {
+    font-size: 32px !important;
+  }
+
+  .invoiceTable th {
+    background-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .businessLabel {
+    background-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .infoLabel {
+    background-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* 용지 여백 설정 */
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+}

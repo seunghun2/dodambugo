@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고 테스트 - 도담부고</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #FAFAFA;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #191F28;
+            margin-bottom: 8px;
+        }
+        
+        p {
+            font-size: 15px;
+            color: #4E5968;
+            margin-bottom: 32px;
+        }
+        
+        .bugo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .bugo-card {
+            padding: 20px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .bugo-card:hover {
+            background: #F2F4F6;
+            border-color: #3182F6;
+        }
+        
+        .bugo-card:active {
+            transform: scale(0.98);
+        }
+        
+        .bugo-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #191F28;
+            margin-bottom: 4px;
+        }
+        
+        .bugo-id {
+            font-size: 13px;
+            color: #8B95A1;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4E5968;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #E03131;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #E5E8EB;
+            border-top-color: #3182F6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 24px;
+            padding: 10px 20px;
+            background: #F2F4F6;
+            border-radius: 8px;
+            color: #4E5968;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-back:hover {
+            background: #E5E8EB;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="btn-back">← 홈으로</a>
+        <h1>📋 생성된 부고장 목록</h1>
+        <p>테스트를 위해 생성된 부고장을 확인하세요</p>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>부고 목록을 불러오는 중...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <p>부고 목록을 불러오는데 실패했습니다.</p>
+        </div>
+        
+        <div id="bugoList" class="bugo-list" style="display: none;">
+            <!-- JavaScript로 생성됨 -->
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 부고 목록 불러오기
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadBugoList();
+        });
+
+        async function loadBugoList() {
+            try {
+                console.log('부고 목록 API 호출 시작...');
+                const response = await fetch('tables/bugo?limit=50&sort=-created_at');
+                console.log('API 응답 상태:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API 오류 응답:', errorText);
+                    throw new Error('API 오류: ' + response.status);
+                }
+                
+                const result = await response.json();
+                console.log('부고 목록 응답:', result);
+                console.log('데이터 개수:', result.data ? result.data.length : 0);
+                
+                // 로딩 숨기기
+                document.getElementById('loading').style.display = 'none';
+                
+                // 데이터가 있으면 표시
+                if (result.data && result.data.length > 0) {
+                    displayBugoList(result.data);
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').innerHTML = '<p>생성된 부고장이 없습니다.<br><a href="create.html" style="color: #3182F6;">부고장 만들기</a></p>';
+                }
+                
+            } catch (error) {
+                console.error('부고 목록 로드 오류:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `<p>오류: ${error.message}</p>`;
+            }
+        }
+
+        function displayBugoList(bugoList) {
+            const listContainer = document.getElementById('bugoList');
+            listContainer.style.display = 'block';
+            listContainer.innerHTML = '';
+            
+            bugoList.forEach(bugo => {
+                const card = document.createElement('div');
+                card.className = 'bugo-card';
+                card.onclick = () => {
+                    window.location.href = `view.html?id=${bugo.id}`;
+                };
+                
+                // 템플릿 이름 매핑
+                const templateNames = {
+                    'ribbon': '정중형 (검은리본)',
+                    'basic': '기본형 (나뭇가지)',
+                    'flower': '고급형 (국화)',
+                    'border': '안내형 (대리석)'
+                };
+                const templateName = templateNames[bugo.template] || '기본형';
+                
+                card.innerHTML = `
+                    <div class="bugo-name">故 ${bugo.deceased_name || '이름 없음'} <span style="color: #3182F6; font-weight: 600;">[${templateName}]</span></div>
+                    <div class="bugo-id">ID: ${bugo.id}</div>
+                `;
+                
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

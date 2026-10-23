@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>썸네일 옵션 비교 - 도담부고</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #FAFAFA;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #191F28;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #4E5968;
+            margin-bottom: 48px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .option-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: #3182F6;
+        }
+        
+        .option-card.recommended {
+            border-color: #3182F6;
+            position: relative;
+        }
+        
+        .recommended-badge {
+            position: absolute;
+            top: -12px;
+            right: 24px;
+            background: #3182F6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .option-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #191F28;
+            margin-bottom: 8px;
+        }
+        
+        .option-desc {
+            font-size: 14px;
+            color: #4E5968;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            background: #F2F4F6;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #8B95A1;
+            overflow: hidden;
+        }
+        
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .pros-cons {
+            margin-bottom: 16px;
+        }
+        
+        .pros-cons h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #191F28;
+            margin-bottom: 8px;
+        }
+        
+        .pros-cons ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .pros-cons li {
+            font-size: 13px;
+            color: #4E5968;
+            padding-left: 20px;
+            margin-bottom: 4px;
+            position: relative;
+        }
+        
+        .pros-cons li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: #3182F6;
+        }
+        
+        .btn-select {
+            width: 100%;
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            background: #3182F6;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-select:hover {
+            background: #1B64DA;
+        }
+        
+        .btn-select:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-select.secondary {
+            background: #F2F4F6;
+            color: #191F28;
+        }
+        
+        .btn-select.secondary:hover {
+            background: #E5E8EB;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: #F2F4F6;
+            border-radius: 8px;
+            color: #4E5968;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            background: #E5E8EB;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 썸네일 디자인 옵션</h1>
+        <p class="subtitle">가장 마음에 드는 디자인을 선택하세요</p>
+        
+        <div class="options-grid">
+            <!-- 옵션 1: 심플 -->
+            <div class="option-card recommended">
+                <span class="recommended-badge">⭐ 추천</span>
+                <h3 class="option-title">옵션 1: 심플 썸네일</h3>
+                <p class="option-desc">이미지만 표시하고 애도 문구는 별도 섹션에 배치</p>
+                
+                <div class="preview-image">
+                    <img src="images/template-basic.jpg" alt="심플 썸네일 미리보기">
+                </div>
+                
+                <div class="pros-cons">
+                    <h4>✅ 장점</h4>
+                    <ul>
+                        <li>가장 깔끔하고 토스 스타일</li>
+                        <li>이미지 품질 100% 활용</li>
+                        <li>텍스트 중복 없음</li>
+                        <li>가독성 최고</li>
+                    </ul>
+                </div>
+                
+                <button class="btn-select" onclick="selectOption(1)">
+                    이 디자인 적용하기
+                </button>
+            </div>
+            
+            <!-- 옵션 2: 반투명 박스 -->
+            <div class="option-card">
+                <h3 class="option-title">옵션 2: 반투명 박스</h3>
+                <p class="option-desc">이미지 위에 반투명 박스를 추가하여 가독성 개선</p>
+                
+                <div class="preview-image">
+                    텍스트 오버레이 + 반투명 박스
+                </div>
+                
+                <div class="pros-cons">
+                    <h4>✅ 장점</h4>
+                    <ul>
+                        <li>텍스트 가독성 향상</li>
+                        <li>이미지도 함께 활용</li>
+                        <li>세련된 느낌</li>
+                    </ul>
+                </div>
+                
+                <button class="btn-select secondary" onclick="selectOption(2)">
+                    이 디자인 보기
+                </button>
+            </div>
+            
+            <!-- 옵션 3: 축소 -->
+            <div class="option-card">
+                <h3 class="option-title">옵션 3: 축소 썸네일</h3>
+                <p class="option-desc">썸네일 크기를 줄여 공간 절약</p>
+                
+                <div class="preview-image">
+                    작은 썸네일 (280px)
+                </div>
+                
+                <div class="pros-cons">
+                    <h4>✅ 장점</h4>
+                    <ul>
+                        <li>전체 레이아웃 깔끔</li>
+                        <li>스크롤 적음</li>
+                        <li>정보 전달 빠름</li>
+                    </ul>
+                </div>
+                
+                <button class="btn-select secondary" onclick="selectOption(3)">
+                    이 디자인 보기
+                </button>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="test-view.html" class="back-link">← 부고 목록으로 돌아가기</a>
+            <a href="index.html" class="back-link">홈으로</a>
+        </div>
+    </div>
+
+    <script>
+        function selectOption(optionNumber) {
+            const messages = {
+                1: '✅ 옵션 1 (심플 썸네일)을 선택하셨습니다!\n\nview-simple-thumbnail.html 페이지를 확인해보세요.',
+                2: '🎨 옵션 2 (반투명 박스)를 선택하셨습니다!\n\n이 옵션은 CSS 수정이 필요합니다.',
+                3: '📐 옵션 3 (축소 썸네일)을 선택하셨습니다!\n\n이 옵션은 CSS 수정이 필요합니다.'
+            };
+            
+            alert(messages[optionNumber]);
+            
+            if (optionNumber === 1) {
+                // 심플 썸네일 페이지로 이동
+                const urlParams = new URLSearchParams(window.location.search);
+                const bugoId = urlParams.get('id');
+                if (bugoId) {
+                    window.location.href = `view-simple-thumbnail.html?id=${bugoId}`;
+                } else {
+                    window.location.href = 'test-view.html';
+                }
+            } else {
+                console.log('옵션', optionNumber, '선택됨');
+            }
+        }
+    </script>
+</body>
+</html>

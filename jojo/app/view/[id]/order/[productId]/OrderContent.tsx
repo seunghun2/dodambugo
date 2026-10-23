@@ -1,0 +1,440 @@
+'use client';
+
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { gaEvents } from '@/components/GoogleAnalytics';
+import { useIsB2b } from '@/lib/b2b';
+import './order.css';
+
+interface FlowerProduct {
+    id: string;
+    sort_order: number;
+    name: string;
+    description: string;
+    price: number;
+    b2b_price?: number | null;
+    discount_price: number | null;
+    images: string[];
+    regional_prices?: Record<string, number>;
+    special_surcharges?: Record<string, number>;
+    exclude_regions?: string[];
+}
+
+// 지역별 가격 계산 헬퍼 (시/도 추가금 + 특수지역 추가금)
+const calculateRegionalPrice = (
+    basePrice: number,
+    discountPrice: number | null,
+    regionalPrices: Record<string, number> | undefined,
+    specialSurcharges: Record<string, number> | undefined,
+    region: string,
+    address: string
+): number => {
+    const price = discountPrice || basePrice;
+    const regionalSurcharge = (regionalPrices && region && regionalPrices[region]) || 0;
+    let specialSurcharge = 0;
+    if (specialSurcharges && address) {
+        for (const [keyword, surcharge] of Object.entries(specialSurcharges)) {
+            if (address.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge);
+            }
+        }
+    }
+    return price + regionalSurcharge + specialSurcharge;
+};
+
+interface BugoData {
+    id: string;
+    bugo_number?: string;
+    deceased_name: string;
+    funeral_home?: string;
+    room_number?: string;
+    address?: string;
+    mourners?: Array<{ relationship: string; name: string; contact: string }>;
+    mourner_name?: string;
+}
+
+interface OrderContentProps {
+    initialBugo: BugoData | null;
+    initialProduct: FlowerProduct;
+    bugoId: string;
+    productId: string;
+}
+
+export default function OrderContent({ initialBugo, initialProduct, bugoId, productId }: OrderContentProps) {
+    const router = useRouter();
+    const isB2b = useIsB2b();
+    const pathPrefix = isB2b ? '/b2b' : '';
+    const bugo = initialBugo;
+    const product = initialProduct;
+
+    // 지역 및 최종 가격 계산
+    const funeralAddress = bugo?.address || bugo?.funeral_home || '';
+    const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+    const bugoRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
+    const effectiveBasePrice = (isB2b && product?.b2b_price) ? product.b2b_price : (product?.price || 0);
+    const finalProductPrice = product ? calculateRegionalPrice(
+        effectiveBasePrice,
+        product.discount_price,
+        product.regional_prices,
+        product.special_surcharges,
+        bugoRegion,
+        funeralAddress
+    ) : 0;
+
+    const regionalSurcharge = (product?.regional_prices && bugoRegion && product.regional_prices[bugoRegion]) || 0;
+    let specialSurcharge = 0;
+    if (product?.special_surcharges && funeralAddress) {
+        for (const [keyword, surcharge] of Object.entries(product.special_surcharges)) {
+            if (funeralAddress.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge);
+            }
+        }
+    }
+    const totalSurcharge = regionalSurcharge + specialSurcharge;
+
+    const [isCustomMessage, setIsCustomMessage] = useState(false); // 직접입력 여부
+    const [recipientModalOpen, setRecipientModalOpen] = useState(false); // 상주변경 모달
+    const [tempRecipientName, setTempRecipientName] = useState(''); // 임시 상주명
+
+    // 문구 옵션
+    const messageOptions = [
+        '삼가 故人의 冥福을 빕니다',
+        '삼가 고인의 명복을 빕니다',
+        '謹弔',
+        '極樂往生發願',
+        '극락왕생발원',
+        '하나님의 위로가 함께 하시길 빕니다',
+        '주님의 위로와 소망이 함께 하기를 기원합니다',
+    ];
+
+    // 상주 목록 파싱
+    const parsedMourners: any[] = (() => {
+        if (!bugo?.mourners) return [];
+        try {
+            return typeof bugo.mourners === 'string' ? JSON.parse(bugo.mourners) : bugo.mourners;
+        } catch {
+            return [];
+        }
+    })();
+
+    // 상주 이름 초기값
+    const getPrimaryMournerName = (): string => {
+        if (Array.isArray(parsedMourners) && parsedMourners.length > 0) {
+            const firstWithName = parsedMourners.find((m: any) => m && m.name && String(m.name).trim() !== '');
+            if (firstWithName?.name) return firstWithName.name;
+        }
+        return bugo?.mourner_name || '';
+    };
+
+    const initialRecipientName = getPrimaryMournerName();
+
+    // 주문 폼
+    const [orderForm, setOrderForm] = useState({
+        senderName: '',
+        senderPhone: '',
+        ribbonText1: '삼가 故人의 冥福을 빕니다', // 기본 문구
+        ribbonText2: '', // 보내는 분
+        customMessage: '', // 직접입력 문구
+        recipientName: initialRecipientName, // 받으시는 분 (상주)
+    });
+
+    // 모바일 키패드 가림 방지 자동 스크롤 핸들러
+    const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const target = e.target;
+        setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    };
+
+    // bugo 데이터 로드 시 recipientName 동기화
+    useEffect(() => {
+        const primaryName = getPrimaryMournerName();
+        if (primaryName) {
+            setOrderForm(prev => {
+                if (!prev.recipientName || prev.recipientName === '상주') {
+                    return { ...prev, recipientName: primaryName };
+                }
+                return prev;
+            });
+        }
+    }, [bugo]);
+
+    // 📱 안드로이드 뒤로가기 (<) 시 상주변경 모달 우선 닫기
+    useEffect(() => {
+        if (!recipientModalOpen) return;
+
+        window.history.pushState({ recipientModal: true }, '');
+        const handlePopState = () => setRecipientModalOpen(false);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [recipientModalOpen]);
+
+    // sessionStorage에서 이전 입력값 복원
+    useEffect(() => {
+        // GA: 주문 페이지 조회 이벤트
+        gaEvents.viewFlowerDetail(productId);
+
+        const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
+        if (storedData) {
+            try {
+                const parsed = JSON.parse(storedData);
+                setOrderForm(prev => ({
+                    ...prev,
+                    ribbonText1: parsed.ribbonText1 || prev.ribbonText1,
+                    ribbonText2: parsed.ribbonText2 || prev.ribbonText2,
+                    recipientName: parsed.recipientName || prev.recipientName,
+                }));
+                // 직접입력 상태 복원
+                const isCustom = !['삼가 故人의 冥福을 빕니다', '삼가 고인의 명복을 빕니다', '謹弔', '極樂往生發願', '극락왕생발원', '하나님의 위로가 함께 하시길 빕니다', '주님의 위로와 소망이 함께 하기를 기원합니다'].includes(parsed.ribbonText1);
+                setIsCustomMessage(isCustom);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, [bugoId, productId]);
+
+    const handleNext = () => {
+        // 유효성 검사
+        if (!orderForm.ribbonText2.trim()) {
+            alert('보내는 분 성함을 입력해주세요.');
+            return;
+        }
+        if (!product) {
+            alert('상품 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+        if (!bugo) {
+            alert('부고 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+        if (product?.exclude_regions && product.exclude_regions.some((r: string) => funeralAddress.includes(r))) {
+            alert('해당 장례식장은 화훼사 직배송이 불가능한 지역(세종/도서지역 등)입니다. 상주님께 모바일 조의금 또는 위로 메시지를 전달해 주세요.');
+            return;
+        }
+        // sessionStorage에 주문 정보 저장
+        sessionStorage.setItem(`order_${bugoId}_${productId}`, JSON.stringify({
+            ribbonText1: orderForm.ribbonText1,
+            ribbonText2: orderForm.ribbonText2,
+            recipientName: orderForm.recipientName,
+            productName: product.name,
+            productPrice: finalProductPrice,
+            funeralHome: bugo.funeral_home || '',
+            room: bugo.room_number || '',
+            address: bugo.address || '',
+        }));
+        // GA: 화환 주문 제출 이벤트
+        gaEvents.submitFlowerOrder(productId, finalProductPrice);
+        // payment 페이지로 이동
+        router.push(`${pathPrefix}/view/${bugoId}/payment/${productId}`);
+    };
+
+    // 로딩/에러 처리는 서버 컴포넌트에서 담당
+
+    return (
+        <div className={`order-page ${isB2b ? 'b2b-theme' : ''}`}>
+            {/* 헤더 */}
+            <header className="order-header">
+                <button className="back-btn" onClick={() => router.push(`${pathPrefix}/view/${bugoId}?flower=open`)}>
+                    <span className="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h1>주문하기</h1>
+                <div style={{ width: 40 }} />
+            </header>
+
+            <div className="order-content">
+                {product?.exclude_regions && product.exclude_regions.some((r: string) => funeralAddress.includes(r)) && (
+                    <div style={{ padding: '14px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '12px', color: '#991B1B', fontSize: '13px', lineHeight: '1.5', marginBottom: '16px' }}>
+                        <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                            <span>⚠️</span> <span>배송 제한 지역 안내</span>
+                        </div>
+                        해당 장례식장 소재지는 화훼사 직발송이 불가능한 지역(세종/도서산간 등)으로, 화환 주문 접수가 불가합니다.
+                    </div>
+                )}
+                {/* Step 1: 선택한 상품 */}
+                <section className="order-section">
+                    <h2 className="section-title">선택한 상품</h2>
+                    <div className="selected-product">
+                        <div className="product-image">
+                            <img src={product.images?.[0] || '/images/flower-wreath.png'} alt={product.name} />
+                        </div>
+                        <div className="product-info">
+                            <h3>{product.name}</h3>
+                            <p className="price">
+                                {finalProductPrice.toLocaleString()}원
+                                {totalSurcharge > 0 && (
+                                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 'normal', marginLeft: '6px' }}>
+                                        (지역 배송비 +{totalSurcharge.toLocaleString()}원 포함)
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Step 1: 화환에 들어갈 리본문구 */}
+                <section className="order-section">
+                    <h2 className="section-title">화환에 들어갈 리본문구</h2>
+
+                    {/* 보내는 분 (위) */}
+                    <div className="form-group">
+                        <input
+                            type="text"
+                            placeholder="예시) 주식회사 대표 홍길동"
+                            value={orderForm.ribbonText2}
+                            onChange={(e) => setOrderForm({ ...orderForm, ribbonText2: e.target.value })}
+                            onFocus={handleInputFocus}
+                            autoFocus
+                        />
+                    </div>
+
+                    {/* 문구 드롭다운 (아래) */}
+                    <div className="form-group">
+                        <select
+                            className="message-select"
+                            value={isCustomMessage ? 'custom' : orderForm.ribbonText1}
+                            onFocus={handleInputFocus}
+                            onChange={(e) => {
+                                if (e.target.value === 'custom') {
+                                    setIsCustomMessage(true);
+                                    setOrderForm({ ...orderForm, ribbonText1: '', customMessage: '' });
+                                } else {
+                                    setIsCustomMessage(false);
+                                    setOrderForm({ ...orderForm, ribbonText1: e.target.value, customMessage: '' });
+                                }
+                            }}
+                        >
+                            {messageOptions.map((msg, idx) => (
+                                <option key={idx} value={msg}>{msg}</option>
+                            ))}
+                            <option value="custom">직접입력</option>
+                        </select>
+                    </div>
+
+                    {/* 직접입력 시 추가 인풋 */}
+                    {isCustomMessage && (
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                placeholder="문구를 직접 입력해주세요"
+                                value={orderForm.customMessage}
+                                onChange={(e) => setOrderForm({ ...orderForm, customMessage: e.target.value, ribbonText1: e.target.value })}
+                                onFocus={handleInputFocus}
+                            />
+                        </div>
+                    )}
+                </section>
+
+                {/* Step 1: 받으시는 분 */}
+                <section className="order-section">
+                    <h2 className="section-title">받으시는 분</h2>
+                    <div className="recipient-info">
+                        <div className="recipient-row">
+                            <span className="recipient-label">상주</span>
+                            <span className="recipient-value">
+                                {orderForm.recipientName || '상주'}
+                                <button
+                                    className="btn-change-recipient"
+                                    type="button"
+                                    onClick={() => {
+                                        setTempRecipientName(orderForm.recipientName);
+                                        setRecipientModalOpen(true);
+                                    }}
+                                >
+                                    상주변경
+                                </button>
+                            </span>
+                        </div>
+                        <div className="recipient-row">
+                            <span className="recipient-label">빈소</span>
+                            <span className="recipient-value">{bugo?.funeral_home || '장례식장'} {bugo?.room_number || ''}</span>
+                        </div>
+                        <div className="recipient-row">
+                            <span className="recipient-label">주소</span>
+                            <span className="recipient-value">{bugo?.address || '-'}</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {/* 하단 버튼 - 모달 열릴 때 숨김 */}
+            {!recipientModalOpen && (
+                <div className="order-footer">
+                    <button className="btn-payment" onClick={handleNext}>
+                        다음
+                    </button>
+                </div>
+            )}
+
+            {/* 상주변경 바텀시트 모달 */}
+            {
+                recipientModalOpen && (
+                    <div className="recipient-modal-overlay" onClick={() => setRecipientModalOpen(false)}>
+                        <div className="recipient-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="recipient-modal-header">
+                                <h3>상주 변경</h3>
+                                <button className="btn-modal-close" onClick={() => setRecipientModalOpen(false)}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="recipient-modal-content">
+                                {parsedMourners.filter(m => m.name).length > 0 && (
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label style={{ display: 'block', fontSize: '13px', color: '#666', marginBottom: '8px', fontWeight: 500 }}>
+                                            등록된 상주 목록에서 선택
+                                        </label>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {parsedMourners.filter(m => m.name).map((m: any, idx: number) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    style={{
+                                                        padding: '8px 12px',
+                                                        borderRadius: '8px',
+                                                        border: tempRecipientName === m.name ? '1.5px solid #1A1A1A' : '1px solid #E5E5E5',
+                                                        background: tempRecipientName === m.name ? '#F5F5F5' : '#FFFFFF',
+                                                        color: '#1A1A1A',
+                                                        fontWeight: tempRecipientName === m.name ? 600 : 400,
+                                                        fontSize: '14px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={() => setTempRecipientName(m.name)}
+                                                >
+                                                    [{m.relationship || '상주'}] {m.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="form-group">
+                                    <label>상주명 직접 입력</label>
+                                    <input
+                                        type="text"
+                                        placeholder="상주명을 입력해주세요"
+                                        value={tempRecipientName}
+                                        onChange={(e) => setTempRecipientName(e.target.value)}
+                                        onFocus={handleInputFocus}
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+                            <div className="recipient-modal-footer">
+                                <button
+                                    className="btn-confirm"
+                                    onClick={() => {
+                                        setOrderForm({ ...orderForm, recipientName: tempRecipientName });
+                                        setRecipientModalOpen(false);
+                                    }}
+                                >
+                                    확인
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
+    );
+}
