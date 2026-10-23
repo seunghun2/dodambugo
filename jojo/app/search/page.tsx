@@ -21,37 +21,6 @@ export default function SearchPage() {
     const [passwordInput, setPasswordInput] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    // 1달 전 날짜 계산
-    const getOneMonthAgo = () => {
-        const date = new Date();
-        date.setDate(date.getDate() - 30);
-        return date.toISOString().split('T')[0];
-    };
-
-    // 최근 부고 목록 불러오기 (1달 이내만)
-    useEffect(() => {
-        const fetchRecentBugo = async () => {
-            try {
-                const { supabase } = await import('@/lib/supabase');
-                const { data, error } = await supabase
-                    .from('bugo')
-                    .select('*')
-                    .is('deleted_at', null)
-                    .neq('bugo_number', '5169')
-                    .gte('funeral_date', getOneMonthAgo())
-                    .order('created_at', { ascending: false })
-                    .limit(100);
-
-                if (error) throw error;
-                setRecentBugo(data || []);
-            } catch (err) {
-                console.error('최근 부고 로딩 오류:', err);
-            }
-        };
-
-        fetchRecentBugo();
-    }, []);
-
     const handleSearch = async () => {
         if (!query.trim()) return;
 
@@ -60,19 +29,10 @@ export default function SearchPage() {
         setCurrentPage(1);
 
         try {
-            const { supabase } = await import('@/lib/supabase');
-            const { data, error } = await supabase
-                .from('bugo')
-                .select('*')
-                .is('deleted_at', null)
-                .neq('bugo_number', '5169')
-                .or(`bugo_number.eq.${query},deceased_name.ilike.%${query}%,mourner_name.ilike.%${query}%`)
-                .gte('funeral_date', getOneMonthAgo())
-                .order('created_at', { ascending: false })
-                .limit(100);
-
-            if (error) throw error;
-            setResults(data || []);
+            const res = await fetch(`/api/bugo/search?q=${encodeURIComponent(query.trim())}`);
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || '검색 오류');
+            setResults(json.data || []);
         } catch (err) {
             console.error('검색 오류:', err);
             setResults([]);
@@ -95,20 +55,28 @@ export default function SearchPage() {
         setShowPasswordModal(true);
     };
 
-    // 비밀번호 확인
-    const handlePasswordSubmit = () => {
+    // 비밀번호 확인 (서버 검증 — 브라우저에 연락처/비밀번호 미노출)
+    const handlePasswordSubmit = async () => {
         if (!selectedBugo) return;
 
-        // phone_password 또는 applicant_phone 뒤 4자리와 비교
-        const phonePassword = (selectedBugo as any).phone_password || (selectedBugo as any).applicant_phone || '';
-        const cleanPhone = phonePassword.replace(/-/g, '');
-        const last4 = cleanPhone.slice(-4);
-
-        if (passwordInput === last4) {
-            setShowPasswordModal(false);
-            router.push(`/create/complete/${selectedBugo.bugo_number}`);
-        } else {
-            setPasswordError('비밀번호가 일치하지 않습니다');
+        try {
+            const res = await fetch('/api/bugo/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bugo_number: selectedBugo.bugo_number,
+                    password: passwordInput.trim(),
+                }),
+            });
+            const json = await res.json();
+            if (res.ok && json.valid) {
+                setShowPasswordModal(false);
+                router.push(`/create/complete/${selectedBugo.bugo_number}`);
+            } else {
+                setPasswordError(json.error || '비밀번호가 일치하지 않습니다');
+            }
+        } catch {
+            setPasswordError('비밀번호 확인 중 오류가 발생했습니다');
         }
     };
 

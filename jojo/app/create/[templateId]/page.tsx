@@ -777,13 +777,14 @@ export default function WriteFormPage() {
 
         const loadDraftData = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('drafts')
-                    .select('*')
-                    .eq('id', draftIdParam)
-                    .single();
+                const res = await fetch(`/api/drafts?id=${encodeURIComponent(draftIdParam)}`);
+                if (!res.ok) {
+                    console.log('임시저장 데이터 없음:', draftIdParam);
+                    return;
+                }
+                const { data } = await res.json();
 
-                if (error || !data) {
+                if (!data) {
                     console.log('임시저장 데이터 없음:', draftIdParam);
                     return;
                 }

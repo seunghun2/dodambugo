@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendPartnerNotification } from '@/lib/partner-notification';
 
@@ -7,6 +7,13 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function verifyCronRequest(request: NextRequest): boolean {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader === `Bearer ${process.env.CRON_SECRET}`) return true;
+    if (process.env.NODE_ENV === 'development') return true;
+    return false;
+}
+
 /**
  * 발인 3시간 전 파트너 리마인더 푸시 크론
  * 
@@ -14,7 +21,10 @@ const supabase = createClient(
  * 동작: 현재 시각 기준 3시간 뒤에 발인 예정인 부고를 찾아
  *       해당 부고를 만든 B2B 파트너에게 푸시 알림을 보냄
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+    if (process.env.CRON_SECRET && !verifyCronRequest(request)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         const now = new Date();
         const kstOffset = 9 * 60 * 60 * 1000;

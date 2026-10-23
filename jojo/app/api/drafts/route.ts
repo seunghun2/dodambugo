@@ -7,8 +7,29 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// 임시저장 목록 조회 (어드민용)
+// 임시저장 조회 (단건 id 조회는 복원용 허용, 전체 목록 조회는 어드민 전용)
 export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
+    const draftId = searchParams.get('id');
+
+    if (draftId) {
+        try {
+            const { data, error } = await supabase
+                .from('drafts')
+                .select('*')
+                .eq('id', draftId)
+                .maybeSingle();
+
+            if (error) throw error;
+            if (!data) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 });
+            }
+            return NextResponse.json({ data });
+        } catch (error: any) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+    }
+
     if (!verifyAdmin(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

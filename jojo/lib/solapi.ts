@@ -137,7 +137,7 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     // 2. 감사장 안내 (상주용)
     'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내 (구버전 1버튼)
     'KA01TP261020144548548T40f3Xuc1h4': 'KA01TP261020144549419wtsS3DtoDm5', // b2b_감사장 및 답례품 안내 (신규 2버튼)
-    'KA01TP261023133301983ZQ1IqnoKNRb': 'KA01TP261023133302776XQc2Z0Vuki3', // b2b_감사장 및 답례품 재안내 (발인 3일 후 리마인드)
+    'KA01TP261023133301983ZQ1IqnoKNRb': 'KA01TP261023133302776XQc2Z0Vuki3', // b2b_감사장 및 답례품 재안내 (발인 3일 후 리마인드 2버튼)
     // 3. 화환 결제 완료 (조문객용)
     'KA01TP2601311316586435pxsJOWuWbz': 'KA01TP260714224254339AmgosqXieKb', // b2b_01-화환 결제 완료
     // 4. 화환 배송 완료 (조문객용)
@@ -155,11 +155,9 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP260310031832180MIhfBqgYYoB': 'KA01TP260714225958774NSjzKCXWvdF', // 장지 이용후기(사본 - v2)
     // 10. 부의금 전달 완료 (조문객용)
     'KA01TP260128002838240ioiYHpImLDY': 'KA01TP260714224630629Z7tOdxnlNNK', // b2b_03-상품결제 완료
-    // 11. 답례품 결제 완료 (상주용)
-    'KA01TP261020132835419ZOxQt2Dto3W': 'KA01TP261023124428617bcO4qkzxHT1', // b2b_07-답례품 결제 완료
 };
 
-// 신규 감사장+답례품 2버튼 템플릿: 카카오 검수 승인(APPROVED)일 때 자동 사용 (GIFT_ALIMTALK_LIVE === 'false' 로 강제 비활성 가능)
+// 신규 감사장+답례품 2버튼 템플릿: 기본 활성(GIFT_ALIMTALK_LIVE !== 'false') & 카카오 검수 승인(APPROVED)일 때 2버튼 사용
 export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> {
     if (process.env.GIFT_ALIMTALK_LIVE === 'false') {
         return 'KA01TP2603110816428720O999vVNBCV';
@@ -183,7 +181,7 @@ export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> 
     return 'KA01TP2603110816428720O999vVNBCV';
 }
 
-// 발인 3일 후 감사장+답례품 재안내(리마인드) 템플릿: 카카오 검수 승인(APPROVED)일 때만 B2C 기본 템플릿 ID 반환 (미승인 시 null 반환하여 발송 보류)
+// 발인 3일 후 감사장+답례품 리마인드 2버튼 템플릿: 카카오 검수 승인(APPROVED) 완료 시 템플릿 ID 반환, 검수 중이면 null 반환
 export async function resolveThanksReminderTemplateId(isB2B?: boolean): Promise<string | null> {
     if (process.env.GIFT_ALIMTALK_LIVE === 'false') {
         return null;
@@ -301,10 +299,9 @@ export async function sendAlimtalk(
         const data = await response.json();
         console.log('알림톡 발송 결과:', JSON.stringify(data, null, 2));
 
-        if (!response.ok || data.errorCode || (data.statusCode && data.statusCode !== '2000')) {
+        if (data.statusCode && data.statusCode !== '2000') {
             status = 'fail';
-            errorMessage = data.errorMessage || `알림톡 발송 실패 (HTTP ${response.status})`;
-            throw new Error(errorMessage);
+            errorMessage = data.errorMessage || '알림톡 발송 실패';
         }
         return data;
     } catch (error: any) {
