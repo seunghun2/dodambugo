@@ -260,13 +260,13 @@ export default function OrderDetailPage() {
             });
             const json = await res.json();
             if (!res.ok || !json.success) {
-                alert((json.error || '주문을 취소할 수 없습니다.') + '\n\n문의사항은 고객센터(1599-6567)로 연락해 주세요.');
+                alert(json.error || '주문을 취소할 수 없습니다.');
                 await fetchGiftOrder().catch(() => {});
             } else {
                 await fetchGiftOrder();
             }
         } catch (e: any) {
-            alert((e?.message || '취소 처리 중 오류가 발생했습니다.') + '\n\n문의사항은 고객센터(1599-6567)로 연락해 주세요.');
+            alert(e?.message || '취소 처리 중 오류가 발생했습니다.');
         } finally {
             setCancellingGift(false);
         }
