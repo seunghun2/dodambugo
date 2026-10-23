@@ -234,7 +234,7 @@ class DaouIssuer implements GiftIssuer {
 }
 
 export function isLiveMode(): boolean {
-    return process.env.GIFT_LIVE_MODE === 'true';
+    return process.env.GIFT_LIVE_MODE !== 'false';
 }
 
 export class GiftNotReadyError extends Error {

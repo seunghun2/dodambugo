@@ -156,9 +156,9 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP260128002838240ioiYHpImLDY': 'KA01TP260714224630629Z7tOdxnlNNK', // b2b_03-상품결제 완료
 };
 
-// 신규 감사장+답례품 2버튼 템플릿: 답례품 실결제 오픈(GIFT_LIVE_MODE === 'true') & 카카오 검수 승인(APPROVED)일 때만 전환, 그 전에는 기존 1버튼 템플릿 유지
+// 신규 감사장+답례품 2버튼 템플릿: 알림톡 전환 스위치(GIFT_ALIMTALK_LIVE === 'true') & 카카오 검수 승인(APPROVED)일 때만 전환, 그 전에는 기존 1버튼 템플릿 유지
 export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> {
-    if (process.env.GIFT_LIVE_MODE !== 'true') {
+    if (process.env.GIFT_ALIMTALK_LIVE !== 'true') {
         return 'KA01TP2603110816428720O999vVNBCV';
     }
     const checkId = isB2B
