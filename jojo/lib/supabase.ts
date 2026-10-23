@@ -2,35 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseKey =
-    typeof window === 'undefined'
-        ? process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey
-        : supabaseAnonKey;
 
-const customFetch: typeof fetch = (input, init) => {
-    if (typeof window !== 'undefined') {
-        const urlStr =
-            typeof input === 'string'
-                ? input
-                : input instanceof URL
-                  ? input.toString()
-                  : input.url;
-
-        const restPrefix = `${supabaseUrl}/rest/v1/`;
-        if (urlStr.startsWith(restPrefix)) {
-            const proxiedUrl = `/api/db/rest/v1/${urlStr.slice(restPrefix.length)}`;
-            return fetch(proxiedUrl, {
-                ...init,
-                credentials: 'same-origin',
-            });
-        }
-    }
-    return fetch(input, init);
-};
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-    global: { fetch: customFetch },
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // 타입 정의
 export interface Bugo {

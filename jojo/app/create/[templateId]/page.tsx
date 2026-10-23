@@ -388,28 +388,77 @@ export default function WriteFormPage() {
     // 임시저장 모달
     const [draftModalOpen, setDraftModalOpen] = useState(false);
     const [draftId, setDraftId] = useState<string | null>(null);
+    const draftIdRef = useRef<string | null>(null);
+    const isDirtyDraftRef = useRef<boolean>(false);
+    const latestDraftPayloadRef = useRef<any>(null);
 
     const handleDraftClick = () => {
         setDraftModalOpen(true);
     };
 
-    // DB에 임시저장 (API 호출)
-    const saveDraftToDb = async () => {
+    const ensureDraftId = (): string => {
+        if (draftIdRef.current) return draftIdRef.current;
+        if (draftId) {
+            draftIdRef.current = draftId;
+            return draftId;
+        }
         try {
+            const saved = localStorage.getItem('bugo_draft_id');
+            if (saved) {
+                draftIdRef.current = saved;
+                setDraftId(saved);
+                return saved;
+            }
+        } catch { }
+        const generated = typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = (Math.random() * 16) | 0;
+                const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            });
+        draftIdRef.current = generated;
+        setDraftId(generated);
+        try { localStorage.setItem('bugo_draft_id', generated); } catch { }
+        return generated;
+    };
+
+    // DB에 임시저장 (API 호출)
+    const saveDraftToDb = async (options?: { keepalive?: boolean }) => {
+        try {
+            const idToUse = ensureDraftId();
+            const payload = latestDraftPayloadRef.current || {
+                draftId: idToUse,
+                formData,
+                mourners,
+                accounts,
+                isAccountSaved,
+                showAccount: false,
+                showBurial,
+                showIlpo,
+                hideFuneral,
+                showPhoto,
+                photoUrl,
+                phoneVerified,
+                templateId,
+                ipAddress: clientIp,
+            };
+            payload.draftId = idToUse;
+            isDirtyDraftRef.current = false;
+
             const response = await fetch('/api/drafts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    draftId,
-                    formData,
-                    templateId,
-                    ipAddress: clientIp,
-                }),
+                body: JSON.stringify(payload),
+                keepalive: options?.keepalive,
             });
-            const result = await response.json();
-            if (result.draftId) {
-                setDraftId(result.draftId);
-                localStorage.setItem('bugo_draft_id', result.draftId);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.draftId) {
+                    draftIdRef.current = result.draftId;
+                    setDraftId(result.draftId);
+                    try { localStorage.setItem('bugo_draft_id', result.draftId); } catch { }
+                }
             }
         } catch (error) {
             console.error('Draft save to DB failed:', error);
@@ -424,17 +473,21 @@ export default function WriteFormPage() {
             formData,
             mourners,
             accounts,
-            showAccount,
+            isAccountSaved,
+            showAccount: false,
             showBurial,
+            showIlpo,
+            hideFuneral,
             showPhoto,
             photoUrl,
+            phoneVerified,
             templateId,
             savedAt: new Date().toISOString()
         };
         localStorage.setItem('bugo_draft', JSON.stringify(draftData));
 
-        // DB에도 저장 (새로 추가)
-        await saveDraftToDb();
+        // DB에도 저장
+        await saveDraftToDb({ keepalive: true });
 
         setDraftModalOpen(false);
         router.push('/');
@@ -445,10 +498,14 @@ export default function WriteFormPage() {
             formData,
             mourners,
             accounts,
-            showAccount,
+            isAccountSaved,
+            showAccount: false,
             showBurial,
+            showIlpo,
+            hideFuneral,
             showPhoto,
             photoUrl,
+            phoneVerified,
             templateId,
             savedAt: new Date().toISOString()
         };
@@ -569,6 +626,12 @@ export default function WriteFormPage() {
         }
 
         // 2. 복제 데이터 없으면 draft 확인
+        const savedDraftId = localStorage.getItem('bugo_draft_id');
+        if (savedDraftId && !draftIdRef.current) {
+            draftIdRef.current = savedDraftId;
+            setDraftId(savedDraftId);
+        }
+
         const draft = localStorage.getItem('bugo_draft');
         if (draft) {
             try {
@@ -586,9 +649,15 @@ export default function WriteFormPage() {
                         }));
                     }
                     if (parsed.mourners) setMourners(parsed.mourners);
-                    if (parsed.accounts) setAccounts(parsed.accounts);
-                    if (parsed.showAccount !== undefined) setShowAccount(parsed.showAccount);
+                    if (parsed.accounts) {
+                        setAccounts(parsed.accounts);
+                        if (parsed.isAccountSaved || parsed.accounts.some((a: any) => a.bank && a.number)) {
+                            setIsAccountSaved(true);
+                        }
+                    }
                     if (parsed.showBurial !== undefined) setShowBurial(parsed.showBurial);
+                    if (parsed.showIlpo !== undefined) setShowIlpo(parsed.showIlpo);
+                    if (parsed.hideFuneral !== undefined) setHideFuneral(parsed.hideFuneral);
                     if (parsed.showPhoto !== undefined) setShowPhoto(parsed.showPhoto);
                     if (parsed.photoUrl) setPhotoUrl(parsed.photoUrl);
                 }
@@ -598,57 +667,94 @@ export default function WriteFormPage() {
         }
     }, [templateId]);
 
-    // 30초마다 자동 임시저장
+    // 입력 멈춘 후 2초 디바운스 자동 임시저장 + 페이지 이탈 시 즉시 저장
     useEffect(() => {
         // 수정 모드에서는 자동저장 안 함
         if (editBugoNumber) return;
 
-        const autoSave = async () => {
-            // 최소 하나 이상 입력된 경우에만 저장
-            if (formData.deceased_name || formData.funeral_home || formData.primary_mourner) {
-                // localStorage에 저장 (기존)
-                const draftData = {
-                    formData,
-                    mourners,
-                    accounts,
-                    showAccount,
-                    showBurial,
-                    showPhoto,
-                    photoUrl,
-                    templateId,
-                    savedAt: new Date().toISOString()
-                };
-                localStorage.setItem('bugo_draft', JSON.stringify(draftData));
+        const hasMeaningfulInput = Boolean(
+            formData.applicant_name ||
+            formData.applicant_phone ||
+            formData.deceased_name ||
+            formData.funeral_home ||
+            formData.primary_mourner ||
+            formData.burial_place ||
+            mourners.some(m => m.name || m.contact) ||
+            accounts.some(a => a.bank || a.number || a.holder)
+        );
 
-                // DB에도 저장 (IP 추적용)
-                try {
-                    const savedDraftId = localStorage.getItem('bugo_draft_id');
-                    const response = await fetch('/api/drafts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            draftId: savedDraftId,
-                            formData,
-                            templateId,
-                            ipAddress: clientIp,
-                        }),
-                    });
-                    const result = await response.json();
-                    if (result.draftId && !savedDraftId) {
-                        localStorage.setItem('bugo_draft_id', result.draftId);
-                    }
-                } catch (error) {
-                    console.error('Auto-save to DB failed:', error);
-                }
+        if (!hasMeaningfulInput) return;
 
-                console.log('자동 저장 완료:', new Date().toLocaleTimeString());
+        // 1. localStorage 즉시 저장 (창 닫아도 0ms 보존)
+        const draftData = {
+            formData,
+            mourners,
+            accounts,
+            isAccountSaved,
+            showAccount: false,
+            showBurial,
+            showIlpo,
+            hideFuneral,
+            showPhoto,
+            photoUrl,
+            phoneVerified,
+            templateId,
+            savedAt: new Date().toISOString()
+        };
+        try {
+            localStorage.setItem('bugo_draft', JSON.stringify(draftData));
+        } catch { }
+
+        const idToUse = ensureDraftId();
+        latestDraftPayloadRef.current = {
+            draftId: idToUse,
+            formData,
+            mourners,
+            accounts,
+            isAccountSaved,
+            showAccount: false,
+            showBurial,
+            showIlpo,
+            hideFuneral,
+            showPhoto,
+            photoUrl,
+            phoneVerified,
+            templateId,
+            ipAddress: clientIp,
+        };
+        isDirtyDraftRef.current = true;
+
+        // 2. 2초 디바운스 후 DB 저장
+        const timer = setTimeout(() => {
+            saveDraftToDb();
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [formData, mourners, accounts, isAccountSaved, showBurial, showIlpo, hideFuneral, showPhoto, photoUrl, phoneVerified, templateId, editBugoNumber, clientIp]);
+
+    // 창 닫기 / 앱 전환(visibilitychange, pagehide) 시 미저장 변경사항 즉시 DB 전송
+    useEffect(() => {
+        if (editBugoNumber) return;
+
+        const flushOnLeave = () => {
+            if (isDirtyDraftRef.current && latestDraftPayloadRef.current) {
+                saveDraftToDb({ keepalive: true });
             }
         };
 
-        const timer = setInterval(autoSave, 30000); // 30초
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                flushOnLeave();
+            }
+        };
 
-        return () => clearInterval(timer);
-    }, [formData, mourners, accounts, showAccount, showBurial, showPhoto, photoUrl, templateId, editBugoNumber, clientIp]);
+        window.addEventListener('pagehide', flushOnLeave);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            window.removeEventListener('pagehide', flushOnLeave);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [editBugoNumber]);
 
     // 수정 모드: 기존 부고장 데이터 불러오기
     useEffect(() => {
@@ -771,7 +877,7 @@ export default function WriteFormPage() {
         loadBugoData();
     }, [editBugoNumber]);
 
-    // 알림톡 리마인더: ?draft= 파라미터로 DB 임시저장 불러오기
+    // 알림톡/문자 리마인더: ?draft= 파라미터로 DB 임시저장 전체 복원
     useEffect(() => {
         if (!draftIdParam || editBugoNumber) return;
 
@@ -791,39 +897,118 @@ export default function WriteFormPage() {
 
                 console.log('📋 DB 임시저장 불러옴:', data.id);
 
-                // formData에 채우기
+                // 동일한 draft ID를 유지해 이후 자동저장이 중복 행을 만들지 않도록 설정
+                draftIdRef.current = data.id;
+                setDraftId(data.id);
+                try {
+                    localStorage.setItem('bugo_draft_id', data.id);
+                } catch { }
+
+                const payload = data.form_payload && typeof data.form_payload === 'object' ? data.form_payload : null;
+                const payloadForm = payload?.formData && typeof payload.formData === 'object' ? payload.formData : {};
+
+                const restoredFuneralTime = data.funeral_time || payloadForm.funeral_time || '';
+                const restoredDeathTime = data.death_time || payloadForm.death_time || '';
+                const restoredEncoffinTime = data.encoffin_time || payloadForm.encoffin_time || '';
+
+                const nextFormData = {
+                    applicant_name: data.applicant_name || payloadForm.applicant_name || '',
+                    applicant_phone: data.applicant_phone || payloadForm.applicant_phone || '',
+                    deceased_name: data.deceased_name || payloadForm.deceased_name || '',
+                    gender: data.gender || payloadForm.gender || '',
+                    relationship: data.relationship || payloadForm.relationship || '',
+                    age: data.age?.toString() || payloadForm.age?.toString() || '',
+                    religion: data.religion || payloadForm.religion || '일반',
+                    religion_custom: payloadForm.religion_custom || '',
+                    religious_title: payloadForm.religious_title || '',
+                    hide_religious_title: Boolean(payloadForm.hide_religious_title),
+                    funeral_type: data.funeral_type || payloadForm.funeral_type || '일반 장례',
+                    funeral_home: data.funeral_home || payloadForm.funeral_home || '',
+                    room_number: data.room_number || payloadForm.room_number || '',
+                    funeral_home_tel: data.funeral_home_tel || payloadForm.funeral_home_tel || '',
+                    address: data.address || payloadForm.address || '',
+                    address_detail: payloadForm.address_detail || '',
+                    funeral_date: data.funeral_date || payloadForm.funeral_date || '',
+                    funeral_time: restoredFuneralTime,
+                    funeral_hour: payloadForm.funeral_hour || restoredFuneralTime.split(':')[0] || '',
+                    funeral_minute: payloadForm.funeral_minute || restoredFuneralTime.split(':')[1] || '00',
+                    death_date: data.death_date || payloadForm.death_date || '',
+                    death_time: restoredDeathTime,
+                    death_hour: payloadForm.death_hour || restoredDeathTime.split(':')[0] || '',
+                    death_minute: payloadForm.death_minute || restoredDeathTime.split(':')[1] || '00',
+                    encoffin_date: data.encoffin_date || payloadForm.encoffin_date || '',
+                    encoffin_hour: payloadForm.encoffin_hour || restoredEncoffinTime.split(':')[0] || '',
+                    encoffin_minute: payloadForm.encoffin_minute || restoredEncoffinTime.split(':')[1] || '00',
+                    ilpo_date: data.ilpo_date || payloadForm.ilpo_date || '',
+                    ilpo_time: data.ilpo_time || payloadForm.ilpo_time || '',
+                    burial_place: data.burial_place || payloadForm.burial_place || '',
+                    burial_place2: data.burial_place2 || payloadForm.burial_place2 || '',
+                    message: data.message || payloadForm.message || '뜻밖의 비보에 두루 알려드리지 못하오니 넓은 마음으로 이해해 주시기 바랍니다.',
+                    primary_mourner: data.mourner_name || payloadForm.primary_mourner || data.applicant_name || '',
+                };
+
                 setFormData(prev => ({
                     ...prev,
-                    applicant_name: data.applicant_name || prev.applicant_name,
-                    applicant_phone: data.applicant_phone || prev.applicant_phone,
-                    deceased_name: data.deceased_name || prev.deceased_name,
-                    gender: data.gender || prev.gender,
-                    age: data.age?.toString() || prev.age,
-                    religion: data.religion || prev.religion,
-                    funeral_home: data.funeral_home || prev.funeral_home,
-                    room_number: data.room_number || prev.room_number,
-                    funeral_home_tel: data.funeral_home_tel || prev.funeral_home_tel,
-                    address: data.address || prev.address,
-                    funeral_date: data.funeral_date || prev.funeral_date,
-                    funeral_time: data.funeral_time || prev.funeral_time,
-                    funeral_hour: data.funeral_time?.split(':')[0] || prev.funeral_hour,
-                    funeral_minute: data.funeral_time?.split(':')[1] || prev.funeral_minute,
-                    death_date: data.death_date || prev.death_date,
-                    death_time: data.death_time || prev.death_time,
-                    death_hour: data.death_time?.split(':')[0] || prev.death_hour,
-                    death_minute: data.death_time?.split(':')[1] || prev.death_minute,
-                    message: data.message || prev.message,
+                    ...nextFormData,
+                    funeral_date: nextFormData.funeral_date || prev.funeral_date,
+                    death_date: nextFormData.death_date || prev.death_date,
+                    encoffin_date: nextFormData.encoffin_date || prev.encoffin_date,
                 }));
 
-                // 인증 상태 복원
-                const phone = data.applicant_phone;
+                // 추가 상주 복원
+                let restoredMourners = payload?.mourners || data.mourners;
+                if (typeof restoredMourners === 'string') {
+                    try { restoredMourners = JSON.parse(restoredMourners); } catch { restoredMourners = null; }
+                }
+                if (Array.isArray(restoredMourners) && restoredMourners.length > 0) {
+                    setMourners(restoredMourners);
+                }
+
+                // 계좌 정보 복원
+                let restoredAccounts = payload?.accounts || data.account_info;
+                if (typeof restoredAccounts === 'string') {
+                    try { restoredAccounts = JSON.parse(restoredAccounts); } catch { restoredAccounts = null; }
+                }
+                if (Array.isArray(restoredAccounts) && restoredAccounts.length > 0) {
+                    setAccounts(restoredAccounts);
+                    if (payload?.isAccountSaved || restoredAccounts.some((a: any) => a.bank && a.number)) {
+                        setIsAccountSaved(true);
+                    }
+                }
+
+                // 장지 / 일포 / 영정사진 토글 복원
+                if (payload?.showBurial !== undefined || data.burial_place) {
+                    setShowBurial(Boolean(payload?.showBurial || data.burial_place));
+                }
+                if (payload?.showIlpo !== undefined || data.ilpo_date) {
+                    setShowIlpo(Boolean(payload?.showIlpo || data.ilpo_date));
+                }
+                if (payload?.hideFuneral !== undefined) {
+                    setHideFuneral(Boolean(payload.hideFuneral));
+                }
+                const restoredPhotoUrl = payload?.photoUrl || data.photo_url || '';
+                if (restoredPhotoUrl) {
+                    setPhotoUrl(restoredPhotoUrl);
+                    setShowPhoto(true);
+                } else if (payload?.showPhoto !== undefined) {
+                    setShowPhoto(Boolean(payload.showPhoto));
+                }
+
+                // 인증 상태 복원 (기존 인증 번호 일치, 저장 당시 인증됨, 또는 본인 번호로 발송된 문자 링크 진입 시)
+                const phone = nextFormData.applicant_phone;
                 if (phone) {
+                    const cleanPhone = phone.replace(/-/g, '');
                     try {
                         const verifiedPhone = localStorage.getItem('mb_verified_phone');
-                        if (verifiedPhone === phone.replace(/-/g, '')) {
+                        if (verifiedPhone === cleanPhone || payload?.phoneVerified || data.reminder_sent) {
+                            setPhoneVerified(true);
+                            localStorage.setItem('mb_verified_phone', cleanPhone);
+                        }
+                    } catch {
+                        if (payload?.phoneVerified || data.reminder_sent) {
                             setPhoneVerified(true);
                         }
-                    } catch { }
+                    }
                 }
 
                 // URL 정리 (draft 파라미터 제거)
@@ -841,7 +1026,7 @@ export default function WriteFormPage() {
     const roomNumberRef = useRef<HTMLInputElement>(null);
     const funeralHomeRef = useRef<HTMLInputElement>(null);
 
-    // 날짜 초기화
+    // 날짜 초기화 (이미 복원된 날짜가 있으면 덮어쓰지 않음)
     useEffect(() => {
         const today = new Date();
         const formatDate = (date: Date) => date.toISOString().split('T')[0];
@@ -852,9 +1037,9 @@ export default function WriteFormPage() {
 
         setFormData(prev => ({
             ...prev,
-            death_date: formatDate(today),
-            encoffin_date: formatDate(tomorrow),
-            funeral_date: formatDate(dayAfter),
+            death_date: prev.death_date || formatDate(today),
+            encoffin_date: prev.encoffin_date || formatDate(tomorrow),
+            funeral_date: prev.funeral_date || formatDate(dayAfter),
             // ilpo_date는 showIlpo 토글 ON일 때만 설정 (제주도 전용)
         }));
     }, []);
@@ -1185,6 +1370,8 @@ export default function WriteFormPage() {
 
     const handleConfirmSubmit = async () => {
         setShowPreview(false);
+        isDirtyDraftRef.current = false;
+        latestDraftPayloadRef.current = null;
 
         setIsSubmitting(true);
 
@@ -1341,6 +1528,10 @@ export default function WriteFormPage() {
                 // 🎉 알림톡 모달용 세션 저장 (신규 생성 시에만)
                 sessionStorage.setItem('new_bugo_created', 'true');
                 sessionStorage.setItem('new_bugo_phone', formData.applicant_phone.replace(/-/g, ''));
+                try {
+                    localStorage.removeItem('bugo_draft');
+                    localStorage.removeItem('bugo_draft_id');
+                } catch { }
             } else {
                 // 📱 수정 모드: 연락처 변경됐을 때만 알림톡 발송
                 const phoneChanged = formData.applicant_phone !== originalPhone;

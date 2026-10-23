@@ -234,6 +234,7 @@ export default function HomeContent() {
 
   const discardDraft = () => {
     localStorage.removeItem('bugo_draft');
+    localStorage.removeItem('bugo_draft_id');
     if (draftTemplateId) {
       localStorage.removeItem(`bugo_draft_${draftTemplateId}`);
     }

@@ -53,67 +53,119 @@ export async function GET(request: NextRequest) {
     // 1. 임시저장 리마인더
     // ========================================
     try {
-        const oneHourAgo = new Date();
-        oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-        const oneDayAgo = new Date();
-        oneDayAgo.setHours(oneDayAgo.getHours() - 24);
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-        // 1~24시간 전 저장 + 리마인더 미발송 + 연락처 있음
+        // 최근 24시간 내 이미 리마인더가 발송된 전화번호 조회 (중복 문자 원천 차단)
+        const { data: recentlyReminded } = await supabase
+            .from('drafts')
+            .select('applicant_phone')
+            .eq('reminder_sent', true)
+            .gt('updated_at', oneDayAgo.toISOString())
+            .not('applicant_phone', 'is', null);
+
+        const alreadyRemindedPhones = new Set(
+            (recentlyReminded || [])
+                .map(d => (d.applicant_phone || '').replace(/\D/g, ''))
+                .filter(Boolean)
+        );
+
+        // 15분~24시간 전 저장 + 리마인더 미발송 + 연락처 있음 (고인명 미입력자도 포함)
         const { data: drafts } = await supabase
             .from('drafts')
             .select('*')
-            .lt('updated_at', oneHourAgo.toISOString())
+            .lt('updated_at', fifteenMinutesAgo.toISOString())
             .gt('updated_at', oneDayAgo.toISOString())
             .or('reminder_sent.is.null,reminder_sent.eq.false')
             .not('applicant_phone', 'is', null)
             .not('applicant_phone', 'eq', '')
-            .not('deceased_name', 'is', null)
-            .not('deceased_name', 'eq', '');
+            .order('updated_at', { ascending: false });
 
         if (drafts && drafts.length > 0) {
-            results.draft.total = drafts.length;
-            console.log(`📝 임시저장 리마인더 대상: ${drafts.length}건`);
+            // 동일 전화번호 중복 제거: 번호별 가장 완성도 높은/최신 draft 1건만 선택
+            const phoneDraftMap = new Map<string, typeof drafts[0]>();
+            const phoneAllIdsMap = new Map<string, string[]>();
 
             for (const draft of drafts) {
-                const phone = draft.applicant_phone.replace(/-/g, '');
-
-                // 차단 번호 제외
-                if (blockedSet.has(phone)) {
-                    console.log(`⛔ 차단된 번호 건너뜀: ${phone}`);
+                const phone = (draft.applicant_phone || '').replace(/\D/g, '');
+                if (!phone.startsWith('010') || phone.length < 10) {
+                    // 유효하지 않은 번호는 발송 대상에서 제외 처리
                     await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
                     continue;
                 }
 
-                // 이미 부고 완성했는지 확인
+                const ids = phoneAllIdsMap.get(phone) || [];
+                ids.push(draft.id);
+                phoneAllIdsMap.set(phone, ids);
+
+                const existing = phoneDraftMap.get(phone);
+                if (!existing) {
+                    phoneDraftMap.set(phone, draft);
+                } else {
+                    // 고인명이나 장례식장이 있는 쪽을 우선 선택
+                    const existingScore = (existing.deceased_name ? 2 : 0) + (existing.funeral_home ? 1 : 0);
+                    const currentScore = (draft.deceased_name ? 2 : 0) + (draft.funeral_home ? 1 : 0);
+                    if (currentScore > existingScore) {
+                        phoneDraftMap.set(phone, draft);
+                    }
+                }
+            }
+
+            results.draft.total = phoneDraftMap.size;
+            console.log(`📝 임시저장 리마인더 대상: ${phoneDraftMap.size}명 (원본 ${drafts.length}건)`);
+
+            for (const [phone, draft] of phoneDraftMap.entries()) {
+                const allIdsForPhone = phoneAllIdsMap.get(phone) || [draft.id];
+                const formattedPhone = phone.length === 11
+                    ? `${phone.slice(0, 3)}-${phone.slice(3, 7)}-${phone.slice(7)}`
+                    : phone;
+
+                // 차단 번호 또는 최근 24시간 내 이미 발송된 번호 제외
+                if (blockedSet.has(phone) || alreadyRemindedPhones.has(phone)) {
+                    console.log(`⛔ 차단 또는 기발송 번호 건너뜀: ${phone}`);
+                    await supabase.from('drafts').update({ reminder_sent: true }).in('id', allIdsForPhone);
+                    continue;
+                }
+
+                // 이미 부고 완성했는지 확인 (하이픈 유무 및 phone_password 모두 대조)
                 const { data: existingBugo } = await supabase
                     .from('bugo')
                     .select('bugo_number')
-                    .eq('applicant_phone', draft.applicant_phone)
-                    .gte('created_at', oneDayAgo.toISOString())
+                    .is('deleted_at', null)
+                    .or(`applicant_phone.eq.${phone},applicant_phone.eq.${formattedPhone},phone_password.eq.${phone},phone_password.eq.${formattedPhone}`)
+                    .gte('created_at', sevenDaysAgo.toISOString())
                     .limit(1);
 
                 if (existingBugo && existingBugo.length > 0) {
-                    console.log(`⏭️ 이미 부고 완성: ${draft.applicant_phone}`);
-                    await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
+                    console.log(`⏭️ 이미 부고 완성: ${phone}`);
+                    await supabase.from('drafts').update({ reminder_sent: true }).in('id', allIdsForPhone);
                     continue;
                 }
+
                 try {
                     const isB2B = !!draft.b2b_user_id;
                     const brand = isB2B ? '부고온' : '마음부고';
                     const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
-                    const templateId = draft.template_id || 'basic';
+                    const templateId = draft.template || draft.template_id || 'basic';
                     const continueUrl = `https://${domain}/create/${templateId}?draft=${draft.id}`;
+                    const statusLine = draft.deceased_name
+                        ? `故 ${draft.deceased_name} 님의 부고장이 임시저장되어 있습니다.`
+                        : `${draft.applicant_name ? `${draft.applicant_name} 님, ` : ''}작성 중이시던 부고장이 임시저장되어 있습니다.`;
+
+                    // 동일 번호의 모든 draft를 먼저 reminder_sent = true 처리하여 중복 발송 방지
+                    await supabase.from('drafts').update({ reminder_sent: true }).in('id', allIdsForPhone);
+                    alreadyRemindedPhones.add(phone);
 
                     await sendSMS(phone, `[${brand}] 작성 중인 부고장이 있습니다.
 
-故 ${draft.deceased_name || ''} 님의 부고장이 임시저장되어 있습니다.
+${statusLine}
 
 아래 링크에서 이어서 작성하실 수 있습니다.
 ${continueUrl}
 
 문의: ${brand}`);
-                    await supabase.from('drafts').update({ reminder_sent: true }).eq('id', draft.id);
-                    console.log(`✅ 임시저장 리마인더: ${draft.id} → ${phone}`);
+                    console.log(`✅ 임시저장 리마인더: ${draft.id} (${templateId}) → ${phone}`);
                     results.draft.sent++;
                 } catch (err) {
                     console.error(`❌ 임시저장 발송 실패: ${draft.id}`, err);
@@ -135,10 +187,11 @@ ${continueUrl}
         const oneDayAgo = new Date();
         oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-        // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송 + B2C 일반 부고만 (B2B 부고온은 공유 리마인더 미발송)
+        // 1~24시간 전 생성 + 공유 4회 미만 + 리마인더 미발송 + 삭제되지 않은 B2C 일반 부고만
         const { data: bugos } = await supabase
             .from('bugo')
             .select('bugo_number, deceased_name, phone_password, owner_token, share_count, share_reminder_sent, b2b_user_id, funeral_home, room_number, funeral_date, funeral_time, funeral_type')
+            .is('deleted_at', null)
             .lt('created_at', oneHourAgo.toISOString())
             .gt('created_at', oneDayAgo.toISOString())
             .is('b2b_user_id', null)
