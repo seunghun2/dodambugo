@@ -215,6 +215,14 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
 
             // 실결제(이노페이) 모드일 경우 이노페이 결제창 호출 → 콜백 승인 후 /order/[orderNumber] 이동
             if (!data.isTest) {
+                if (typeof window !== 'undefined' && !window.innopay) {
+                    try {
+                        const script = document.createElement('script');
+                        script.textContent = 'if (typeof innopay !== "undefined") window.innopay = innopay;';
+                        document.body.appendChild(script);
+                        document.body.removeChild(script);
+                    } catch {}
+                }
                 if (typeof window === 'undefined' || !window.innopay) {
                     return notify('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
                 }
@@ -289,7 +297,20 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
 
     return (
         <div className="gs-page">
-            <Script src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js" strategy="lazyOnload" />
+            <Script
+                src="https://pg.innopay.co.kr/tpay/js/v1/innopay.js"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    if (typeof (window as any).innopay === 'undefined') {
+                        try {
+                            const script = document.createElement('script');
+                            script.textContent = 'if (typeof innopay !== "undefined") window.innopay = innopay;';
+                            document.body.appendChild(script);
+                            document.body.removeChild(script);
+                        } catch {}
+                    }
+                }}
+            />
             <header className="gs-header">
                 <button className="gs-icon-btn" onClick={() => router.push(`/view/${bugoId}/gift/${product.id}`)} aria-label="뒤로">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
