@@ -529,7 +529,9 @@ export default function AdminGiftOrdersPage() {
                                                     즉시 발송 (병렬)
                                                 </button>
                                             )}
-                                            {selectedOrder.status !== 'cancelled' && (
+                                            {(selectedOrder.status === 'paid' ||
+                                                selectedOrder.status === 'test_paid' ||
+                                                selectedOrder.status === 'failed') && (
                                                 <button
                                                     type="button"
                                                     disabled={processing}
@@ -546,7 +548,7 @@ export default function AdminGiftOrdersPage() {
                                                         cursor: 'pointer',
                                                     }}
                                                 >
-                                                    주문 취소
+                                                    발송 전 주문 취소
                                                 </button>
                                             )}
                                             <button

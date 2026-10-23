@@ -9,7 +9,8 @@
 export interface IssueRequest {
     orderNumber: string;
     seq?: number; // 주문 내 순번 (1..N) — 다우 COOPER_ORDER 유일성 보장용
-    bugoNumber?: string; // 감사장 단축링크(/t/[bugoNumber]) 생성용
+    bugoNumber?: string; // 감사장 링크(/view/[bugoNumber]/thanks/card) 생성용
+    isB2B?: boolean; // B2B(부고온플러스) 여부 — 도메인 및 타이틀 분기용
     senderName?: string;
     recipientName: string;
     recipientPhone: string; // 숫자만
@@ -123,8 +124,10 @@ class DaouIssuer implements GiftIssuer {
 
         // 다우 CI102_ISSUECPN_TITLE_WITHPAY 의 SEND_MSG 는 EUC-KR 기준 500byte 까지 허용됨.
         // 상주가 작성한 감사인사 전문 + 하단 감사장 링크(/view/[bugoNumber]/thanks/card)를 480byte 이내로 합쳐 1통으로 발송.
+        const siteOrigin = req.isB2B ? 'https://bugoon.maeumbugo.co.kr' : 'https://maeumbugo.co.kr';
+        const defaultBrand = req.isB2B ? '부고온플러스' : '마음부고';
         const thanksLinkSuffix = req.bugoNumber
-            ? `\n\n▼ 감사장 보기\nhttps://maeumbugo.co.kr/view/${req.bugoNumber}/thanks/card`
+            ? `\n\n▼ 감사장 보기\n${siteOrigin}/view/${req.bugoNumber}/thanks/card`
             : '';
         const suffixBytes = calcEucKrBytes(thanksLinkSuffix);
         const bodyText = (req.message || `${req.senderName || '상주'} 드림. 조문해 주셔서 깊이 감사드립니다.`).trim();
@@ -139,7 +142,7 @@ class DaouIssuer implements GiftIssuer {
             COOPER_ORDER: cooperOrder,
             ISSUE_COUNT: '1',
             CALL_CTN: this.config.senderPhone.replace(/[^0-9]/g, '').slice(0, 20),
-            SENDER: truncateEucKrBytes(req.senderName || '마음부고', 28),
+            SENDER: truncateEucKrBytes(req.senderName || defaultBrand, 28),
             RCV_CTN: req.recipientPhone.replace(/[^0-9]/g, '').slice(0, 20),
             RECEIVER: truncateEucKrBytes(req.recipientName || '', 28),
             SEND_MSG: safeShortMsg,
@@ -147,8 +150,8 @@ class DaouIssuer implements GiftIssuer {
             VALID_END: formatKstYmd(req.validDays && req.validDays > 0 ? req.validDays : 30),
             PAY_ID: '0',
             BOOKING_NO: '0',
-            SITE_URL: 'https://maeumbugo.co.kr',
-            TITLE: truncateEucKrBytes(req.title || '[마음부고] 감사 답례품', 24),
+            SITE_URL: siteOrigin,
+            TITLE: truncateEucKrBytes(req.title || `[${defaultBrand}] 감사 답례품`, 24),
             SEND_TYPE: req.sendType || '1001', // 연동업체지정(10004008) 캠페인 필수값 (1001: MMS 기본)
         };
 
@@ -248,7 +251,7 @@ export function getIssuer(): GiftIssuer {
     if (!isLiveMode()) return new MockIssuer();
 
     const cooperId = (process.env.DAOU_COOPER_ID || 'SC2859').trim();
-    const cooperPw = (process.env.DAOU_COOPER_PW || 'eqph04@@').trim();
+    const cooperPw = (process.env.DAOU_COOPER_PW || '').trim();
     const siteId = (process.env.DAOU_SITE_ID || '10004255').trim();
     const endpointUrl = (process.env.DAOU_PROXY_URL || process.env.DAOU_API_URL || 'http://49.50.139.204/proxy/daou').trim();
     const senderPhone = (process.env.DAOU_SENDER_PHONE || '15996567').trim();

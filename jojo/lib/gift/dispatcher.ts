@@ -230,7 +230,23 @@ export async function dispatchGiftOrder(
     const isTestOrder = Boolean(order.is_test);
     const hasThanksCard = Boolean(order.card_id && order.card_id !== 'none');
     const useSeparateThanksLms = process.env.GIFT_SEPARATE_THANKS_LMS === 'true';
-    const thanksUrl = `https://maeumbugo.co.kr/view/${order.bugo_number}/thanks/card`;
+
+    // 부고의 B2B(부고온플러스) 여부 확인 → 쿠폰 MMS 내 감사장 링크 도메인 분기
+    let isB2BBugo = false;
+    try {
+        if (order.bugo_id || order.bugo_number) {
+            const bq = sb.from('bugo').select('b2b_user_id');
+            const { data: bugoRow } = order.bugo_id
+                ? await bq.eq('id', order.bugo_id).maybeSingle()
+                : await bq.eq('bugo_number', String(order.bugo_number)).limit(1).maybeSingle();
+            isB2BBugo = Boolean(bugoRow?.b2b_user_id);
+        }
+    } catch {
+        /* ignore */
+    }
+
+    const siteOrigin = isB2BBugo ? 'https://bugoon.maeumbugo.co.kr' : 'https://maeumbugo.co.kr';
+    const thanksUrl = `${siteOrigin}/view/${order.bugo_number}/thanks/card`;
     const fullThanksText = hasThanksCard
         ? `${order.message || ''}\n\n▼ 감사장 보기\n${thanksUrl}`.trim()
         : String(order.message || '').trim();
@@ -260,11 +276,12 @@ export async function dispatchGiftOrder(
             lmsSentAt = new Date().toISOString();
         }
 
-        // 2) 모바일 쿠폰 발행 (인사말 + 감사장 단축링크 통합 MMS)
+        // 2) 모바일 쿠폰 발행 (인사말 + 감사장 링크 통합 MMS)
         const res = await issuer.issue({
             orderNumber: order.order_number,
             seq: idx + 1,
             bugoNumber: hasThanksCard ? String(order.bugo_number) : undefined,
+            isB2B: isB2BBugo,
             senderName: order.buyer_name || '상주',
             recipientName: r.name || '',
             recipientPhone: cleanRecipientPhone,
@@ -410,44 +427,21 @@ export async function cancelGiftOrder(
     const list = recipients || [];
     const sentOnes = list.filter((r) => r.send_status === 'sent' && r.coupon_ref);
 
-    if (options?.enforceGraceWindow && sentOnes.length > 0) {
+    // 정책상 이미 발송 완료(sent)된 모바일 쿠폰은 취소·폐기·환불 불가 (구매자·어드민 공통)
+    if (
+        order.status === 'sent' ||
+        order.status === 'partial' ||
+        order.status === 'partially_sent' ||
+        sentOnes.length > 0
+    ) {
         return {
             ok: false,
-            error: '이미 모바일 쿠폰이 발송되어 온라인 취소가 불가합니다.',
+            error: '이미 모바일 쿠폰이 발송 완료되어 취소·환불이 불가합니다.',
             cancelledCoupons: 0,
         };
     }
 
-    // 1) 이미 발송된 쿠폰이 있는 경우(어드민 취소) 다우 쿠폰 폐기 먼저 수행
-    let cancelledCoupons = 0;
-    let failedCouponCancel = 0;
-    if (sentOnes.length > 0) {
-        const issuer = getIssuer();
-        await runInParallelBatches(sentOnes, BATCH_CONCURRENCY, async (r) => {
-            const res = await issuer.cancel(r.coupon_ref, order.order_number);
-            if (res.ok) {
-                cancelledCoupons++;
-                await sb
-                    .from('gift_order_recipients')
-                    .update({ send_status: 'cancelled', error: `쿠폰 폐기 완료 (${reason})` })
-                    .eq('id', r.id);
-            } else {
-                failedCouponCancel++;
-                await sb
-                    .from('gift_order_recipients')
-                    .update({ error: `쿠폰 폐기 실패: ${res.error || '사용됨/취소불가'}` })
-                    .eq('id', r.id);
-            }
-        });
-
-        if (failedCouponCancel > 0) {
-            return {
-                ok: false,
-                error: `수신자 중 ${failedCouponCancel}건의 쿠폰 폐기에 실패하여 주문을 전체 취소할 수 없습니다. (이미 교환된 쿠폰 여부 확인 필요)`,
-                cancelledCoupons,
-            };
-        }
-    }
+    const cancelledCoupons = 0;
 
     // 2) 이노페이 실결제 TID가 있는 경우 이노페이 결제 취소 API 호출
     if (order.tid && !order.is_test) {

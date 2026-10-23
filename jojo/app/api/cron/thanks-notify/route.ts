@@ -43,12 +43,14 @@ export async function GET(request: NextRequest) {
 
         console.log('🔍 어제 발인한 부고 검색:', yesterdayStr);
 
-        // funeral_date가 어제인 부고 + 아직 감사장 알림톡 안 보낸 것
+        // funeral_date가 어제인 부고 + 삭제되지 않은 부고 + 아직 감사장 알림톡 안 보낸 것 (조회수 높은 실사용 부고 우선)
         const { data: bugos, error } = await supabase
             .from('bugo')
-            .select('bugo_number, deceased_name, mourner_name, phone_password, thanks_sent, b2b_user_id')
+            .select('bugo_number, deceased_name, mourner_name, phone_password, thanks_sent, b2b_user_id, view_count')
             .eq('funeral_date', yesterdayStr)
-            .or('thanks_sent.is.null,thanks_sent.eq.false');
+            .is('deleted_at', null)
+            .or('thanks_sent.is.null,thanks_sent.eq.false')
+            .order('view_count', { ascending: false });
 
         if (error) {
             console.error('DB 조회 에러:', JSON.stringify(error, null, 2));
