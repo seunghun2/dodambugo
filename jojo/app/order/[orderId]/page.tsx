@@ -573,11 +573,11 @@ export default function OrderDetailPage() {
                 <div className="order-footer">
                     {giftOrder.bugo_number ? (
                         <Link
-                            href={`/view/${giftOrder.bugo_number}`}
+                            href={`/view/${giftOrder.bugo_number}/gift`}
                             className="btn-payment"
                             style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                            부고 페이지로 돌아가기
+                            답례품 추가 주문
                         </Link>
                     ) : (
                         <Link
