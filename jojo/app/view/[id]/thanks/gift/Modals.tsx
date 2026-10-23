@@ -174,7 +174,9 @@ export function ConfirmModal({
                 </button>
                 <h3 className="gs-confirm-title">주의사항</h3>
                 <p className="gs-confirm-desc">
-                    결제 1시간 후 발송되며, 발송 후에는 <strong>취소·환불이 불가</strong>합니다.
+                    결제 1시간 후 발송되며,
+                    <br />
+                    발송 후에는 <strong>취소·환불이 불가합니다.</strong>
                 </p>
                 <p className="gs-confirm-sub">1시간 이내에는 주문내역에서 취소할 수 있어요.</p>
                 <div className="gs-confirm-info">

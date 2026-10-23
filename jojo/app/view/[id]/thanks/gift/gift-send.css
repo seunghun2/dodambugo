@@ -69,7 +69,7 @@
 
 /* ---------- 본문 ---------- */
 .gs-main {
-    padding: 12px 16px 140px;
+    padding: 12px 16px calc(210px + env(safe-area-inset-bottom));
 }
 /* 섹션 사이는 여백만 두지 않고 구분선으로 나눈다 */
 /* 전역 section { padding: 40px 0 } 을 덮어쓴다 (이게 간격이 벙벙했던 원인) */
@@ -682,6 +682,7 @@
     padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
     flex-wrap: wrap;
     background: #fff;
+    border-top: 1px solid #e6e6e6;
 }
 .gs-bottom-notice {
     flex: 0 0 100%;
