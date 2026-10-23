@@ -2,6 +2,7 @@
 
 import { Fragment, useState } from 'react';
 import { CARD_OPTIONS, type CardId } from '@/lib/gift/thanks-messages';
+import { GIFT_VALID_DAYS } from '@/lib/gift/notices';
 import { won, type GiftProduct } from './types';
 
 
@@ -193,6 +194,10 @@ export function ConfirmModal({
                     <div className="gs-confirm-row">
                         <span>결제금액</span>
                         <b>{won(product.sale_price * count)}</b>
+                    </div>
+                    <div className="gs-confirm-row">
+                        <span>유효기간</span>
+                        <b>발송일로부터 {GIFT_VALID_DAYS}일</b>
                     </div>
                     {!isTest && (
                         <div className="gs-confirm-row">
