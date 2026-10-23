@@ -96,10 +96,10 @@ export async function GET(request: NextRequest) {
                 const validOrderIds = orderIds.filter(id => uuidPattern.test(id));
 
                 if (validOrderIds.length > 0) {
-                    // 1. 화환 주문들 조회 (bugo_id 포함)
+                    // 1. 화환 주문들 조회 (bugo_id, price 포함)
                     const { data: orders } = await supabase
                         .from('flower_orders')
-                        .select('id, order_number, product_name, sender_name, bugo_id')
+                        .select('id, order_number, product_name, sender_name, price, bugo_id')
                         .in('id', validOrderIds);
 
                     if (orders) {

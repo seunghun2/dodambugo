@@ -357,6 +357,52 @@ export default function CompanyDashboardPage() {
     const isSettled = totalCompleted > 0 && totalPending === 0;
     const latestPaymentDate = settleDetails[0]?.payment_date || condolenceDetails[0]?.payment_date || giftDetails[0]?.payment_date;
 
+    // ── 이음부고 방식: 정산서 본문용 집계 테이블 데이터 생성 (취소 제외) ──
+    const validFlowers = settleDetails.filter(s => s.status !== 'cancelled');
+    const wreathProductMap = new Map<string, { name: string; count: number; salesAmount: number; unitCommission: number; settleAmount: number }>();
+    validFlowers.forEach((s) => {
+        const name = s.order?.product_name || '근조화환';
+        const cur = wreathProductMap.get(name) || { name, count: 0, salesAmount: 0, unitCommission: s.amount, settleAmount: 0 };
+        cur.count += 1;
+        cur.salesAmount += Number(s.order?.price || 0);
+        cur.settleAmount += Number(s.amount || 0);
+        wreathProductMap.set(name, cur);
+    });
+    const wreathProductRows = Array.from(wreathProductMap.values());
+    const wreathTotalCount = wreathProductRows.reduce((sum, r) => sum + r.count, 0);
+    const wreathTotalSales = wreathProductRows.reduce((sum, r) => sum + r.salesAmount, 0);
+    const wreathTotalSettle = wreathProductRows.reduce((sum, r) => sum + r.settleAmount, 0);
+
+    const validCondolences = condolenceDetails.filter(c => c.status !== 'cancelled');
+    const condolenceAmountMap = new Map<number, { unitAmount: number; count: number; totalAmount: number; rate: number; settleAmount: number }>();
+    validCondolences.forEach((c) => {
+        const unit = Number(c.amount || 0);
+        const cur = condolenceAmountMap.get(unit) || { unitAmount: unit, count: 0, totalAmount: 0, rate: Number(c.company_rate || 0), settleAmount: 0 };
+        cur.count += 1;
+        cur.totalAmount += unit;
+        cur.settleAmount += Number(c.share_amount || 0);
+        condolenceAmountMap.set(unit, cur);
+    });
+    const condolenceAmountRows = Array.from(condolenceAmountMap.values()).sort((a, b) => a.unitAmount - b.unitAmount);
+    const condolenceTotalCount = condolenceAmountRows.reduce((sum, r) => sum + r.count, 0);
+    const condolenceTotalSales = condolenceAmountRows.reduce((sum, r) => sum + r.totalAmount, 0);
+    const condolenceTotalSettle = condolenceAmountRows.reduce((sum, r) => sum + r.settleAmount, 0);
+
+    const validGifts = giftDetails.filter(g => g.status !== 'cancelled');
+    const giftProductMap = new Map<string, { name: string; qty: number; totalAmount: number; rate: number; settleAmount: number }>();
+    validGifts.forEach((g) => {
+        const name = g.product_name || '답례품';
+        const cur = giftProductMap.get(name) || { name, qty: 0, totalAmount: 0, rate: Number(g.company_rate || 4), settleAmount: 0 };
+        cur.qty += Number(g.quantity || 1);
+        cur.totalAmount += Number(g.amount || 0);
+        cur.settleAmount += Number(g.share_amount || 0);
+        giftProductMap.set(name, cur);
+    });
+    const giftProductRows = Array.from(giftProductMap.values());
+    const giftTotalQty = giftProductRows.reduce((sum, r) => sum + r.qty, 0);
+    const giftTotalSales = giftProductRows.reduce((sum, r) => sum + r.totalAmount, 0);
+    const giftTotalSettle = giftProductRows.reduce((sum, r) => sum + r.settleAmount, 0);
+
     return (
         <div className={styles.appContainer}>
             {/* 좌측 사이드바 */}
@@ -580,9 +626,199 @@ export default function CompanyDashboardPage() {
                                             </tbody>
                                         </table>
 
-                                        {/* 1. 화환 세부 판매 거래 목록 */}
+                                        {/* 1. 화환 판매 정산 내역 (상품별 집계 - 이음부고 정산서 양식) */}
                                         <div style={{ marginTop: '24px' }}>
-                                            <span className={styles.partyLabel}>■ 화환 판매 정산 세부 내역 명세</span>
+                                            <span className={styles.partyLabel}>● 화환 판매 정산 내역 (상품별 집계)</span>
+                                            <div className={styles.detailTableWrapper}>
+                                                <table className={styles.detailTable}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{ textAlign: 'left', paddingLeft: '14px' }}>화환 상품명</th>
+                                                            <th style={{ textAlign: 'center', width: '90px' }}>판매수량</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>판매금액</th>
+                                                            <th style={{ textAlign: 'center', width: '110px' }}>건당 수수료</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>정산 금액</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {settleDetailLoading ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>정산 내역을 불러오는 중...</td></tr>
+                                                        ) : wreathProductRows.length === 0 ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '18px', color: '#94a3b8' }}>해당 월 화환 판매 내역이 없습니다. (0건 / 0원)</td></tr>
+                                                        ) : (
+                                                            <>
+                                                                {wreathProductRows.map((row, idx) => (
+                                                                    <tr key={idx}>
+                                                                        <td style={{ textAlign: 'left', paddingLeft: '14px', fontWeight: 500 }}>{row.name}</td>
+                                                                        <td style={{ textAlign: 'center' }}>{row.count}건</td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                            {row.salesAmount > 0 ? `${row.salesAmount.toLocaleString()}원` : '-'}
+                                                                        </td>
+                                                                        <td style={{ textAlign: 'center' }}>
+                                                                            {(row.count > 0 ? Math.round(row.settleAmount / row.count) : row.unitCommission).toLocaleString()}원
+                                                                        </td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px', fontWeight: 'bold' }}>
+                                                                            {row.settleAmount.toLocaleString()}원
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                                <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
+                                                                    <td style={{ textAlign: 'center' }}>합 계</td>
+                                                                    <td style={{ textAlign: 'center' }}>{wreathTotalCount}건</td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                        {wreathTotalSales > 0 ? `${wreathTotalSales.toLocaleString()}원` : '-'}
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'center' }}>-</td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px', color: '#0f172a' }}>
+                                                                        {wreathTotalSettle.toLocaleString()}원
+                                                                    </td>
+                                                                </tr>
+                                                            </>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* 2. 부의금 정산 내역 (부의금액별 집계 - 이음부고 정산서 양식) */}
+                                        <div style={{ marginTop: '24px' }}>
+                                            <span className={styles.partyLabel}>● 부의금 정산 내역 (부의금액별 집계)</span>
+                                            <div className={styles.detailTableWrapper}>
+                                                <table className={styles.detailTable}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{ textAlign: 'left', paddingLeft: '14px' }}>부의금액</th>
+                                                            <th style={{ textAlign: 'center', width: '90px' }}>결제건수</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>합계 부의금액</th>
+                                                            <th style={{ textAlign: 'center', width: '110px' }}>수수료율</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>정산 금액</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {settleDetailLoading ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>정산 내역을 불러오는 중...</td></tr>
+                                                        ) : condolenceAmountRows.length === 0 ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '18px', color: '#94a3b8' }}>해당 월 부의금 정산 내역이 없습니다. (0건 / 0원)</td></tr>
+                                                        ) : (
+                                                            <>
+                                                                {condolenceAmountRows.map((row, idx) => (
+                                                                    <tr key={idx}>
+                                                                        <td style={{ textAlign: 'left', paddingLeft: '14px', fontWeight: 500 }}>
+                                                                            {row.unitAmount.toLocaleString()}원
+                                                                        </td>
+                                                                        <td style={{ textAlign: 'center' }}>{row.count}건</td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                            {row.totalAmount.toLocaleString()}원
+                                                                        </td>
+                                                                        <td style={{ textAlign: 'center' }}>{row.rate}%</td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px', fontWeight: 'bold' }}>
+                                                                            {row.settleAmount.toLocaleString()}원
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                                <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
+                                                                    <td style={{ textAlign: 'center' }}>합 계</td>
+                                                                    <td style={{ textAlign: 'center' }}>{condolenceTotalCount}건</td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                        {condolenceTotalSales.toLocaleString()}원
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'center' }}>
+                                                                        {condolenceAmountRows[0]?.rate ?? 1.5}%
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px', color: '#0f172a' }}>
+                                                                        {condolenceTotalSettle.toLocaleString()}원
+                                                                    </td>
+                                                                </tr>
+                                                            </>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* 3. 답례품 판매 정산 내역 (상품별 집계 - 이음부고 정산서 양식) */}
+                                        <div style={{ marginTop: '24px' }}>
+                                            <span className={styles.partyLabel}>● 답례품 판매 정산 내역 (상품별 집계)</span>
+                                            <div className={styles.detailTableWrapper}>
+                                                <table className={styles.detailTable}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{ textAlign: 'left', paddingLeft: '14px' }}>답례품 상품명</th>
+                                                            <th style={{ textAlign: 'center', width: '90px' }}>구매수량</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>구매금액</th>
+                                                            <th style={{ textAlign: 'center', width: '110px' }}>수수료율</th>
+                                                            <th style={{ textAlign: 'right', paddingRight: '14px', width: '130px' }}>정산 금액</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {settleDetailLoading ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>정산 내역을 불러오는 중...</td></tr>
+                                                        ) : giftProductRows.length === 0 ? (
+                                                            <tr><td colSpan={5} style={{ textAlign: 'center', padding: '18px', color: '#94a3b8' }}>해당 월 답례품 판매 내역이 없습니다. (0건 / 0원)</td></tr>
+                                                        ) : (
+                                                            <>
+                                                                {giftProductRows.map((row, idx) => (
+                                                                    <tr key={idx}>
+                                                                        <td style={{ textAlign: 'left', paddingLeft: '14px', fontWeight: 500 }}>{row.name}</td>
+                                                                        <td style={{ textAlign: 'center' }}>{row.qty}개</td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                            {row.totalAmount.toLocaleString()}원
+                                                                        </td>
+                                                                        <td style={{ textAlign: 'center' }}>{row.rate}%</td>
+                                                                        <td style={{ textAlign: 'right', paddingRight: '14px', fontWeight: 'bold' }}>
+                                                                            {row.settleAmount.toLocaleString()}원
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                                <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
+                                                                    <td style={{ textAlign: 'center' }}>합 계</td>
+                                                                    <td style={{ textAlign: 'center' }}>{giftTotalQty}개</td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px' }}>
+                                                                        {giftTotalSales.toLocaleString()}원
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'center' }}>
+                                                                        {giftProductRows[0]?.rate ?? 4}%
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'right', paddingRight: '14px', color: '#0f172a' }}>
+                                                                        {giftTotalSettle.toLocaleString()}원
+                                                                    </td>
+                                                                </tr>
+                                                            </>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className={styles.emptyDetail}>
+                                        조회할 정산월을 선택해 주세요.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 📋 건별 상세 거래 내역 명세 (정산서 본문과 분리된 별도 섹션, 인쇄 시 제외) */}
+                            {settleSelectedMonth && (
+                                <div className={`${styles.sheetCard} no-print`} style={{ marginTop: '28px' }}>
+                                    <div className={styles.invoiceSheet}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '12px', marginBottom: '20px' }}>
+                                            <div>
+                                                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                                                    건별 상세 거래 내역 ({settleSelectedMonth.split('-')[0]}년 {parseInt(settleSelectedMonth.split('-')[1], 10)}월)
+                                                </h2>
+                                                <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+                                                    정산서 집계표의 근거가 되는 건별 상세 내역입니다. (인쇄 시에는 위 정산서 본문만 출력되며, 상세 내역은 엑셀 내보내기로 보관하실 수 있습니다.)
+                                                </p>
+                                            </div>
+                                            <button onClick={handleDownloadCSV} className={styles.downloadBtn}>
+                                                <IconDownload size={16} />
+                                                <span>상세내역 엑셀 내보내기</span>
+                                            </button>
+                                        </div>
+
+                                        {/* 1) 화환 건별 상세 내역 */}
+                                        <div>
+                                            <span className={styles.partyLabel}>■ 화환 판매 건별 상세 내역 ({settleDetails.length}건)</span>
                                             <div className={styles.detailTableWrapper}>
                                                 <table className={styles.detailTable}>
                                                     <thead>
@@ -621,9 +857,9 @@ export default function CompanyDashboardPage() {
                                             </div>
                                         </div>
 
-                                        {/* 2. 부의금 세부 정산 내역 목록 */}
+                                        {/* 2) 부의금 건별 상세 내역 */}
                                         <div style={{ marginTop: '28px' }}>
-                                            <span className={styles.partyLabel}>■ 부의금 정산 세부 내역 명세</span>
+                                            <span className={styles.partyLabel}>■ 부의금 건별 상세 내역 ({condolenceDetails.length}건)</span>
                                             <div className={styles.detailTableWrapper}>
                                                 <table className={styles.detailTable}>
                                                     <thead>
@@ -664,9 +900,9 @@ export default function CompanyDashboardPage() {
                                             </div>
                                         </div>
 
-                                        {/* 3. 답례품 세부 정산 내역 목록 */}
+                                        {/* 3) 답례품 건별 상세 내역 */}
                                         <div style={{ marginTop: '28px' }}>
-                                            <span className={styles.partyLabel}>■ 답례품 정산 세부 내역 명세</span>
+                                            <span className={styles.partyLabel}>■ 답례품 건별 상세 내역 ({giftDetails.length}건)</span>
                                             <div className={styles.detailTableWrapper}>
                                                 <table className={styles.detailTable}>
                                                     <thead>
@@ -709,12 +945,8 @@ export default function CompanyDashboardPage() {
                                             </div>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className={styles.emptyDetail}>
-                                        조회할 정산월을 선택해 주세요.
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
