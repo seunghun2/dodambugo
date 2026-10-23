@@ -13,7 +13,7 @@ import {
     type CardId,
     type ReligionType,
 } from '@/lib/gift/thanks-messages';
-import { AGREE_TEXT, GIFT_VALID_DAYS } from '@/lib/gift/notices';
+import { GIFT_NOTICES, GIFT_VALID_DAYS, ORDER_INFO } from '@/lib/gift/notices';
 import { ProductThumb } from './ProductThumb';
 import RecipientPanel from './RecipientPanel';
 import { AuthModal, ConfirmModal, DoneModal, PreviewModal } from './Modals';
@@ -61,7 +61,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     const product = initialProduct;
     const [items, setItems] = useState<RecipientItem[]>([]);
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
-    const [agree, setAgree] = useState(false);
+    const [noticeOpen, setNoticeOpen] = useState(false);
     const [draftRestored, setDraftRestored] = useState(false);
 
     // ----- 초안 복원 (카톡→크롬 이동 시 URL ?draft= 파라미터 또는 상품 변경 시 localStorage) -----
@@ -144,7 +144,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     }, []);
 
     // 오버레이가 열려 있으면 뒤 화면 스크롤 잠금
-    const anyOverlay = previewOpen || confirmOpen || helpOpen || authOpen || !!done;
+    const anyOverlay = noticeOpen || previewOpen || confirmOpen || helpOpen || authOpen || !!done;
     useEffect(() => {
         document.body.style.overflow = anyOverlay ? 'hidden' : '';
         return () => {
@@ -175,11 +175,10 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     // ----- 결제(주문) -----
     const total = product ? product.sale_price * items.length : 0;
     const hasRefs = items.some((i) => i.ref);
-    const canPay = items.length > 0 && agree;
+    const canPay = items.length > 0;
 
     const startPay = async () => {
         if (items.length === 0) return notify('받는 사람을 선택해주세요.');
-        if (!agree) return notify('상품 안내를 확인하고 동의해주세요.');
         if (!(await ensureAuth())) return;
         setConfirmOpen(true);
     };
@@ -427,14 +426,16 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     </div>
                 </section>
 
-                <label className="gs-agree">
-                    <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-                    <span>{AGREE_TEXT}</span>
-                </label>
             </main>
 
             {/* 하단 바: 기존 감사장 화면(문구 수정 | 감사장 전달하기)과 같은 디자인, 미리보기 | 결제하기 반반 */}
             <div className="gs-bottom">
+                <button type="button" className="gs-bottom-notice" onClick={() => setNoticeOpen(true)}>
+                    상품 안내 및 주문 내용을 확인하였으며, 구매에 동의합니다.
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </button>
                 <button className="gs-bottom-btn" onClick={() => setPreviewOpen(true)}>
                     미리보기
                 </button>
@@ -444,6 +445,31 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
             </div>
 
             {/* 오버레이 */}
+            {noticeOpen && (
+                <div className="gs-overlay gs-center-wrap" onClick={() => setNoticeOpen(false)}>
+                    <div className="gs-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="상품 안내">
+                        <h3 className="gs-h3">상품 안내</h3>
+                        <dl className="gs-summary">
+                            {ORDER_INFO.map((o) => (
+                                <div key={o.label}>
+                                    <dt>{o.label}</dt>
+                                    <dd>{o.text}</dd>
+                                </div>
+                            ))}
+                        </dl>
+                        <ul className="gs-notice-list">
+                            {GIFT_NOTICES.map((n) => (
+                                <li key={n}>{n}</li>
+                            ))}
+                        </ul>
+                        <div className="gs-dialog-btns">
+                            <button className="gs-btn-dark" onClick={() => setNoticeOpen(false)}>
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {previewOpen && <PreviewModal cardId={cardId} message={message} mournerName={mournerName} onClose={() => setPreviewOpen(false)} />}
             {authOpen && <AuthModal bugoId={bugoId} defaultName={mournerName} onSuccess={() => closeAuth(true)} onClose={() => closeAuth(false)} />}
             {confirmOpen && product && (

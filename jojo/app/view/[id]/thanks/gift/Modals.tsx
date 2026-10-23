@@ -174,12 +174,9 @@ export function ConfirmModal({
                 </button>
                 <h3 className="gs-confirm-title">주의사항</h3>
                 <p className="gs-confirm-desc">
-                    결제 1시간 후 받는 분께 감사장과 쿠폰이 발송됩니다.
-                    발송 전 1시간 이내에는 주문내역에서 취소할 수 있고,
-                    <br />
-                    <strong>발송 후에는 취소·환불이 불가능합니다.</strong>
+                    결제 1시간 후 발송되며, 발송 후에는 <strong>취소·환불이 불가</strong>합니다.
                 </p>
-                <p className="gs-confirm-sub">결제금액과 받는 분 수가 맞는지 한 번 더 확인해주세요.</p>
+                <p className="gs-confirm-sub">1시간 이내에는 주문내역에서 취소할 수 있어요.</p>
                 <div className="gs-confirm-info">
                     <div className="gs-confirm-row">
                         <span>상품</span>
