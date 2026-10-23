@@ -260,13 +260,13 @@ export default function OrderDetailPage() {
             });
             const json = await res.json();
             if (!res.ok || !json.success) {
-                alert((json.error || '주문을 취소할 수 없습니다.') + '\n\n취소가 되지 않으면 다우기술 고객센터 1599-6567로 문의해 주세요.');
+                alert((json.error || '주문을 취소할 수 없습니다.') + '\n\n취소가 어려우시면 다우기술 고객센터(1599-6567)로 문의해 주세요.');
                 await fetchGiftOrder().catch(() => {});
             } else {
                 await fetchGiftOrder();
             }
         } catch (e: any) {
-            alert((e?.message || '취소 처리 중 오류가 발생했습니다.') + '\n\n취소가 되지 않으면 다우기술 고객센터 1599-6567로 문의해 주세요.');
+            alert((e?.message || '취소 처리 중 오류가 발생했습니다.') + '\n\n취소가 어려우시면 다우기술 고객센터(1599-6567)로 문의해 주세요.');
         } finally {
             setCancellingGift(false);
         }
@@ -544,13 +544,6 @@ export default function OrderDetailPage() {
                                     </button>
                                 </div>
                             )}
-                            <p style={{ fontSize: 12, color: '#888', lineHeight: 1.6, marginTop: 12 }}>
-                                취소가 되지 않거나 문의가 필요하시면 다우기술 고객센터{' '}
-                                <a href="tel:15996567" style={{ color: '#1A1A1A', fontWeight: 600, textDecoration: 'underline' }}>
-                                    1599-6567
-                                </a>
-                                로 연락해 주세요.
-                            </p>
                         </section>
                     )}
 
@@ -571,6 +564,13 @@ export default function OrderDetailPage() {
                                     <p>• 결제 완료 후 1시간 이내에는 본 주문내역 페이지에서 직접 주문을 취소하실 수 있습니다.</p>
                                     <p>• 결제 후 1시간이 경과하면 받으시는 분께 감사장 문자(LMS)와 모바일 쿠폰(MMS)이 발송되며 이후에는 취소가 불가합니다.</p>
                                     <p>• 모바일 쿠폰의 유효기간은 발송일로부터 30일이며, 기간 만료 후 연장 및 환불은 불가합니다.</p>
+                                    <p>
+                                        • 취소가 어려우시거나 궁금한 점이 있으시면 다우기술 고객센터{' '}
+                                        <a href="tel:15996567" onClick={(e) => e.stopPropagation()} style={{ color: '#1A1A1A', fontWeight: 600, textDecoration: 'underline' }}>
+                                            1599-6567
+                                        </a>
+                                        로 문의해 주세요.
+                                    </p>
                                 </div>
                             )}
                         </div>
