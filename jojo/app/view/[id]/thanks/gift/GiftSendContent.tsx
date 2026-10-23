@@ -60,6 +60,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     // ----- 상품 / 받는 사람 -----
     const product = initialProduct;
     const [items, setItems] = useState<RecipientItem[]>([]);
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [agree, setAgree] = useState(false);
     const [draftRestored, setDraftRestored] = useState(false);
 
@@ -258,7 +259,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 const finalTotalStr = String(data.total || total);
 
                 window.innopay.goPay({
-                    payMethod: 'CARD',
+                    payMethod: paymentMethod === 'simple' ? 'EPAY' : 'CARD',
                     mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
                     moid: data.orderNumber,
                     goodsName: safeGoodsName,
@@ -406,6 +407,26 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     </p>
                 )}
 
+                <section className="gs-section">
+                    <h3 className="gs-h3">결제 방식</h3>
+                    <div className="gs-pay-methods">
+                        <button
+                            type="button"
+                            className={`gs-pay-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('card')}
+                        >
+                            카드
+                        </button>
+                        <button
+                            type="button"
+                            className={`gs-pay-method-btn ${paymentMethod === 'simple' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('simple')}
+                        >
+                            간편결제
+                        </button>
+                    </div>
+                </section>
+
                 <label className="gs-agree">
                     <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
                     <span>{AGREE_TEXT}</span>
@@ -429,6 +450,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 <ConfirmModal
                     product={product}
                     count={items.length}
+                    paymentMethod={paymentMethod}
                     isTest={!live}
                     hasRefs={hasRefs}
                     busy={busy}

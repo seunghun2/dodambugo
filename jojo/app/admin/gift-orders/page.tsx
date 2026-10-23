@@ -21,6 +21,7 @@ interface GiftOrder {
     bugo_id: string | null;
     bugo_number: string;
     buyer_name: string | null;
+    buyer_phone?: string | null;
     product_id: string;
     product_name: string;
     unit_price: number;
@@ -30,6 +31,9 @@ interface GiftOrder {
     message: string;
     status: string;
     is_test: boolean;
+    payment_method?: string | null;
+    cancelled_at?: string | null;
+    cancel_reason?: string | null;
     created_at: string;
     updated_at: string | null;
     recipients: GiftOrderRecipient[];
@@ -246,13 +250,14 @@ export default function AdminGiftOrdersPage() {
         }
     };
 
+    // 기본 목록에서는 결제창만 띄우고 이탈한 미결제(pending) 건을 제외해 실결제/취소/발송 건만 표시
     const filteredOrders = statusFilter
         ? orders.filter((o) =>
               statusFilter === 'waiting'
                   ? o.status === 'paid' || o.status === 'test_paid'
                   : o.status === statusFilter,
           )
-        : orders;
+        : orders.filter((o) => o.status !== 'pending');
 
     return (
         <div className="admin-pc">
@@ -439,16 +444,34 @@ export default function AdminGiftOrdersPage() {
                                             <label>발신 상주</label>
                                             <span>
                                                 {selectedOrder.buyer_name || '상주'}
-                                                {(selectedOrder as any).buyer_phone
-                                                    ? ` (${formatPhoneDisplay((selectedOrder as any).buyer_phone)})`
+                                                {selectedOrder.buyer_phone
+                                                    ? ` (${formatPhoneDisplay(selectedOrder.buyer_phone)})`
                                                     : ''}
                                             </span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <label>결제수단</label>
+                                            <span>{selectedOrder.payment_method || (selectedOrder.is_test ? '테스트결제' : '-')}</span>
                                         </div>
                                         <div className="detail-row">
                                             <label>주문일시</label>
                                             <span>{formatDate(selectedOrder.created_at)}</span>
                                         </div>
-                                        {selectedOrder.updated_at && (
+                                        {selectedOrder.cancelled_at && (
+                                            <div className="detail-row">
+                                                <label>취소일시</label>
+                                                <span style={{ color: '#dc2626', fontWeight: 600 }}>
+                                                    {formatDate(selectedOrder.cancelled_at)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {selectedOrder.cancel_reason && (
+                                            <div className="detail-row">
+                                                <label>취소사유</label>
+                                                <span style={{ color: '#dc2626' }}>{selectedOrder.cancel_reason}</span>
+                                            </div>
+                                        )}
+                                        {selectedOrder.updated_at && !selectedOrder.cancelled_at && (
                                             <div className="detail-row">
                                                 <label>최근처리</label>
                                                 <span>{formatDate(selectedOrder.updated_at)}</span>

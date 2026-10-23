@@ -998,6 +998,35 @@
     color: #333;
 }
 
+/* 결제 방식 선택 (부의금/화환과 동일 디자인) */
+.gs-pay-methods {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+.gs-pay-method-btn {
+    flex: 1;
+    padding: 15px 8px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+.gs-pay-method-btn.active {
+    border-color: #ffd43b;
+    background: #fff9e6;
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
 /* 결제 전 상품 안내 동의 */
 .gs-agree {
     display: flex;

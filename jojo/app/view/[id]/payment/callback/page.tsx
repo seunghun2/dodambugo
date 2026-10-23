@@ -280,7 +280,14 @@ export default function PaymentCallbackPage() {
                     return;
                 }
 
-                // 화환 결제인 경우 (기존 로직)
+                // 답례품 결제인 경우 임시저장 초안 정리
+                if (paymentType === 'gift' || (orderNumber && orderNumber.startsWith('GF'))) {
+                    try {
+                        window.localStorage.removeItem(`maeum_gift_draft_${finalBugoId2}`);
+                    } catch { /* noop */ }
+                }
+
+                // 화환/답례품 결제인 경우 주문 상세로 이동
                 setTimeout(() => {
                     console.log('🔍 [REDIRECT] pathPrefix:', pathPrefix, 'orderNumber:', orderNumber);
                     const finalUrl = orderNumber 

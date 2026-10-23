@@ -148,6 +148,7 @@ export function PreviewModal({
 export function ConfirmModal({
     product,
     count,
+    paymentMethod = 'card',
     isTest,
     hasRefs,
     busy,
@@ -156,6 +157,7 @@ export function ConfirmModal({
 }: {
     product: GiftProduct;
     count: number;
+    paymentMethod?: 'card' | 'simple';
     isTest: boolean;
     hasRefs: boolean;
     busy: boolean;
@@ -172,6 +174,11 @@ export function ConfirmModal({
                 <p className="gs-confirm-line">
                     {count}명 × {won(product.sale_price)} = <strong>{won(product.sale_price * count)}</strong>
                 </p>
+                {!isTest && (
+                    <p className="gs-confirm-line" style={{ fontSize: '13px', color: '#555' }}>
+                        결제 방식: <strong>{paymentMethod === 'simple' ? '간편결제' : '카드결제'}</strong>
+                    </p>
+                )}
                 <p className="gs-hint">결제 완료 1시간 후 감사장과 모바일 쿠폰이 함께 발송됩니다. (1시간 이내 취소 가능)</p>
                 {isTest && <p className="gs-test-note">테스트 모드입니다. 실제 결제와 발송은 이루어지지 않습니다.</p>}
                 <div className="gs-dialog-btns">
