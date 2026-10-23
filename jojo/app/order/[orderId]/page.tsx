@@ -260,13 +260,13 @@ export default function OrderDetailPage() {
             });
             const json = await res.json();
             if (!res.ok || !json.success) {
-                alert(json.error || '주문을 취소할 수 없습니다.');
+                alert((json.error || '주문을 취소할 수 없습니다.') + '\n\n취소가 되지 않으면 다우기술 고객센터 1599-6567로 문의해 주세요.');
                 await fetchGiftOrder().catch(() => {});
             } else {
                 await fetchGiftOrder();
             }
         } catch (e: any) {
-            alert(e?.message || '취소 처리 중 오류가 발생했습니다.');
+            alert((e?.message || '취소 처리 중 오류가 발생했습니다.') + '\n\n취소가 되지 않으면 다우기술 고객센터 1599-6567로 문의해 주세요.');
         } finally {
             setCancellingGift(false);
         }
@@ -544,6 +544,13 @@ export default function OrderDetailPage() {
                                     </button>
                                 </div>
                             )}
+                            <p style={{ fontSize: 12, color: '#888', lineHeight: 1.6, marginTop: 12 }}>
+                                취소가 되지 않거나 문의가 필요하시면 다우기술 고객센터{' '}
+                                <a href="tel:15996567" style={{ color: '#1A1A1A', fontWeight: 600, textDecoration: 'underline' }}>
+                                    1599-6567
+                                </a>
+                                로 연락해 주세요.
+                            </p>
                         </section>
                     )}
 
