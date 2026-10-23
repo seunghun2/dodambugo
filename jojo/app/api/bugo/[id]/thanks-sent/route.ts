@@ -15,10 +15,14 @@ export async function POST(
     try {
         const { id } = await params;
         const supabase = getSupabase();
-        const { error } = await supabase
+        const isUUID = id.includes('-') && id.length > 10;
+        const query = supabase
             .from('bugo')
-            .update({ thanks_sent: true })
-            .eq('id', id);
+            .update({ thanks_shared_at: new Date().toISOString() });
+
+        const { error } = isUUID
+            ? await query.eq('id', id)
+            : await query.eq('bugo_number', id);
 
         if (error) {
             console.error('Error updating thanks_sent:', error);
