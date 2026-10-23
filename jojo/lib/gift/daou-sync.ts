@@ -115,6 +115,8 @@ export async function syncDaouCatalogToSupabase(): Promise<{
 
     const byNormName = new Map<string, DaouGoodsItem>();
     for (const item of parsed.items) {
+        // 60일(59일) 유효기간 상품 및 테스트 상품은 취급하지 않으므로 동기화에서 원천 제외 (30일 상품만 연동)
+        if (Number(item.validTerm) > 30) continue;
         byNormName.set(normalizeGoodsName(item.nmGoods), item);
     }
 
