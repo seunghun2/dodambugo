@@ -6,6 +6,7 @@
 import { getSupabase } from './auth';
 import { getIssuer } from './issuer';
 import { sendAlimtalk, sendLMS } from '@/lib/solapi';
+import { sendGiftCancelNotification, sendGiftDispatchNotification } from '@/lib/slack';
 
 export const GIFT_GRACE_MINUTES = 60;
 export const GIFT_GRACE_MS = GIFT_GRACE_MINUTES * 60 * 1000;
@@ -332,6 +333,19 @@ export async function dispatchGiftOrder(
         })
         .eq('id', order.id);
 
+    if (!isTestOrder) {
+        await sendGiftDispatchNotification({
+            order_number: order.order_number,
+            bugo_number: order.bugo_number,
+            buyer_name: order.buyer_name,
+            product_name: order.product_name,
+            total_recipients: list.length,
+            sent_count: sentCount,
+            failed_count: failedCount,
+            isB2B: isB2BBugo,
+        }).catch(() => {});
+    }
+
     return {
         ok: true,
         totalRecipients: list.length,
@@ -498,7 +512,21 @@ export async function cancelGiftOrder(
         })
         .eq('id', orderId);
 
-    // 4) 실결제 취소 시 상주에게 결제 취소 완료 알림 발송 (GIFT_CANCEL_TEMPLATE_ID 우선, 미설정/실패 시 LMS 폴백)
+    // 4) 실결제 취소 시 슬랙 알림 + 상주에게 결제 취소 완료 알림 발송
+    if (!order.is_test) {
+        await sendGiftCancelNotification({
+            order_number: order.order_number,
+            bugo_number: order.bugo_number,
+            buyer_name: order.buyer_name,
+            buyer_phone: order.buyer_phone,
+            product_name: order.product_name,
+            quantity: order.quantity,
+            total_amount: order.total_amount,
+            payment_method: order.payment_method,
+            reason,
+        }).catch(() => {});
+    }
+
     if (!order.is_test && order.buyer_phone) {
         const cleanPhone = String(order.buyer_phone).replace(/\D/g, '');
         if (cleanPhone.startsWith('010')) {

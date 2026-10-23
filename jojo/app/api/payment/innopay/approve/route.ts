@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { insertInAppAlarm } from '@/lib/partner-notification';
 import { sendAlimtalk } from '@/lib/solapi';
-import { sendFlowerOrderNotification, sendCondolenceNotification } from '@/lib/slack';
+import { sendFlowerOrderNotification, sendCondolenceNotification, sendGiftOrderNotification } from '@/lib/slack';
 import { normalizeCompanyData } from '@/lib/b2b-company';
 
 // Supabase 클라이언트
@@ -312,10 +312,24 @@ export async function POST(request: NextRequest) {
                 .select('*')
                 .single();
 
-            // 결제 완료 안내(주문내역 + 10분 내 취소 링크 포함) 발송
+            // 결제 완료 안내(주문내역 + 1시간 내 취소 링크 포함) 및 슬랙(#01_04_답례품판매) 알림 발송
             try {
                 const { sendGiftOrderCompleteNotify } = await import('@/lib/gift/dispatcher');
-                await sendGiftOrderCompleteNotify(updatedGift || existingGift);
+                const finalGift = updatedGift || existingGift;
+                await Promise.allSettled([
+                    sendGiftOrderCompleteNotify(finalGift),
+                    sendGiftOrderNotification({
+                        order_number: finalGift.order_number,
+                        bugo_number: finalGift.bugo_number,
+                        buyer_name: finalGift.buyer_name,
+                        buyer_phone: finalGift.buyer_phone,
+                        product_name: finalGift.product_name,
+                        unit_price: finalGift.unit_price,
+                        quantity: finalGift.quantity,
+                        total_amount: finalGift.total_amount,
+                        payment_method: finalGift.payment_method,
+                    }),
+                ]);
             } catch (notifyErr) {
                 console.error('[gift/approve] 결제완료 알림 발송 실패:', notifyErr);
             }
