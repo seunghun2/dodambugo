@@ -465,6 +465,100 @@ export async function sendB2BWithdrawalRejectNotification(info: {
 }
 
 /**
+ * 답례품 결제·발송·취소 알림 전송 (#01_04_답례품판매)
+ * 화환(#01_02) / 조의금(#01_03)과 동일한 톤앤매너
+ */
+export async function sendGiftOrderNotification(order: {
+    order_number: string;
+    bugo_number: string;
+    buyer_name?: string | null;
+    buyer_phone?: string | null;
+    product_name: string;
+    unit_price: number;
+    quantity: number;
+    total_amount: number;
+    payment_method?: string | null;
+    view_count?: number;
+    isB2B?: boolean;
+}): Promise<boolean> {
+    const webhookUrl = order.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+    const brand = order.isB2B ? '부고온' : '마음부고';
+    const domain = order.isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
+    const unitFormatted = new Intl.NumberFormat('ko-KR').format(order.unit_price || 0);
+    const totalFormatted = new Intl.NumberFormat('ko-KR').format(order.total_amount || 0);
+
+    const text = `[${brand}] 답례품 결제가 완료되었습니다. (부고번호: ${order.bugo_number} / 주문번호: ${order.order_number})
+  - 주문상주: ${order.buyer_name || '상주'}${order.buyer_phone ? `(${order.buyer_phone})` : ''}
+  - 상품명: ${order.product_name}
+  - 수량: ${order.quantity}명 (단가 ${unitFormatted}원)
+  - 총결제금액: ${totalFormatted}원
+  - 결제수단: ${order.payment_method || '카드결제'}
+  - 발송예정: 결제 1시간 후 자동 발송
+  - 주문내역: https://${domain}/order/${order.order_number}
+  - 부고장: https://${domain}/view/${order.bugo_number}
+  - ${(order.view_count ?? 0).toLocaleString()}명 방문`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+export async function sendGiftDispatchNotification(info: {
+    order_number: string;
+    bugo_number: string;
+    buyer_name?: string | null;
+    product_name: string;
+    total_recipients: number;
+    sent_count: number;
+    failed_count: number;
+    isB2B?: boolean;
+}): Promise<boolean> {
+    const webhookUrl = info.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+    const brand = info.isB2B ? '부고온' : '마음부고';
+    const statusHeader =
+        info.failed_count === 0
+            ? `[${brand}] 답례품 모바일 쿠폰 발송이 완료되었습니다.`
+            : `⚠️ [${brand}] 답례품 발송 일부 실패 (${info.failed_count}건 확인 필요)`;
+
+    const text = `${statusHeader} (부고번호: ${info.bugo_number} / 주문번호: ${info.order_number})
+  - 주문상주: ${info.buyer_name || '상주'}
+  - 상품명: ${info.product_name}
+  - 발송결과: 총 ${info.total_recipients}명 중 성공 ${info.sent_count}명 / 실패 ${info.failed_count}명
+  - 어드민: https://maeumbugo.co.kr/admin/gift-orders`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+export async function sendGiftCancelNotification(info: {
+    order_number: string;
+    bugo_number: string;
+    buyer_name?: string | null;
+    buyer_phone?: string | null;
+    product_name: string;
+    quantity: number;
+    total_amount: number;
+    payment_method?: string | null;
+    reason?: string;
+    isB2B?: boolean;
+}): Promise<boolean> {
+    const webhookUrl = info.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+    const brand = info.isB2B ? '부고온' : '마음부고';
+    const totalFormatted = new Intl.NumberFormat('ko-KR').format(info.total_amount || 0);
+
+    const text = `[${brand}] 답례품 주문이 취소되었습니다. (부고번호: ${info.bugo_number} / 주문번호: ${info.order_number})
+  - 주문상주: ${info.buyer_name || '상주'}${info.buyer_phone ? `(${info.buyer_phone})` : ''}
+  - 상품명: ${info.product_name} (${info.quantity}명)
+  - 환불금액: ${totalFormatted}원 (${info.payment_method || '카드결제'})
+  - 취소사유: ${info.reason || '1시간 이내 취소'}`;
+
+    return sendToWebhook(webhookUrl!, { text });
+}
+
+/**
  * B2B 신규 파트너 회원가입 알림 전송
  */
 export async function sendB2BSignupNotification(info: {

@@ -6,6 +6,7 @@
 import { getSupabase } from './auth';
 import { getIssuer } from './issuer';
 import { sendAlimtalk, sendLMS } from '@/lib/solapi';
+import { sendGiftCancelNotification, sendGiftDispatchNotification } from '@/lib/slack';
 
 export const GIFT_GRACE_MINUTES = 60;
 export const GIFT_GRACE_MS = GIFT_GRACE_MINUTES * 60 * 1000;
@@ -80,19 +81,40 @@ export async function sendGiftOrderCompleteNotify(order: {
     const cleanPhone = String(order.buyer_phone || '').replace(/\D/g, '');
     if (!cleanPhone.startsWith('010')) return;
 
-    const orderUrl = `https://maeumbugo.co.kr/order/${order.order_number}`;
+    let isB2B = false;
+    try {
+        const sb = getSupabase();
+        const { data: b } = await sb
+            .from('bugo')
+            .select('b2b_user_id')
+            .eq('bugo_number', String(order.bugo_number))
+            .maybeSingle();
+        isB2B = Boolean(b?.b2b_user_id);
+    } catch {
+        // ignore
+    }
+
+    const brand = isB2B ? '부고온' : '마음부고';
+    const domain = isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
+    const orderUrl = `https://${domain}/order/${order.order_number}`;
     const templateId = process.env.GIFT_PAYMENT_TEMPLATE_ID || 'KA01TP261020132835419ZOxQt2Dto3W';
 
     if (templateId) {
         try {
-            const res = await sendAlimtalk(cleanPhone, templateId, {
-                주문자명: order.buyer_name || '상주',
-                상품명: order.product_name,
-                수량: `${order.quantity}명`,
-                결제금액: (order.total_amount || 0).toLocaleString(),
-                주문번호: order.order_number,
-                부고번호: order.bugo_number,
-            });
+            const res = await sendAlimtalk(
+                cleanPhone,
+                templateId,
+                {
+                    주문자명: order.buyer_name || '상주',
+                    상품명: order.product_name,
+                    수량: `${order.quantity}명`,
+                    결제금액: (order.total_amount || 0).toLocaleString(),
+                    주문번호: order.order_number,
+                    부고번호: order.bugo_number,
+                },
+                undefined,
+                isB2B
+            );
             if (!res?.statusCode || res.statusCode === '2000') return;
         } catch (e) {
             console.error('[gift/notify] 결제완료 알림톡 실패, LMS 대체 발송:', e);
@@ -100,7 +122,7 @@ export async function sendGiftOrderCompleteNotify(order: {
     }
 
     const lmsText = [
-        `[마음부고] 답례품 결제가 완료되었습니다.`,
+        `[${brand}] 답례품 결제가 완료되었습니다.`,
         ``,
         `◼ 주문 정보`,
         `- 주문번호: ${order.order_number}`,
@@ -116,7 +138,7 @@ export async function sendGiftOrderCompleteNotify(order: {
     ].join('\n');
 
     try {
-        await sendLMS(cleanPhone, '[마음부고] 답례품 결제 완료 안내', lmsText);
+        await sendLMS(cleanPhone, `[${brand}] 답례품 결제 완료 안내`, lmsText);
     } catch (e) {
         console.error('[gift/notify] 결제완료 LMS 발송 오류:', e);
     }
@@ -230,7 +252,23 @@ export async function dispatchGiftOrder(
     const isTestOrder = Boolean(order.is_test);
     const hasThanksCard = Boolean(order.card_id && order.card_id !== 'none');
     const useSeparateThanksLms = process.env.GIFT_SEPARATE_THANKS_LMS === 'true';
-    const thanksUrl = `https://maeumbugo.co.kr/view/${order.bugo_number}/thanks/card`;
+
+    // 부고의 B2B(부고온플러스) 여부 확인 → 쿠폰 MMS 내 감사장 링크 도메인 분기
+    let isB2BBugo = false;
+    try {
+        if (order.bugo_id || order.bugo_number) {
+            const bq = sb.from('bugo').select('b2b_user_id');
+            const { data: bugoRow } = order.bugo_id
+                ? await bq.eq('id', order.bugo_id).maybeSingle()
+                : await bq.eq('bugo_number', String(order.bugo_number)).limit(1).maybeSingle();
+            isB2BBugo = Boolean(bugoRow?.b2b_user_id);
+        }
+    } catch {
+        /* ignore */
+    }
+
+    const siteOrigin = isB2BBugo ? 'https://bugoon.maeumbugo.co.kr' : 'https://maeumbugo.co.kr';
+    const thanksUrl = `${siteOrigin}/view/${order.bugo_number}/thanks/card`;
     const fullThanksText = hasThanksCard
         ? `${order.message || ''}\n\n▼ 감사장 보기\n${thanksUrl}`.trim()
         : String(order.message || '').trim();
@@ -260,11 +298,12 @@ export async function dispatchGiftOrder(
             lmsSentAt = new Date().toISOString();
         }
 
-        // 2) 모바일 쿠폰 발행 (인사말 + 감사장 단축링크 통합 MMS)
+        // 2) 모바일 쿠폰 발행 (인사말 + 감사장 링크 통합 MMS)
         const res = await issuer.issue({
             orderNumber: order.order_number,
             seq: idx + 1,
             bugoNumber: hasThanksCard ? String(order.bugo_number) : undefined,
+            isB2B: isB2BBugo,
             senderName: order.buyer_name || '상주',
             recipientName: r.name || '',
             recipientPhone: cleanRecipientPhone,
@@ -314,6 +353,19 @@ export async function dispatchGiftOrder(
             updated_at: nowIso,
         })
         .eq('id', order.id);
+
+    if (!isTestOrder) {
+        await sendGiftDispatchNotification({
+            order_number: order.order_number,
+            bugo_number: order.bugo_number,
+            buyer_name: order.buyer_name,
+            product_name: order.product_name,
+            total_recipients: list.length,
+            sent_count: sentCount,
+            failed_count: failedCount,
+            isB2B: isB2BBugo,
+        }).catch(() => {});
+    }
 
     return {
         ok: true,
@@ -410,44 +462,21 @@ export async function cancelGiftOrder(
     const list = recipients || [];
     const sentOnes = list.filter((r) => r.send_status === 'sent' && r.coupon_ref);
 
-    if (options?.enforceGraceWindow && sentOnes.length > 0) {
+    // 정책상 이미 발송 완료(sent)된 모바일 쿠폰은 취소·폐기·환불 불가 (구매자·어드민 공통)
+    if (
+        order.status === 'sent' ||
+        order.status === 'partial' ||
+        order.status === 'partially_sent' ||
+        sentOnes.length > 0
+    ) {
         return {
             ok: false,
-            error: '이미 모바일 쿠폰이 발송되어 온라인 취소가 불가합니다.',
+            error: '이미 모바일 쿠폰이 발송 완료되어 취소·환불이 불가합니다.',
             cancelledCoupons: 0,
         };
     }
 
-    // 1) 이미 발송된 쿠폰이 있는 경우(어드민 취소) 다우 쿠폰 폐기 먼저 수행
-    let cancelledCoupons = 0;
-    let failedCouponCancel = 0;
-    if (sentOnes.length > 0) {
-        const issuer = getIssuer();
-        await runInParallelBatches(sentOnes, BATCH_CONCURRENCY, async (r) => {
-            const res = await issuer.cancel(r.coupon_ref, order.order_number);
-            if (res.ok) {
-                cancelledCoupons++;
-                await sb
-                    .from('gift_order_recipients')
-                    .update({ send_status: 'cancelled', error: `쿠폰 폐기 완료 (${reason})` })
-                    .eq('id', r.id);
-            } else {
-                failedCouponCancel++;
-                await sb
-                    .from('gift_order_recipients')
-                    .update({ error: `쿠폰 폐기 실패: ${res.error || '사용됨/취소불가'}` })
-                    .eq('id', r.id);
-            }
-        });
-
-        if (failedCouponCancel > 0) {
-            return {
-                ok: false,
-                error: `수신자 중 ${failedCouponCancel}건의 쿠폰 폐기에 실패하여 주문을 전체 취소할 수 없습니다. (이미 교환된 쿠폰 여부 확인 필요)`,
-                cancelledCoupons,
-            };
-        }
-    }
+    const cancelledCoupons = 0;
 
     // 2) 이노페이 실결제 TID가 있는 경우 이노페이 결제 취소 API 호출
     if (order.tid && !order.is_test) {
@@ -504,7 +533,35 @@ export async function cancelGiftOrder(
         })
         .eq('id', orderId);
 
-    // 4) 실결제 취소 시 상주에게 결제 취소 완료 알림 발송 (GIFT_CANCEL_TEMPLATE_ID 우선, 미설정/실패 시 LMS 폴백)
+    // 4) 실결제 취소 시 슬랙 알림 + 상주에게 결제 취소 완료 알림 발송
+    let isB2B = false;
+    try {
+        const { data: b } = await sb
+            .from('bugo')
+            .select('b2b_user_id')
+            .eq('bugo_number', String(order.bugo_number))
+            .maybeSingle();
+        isB2B = Boolean(b?.b2b_user_id);
+    } catch {
+        // ignore
+    }
+    const brand = isB2B ? '부고온' : '마음부고';
+
+    if (!order.is_test) {
+        await sendGiftCancelNotification({
+            order_number: order.order_number,
+            bugo_number: order.bugo_number,
+            buyer_name: order.buyer_name,
+            buyer_phone: order.buyer_phone,
+            product_name: order.product_name,
+            quantity: order.quantity,
+            total_amount: order.total_amount,
+            payment_method: order.payment_method,
+            reason,
+            isB2B,
+        }).catch(() => {});
+    }
+
     if (!order.is_test && order.buyer_phone) {
         const cleanPhone = String(order.buyer_phone).replace(/\D/g, '');
         if (cleanPhone.startsWith('010')) {
@@ -512,14 +569,20 @@ export async function cancelGiftOrder(
             let sentAlim = false;
             if (cancelTemplateId) {
                 try {
-                    const res = await sendAlimtalk(cleanPhone, cancelTemplateId, {
-                        주문자명: order.buyer_name || '상주',
-                        주문번호: order.order_number,
-                        상품명: order.product_name,
-                        수량: `${order.quantity}명`,
-                        환불금액: (order.total_amount || 0).toLocaleString(),
-                        결제수단: order.payment_method || '신용카드',
-                    });
+                    const res = await sendAlimtalk(
+                        cleanPhone,
+                        cancelTemplateId,
+                        {
+                            주문자명: order.buyer_name || '상주',
+                            주문번호: order.order_number,
+                            상품명: order.product_name,
+                            수량: `${order.quantity}명`,
+                            환불금액: (order.total_amount || 0).toLocaleString(),
+                            결제수단: order.payment_method || '신용카드',
+                        },
+                        undefined,
+                        isB2B
+                    );
                     if (!res?.statusCode || res.statusCode === '2000') sentAlim = true;
                 } catch (alimErr) {
                     console.error('[gift/cancel] 취소 알림톡 실패, LMS 대체 발송:', alimErr);
@@ -527,7 +590,7 @@ export async function cancelGiftOrder(
             }
             if (!sentAlim) {
                 const cancelLms = [
-                    `[마음부고] 답례품 주문이 정상적으로 취소되었습니다.`,
+                    `[${brand}] 답례품 주문이 정상적으로 취소되었습니다.`,
                     ``,
                     `◼ 취소 내역`,
                     `- 주문번호: ${order.order_number}`,
@@ -539,7 +602,7 @@ export async function cancelGiftOrder(
                     `※ 결제 승인 취소는 카드사 정책에 따라 영업일 기준 2~3일 소요될 수 있습니다.`,
                     `※ 감사장과 모바일 쿠폰은 발송되지 않습니다.`,
                 ].join('\n');
-                await sendLMS(cleanPhone, '[마음부고] 답례품 주문 취소 안내', cancelLms).catch((err) =>
+                await sendLMS(cleanPhone, `[${brand}] 답례품 주문 취소 안내`, cancelLms).catch((err) =>
                     console.error('[gift/cancel] 취소 LMS 발송 오류:', err)
                 );
             }
