@@ -301,9 +301,10 @@ export async function sendAlimtalk(
         const data = await response.json();
         console.log('알림톡 발송 결과:', JSON.stringify(data, null, 2));
 
-        if (data.statusCode && data.statusCode !== '2000') {
+        if (!response.ok || data.errorCode || (data.statusCode && data.statusCode !== '2000')) {
             status = 'fail';
-            errorMessage = data.errorMessage || '알림톡 발송 실패';
+            errorMessage = data.errorMessage || `알림톡 발송 실패 (HTTP ${response.status})`;
+            throw new Error(errorMessage);
         }
         return data;
     } catch (error: any) {

@@ -48,11 +48,12 @@ export async function GET(request: NextRequest) {
 
         console.log('🔍 어제 발인한 부고 검색:', yesterdayStr, '/ 3일 전 발인한 부고 검색:', threeDaysAgoStr);
 
-        // 1) 1차 감사장 알림톡: funeral_date가 어제인 부고 + 삭제되지 않은 부고 + 아직 감사장 알림톡 안 보낸 것 (조회수 높은 실사용 부고 우선)
+        // 1) 1차 감사장 알림톡: funeral_date가 어제(또는 최근 3일 내 발송 누락분)인 부고 + 삭제되지 않은 부고 + 아직 감사장 알림톡 안 보낸 것 (조회수 높은 실사용 부고 우선)
         const { data: bugos, error } = await supabase
             .from('bugo')
             .select('bugo_number, deceased_name, mourner_name, phone_password, thanks_sent, b2b_user_id, view_count')
-            .eq('funeral_date', yesterdayStr)
+            .gte('funeral_date', threeDaysAgoStr)
+            .lte('funeral_date', yesterdayStr)
             .is('deleted_at', null)
             .or('thanks_sent.is.null,thanks_sent.eq.false')
             .order('view_count', { ascending: false });
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
 
         let sentCount = 0;
         const errors: string[] = [];
+        const sentFirstTodayPhones = new Set<string>();
 
         if (bugos && bugos.length > 0) {
             console.log(`📬 1차 감사장 알림톡 발송 대상: ${bugos.length}건`);
@@ -114,6 +116,7 @@ export async function GET(request: NextRequest) {
 
                     console.log(`✅ 1차 감사장 알림톡 발송 완료: ${primaryBugo.bugo_number} 외 ${phoneBugos.length - 1}건 → ${phoneNumber}`);
                     sentCount++;
+                    sentFirstTodayPhones.add(phoneNumber);
 
                 } catch (err) {
                     console.error(`❌ 1차 발송 실패: ${phoneNumber} (${allBugoNumbers.join(', ')})`, err);
@@ -167,6 +170,16 @@ export async function GET(request: NextRequest) {
             for (const [phoneNumber, phoneBugos] of remindByPhone.entries()) {
                 const primaryBugo = phoneBugos[0];
                 const allBugoNumbers = phoneBugos.map(b => b.bugo_number);
+
+                // 당일 1차 감사장 알림톡을 방금 발송한 상주는 같은 날 2차 리마인드 중복 발송 제외
+                if (sentFirstTodayPhones.has(phoneNumber)) {
+                    await supabase
+                        .from('bugo')
+                        .update({ thanks_remind_sent: true })
+                        .in('bugo_number', allBugoNumbers);
+                    remindSkippedCount++;
+                    continue;
+                }
 
                 // 이 상주의 부고 중 하나라도 감사장을 공유했거나 답례품을 보낸 경우 → 리마인드 발송 제외 & 완료 처리
                 const hasSharedThanks = phoneBugos.some(b => !!b.thanks_shared_at);
