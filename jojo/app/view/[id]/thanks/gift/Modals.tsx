@@ -165,43 +165,47 @@ export function ConfirmModal({
     onClose: () => void;
 }) {
     return (
-        <div className="gs-overlay gs-center-wrap" onClick={busy ? undefined : onClose}>
-            <div className="gs-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="주문 확인">
-                <h3 className="gs-h3">답례품 주문 확인</h3>
-                <dl className="gs-summary">
-                    <div>
-                        <dt>상품</dt>
-                        <dd>
+        <div className="gs-overlay gs-center-wrap gs-confirm-overlay" onClick={busy ? undefined : onClose}>
+            <div className="gs-confirm" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="주문 확인">
+                <button className="gs-confirm-x" onClick={onClose} disabled={busy} aria-label="닫기">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 className="gs-confirm-title">주의사항</h3>
+                <p className="gs-confirm-desc">
+                    결제 1시간 후 받는 분께 감사장과 쿠폰이 발송됩니다.
+                    발송 전 1시간 이내에는 주문내역에서 취소할 수 있고,
+                    <br />
+                    <strong>발송 후에는 취소·환불이 불가능합니다.</strong>
+                </p>
+                <p className="gs-confirm-sub">결제금액과 받는 분 수가 맞는지 한 번 더 확인해주세요.</p>
+                <div className="gs-confirm-info">
+                    <div className="gs-confirm-row">
+                        <span>상품</span>
+                        <b>
                             [{product.brand}] {product.name}
-                        </dd>
+                        </b>
                     </div>
-                    <div>
-                        <dt>수량</dt>
-                        <dd>
-                            {count}명 × {won(product.sale_price)}
-                        </dd>
+                    <div className="gs-confirm-row">
+                        <span>받는 분</span>
+                        <b>{count}명</b>
+                    </div>
+                    <div className="gs-confirm-row">
+                        <span>결제금액</span>
+                        <b>{won(product.sale_price * count)}</b>
                     </div>
                     {!isTest && (
-                        <div>
-                            <dt>결제수단</dt>
-                            <dd>{paymentMethod === 'simple' ? '간편결제' : '카드결제'}</dd>
+                        <div className="gs-confirm-row">
+                            <span>결제수단</span>
+                            <b>{paymentMethod === 'simple' ? '간편결제' : '카드결제'}</b>
                         </div>
                     )}
-                    <div className="gs-summary-total">
-                        <dt>총 결제금액</dt>
-                        <dd>{won(product.sale_price * count)}</dd>
-                    </div>
-                </dl>
-                <p className="gs-hint">결제 완료 1시간 후 감사장과 모바일 쿠폰이 함께 발송됩니다. 1시간 이내에는 주문내역에서 취소할 수 있어요.</p>
-                {isTest && <p className="gs-test-note">테스트 모드입니다. 실제 결제와 발송은 이루어지지 않습니다.</p>}
-                <div className="gs-dialog-btns">
-                    <button className="gs-btn-light" onClick={onClose} disabled={busy}>
-                        취소
-                    </button>
-                    <button className="gs-btn-dark" onClick={onConfirm} disabled={busy}>
-                        {busy ? '처리 중…' : isTest ? '테스트 주문하기' : '결제하기'}
-                    </button>
                 </div>
+                {isTest && <p className="gs-test-note">테스트 모드입니다. 실제 결제와 발송은 이루어지지 않습니다.</p>}
+                <button className="gs-confirm-btn" onClick={onConfirm} disabled={busy}>
+                    {busy ? '처리 중…' : isTest ? '테스트 주문하기' : '동의하고 결제하기'}
+                </button>
             </div>
         </div>
     );

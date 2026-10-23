@@ -998,7 +998,100 @@
     color: #333;
 }
 
-/* 주문 확인 모달 요약 */
+/* 주문 확인 모달 (부의금 결제 확인 팝업과 동일 디자인) */
+.gs-confirm-overlay {
+    z-index: 3000;
+}
+.gs-confirm {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    padding: 24px 20px;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+}
+.gs-confirm-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: #999 !important;
+}
+.gs-confirm-title {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+.gs-confirm-desc {
+    margin: 0 0 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    word-break: keep-all;
+}
+.gs-confirm-desc strong {
+    color: #1a1a1a;
+}
+.gs-confirm-sub {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: #888;
+}
+.gs-confirm-info {
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 8px;
+    background: #f8f8f8;
+}
+.gs-confirm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 8px 0;
+    text-align: left;
+}
+.gs-confirm-row:first-child {
+    padding-top: 0;
+}
+.gs-confirm-row:last-child {
+    padding-bottom: 0;
+}
+.gs-confirm-row span {
+    flex: 0 0 auto;
+    font-size: 13px;
+    color: #666;
+}
+.gs-confirm-row b {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: right;
+    word-break: keep-all;
+}
+.gs-confirm-btn {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #ffd43b;
+    color: #1a1a1a;
+    font-size: 15px;
+    font-weight: 600;
+}
+.gs-confirm-btn:disabled {
+    opacity: 0.5;
+}
+
+/* 주문 확인 모달 요약 (구) */
 .gs-summary {
     margin: 14px 0 0;
     padding: 4px 14px;
