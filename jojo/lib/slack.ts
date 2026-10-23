@@ -481,11 +481,9 @@ export async function sendGiftOrderNotification(order: {
     view_count?: number;
     isB2B?: boolean;
 }): Promise<boolean> {
-    const webhookUrl =
-        process.env.SLACK_WEBHOOK_GIFT ||
-        process.env.SLACK_WEBHOOK_CONDOLENCE ||
-        process.env.SLACK_WEBHOOK_FLOWER ||
-        process.env.SLACK_WEBHOOK_BUGO;
+    const webhookUrl = order.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
     const brand = order.isB2B ? '부고온' : '마음부고';
     const domain = order.isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
     const unitFormatted = new Intl.NumberFormat('ko-KR').format(order.unit_price || 0);
@@ -498,7 +496,7 @@ export async function sendGiftOrderNotification(order: {
   - 총결제금액: ${totalFormatted}원
   - 결제수단: ${order.payment_method || '카드결제'}
   - 발송예정: 결제 1시간 후 자동 발송
-  - 주문내역: https://maeumbugo.co.kr/order/${order.order_number}
+  - 주문내역: https://${domain}/order/${order.order_number}
   - 부고장: https://${domain}/view/${order.bugo_number}
   - ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
@@ -515,11 +513,9 @@ export async function sendGiftDispatchNotification(info: {
     failed_count: number;
     isB2B?: boolean;
 }): Promise<boolean> {
-    const webhookUrl =
-        process.env.SLACK_WEBHOOK_GIFT ||
-        process.env.SLACK_WEBHOOK_CONDOLENCE ||
-        process.env.SLACK_WEBHOOK_FLOWER ||
-        process.env.SLACK_WEBHOOK_BUGO;
+    const webhookUrl = info.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
     const brand = info.isB2B ? '부고온' : '마음부고';
     const statusHeader =
         info.failed_count === 0
@@ -547,11 +543,9 @@ export async function sendGiftCancelNotification(info: {
     reason?: string;
     isB2B?: boolean;
 }): Promise<boolean> {
-    const webhookUrl =
-        process.env.SLACK_WEBHOOK_GIFT ||
-        process.env.SLACK_WEBHOOK_CONDOLENCE ||
-        process.env.SLACK_WEBHOOK_FLOWER ||
-        process.env.SLACK_WEBHOOK_BUGO;
+    const webhookUrl = info.isB2B
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
+        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
     const brand = info.isB2B ? '부고온' : '마음부고';
     const totalFormatted = new Intl.NumberFormat('ko-KR').format(info.total_amount || 0);
 

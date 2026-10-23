@@ -154,6 +154,8 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP260310031832180MIhfBqgYYoB': 'KA01TP260714225958774NSjzKCXWvdF', // 장지 이용후기(사본 - v2)
     // 10. 부의금 전달 완료 (조문객용)
     'KA01TP260128002838240ioiYHpImLDY': 'KA01TP260714224630629Z7tOdxnlNNK', // b2b_03-상품결제 완료
+    // 11. 답례품 결제 완료 (상주용)
+    'KA01TP261020132835419ZOxQt2Dto3W': 'KA01TP261023124428617bcO4qkzxHT1', // b2b_07-답례품 결제 완료
 };
 
 // 신규 감사장+답례품 2버튼 템플릿: 알림톡 전환 스위치(GIFT_ALIMTALK_LIVE === 'true') & 카카오 검수 승인(APPROVED)일 때만 전환, 그 전에는 기존 1버튼 템플릿 유지
