@@ -998,6 +998,45 @@
     color: #333;
 }
 
+/* 주문 확인 모달 요약 */
+.gs-summary {
+    margin: 14px 0 0;
+    padding: 4px 14px;
+    border-radius: 10px;
+    background: #f7f7f7;
+}
+.gs-summary > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ececec;
+    font-size: 13px;
+}
+.gs-summary > div:last-child {
+    border-bottom: 0;
+}
+.gs-summary dt {
+    flex: 0 0 auto;
+    margin: 0;
+    color: #888;
+}
+.gs-summary dd {
+    margin: 0;
+    text-align: right;
+    color: #222;
+    word-break: keep-all;
+}
+.gs-summary-total dt {
+    color: #222;
+    font-weight: 700;
+}
+.gs-summary-total dd {
+    font-size: 17px;
+    font-weight: 800;
+}
+
 /* 결제 방식 선택 (부의금/화환과 동일 디자인) */
 .gs-pay-methods {
     display: flex;
