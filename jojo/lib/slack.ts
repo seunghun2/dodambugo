@@ -478,6 +478,7 @@ export async function sendGiftOrderNotification(order: {
     quantity: number;
     total_amount: number;
     payment_method?: string | null;
+    view_count?: number;
     isB2B?: boolean;
 }): Promise<boolean> {
     const webhookUrl =
@@ -497,8 +498,9 @@ export async function sendGiftOrderNotification(order: {
   - 총결제금액: ${totalFormatted}원
   - 결제수단: ${order.payment_method || '카드결제'}
   - 발송예정: 결제 1시간 후 자동 발송
-  - 주문내역: https://${domain}/order/${order.order_number}
-  - 부고장: https://${domain}/view/${order.bugo_number}`;
+  - 주문내역: https://maeumbugo.co.kr/order/${order.order_number}
+  - 부고장: https://${domain}/view/${order.bugo_number}
+  - ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }

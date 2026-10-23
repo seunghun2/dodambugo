@@ -316,6 +316,17 @@ export async function POST(request: NextRequest) {
             try {
                 const { sendGiftOrderCompleteNotify } = await import('@/lib/gift/dispatcher');
                 const finalGift = updatedGift || existingGift;
+                let bugoViewCount = 0;
+                let isB2BGift = false;
+                try {
+                    const bq = supabase.from('bugo').select('view_count, b2b_user_id');
+                    const { data: bugoInfo } = finalGift.bugo_id
+                        ? await bq.eq('id', finalGift.bugo_id).maybeSingle()
+                        : await bq.eq('bugo_number', String(finalGift.bugo_number)).limit(1).maybeSingle();
+                    bugoViewCount = bugoInfo?.view_count ?? 0;
+                    isB2BGift = Boolean(bugoInfo?.b2b_user_id);
+                } catch {}
+
                 await Promise.allSettled([
                     sendGiftOrderCompleteNotify(finalGift),
                     sendGiftOrderNotification({
@@ -328,6 +339,8 @@ export async function POST(request: NextRequest) {
                         quantity: finalGift.quantity,
                         total_amount: finalGift.total_amount,
                         payment_method: finalGift.payment_method,
+                        view_count: bugoViewCount,
+                        isB2B: isB2BGift,
                     }),
                 ]);
             } catch (notifyErr) {
