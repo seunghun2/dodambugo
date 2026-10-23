@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const source = searchParams.get('source');
 
     const supabase = getSupabase();
 
@@ -38,9 +39,15 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(results);
     }
 
-    const { data, error } = await supabase
+    let query = supabase
         .from('access_logs')
-        .select('*')
+        .select('*');
+
+    if (source === 'b2b') {
+        query = query.like('path', '/b2b%');
+    }
+
+    const { data, error } = await query
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 

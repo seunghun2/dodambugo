@@ -74,7 +74,7 @@ export default function B2BBlockedIPsPage() {
         setLogsLoading(true);
         setHasMore(true);
         try {
-            const res = await fetch(`/api/access-logs?limit=${PAGE_SIZE}&offset=0`);
+            const res = await fetch(`/api/access-logs?source=b2b&limit=${PAGE_SIZE}&offset=0`);
             const data = await res.json();
             setAccessLogs(Array.isArray(data) ? data : []);
             if (!Array.isArray(data) || data.length < PAGE_SIZE) setHasMore(false);
@@ -89,7 +89,7 @@ export default function B2BBlockedIPsPage() {
         setLoadingMore(true);
         const offset = accessLogs.length;
         try {
-            const res = await fetch(`/api/access-logs?limit=${PAGE_SIZE}&offset=${offset}`);
+            const res = await fetch(`/api/access-logs?source=b2b&limit=${PAGE_SIZE}&offset=${offset}`);
             const data = await res.json();
             if (Array.isArray(data) && data.length > 0) {
                 setAccessLogs(prev => [...prev, ...data]);
@@ -547,13 +547,13 @@ export default function B2BBlockedIPsPage() {
                                                 <td className={styles.ipCell} style={{ color: isBlocked(log.ip_address) ? '#ef4444' : '#2563eb' }}>
                                                     {log.ip_address || '-'}
                                                 </td>
-                                                <td style={{ fontWeight: 500 }}>{log.path}</td>
+                                                <td style={{ fontWeight: 500, wordBreak: 'break-all' }}>{decodeReason(log.path)}</td>
                                                 <td>{getDevice(log.user_agent)}</td>
                                                 <td style={{ color: '#64748b', fontSize: '13px', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                     {log.referer || '-'}
                                                 </td>
                                                 <td style={{ color: '#64748b', fontSize: '13px' }}>
-                                                    {formatTime(log.created_at)}
+                                                    {formatDate(log.created_at)}
                                                 </td>
                                                 <td style={{ textAlign: 'center' }}>
                                                     {!isBlocked(log.ip_address) && log.ip_address ? (

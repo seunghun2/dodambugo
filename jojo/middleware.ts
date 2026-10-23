@@ -121,7 +121,7 @@ async function getBlockedIPs(): Promise<string[]> {
 // 접속 로그 기록 (비동기, 논블로킹)
 function logAccess(ip: string, path: string, userAgent: string, referer: string) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
-  if (path.startsWith('/admin')) return;
+  if (path.startsWith('/admin') || path.startsWith('/b2b/admin')) return;
   if (isAdminIP(ip)) return;
 
   fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
@@ -243,23 +243,26 @@ export async function middleware(request: NextRequest) {
       return false;
     };
 
-    // 관리자, 사설 IP, B2B 접속 여부 체크 (B2B 사용자는 차단 대상에서 예외 처리)
+    // 관리자, 사설 IP, B2B 접속 여부 체크 (B2B 사용자는 자동 차단 대상에서 예외 처리하되 접속 로그는 정상 기록)
     const isAdminCookie = Boolean(request.cookies.get('admin_token')?.value || request.cookies.get('admin_ip')?.value);
-    const isExcluded = 
-      isAdminIP(ip) || 
-      isAdminCookie || 
-      isPrivateIp(ip) || 
-      isB2BSubdomain || 
-      path.startsWith('/b2b');
+    const isAdminOrPrivate = isAdminIP(ip) || isAdminCookie || isPrivateIp(ip);
+    const isB2BRequest = isB2BSubdomain || path.startsWith('/b2b');
+    const isExcluded = isAdminOrPrivate || isB2BRequest;
 
-    if (!isExcluded) {
-      // 접속 로그 기록 (논블로킹 - 쿼리 파라미터 보존)
+    if (!isAdminOrPrivate) {
+      const loggedPath = isB2BSubdomain && !fullPath.startsWith('/b2b')
+        ? `/b2b${fullPath === '/' ? '' : fullPath}`.slice(0, 2000)
+        : fullPath;
+      // 접속 로그 기록 (논블로킹 - B2B 서브도메인도 /b2b 접두사로 정규화하여 기록)
       logAccess(
         ip,
-        fullPath,
+        loggedPath,
         request.headers.get('user-agent') || '',
         request.headers.get('referer') || ''
       );
+    }
+
+    if (!isExcluded) {
 
       // 🇨🇳 중국 IP 차단 (Vercel geo 감지 + IP 대역 fallback)
       const country = (request as any).geo?.country || request.headers.get('x-vercel-ip-country') || '';
