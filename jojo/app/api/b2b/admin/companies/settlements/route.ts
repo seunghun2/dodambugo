@@ -96,10 +96,10 @@ export async function GET(request: NextRequest) {
                 const validOrderIds = orderIds.filter(id => uuidPattern.test(id));
 
                 if (validOrderIds.length > 0) {
-                    // 1. 화환 주문들 조회 (bugo_id, price 포함)
+                    // 1. 화환 주문들 조회 (bugo_id, product_price, recipient_name, partner_data 포함)
                     const { data: orders } = await supabase
                         .from('flower_orders')
-                        .select('id, order_number, product_name, sender_name, price, bugo_id')
+                        .select('id, order_number, product_name, sender_name, product_price, recipient_name, partner_data, bugo_id')
                         .in('id', validOrderIds);
 
                     if (orders) {
@@ -107,6 +107,7 @@ export async function GET(request: NextRequest) {
                         
                         // 2. 부고 정보 조회 (deceased_name, b2b_user_id 포함)
                         const bugoIds = orders.map(o => o.bugo_id).filter(Boolean);
+                        let bugoUserIds: string[] = [];
                         if (bugoIds.length > 0) {
                             const { data: bugos } = await supabase
                                 .from('bugo')
@@ -115,19 +116,21 @@ export async function GET(request: NextRequest) {
 
                             if (bugos) {
                                 bugos.forEach(b => bugoMap.set(b.id, b));
-                                
-                                // 3. 장례지도사명(b2b_users.owner_name) 조회
-                                const b2bUserIds = bugos.map(b => b.b2b_user_id).filter(Boolean);
-                                if (b2bUserIds.length > 0) {
-                                    const { data: b2bUsers } = await supabase
-                                        .from('b2b_users')
-                                        .select('id, owner_name, company_name')
-                                        .in('id', b2bUserIds);
-                                    
-                                    if (b2bUsers) {
-                                        b2bUsers.forEach(u => partnerMap.set(u.id, u));
-                                    }
-                                }
+                                bugoUserIds = bugos.map(b => b.b2b_user_id).filter(Boolean);
+                            }
+                        }
+
+                        // 3. 장례지도사명(b2b_users.owner_name) 조회 (부고 연결 + 직접발주 partner_data 통합)
+                        const directUserIds = orders.map(o => o.partner_data?.b2b_user_id).filter(Boolean);
+                        const b2bUserIds = Array.from(new Set([...bugoUserIds, ...directUserIds]));
+                        if (b2bUserIds.length > 0) {
+                            const { data: b2bUsers } = await supabase
+                                .from('b2b_users')
+                                .select('id, owner_name, company_name')
+                                .in('id', b2bUserIds);
+                            
+                            if (b2bUsers) {
+                                b2bUsers.forEach(u => partnerMap.set(u.id, u));
                             }
                         }
                     }
@@ -170,7 +173,8 @@ export async function GET(request: NextRequest) {
                         supabase
                             .from('gift_orders')
                             .select('*')
-                            .neq('status', 'pending')
+                            .eq('is_test', false)
+                            .in('status', ['paid', 'sending', 'sent', 'partial', 'cancelled'])
                             .gte('created_at', startOfMonth)
                             .lt('created_at', endOfMonth)
                             .order('created_at', { ascending: false })
@@ -192,8 +196,10 @@ export async function GET(request: NextRequest) {
                             s.order_id?.startsWith('DO') ||
                             condOrderKeySet.has(String(s.order_id))
                         );
-                        const condSettleMap = new Map<string, string>();
-                        condSettlementRecords.forEach(s => condSettleMap.set(String(s.order_id), s.status));
+                        const condSettleMap = new Map<string, { status: string; payment_date: string | null }>();
+                        condSettlementRecords.forEach(s =>
+                            condSettleMap.set(String(s.order_id), { status: s.status, payment_date: s.payment_date || null })
+                        );
 
                         condolenceList = condOrders.map(c => {
                             const matchedBugo = compBugos.find(b => String(b.id) === String(c.bugo_number) || String(b.bugo_number) === String(c.bugo_number));
@@ -203,12 +209,12 @@ export async function GET(request: NextRequest) {
 
                             // 정산 마감 상태: b2b_company_settlements 기준 (completed → 정산완료)
                             const condOrderNumber = c.moid?.startsWith('BCOND_') ? c.moid : `BCOND_${c.id}`;
-                            const settlementStatus =
+                            const settleInfo =
                                 condSettleMap.get(String(c.id)) ||
                                 condSettleMap.get(condOrderNumber) ||
-                                condSettleMap.get(c.order_number) ||
-                                condSettleMap.get(c.moid) ||
-                                'pending';
+                                (c.order_number ? condSettleMap.get(String(c.order_number)) : undefined) ||
+                                (c.moid ? condSettleMap.get(String(c.moid)) : undefined);
+                            const settlementStatus = settleInfo?.status || 'pending';
 
                             return {
                                 id: c.id,
@@ -224,6 +230,7 @@ export async function GET(request: NextRequest) {
                                 deceased_name: matchedBugo?.deceased_name || '미등록',
                                 status: isCancelled ? 'cancelled' : settlementStatus,
                                 settlement_status: isCancelled ? 'cancelled' : settlementStatus,
+                                payment_date: settleInfo?.payment_date || null,
                                 created_at: c.created_at,
                                 bugo_id: matchedBugo?.bugo_number || c.bugo_number
                             };
@@ -309,8 +316,9 @@ export async function GET(request: NextRequest) {
 
             const detailedList = wreathSettlements.map(s => {
                 const orderInfo = orderMap.get(s.order_id) || null;
-                const bugoInfo = orderInfo ? bugoMap.get(orderInfo.bugo_id) : null;
-                const partnerInfo = bugoInfo ? partnerMap.get(bugoInfo.b2b_user_id) : null;
+                const bugoInfo = orderInfo?.bugo_id ? bugoMap.get(orderInfo.bugo_id) : null;
+                const resolvedUserId = bugoInfo?.b2b_user_id || orderInfo?.partner_data?.b2b_user_id;
+                const partnerInfo = resolvedUserId ? partnerMap.get(resolvedUserId) : null;
                 const isCancelled = s.status === 'cancelled';
 
                 return {
@@ -323,9 +331,10 @@ export async function GET(request: NextRequest) {
                     updated_at: s.updated_at,
                     order: orderInfo ? {
                         ...orderInfo,
-                        deceased_name: bugoInfo?.deceased_name || '미등록',
-                        partner_name: partnerInfo?.owner_name || '미등록',
-                        partner_company: partnerInfo?.company_name || '미등록',
+                        price: orderInfo.product_price || 0,
+                        deceased_name: bugoInfo?.deceased_name || orderInfo.recipient_name || '미등록',
+                        partner_name: partnerInfo?.owner_name || orderInfo.partner_data?.partner_name || '미등록',
+                        partner_company: partnerInfo?.company_name || orderInfo.partner_data?.company_name || '미등록',
                         bugo_id: orderInfo.bugo_id
                     } : null
                 };
@@ -365,7 +374,9 @@ export async function GET(request: NextRequest) {
                 }
 
                 const current = monthlySummaryMap.get(key)!;
-                current.total_count += 1;
+                if (s.status !== 'cancelled') {
+                    current.total_count += 1;
+                }
                 if (s.status === 'pending') {
                     current.pending_amount += (s.amount || 0);
                 } else if (s.status === 'completed') {
@@ -392,7 +403,8 @@ export async function GET(request: NextRequest) {
                     const { data: rawGiftOrders } = await supabase
                         .from('gift_orders')
                         .select('id, order_number, bugo_id, bugo_number, total_amount, status, created_at')
-                        .in('status', ['paid', 'sent', 'partial']);
+                        .eq('is_test', false)
+                        .in('status', ['paid', 'sending', 'sent', 'partial']);
 
                     const giftRate = companyData?.gift_company_rate ?? 4.0;
                     (rawGiftOrders || []).forEach(g => {
@@ -441,10 +453,12 @@ export async function GET(request: NextRequest) {
                 }];
             }
 
-            // 전체 정산 통계 도출
+            // 전체 정산 통계 도출 (취소 건 제외)
             let pendingTotal = extraPendingGiftAmount;
             let completedTotal = 0;
+            let validSettleCount = 0;
             settlements.forEach(s => {
+                if (s.status !== 'cancelled') validSettleCount += 1;
                 if (s.status === 'pending') pendingTotal += (s.amount || 0);
                 else if (s.status === 'completed') completedTotal += (s.amount || 0);
             });
@@ -455,7 +469,7 @@ export async function GET(request: NextRequest) {
                 summary: {
                     pending_amount: pendingTotal,
                     completed_amount: completedTotal,
-                    total_count: settlements.length + extraGiftCount
+                    total_count: validSettleCount + extraGiftCount
                 },
                 monthlyList
             });
@@ -532,7 +546,8 @@ export async function PATCH(request: NextRequest) {
                 const { data: rawGiftOrders } = await supabase
                     .from('gift_orders')
                     .select('id, order_number, bugo_id, bugo_number, total_amount, status, created_at')
-                    .in('status', ['paid', 'sent', 'partial'])
+                    .eq('is_test', false)
+                    .in('status', ['paid', 'sending', 'sent', 'partial'])
                     .gte('created_at', startOfMonth)
                     .lt('created_at', endOfMonth);
 

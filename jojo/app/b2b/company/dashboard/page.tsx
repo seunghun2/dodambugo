@@ -355,7 +355,11 @@ export default function CompanyDashboardPage() {
     const totalCompleted = flowerCompleted + condolenceCompleted + giftCompleted;
     const totalAmount = totalPending + totalCompleted;
     const isSettled = totalCompleted > 0 && totalPending === 0;
-    const latestPaymentDate = settleDetails[0]?.payment_date || condolenceDetails[0]?.payment_date || giftDetails[0]?.payment_date;
+    const latestPaymentDate =
+        settleDetails.find(s => s.payment_date)?.payment_date ||
+        condolenceDetails.find(c => c.payment_date)?.payment_date ||
+        giftDetails.find(g => g.payment_date)?.payment_date ||
+        null;
 
     // ── 이음부고 방식: 정산서 본문용 집계 테이블 데이터 생성 (취소 제외) ──
     const validFlowers = settleDetails.filter(s => s.status !== 'cancelled');

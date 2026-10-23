@@ -359,7 +359,11 @@ function SettlementsContent() {
     const totalCompleted = flowerCompleted + condolenceCompleted + giftCompleted;
     const grandTotal = totalPending + totalCompleted;
     const isSettled = totalCompleted > 0 && totalPending === 0;
-    const latestPaymentDate = settlements[0]?.payment_date || condolenceSettlements[0]?.payment_date || giftSettlements[0]?.payment_date;
+    const latestPaymentDate =
+        settlements.find(s => s.payment_date)?.payment_date ||
+        condolenceSettlements.find(c => c.payment_date)?.payment_date ||
+        giftSettlements.find(g => g.payment_date)?.payment_date ||
+        null;
 
     // ── 이음부고 방식: 정산서 본문용 집계 테이블 데이터 생성 (취소 제외) ──
     const validFlowers = settlements.filter(s => s.status !== 'cancelled');
