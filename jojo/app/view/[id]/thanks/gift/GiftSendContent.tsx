@@ -15,7 +15,7 @@ import {
 } from '@/lib/gift/thanks-messages';
 import { GIFT_NOTICES, GIFT_VALID_DAYS, ORDER_INFO } from '@/lib/gift/notices';
 import { ProductThumb } from './ProductThumb';
-import RecipientPanel from './RecipientPanel';
+import RecipientPanel, { type RecipientPanelHandle } from './RecipientPanel';
 import { AuthModal, ConfirmModal, DoneModal, PreviewModal } from './Modals';
 import { won, type GiftProduct, type RecipientItem } from './types';
 
@@ -37,6 +37,7 @@ const TAB_KEYS = RELIGION_TABS.map((t) => t.key);
 export default function GiftSendContent({ bugoId, initialProduct, live, deceasedName, mournerName, religion, thanksReligion, thanksMessage }: Props) {
     const router = useRouter();
     const draftStorageKey = `maeum_gift_draft_${bugoId}`;
+    const pendingStorageKey = `maeum_gift_pending_${bugoId}`;
 
     // ----- 카드 / 문구 -----
     const initialTab: ReligionType = TAB_KEYS.includes(thanksReligion as ReligionType) ? (thanksReligion as ReligionType) : getReligionType(religion);
@@ -59,6 +60,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
 
     // ----- 상품 / 받는 사람 -----
     const product = initialProduct;
+    const recipientRef = useRef<RecipientPanelHandle>(null);
     const [items, setItems] = useState<RecipientItem[]>([]);
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [noticeOpen, setNoticeOpen] = useState(false);
@@ -90,6 +92,11 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 if (Array.isArray(parsed.items) && parsed.items.length > 0) {
                     setItems(parsed.items);
                 }
+                if (parsed.pending && typeof parsed.pending === 'object') {
+                    try {
+                        window.localStorage.setItem(`maeum_gift_pending_${bugoId}`, JSON.stringify(parsed.pending));
+                    } catch {}
+                }
             }
         } catch {
             /* 파싱 오류 무시 */
@@ -113,17 +120,20 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     }, [draftRestored, draftStorageKey, tab, cardId, messages, items]);
 
     // 카톡 인앱 → 크롬 이동 시 현재 작성 중인 문구·명단을 URL에 실어 넘긴다
-    const buildShareableDraftUrl = useCallback(() => {
-        try {
-            const url = new URL(window.location.href);
-            const payload = JSON.stringify({ tab, cardId, messages, items });
-            const encoded = window.btoa(unescape(encodeURIComponent(payload)));
-            url.searchParams.set('draft', encoded);
-            return url.toString();
-        } catch {
-            return window.location.href;
-        }
-    }, [tab, cardId, messages, items]);
+    const buildShareableDraftUrl = useCallback(
+        (extraPending?: { dName?: string; dPhone?: string; bulkText?: string; inputTab?: 'direct' | 'paste' | null }) => {
+            try {
+                const url = new URL(window.location.href);
+                const payload = JSON.stringify({ tab, cardId, messages, items, pending: extraPending });
+                const encoded = window.btoa(unescape(encodeURIComponent(payload)));
+                url.searchParams.set('draft', encoded);
+                return url.toString();
+            } catch {
+                return window.location.href;
+            }
+        },
+        [tab, cardId, messages, items]
+    );
 
     // ----- 오버레이 -----
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -178,7 +188,20 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     const canPay = items.length > 0;
 
     const startPay = async () => {
-        if (items.length === 0) return notify('받는 사람을 선택해주세요.');
+        // 입력칸(직접입력/붙여넣기)에 아직 [추가]를 안 누르고 적어둔 번호가 있으면 먼저 목록에 추가하고 해당 영역으로 스크롤
+        const flushStatus = recipientRef.current?.flushPendingInput() ?? 'none';
+        if (flushStatus === 'added') {
+            notify('받는 분 목록에 추가되었습니다. 더 추가하시거나 ‘결제하기’를 한 번 더 눌러주세요.');
+            return;
+        }
+        if (flushStatus === 'invalid') {
+            notify('휴대폰 번호 11자리를 정확히 입력 후 추가해주세요. (예: 010-1234-5678)');
+            return;
+        }
+        if (items.length === 0) {
+            recipientRef.current?.scrollToInput();
+            return notify('받는 분의 이름·휴대폰 번호를 먼저 추가해주세요.');
+        }
         if (!(await ensureAuth())) return;
         setConfirmOpen(true);
     };
@@ -285,6 +308,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
             setItems([]);
             try {
                 window.localStorage.removeItem(draftStorageKey);
+                window.localStorage.removeItem(pendingStorageKey);
             } catch {}
             router.push(`/order/${data.orderNumber}`);
         } catch {
@@ -392,6 +416,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 </section>
 
                 <RecipientPanel
+                    ref={recipientRef}
                     items={items}
                     setItems={(u) => setItems(u)}
                     bugoId={bugoId}

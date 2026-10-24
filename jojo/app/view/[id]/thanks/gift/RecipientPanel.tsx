@@ -1,8 +1,22 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { formatPhoneInput, isValidMobile, maskPhone, normalizePhone, phoneDedupeKey } from '@/lib/gift/phone';
 import type { RecipientItem } from './types';
+
+export interface RecipientPanelHandle {
+    /**
+     * 입력칸(직접입력/붙여넣기)에 아직 [추가]를 누르지 않은 텍스트가 있는지 확인하고,
+     * 유효한 번호가 있으면 목록에 추가한 뒤 'added' 반환.
+     * 입력 중인 텍스트가 있으나 번호가 불완전하면 'invalid' 반환.
+     * 입력칸이 비어 있으면 'none' 반환.
+     */
+    flushPendingInput: () => 'added' | 'invalid' | 'none';
+    /** 받는 사람 입력 영역으로 스크롤 및 포커스 이동 */
+    scrollToInput: () => void;
+    /** 현재 입력칸에 작성 중인 미추가 텍스트가 있는지 여부 */
+    hasPendingInput: () => boolean;
+}
 
 export const MAX_RECIPIENTS = 200;
 const SOURCE_LABEL: Record<RecipientItem['source'], string> = {
@@ -129,26 +143,66 @@ function parseBulkContacts(rawText: string): { items: RecipientItem[]; invalidCo
     return { items, invalidCount };
 }
 
-export default function RecipientPanel({
+const RecipientPanel = forwardRef<
+    RecipientPanelHandle,
+    {
+        items: RecipientItem[];
+        setItems: (updater: (prev: RecipientItem[]) => RecipientItem[]) => void;
+        bugoId: string;
+        ensureAuth: () => Promise<boolean>;
+        notify: (msg: string) => void;
+        buildShareableDraftUrl?: (extraPending?: { dName?: string; dPhone?: string; bulkText?: string; inputTab?: 'direct' | 'paste' | null }) => string;
+    }
+>(function RecipientPanel({
     items,
     setItems,
     bugoId,
     ensureAuth,
     notify,
     buildShareableDraftUrl,
-}: {
-    items: RecipientItem[];
-    setItems: (updater: (prev: RecipientItem[]) => RecipientItem[]) => void;
-    bugoId: string;
-    ensureAuth: () => Promise<boolean>;
-    notify: (msg: string) => void;
-    buildShareableDraftUrl?: () => string;
-}) {
+}, ref) {
     const fileRef = useRef<HTMLInputElement>(null);
+    const sectionRef = useRef<HTMLElement>(null);
+    const directPhoneRef = useRef<HTMLInputElement>(null);
+    const pasteTextareaRef = useRef<HTMLTextAreaElement>(null);
+    const pendingStorageKey = `maeum_gift_pending_${bugoId}`;
+
     const [inputTab, setInputTab] = useState<'direct' | 'paste' | null>('direct');
     const [dName, setDName] = useState('');
     const [dPhone, setDPhone] = useState('');
     const [bulkText, setBulkText] = useState('');
+    const [pendingRestored, setPendingRestored] = useState(false);
+
+    // 입력칸에 작성 중이던 텍스트 복원 (크롬 이동 URL ?draft= 또는 localStorage)
+    useEffect(() => {
+        try {
+            const saved = window.localStorage.getItem(pendingStorageKey);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.dName === 'string') setDName(parsed.dName);
+                if (typeof parsed.dPhone === 'string') setDPhone(parsed.dPhone);
+                if (typeof parsed.bulkText === 'string') setBulkText(parsed.bulkText);
+                if (parsed.inputTab === 'direct' || parsed.inputTab === 'paste') setInputTab(parsed.inputTab);
+            }
+        } catch {
+            /* 무시 */
+        } finally {
+            setPendingRestored(true);
+        }
+    }, [pendingStorageKey]);
+
+    // 입력칸 텍스트 자동 보존 (새로고침·잠시 이탈 시에도 [추가] 안 누른 번호 증발 방지)
+    useEffect(() => {
+        if (!pendingRestored) return;
+        try {
+            window.localStorage.setItem(
+                pendingStorageKey,
+                JSON.stringify({ dName, dPhone, bulkText, inputTab })
+            );
+        } catch {
+            /* 무시 */
+        }
+    }, [pendingRestored, pendingStorageKey, dName, dPhone, bulkText, inputTab]);
 
     // 부고장 조문 내역(조의금+화환 통합) 모달 상태
     const [listOpen, setListOpen] = useState(false);
@@ -452,8 +506,75 @@ export default function RecipientPanel({
             ? ''
             : `(${historyCounts.total})`;
 
+    const scrollToInput = () => {
+        if (!inputTab) setInputTab('direct');
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            if (inputTab === 'paste') {
+                pasteTextareaRef.current?.focus();
+            } else {
+                directPhoneRef.current?.focus();
+            }
+        }, 250);
+    };
+
+    const hasPendingInput = () => {
+        if (inputTab === 'paste') return bulkText.trim().length > 0;
+        return dName.trim().length > 0 || dPhone.trim().length > 0;
+    };
+
+    const flushPendingInput = (): 'added' | 'invalid' | 'none' => {
+        if (inputTab === 'paste' && bulkText.trim().length > 0) {
+            if (parsedPreview.items.length > 0) {
+                addItems(parsedPreview.items, parsedPreview.invalidCount);
+                setBulkText('');
+                sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return 'added';
+            }
+            scrollToInput();
+            return 'invalid';
+        }
+        const combined = `${dName} ${dPhone}`.trim();
+        if (combined.length > 0) {
+            const phone = normalizePhone(dPhone);
+            if (isValidMobile(phone)) {
+                addItems([
+                    {
+                        key: nextKey(),
+                        name: dName.trim().slice(0, 20),
+                        phone,
+                        dedupeKey: phoneDedupeKey(phone),
+                        maskedPhone: maskPhone(phone),
+                        source: 'manual',
+                    },
+                ]);
+                setDName('');
+                setDPhone('');
+                sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return 'added';
+            }
+            const parsed = parseBulkContacts(combined);
+            if (parsed.items.length > 0) {
+                addItems(parsed.items, parsed.invalidCount);
+                setDName('');
+                setDPhone('');
+                sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return 'added';
+            }
+            scrollToInput();
+            return 'invalid';
+        }
+        return 'none';
+    };
+
+    useImperativeHandle(ref, () => ({
+        flushPendingInput,
+        scrollToInput,
+        hasPendingInput,
+    }));
+
     return (
-        <section className="gs-section">
+        <section ref={sectionRef} className="gs-section">
             <div className="gs-row-between">
                 <h3 className="gs-h3">
                     받는 사람 <small>({items.length}명)</small>
@@ -512,6 +633,7 @@ export default function RecipientPanel({
                             aria-label="받는 사람 이름"
                         />
                         <input
+                            ref={directPhoneRef}
                             value={dPhone}
                             onChange={(e) => setDPhone(formatPhoneInput(e.target.value))}
                             onPaste={handleDirectPaste}
@@ -534,6 +656,7 @@ export default function RecipientPanel({
             {inputTab === 'paste' && (
                 <div className="gs-paste-box">
                     <textarea
+                        ref={pasteTextareaRef}
                         value={bulkText}
                         onChange={(e) => setBulkText(e.target.value)}
                         rows={5}
@@ -605,7 +728,13 @@ export default function RecipientPanel({
                                 className="gs-btn-dark"
                                 onClick={() => {
                                     setChromeAsk(false);
-                                    openInChrome(buildShareableDraftUrl?.());
+                                    // 크롬으로 이동하기 직전 입력칸에 적혀 있는 번호가 있으면 자동 반영/전달
+                                    const flushed = flushPendingInput();
+                                    const pending =
+                                        flushed === 'added'
+                                            ? undefined
+                                            : { dName, dPhone, bulkText, inputTab };
+                                    openInChrome(buildShareableDraftUrl?.(pending));
                                 }}
                             >
                                 확인
@@ -740,4 +869,6 @@ export default function RecipientPanel({
             )}
         </section>
     );
-}
+});
+
+export default RecipientPanel;
