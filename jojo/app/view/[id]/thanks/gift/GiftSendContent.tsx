@@ -62,6 +62,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     const product = initialProduct;
     const recipientRef = useRef<RecipientPanelHandle>(null);
     const [items, setItems] = useState<RecipientItem[]>([]);
+    const [hasPendingValid, setHasPendingValid] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'simple'>('card');
     const [noticeOpen, setNoticeOpen] = useState(false);
     const [draftRestored, setDraftRestored] = useState(false);
@@ -185,7 +186,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
     // ----- 결제(주문) -----
     const total = product ? product.sale_price * items.length : 0;
     const hasRefs = items.some((i) => i.ref);
-    const canPay = items.length > 0;
+    const canPay = items.length > 0 || hasPendingValid;
 
     const startPay = async () => {
         // 입력칸(직접입력/붙여넣기)에 아직 [추가]를 안 누르고 적어둔 번호가 있으면 먼저 목록에 추가하고 해당 영역으로 스크롤
@@ -423,6 +424,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     ensureAuth={ensureAuth}
                     notify={notify}
                     buildShareableDraftUrl={buildShareableDraftUrl}
+                    onPendingValidChange={setHasPendingValid}
                 />
 
                 {items.length > 0 && (
@@ -464,7 +466,7 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 <button className="gs-bottom-btn" onClick={() => setPreviewOpen(true)}>
                     미리보기
                 </button>
-                <button className={`gs-bottom-cta ${canPay ? '' : 'disabled'}`} onClick={startPay} aria-disabled={!canPay}>
+                <button className={`gs-bottom-cta ${canPay ? '' : 'disabled'}`} onClick={startPay}>
                     결제하기
                 </button>
             </div>

@@ -152,6 +152,7 @@ const RecipientPanel = forwardRef<
         ensureAuth: () => Promise<boolean>;
         notify: (msg: string) => void;
         buildShareableDraftUrl?: (extraPending?: { dName?: string; dPhone?: string; bulkText?: string; inputTab?: 'direct' | 'paste' | null }) => string;
+        onPendingValidChange?: (valid: boolean) => void;
     }
 >(function RecipientPanel({
     items,
@@ -160,6 +161,7 @@ const RecipientPanel = forwardRef<
     ensureAuth,
     notify,
     buildShareableDraftUrl,
+    onPendingValidChange,
 }, ref) {
     const fileRef = useRef<HTMLInputElement>(null);
     const sectionRef = useRef<HTMLElement>(null);
@@ -435,6 +437,14 @@ const RecipientPanel = forwardRef<
 
     // ---------- 카톡/메모장 대량 붙여넣기 ----------
     const parsedPreview = useMemo(() => parseBulkContacts(bulkText), [bulkText]);
+
+    // 입력칸에 유효한 휴대폰 번호가 작성되면 부모 하단 [결제하기] 버튼도 즉시 노란색으로 활성화
+    useEffect(() => {
+        if (!onPendingValidChange) return;
+        const directValid = isValidMobile(normalizePhone(dPhone)) || parseBulkContacts(`${dName} ${dPhone}`).items.length > 0;
+        const pasteValid = parsedPreview.items.length > 0;
+        onPendingValidChange(inputTab === 'paste' ? pasteValid : directValid);
+    }, [dName, dPhone, parsedPreview, inputTab, onPendingValidChange]);
 
     const addBulkPaste = () => {
         if (!bulkText.trim()) {
