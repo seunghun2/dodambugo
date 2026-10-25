@@ -243,7 +243,7 @@ export function DoneModal({
                 <div className="gs-dialog-btns">
                     {onAddMore && (
                         <button className="gs-btn-light" onClick={onAddMore}>
-                            추가주문하기
+                            답례품 추가 주문
                         </button>
                     )}
                     <button className="gs-btn-dark" onClick={onClose}>
