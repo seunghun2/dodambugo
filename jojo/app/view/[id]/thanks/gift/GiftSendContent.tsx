@@ -305,10 +305,10 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 return;
             }
 
-            // 테스트 모드: 임시저장 정리 후 주문내역(10분 내 취소 가능) 페이지로 바로 이동
+            // 테스트 모드: 받는 사람 목록만 비우고(감사장 문구·카드는 유지) 주문내역 페이지로 이동
             setItems([]);
             try {
-                window.localStorage.removeItem(draftStorageKey);
+                window.localStorage.setItem(draftStorageKey, JSON.stringify({ tab, cardId, messages, items: [] }));
                 window.localStorage.removeItem(pendingStorageKey);
             } catch {}
             router.push(`/order/${data.orderNumber}`);
@@ -511,7 +511,16 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                     onClose={() => setConfirmOpen(false)}
                 />
             )}
-            {done && <DoneModal {...done} onClose={() => setDone(null)} />}
+            {done && (
+                <DoneModal
+                    {...done}
+                    onAddMore={() => {
+                        setDone(null);
+                        router.push(`/view/${bugoId}/gift`);
+                    }}
+                    onClose={() => setDone(null)}
+                />
+            )}
             {helpOpen && (
                 <div className="gs-overlay gs-center-wrap" onClick={() => setHelpOpen(false)}>
                     <div className="gs-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="선물하기 안내">

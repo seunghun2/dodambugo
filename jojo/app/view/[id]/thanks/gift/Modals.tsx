@@ -220,12 +220,14 @@ export function DoneModal({
     count,
     total,
     isTest,
+    onAddMore,
     onClose,
 }: {
     orderNumber: string;
     count: number;
     total: number;
     isTest: boolean;
+    onAddMore?: () => void;
     onClose: () => void;
 }) {
     return (
@@ -239,6 +241,11 @@ export function DoneModal({
                 <p className="gs-hint">결제 후 1시간 뒤 감사장과 모바일 쿠폰이 자동 발송됩니다.</p>
                 {isTest && <p className="gs-test-note">실제 결제·발송은 이루어지지 않았습니다.</p>}
                 <div className="gs-dialog-btns">
+                    {onAddMore && (
+                        <button className="gs-btn-light" onClick={onAddMore}>
+                            추가주문하기
+                        </button>
+                    )}
                     <button className="gs-btn-dark" onClick={onClose}>
                         확인
                     </button>

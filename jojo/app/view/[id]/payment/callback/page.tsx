@@ -280,10 +280,24 @@ export default function PaymentCallbackPage() {
                     return;
                 }
 
-                // 답례품 결제인 경우 임시저장 초안 정리
+                // 답례품 결제인 경우 받는 사람 명단(items)만 초기화하고 감사장 문구·카드(tab, cardId, messages)는 유지 (추가주문하기 편의)
                 if (paymentType === 'gift' || (orderNumber && orderNumber.startsWith('GF'))) {
                     try {
-                        window.localStorage.removeItem(`maeum_gift_draft_${finalBugoId2}`);
+                        const draftKey = `maeum_gift_draft_${finalBugoId2}`;
+                        const prevDraft = window.localStorage.getItem(draftKey);
+                        if (prevDraft) {
+                            const parsed = JSON.parse(prevDraft);
+                            window.localStorage.setItem(
+                                draftKey,
+                                JSON.stringify({
+                                    tab: parsed.tab,
+                                    cardId: parsed.cardId,
+                                    messages: parsed.messages,
+                                    items: [],
+                                })
+                            );
+                        }
+                        window.localStorage.removeItem(`maeum_gift_pending_${finalBugoId2}`);
                     } catch { /* noop */ }
                 }
 

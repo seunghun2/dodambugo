@@ -584,7 +584,7 @@ export default function OrderDetailPage() {
                             className="btn-payment"
                             style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                            답례품 추가 주문
+                            추가주문하기
                         </Link>
                     ) : (
                         <Link
