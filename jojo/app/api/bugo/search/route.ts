@@ -14,29 +14,28 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const query = (searchParams.get('q') || '').trim();
 
-        if (!query) {
-            return NextResponse.json({ data: [] });
-        }
-
-        const sanitized = query.replace(/[,%()]/g, '').trim();
-        if (!sanitized) {
-            return NextResponse.json({ data: [] });
-        }
-
         const oneMonthAgo = new Date();
         oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
         const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
 
+        const sanitized = query.replace(/[,%()]/g, '').trim();
+        if (query && !sanitized) {
+            return NextResponse.json({ data: [] });
+        }
+
         const supabase = getSupabase();
-        const { data, error } = await supabase
+        let builder = supabase
             .from('bugo')
-            .select('id, bugo_number, deceased_name, mourner_name, applicant_name, funeral_home, room_number, funeral_date, funeral_time, created_at')
+            .select('id, bugo_number, deceased_name, mourner_name, applicant_name, funeral_home, room_number, funeral_type, funeral_date, funeral_time, created_at')
             .is('deleted_at', null)
-            .neq('bugo_number', '5169')
-            .or(`bugo_number.eq.${sanitized},deceased_name.ilike.%${sanitized}%,mourner_name.ilike.%${sanitized}%`)
+            .neq('bugo_number', '5169');
+        if (sanitized) {
+            builder = builder.or(`bugo_number.eq.${sanitized},deceased_name.ilike.%${sanitized}%,mourner_name.ilike.%${sanitized}%`);
+        }
+        const { data, error } = await builder
             .gte('funeral_date', oneMonthAgoStr)
             .order('created_at', { ascending: false })
-            .limit(50);
+            .limit(sanitized ? 50 : 100);
 
         if (error) {
             throw error;

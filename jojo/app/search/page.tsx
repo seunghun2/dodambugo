@@ -21,6 +21,19 @@ export default function SearchPage() {
     const [passwordInput, setPasswordInput] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    // 최근 부고 목록 (서버 API, 민감정보 제외)
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch('/api/bugo/search');
+                const json = await res.json();
+                setRecentBugo(json.data || []);
+            } catch (err) {
+                console.error('최근 부고 로딩 오류:', err);
+            }
+        })();
+    }, []);
+
     const handleSearch = async () => {
         if (!query.trim()) return;
 
