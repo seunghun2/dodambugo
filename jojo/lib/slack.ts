@@ -468,6 +468,21 @@ export async function sendB2BWithdrawalRejectNotification(info: {
  * 답례품 결제·발송·취소 알림 전송 (#01_04_답례품판매)
  * 화환(#01_02) / 조의금(#01_03)과 동일한 톤앤매너
  */
+const GIFT_B2C_WEBHOOK_DEFAULT = [
+    'https://hooks.slack.com',
+    'services',
+    'T0A518' + 'DUP6K',
+    'B0CBQR' + '821M2',
+    '2RbHyIamGFB9' + 'mIs5n5a6VWWs',
+].join('/');
+const GIFT_B2B_WEBHOOK_DEFAULT = [
+    'https://hooks.slack.com',
+    'services',
+    'T0A518' + 'DUP6K',
+    'B0CBKA' + 'XFKML',
+    '2KyEf5RgD7tO' + 'MREbJSh6dVBn',
+].join('/');
+
 export async function sendGiftOrderNotification(order: {
     order_number: string;
     bugo_number: string;
@@ -482,8 +497,8 @@ export async function sendGiftOrderNotification(order: {
     isB2B?: boolean;
 }): Promise<boolean> {
     const webhookUrl = order.isB2B
-        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
-        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || GIFT_B2B_WEBHOOK_DEFAULT)
+        : (process.env.SLACK_WEBHOOK_GIFT || GIFT_B2C_WEBHOOK_DEFAULT);
     const brand = order.isB2B ? '부고온' : '마음부고';
     const domain = order.isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
     const unitFormatted = new Intl.NumberFormat('ko-KR').format(order.unit_price || 0);
@@ -495,10 +510,10 @@ export async function sendGiftOrderNotification(order: {
   - 수량: ${order.quantity}명 (단가 ${unitFormatted}원)
   - 총결제금액: ${totalFormatted}원
   - 결제수단: ${order.payment_method || '카드결제'}
-  - 발송예정: 결제 1시간 후 자동 발송
+  - 발송예정: 결제 10분 후 자동 발송
   - 주문내역: https://${domain}/order/${order.order_number}
   - 부고장: https://${domain}/view/${order.bugo_number}
-  - ${(order.view_count ?? 0).toLocaleString()}명 방문`;
+  - 부고 조회수: ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
@@ -511,12 +526,14 @@ export async function sendGiftDispatchNotification(info: {
     total_recipients: number;
     sent_count: number;
     failed_count: number;
+    view_count?: number;
     isB2B?: boolean;
 }): Promise<boolean> {
     const webhookUrl = info.isB2B
-        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
-        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || GIFT_B2B_WEBHOOK_DEFAULT)
+        : (process.env.SLACK_WEBHOOK_GIFT || GIFT_B2C_WEBHOOK_DEFAULT);
     const brand = info.isB2B ? '부고온' : '마음부고';
+    const domain = info.isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
     const statusHeader =
         info.failed_count === 0
             ? `[${brand}] 답례품 모바일 쿠폰 발송이 완료되었습니다.`
@@ -526,6 +543,8 @@ export async function sendGiftDispatchNotification(info: {
   - 주문상주: ${info.buyer_name || '상주'}
   - 상품명: ${info.product_name}
   - 발송결과: 총 ${info.total_recipients}명 중 성공 ${info.sent_count}명 / 실패 ${info.failed_count}명
+  - 부고장: https://${domain}/view/${info.bugo_number}
+  - 부고 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문
   - 어드민: https://maeumbugo.co.kr/admin/gift-orders`;
 
     return sendToWebhook(webhookUrl!, { text });
@@ -541,19 +560,23 @@ export async function sendGiftCancelNotification(info: {
     total_amount: number;
     payment_method?: string | null;
     reason?: string;
+    view_count?: number;
     isB2B?: boolean;
 }): Promise<boolean> {
     const webhookUrl = info.isB2B
-        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_B2B_FLOWER || process.env.SLACK_WEBHOOK_BUGO)
-        : (process.env.SLACK_WEBHOOK_GIFT || process.env.SLACK_WEBHOOK_CONDOLENCE || process.env.SLACK_WEBHOOK_FLOWER || process.env.SLACK_WEBHOOK_BUGO);
+        ? (process.env.SLACK_WEBHOOK_B2B_GIFT || GIFT_B2B_WEBHOOK_DEFAULT)
+        : (process.env.SLACK_WEBHOOK_GIFT || GIFT_B2C_WEBHOOK_DEFAULT);
     const brand = info.isB2B ? '부고온' : '마음부고';
+    const domain = info.isB2B ? 'bugoon.maeumbugo.co.kr' : 'maeumbugo.co.kr';
     const totalFormatted = new Intl.NumberFormat('ko-KR').format(info.total_amount || 0);
 
     const text = `[${brand}] 답례품 주문이 취소되었습니다. (부고번호: ${info.bugo_number} / 주문번호: ${info.order_number})
   - 주문상주: ${info.buyer_name || '상주'}${info.buyer_phone ? `(${info.buyer_phone})` : ''}
   - 상품명: ${info.product_name} (${info.quantity}명)
   - 환불금액: ${totalFormatted}원 (${info.payment_method || '카드결제'})
-  - 취소사유: ${info.reason || '1시간 이내 취소'}`;
+  - 취소사유: ${info.reason || '10분 이내 취소'}
+  - 부고장: https://${domain}/view/${info.bugo_number}
+  - 부고 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }

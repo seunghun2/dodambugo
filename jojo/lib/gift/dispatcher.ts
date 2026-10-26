@@ -253,15 +253,17 @@ export async function dispatchGiftOrder(
     const hasThanksCard = Boolean(order.card_id && order.card_id !== 'none');
     const useSeparateThanksLms = process.env.GIFT_SEPARATE_THANKS_LMS === 'true';
 
-    // 부고의 B2B(부고온플러스) 여부 확인 → 쿠폰 MMS 내 감사장 링크 도메인 분기
+    // 부고의 B2B(부고온플러스) 여부 및 조회수 확인 → 쿠폰 MMS 내 감사장 링크 도메인 분기 & 슬랙 알림 표시
     let isB2BBugo = false;
+    let bugoViewCount = 0;
     try {
         if (order.bugo_id || order.bugo_number) {
-            const bq = sb.from('bugo').select('b2b_user_id');
+            const bq = sb.from('bugo').select('b2b_user_id, view_count');
             const { data: bugoRow } = order.bugo_id
                 ? await bq.eq('id', order.bugo_id).maybeSingle()
                 : await bq.eq('bugo_number', String(order.bugo_number)).limit(1).maybeSingle();
             isB2BBugo = Boolean(bugoRow?.b2b_user_id);
+            bugoViewCount = bugoRow?.view_count ?? 0;
         }
     } catch {
         /* ignore */
@@ -363,6 +365,7 @@ export async function dispatchGiftOrder(
             total_recipients: list.length,
             sent_count: sentCount,
             failed_count: failedCount,
+            view_count: bugoViewCount,
             isB2B: isB2BBugo,
         }).catch(() => {});
     }
@@ -535,13 +538,15 @@ export async function cancelGiftOrder(
 
     // 4) 실결제 취소 시 슬랙 알림 + 상주에게 결제 취소 완료 알림 발송
     let isB2B = false;
+    let cancelViewCount = 0;
     try {
         const { data: b } = await sb
             .from('bugo')
-            .select('b2b_user_id')
+            .select('b2b_user_id, view_count')
             .eq('bugo_number', String(order.bugo_number))
             .maybeSingle();
         isB2B = Boolean(b?.b2b_user_id);
+        cancelViewCount = b?.view_count ?? 0;
     } catch {
         // ignore
     }
@@ -558,6 +563,7 @@ export async function cancelGiftOrder(
             total_amount: order.total_amount,
             payment_method: order.payment_method,
             reason,
+            view_count: cancelViewCount,
             isB2B,
         }).catch(() => {});
     }
