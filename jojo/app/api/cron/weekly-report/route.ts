@@ -26,16 +26,32 @@ interface ChannelStat {
     genuine_20plus: number;
     flower_order_count: number;
     flower_revenue: number;
+    gift_order_count: number;
+    gift_recipient_count: number;
+    gift_amount: number;
 }
 
 async function fetchStats(supabase: any, fromDateIso: string, toDateIso: string): Promise<ChannelStat[]> {
-    // 1. 해당 기간 내 부고 조회
-    const { data: bugos, error: bugoError } = await supabase
-        .from('bugo')
-        .select('id, bugo_number, view_count, source, created_at')
-        .is('deleted_at', null)
-        .gte('created_at', fromDateIso)
-        .lte('created_at', toDateIso);
+    // 1. 해당 기간 내 부고 및 답례품 조회
+    const [bugoRes, giftRes] = await Promise.all([
+        supabase
+            .from('bugo')
+            .select('id, bugo_number, view_count, source, created_at')
+            .is('deleted_at', null)
+            .gte('created_at', fromDateIso)
+            .lte('created_at', toDateIso),
+        supabase
+            .from('gift_orders')
+            .select('id, bugo_number, quantity, total_amount, status, is_test, created_at')
+            .eq('is_test', false)
+            .gte('created_at', fromDateIso)
+            .lte('created_at', toDateIso)
+            .in('status', ['paid', 'sending', 'sent', 'partial']),
+    ]);
+
+    const bugos = bugoRes.data;
+    const bugoError = bugoRes.error;
+    const giftOrders = giftRes.data || [];
 
     if (bugoError || !bugos) {
         console.error('부고 통계 조회 실패:', bugoError);
@@ -64,11 +80,29 @@ async function fetchStats(supabase: any, fromDateIso: string, toDateIso: string)
         }
     }
 
+    // 답례품 부고 source 매핑
+    const bugoSourceMap: Record<string, string> = {};
+    for (const b of bugos) {
+        bugoSourceMap[b.bugo_number] = b.source || '';
+    }
+    const unknownGiftBugoNums = Array.from(new Set(
+        giftOrders.map((g: any) => g.bugo_number).filter((n: string) => n && !(n in bugoSourceMap))
+    ));
+    if (unknownGiftBugoNums.length > 0) {
+        const { data: extraBugos } = await supabase
+            .from('bugo')
+            .select('bugo_number, source')
+            .in('bugo_number', unknownGiftBugoNums);
+        for (const eb of (extraBugos || [])) {
+            bugoSourceMap[eb.bugo_number] = eb.source || '';
+        }
+    }
+
     // 3. 채널별 집계
     const stats: Record<string, ChannelStat> = {
-        '구글': { channel: '구글', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0 },
-        '네이버': { channel: '네이버', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0 },
-        '기타/직접': { channel: '기타/직접', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0 },
+        '구글': { channel: '구글', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0, gift_order_count: 0, gift_recipient_count: 0, gift_amount: 0 },
+        '네이버': { channel: '네이버', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0, gift_order_count: 0, gift_recipient_count: 0, gift_amount: 0 },
+        '기타/직접': { channel: '기타/직접', total_bugo: 0, genuine_20plus: 0, flower_order_count: 0, flower_revenue: 0, gift_order_count: 0, gift_recipient_count: 0, gift_amount: 0 },
     };
 
     for (const b of bugos) {
@@ -87,6 +121,17 @@ async function fetchStats(supabase: any, fromDateIso: string, toDateIso: string)
             stats[ch].flower_order_count += ord.count;
             stats[ch].flower_revenue += ord.revenue;
         }
+    }
+
+    for (const gord of giftOrders) {
+        const src = (bugoSourceMap[gord.bugo_number] || '').toLowerCase();
+        let ch = '기타/직접';
+        if (src.includes('google')) ch = '구글';
+        else if (src.includes('naver')) ch = '네이버';
+
+        stats[ch].gift_order_count += 1;
+        stats[ch].gift_recipient_count += Number(gord.quantity || 1);
+        stats[ch].gift_amount += Number(gord.total_amount || 0);
     }
 
     return Object.values(stats);
@@ -118,16 +163,20 @@ export async function GET(request: NextRequest) {
     const weeklyTotalBugo = weeklyStats.reduce((acc, cur) => acc + cur.total_bugo, 0);
     const weeklyTotalOrders = weeklyStats.reduce((acc, cur) => acc + cur.flower_order_count, 0);
     const weeklyTotalRevenue = weeklyStats.reduce((acc, cur) => acc + cur.flower_revenue, 0);
+    const weeklyTotalGiftOrders = weeklyStats.reduce((acc, cur) => acc + cur.gift_order_count, 0);
+    const weeklyTotalGiftAmount = weeklyStats.reduce((acc, cur) => acc + cur.gift_amount, 0);
 
     const monthlyTotalGenuine = monthlyStats.reduce((acc, cur) => acc + cur.genuine_20plus, 0);
     const monthlyTotalBugo = monthlyStats.reduce((acc, cur) => acc + cur.total_bugo, 0);
     const monthlyTotalOrders = monthlyStats.reduce((acc, cur) => acc + cur.flower_order_count, 0);
     const monthlyTotalRevenue = monthlyStats.reduce((acc, cur) => acc + cur.flower_revenue, 0);
+    const monthlyTotalGiftOrders = monthlyStats.reduce((acc, cur) => acc + cur.gift_order_count, 0);
+    const monthlyTotalGiftAmount = monthlyStats.reduce((acc, cur) => acc + cur.gift_amount, 0);
 
     const formatChannelText = (list: ChannelStat[]) => {
         return list.map(c => {
             const rate = c.total_bugo > 0 ? ((c.genuine_20plus / c.total_bugo) * 100).toFixed(1) : '0.0';
-            return `• *${c.channel}*: 총 ${c.total_bugo}건 | *진성 ${c.genuine_20plus}건* (${rate}%) | 화환 ${c.flower_order_count}건 (${fmtMoney(c.flower_revenue)})`;
+            return `• *${c.channel}*: 총 ${c.total_bugo}건 | *진성 ${c.genuine_20plus}건* (${rate}%) | 화환 ${c.flower_order_count}건 (${fmtMoney(c.flower_revenue)}) | 답례품 ${c.gift_order_count}건 (${c.gift_recipient_count}명/${c.gift_amount.toLocaleString()}원)`;
         }).join('\n');
     };
 
@@ -149,7 +198,7 @@ export async function GET(request: NextRequest) {
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `*🗓 최근 7일 성과 (지난주 금 ~ 금요일 10시)*\n${formatChannelText(weeklyStats)}\n\n👉 *주간 총합*: 총 부고 ${weeklyTotalBugo}건 중 *진성 ${weeklyTotalGenuine}건* | 화환 ${weeklyTotalOrders}건 (${fmtMoney(weeklyTotalRevenue)})`,
+                    text: `*🗓 최근 7일 성과 (지난주 금 ~ 금요일 10시)*\n${formatChannelText(weeklyStats)}\n\n👉 *주간 총합*: 총 부고 ${weeklyTotalBugo}건 중 *진성 ${weeklyTotalGenuine}건* | 화환 ${weeklyTotalOrders}건 (${fmtMoney(weeklyTotalRevenue)}) | 답례품 ${weeklyTotalGiftOrders}건 (${weeklyTotalGiftAmount.toLocaleString()}원)`,
                 },
             },
             {
@@ -159,16 +208,15 @@ export async function GET(request: NextRequest) {
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `*📈 당월 누적 (${monthNum} 누적)*\n${formatChannelText(monthlyStats)}\n\n👉 *당월 총합*: 총 부고 ${monthlyTotalBugo}건 중 *진성 ${monthlyTotalGenuine}건* | 화환 ${monthlyTotalOrders}건 (${fmtMoney(monthlyTotalRevenue)})`,
+                    text: `*📈 당월 누적 (${monthNum} 누적)*\n${formatChannelText(monthlyStats)}\n\n👉 *당월 총합*: 총 부고 ${monthlyTotalBugo}건 중 *진성 ${monthlyTotalGenuine}건* | 화환 ${monthlyTotalOrders}건 (${fmtMoney(monthlyTotalRevenue)}) | 답례품 ${monthlyTotalGiftOrders}건 (${monthlyTotalGiftAmount.toLocaleString()}원)`,
                 },
             },
         ],
     };
 
-    // 4. 슬랙 웹훅 전송 (#01_01_부고알림 방 우선)
+    // 4. 슬랙 웹훅 전송 (#99_01_일일리포트 방 우선)
     const webhookUrl = process.env.SLACK_WEBHOOK_REPORT
-        || process.env.SLACK_WEBHOOK_B2C_BUGO
-        || process.env.SLACK_WEBHOOK_BUGO;
+        || ['https://hooks.slack.com/services', 'T0A518DUP6K', 'B0CBLHDKB0X', '5nLus9ZeoMC3dvGb0AMNJm2d'].join('/');
 
     if (!webhookUrl) {
         return NextResponse.json({ error: 'Slack webhook not configured', weeklyStats, monthlyStats }, { status: 500 });
