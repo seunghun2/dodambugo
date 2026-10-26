@@ -510,10 +510,10 @@ export async function sendGiftOrderNotification(order: {
   - 수량: ${order.quantity}명 (단가 ${unitFormatted}원)
   - 총결제금액: ${totalFormatted}원
   - 결제수단: ${order.payment_method || '카드결제'}
-  - 발송예정: 결제 10분 후 자동 발송
+  - 발송예정: 결제 1시간 후 자동 발송
   - 주문내역: https://${domain}/order/${order.order_number}
   - 부고장: https://${domain}/view/${order.bugo_number}
-  - 부고 조회수: ${(order.view_count ?? 0).toLocaleString()}명 방문`;
+  - 조회수: ${(order.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
@@ -543,9 +543,9 @@ export async function sendGiftDispatchNotification(info: {
   - 주문상주: ${info.buyer_name || '상주'}
   - 상품명: ${info.product_name}
   - 발송결과: 총 ${info.total_recipients}명 중 성공 ${info.sent_count}명 / 실패 ${info.failed_count}명
+  - 어드민: https://maeumbugo.co.kr/admin/gift-orders
   - 부고장: https://${domain}/view/${info.bugo_number}
-  - 부고 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문
-  - 어드민: https://maeumbugo.co.kr/admin/gift-orders`;
+  - 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
@@ -574,9 +574,9 @@ export async function sendGiftCancelNotification(info: {
   - 주문상주: ${info.buyer_name || '상주'}${info.buyer_phone ? `(${info.buyer_phone})` : ''}
   - 상품명: ${info.product_name} (${info.quantity}명)
   - 환불금액: ${totalFormatted}원 (${info.payment_method || '카드결제'})
-  - 취소사유: ${info.reason || '10분 이내 취소'}
+  - 취소사유: ${info.reason || '1시간 이내 취소'}
   - 부고장: https://${domain}/view/${info.bugo_number}
-  - 부고 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문`;
+  - 조회수: ${(info.view_count ?? 0).toLocaleString()}명 방문`;
 
     return sendToWebhook(webhookUrl!, { text });
 }
