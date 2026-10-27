@@ -290,20 +290,31 @@ export async function POST(request: NextRequest) {
                 });
             }
 
-            // 🔒 서버측 금액/주문번호 검증: 클라이언트가 보낸 amt/moid 조작으로 싸게 결제하고
-            // 비싼 주문을 paid 처리(쿠폰 발급)하는 것을 방지. PG 응답에 값이 있을 때만 비교(없으면 로그만).
+            // 🔒 서버측 금액/주문번호 검증: 클라이언트가 보낸 amt/taxFreeAmt/moid 조작으로 싸게 결제하고
+            // 비싼 주문을 paid 처리(쿠폰 발급)하는 것을 방지.
+            // 주의: 답례품은 면세(amt='0', taxFreeAmt=총액)로 결제되므로 과세+비과세 합산 금액으로 비교해야 함.
             {
-                const pgAmtRaw = approveResult.data?.amt;
-                const pgMoid = approveResult.data?.moid;
+                const verifiedPaidTotal = (Number(amt) || 0) + (Number(taxFreeAmt) || 0);
+                const pgDataTotal = (Number(approveResult.data?.amt) || 0) + (Number(approveResult.data?.taxFreeAmt) || 0);
+                const pgAmtOnly = Number(approveResult.data?.amt);
+                const pgMoid = approveResult.data?.moid || moid;
                 const expectedAmt = Number(existingGift.total_amount);
-                const amtMismatch = pgAmtRaw !== undefined && pgAmtRaw !== null && String(pgAmtRaw) !== ''
-                    && Number(pgAmtRaw) !== expectedAmt;
+
+                const hasVerifiedAmt = verifiedPaidTotal > 0 || pgDataTotal > 0;
+                const amtMatches =
+                    !hasVerifiedAmt ||
+                    verifiedPaidTotal === expectedAmt ||
+                    pgDataTotal === expectedAmt ||
+                    pgAmtOnly === expectedAmt;
                 const moidMismatch = !!pgMoid && String(pgMoid).trim() !== String(existingGift.order_number).trim();
-                if (amtMismatch || moidMismatch) {
+
+                if (!amtMatches || moidMismatch) {
                     console.error('🚨 답례품 결제 검증 실패 (금액/주문번호 불일치) - paid 처리 중단', {
                         orderNumber: existingGift.order_number,
                         expectedAmt,
-                        pgAmt: pgAmtRaw,
+                        verifiedPaidTotal,
+                        pgDataTotal,
+                        pgAmtRaw: approveResult.data?.amt,
                         pgMoid,
                         tid: transactionId,
                     });
@@ -311,9 +322,6 @@ export async function POST(request: NextRequest) {
                         { success: false, error: '결제 금액 또는 주문 정보가 일치하지 않아 처리할 수 없습니다. 고객센터로 문의해주세요.' },
                         { status: 400 }
                     );
-                }
-                if (pgAmtRaw === undefined || pgAmtRaw === null || String(pgAmtRaw) === '') {
-                    console.warn('⚠️ PG 응답에 amt 없음 - 금액 검증 생략', { orderNumber: existingGift.order_number });
                 }
             }
 
@@ -394,7 +402,7 @@ export async function POST(request: NextRequest) {
             // 🛡️ 1. 중복 승인 방지 (이미 처리된 주문인 경우 중복 수당 적립 및 중복 알림 방지)
             const { data: existingOrder } = await supabase
                 .from('flower_orders')
-                .select('id, status, order_number')
+                .select('id, status, order_number, product_price')
                 .eq('id', actualOrderId)
                 .maybeSingle();
 
@@ -406,6 +414,31 @@ export async function POST(request: NextRequest) {
                     orderId: actualOrderId,
                     orderNumber: existingOrder.order_number
                 });
+            }
+
+            // 🔒 2. 화환 결제 금액 검증 (소액 결제 후 고액 화환 주문 완료 및 B2B 파트너 수당 5만원 편취 방지)
+            // 화환은 면세(amt='0', taxFreeAmt=상품가)로 결제되므로 과세+비과세 합산 금액으로 비교
+            const verifiedFlowerTotal = (Number(amt) || 0) + (Number(taxFreeAmt) || 0);
+            const pgFlowerTotal = (Number(approveResult.data?.amt) || 0) + (Number(approveResult.data?.taxFreeAmt) || 0);
+            const expectedFlowerPrice = Number(existingOrder?.product_price || 0);
+            if (
+                expectedFlowerPrice > 0 &&
+                verifiedFlowerTotal > 0 &&
+                verifiedFlowerTotal !== expectedFlowerPrice &&
+                pgFlowerTotal !== expectedFlowerPrice &&
+                Number(approveResult.data?.amt) !== expectedFlowerPrice
+            ) {
+                console.error('🚨 [Flower Order] 결제 금액 불일치 차단:', {
+                    orderId: actualOrderId,
+                    expectedFlowerPrice,
+                    verifiedFlowerTotal,
+                    pgFlowerTotal,
+                    tid: transactionId,
+                });
+                return NextResponse.json(
+                    { success: false, error: '결제 금액이 화환 주문 금액과 일치하지 않습니다. 고객센터로 문의해주세요.' },
+                    { status: 400 }
+                );
             }
 
             // 1단계: status 먼저 업데이트 (확실히 작동)
