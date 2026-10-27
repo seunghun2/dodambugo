@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { isGoogleIp } from '@/lib/googleIp';
 
 function getSupabase() {
     return createClient(
@@ -51,7 +52,8 @@ export async function POST(request: NextRequest) {
 
         // 2. 자동 차단 판단
         const threshold = AUTO_BLOCK_THRESHOLDS[type];
-        if (threshold && !ADMIN_WHITELIST_IPS.includes(ip)) {
+        // 구글 공식 크롤러 IP(Googlebot/AdsBot 등)는 자동 차단 제외 (광고 검수·검색 색인 보호)
+        if (threshold && !ADMIN_WHITELIST_IPS.includes(ip) && !isGoogleIp(ip)) {
             // 최근 24시간 내 같은 IP의 같은 유형 활동 횟수 조회
             const oneDayAgo = new Date();
             oneDayAgo.setHours(oneDayAgo.getHours() - 24);
