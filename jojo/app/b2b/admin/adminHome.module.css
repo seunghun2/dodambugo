@@ -1,0 +1,131 @@
+.titleArea {
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.cardIcon {
+    color: #94a3b8;
+}
+
+.cardValue {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.cardDesc {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.highlightCard {
+    border-color: #fbd38d;
+    background-color: #fffdf5;
+}
+
+.highlightValue {
+    color: #c5973b;
+}
+
+.quickMenuSection {
+    margin-top: 40px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+}
+
+.menuGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.menuLink {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: #1e293b;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.menuLink:hover {
+    transform: translateY(-2px);
+    border-color: #d4a84b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.menuIconWrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+}
+
+.menuLink:hover .menuIconWrapper {
+    background-color: #fffdf5;
+    color: #d4a84b;
+}
+
+.menuLabel {
+    font-size: 15px;
+    font-weight: 600;
+}

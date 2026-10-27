@@ -1,0 +1,183 @@
+/* ========================================
+   부고장 템플릿 헤더 스타일
+   - 4가지 템플릿: basic, ribbon, border, flower
+======================================== */
+
+/* 헤더 컨테이너 */
+.bugo-header {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    min-height: 0;
+    padding-bottom: 165%; /* 비율 약간 축소 */
+    margin: 20px auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+}
+
+/* 템플릿별 여백 조정 */
+.template-basic.bugo-header,
+.template-ribbon.bugo-header {
+    padding: 8px;
+    padding-bottom: calc(165% + 16px); /* 165% + 상하 패딩 */
+}
+
+.template-border.bugo-header {
+    padding-bottom: 165%; /* 패딩 없음 */
+}
+
+.template-flower.bugo-header {
+    padding-bottom: 165%; /* 패딩 없음 */
+}
+
+/* 백그라운드 이미지 */
+.header-template-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+/* 템플릿별 배경 색상 */
+.template-basic .header-template-bg {
+    background-color: #ffffff;
+}
+
+.template-ribbon .header-template-bg {
+    background-color: #f9f9f9;
+}
+
+.template-border .header-template-bg {
+    background-color: #ffffff;
+}
+
+.template-flower .header-template-bg {
+    background-color: #000000;
+}
+
+/* 텍스트 오버레이 */
+.header-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+/* 템플릿별 본문 위치 (퍼센트 기반) */
+.template-basic .header-text-overlay {
+    padding-top: 45%; /* 訃告 아래 */
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.template-ribbon .header-text-overlay {
+    padding-top: 55%; /* 부고 리본 아래 */
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.template-border .header-text-overlay {
+    padding-top: 55%; /* 謹弔 아래 */
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.template-flower .header-text-overlay {
+    padding-top: 26%; /* 검정 배경 부고 아래 */
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+/* 애도 문구 컨테이너 */
+.condolence-message-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 0;
+}
+
+.condolence-message-header p {
+    font-family: 'KoPub Batang', 'Noto Serif KR', serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: -0.1px;
+    margin: 0;
+    padding: 0 12px;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* 템플릿별 본문 색상 */
+.template-basic .condolence-message-header p {
+    color: #1a1a1a;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.template-ribbon .condolence-message-header p {
+    color: #1a1a1a;
+}
+
+.template-border .condolence-message-header p {
+    color: #1a1a1a;
+}
+
+.template-flower .condolence-message-header p {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 첫 번째 줄 */
+.condolence-line1 {
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+    margin-bottom: 1px !important;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .bugo-header {
+        max-width: 100%;
+    }
+    
+    .condolence-message-header p {
+        font-size: 11px;
+        line-height: 19px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bugo-header {
+        max-width: 100%;
+    }
+    
+    .template-basic .header-text-overlay,
+    .template-ribbon .header-text-overlay,
+    .template-border .header-text-overlay,
+    .template-flower .header-text-overlay {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+    
+    .condolence-message-header p {
+        font-size: 10px;
+        line-height: 18px;
+        padding: 0 8px;
+    }
+}

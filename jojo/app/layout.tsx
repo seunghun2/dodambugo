@@ -1,0 +1,256 @@
+// Import styles of packages that you've installed.
+// All packages except `@mantine/hooks` require styles imports
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
+import './globals.css';
+
+import { MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+import { ModalsProvider } from '@mantine/modals';
+import { dodamTheme } from '@/lib/theme';
+import MainLayout from '@/components/MainLayout';
+import KakaoInit from '@/components/KakaoInit';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import MicrosoftClarity from '@/components/MicrosoftClarity';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import Script from 'next/script';
+import GlobalBackButtonHandler from '@/components/GlobalBackButtonHandler';
+
+export const metadata = {
+  title: '마음부고 - 무료 모바일 부고장 만들기 | 3분 완성, 카카오톡 공유',
+  description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료, 광고 없음, 카카오톡 공유',
+  keywords: '마음부고, 부고장, 모바일 부고장, 모바일부고, 부고문자, 부고, 무료 부고장, 온라인 부고, 카카오톡 공유, 장례식장, 조문, 화환, 근조화환',
+  authors: [{ name: '마음부고' }],
+  creator: '마음부고',
+  publisher: '마음부고',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: '마음부고 - 무료 모바일 부고장 만들기',
+    description: '3분 만에 만드는 품격있는 무료 모바일 부고장. 4가지 세련된 템플릿, 완전 무료',
+    type: 'website',
+    url: 'https://maeumbugo.co.kr',
+    siteName: '마음부고',
+    locale: 'ko_KR',
+    images: [
+      {
+        url: 'https://maeumbugo.co.kr/og-maeumbugo.png',
+        width: 1200,
+        height: 630,
+        alt: '마음부고 - 무료 모바일 부고장 만들기',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '마음부고 - 품격있는 무료 모바일 부고장',
+    description: '3분 만에 만드는 품격있는 무료 모바일 부고장',
+    images: ['https://maeumbugo.co.kr/og-maeumbugo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  // canonical은 각 페이지에서 자기 URL로 개별 지정 (전역 지정 시 모든 페이지가 홈으로 상속됨)
+  verification: {
+    google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',
+    other: {
+      'naver-site-verification': '8541a7d656fb18d451eebcb9bb7f10b77626fc8f',
+    },
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover' as const,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ko" {...mantineHtmlProps} suppressHydrationWarning>
+      <head>
+        <meta name="format-detection" content="telephone=no, address=no, email=no" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        {/* Nanum Myeongjo: 부고장 본문 폰트 (display=swap으로 논블로킹) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+          rel="stylesheet"
+        />
+        {/* Pretendard */}
+        <link
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+          rel="stylesheet"
+        />
+        {/* Material Symbols */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          rel="stylesheet"
+        />
+        {/* 카카오 SDK */}
+        <Script 
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" 
+          integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" 
+          crossOrigin="anonymous" 
+          strategy="afterInteractive"
+        />
+        {/* Material Symbols 폰트 로딩 감지 */}
+        <Script
+          id="material-symbols-font-loader"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function checkFont() {
+                  if (document.fonts && document.fonts.check('24px "Material Symbols Outlined"')) {
+                    document.documentElement.classList.add('fonts-loaded');
+                    return true;
+                  }
+                  return false;
+                }
+                
+                if (checkFont()) return;
+                
+                if (document.fonts && document.fonts.ready) {
+                  document.fonts.ready.then(function() {
+                    document.documentElement.classList.add('fonts-loaded');
+                  });
+                }
+                
+                // Fallback: 최대 3초 후 강제 표시
+                setTimeout(function() {
+                  document.documentElement.classList.add('fonts-loaded');
+                }, 3000);
+              })();
+            `,
+          }}
+        />
+        {/* 📊 유입 채널(광고 키워드/오가닉) 정밀 감지 및 7일 기여 저장 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var p = new URLSearchParams(window.location.search);
+                  var s = null;
+                  if (p.has('gclid') || p.has('gbraid') || p.has('wbraid')) {
+                    var utmTerm = p.get('utm_term') || p.get('q');
+                    s = utmTerm ? ('google_ad:' + utmTerm.trim()) : 'google_ad';
+                  } else if (p.has('n_media') || p.has('n_query') || p.has('n_ad_group') || p.has('n_ad')) {
+                    var rawKeyword = p.get('n_query') || p.get('n_keyword');
+                    var decodedKeyword = '';
+                    if (rawKeyword) {
+                      try { decodedKeyword = decodeURIComponent(rawKeyword).trim(); } catch(e) { decodedKeyword = rawKeyword.trim(); }
+                    }
+                    s = decodedKeyword ? ('naver_ad:' + decodedKeyword) : 'naver_ad';
+                  } else if (p.get('utm_source')) {
+                    var src = p.get('utm_source');
+                    var term = p.get('utm_term');
+                    s = term ? (src + ':' + term.trim()) : src;
+                  } else {
+                    var r = document.referrer || '';
+                    if (r.indexOf('ad.search.naver.com') !== -1) s = 'naver_ad';
+                    else if (r.indexOf('google.') !== -1) s = 'google_organic';
+                    else if (r.indexOf('naver.') !== -1) s = 'naver_organic';
+                    else if (r.indexOf('daum.') !== -1 || r.indexOf('kakao.') !== -1) s = 'daum_kakao';
+                  }
+                  if (s) {
+                    var now = Date.now();
+                    var isPaid = s.indexOf('_ad') !== -1;
+                    var existingTime = parseInt(localStorage.getItem('mb_source_time') || '0', 10);
+                    // 7일(604,800,000ms) 경과 시 기존 광고 유입 만료 처리
+                    var isExpired = !existingTime || (now - existingTime > 604800000);
+                    var existing = isExpired ? null : (sessionStorage.getItem('mb_source') || localStorage.getItem('mb_source'));
+                    var isExistingPaid = existing && existing.indexOf('_ad') !== -1;
+                    if (isPaid || !isExistingPaid) {
+                      sessionStorage.setItem('mb_source', s);
+                      localStorage.setItem('mb_source', s);
+                      localStorage.setItem('mb_source_time', now.toString());
+                      document.cookie = 'mb_ad_channel=' + encodeURIComponent(s) + '; path=/; max-age=' + (7*86400) + '; SameSite=Lax';
+                    }
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning>
+        <GoogleAnalytics />
+        <MicrosoftClarity />
+        <KakaoInit />
+        {/* 🔒 개발자 도구 방지 및 F12 차단 (disable-devtool 라이브러리 연동) */}
+        <Script
+          src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.8"
+          strategy="lazyOnload"
+        />
+        <Script
+          id="devtools-blocker"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window === 'undefined') return;
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+                // 검색봇·측정도구는 제외 (렌더링 중 about:blank로 튕기면 색인 실패)
+                if (/bot|google|crawler|spider|yeti|daum|lighthouse|pagespeed|headless/i.test(navigator.userAgent)) return;
+
+                function initBlocker() {
+                  if (typeof DisableDevtool !== 'undefined') {
+                    DisableDevtool({
+                      url: 'about:blank',
+                      disableMenu: false, // 우클릭 허용 (복사/붙여넣기 가능)
+                      clearLog: true,
+                    });
+                  }
+                }
+
+                if (typeof DisableDevtool !== 'undefined') {
+                  initBlocker();
+                } else {
+                  var interval = setInterval(function() {
+                    if (typeof DisableDevtool !== 'undefined') {
+                      initBlocker();
+                      clearInterval(interval);
+                    }
+                  }, 100);
+                }
+              })();
+            `,
+          }}
+        />
+        <MantineProvider theme={dodamTheme} defaultColorScheme="light">
+          <ModalsProvider>
+            <Notifications position="top-center" zIndex={10000} />
+            <GlobalBackButtonHandler />
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </ModalsProvider>
+        </MantineProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
+  );
+}

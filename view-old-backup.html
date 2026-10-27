@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고장 - 도담부고</title>
+    <meta name="description" content="품격있는 모바일 부고장">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- KoPubWorld 바탕체 (공공누리 폰트) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-kopub@1.0/kopubdotum.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/view-template.css">
+    <link rel="stylesheet" href="css/view-toss.css">
+</head>
+<body>
+    <!-- Loading -->
+    <div id="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>부고장을 불러오는 중...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2>부고장을 찾을 수 없습니다</h2>
+            <p>존재하지 않거나 삭제된 부고장입니다.</p>
+            <div class="error-actions">
+                <a href="search.html" class="btn-secondary">부고 검색하기</a>
+                <a href="index.html" class="btn-primary">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bugo View -->
+    <main id="bugoView" class="bugo-view" style="display: none;">
+        <!-- Header with Template Background -->
+        <div class="bugo-header" id="bugoHeader">
+            <div class="header-template-bg" id="templateBg"></div>
+            <div class="header-text-overlay">
+                <div class="condolence-message-header" id="condolenceHeader">
+                    <p class="condolence-line1" id="condolenceLine1">故홍길동님께서 11월 25일</p>
+                    <p class="condolence-line2">별세하셨기에 삼가 알려드립니다.</p>
+                    <p class="condolence-line3">마음으로 마주한 위로 부탁드리며</p>
+                    <p class="condolence-line4">고인의 명복을 빌어주시길 바랍니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bugo-content">
+            <!-- 썸네일 안내 문구 -->
+            <section class="content-section condolence-message">
+                <div class="condolence-text" id="condolenceText">
+                    <!-- JavaScript로 자동 생성 -->
+                </div>
+            </section>
+
+            <!-- 고인 정보 -->
+            <section class="content-section" id="deceasedSection">
+                <h3 class="content-title">고인</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">고인</span>
+                        <span class="info-value" id="deceasedNameInfo">故 홍길동</span>
+                    </div>
+                    <div class="info-row" id="ageRow">
+                        <span class="info-label">향년</span>
+                        <span class="info-value" id="age">75세</span>
+                    </div>
+                    <div class="info-row" id="genderRow">
+                        <span class="info-label">성별</span>
+                        <span class="info-value" id="gender">남</span>
+                    </div>
+                    <div class="info-row" id="religionRow">
+                        <span class="info-label">종교</span>
+                        <span class="info-value" id="religion">불교</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 상주 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">상주</h3>
+                <div id="mournersInfo" class="mourners-list">
+                    <!-- JavaScript로 동적 생성 (아들, 딸, 사위, 며느리 순) -->
+                </div>
+            </section>
+
+            <!-- 별세 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">별세</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">별세일시</span>
+                        <span class="info-value" id="deathDatetime">-</span>
+                    </div>
+                    <div class="info-row" id="encoffinRow">
+                        <span class="info-label">입관일시</span>
+                        <span class="info-value" id="encoffinDatetime">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 발인 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">발인</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">발인일시</span>
+                        <span class="info-value" id="funeralDatetime">-</span>
+                    </div>
+                    <div class="info-row" id="funeralTypeRow">
+                        <span class="info-label">장례방법</span>
+                        <span class="info-value" id="funeralType">-</span>
+                    </div>
+                    <div class="info-row" id="burialPlaceRow">
+                        <span class="info-label">장지</span>
+                        <span class="info-value" id="burialPlace">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 빈소 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">빈소</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">장례식장</span>
+                        <span class="info-value" id="funeralHome">-</span>
+                    </div>
+                    <div class="info-row" id="roomRow">
+                        <span class="info-label">호실</span>
+                        <span class="info-value" id="roomNumber">-</span>
+                    </div>
+                    <div class="info-row" id="funeralTelRow">
+                        <span class="info-label">연락처</span>
+                        <span class="info-value" id="funeralTel">
+                            <a href="tel:" id="funeralTelLink">-</a>
+                        </span>
+                    </div>
+                    <div class="info-row" id="addressRow">
+                        <span class="info-label">주소</span>
+                        <span class="info-value" id="address">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 장례식장 오시는 길 -->
+            <section class="content-section map-section" id="mapSection">
+                <div class="map-header">
+                    <h3 class="content-title">장례식장 오시는 길</h3>
+                </div>
+                <div id="map" class="map-container">
+                    <!-- Kakao Map -->
+                </div>
+                <div class="map-actions">
+                    <button class="map-btn" onclick="openKakaoMap()">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2.5c-3.866 0-7 2.686-7 6 0 3.866 4.667 8.333 7 9.5 2.333-1.167 7-5.634 7-9.5 0-3.314-3.134-6-7-6z" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="10" cy="8.5" r="2" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        길찾기
+                    </button>
+                    <button class="map-btn primary" onclick="shareBugo()">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 6.667a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 18.333a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7.083 11.25l5.834 3.167M12.917 5.583L7.083 8.75" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        부고 보내기
+                    </button>
+                </div>
+            </section>
+
+            <!-- 안내 메시지 -->
+            <section class="content-section" id="messageSection" style="display: none;">
+                <h3 class="content-title">안내하는 글</h3>
+                <div class="message-box" id="message"></div>
+            </section>
+
+            <!-- 계좌 정보 -->
+            <section class="content-section" id="accountSection" style="display: none;">
+                <h3 class="content-title">계좌 정보</h3>
+                <div id="accountInfo" class="account-list">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+            </section>
+
+            <!-- 하단 안내 문구 -->
+            <section class="content-section footer-notice">
+                <p class="notice-text">
+                    황망한 마음에 일일이 연락드리지 못함을<br>
+                    너그러이 양해해 주시기 바랍니다.
+                </p>
+            </section>
+        </div>
+
+        <!-- Actions -->
+        <div class="bugo-actions">
+            <button class="action-btn" onclick="shareBugo()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M15 6.667a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 18.333a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M7.083 11.25l5.834 3.167M12.917 5.583L7.083 8.75" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                공유하기
+            </button>
+            <button class="action-btn" onclick="showEditModal()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M14.167 2.5a1.768 1.768 0 0 1 2.5 2.5L5.833 15.833 1.667 17.5l1.666-4.167L14.167 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                수정하기
+            </button>
+            <button class="action-btn btn-primary" onclick="location.href='index.html'">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M2.5 7.5l7.5-5 7.5 5v8.333a1.667 1.667 0 0 1-1.667 1.667H4.167A1.667 1.667 0 0 1 2.5 15.833V7.5z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M7.5 17.5v-7.5h5v7.5" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                홈으로
+            </button>
+        </div>
+    </main>
+
+    <!-- 플로팅 근조화 보내기 버튼 -->
+    <div id="floatingBtn" class="floating-button" style="display: none;">
+        <button class="condolence-flower-btn" onclick="sendCondolenceFlower()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" stroke="white" stroke-width="2"/>
+                <path d="M12 8v8M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>근조화 보내기</span>
+        </button>
+    </div>
+
+    <!-- 비밀번호 확인 모달 -->
+    <div id="editModal" class="edit-modal" style="display: none;">
+        <div class="edit-modal-overlay" onclick="closeEditModal()"></div>
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3>부고장 수정</h3>
+                <button class="edit-modal-close" onclick="closeEditModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="edit-modal-body">
+                <p class="edit-modal-description">부고장을 수정하려면 작성 시 입력한 휴대번호 뒷 4자리를 입력하세요.</p>
+                <input type="password" id="editPassword" class="edit-password-input" placeholder="휴대번호 뒷 4자리" maxlength="4" pattern="[0-9]{4}">
+                <div id="editError" class="edit-error" style="display: none;"></div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn-cancel" onclick="closeEditModal()">취소</button>
+                <button class="btn-confirm" onclick="verifyPassword()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kakao Map API -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
+    
+    <script src="js/view-new.js"></script>
+</body>
+</html>

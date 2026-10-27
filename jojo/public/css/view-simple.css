@@ -1,0 +1,188 @@
+/* ========================================
+   심플 썸네일 스타일 - 4가지 템플릿
+   기본형(basic) / 정중형(ribbon) / 안내형(border) / 고급형(flower)
+======================================== */
+
+/* 공통 썸네일 스타일 */
+.bugo-header {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin: 20px auto 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.bugo-header img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 템플릿별 특별 효과 */
+
+/* 기본형 (basic) - 訃告 */
+.template-basic .bugo-header {
+    background: #FFFFFF;
+}
+
+.template-basic .condolence-section {
+    background: linear-gradient(to bottom, #FAFAFA, #FFFFFF);
+}
+
+/* 정중형 (ribbon) - 부고 + 검은리본 */
+.template-ribbon .bugo-header {
+    background: #F9F9F9;
+    border: 1px solid #E5E8EB;
+}
+
+.template-ribbon .condolence-section {
+    background: #FFFFFF;
+    border-top: 3px solid #1a1a1a;
+}
+
+/* 안내형 (border) - 謹弔 + 리본프레임 */
+.template-border .bugo-header {
+    background: #FFFFFF;
+    border: 2px solid #8B7355;
+}
+
+.template-border .condolence-section {
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+}
+
+.template-border .condolence-main {
+    color: #8B7355;
+}
+
+/* 고급형 (flower) - 국화 + 검정배경 */
+.template-flower .bugo-header {
+    background: #000000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.template-flower .condolence-section {
+    background: linear-gradient(to bottom, #2C2C2E, #1C1C1E);
+}
+
+.template-flower .condolence-main {
+    color: #FFFFFF;
+}
+
+.template-flower .condolence-sub {
+    color: #CCCCCC;
+}
+
+/* 다크모드 썸네일 */
+.dark .bugo-header {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.dark .template-basic .bugo-header,
+.dark .template-ribbon .bugo-header,
+.dark .template-border .bugo-header {
+    border: 1px solid #3A3A3C;
+}
+
+.dark .template-flower .bugo-header {
+    border: none;
+}
+
+/* 애도 문구 섹션 */
+.condolence-section {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    border-bottom: 8px solid #F5F5F5;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.condolence-main {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #191F28;
+    line-height: 1.7;
+    margin: 0 0 12px 0;
+    word-break: keep-all;
+}
+
+.condolence-sub {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: #4E5968;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* 템플릿별 텍스트 크기 조정 */
+.template-flower .condolence-main {
+    font-size: 18px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 다크모드 애도 문구 */
+.dark .condolence-section {
+    background: #1C1C1E;
+    border-bottom-color: #2C2C2E;
+}
+
+.dark .condolence-main {
+    color: #FFFFFF;
+}
+
+.dark .condolence-sub {
+    color: #98989D;
+}
+
+.dark .template-border .condolence-section {
+    background: #2C2C2E;
+}
+
+.dark .template-border .condolence-main {
+    color: #D4C4B0;
+}
+
+.dark .template-flower .condolence-section {
+    background: #1C1C1E;
+}
+
+.dark .template-flower .condolence-main {
+    color: #FFFFFF;
+}
+
+.dark .template-flower .condolence-sub {
+    color: #CCCCCC;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+    .bugo-header {
+        max-width: 100%;
+        margin: 16px auto 0;
+        border-radius: 0;
+    }
+    
+    .condolence-section {
+        padding: 28px 20px;
+    }
+    
+    .condolence-main {
+        font-size: 16px;
+    }
+    
+    .condolence-sub {
+        font-size: 14px;
+    }
+}
+
+/* 호버 효과 (데스크톱) */
+@media (min-width: 768px) {
+    .bugo-header:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+}

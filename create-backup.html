@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부고장 만들기 - 도담부고</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/create.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="nav-logo" onclick="location.href='index.html'" style="cursor: pointer;">도담부고</div>
+            <div class="progress-indicator">
+                <div class="progress-step active" data-step="1">
+                    <div class="progress-circle">1</div>
+                    <span>템플릿</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="progress-circle">2</div>
+                    <span>정보입력</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="progress-circle">3</div>
+                    <span>완성</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Step 1: 템플릿 선택 -->
+    <section class="create-section active" id="step1">
+        <div class="create-container">
+            <div class="step-header">
+                <h1 class="step-title">원하시는 템플릿을 선택해주세요</h1>
+                <p class="step-subtitle">4가지 스타일 중에서 고인께 어울리는 디자인을 선택하세요</p>
+            </div>
+
+            <div class="template-selection">
+                <div class="template-option" data-template="classic">
+                    <div class="template-preview-card">
+                        <div class="template-sample" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="sample-badge">클래식</div>
+                        </div>
+                        <div class="template-meta">
+                            <h3>클래식</h3>
+                            <p>전통적이고 정중한 분위기</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="template-option" data-template="modern">
+                    <div class="template-preview-card">
+                        <div class="template-sample" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="sample-badge">모던</div>
+                        </div>
+                        <div class="template-meta">
+                            <h3>모던</h3>
+                            <p>세련되고 현대적인 디자인</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="template-option" data-template="simple">
+                    <div class="template-preview-card">
+                        <div class="template-sample" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="sample-badge">심플</div>
+                        </div>
+                        <div class="template-meta">
+                            <h3>심플</h3>
+                            <p>깔끔하고 미니멀한 스타일</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="template-option" data-template="elegant">
+                    <div class="template-preview-card">
+                        <div class="template-sample" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <div class="sample-badge">엘레강스</div>
+                        </div>
+                        <div class="template-meta">
+                            <h3>엘레강스</h3>
+                            <p>우아하고 품격있는 느낌</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-next btn-primary" onclick="nextStep()">
+                    다음 단계
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 2: 정보 입력 -->
+    <section class="create-section" id="step2">
+        <div class="create-container">
+            <div class="step-header">
+                <h1 class="step-title">부고 정보를 입력해주세요</h1>
+                <p class="step-subtitle">정확한 정보를 입력하시면 더욱 품격있는 부고장이 완성됩니다</p>
+            </div>
+
+            <div class="form-container">
+                <form id="bugoForm">
+                    <!-- 고인 정보 -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-icon">👤</span>
+                            고인 정보
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">고인 성함 <span class="required">*</span></label>
+                                <input type="text" class="form-input" name="deceased_name" placeholder="예) 홍길동" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">고인과의 관계 <span class="required">*</span></label>
+                                <select class="form-select" name="relationship" required>
+                                    <option value="">선택해주세요</option>
+                                    <option value="부친">부친</option>
+                                    <option value="모친">모친</option>
+                                    <option value="조부">조부</option>
+                                    <option value="조모">조모</option>
+                                    <option value="배우자">배우자</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">향년</label>
+                                <input type="number" class="form-input" name="age" placeholder="예) 75">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">별세일</label>
+                                <input type="date" class="form-input" name="death_date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 상주 정보 -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-icon">👥</span>
+                            상주 정보
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">상주 이름 <span class="required">*</span></label>
+                                <input type="text" class="form-input" name="mourner_name" placeholder="예) 홍철수, 홍영희" required>
+                                <span class="form-hint">여러 명인 경우 쉼표(,)로 구분해주세요</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">연락처</label>
+                                <input type="tel" class="form-input" name="contact" placeholder="010-1234-5678">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 장례 일정 -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-icon">📅</span>
+                            장례 일정
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">빈소 <span class="required">*</span></label>
+                                <input type="text" class="form-input" name="funeral_home" placeholder="예) 서울대병원 장례식장" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">호실</label>
+                                <input type="text" class="form-input" name="room_number" placeholder="예) 3호실">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">발인일시 <span class="required">*</span></label>
+                                <input type="datetime-local" class="form-input" name="funeral_datetime" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">장지</label>
+                                <input type="text" class="form-input" name="burial_place" placeholder="예) 하늘공원묘지">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">주소</label>
+                                <input type="text" class="form-input" name="address" placeholder="장례식장 주소를 입력해주세요">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 추가 메시지 -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-icon">✉️</span>
+                            추가 메시지 (선택)
+                        </h2>
+                        <div class="form-group">
+                            <textarea class="form-textarea" name="message" rows="4" placeholder="고인에 대한 간단한 소개나 추모 메시지를 입력해주세요"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-prev btn-secondary" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="transform: rotate(180deg);">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    이전 단계
+                </button>
+                <button class="btn-next btn-primary" onclick="previewBugo()">
+                    미리보기
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 3: 완성 -->
+    <section class="create-section" id="step3">
+        <div class="create-container">
+            <div class="completion-content">
+                <div class="completion-icon">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                        <circle cx="40" cy="40" r="38" stroke="#3182F6" stroke-width="4"/>
+                        <path d="M25 40L35 50L55 30" stroke="#3182F6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h1 class="completion-title">부고장이 완성되었습니다</h1>
+                <p class="completion-subtitle">아래 링크를 통해 부고장을 공유하실 수 있습니다</p>
+
+                <div class="link-box">
+                    <div class="link-display">
+                        <span class="link-text" id="bugoLink">https://dodambugo.com/view/12345</span>
+                        <button class="btn-copy" onclick="copyLink()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M13 7V5C13 3.89543 12.1046 3 11 3H5C3.89543 3 3 3.89543 3 5V11C3 12.1046 3.89543 13 5 13H7" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            복사
+                        </button>
+                    </div>
+                </div>
+
+                <div class="share-buttons">
+                    <button class="share-btn kakao">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 3C6.477 3 2 6.477 2 10.75C2 13.4 3.813 15.713 6.508 17L5.502 20.502C5.427 20.777 5.727 21 5.977 20.85L10.252 18.15C10.827 18.2 11.408 18.25 12 18.25C17.523 18.25 22 14.773 22 10.5C22 6.477 17.523 3 12 3Z"/>
+                        </svg>
+                        카카오톡
+                    </button>
+                    <button class="share-btn sms">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"/>
+                        </svg>
+                        문자
+                    </button>
+                    <button class="share-btn link">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13C10.4295 13.5741 10.9774 14.0491 11.6066 14.3929C12.2357 14.7367 12.9315 14.9411 13.6467 14.9923C14.3618 15.0435 15.0796 14.9403 15.7513 14.6897C16.4231 14.4392 17.0331 14.047 17.54 13.54L20.54 10.54C21.4508 9.59695 21.9548 8.33394 21.9434 7.02296C21.932 5.71198 21.4061 4.45791 20.4791 3.53087C19.5521 2.60383 18.298 2.07799 16.987 2.0666C15.676 2.0552 14.413 2.55918 13.47 3.47L11.75 5.18"/>
+                            <path d="M14 11C13.5705 10.4259 13.0226 9.95083 12.3934 9.60707C11.7642 9.26331 11.0685 9.05889 10.3533 9.00768C9.63819 8.95646 8.92037 9.05969 8.24861 9.31023C7.57685 9.56077 6.96684 9.95299 6.46 10.46L3.46 13.46C2.54918 14.403 2.04519 15.6661 2.05659 16.977C2.06798 18.288 2.59382 19.5421 3.52086 20.4691C4.44791 21.3962 5.70197 21.922 7.01296 21.9334C8.32394 21.9448 9.58696 21.4408 10.53 20.53L12.24 18.82"/>
+                        </svg>
+                        링크
+                    </button>
+                </div>
+
+                <div class="preview-card" id="previewCard">
+                    <!-- 미리보기 내용이 여기 표시됩니다 -->
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-secondary" onclick="prevStep()">수정하기</button>
+                    <button class="btn-primary" onclick="location.href='index.html'">완료</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">도담부고</div>
+                <div class="footer-links">
+                    <a href="terms.html" target="_blank">이용약관</a>
+                    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+                    <a href="contact.html" target="_blank">제휴/문의</a>
+                </div>
+                <div class="footer-info">
+                    <p>부산 북구 | 대표: 김미연 | 사업자 212-12-88198</p>
+                    <p>통신판매 제 2024-서울강서-1938</p>
+                    <p>Copyright dodambugo Corp All right reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/create.js"></script>
+</body>
+</html>

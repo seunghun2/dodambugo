@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기본형 부고장 미리보기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/view-toss.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #FAFAFA;
+        }
+        
+        .bugo-view {
+            display: block;
+            padding-bottom: 40px;
+        }
+        
+        .bugo-actions,
+        .fixed-flower-button,
+        .theme-toggle {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <main class="bugo-view">
+        <!-- 템플릿 헤더 -->
+        <div class="bugo-header">
+            <img src="../images/template-basic.png" alt="기본형 부고장">
+        </div>
+
+        <!-- 컨텐츠 -->
+        <div class="bugo-content">
+            <!-- 고인 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">고인</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">고인</span>
+                        <span class="info-value">故 홍길동</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">향년</span>
+                        <span class="info-value">75세</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">성별</span>
+                        <span class="info-value">남</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">종교</span>
+                        <span class="info-value">불교</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 상주 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">상주</h3>
+                <div class="mourners-list">
+                    <div class="mourner-card">
+                        <div class="mourner-main">
+                            <span class="mourner-relation">장남</span>
+                            <span class="mourner-name">홍철수</span>
+                        </div>
+                        <div class="mourner-contact">
+                            <a href="tel:010-1234-5678">010-1234-5678</a>
+                        </div>
+                    </div>
+                    <div class="mourner-card">
+                        <div class="mourner-main">
+                            <span class="mourner-relation">차남</span>
+                            <span class="mourner-name">홍영희</span>
+                        </div>
+                        <div class="mourner-contact">
+                            <a href="tel:010-2345-6789">010-2345-6789</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 빈소 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">빈소</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">장례식장</span>
+                        <span class="info-value">서울아산병원 장례식장</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">호실</span>
+                        <span class="info-value">특1호</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">연락처</span>
+                        <span class="info-value">
+                            <a href="tel:02-3010-2000">02-3010-2000</a>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">주소</span>
+                        <span class="info-value">서울시 송파구 올림픽로 43길 88</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 일정 정보 -->
+            <section class="content-section">
+                <h3 class="content-title">일정</h3>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">별세</span>
+                        <span class="info-value">2024년 11월 8일 오전 10시 30분</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">입관</span>
+                        <span class="info-value">2024년 11월 9일 오전 9시 00분</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">발인</span>
+                        <span class="info-value">2024년 11월 10일 오전 8시 00분</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">장지</span>
+                        <span class="info-value">추모공원 1묘역</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 하단 안내 -->
+            <section class="content-section">
+                <div class="footer-notice">
+                    <p class="notice-text">
+                        황망한 마음에 일일이 연락드리지 못함을<br>
+                        너그러이 양해해 주시기 바랍니다.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

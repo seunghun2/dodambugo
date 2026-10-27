@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>마음부고 파트너 앱 시뮬레이터</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --primary: #FFD43B;
+  --primary-dark: #FCC419;
+  --primary-light: #FFF3BF;
+  --primary-text: #1A1A1A;
+  --accent: #364F6B;
+  --accent-dark: #2A3F54;
+  --brown: #8B7355;
+  --gray-900: #191F28; /* 마음부고 B2C 표준 Noto/Pretendard 그레이 */
+  --gray-800: #333D4B;
+  --gray-700: #4E5968;
+  --gray-600: #6B7684;
+  --gray-50: #F9FAFB;
+  --gray-100: #F2F4F6;
+  --gray-200: #E5E8EB;
+  --gray-300: #D1D6DB;
+  --gray-400: #B0B8C1;
+  --gray-500: #8B95A1;
+  --bg-white: #FFFFFF;
+  --bg-gray: #F9FAFB;
+  --success: #00C853;
+  --success-bg: #E8F5E9;
+  --success-border: #C8E6C9;
+  --error: #FF6B6B;
+  --error-bg: #FFEBEE;
+  --error-border: #FFCDD2;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--gray-900);
+  background: #E8EEF4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  letter-spacing: -0.02em; /* 쫀쫀한 자간 적용 */
+}
+a { text-decoration: none; color: inherit; }
+
+/* 스마트폰 프레임 */
+.phone-frame {
+  width: 100%;
+  max-width: 412px;
+  height: 844px;
+  background: var(--bg-white);
+  border: 12px solid #1e293b;
+  border-radius: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 화면별 컨테이너 */
+.screen {
+  width: 100%;
+  height: 100%;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-gray);
+  overflow-y: auto;
+  padding-bottom: 70px; /* 바텀탭 공간 확보 */
+}
+.screen.active {
+  display: flex;
+}
+
+/* ========================================
+   1. 스플래시 화면
+   ======================================== */
+#screen-splash {
+  background-color: var(--accent);
+  justify-content: space-between;
+  align-items: center;
+  padding: 100px 24px 60px;
+  color: #ffffff;
+  padding-bottom: 60px;
+}
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15vh;
+}
+.splash-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.splash-logo-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--primary);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.splash-logo-sub {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+.loader {
+  margin-top: 48px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.splash-footer { text-align: center; font-size: 11px; color: rgba(255, 255, 255, 0.35); }
+
+/* ========================================
+   2. 로그인 화면
+   ======================================== */
+#screen-login {
+  background: var(--bg-gray);
+  justify-content: center;
+  padding: 40px 24px;
+  padding-bottom: 40px;
+}
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.login-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+.login-sub {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  background: var(--bg-white);
+  outline: none;
+  color: var(--gray-900);
+  transition: border-color 150ms ease;
+}
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background: var(--primary);
+  color: var(--primary-text);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 150ms ease;
+}
+.btn-submit:hover { background: var(--primary-dark); }
+.login-footer {
+  text-align: center;
+  margin-top: 32px;
+}
+.login-footer p { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+.login-footer a { font-size: 14px; color: var(--accent); font-weight: 600; cursor: pointer; }
+.login-footer a:hover { text-decoration: underline; }
+
+/* ========================================
+   3. 회원가입 화면
+   ======================================== */
+#screen-signup {
+  background: var(--bg-gray);
+  padding-bottom: 40px;
+}
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.btn-back { background:none; border:none; font-size:20px; cursor:pointer; color:var(--gray-900); padding:4px 8px; }
+.header-title { font-size: 15px; font-weight: 600; color: var(--gray-900); }
+.progress-bar-wrap { height: 3px; background: var(--gray-200); }
+.progress-bar { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.step-num-label { text-align: center; font-size: 12px; color: var(--gray-500); margin-top: 12px; }
+.signup-content { padding: 24px 20px; }
+.signup-title { font-size: 19px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.signup-desc { font-size: 13px; color: var(--gray-600); margin-bottom: 28px; }
+.verify-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.verify-row .input { margin-bottom: 0; }
+.btn-verify {
+  padding: 12px 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  color: var(--gray-900);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-verify:hover { background: var(--primary-light); }
+.alert-box {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.alert-box.success { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success); }
+.alert-box.error { background: var(--error-bg); border: 1px solid var(--error-border); color: var(--error); }
+.skip-link {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-top: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ========================================
+   4. 대시보드 화면
+   ======================================== */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon {
+  color: var(--gray-700);
+  cursor: pointer;
+}
+.bell-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.bell-tooltip {
+  position: absolute;
+  top: 30px;
+  right: -10px;
+  background: #3182F6;
+  color: white;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  z-index: 20;
+  animation: bounceTooltip 2s infinite;
+}
+.bell-tooltip::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 14px;
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent #3182F6 transparent;
+}
+@keyframes bounceTooltip {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.profile-section {
+  padding: 20px 20px 8px;
+  background: var(--bg-white);
+}
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+.greeting {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.sub-greeting {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-top: 1px;
+}
+
+.promo-banner {
+  margin: 12px 20px 4px;
+  padding: 16px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+.promo-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.promo-badge {
+  align-self: flex-start;
+  background: #F59E0B;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+.promo-title { font-size: 13px; font-weight: 700; color: #92400E; }
+.promo-subtitle { font-size: 11px; color: #B45309; }
+
+/* 2단 실적 보드 */
+.balance-card {
+  margin: 16px 20px;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+.balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.balance-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+.btn-toggle-balance {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  color: white;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.balance-amount {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.balance-amount span {
+  font-size: 15px;
+  font-weight: 500;
+  margin-left: 2px;
+  opacity: 0.8;
+}
+.stats-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-bottom: 14px;
+}
+.card-stats-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.card-stat-item {
+  text-align: center;
+  flex: 1;
+}
+.card-stat-label {
+  display: block;
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.card-stat-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+.card-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 6구 그리드 퀵 메뉴 */
+.quick-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.menu-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px;
+  background: var(--bg-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+.menu-grid-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
+}
+.menu-grid-item.primary {
+  background: var(--accent);
+  border: none;
+  color: white;
+}
+.menu-grid-item.primary:hover {
+  background: var(--accent-dark);
+}
+.menu-grid-icon-wrap {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--accent);
+}
+.menu-grid-item.primary .menu-grid-icon-wrap {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+}
+.menu-grid-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.menu-grid-item.primary .menu-grid-label {
+  color: white;
+}
+
+/* 추천인 영역 */
+.referral-card-wrapper {
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.referral-mini-card {
+  padding: 14px 18px;
+  background: var(--bg-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.referral-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.referral-label { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+.referral-count { font-size: 12px; color: var(--brown); font-weight: 600; }
+.referral-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.referral-code { font-size: 18px; font-weight: 700; color: var(--gray-900); letter-spacing: 1px; }
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  color: var(--gray-600);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.referral-desc { font-size: 11px; color: var(--gray-500); line-height: 1.5; }
+
+/* 하단 탭 영역 */
+.tab-section {
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+.tab-bar-menu {
+  display: flex;
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 12px;
+}
+.tab-menu-btn {
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+}
+.tab-menu-btn.active {
+  color: var(--accent);
+  font-weight: 700;
+}
+.tab-menu-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.tab-content-card {
+  background: var(--bg-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 8px 16px;
+}
+.list-container { display: flex; flex-direction: column; }
+.list-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.list-item-row:last-child { border-bottom: none; }
+.list-item-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.list-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-item-date { font-size: 11px; color: var(--gray-400); margin-left: 12px; flex-shrink: 0; }
+.list-item-icon { color: var(--gray-400); flex-shrink: 0; font-size: 16px; }
+.event-tag {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.btn-see-more {
+  width: 100%;
+  padding: 12px 0 6px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--gray-100);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+}
+
+/* ========================================
+   5. 정산 화면 (지갑)
+   ======================================== */
+.wallet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.wallet-balance-card {
+  margin: 16px 20px;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+.wallet-balance-card .amount { font-size: 28px; font-weight: 700; margin: 8px 0 16px; }
+.btn-withdraw {
+  padding: 8px 24px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-withdraw:hover { background: rgba(255,255,255,0.25); }
+
+/* 출금 신청 모달 (바텀 시트) */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  width: 100%;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px 20px 32px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.modal-desc { font-size: 13px; color: var(--gray-600); margin-bottom: 20px; }
+.modal-input-wrap { margin-bottom: 8px; }
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+.modal-input:focus { border-color: var(--primary); }
+.modal-hint { font-size: 12px; color: var(--gray-500); text-align: center; margin-bottom: 20px; }
+.modal-btns { display: flex; gap: 12px; }
+.btn-modal-cancel {
+  flex: 1;
+  padding: 12px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+.btn-modal-confirm {
+  flex: 1;
+  padding: 12px;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+  cursor: pointer;
+}
+
+/* ========================================
+   6. 설정 화면 (신규)
+   ======================================== */
+.settings-header {
+  padding: 16px 20px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--gray-200);
+  text-align: center;
+}
+.settings-header .title { font-size: 15px; font-weight: 600; color: var(--gray-900); }
+.settings-section { padding: 16px 20px; }
+.settings-card {
+  background: var(--bg-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+.settings-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.settings-info-group { display: flex; flex-direction: column; gap: 14px; }
+.settings-info-row { display: flex; justify-content: space-between; align-items: center; }
+.settings-info-label { font-size: 13px; color: var(--gray-500); }
+.settings-info-value { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+.settings-account-wrap { display: flex; align-items: center; gap: 8px; }
+.settings-badge {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.settings-menu-list {
+  background: var(--bg-white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.settings-menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--gray-100);
+  width: 100%;
+  cursor: pointer;
+}
+.settings-menu-item:last-child { border-bottom: none; }
+.settings-menu-label { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.settings-menu-label.danger { color: var(--error); }
+.settings-footer { text-align: center; padding: 24px 20px 40px; }
+.settings-footer p { font-size: 11px; color: var(--gray-400); line-height: 1.6; }
+
+/* ========================================
+   바텀 네비게이션 탭바 (공통)
+   ======================================== */
+.bottom-tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background: var(--bg-white);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-400);
+}
+.tab-btn i { font-size: 20px; }
+.tab-btn span { font-size: 10px; font-weight: 500; }
+.tab-btn.active { color: var(--accent); }
+.tab-btn.active span { font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  
+  <!-- [1] 스플래시 화면 (웰컴) -->
+  <div id="screen-splash" class="screen active">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <span class="splash-logo-title">마음부고</span>
+        <span class="splash-logo-sub">Partner App</span>
+      </div>
+      <div class="loader"></div>
+    </div>
+    <div class="splash-footer">
+      <p>© 마음부고 파트너. All rights reserved.</p>
+    </div>
+  </div>
+
+  <!-- [2] 로그인 화면 -->
+  <div id="screen-login" class="screen">
+    <div class="login-header">
+      <h1 class="login-logo">마음부고</h1>
+      <p class="login-sub">파트너 전용 앱</p>
+    </div>
+    
+    <div id="login-error" class="alert-box error" style="display: none;"></div>
+
+    <div class="form-group">
+      <input type="tel" id="login-phone" class="input" placeholder="휴대폰 번호">
+      <input type="password" id="login-pw" class="input" placeholder="비밀번호">
+      <button class="btn-submit" onclick="attemptLogin()">로그인</button>
+    </div>
+
+    <div class="login-footer">
+      <p>아직 파트너가 아니신가요?</p>
+      <a onclick="navigateTo('screen-signup')">가입하기</a>
+    </div>
+  </div>
+
+  <!-- [3] 회원가입 화면 -->
+  <div id="screen-signup" class="screen">
+    <div class="header-bar">
+      <button class="btn-back" onclick="navigateTo('screen-login')">←</button>
+      <span class="header-title">회원가입</span>
+      <div style="width:40px"></div>
+    </div>
+    
+    <div class="progress-bar-wrap">
+      <div id="signup-progress" class="progress-bar" style="width: 20%"></div>
+    </div>
+    <p id="signup-step-label" class="step-num-label">1 / 5</p>
+
+    <div class="signup-content">
+      <!-- Step 1: 휴대폰 인증 -->
+      <div id="signup-step1" class="signup-step-view">
+        <h2 class="signup-title">휴대폰 번호 인증</h2>
+        <p class="signup-desc">로그인에 사용할 번호를 입력해 주세요</p>
+        <div class="verify-row">
+          <input type="tel" id="signup-phone" class="input" placeholder="010-0000-0000">
+          <button class="btn-verify" onclick="sendAuthCode()">인증 요청</button>
+        </div>
+        <div id="auth-code-row" class="verify-row" style="display:none;">
+          <input type="text" id="signup-authcode" class="input" placeholder="인증번호 6자리">
+          <button class="btn-verify" onclick="confirmAuthCode()">확인</button>
+        </div>
+        <div id="signup-step1-alert" class="alert-box" style="display:none;"></div>
+        <button id="btn-step1-next" class="btn-submit" style="margin-top:20px;" disabled onclick="goSignupStep(2)">다음으로</button>
+      </div>
+
+      <!-- Step 2: 비밀번호 설정 -->
+      <div id="signup-step2" class="signup-step-view" style="display:none;">
+        <h2 class="signup-title">비밀번호 설정</h2>
+        <p class="signup-desc">로그인에 사용할 비밀번호를 입력해 주세요</p>
+        <input type="password" id="signup-pw1" class="input" placeholder="비밀번호 (6자리 이상)" style="margin-bottom:12px;">
+        <input type="password" id="signup-pw2" class="input" placeholder="비밀번호 확인" style="margin-bottom:16px;">
+        <div id="signup-step2-alert" class="alert-box error" style="display:none; margin-bottom:16px;"></div>
+        <button class="btn-submit" onclick="verifyPasswordAndNext()">다음으로</button>
+      </div>
+
+      <!-- Step 3: 사업자 정보 -->
+      <div id="signup-step3" class="signup-step-view" style="display:none;">
+        <h2 class="signup-title">사업자 정보</h2>
+        <p class="signup-desc">정산 및 파트너 관리에 필요한 정보입니다</p>
+        <input type="text" id="signup-company" class="input" placeholder="상호명 (회사명)" style="margin-bottom:12px;">
+        <input type="text" id="signup-owner" class="input" placeholder="대표자명" style="margin-bottom:16px;">
+        <button class="btn-submit" onclick="goSignupStep(4)">다음으로</button>
+      </div>
+
+      <!-- Step 4: 정산 계좌 -->
+      <div id="signup-step4" class="signup-step-view" style="display:none;">
+        <h2 class="signup-title">정산 계좌 등록</h2>
+        <p class="signup-desc">화환 판매 수익이 입금될 계좌입니다</p>
+        <input type="text" id="signup-bank" class="input" placeholder="은행명 (예: 국민은행)" style="margin-bottom:12px;">
+        <input type="text" id="signup-account" class="input" placeholder="계좌번호 (숫자만)" style="margin-bottom:12px;">
+        <input type="text" id="signup-holder" class="input" placeholder="예금주" style="margin-bottom:16px;">
+        <button class="btn-submit" onclick="goSignupStep(5)">다음으로</button>
+        <span class="skip-link" onclick="goSignupStep(5)">나중에 등록하기</span>
+      </div>
+
+      <!-- Step 5: 추천인 코드 -->
+      <div id="signup-step5" class="signup-step-view" style="display:none;">
+        <h2 class="signup-title">추천인 코드</h2>
+        <p class="signup-desc">추천받고 오셨다면 코드를 입력해 주세요</p>
+        <input type="text" id="signup-ref" class="input" placeholder="추천인 코드 (선택)" style="margin-bottom:16px;">
+        <button class="btn-submit" onclick="completeSignup()">가입 완료하기</button>
+        <span class="skip-link" onclick="completeSignup()">추천 코드 없음</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- [4] 대시보드 화면 -->
+  <div id="screen-dashboard" class="screen">
+    <!-- 상단 헤더 -->
+    <header class="dashboard-header">
+      <span class="logo">마음부고 파트너</span>
+      <div class="header-right">
+        <div class="bell-wrapper">
+          <i class="ti ti-bell header-icon" style="font-size: 22px;"></i>
+          <div class="bell-tooltip">
+            <span>읽지 않은 알람이 있어요!</span>
+          </div>
+        </div>
+        <i class="ti ti-menu-2 header-icon" style="font-size: 22px;" onclick="navigateTo('screen-settings')"></i>
+      </div>
+    </header>
+
+    <!-- 프로필 영역 -->
+    <div class="profile-section">
+      <div class="profile-row">
+        <div class="profile-avatar">
+          <span id="user-avatar-char">홍</span>
+        </div>
+        <div class="profile-info">
+          <p id="user-name" class="greeting">홍길동님</p>
+          <p class="sub-greeting">만나서 반갑습니다</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 프로모션 카드 배너 -->
+    <div class="promo-banner" onclick="alert('이벤트: 근조화환 2배 수익금 적립 이벤트 페이지로 이동')">
+      <div class="promo-content">
+        <span class="promo-badge">EVENT</span>
+        <p class="promo-title">근조화환 판매 수익금 2배 적립 이벤트!</p>
+        <p class="promo-subtitle">부고 작성 후 화환이 판매되면 추가 수당 적립</p>
+      </div>
+    </div>
+
+    <!-- 2단 실적 카드 -->
+    <div class="balance-card">
+      <div class="balance-header">
+        <div class="balance-top">
+          <i class="ti ti-wallet"></i>
+          <span>적립 예정 금액</span>
+        </div>
+        <button class="btn-toggle-balance" onclick="toggleBalanceValue()">숨기기</button>
+      </div>
+      <p class="balance-amount"><span id="user-balance">60,000</span><span>원</span></p>
+      
+      <div class="stats-divider"></div>
+      
+      <div class="card-stats-grid">
+        <div class="card-stat-item">
+          <span class="card-stat-label">상품 판매</span>
+          <span class="card-stat-value">0건</span>
+        </div>
+        <div class="card-stat-divider"></div>
+        <div class="card-stat-item">
+          <span class="card-stat-label">부고장 제작</span>
+          <span class="card-stat-value">29건</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6구 기능 그리드 메뉴 -->
+    <div class="quick-menu-grid">
+      <button class="menu-grid-item primary" onclick="alert('모의 환경: 부고 작성 화면으로 이동합니다.')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-plus" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">부고 만들기</span>
+      </button>
+
+      <button class="menu-grid-item" onclick="alert('모의 환경: 부고 관리 화면으로 이동합니다.')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-list" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">부고 관리</span>
+      </button>
+
+      <button class="menu-grid-item" onclick="navigateTo('screen-wallet')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-currency-won" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">출금 신청</span>
+      </button>
+
+      <button class="menu-grid-item" onclick="navigateTo('screen-wallet')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-wallet" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">정산/장부</span>
+      </button>
+
+      <button class="menu-grid-item" onclick="navigateTo('screen-settings')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-message" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">답례 인사</span>
+      </button>
+
+      <button class="menu-grid-item" onclick="navigateTo('screen-settings')">
+        <div class="menu-grid-icon-wrap"><i class="ti ti-help-circle" style="font-size: 20px;"></i></div>
+        <span class="menu-grid-label">고객 센터</span>
+      </button>
+    </div>
+
+    <!-- 추천 코드 카드 -->
+    <div class="referral-card-wrapper">
+      <div class="referral-mini-card">
+        <div class="referral-top">
+          <span class="referral-label">나의 추천 코드</span>
+          <span id="user-ref-count" class="referral-count">추천 2명</span>
+        </div>
+        <div class="referral-row">
+          <span id="user-ref-code" class="referral-code">MBG8831</span>
+          <button class="btn-copy" onclick="copyMockCode()"><i class="ti ti-copy"></i> 복사</button>
+        </div>
+        <p class="referral-desc">동료 장례지도사를 추천하고 추가 정산 혜택을 받아보세요.</p>
+      </div>
+    </div>
+
+    <!-- 하단 탭 영역 -->
+    <div class="tab-section">
+      <div class="tab-bar-menu">
+        <button id="tab-btn-notice" class="tab-menu-btn active" onclick="switchDashboardTab('notice')">공지사항</button>
+        <button id="tab-btn-event" class="tab-menu-btn" onclick="switchDashboardTab('event')">이벤트</button>
+      </div>
+
+      <div class="tab-content-card">
+        <!-- 공지사항 탭 내용 -->
+        <div id="tab-content-notice" class="list-container">
+          <div class="list-item-row">
+            <div class="list-item-left">
+              <i class="ti ti-megaphone list-item-icon"></i>
+              <span class="list-item-title">등급별 포인트 지급 누락 관련 안내</span>
+            </div>
+            <span class="list-item-date">06/15</span>
+          </div>
+          <div class="list-item-row">
+            <div class="list-item-left">
+              <i class="ti ti-megaphone list-item-icon"></i>
+              <span class="list-item-title">화환 판매금액 설정 기능 추가 안내</span>
+            </div>
+            <span class="list-item-date">05/22</span>
+          </div>
+          <div class="list-item-row">
+            <div class="list-item-left">
+              <i class="ti ti-megaphone list-item-icon"></i>
+              <span class="list-item-title">마음부고 파트너 화환 수수료 안내</span>
+            </div>
+            <span class="list-item-date">05/16</span>
+          </div>
+        </div>
+        
+        <!-- 이벤트 탭 내용 -->
+        <div id="tab-content-event" class="list-container" style="display:none;">
+          <div class="list-item-row">
+            <div class="list-item-left">
+              <span class="event-tag">진행중</span>
+              <span class="list-item-title">신규 파트너 가입 웰컴 1만 포인트 지급!</span>
+            </div>
+            <span class="list-item-date">~07/31</span>
+          </div>
+          <div class="list-item-row">
+            <div class="list-item-left">
+              <span class="event-tag">진행중</span>
+              <span class="list-item-title">추천인 무제한 적립 릴레이 이벤트</span>
+            </div>
+            <span class="list-item-date">~06/30</span>
+          </div>
+        </div>
+
+        <button class="btn-see-more" onclick="alert('더 많은 목록을 확인합니다.')">더보기 <i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- 공통 바텀 탭바 -->
+    <nav class="bottom-tab-bar">
+      <button class="tab-btn active" onclick="navigateTo('screen-dashboard')"><i class="ti ti-home"></i><span>홈</span></button>
+      <button class="tab-btn" onclick="alert('모의 환경: 부고 작성 화면으로 이동합니다.')"><i class="ti ti-file-text"></i><span>부고</span></button>
+      <button class="tab-btn" onclick="navigateTo('screen-wallet')"><i class="ti ti-wallet"></i><span>정산</span></button>
+      <button class="tab-btn" onclick="navigateTo('screen-settings')"><i class="ti ti-settings"></i><span>설정</span></button>
+    </nav>
+  </div>
+
+  <!-- [5] 정산 화면 -->
+  <div id="screen-wallet" class="screen">
+    <div class="wallet-header">
+      <button class="btn-back" onclick="navigateTo('screen-dashboard')">←</button>
+      <span class="header-title">정산</span>
+      <div style="width:40px"></div>
+    </div>
+
+    <div class="wallet-balance-card">
+      <p class="balance-label">내 예치금</p>
+      <p class="amount"><span id="user-balance-wallet">60,000</span>원</p>
+      <button class="btn-withdraw" onclick="openWithdrawModal()">출금 신청</button>
+    </div>
+
+    <div id="wallet-alert" class="alert-box success" style="display:none; margin: 0 20px 16px;"></div>
+
+    <div class="list-section">
+      <h3 class="list-section-title">입출금 내역</h3>
+      <div id="wallet-tx-list" class="tx-list-card">
+        <div class="tx-item">
+          <div>
+            <p class="tx-type">화환 판매 적립</p>
+            <p class="tx-desc">고인 김철수 부고장 화환 주문</p>
+            <p class="tx-date">06/16 14:15</p>
+          </div>
+          <span class="tx-amount plus">+20,000원</span>
+        </div>
+        <div class="tx-item">
+          <div>
+            <p class="tx-type">추천 수당</p>
+            <p class="tx-desc">가온라이프 파트너 화환 판매 수당</p>
+            <p class="tx-date">06/16 11:20</p>
+          </div>
+          <span class="tx-amount plus">+5,000원</span>
+        </div>
+        <div class="tx-item">
+          <div>
+            <p class="tx-type">출금 완료</p>
+            <p class="tx-desc">국민은행 4883***</p>
+            <p class="tx-date">06/15 17:00</p>
+          </div>
+          <span class="tx-amount minus">-30,000원</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 출금 모달 -->
+    <div id="withdraw-modal" class="modal-overlay" onclick="closeWithdrawModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 class="modal-title">출금 신청</h3>
+        <p class="modal-desc">등록된 정산 계좌로 입금됩니다</p>
+        <div class="modal-input-wrap">
+          <input type="number" id="withdraw-amount" class="modal-input" placeholder="출금 금액 입력">
+        </div>
+        <p class="modal-hint">출금 가능: <span id="modal-max-balance">60,000</span>원</p>
+        <div class="modal-btns">
+          <button class="btn-modal-cancel" onclick="closeWithdrawModal()">취소</button>
+          <button class="btn-modal-confirm" onclick="submitWithdraw()">신청하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공통 바텀 탭바 -->
+    <nav class="bottom-tab-bar">
+      <button class="tab-btn" onclick="navigateTo('screen-dashboard')"><i class="ti ti-home"></i><span>홈</span></button>
+      <button class="tab-btn" onclick="alert('모의 환경: 부고 작성 화면으로 이동합니다.')"><i class="ti ti-file-text"></i><span>부고</span></button>
+      <button class="tab-btn active" onclick="navigateTo('screen-wallet')"><i class="ti ti-wallet"></i><span>정산</span></button>
+      <button class="tab-btn" onclick="navigateTo('screen-settings')"><i class="ti ti-settings"></i><span>설정</span></button>
+    </nav>
+  </div>
+
+  <!-- [6] 설정 화면 -->
+  <div id="screen-settings" class="screen">
+    <div class="settings-header">
+      <span class="title">설정</span>
+    </div>
+
+    <div class="settings-section">
+      <!-- 파트너 정보 -->
+      <div class="settings-card">
+        <h3 class="settings-card-title">
+          <i class="ti ti-user"></i> 파트너 정보
+        </h3>
+        <div class="settings-info-group">
+          <div class="settings-info-row">
+            <span class="settings-info-label">상호명 (회사명)</span>
+            <span id="set-company" class="settings-info-value">도담상조</span>
+          </div>
+          <div class="settings-info-row">
+            <span class="settings-info-label">대표자명</span>
+            <span id="set-owner" class="settings-info-value">홍길동</span>
+          </div>
+          <div class="settings-info-row">
+            <span class="settings-info-label">휴대폰 번호</span>
+            <span id="set-phone" class="settings-info-value">010-1234-5678</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 정산 계좌 정보 -->
+      <div class="settings-card">
+        <h3 class="settings-card-title">
+          <i class="ti ti-credit-card"></i> 정산 계좌 정보
+        </h3>
+        <div class="settings-info-group">
+          <div class="settings-info-row">
+            <span class="settings-info-label">은행명</span>
+            <span id="set-bank" class="settings-info-value">국민은행</span>
+          </div>
+          <div class="settings-info-row">
+            <span class="settings-info-label">계좌번호</span>
+            <div class="settings-account-wrap">
+              <span class="settings-badge">확인완료</span>
+              <span id="set-account" class="settings-info-value">488392-01-38294</span>
+            </div>
+          </div>
+          <div class="settings-info-row">
+            <span class="settings-info-label">예금주</span>
+            <span id="set-holder" class="settings-info-value">홍길동</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 고객센터 -->
+      <div class="settings-card">
+        <h3 class="settings-card-title">
+          <i class="ti ti-headset"></i> 고객센터 및 지원
+        </h3>
+        <div class="settings-info-group">
+          <div class="settings-info-row">
+            <span class="settings-info-label">이메일 문의</span>
+            <span class="settings-info-value">miyoun1990@gmail.com</span>
+          </div>
+          <div class="settings-info-row">
+            <span class="settings-info-label">이용 가이드</span>
+            <span class="settings-info-value">준비 중</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 유틸리티 메뉴 -->
+      <div class="settings-menu-list">
+        <button class="settings-menu-item" onclick="logoutMock()">
+          <span class="settings-menu-label danger">로그아웃</span>
+          <i class="ti ti-chevron-right" style="color:var(--gray-400)"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <p>마음부고 파트너 v1.0.0<br>비즈니스 라이센스 408-22-68851</p>
+    </div>
+
+    <!-- 공통 바텀 탭바 -->
+    <nav class="bottom-tab-bar">
+      <button class="tab-btn" onclick="navigateTo('screen-dashboard')"><i class="ti ti-home"></i><span>홈</span></button>
+      <button class="tab-btn" onclick="alert('모의 환경: 부고 작성 화면으로 이동합니다.')"><i class="ti ti-file-text"></i><span>부고</span></button>
+      <button class="tab-btn" onclick="navigateTo('screen-wallet')"><i class="ti ti-wallet"></i><span>정산</span></button>
+      <button class="tab-btn active" onclick="navigateTo('screen-settings')"><i class="ti ti-settings"></i><span>설정</span></button>
+    </nav>
+  </div>
+
+</div>
+
+<script>
+// Mock 데이터 관리
+let mockUser = {
+  phone: '010-1234-5678',
+  company_name: '도담상조',
+  owner_name: '홍길동',
+  bank_name: '국민은행',
+  account_no: '488392-01-38294',
+  account_holder: '홍길동',
+  balance: 60000,
+  ref_code: 'MBG8831',
+  ref_count: 2
+};
+
+let isBalanceShown = true;
+
+// 스플래시 화면 1.2초 후 자동 리다이렉트 (Mock)
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    updateUI();
+    navigateTo('screen-dashboard');
+  }, 1200);
+});
+
+// 화면 이동 함수
+function navigateTo(screenId) {
+  document.querySelectorAll('.screen').forEach(scr => {
+    scr.classList.remove('active');
+  });
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+  }
+}
+
+// UI 갱신 함수
+function updateUI() {
+  document.getElementById('user-name').innerText = mockUser.owner_name + '님';
+  document.getElementById('user-avatar-char').innerText = mockUser.owner_name.slice(0, 1);
+  
+  if (isBalanceShown) {
+    document.getElementById('user-balance').innerText = mockUser.balance.toLocaleString();
+  } else {
+    document.getElementById('user-balance').innerText = '••••••';
+  }
+  
+  document.getElementById('user-balance-wallet').innerText = mockUser.balance.toLocaleString();
+  document.getElementById('user-ref-count').innerText = '추천 ' + mockUser.ref_count + '명';
+  document.getElementById('user-ref-code').innerText = mockUser.ref_code;
+  
+  // 설정 화면 적용
+  document.getElementById('set-company').innerText = mockUser.company_name;
+  document.getElementById('set-owner').innerText = mockUser.owner_name;
+  document.getElementById('set-phone').innerText = mockUser.phone;
+  document.getElementById('set-bank').innerText = mockUser.bank_name || '미등록';
+  document.getElementById('set-account').innerText = mockUser.account_no || '미등록';
+  document.getElementById('set-holder').innerText = mockUser.account_holder || '미등록';
+}
+
+// 금액 조회/숨기기 토글
+function toggleBalanceValue() {
+  const btn = document.querySelector('.btn-toggle-balance');
+  isBalanceShown = !isBalanceShown;
+  if (isBalanceShown) {
+    btn.innerText = '숨기기';
+  } else {
+    btn.innerText = '조회';
+  }
+  updateUI();
+}
+
+// 대시보드 공지사항/이벤트 탭 전환
+function switchDashboardTab(tabName) {
+  document.querySelectorAll('.tab-menu-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.getElementById('tab-btn-' + tabName).classList.add('active');
+
+  if (tabName === 'notice') {
+    document.getElementById('tab-content-notice').style.display = 'flex';
+    document.getElementById('tab-content-event').style.display = 'none';
+  } else {
+    document.getElementById('tab-content-notice').style.display = 'none';
+    document.getElementById('tab-content-event').style.display = 'flex';
+  }
+}
+
+// 로그인 시도
+function attemptLogin() {
+  const phone = document.getElementById('login-phone').value;
+  const pw = document.getElementById('login-pw').value;
+  const errorDiv = document.getElementById('login-error');
+  
+  if (!phone || !pw) {
+    errorDiv.style.display = 'block';
+    errorDiv.innerText = '휴대폰 번호와 비밀번호를 모두 입력하세요.';
+    return;
+  }
+  
+  errorDiv.style.display = 'none';
+  mockUser.phone = phone;
+  updateUI();
+  navigateTo('screen-dashboard');
+}
+
+// 로그아웃
+function logoutMock() {
+  document.getElementById('login-phone').value = '';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  navigateTo('screen-login');
+}
+
+// 회원가입 멀티스텝 관리
+let currentSignupStep = 1;
+function goSignupStep(step) {
+  currentSignupStep = step;
+  document.getElementById('signup-progress').style.width = (step / 5 * 100) + '%';
+  document.getElementById('signup-step-label').innerText = step + ' / 5';
+  
+  document.querySelectorAll('.signup-step-view').forEach(view => {
+    view.style.display = 'none';
+  });
+  document.getElementById('signup-step' + step).style.display = 'block';
+}
+
+// 회원가입 문자 전송
+function sendAuthCode() {
+  const phone = document.getElementById('signup-phone').value;
+  const alertBox = document.getElementById('signup-step1-alert');
+  if (phone.replace(/[^0-9]/g, '').length !== 11) {
+    alertBox.className = 'alert-box error';
+    alertBox.style.display = 'block';
+    alertBox.innerText = '올바른 휴대폰 번호를 입력하세요.';
+    return;
+  }
+  
+  alertBox.className = 'alert-box success';
+  alertBox.style.display = 'block';
+  alertBox.innerText = '인증번호 1234가 발송되었습니다.';
+  document.getElementById('auth-code-row').style.display = 'flex';
+}
+
+// 회원가입 문자 인증 확인
+function confirmAuthCode() {
+  const code = document.getElementById('signup-authcode').value;
+  const alertBox = document.getElementById('signup-step1-alert');
+  if (code === '1234') {
+    alertBox.className = 'alert-box success';
+    alertBox.style.display = 'block';
+    alertBox.innerText = '휴대폰 인증이 완료되었습니다.';
+    document.getElementById('btn-step1-next').disabled = false;
+  } else {
+    alertBox.className = 'alert-box error';
+    alertBox.style.display = 'block';
+    alertBox.innerText = '잘못된 인증번호입니다. (1234 입력)';
+  }
+}
+
+// 회원가입 비밀번호 검증
+function verifyPasswordAndNext() {
+  const p1 = document.getElementById('signup-pw1').value;
+  const p2 = document.getElementById('signup-pw2').value;
+  const alertBox = document.getElementById('signup-step2-alert');
+  
+  if (p1.length < 6) {
+    alertBox.style.display = 'block';
+    alertBox.innerText = '비밀번호는 6자리 이상이어야 합니다.';
+    return;
+  }
+  if (p1 !== p2) {
+    alertBox.style.display = 'block';
+    alertBox.innerText = '비밀번호가 일치하지 않습니다.';
+    return;
+  }
+  
+  alertBox.style.display = 'none';
+  goSignupStep(3);
+}
+
+// 회원가입 완료
+function completeSignup() {
+  const company = document.getElementById('signup-company').value || '도담상조';
+  const owner = document.getElementById('signup-owner').value || '홍길동';
+  const bank = document.getElementById('signup-bank').value || '';
+  const account = document.getElementById('signup-account').value || '';
+  const holder = document.getElementById('signup-holder').value || '';
+  
+  mockUser.company_name = company;
+  mockUser.owner_name = owner;
+  mockUser.bank_name = bank;
+  mockUser.account_no = account;
+  mockUser.account_holder = holder;
+  mockUser.balance = 0;
+  
+  updateUI();
+  navigateTo('screen-dashboard');
+}
+
+// 출금 모달 관련
+function openWithdrawModal() {
+  document.getElementById('withdraw-amount').value = '';
+  document.getElementById('modal-max-balance').innerText = mockUser.balance.toLocaleString();
+  document.getElementById('withdraw-modal').classList.add('active');
+}
+function closeWithdrawModal() {
+  document.getElementById('withdraw-modal').classList.remove('active');
+}
+function submitWithdraw() {
+  const amount = parseInt(document.getElementById('withdraw-amount').value);
+  if (!amount || amount <= 0) {
+    alert('올바른 금액을 입력해 주세요.');
+    return;
+  }
+  if (amount > mockUser.balance) {
+    alert('출금 가능 금액을 초과했습니다.');
+    return;
+  }
+  
+  mockUser.balance -= amount;
+  updateUI();
+  closeWithdrawModal();
+  
+  // 내역에 출금 추가
+  const txList = document.getElementById('wallet-tx-list');
+  const now = new Date();
+  const dateStr = (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+  
+  const newTx = document.createElement('div');
+  newTx.className = 'tx-item';
+  newTx.innerHTML = `
+    <div>
+      <p class="tx-type">출금 신청 완료</p>
+      <p class="tx-desc">${mockUser.bank_name || '정산계좌'}</p>
+      <p class="tx-date">${dateStr}</p>
+    </div>
+    <span class="tx-amount minus">-${amount.toLocaleString()}원</span>
+  `;
+  txList.insertBefore(newTx, txList.firstChild);
+  
+  const alertBox = document.getElementById('wallet-alert');
+  alertBox.style.display = 'block';
+  alertBox.innerText = amount.toLocaleString() + '원 출금 신청이 완료되었습니다.';
+  setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+}
+
+// 코드 복사 모의
+function copyMockCode() {
+  alert('추천 코드(' + mockUser.ref_code + ')가 클립보드에 복사되었습니다.');
+}
+</script>
+
+</body>
+</html>
