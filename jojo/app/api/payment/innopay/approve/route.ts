@@ -290,6 +290,33 @@ export async function POST(request: NextRequest) {
                 });
             }
 
+            // 🔒 서버측 금액/주문번호 검증: 클라이언트가 보낸 amt/moid 조작으로 싸게 결제하고
+            // 비싼 주문을 paid 처리(쿠폰 발급)하는 것을 방지. PG 응답에 값이 있을 때만 비교(없으면 로그만).
+            {
+                const pgAmtRaw = approveResult.data?.amt;
+                const pgMoid = approveResult.data?.moid;
+                const expectedAmt = Number(existingGift.total_amount);
+                const amtMismatch = pgAmtRaw !== undefined && pgAmtRaw !== null && String(pgAmtRaw) !== ''
+                    && Number(pgAmtRaw) !== expectedAmt;
+                const moidMismatch = !!pgMoid && String(pgMoid).trim() !== String(existingGift.order_number).trim();
+                if (amtMismatch || moidMismatch) {
+                    console.error('🚨 답례품 결제 검증 실패 (금액/주문번호 불일치) - paid 처리 중단', {
+                        orderNumber: existingGift.order_number,
+                        expectedAmt,
+                        pgAmt: pgAmtRaw,
+                        pgMoid,
+                        tid: transactionId,
+                    });
+                    return NextResponse.json(
+                        { success: false, error: '결제 금액 또는 주문 정보가 일치하지 않아 처리할 수 없습니다. 고객센터로 문의해주세요.' },
+                        { status: 400 }
+                    );
+                }
+                if (pgAmtRaw === undefined || pgAmtRaw === null || String(pgAmtRaw) === '') {
+                    console.warn('⚠️ PG 응답에 amt 없음 - 금액 검증 생략', { orderNumber: existingGift.order_number });
+                }
+            }
+
             const nowIso = new Date().toISOString();
             const detailedMethod = getDetailedPaymentMethod(
                 approveResult.data?.payMethod || payMethod || 'CARD',
