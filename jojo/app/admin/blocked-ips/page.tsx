@@ -323,7 +323,7 @@ export default function BlockedIPsPage() {
                             </div>
                         ) : (
                             <div className="inquiry-table">
-                                <table>
+                                <table style={{ tableLayout: 'fixed', width: '100%' }}>
                                     <thead>
                                         <tr>
                                             <th style={{ width: '140px' }}>IP 주소</th>
@@ -352,7 +352,14 @@ export default function BlockedIPsPage() {
                                                     }}>
                                                         {item.ip_address}
                                                     </td>
-                                                    <td style={{ fontSize: '13px', color: '#444' }}>
+                                                    <td style={{
+                                                        fontSize: '13px',
+                                                        color: '#444',
+                                                        whiteSpace: 'normal',
+                                                        wordBreak: 'break-all',
+                                                        overflowWrap: 'anywhere',
+                                                        lineHeight: 1.5,
+                                                    }}>
                                                         {decodeReason(item.reason)}
                                                     </td>
                                                     <td>
