@@ -6,29 +6,29 @@ import '@/components/b2b/common.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: '부고온 파트너 - B2B 파트너 서비스',
-  description: '부고온 B2B 파트너 서비스 - 장례지도사 및 파트너사를 위한 모바일 부고 플랫폼',
+  title: '부고온 - 모바일 부고장 서비스',
+  description: '정중하고 품격 있는 모바일 부고장 서비스 부고온',
   openGraph: {
-    title: '부고온 파트너 - B2B 파트너 회원가입',
-    description: '부고온 B2B 파트너 전용 서비스 - 모바일 부고장 작성 및 정산 플랫폼',
+    title: '부고온 - 모바일 부고장 서비스',
+    description: '정중하고 품격 있는 모바일 부고장 서비스 부고온',
     type: 'website',
     url: 'https://bugoon.maeumbugo.co.kr',
-    siteName: '부고온 B2B 파트너',
+    siteName: '부고온',
     locale: 'ko_KR',
     images: [
       {
-        url: 'https://bugoon.maeumbugo.co.kr/b2b-og-card.png?v=2',
-        width: 1024,
-        height: 500,
-        alt: '부고온 B2B 파트너',
+        url: 'https://bugoon.maeumbugo.co.kr/og-bugoon.png?v=2',
+        width: 1200,
+        height: 630,
+        alt: '부고온',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '부고온 파트너 - B2B 파트너 서비스',
-    description: '부고온 B2B 파트너 전용 서비스',
-    images: ['https://bugoon.maeumbugo.co.kr/b2b-og-card.png?v=2'],
+    title: '부고온 - 모바일 부고장 서비스',
+    description: '정중하고 품격 있는 모바일 부고장 서비스 부고온',
+    images: ['https://bugoon.maeumbugo.co.kr/og-bugoon.png?v=2'],
   },
   verification: {
     google: '19Py1zFue07o3TzDBzUlkuiJ_D7fwRBOqh44i21eK10',

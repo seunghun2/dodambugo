@@ -21,6 +21,41 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps) {
+    const { id } = await params;
+    const supabase = getSupabase();
+    const isUUID = id.includes('-') && id.length > 10;
+    const { data } = await supabase
+        .from('bugo')
+        .select('deceased_name')
+        .eq(isUUID ? 'id' : 'bugo_number', id)
+        .limit(1);
+    const deceasedName = data?.[0]?.deceased_name;
+    const title = deceasedName ? `故 ${deceasedName}님 감사장` : '감사 인사 보내기 | 마음부고';
+    const description = '감사의 마음을 전합니다.';
+
+    return {
+        title: `${title} | 마음부고`,
+        description,
+        robots: { index: false, follow: false },
+        openGraph: {
+            title,
+            description,
+            type: 'article',
+            url: `https://maeumbugo.co.kr/view/${id}/thanks`,
+            siteName: '마음부고',
+            locale: 'ko_KR',
+            images: [{ url: 'https://maeumbugo.co.kr/og-maeumbugo.png', width: 1024, height: 1024, alt: title }],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: ['https://maeumbugo.co.kr/og-maeumbugo.png'],
+        },
+    };
+}
+
 export default async function ThanksPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = getSupabase();
