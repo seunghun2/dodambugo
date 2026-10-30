@@ -138,8 +138,8 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내 (구버전 1버튼)
     'KA01TP261020144548548T40f3Xuc1h4': 'KA01TP261020144549419wtsS3DtoDm5', // b2b_감사장 및 답례품 안내 (신규 2버튼)
     'KA01TP261023133301983ZQ1IqnoKNRb': 'KA01TP261023133302776XQc2Z0Vuki3', // b2b_감사장 및 답례품 재안내 (발인 3일 후 리마인드)
-    'KA01TP261030082246336kny48mlgazJ': 'KA01TP261030082247299mIcpFZ5skGL', // b2b_감사장 및 사후 정리 안내 (3버튼: 유품·휴대폰 정리 추가)
-    'KA01TP2610300822481090P3YIqjvWmK': 'KA01TP261030082249117D5shbo9TI3A', // b2b_감사장 및 사후 정리 재안내 (3버튼: 발인 3일 후 리마인드)
+    'KA01TP261030082621637TGCBdxe1In1': 'KA01TP261030082622539yNvjKDsQlFc', // b2b_감사장 및 유품 정리 안내 (3버튼: 유품 정리 신청하기)
+    'KA01TP261030082623804ZjqajzkYzGb': 'KA01TP261030082624549UnLgzPppr3r', // b2b_감사장 및 유품 정리 재안내 (3버튼: 발인 3일 후 리마인드)
     // 3. 화환 결제 완료 (조문객용)
     'KA01TP2601311316586435pxsJOWuWbz': 'KA01TP260714224254339AmgosqXieKb', // b2b_01-화환 결제 완료
     // 4. 화환 배송 완료 (조문객용)
@@ -173,8 +173,8 @@ export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> 
     );
     if (careEnabled) {
         const careCheckId = isB2B
-            ? 'KA01TP261030082247299mIcpFZ5skGL'
-            : 'KA01TP261030082246336kny48mlgazJ';
+            ? 'KA01TP261030082622539yNvjKDsQlFc'
+            : 'KA01TP261030082621637TGCBdxe1In1';
         try {
             const careRes = await fetch(`${SOLAPI_URL}/kakao/v2/templates/${careCheckId}`, {
                 headers: getAuthHeader(),
@@ -182,7 +182,7 @@ export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> 
             if (careRes.ok) {
                 const careTpl = await careRes.json();
                 if (careTpl?.status === 'APPROVED') {
-                    return 'KA01TP261030082246336kny48mlgazJ';
+                    return 'KA01TP261030082621637TGCBdxe1In1';
                 }
             }
         } catch {
@@ -220,8 +220,8 @@ export async function resolveThanksReminderTemplateId(isB2B?: boolean): Promise<
     );
     if (careEnabled) {
         const careCheckId = isB2B
-            ? 'KA01TP261030082249117D5shbo9TI3A'
-            : 'KA01TP2610300822481090P3YIqjvWmK';
+            ? 'KA01TP261030082624549UnLgzPppr3r'
+            : 'KA01TP261030082623804ZjqajzkYzGb';
         try {
             const careRes = await fetch(`${SOLAPI_URL}/kakao/v2/templates/${careCheckId}`, {
                 headers: getAuthHeader(),
@@ -229,7 +229,7 @@ export async function resolveThanksReminderTemplateId(isB2B?: boolean): Promise<
             if (careRes.ok) {
                 const careTpl = await careRes.json();
                 if (careTpl?.status === 'APPROVED') {
-                    return 'KA01TP2610300822481090P3YIqjvWmK';
+                    return 'KA01TP261030082623804ZjqajzkYzGb';
                 }
             }
         } catch {
