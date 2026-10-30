@@ -138,6 +138,8 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP2603110816428720O999vVNBCV': 'KA01TP2607142239126854Fj3TBPuX5w', // b2b_감사장 안내 (구버전 1버튼)
     'KA01TP261020144548548T40f3Xuc1h4': 'KA01TP261020144549419wtsS3DtoDm5', // b2b_감사장 및 답례품 안내 (신규 2버튼)
     'KA01TP261023133301983ZQ1IqnoKNRb': 'KA01TP261023133302776XQc2Z0Vuki3', // b2b_감사장 및 답례품 재안내 (발인 3일 후 리마인드)
+    'KA01TP261030082246336kny48mlgazJ': 'KA01TP261030082247299mIcpFZ5skGL', // b2b_감사장 및 사후 정리 안내 (3버튼: 유품·휴대폰 정리 추가)
+    'KA01TP2610300822481090P3YIqjvWmK': 'KA01TP261030082249117D5shbo9TI3A', // b2b_감사장 및 사후 정리 재안내 (3버튼: 발인 3일 후 리마인드)
     // 3. 화환 결제 완료 (조문객용)
     'KA01TP2601311316586435pxsJOWuWbz': 'KA01TP260714224254339AmgosqXieKb', // b2b_01-화환 결제 완료
     // 4. 화환 배송 완료 (조문객용)
@@ -159,10 +161,33 @@ export const B2B_TEMPLATE_MAP: Record<string, string> = {
     'KA01TP261020132835419ZOxQt2Dto3W': 'KA01TP261023124428617bcO4qkzxHT1', // b2b_07-답례품 결제 완료
 };
 
-// 신규 감사장+답례품 2버튼 템플릿: 카카오 검수 승인(APPROVED)일 때 자동 사용 (GIFT_ALIMTALK_LIVE === 'false' 로 강제 비활성 가능)
+// 신규 감사장+답례품+사후정리 템플릿: 카카오 검수 승인(APPROVED)일 때 자동 사용 (GIFT_ALIMTALK_LIVE === 'false' 로 강제 비활성 가능)
 export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> {
     if (process.env.GIFT_ALIMTALK_LIVE === 'false') {
         return 'KA01TP2603110816428720O999vVNBCV';
+    }
+    const careEnabled = process.env.CARE_ALIMTALK_LIVE !== 'false' && (
+        process.env.CARE_ALIMTALK_LIVE === 'true' ||
+        !!process.env.NEXT_PUBLIC_BGZT_PHONE_URL ||
+        !!process.env.NEXT_PUBLIC_BGZT_CONSIGN_URL
+    );
+    if (careEnabled) {
+        const careCheckId = isB2B
+            ? 'KA01TP261030082247299mIcpFZ5skGL'
+            : 'KA01TP261030082246336kny48mlgazJ';
+        try {
+            const careRes = await fetch(`${SOLAPI_URL}/kakao/v2/templates/${careCheckId}`, {
+                headers: getAuthHeader(),
+            });
+            if (careRes.ok) {
+                const careTpl = await careRes.json();
+                if (careTpl?.status === 'APPROVED') {
+                    return 'KA01TP261030082246336kny48mlgazJ';
+                }
+            }
+        } catch {
+            // 3버튼 템플릿 조회 실패 시 2버튼 템플릿으로 폴백
+        }
     }
     const checkId = isB2B
         ? 'KA01TP261020144549419wtsS3DtoDm5'
@@ -183,10 +208,33 @@ export async function resolveThanksTemplateId(isB2B?: boolean): Promise<string> 
     return 'KA01TP2603110816428720O999vVNBCV';
 }
 
-// 발인 3일 후 감사장+답례품 재안내(리마인드) 템플릿: 카카오 검수 승인(APPROVED)일 때만 B2C 기본 템플릿 ID 반환 (미승인 시 null 반환하여 발송 보류)
+// 발인 3일 후 감사장+답례품(+사후정리) 재안내(리마인드) 템플릿: 카카오 검수 승인(APPROVED)일 때만 B2C 기본 템플릿 ID 반환 (미승인 시 null 반환하여 발송 보류)
 export async function resolveThanksReminderTemplateId(isB2B?: boolean): Promise<string | null> {
     if (process.env.GIFT_ALIMTALK_LIVE === 'false') {
         return null;
+    }
+    const careEnabled = process.env.CARE_ALIMTALK_LIVE !== 'false' && (
+        process.env.CARE_ALIMTALK_LIVE === 'true' ||
+        !!process.env.NEXT_PUBLIC_BGZT_PHONE_URL ||
+        !!process.env.NEXT_PUBLIC_BGZT_CONSIGN_URL
+    );
+    if (careEnabled) {
+        const careCheckId = isB2B
+            ? 'KA01TP261030082249117D5shbo9TI3A'
+            : 'KA01TP2610300822481090P3YIqjvWmK';
+        try {
+            const careRes = await fetch(`${SOLAPI_URL}/kakao/v2/templates/${careCheckId}`, {
+                headers: getAuthHeader(),
+            });
+            if (careRes.ok) {
+                const careTpl = await careRes.json();
+                if (careTpl?.status === 'APPROVED') {
+                    return 'KA01TP2610300822481090P3YIqjvWmK';
+                }
+            }
+        } catch {
+            // 3버튼 템플릿 조회 실패 시 2버튼 템플릿으로 폴백
+        }
     }
     const checkId = isB2B
         ? 'KA01TP261023133302776XQc2Z0Vuki3'
