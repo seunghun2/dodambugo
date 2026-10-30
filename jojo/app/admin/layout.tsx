@@ -15,17 +15,35 @@ export default function AdminLayout({
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // 세션 확인
+    // 세션 확인 (서명된 JWT 쿠키 유효성 서버 검증)
     useEffect(() => {
-        const session = sessionStorage.getItem('admin_session');
-        if (session === 'authenticated') {
-            setIsAuthenticated(true);
-            // /admin 루트로 접근하면 /admin/bugo로 리다이렉트
-            if (pathname === '/admin') {
-                router.replace('/admin/bugo');
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/admin-auth', { credentials: 'same-origin', cache: 'no-store' });
+                if (cancelled) return;
+                if (res.ok) {
+                    sessionStorage.setItem('admin_session', 'authenticated');
+                    setIsAuthenticated(true);
+                    if (pathname === '/admin') {
+                        router.replace('/admin/bugo');
+                    }
+                } else {
+                    sessionStorage.removeItem('admin_session');
+                    setIsAuthenticated(false);
+                }
+            } catch {
+                if (!cancelled) {
+                    const session = sessionStorage.getItem('admin_session');
+                    setIsAuthenticated(session === 'authenticated');
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
             }
-        }
-        setLoading(false);
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, [pathname, router]);
 
     const handleLogin = async (e: React.FormEvent) => {

@@ -1,11 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { signAdminToken } from '@/lib/admin-auth';
+import { signAdminToken, verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
+
+export async function GET(request: NextRequest) {
+    if (verifyAdmin(request)) {
+        return NextResponse.json({ authenticated: true });
+    }
+    return NextResponse.json({ authenticated: false }, { status: 401 });
+}
+
+export async function DELETE(request: NextRequest) {
+    const host = request.headers.get('host') || '';
+    const isProdDomain = host.includes('maeumbugo.co.kr');
+    const res = NextResponse.json({ success: true });
+    const clearOpts: any = { path: '/', maxAge: 0 };
+    if (isProdDomain) clearOpts.domain = '.maeumbugo.co.kr';
+    res.cookies.set('admin_token', '', clearOpts);
+    res.cookies.set('admin_ip', '', clearOpts);
+    return res;
+}
 
 export async function POST(request: NextRequest) {
     try {

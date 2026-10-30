@@ -162,7 +162,12 @@ async function handleProxy(
         cache: 'no-store',
     });
 
-    const resBody = await upstreamRes.arrayBuffer();
+    const isNoContentStatus =
+        upstreamRes.status === 204 ||
+        upstreamRes.status === 205 ||
+        upstreamRes.status === 304 ||
+        method === 'HEAD';
+    const resBody = isNoContentStatus ? null : await upstreamRes.arrayBuffer();
     const resHeaders = new Headers();
     const copyHeaderNames = ['content-type', 'content-range', 'preference-applied'];
     for (const h of copyHeaderNames) {

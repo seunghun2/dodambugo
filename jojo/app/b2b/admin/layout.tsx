@@ -20,14 +20,38 @@ export default function B2BAdminLayout({
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
 
-    // 세션 확인
+    // 세션 확인 (서명된 JWT 쿠키 또는 저장된 토큰 유효성 서버 검증)
     useEffect(() => {
         setMounted(true);
-        const session = sessionStorage.getItem('admin_session');
-        if (session === 'authenticated') {
-            setIsAuthenticated(true);
-        }
-        setLoading(false);
+        let cancelled = false;
+        (async () => {
+            try {
+                const storedToken = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || '';
+                const res = await fetch('/api/admin-auth', {
+                    headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : undefined,
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                });
+                if (cancelled) return;
+                if (res.ok) {
+                    sessionStorage.setItem('admin_session', 'authenticated');
+                    setIsAuthenticated(true);
+                } else {
+                    sessionStorage.removeItem('admin_session');
+                    setIsAuthenticated(false);
+                }
+            } catch {
+                if (!cancelled) {
+                    const session = sessionStorage.getItem('admin_session');
+                    setIsAuthenticated(session === 'authenticated');
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const handleLogin = async (e: React.FormEvent) => {

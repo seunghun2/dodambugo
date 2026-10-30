@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isGoogleIp, claimsGoogleCrawlerUA } from './lib/googleIp';
 
 // 무한 로딩 페이지 (차단된 IP/국가에 표시) 😈
 const infiniteLoadingHtml = `
@@ -277,6 +278,17 @@ export async function middleware(request: NextRequest) {
       const ua = request.headers.get('user-agent') || '';
       // google: Googlebot 외 AdsBot-Google, Google-InspectionTool, Mediapartners-Google 등 포함 (광고 검수봇 차단 방지)
       const friendlyBots = /vercel|google|bingbot|yandex|naverbot|yeti|daumoa|kakaotalk/i;
+
+      // 구글 크롤러 사칭 감지: UA는 Googlebot인데 구글 공식 IP 대역이 아니면 가짜 → 자동 차단
+      // (https://developers.google.com/crawling/docs/crawlers-fetchers/verify-google-requests)
+      // 진짜 구글봇(공식 IP)은 아래 friendlyBots 로직 그대로 통과. IP가 비어있으면 판단 불가 → 차단 안 함.
+      if (ip && claimsGoogleCrawlerUA(ua) && !isGoogleIp(ip)) {
+        const reason = `[자동] 구글봇 사칭 (공식 IP 아님, UA: ${ua.substring(0, 80)})`;
+        autoBlockIP(ip, reason);
+        if (!cachedBlockedIPs.includes(ip)) {
+          cachedBlockedIPs.push(ip);
+        }
+      }
 
       if (!friendlyBots.test(ua)) {
         // 악성 봇/크롤러 감지 → 자동 차단
