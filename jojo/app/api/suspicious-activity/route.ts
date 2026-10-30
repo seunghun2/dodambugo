@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { isGoogleIp } from '@/lib/googleIp';
 
 function getSupabase() {
     return createClient(
@@ -9,21 +8,11 @@ function getSupabase() {
     );
 }
 
-// 관리자 화이트리스트 (자동 차단 제외 — middleware.ts와 동일하게 유지)
+// 관리자 화이트리스트 (자동 차단 제외)
 const ADMIN_WHITELIST_IPS = [
     '14.38.63.241',   // 관리자
     '211.36.143.67',  // 관리자 모바일
-    '210.121.187.54', // 관리자 오피스
-    '127.0.0.1',
-    '::1',
 ];
-
-function isAdminWhitelistedIp(ip: string): boolean {
-    if (!ip) return false;
-    if (ADMIN_WHITELIST_IPS.includes(ip)) return true;
-    if (ip.startsWith('117.111.')) return true;
-    return false;
-}
 
 // 자동 차단 임계값
 const AUTO_BLOCK_THRESHOLDS: Record<string, number> = {
@@ -62,8 +51,7 @@ export async function POST(request: NextRequest) {
 
         // 2. 자동 차단 판단
         const threshold = AUTO_BLOCK_THRESHOLDS[type];
-        // 구글 공식 크롤러 IP(Googlebot/AdsBot 등)는 자동 차단 제외 (광고 검수·검색 색인 보호)
-        if (threshold && !isAdminWhitelistedIp(ip) && !isGoogleIp(ip)) {
+        if (threshold && !ADMIN_WHITELIST_IPS.includes(ip)) {
             // 최근 24시간 내 같은 IP의 같은 유형 활동 횟수 조회
             const oneDayAgo = new Date();
             oneDayAgo.setHours(oneDayAgo.getHours() - 24);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { gaEvents } from '@/components/GoogleAnalytics';
 import { useIsB2b } from '@/lib/b2b';
+import { sanitizeThanksMessage } from '@/lib/gift/thanks-messages';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -259,7 +260,9 @@ ${mournerName} 배상`;
     };
 
     const currentMessage = messages[activeTab];
-    const currentCustomMessage = customMessages[activeTab];
+    const currentCustomMessage = customMessages[activeTab]
+        ? sanitizeThanksMessage(customMessages[activeTab]!, bugo.deceased_name)
+        : undefined;
 
     // 기본 메시지를 텍스트로 변환
     const getDefaultMessageText = () => {
@@ -276,9 +279,10 @@ ${mournerName} 배상`;
 
     // 메시지 저장 (Optimistic Update)
     const handleSaveMessage = async () => {
+        const sanitizedMessage = sanitizeThanksMessage(editingMessage, bugo.deceased_name);
         const updatedMessages = {
             ...customMessages,
-            [activeTab]: editingMessage,
+            [activeTab]: sanitizedMessage,
         };
 
         // 즉시 UI 업데이트

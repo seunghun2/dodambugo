@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useIsB2b } from '@/lib/b2b';
+import { sanitizeThanksMessage } from '@/lib/gift/thanks-messages';
 
 type ReligionType = 'general' | 'christian' | 'catholic' | 'buddhist';
 
@@ -108,7 +109,8 @@ export default function CardContent({ bugo, bugoId, isB2bPage }: CardContentProp
     // 표시할 메시지
     const getDisplayMessage = () => {
         if (customMessage) {
-            return customMessage.split('\n\n').map(p => p.replace(/\n/g, '<br/>'));
+            const safeCustom = sanitizeThanksMessage(customMessage, bugo.deceased_name);
+            return safeCustom.split('\n\n').map(p => p.replace(/\n/g, '<br/>'));
         }
         return defaultMessages[religionType].map(t => replaceDeceased(t));
     };

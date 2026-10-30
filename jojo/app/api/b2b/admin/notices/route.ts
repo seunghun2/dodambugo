@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,10 +12,7 @@ function getSupabase() {
 }
 
 // GET: 어드민 공지사항 전체 조회
-export async function GET(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET() {
     const supabase = getSupabase();
     const { data, error } = await supabase
         .from('b2b_notices')
@@ -30,9 +26,6 @@ export async function GET(request: NextRequest) {
 
 // POST: 공지사항 등록
 export async function POST(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     try {
         const { title, content, is_fixed } = await request.json();
         if (!title || !content) {
@@ -68,9 +61,6 @@ export async function POST(request: NextRequest) {
 
 // PATCH: 공지사항 수정
 export async function PATCH(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     try {
         const { id, title, content, is_fixed } = await request.json();
         if (!id) {
@@ -101,9 +91,6 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE: 공지사항 삭제
 export async function DELETE(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');

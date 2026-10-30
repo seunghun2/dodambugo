@@ -17,7 +17,7 @@ export default function SettingsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const token = typeof window !== 'undefined' ? (sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || localStorage.getItem('b2b_token') || '') : '';
+                const token = typeof window !== 'undefined' ? (localStorage.getItem('b2b_token') || sessionStorage.getItem('admin_token') || '') : '';
                 const headers: Record<string, string> = {};
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -59,7 +59,7 @@ export default function SettingsPage() {
 
         setSaving(true);
         try {
-            const token = typeof window !== 'undefined' ? (sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || localStorage.getItem('b2b_token') || '') : '';
+            const token = typeof window !== 'undefined' ? (localStorage.getItem('b2b_token') || sessionStorage.getItem('admin_token') || '') : '';
             const headers: Record<string, string> = { 'Content-Type': 'application/json' };
             if (token) headers['Authorization'] = `Bearer ${token}`;
 

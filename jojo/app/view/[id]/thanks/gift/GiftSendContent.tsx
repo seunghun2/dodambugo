@@ -10,6 +10,7 @@ import {
     buildMessage,
     getReligionType,
     parseCustomMessages,
+    sanitizeThanksMessage,
     type CardId,
     type ReligionType,
 } from '@/lib/gift/thanks-messages';
@@ -88,7 +89,13 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
                 if (parsed.tab && TAB_KEYS.includes(parsed.tab)) setTab(parsed.tab);
                 if (parsed.cardId) setCardId(parsed.cardId);
                 if (parsed.messages && typeof parsed.messages === 'object') {
-                    setMessages((prev) => ({ ...prev, ...parsed.messages }));
+                    const healed = Object.fromEntries(
+                        Object.entries(parsed.messages as Record<string, unknown>).map(([k, v]) => [
+                            k,
+                            typeof v === 'string' ? sanitizeThanksMessage(v, deceasedName) : v,
+                        ])
+                    );
+                    setMessages((prev) => ({ ...prev, ...healed }));
                 }
                 if (Array.isArray(parsed.items) && parsed.items.length > 0) {
                     setItems(parsed.items);

@@ -6,6 +6,7 @@ import { isResponse, requireMourner } from '@/lib/gift/guard';
 import { GiftNotReadyError, getIssuer, isLiveMode } from '@/lib/gift/issuer';
 import { dedupeRecipients, normalizePhone, type GiftRecipient } from '@/lib/gift/phone';
 import { resolveRefPhone } from '@/lib/gift/recipient-source';
+import { parseCustomMessages, sanitizeThanksMessage } from '@/lib/gift/thanks-messages';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,8 +61,9 @@ export async function POST(req: NextRequest) {
             .single();
         if (!product) return NextResponse.json({ error: '선택하신 상품을 찾을 수 없습니다.' }, { status: 400 });
 
-        // 2) 메시지 / 카드
-        const message = String(body.message ?? '').slice(0, MAX_MESSAGE);
+        // 2) 메시지 / 카드 (실수로 '故OOO님'을 지워 '내시어 의 마지막 길에'가 된 경우 고인명 자동 복원)
+        const rawMessage = String(body.message ?? '').slice(0, MAX_MESSAGE);
+        const message = sanitizeThanksMessage(rawMessage, bugo.deceased_name).slice(0, MAX_MESSAGE);
         const cardId = CARD_IDS.includes(body.cardId) ? body.cardId : 'general';
 
         // 3) 받는 사람 (ref 는 서버에서 번호 조회)
@@ -155,11 +157,12 @@ export async function POST(req: NextRequest) {
 
         // 조문객이 /view/[id]/thanks/card 링크를 열었을 때 상주가 선택한 종교 카드와 감사 문구가 동일하게 보이도록 동기화
         if (cardId !== 'none' && message) {
+            const existingCustom = parseCustomMessages(bugo.thanks_message);
             await supabase
                 .from('bugo')
                 .update({
                     thanks_religion: cardId,
-                    thanks_message: { [cardId]: message },
+                    thanks_message: { ...existingCustom, [cardId]: message },
                 })
                 .eq('id', bugo.id)
                 .then(() => {}, (err) => console.error('[gift/orders] bugo thanks sync warn:', err));

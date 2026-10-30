@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdmin } from '@/lib/admin-auth';
 
 function getSupabase() {
     return createClient(
@@ -10,10 +9,7 @@ function getSupabase() {
 }
 
 // GET: 차단 IP 목록
-export async function GET(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET() {
     const supabase = getSupabase();
     const { data, error } = await supabase
         .from('blocked_ips')
@@ -26,9 +22,6 @@ export async function GET(request: NextRequest) {
 
 // POST: IP 차단 추가
 export async function POST(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const { ip_address, reason } = await request.json();
     if (!ip_address) return NextResponse.json({ error: 'ip_address required' }, { status: 400 });
 
@@ -48,9 +41,6 @@ export async function POST(request: NextRequest) {
 
 // DELETE: IP 차단 해제
 export async function DELETE(request: NextRequest) {
-    if (!verifyAdmin(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const { ip_address } = await request.json();
     if (!ip_address) return NextResponse.json({ error: 'ip_address required' }, { status: 400 });
 

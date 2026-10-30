@@ -73,9 +73,24 @@ export function parseCustomMessages(raw: unknown): CustomMessages {
     return {};
 }
 
-/** 탭에서 보여줄 문구: 사용자가 수정해 둔 문구가 있으면 그것, 없으면 기본 문구 */
+/**
+ * 사용자가 문구 수정 중 실수로 '故OOO님'을 지운 채 저장하여
+ * '귀한 시간 내시어 의 마지막 길에' 처럼 호칭이 누락된 경우 고인명을 자동 복원한다.
+ * (단, '어머님', '아버지', '우리 딸 OOO' 등 대체 호칭을 정상 입력한 경우는 그대로 유지)
+ */
+export function sanitizeThanksMessage(text: string, deceased?: string | null): string {
+    if (!text) return '';
+    const name = (deceased || '').trim() || '고인';
+    return text
+        .replace(/\{deceased\}/g, name)
+        .replace(/귀한 시간 내시어\s*(?:故\s*)?(?:님)?의\s*마지막\s*길에/g, `귀한 시간 내시어 故${name}님의 마지막 길에`)
+        .replace(/귀한 시간 내시어\s*(?:故\s*)?(?:님)?을\s*위해/g, `귀한 시간 내시어 故${name}님을 위해`)
+        .replace(/귀한 시간 내시어\s*(?:故\s*)?(?:님)?의\s*왕생길에/g, `귀한 시간 내시어 故${name}님의 왕생길에`);
+}
+
+/** 탭에서 보여줄 문구: 사용자가 수정해 둔 문구가 있으면 그것(누락 호칭 보정 포함), 없으면 기본 문구 */
 export function buildMessage(tab: ReligionType, deceased: string, custom: CustomMessages): string {
     const saved = custom[tab];
-    if (saved && saved.trim()) return saved;
-    return BODY[tab].map((p) => p.replace('{deceased}', deceased || '고인')).join('\n\n');
+    if (saved && saved.trim()) return sanitizeThanksMessage(saved, deceased);
+    return BODY[tab].map((p) => p.replace('{deceased}', (deceased || '').trim() || '고인')).join('\n\n');
 }
