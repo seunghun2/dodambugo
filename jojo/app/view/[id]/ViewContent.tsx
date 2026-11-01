@@ -652,6 +652,9 @@ ${url}
         if (bugo.funeral_time) {
             const [hours, minutes] = bugo.funeral_time.split(':').map(Number);
             funeralDate.setHours(hours || 0, minutes || 0, 0, 0);
+        } else {
+            // 발인 시간 미정이면 발인일 당일 끝(23:59)까지는 화환 버튼 유지
+            funeralDate.setHours(23, 59, 59, 999);
         }
         return new Date() > funeralDate;
     };
@@ -895,7 +898,7 @@ ${url}
                             {shouldShowIlpo({ funeralType: bugo.funeral_type, ilpoDate: bugo.ilpo_date }) && <div className="funeral-info-divider"></div>}
                             <div className={`funeral-info-row ${bugo.ilpo_date ? '' : 'funeral-highlight'}`}>
                                 <span className="funeral-info-label">발인</span>
-                                <span className="funeral-info-value">{formatDate(bugo.funeral_date!)} {bugo.funeral_time || ''}</span>
+                                <span className="funeral-info-value">{formatDate(bugo.funeral_date!)} {bugo.funeral_time || '(시간 추후 안내)'}</span>
                             </div>
                         </>
                     )}

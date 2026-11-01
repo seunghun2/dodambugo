@@ -1264,7 +1264,8 @@ export default function WriteFormPage() {
         if (!formData.deceased_name) newErrors.deceased_name = '고인 성함을 입력해주세요';
         if (formData.age && Number(formData.age) > 999) newErrors.age = '연세는 3자리까지만 입력해주세요';
         if (!formData.gender) newErrors.gender = '성별을 선택해주세요';
-        if (!formData.relationship || !formData.primary_mourner) newErrors.primary_mourner = '상주를 입력해주세요';
+        if (!formData.relationship && formData.primary_mourner) newErrors.primary_mourner = '고인과의 관계를 선택해주세요';
+        else if (!formData.relationship || !formData.primary_mourner) newErrors.primary_mourner = '상주를 입력해주세요';
 
         // 추가상주: 이름 입력 시 관계 필수, 관계 선택 시 이름 필수
         mourners.forEach((mourner, index) => {
@@ -1291,7 +1292,7 @@ export default function WriteFormPage() {
         const isNoBinso = formData.funeral_type === '무빈소장례';
         if (!showIlpo && !isNoBinso) {
             if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
-            if (!formData.funeral_time || formData.funeral_time === '00:00') newErrors.funeral_time = '발인 시간을 입력해주세요';
+            // 발인 시간은 선택 입력 (초상 첫날 화장장 예약 전이라 모르는 경우가 많음 → 비우면 "추후 안내"로 표시)
         }
 
         // 임종일시는 항상 필수 (알림톡 연동)
@@ -1434,7 +1435,7 @@ export default function WriteFormPage() {
                 encoffin_date: formData.encoffin_date || null,
                 encoffin_time: formData.encoffin_hour ? `${formData.encoffin_hour}:${formData.encoffin_minute}` : null,
                 funeral_date: formData.funeral_date || null,
-                funeral_time: formData.funeral_time || (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
+                funeral_time: (formData.funeral_time && formData.funeral_time !== '00:00') ? formData.funeral_time : (formData.funeral_hour ? `${formData.funeral_hour}:${formData.funeral_minute}` : null),
                 // 일포는 showIlpo가 ON일 때만 저장 (제주도 전용)
                 ilpo_date: showIlpo && formData.ilpo_date ? formData.ilpo_date : null,
                 ilpo_time: showIlpo && formData.ilpo_time ? formData.ilpo_time : null,
@@ -2180,8 +2181,10 @@ export default function WriteFormPage() {
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <label className={`form-label ${!showIlpo && formData.funeral_type !== '무빈소장례' ? 'required' : ''}`} style={{ marginBottom: 0 }}>
                                                     발인일시
-                                                    {formData.funeral_type === '무빈소장례' && (
+                                                    {formData.funeral_type === '무빈소장례' ? (
                                                         <span style={{ fontSize: '13px', fontWeight: 'normal', color: 'var(--gray-500)', marginLeft: '4px' }}>(선택)</span>
+                                                    ) : (
+                                                        <span style={{ fontSize: '13px', fontWeight: 'normal', color: 'var(--gray-500)', marginLeft: '4px' }}>(시간은 모르면 비워두세요)</span>
                                                     )}
                                                 </label>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
