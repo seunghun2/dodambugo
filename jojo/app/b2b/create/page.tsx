@@ -150,6 +150,19 @@ export default function B2BCreatePage() {
       return;
     }
 
+    fetch('/api/b2b/me', {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+    })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('b2b_token');
+          localStorage.removeItem('b2b_user');
+          router.push('/b2b/login');
+        }
+      })
+      .catch(() => {});
+
     const params = new URLSearchParams(window.location.search);
     const editNum = params.get('edit');
     if (editNum) {

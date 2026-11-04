@@ -75,6 +75,12 @@ export default function DashboardPage() {
         headers: { Authorization: `Bearer ${token}` },
         credentials: 'include',
       });
+      if (res.status === 401) {
+        localStorage.removeItem('b2b_token');
+        localStorage.removeItem('b2b_user');
+        router.push('/b2b/login');
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         if (data.user) {

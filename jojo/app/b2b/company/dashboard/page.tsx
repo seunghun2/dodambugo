@@ -86,6 +86,12 @@ export default function CompanyDashboardPage() {
             const res = await fetch(`/api/b2b/admin/companies/settlements?companyId=${companyId}&yearMonth=${yearMonth}`, {
                 headers: { Authorization: token ? `Bearer ${token}` : '' }
             });
+            if (res.status === 401) {
+                localStorage.removeItem('b2b_token');
+                localStorage.removeItem('b2b_user');
+                router.push('/b2b/company/login');
+                return;
+            }
             if (res.ok) {
                 const data = await res.json();
                 if (data.success) {
