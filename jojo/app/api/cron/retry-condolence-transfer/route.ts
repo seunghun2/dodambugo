@@ -109,7 +109,7 @@ async function handleRetryTransfers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     mid: 'bumaeum02m',
-                    merkey: process.env.INNOPAY_LICENSE_KEY!,
+                    merkey: process.env.INNOPAY_TRANSFER_LICENSE_KEY!,
                     moid: txMoid,
                     req_dt: reqDt,
                     bankCode: bankCode,

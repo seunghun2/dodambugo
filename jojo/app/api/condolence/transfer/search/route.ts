@@ -6,7 +6,7 @@ import { verifyAdmin } from '@/lib/admin-auth';
 
 const INNOPAY_SEARCH_URL = 'https://acct.innopay.co.kr/AcctOutTransSearch.acct';
 const INNOPAY_MID = 'bumaeum02m';
-const INNOPAY_LICENSE_KEY = process.env.INNOPAY_LICENSE_KEY!;
+const INNOPAY_LICENSE_KEY = process.env.INNOPAY_TRANSFER_LICENSE_KEY!;
 
 export async function POST(request: NextRequest) {
     if (!verifyAdmin(request)) {
