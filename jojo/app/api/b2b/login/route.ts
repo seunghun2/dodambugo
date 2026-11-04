@@ -8,7 +8,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 export async function POST(request: NextRequest) {
     try {

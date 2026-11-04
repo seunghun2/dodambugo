@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

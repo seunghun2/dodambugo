@@ -7,7 +7,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 // POST: 상조회사 전용 로그인 (login_id + login_password → JWT 발급)
 export async function POST(request: NextRequest) {

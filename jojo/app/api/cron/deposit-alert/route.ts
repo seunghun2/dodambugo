@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const INNOPAY_BALANCE_URL = 'http://49.50.139.204/proxy/balance';
 const INNOPAY_MID = 'bumaeum02m';
-const INNOPAY_LICENSE_KEY = '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==';
+const INNOPAY_LICENSE_KEY = process.env.INNOPAY_LICENSE_KEY!;
 const DEPOSIT_ACCOUNT_NO = '66400001397152';
 
 const ALERT_THRESHOLD = 1500000; // 150만원

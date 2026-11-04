@@ -9,7 +9,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 // GET: 특정 상조회사의 월별 대금 정산 요약 목록 또는 특정 월의 상세 내역 조회 (지도사명, 고인명, 부고ID 조인 추가)
 export async function GET(request: NextRequest) {

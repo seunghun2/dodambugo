@@ -24,6 +24,16 @@ const customFetch: typeof fetch = (input, init) => {
                 credentials: 'same-origin',
             });
         }
+
+        const storageImagesPrefix = `${supabaseUrl}/storage/v1/object/images/`;
+        const method = (init?.method || 'GET').toUpperCase();
+        if (urlStr.startsWith(storageImagesPrefix) && method !== 'GET' && method !== 'HEAD') {
+            const proxiedStorageUrl = `/api/admin/storage/images/${urlStr.slice(storageImagesPrefix.length)}`;
+            return fetch(proxiedStorageUrl, {
+                ...init,
+                credentials: 'same-origin',
+            });
+        }
     }
     return fetch(input, init);
 };

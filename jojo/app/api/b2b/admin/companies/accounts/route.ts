@@ -9,7 +9,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 // 관리자 또는 해당 상조회사 본사 관리자 권한 검증 헬퍼
 async function checkAuth(request: NextRequest, targetCompanyId: string | null): Promise<{ authorized: boolean; companyId?: string }> {

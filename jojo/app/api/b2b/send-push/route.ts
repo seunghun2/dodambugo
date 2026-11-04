@@ -8,7 +8,7 @@ import { sendPushToPartner } from '@/lib/fcm';
 
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 // JWT 검증용 Supabase 클라이언트
 const supabase = createClient(

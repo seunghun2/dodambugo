@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
                 phone: cleanPhone,
                 company_name,
             },
-            process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key',
+            process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : ''),
             { expiresIn: '30d' }
         );
 

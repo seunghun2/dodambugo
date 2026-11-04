@@ -5,7 +5,7 @@ const INNOPAY_ACCT_URL = 'https://acct.innopay.co.kr/acctInterfaceJson.acct';
 
 // 부의금 전용 가맹점 정보
 const MERCHANT_NO = '10748';
-const LICENSE_KEY = '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==';
+const LICENSE_KEY = process.env.INNOPAY_LICENSE_KEY!;
 
 export async function POST(request: NextRequest) {
     try {

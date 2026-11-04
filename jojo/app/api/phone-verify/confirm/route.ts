@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 // 서버리스 환경에서는 같은 인스턴스에서 실행되므로 import로 공유
 import { getVerificationCode, deleteVerificationCode } from '../store';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 export async function POST(request: NextRequest) {
     try {

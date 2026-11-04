@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// 순번(DO000001~) 대입 열람 방지: 결제 직후 영수증 확인용이므로 비관리자는 24시간 이내 주문만 순번 조회 허용
+const DO_RECEIPT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 // 주문 조회에 필요한 컬럼만 선택 (buyer_phone, receipt_url 등 불필요한 개인정보 제외)
 const ORDER_COLUMNS =
@@ -67,6 +71,11 @@ export async function GET(
 
             const targetOrder: any = b2bOrders[doNum - 1];
             if (!targetOrder) {
+                return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
+            }
+            const isAdmin = verifyAdmin(request);
+            const createdMs = targetOrder.created_at ? new Date(targetOrder.created_at).getTime() : 0;
+            if (!isAdmin && (!createdMs || Date.now() - createdMs > DO_RECEIPT_WINDOW_MS)) {
                 return NextResponse.json({ error: '주문을 찾을 수 없습니다.' }, { status: 404 });
             }
             targetOrder.order_number = 'DO' + String(doNum).padStart(6, '0');

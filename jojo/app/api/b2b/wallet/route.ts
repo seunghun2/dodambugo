@@ -8,7 +8,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const JWT_SECRET = process.env.JWT_SECRET || 'maeumbugo-b2b-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'maeumbugo-b2b-secret-key' : '');
 
 function getUserIdFromToken(request: NextRequest): string | null {
     const auth = request.headers.get('Authorization');
@@ -342,7 +342,7 @@ export async function POST(request: NextRequest) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     mid: 'bumaeum02m',
-                    merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
+                    merkey: process.env.INNOPAY_LICENSE_KEY!,
                     moid: txMoid,
                     req_dt: nowStr.slice(0, 8),
                     bankCode: bankCode,

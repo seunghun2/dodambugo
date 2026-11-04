@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 mid: 'bumaeum02m',
-                                merkey: '7bYbeddYcp6/zom99bje/iNEqLO3HFx2wcWGFgKeSCg95b8kRx9IcQtx3aoL3C6BufEXAD/V7bd6INig0ge0Zw==',
+                                merkey: process.env.INNOPAY_LICENSE_KEY!,
                                 moid: txMoid,
                                 req_dt: reqDt,
                                 bankCode: bankCode,
