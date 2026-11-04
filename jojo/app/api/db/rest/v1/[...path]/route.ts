@@ -125,9 +125,65 @@ async function handleProxy(
         }
     }
 
-    // 3. condolence_orders 테이블은 클라이언트에서 SELECT만 허용 (쓰기/수정/삭제 차단)
-    if (table === 'condolence_orders' && !isAdmin && method !== 'GET' && method !== 'HEAD') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // 3. 기타 허용 테이블별 비관리자(!isAdmin) 세부 권한 강제
+    if (!isAdmin && table !== 'bugo') {
+        const READ_ONLY_TABLES = new Set([
+            'facilities',
+            'flower_products',
+            'flower_categories',
+            'condolence_config',
+            'condolence_amounts',
+            'gift_products',
+            'blocked_phones',
+        ]);
+        const READ_INSERT_TABLES = new Set([
+            'guestbook',
+            'ritual_shares',
+            'burial_reviews',
+        ]);
+
+        if (READ_ONLY_TABLES.has(table)) {
+            if (method !== 'GET' && method !== 'HEAD') {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+            if (table === 'blocked_phones' && !searchParams.has('or') && !searchParams.has('phone')) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        } else if (READ_INSERT_TABLES.has(table)) {
+            if (method !== 'GET' && method !== 'HEAD' && method !== 'POST') {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        } else if (table === 'facility_corrections') {
+            if (method !== 'POST') {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        } else if (table === 'inquiries') {
+            if (method === 'GET' || method === 'HEAD') {
+                const phoneFilter = searchParams.get('phone') || '';
+                if (!phoneFilter.startsWith('eq.') || phoneFilter.length <= 3 || phoneFilter === 'eq.undefined') {
+                    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+                }
+            } else if (method !== 'POST') {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        } else if (table === 'condolence_orders') {
+            if (method !== 'GET' && method !== 'HEAD') {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+            const bugoNumFilter = searchParams.get('bugo_number') || '';
+            const bugoIdFilter = searchParams.get('bugo_id') || '';
+            const hasValidBugoNum =
+                bugoNumFilter.startsWith('eq.') &&
+                bugoNumFilter.length > 3 &&
+                bugoNumFilter !== 'eq.undefined';
+            const hasValidBugoId =
+                bugoIdFilter.startsWith('eq.') &&
+                bugoIdFilter.length > 3 &&
+                bugoIdFilter !== 'eq.undefined';
+            if (!hasValidBugoNum && !hasValidBugoId) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        }
     }
 
     // 4. Supabase PostgREST로 안전하게 프록시 전달 (서버 전용 service_role 키 사용)
