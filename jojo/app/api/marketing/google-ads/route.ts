@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,6 +58,9 @@ export async function POST(request: NextRequest) {
 
 // GET: 저장된 구글 광고 데이터 조회
 export async function GET(request: NextRequest) {
+    if (!verifyAdmin(request)) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 401 });
+    }
     try {
         const { searchParams } = new URL(request.url);
         const year = searchParams.get('year') || '2026';
