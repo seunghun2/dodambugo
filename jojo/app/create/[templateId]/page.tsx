@@ -424,7 +424,7 @@ export default function WriteFormPage() {
     };
 
     // DB에 임시저장 (API 호출)
-    const saveDraftToDb = async (options?: { keepalive?: boolean }) => {
+    const saveDraftToDb = async (options?: { keepalive?: boolean; isManualSave?: boolean }) => {
         try {
             const idToUse = ensureDraftId();
             const payload = latestDraftPayloadRef.current || {
@@ -444,6 +444,10 @@ export default function WriteFormPage() {
                 ipAddress: clientIp,
             };
             payload.draftId = idToUse;
+            payload.viewedSteps = Array.from(trackedSteps.current);
+            if (options?.isManualSave) {
+                payload.isManualSave = true;
+            }
             isDirtyDraftRef.current = false;
 
             const response = await fetch('/api/drafts', {
@@ -487,7 +491,7 @@ export default function WriteFormPage() {
         localStorage.setItem('bugo_draft', JSON.stringify(draftData));
 
         // DB에도 저장
-        await saveDraftToDb({ keepalive: true });
+        await saveDraftToDb({ keepalive: true, isManualSave: true });
 
         setDraftModalOpen(false);
         router.push('/');

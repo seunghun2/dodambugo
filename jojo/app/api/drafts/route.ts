@@ -67,6 +67,8 @@ export async function POST(request: NextRequest) {
             templateId,
             ipAddress,
             b2bUserId,
+            isManualSave,
+            viewedSteps,
         } = body;
 
         // 새 ID 생성 또는 기존 ID 사용
@@ -138,6 +140,8 @@ export async function POST(request: NextRequest) {
                 showPhoto: Boolean(showPhoto),
                 photoUrl: resolvedPhotoUrl || '',
                 phoneVerified: Boolean(phoneVerified),
+                isManualSave: Boolean(isManualSave),
+                viewedSteps: Array.isArray(viewedSteps) ? viewedSteps : [],
             },
             ip_address: ipAddress || forwardedIp,
             updated_at: new Date().toISOString(),

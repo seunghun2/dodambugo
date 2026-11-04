@@ -33,6 +33,10 @@
             "schedule": "0 1 * * *"
         },
         {
+            "path": "/api/cron/draft-dropoff-report",
+            "schedule": "0 1 * * *"
+        },
+        {
             "path": "/api/cron/retry-condolence-transfer",
             "schedule": "0 22 * * *"
         },
