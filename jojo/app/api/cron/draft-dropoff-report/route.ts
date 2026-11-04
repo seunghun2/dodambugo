@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Vercel Cron: 매일 오전 10시 (KST) = UTC 01:00 ("0 1 * * *")
+// Vercel Cron: 매일 오전 9시 (KST) = UTC 00:00 ("0 0 * * *")
 export const dynamic = 'force-dynamic';
 
 function getSupabase() {

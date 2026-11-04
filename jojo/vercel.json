@@ -34,7 +34,7 @@
         },
         {
             "path": "/api/cron/draft-dropoff-report",
-            "schedule": "0 1 * * *"
+            "schedule": "0 0 * * *"
         },
         {
             "path": "/api/cron/retry-condolence-transfer",
