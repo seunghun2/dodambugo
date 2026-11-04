@@ -898,7 +898,7 @@ ${url}
                             {shouldShowIlpo({ funeralType: bugo.funeral_type, ilpoDate: bugo.ilpo_date }) && <div className="funeral-info-divider"></div>}
                             <div className={`funeral-info-row ${bugo.ilpo_date ? '' : 'funeral-highlight'}`}>
                                 <span className="funeral-info-label">발인</span>
-                                <span className="funeral-info-value">{formatDate(bugo.funeral_date!)} {bugo.funeral_time || '(시간 추후 안내)'}</span>
+                                <span className="funeral-info-value">{formatDate(bugo.funeral_date!)} {bugo.funeral_time || ''}</span>
                             </div>
                         </>
                     )}
