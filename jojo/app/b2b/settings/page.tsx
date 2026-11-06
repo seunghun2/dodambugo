@@ -604,7 +604,7 @@ export default function SettingsPage() {
         const shareUrl = `https://bugoon.maeumbugo.co.kr/signup?ref=${user.my_referral_code}`;
         const playStoreUrl = `https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon`;
         const appStoreUrl = `https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225`;
-        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 20,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
+        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 50,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
         
         if (navigator.share) {
             try {
@@ -2217,7 +2217,7 @@ const b2bFaqData: FAQItem[] = [
   },
   {
     question: '적립금은 얼마씩, 언제 지급되나요?',
-    answer: '개인 파트너 기준으로 제작하신 부고장에서 근조화환 판매 시 건당 기본 20,000원이 적립됩니다.\n결제 완료 후 부정결제 및 취소 확인을 위해 24시간 정산 대기(적립 예정) 후 출금 가능 적립금으로 전환됩니다.',
+    answer: '개인 파트너 기준으로 제작하신 부고장에서 근조화환 판매 시 건당 기본 50,000원이 적립됩니다.\n결제 완료 후 부정결제 및 취소 확인을 위해 24시간 정산 대기(적립 예정) 후 출금 가능 적립금으로 전환됩니다.',
   },
   {
     question: '환급신청을 했는데 언제 지급되나요?',
