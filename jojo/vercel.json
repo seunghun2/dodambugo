@@ -37,6 +37,10 @@
             "schedule": "0 0 * * *"
         },
         {
+            "path": "/api/cron/gift-behavior-report",
+            "schedule": "0 0 * * *"
+        },
+        {
             "path": "/api/cron/retry-condolence-transfer",
             "schedule": "0 22 * * *"
         },

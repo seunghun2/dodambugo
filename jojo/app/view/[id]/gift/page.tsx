@@ -104,7 +104,25 @@ export default function GiftListPage() {
                 </div>
                 <div className="gift-chips" role="tablist" aria-label="가격대">
                     {PRICE_FILTERS.map((f, i) => (
-                        <button key={f.label} role="tab" aria-selected={i === filterIdx} className={`gift-chip ${i === filterIdx ? 'active' : ''}`} onClick={() => setFilterIdx(i)}>
+                        <button
+                            key={f.label}
+                            role="tab"
+                            aria-selected={i === filterIdx}
+                            className={`gift-chip ${i === filterIdx ? 'active' : ''}`}
+                            onClick={() => {
+                                setFilterIdx(i);
+                                fetch('/api/analytics/track', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        path: `/view/${bugoId}/gift`,
+                                        category: 'gift_action',
+                                        action: 'price_filter',
+                                        label: f.label,
+                                    }),
+                                }).catch(() => {});
+                            }}
+                        >
                             {f.label}
                         </button>
                     ))}

@@ -114,7 +114,8 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [draftStorageKey]);
 
-    // ----- 초안 자동 저장 (localStorage) -----
+    // ----- 초안 자동 저장 (localStorage) + 수령인 추가 행동 로깅 -----
+    const prevItemsLenRef = useRef<number>(0);
     useEffect(() => {
         if (!draftRestored) return;
         try {
@@ -125,7 +126,20 @@ export default function GiftSendContent({ bugoId, initialProduct, live, deceased
         } catch {
             /* 용량 초과 등 무시 */
         }
-    }, [draftRestored, draftStorageKey, tab, cardId, messages, items]);
+        if (items.length > prevItemsLenRef.current) {
+            fetch('/api/analytics/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: `/view/${bugoId}/thanks/gift?product=${product.id}`,
+                    category: 'gift_action',
+                    action: 'recipient_add',
+                    label: `${items.length}명`,
+                }),
+            }).catch(() => {});
+        }
+        prevItemsLenRef.current = items.length;
+    }, [draftRestored, draftStorageKey, tab, cardId, messages, items, bugoId, product.id]);
 
     // 카톡 인앱 → 크롬 이동 시 현재 작성 중인 문구·명단을 URL에 실어 넘긴다
     const buildShareableDraftUrl = useCallback(

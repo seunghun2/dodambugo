@@ -169,14 +169,24 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
         return `https://maeumbugo.co.kr/view/${bugoId}/thanks/card`;
     };
 
-    // 감사장 공유 실행 기록 (발인 3일 후 미발송자 리마인드 알림톡 제외용)
-    const markThanksShared = () => {
+    // 감사장 공유 실행 기록 (발인 3일 후 미발송자 리마인드 알림톡 제외용 + 행동분석 기록)
+    const markThanksShared = (method?: string) => {
         fetch(`/api/bugo/${bugo.id || bugoId}/thanks-sent`, { method: 'POST' }).catch(() => {});
+        fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                path: `${pathPrefix}/view/${bugoId}/thanks`,
+                category: 'thanks_action',
+                action: 'share',
+                label: method || '공유',
+            }),
+        }).catch(() => {});
     };
 
     // 카카오 공유
     const shareKakao = () => {
-        markThanksShared();
+        markThanksShared('카카오톡');
         gaEvents.shareThanks('카카오톡');
         const shareUrl = getShareUrl();
         if (typeof window !== 'undefined' && (window as any).Kakao) {
@@ -204,7 +214,7 @@ export default function ThanksContent({ bugo, bugoId, isB2bPage }: ThanksContent
 
     // SMS 공유
     const shareSMS = () => {
-        markThanksShared();
+        markThanksShared('문자메시지');
         gaEvents.shareThanks('문자메시지');
         const shareUrl = getShareUrl();
         const mournerName = bugo.mourner_name || '상주';
@@ -225,7 +235,7 @@ ${mournerName} 배상`;
 
     // 밴드 공유
     const shareBand = () => {
-        markThanksShared();
+        markThanksShared('밴드');
         gaEvents.shareThanks('밴드');
         const shareUrl = getShareUrl();
         const title = `[감사장] 故 ${bugo.deceased_name || ''} 감사장`;
@@ -237,7 +247,7 @@ ${mournerName} 배상`;
 
     // 링크 복사
     const copyLink = () => {
-        markThanksShared();
+        markThanksShared('링크복사');
         gaEvents.shareThanks('링크복사');
         navigator.clipboard.writeText(getShareUrl()).then(() => {
             alert('링크가 복사되었습니다.');

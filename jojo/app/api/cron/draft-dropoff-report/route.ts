@@ -353,23 +353,34 @@ export async function GET(request: NextRequest) {
         `• *5단계 (인증까지 완료 후 최종 등록 미클릭)*: *${stageCounts[5]}명*`,
     ].join('\n');
 
-    const detailLines =
-        abandonedList.length === 0
-            ? '어제는 미완성 이탈자가 0명입니다. (전원 부고 완성)'
-            : abandonedList
-                  .map((item, idx) => {
-                      const timeRange = `${formatKstTime(item.firstAt)}~${formatKstTime(item.lastAt)}`;
-                      const saveBadge = item.isManualSave ? '💾[임시저장클릭]' : '⚡[자동저장]';
-                      const verifyBadge = item.phoneVerified ? '🔐인증완료' : '🔓미인증';
-                      const draftUrl = `https://maeumbugo.co.kr/create/${item.template}?draft=${item.id}`;
-                      return (
-                          `*${idx + 1}. [${item.stageLabel}]* ${item.applicantName || '이름미입력'} (${item.applicantPhone || '연락처미입력'}) | ${verifyBadge} | ${saveBadge}\n` +
-                          `   • *작성시간*: ${timeRange} (${formatDuration(item.durationSec)})\n` +
-                          `   • *진행경로*: ${item.progressTrail}\n` +
-                          `   • *행동분석*: ${item.dropReason} (<${draftUrl}|이어쓰기 화면 열기>)`
-                      );
-                  })
-                  .join('\n\n');
+    const detailHeader = `*🔍 3. 이탈자(${abandonedList.length}명) 개별 행동분석 상세*`;
+    const detailChunks: string[] = [];
+    if (abandonedList.length === 0) {
+        detailChunks.push(`${detailHeader}\n\n어제는 미완성 이탈자가 0명입니다. (전원 부고 완성)`);
+    } else {
+        const itemTexts = abandonedList.map((item, idx) => {
+            const timeRange = `${formatKstTime(item.firstAt)}~${formatKstTime(item.lastAt)}`;
+            const saveBadge = item.isManualSave ? '💾[임시저장클릭]' : '⚡[자동저장]';
+            const verifyBadge = item.phoneVerified ? '🔐인증완료' : '🔓미인증';
+            const draftUrl = `https://maeumbugo.co.kr/create/${item.template}?draft=${item.id}`;
+            return (
+                `*${idx + 1}. [${item.stageLabel}]* ${item.applicantName || '이름미입력'} (${item.applicantPhone || '연락처미입력'}) | ${verifyBadge} | ${saveBadge}\n` +
+                `   • *작성시간*: ${timeRange} (${formatDuration(item.durationSec)})\n` +
+                `   • *진행경로*: ${item.progressTrail}\n` +
+                `   • *행동분석*: ${item.dropReason} (<${draftUrl}|이어쓰기 화면 열기>)`
+            );
+        });
+        let currentChunk = `${detailHeader}\n\n`;
+        for (const itemText of itemTexts) {
+            if ((currentChunk + itemText + '\n\n').length > 2600) {
+                detailChunks.push(currentChunk.trimEnd());
+                currentChunk = `${itemText}\n\n`;
+            } else {
+                currentChunk += `${itemText}\n\n`;
+            }
+        }
+        if (currentChunk.trim()) detailChunks.push(currentChunk.trimEnd());
+    }
 
     const slackPayload = {
         text: `🕵️ [마음부고] 전일 임시저장 이탈자 행동분석 리포트 (${targetDateStr})`,
@@ -402,13 +413,13 @@ export async function GET(request: NextRequest) {
                 },
             },
             { type: 'divider' },
-            {
+            ...detailChunks.map((chunk) => ({
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `*🔍 3. 이탈자(${abandonedList.length}명) 개별 행동분석 상세*\n\n${detailLines}`,
+                    text: chunk,
                 },
-            },
+            })),
         ],
     };
 
