@@ -42,15 +42,42 @@ interface FlowerProduct {
     id: string;
     name: string;
     price: number;
+    b2b_price?: number | null;
     discount_price: number | null;
     images: string[];
+    regional_prices?: Record<string, number>;
+    special_surcharges?: Record<string, number>;
 }
 
 interface BugoData {
     id: string;
     bugo_number?: string;
     deceased_name: string;
+    funeral_home?: string;
+    address?: string;
 }
+
+// 지역별 가격 계산 헬퍼 (시/도 추가금 + 특수지역 추가금)
+const calculateRegionalPrice = (
+    basePrice: number,
+    discountPrice: number | null,
+    regionalPrices: Record<string, number> | undefined,
+    specialSurcharges: Record<string, number> | undefined,
+    region: string,
+    address: string
+): number => {
+    const price = discountPrice || basePrice;
+    const regionalSurcharge = (regionalPrices && region && regionalPrices[region]) || 0;
+    let specialSurcharge = 0;
+    if (specialSurcharges && address) {
+        for (const [keyword, surcharge] of Object.entries(specialSurcharges)) {
+            if (address.includes(keyword)) {
+                specialSurcharge = Math.max(specialSurcharge, surcharge);
+            }
+        }
+    }
+    return price + regionalSurcharge + specialSurcharge;
+};
 
 interface PaymentContentProps {
     initialBugo: BugoData | null;
@@ -66,12 +93,33 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
     const bugo = initialBugo;
     const product = initialProduct;
 
+    // 지역 및 할증 포함 기본 결제 금액 계산 (SSR/하이드레이션 시점부터 정확한 금액 보장)
+    const funeralAddress = bugo?.address || bugo?.funeral_home || '';
+    const REGION_KEYWORDS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+    const bugoRegion = REGION_KEYWORDS.find(r => funeralAddress.includes(r)) || '';
+    const effectiveBasePrice = (isB2b && product?.b2b_price) ? product.b2b_price : (product?.price || 0);
+    const calculatedRegionalPrice = product ? calculateRegionalPrice(
+        effectiveBasePrice,
+        product.discount_price,
+        product.regional_prices,
+        product.special_surcharges,
+        bugoRegion,
+        funeralAddress
+    ) : 0;
+
     // sessionStorage에서 주문 정보 가져오기
-    const [orderData, setOrderData] = useState({
+    const [orderData, setOrderData] = useState<{
+        ribbonText1: string;
+        ribbonText2: string;
+        recipientName: string;
+        productPrice?: number;
+    }>({
         ribbonText1: '삼가 故人의 冥福을 빕니다',
         ribbonText2: '',
         recipientName: '',
     });
+
+    const displayPrice = orderData.productPrice || calculatedRegionalPrice || product.price;
 
     // 결제 폼
     const [paymentForm, setPaymentForm] = useState({
@@ -107,7 +155,14 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (storedData) {
             try {
-                setOrderData(JSON.parse(storedData));
+                const parsed = JSON.parse(storedData);
+                setOrderData(parsed);
+                if (parsed.ribbonText2) {
+                    setPaymentForm(prev => ({
+                        ...prev,
+                        senderName: prev.senderName || parsed.ribbonText2.trim(),
+                    }));
+                }
             } catch (e) {
                 console.error('주문 데이터 파싱 오류:', e);
             }
@@ -147,8 +202,10 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         // 고유 주문번호 생성
         const moid = `MAEUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+        const effectivePrice = orderData.productPrice || calculatedRegionalPrice || product.discount_price || product.price;
+
         // GA: 화환 결제 시작 이벤트
-        gaEvents.startFlowerPayment(productId, product.price);
+        gaEvents.startFlowerPayment(productId, effectivePrice);
 
         try {
             // DB에 주문 저장 (결제 대기 상태)
@@ -160,7 +217,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                     bugo_number: bugo?.bugo_number || bugoId,
                     product_id: parseInt(productId),
                     product_name: orderData.productName || product.name,
-                    product_price: orderData.productPrice || product.discount_price || product.price,
+                    product_price: effectivePrice,
                     sender_name: paymentForm.senderName,
                     sender_phone: paymentForm.senderPhone,
                     recipient_name: orderData.recipientName,
@@ -218,7 +275,6 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
             })();
 
             // INNOPAY 결제창 호출
-            const effectivePrice = orderData.productPrice || product.price;
             window.innopay.goPay({
                 payMethod: payMethodMap[paymentMethod] || 'CARD',
                 mid: process.env.NEXT_PUBLIC_INNOPAY_MID || 'pgmaeum01m',
@@ -439,7 +495,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
                         style={{ opacity: sdkLoaded ? 1 : 0.6 }}
                     >
                         {sdkLoaded
-                            ? `${product.price.toLocaleString()}원 결제하기`
+                            ? `${displayPrice.toLocaleString()}원 결제하기`
                             : '결제 모듈 로딩중...'
                         }
                     </button>

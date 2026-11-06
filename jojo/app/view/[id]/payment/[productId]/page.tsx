@@ -20,14 +20,14 @@ const getBugo = cache(async (bugoId: string, isUUID: boolean) => {
     if (isUUID) {
         const { data } = await supabase
             .from('bugo')
-            .select('id, bugo_number, deceased_name')
+            .select('id, bugo_number, deceased_name, funeral_home, address')
             .eq('id', bugoId)
             .limit(1);
         return data?.[0] || null;
     } else {
         const { data } = await supabase
             .from('bugo')
-            .select('id, bugo_number, deceased_name')
+            .select('id, bugo_number, deceased_name, funeral_home, address')
             .eq('bugo_number', bugoId)
             .order('created_at', { ascending: false })
             .limit(1);

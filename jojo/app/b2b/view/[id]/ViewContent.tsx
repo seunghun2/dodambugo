@@ -246,7 +246,11 @@ export default function ViewContent({ initialBugo, initialFlowerOrders = [], ini
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const [showFloatingFlower, setShowFloatingFlower] = useState(false);
     const [flowerModalOpen, setFlowerModalOpen] = useState(false);
-    const [selectedFlower, setSelectedFlower] = useState<number | null>(initialFlowerProducts[0]?.sort_order || null); // 선택된 상품 순번
+    const defaultFlowerSortOrder =
+        initialFlowerProducts.find(p => p.sort_order === 2)?.sort_order ??
+        initialFlowerProducts[0]?.sort_order ??
+        null;
+    const [selectedFlower, setSelectedFlower] = useState<number | null>(defaultFlowerSortOrder); // 선택된 상품 순번 (2번 근조화환 기본형 디폴트)
     const [flowerOrders] = useState(initialFlowerOrders);
     const [flowerProducts] = useState(initialFlowerProducts);
     const [condolenceActive, setCondolenceActive] = useState(true);
