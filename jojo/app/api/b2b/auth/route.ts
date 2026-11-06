@@ -59,6 +59,13 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        if (user.status === 'withdrawn') {
+            return NextResponse.json(
+                { authenticated: false, error: '탈퇴한 계정입니다.' },
+                { status: 401 }
+            );
+        }
+
         // 예치금 잔액 조회
         const { data: deposit } = await supabase
             .from('deposits')

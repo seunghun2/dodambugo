@@ -114,16 +114,28 @@ export async function POST(request: NextRequest) {
         let newUser: { id: string; my_referral_code: string } | null = null;
 
         if (withdrawnUser) {
-            // 탈퇴 회원 재가입: UPDATE
+            // 탈퇴 회원 재가입: UPDATE (이전 민감정보 완전 초기화)
             const { data: updatedUser, error: updateError } = await supabase
                 .from('b2b_users')
                 .update({
                     password_hash,
                     company_name,
+                    company_id: null,
                     owner_name,
                     bank_name: bank_name || null,
                     account_no: account_no || null,
                     account_holder: account_holder || null,
+                    identity_verified: false,
+                    identity_name: null,
+                    rrn_front: null,
+                    rrn_back: null,
+                    identity_type: null,
+                    id_issue_date: null,
+                    driver_license_no: null,
+                    identity_phone: null,
+                    id_card_url: null,
+                    verification_status: null,
+                    avatar_url: null,
                     recommender_id,
                     my_referral_code,
                     status: 'approved',

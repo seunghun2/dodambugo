@@ -15,13 +15,35 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>부고온플러스</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaolink</string>
+		<string>kakaokompassauth</string>
+		<string>kakaotalk</string>
+		<string>ispmobile</string>
+		<string>kb-acp</string>
+		<string>shinhan-sr-ansimclick</string>
+		<string>smshinhanansimclick</string>
+		<string>hdcardappcardansimclick</string>
+		<string>mpocket.online.ansimclick</string>
+		<string>supertoss</string>
+		<string>lottesmartpay</string>
+		<string>lotteappcard</string>
+		<string>cloudpay</string>
+		<string>nhallonepayansimclick</string>
+		<string>nonghyupcardansimclick</string>
+		<string>payco</string>
+		<string>kftc-bankpay</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -48,11 +70,11 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>부고온 파트너 로고 및 증빙 사진 촬영을 위해 카메라 권한이 필요합니다. (Camera permission is required to take photos of partner logos and proof documents.)</string>
+	<string>부고온플러스 파트너 프로필 로고 및 정산 본인확인 증빙 사진 촬영을 위해 카메라 권한이 필요합니다. (Camera permission is required to take photos of partner logos and settlement verification documents.)</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>부고온 파트너 로고 및 증빙 사진 업로드를 위해 사진첩 접근 권한이 필요합니다. (Photo library permission is required to upload partner logos and proof documents.)</string>
+	<string>부고온플러스 파트너 프로필 로고 및 정산 본인확인 증빙 사진 업로드를 위해 사진첩 접근 권한이 필요합니다. (Photo library permission is required to upload partner logos and settlement verification documents.)</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>사진첩에 이미지를 저장하기 위해 사진첩 쓰기 권한이 필요합니다. (Photo library add permission is required to save photos.)</string>
+	<string>부고온플러스에서 생성한 부고장 안내 이미지 및 의례문서(위패·축문) 이미지를 기기 사진첩에 저장하기 위해 사진첩 쓰기 권한이 필요합니다. (Photo library add permission is required to save obituary and ritual document images.)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

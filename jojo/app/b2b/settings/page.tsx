@@ -604,7 +604,7 @@ export default function SettingsPage() {
         const shareUrl = `https://bugoon.maeumbugo.co.kr/signup?ref=${user.my_referral_code}`;
         const playStoreUrl = `https://play.google.com/store/apps/details?id=kr.co.maeumbugo.bugoon`;
         const appStoreUrl = `https://apps.apple.com/kr/app/%EB%B6%80%EA%B3%A0%EC%98%A8%ED%94%8C%EB%9F%AC%EC%8A%A4/id6786073225`;
-        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 50,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
+        const text = `[부고온 파트너] ${user.owner_name}님이 초대한 추천 코드가 도착했습니다.\n\n모바일 부고장 무료 제작 · 근조화환 판매 시 건당 20,000원 적립!\n회원가입 시 추천 코드 [${user.my_referral_code}]를 입력해 주세요.\n\n▶ 파트너 추천 회원가입 바로가기:\n${shareUrl}\n\n▶ 갤럭시(Android) 앱 다운로드:\n${playStoreUrl}\n\n▶ 아이폰(iOS) 앱 다운로드:\n${appStoreUrl}`;
         
         if (navigator.share) {
             try {
@@ -1128,7 +1128,8 @@ export default function SettingsPage() {
                     </div>
                     */}
 
-                    {/* 보안 및 인증 그룹 */}
+                    {/* 보안 및 인증 그룹 (추후 간편 비밀번호 연동 시 활성화) */}
+                    {/*
                     <div className={styles.groupTitle}>보안 및 인증</div>
                     <div className={styles.rowItem} style={{ cursor: 'pointer' }} onClick={() => alert('간편 비밀번호 변경 기능이 곧 준비됩니다.')}>
                         <div className={styles.rowLeft}>
@@ -1138,6 +1139,7 @@ export default function SettingsPage() {
                             <B2BIcon name="chevron-right" size={18} />
                         </span>
                     </div>
+                    */}
 
                     {/* 고객지원 그룹 */}
                     <div className={styles.groupTitle}>고객지원</div>
@@ -1923,7 +1925,8 @@ export default function SettingsPage() {
                     },
                     body: JSON.stringify({
                         userId: user?.id,
-                        phone: user?.phone
+                        phone: user?.phone,
+                        forfeitBalance: true
                     })
                 });
                 const data = await res.json();
@@ -1956,8 +1959,8 @@ export default function SettingsPage() {
                     </p>
 
                     <div className={styles.withdrawWarnBox}>
-                        <p className={styles.withdrawWarnItem}>• 고객, 관리, 프로필 등 모든 정보가 삭제됩니다.</p>
-                        <p className={styles.withdrawWarnItem}>• 적립금을 미리 출금하셨는지 확인하세요.</p>
+                        <p className={styles.withdrawWarnItem}>• 고객, 관리, 프로필, 신분증 및 계좌 등 모든 개인정보가 즉시 삭제됩니다.</p>
+                        <p className={styles.withdrawWarnItem}>• 미출금 잔여 적립금({(user?.balance || 0).toLocaleString()}원)은 탈퇴 시 자동 소멸되며 복구되지 않습니다.</p>
                     </div>
 
                     <div className={styles.withdrawAgreeRow} onClick={() => setIsWithdrawAgree(!isWithdrawAgree)}>
@@ -2065,17 +2068,18 @@ export default function SettingsPage() {
                 </header>
 
                 <div className={styles.docViewBody}>
-                    <h3 className={styles.docTitle}>마음부고 B2B 파트너(부고온) 개인정보처리방침</h3>
+                    <h3 className={styles.docTitle}>마음부고 B2B 파트너(부고온플러스 · 부고온) 개인정보처리방침</h3>
                     <div className={styles.docContentBox}>
-                        <p>마음부고(이하 "회사")는 "개인정보 보호법" 등 관련 법규를 준수하여 파트너의 개인정보를 안전하게 보호합니다.</p>
+                        <p>마음부고(이하 "회사")는 부고온플러스(부고온) B2B 파트너 서비스 운영과 관련하여 "개인정보 보호법" 등 관련 법규를 준수하며 파트너의 개인정보를 안전하게 보호합니다.</p>
 
                         <h4>1. 수집하는 개인정보 항목 및 수집방법</h4>
                         <p><strong>가. 수집하는 개인정보 항목</strong></p>
                         <p>- 필수항목: 휴대폰 번호, 상호명(소속), 대표자명(성명), 비밀번호</p>
+                        <p>- 선택항목(프로필 설정 시): 프로필·로고 사진 이미지 (카메라 촬영 및 사진첩 접근)</p>
                         <p>- 정산 수집항목: 예금주, 은행명, 계좌번호</p>
-                        <p>- 원천징수 세무 신고 수집항목: 성명, 주민등록번호(또는 외국인등록번호), 본인인증 정보 (소득세법 제127조 근거)</p>
-                        <p>- 자동 수집항목: 서비스 이용 기록, 접속 로그, IP 주소, 쿠키, 접속 기기 정보</p>
-                        <p><strong>나. 수집방법:</strong> 웹/앱 회원가입, 계좌 등록, 본인인증 폼 직접 입력 및 서비스 이용 중 자동 수집</p>
+                        <p>- 원천징수 세무 신고 및 본인확인 수집항목: 성명, 주민등록번호(또는 외국인등록번호), 운전면허번호, 신분증 발급일자, 신분증(주민등록증·운전면허증)·사업자등록증 사본 이미지, 본인인증 정보 (소득세법 제127조 및 개인정보 보호법 제24조의2 근거)</p>
+                        <p>- 자동 수집항목: 서비스 이용 기록, 접속 로그, IP 주소, 쿠키, 접속 기기 정보, 모바일 앱 푸시 알림 토큰(FCM 토큰)</p>
+                        <p><strong>나. 수집방법:</strong> 웹/앱(부고온플러스) 회원가입, 프로필 설정, 계좌 등록, 본인인증 및 신분증 업로드 시 이용자 직접 입력 및 서비스 이용 중 자동 수집</p>
 
                         <h4>2. 개인정보의 수집 및 이용목적</h4>
                         <p>가. 파트너 서비스 제공, 본인 확인 및 파트너 자격 관리</p>
@@ -2213,7 +2217,7 @@ const b2bFaqData: FAQItem[] = [
   },
   {
     question: '적립금은 얼마씩, 언제 지급되나요?',
-    answer: '개인 파트너 기준으로 제작하신 부고장에서 근조화환 판매 시 건당 기본 50,000원이 적립됩니다.\n결제 완료 후 부정결제 및 취소 확인을 위해 24시간 정산 대기(적립 예정) 후 출금 가능 적립금으로 전환됩니다.',
+    answer: '개인 파트너 기준으로 제작하신 부고장에서 근조화환 판매 시 건당 기본 20,000원이 적립됩니다.\n결제 완료 후 부정결제 및 취소 확인을 위해 24시간 정산 대기(적립 예정) 후 출금 가능 적립금으로 전환됩니다.',
   },
   {
     question: '환급신청을 했는데 언제 지급되나요?',

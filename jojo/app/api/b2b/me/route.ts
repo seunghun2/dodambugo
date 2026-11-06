@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: `회원 정보 조회 실패: ${userError.message}` }, { status: 500 });
         }
 
-        if (!user) {
+        if (!user || user.status === 'withdrawn') {
             return NextResponse.json({ error: '회원 정보를 찾을 수 없습니다.' }, { status: 401 });
         }
 
@@ -114,7 +114,7 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     const allowed = [
-        'company_name', 'owner_name', 'bank_name', 'account_no', 'account_holder',
+        'company_name', 'company_id', 'owner_name', 'bank_name', 'account_no', 'account_holder',
         'alarm_all', 'alarm_deceased', 'alarm_reward', 'alarm_referral', 'alarm_order', 'alarm_deposit', 'alarm_notice', 'alarm_event',
         'avatar_url'
     ];

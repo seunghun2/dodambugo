@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
             rrn_back: encryptRRN(rrn_back),
             identity_type,
             id_issue_date: identity_type === '주민등록증' ? id_issue_date : null,
-            driver_license_no: identity_type === '운전면허증' ? driver_license_no : null,
+            driver_license_no: identity_type === '운전면허증' && driver_license_no ? encryptRRN(driver_license_no) : null,
             identity_phone,
             id_card_url,
             verification_status: 'verified',

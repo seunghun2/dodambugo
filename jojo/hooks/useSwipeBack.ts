@@ -17,6 +17,11 @@ export function useSwipeBack() {
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // iOS 네이티브 앱에서는 WKWebView 자체 스와이프(allowsBackForwardNavigationGestures)를 사용하므로 이중 동작 방지
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.getPlatform?.() === 'ios') {
+      return;
+    }
+
     // 메인 루트/로그인/대시보드 페이지에서는 뒤로가기 비활성화
     const isNoSwipe = pathname === '/b2b' || pathname === '/b2b/' || pathname === '/b2b/dashboard' || pathname === '/b2b/login';
     if (isNoSwipe) return;

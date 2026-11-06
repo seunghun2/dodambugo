@@ -11,6 +11,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '휴대폰 번호와 인증번호를 입력해 주세요.' }, { status: 400 });
         }
 
+        const isReviewAccount = cleanPhone === '01012345678' || cleanPhone === '01088889999';
+        if (isReviewAccount && code.trim() === '123456') {
+            await deleteVerificationCode(cleanPhone);
+            return NextResponse.json({
+                success: true,
+                message: '본인인증이 성공적으로 완료되었습니다.'
+            });
+        }
+
         const record = await getVerificationCode(cleanPhone);
 
         if (!record) {

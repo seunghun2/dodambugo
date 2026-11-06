@@ -15,13 +15,13 @@ export default function B2BTermsPage() {
                 >
                     <span className="material-symbols-outlined">chevron_left</span>
                 </button>
-                <h1>부고온 B2B 파트너 서비스 이용약관</h1>
+                <h1>부고온플러스(부고온) B2B 파트너 서비스 이용약관</h1>
             </header>
 
             <main className="legal-content">
                 <section className="terms-section">
                     <p className="privacy-intro">
-                        본 약관은 마음부고(이하 "회사")가 제공하는 부고온 B2B 파트너 서비스(이하 "서비스")의 이용과 관련하여 회사와 파트너 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+                        본 약관은 마음부고(이하 "회사")가 제공하는 부고온플러스(부고온) B2B 파트너 서비스(이하 "서비스")의 이용과 관련하여 회사와 파트너 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
                     </p>
                 </section>
 

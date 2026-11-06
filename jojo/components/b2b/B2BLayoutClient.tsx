@@ -35,6 +35,10 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
     pathname !== '/b2b/login/' && 
     !pathname.startsWith('/b2b/intro') &&
     !pathname.startsWith('/b2b/signup') && 
+    !pathname.startsWith('/b2b/privacy') &&
+    !pathname.startsWith('/b2b/terms') &&
+    !pathname.startsWith('/b2b/income-tax') &&
+    !pathname.startsWith('/b2b/delete-account') &&
     !pathname.startsWith('/b2b/admin') &&
     !pathname.startsWith('/b2b/company') && 
     !pathname.startsWith('/b2b/flower') && 

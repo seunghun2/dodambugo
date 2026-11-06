@@ -12,6 +12,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '올바른 휴대폰 번호를 입력해주세요.' }, { status: 400 });
         }
 
+        // 앱스토어/구글플레이 심사용 데모 번호 우회 지원 (코드: 123456)
+        const isReviewAccount = cleanPhone === '01012345678' || cleanPhone === '01088889999';
+        if (isReviewAccount) {
+            await saveVerificationCode(cleanPhone, '123456', 30 * 60 * 1000);
+            return NextResponse.json({
+                success: true,
+                message: '인증번호가 문자(SMS)로 발송되었습니다.'
+            });
+        }
+
         // 6자리 난수 생성 (3분 유효, DB + 인메모리 적재)
         const code = String(Math.floor(100000 + Math.random() * 900000));
         await saveVerificationCode(cleanPhone, code, 3 * 60 * 1000);
