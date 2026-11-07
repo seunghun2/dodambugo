@@ -155,14 +155,7 @@ export default function PaymentContent({ initialBugo, initialProduct, bugoId, pr
         const storedData = sessionStorage.getItem(`order_${bugoId}_${productId}`);
         if (storedData) {
             try {
-                const parsed = JSON.parse(storedData);
-                setOrderData(parsed);
-                if (parsed.ribbonText2) {
-                    setPaymentForm(prev => ({
-                        ...prev,
-                        senderName: prev.senderName || parsed.ribbonText2.trim(),
-                    }));
-                }
+                setOrderData(JSON.parse(storedData));
             } catch (e) {
                 console.error('주문 데이터 파싱 오류:', e);
             }
