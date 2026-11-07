@@ -22,7 +22,26 @@ export default function MainLayout({ children }: MainLayoutProps) {
     }, [pathname]);
 
     // 홈, 뷰 페이지, 완료 페이지, 미리보기 페이지, 템플릿 변경 모드, 어드민, 약관 페이지, 답례품 페이지, 주문 페이지, B2B 파트너 앱에서는 헤더 숨김 (각자 관리)
-    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || pathname.startsWith('/create/preview/') || pathname.startsWith('/admin') || pathname === '/privacy' || pathname === '/terms' || pathname === '/privacy-third-party' || pathname === '/marketing' || pathname === '/condolence-refund' || pathname.startsWith('/gift') || pathname.startsWith('/order') || pathname.startsWith('/review') || pathname.startsWith('/b2b') || pathname === '/intro' || isChangeMode;
+    const isB2BRoute =
+        pathname.startsWith('/b2b') ||
+        pathname === '/intro' ||
+        pathname.startsWith('/signup') ||
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/manage') ||
+        pathname.startsWith('/wallet') ||
+        pathname.startsWith('/settings') ||
+        pathname.startsWith('/notice') ||
+        pathname.startsWith('/notifications') ||
+        pathname.startsWith('/inquiry') ||
+        pathname.startsWith('/ritual') ||
+        pathname.startsWith('/delete-account') ||
+        pathname.startsWith('/flower') ||
+        pathname.startsWith('/company') ||
+        pathname === '/condolence-terms' ||
+        pathname === '/condolence-privacy';
+
+    const hideHeader = pathname === '/' || pathname.startsWith('/view/') || pathname.startsWith('/create/complete/') || pathname.startsWith('/create/preview/') || pathname.startsWith('/admin') || pathname === '/privacy' || pathname === '/terms' || pathname === '/privacy-third-party' || pathname === '/marketing' || pathname === '/condolence-refund' || pathname.startsWith('/gift') || pathname.startsWith('/order') || pathname.startsWith('/review') || isB2BRoute || isChangeMode;
 
     if (hideHeader) {
         return <>{children}</>;

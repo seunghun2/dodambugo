@@ -26,47 +26,53 @@ export function B2BLayoutClient({ children }: { children: React.ReactNode }) {
   // WKWebView가 자체적으로 처리합니다. (capacitor.config.ts → ios.backButtonGestures)
   // JS에서 별도로 구현하면 "죽은 캡처" 문제가 발생하므로 네이티브에 위임합니다.
 
-  // 하단 탭바를 보여줄 B2B 경로 정의
-  const showBottomBar = pathname && 
-    pathname.startsWith('/b2b') && 
-    pathname !== '/b2b' && 
-    pathname !== '/b2b/' && 
-    pathname !== '/b2b/login' && 
-    pathname !== '/b2b/login/' && 
-    !pathname.startsWith('/b2b/intro') &&
-    !pathname.startsWith('/b2b/signup') && 
-    !pathname.startsWith('/b2b/privacy') &&
-    !pathname.startsWith('/b2b/terms') &&
-    !pathname.startsWith('/b2b/income-tax') &&
-    !pathname.startsWith('/b2b/delete-account') &&
-    !pathname.startsWith('/b2b/admin') &&
-    !pathname.startsWith('/b2b/company') && 
-    !pathname.startsWith('/b2b/flower') && 
-    !pathname.startsWith('/b2b/view') &&   
-    !pathname.startsWith('/b2b/create') && 
-    !pathname.startsWith('/b2b/order') &&  
-    !pathname.startsWith('/b2b/review') &&  
-    !pathname.includes('/view') &&          
-    !pathname.includes('/flower') &&        
-    !pathname.includes('/create') &&        
-    !pathname.includes('/order');           
+  // bugoon.maeumbugo.co.kr 서브도메인 접속 시 /b2b 접두사가 생략된 경로(/signup, /dashboard 등)를 /b2b/... 형태로 정규화
+  const normPath = pathname
+    ? (pathname.startsWith('/b2b') ? pathname : `/b2b${pathname === '/' ? '' : pathname}`)
+    : '';
 
-  const isAdmin = pathname && (
-    pathname.startsWith('/b2b/admin') || 
-    pathname.startsWith('/b2b/company') ||
-    pathname.startsWith('/admin')
+  // 하단 탭바를 보여줄 B2B 경로 정의
+  const showBottomBar = normPath && 
+    normPath.startsWith('/b2b') && 
+    normPath !== '/b2b' && 
+    normPath !== '/b2b/' && 
+    normPath !== '/b2b/login' && 
+    normPath !== '/b2b/login/' && 
+    !normPath.startsWith('/b2b/login/') &&
+    !normPath.startsWith('/b2b/intro') &&
+    !normPath.startsWith('/b2b/signup') && 
+    !normPath.startsWith('/b2b/privacy') &&
+    !normPath.startsWith('/b2b/terms') &&
+    !normPath.startsWith('/b2b/income-tax') &&
+    !normPath.startsWith('/b2b/delete-account') &&
+    !normPath.startsWith('/b2b/admin') &&
+    !normPath.startsWith('/b2b/company') && 
+    !normPath.startsWith('/b2b/flower') && 
+    !normPath.startsWith('/b2b/view') &&   
+    !normPath.startsWith('/b2b/create') && 
+    !normPath.startsWith('/b2b/order') &&  
+    !normPath.startsWith('/b2b/review') &&  
+    !normPath.includes('/view') &&          
+    !normPath.includes('/flower') &&        
+    !normPath.includes('/create') &&        
+    !normPath.includes('/order');           
+
+  const isAdmin = normPath && (
+    normPath.startsWith('/b2b/admin') || 
+    normPath.startsWith('/b2b/company') ||
+    pathname?.startsWith('/admin')
   );
 
   // 조문객 대상 페이지 (부고장, 주문, 리뷰 등)는 래퍼 스타일 최소화
-  const isViewerPage = pathname && (
-    pathname.startsWith('/b2b/view') ||
-    pathname.startsWith('/b2b/order') ||
-    pathname.startsWith('/b2b/review')
+  const isViewerPage = normPath && (
+    normPath.startsWith('/b2b/view') ||
+    normPath.startsWith('/b2b/order') ||
+    normPath.startsWith('/b2b/review')
   );
 
-  const isIntroPage = pathname && (
-    pathname === '/b2b/intro' ||
-    pathname.startsWith('/b2b/intro') ||
+  const isIntroPage = normPath && (
+    normPath === '/b2b/intro' ||
+    normPath.startsWith('/b2b/intro') ||
     pathname === '/intro'
   );
 

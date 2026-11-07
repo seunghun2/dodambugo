@@ -48,8 +48,11 @@ export default function B2BLayout({
   // MainLayout(상단 네비바) 없이 children만 렌더링
   // 앱으로 래핑될 화면이므로 독립 레이아웃 사용
   return (
-    <B2BLayoutClient>
-      {children}
-    </B2BLayoutClient>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: 'nav#nav { display: none !important; }' }} />
+      <B2BLayoutClient>
+        {children}
+      </B2BLayoutClient>
+    </>
   );
 }
