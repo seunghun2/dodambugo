@@ -346,21 +346,13 @@ export default function B2BCreatePage() {
       if (!formData.funeral_home.trim()) newErrors.funeral_home = '장례식장명을 입력해주세요';
       if (!formData.room_number.trim()) newErrors.room_number = '호실을 입력해주세요';
       if (!formData.funeral_date) newErrors.funeral_date = '발인 날짜를 선택해주세요';
-      if (!formData.funeral_time) {
-        newErrors.funeral_time = '발인 시간을 입력해주세요';
-      } else {
-        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-        if (!timeRegex.test(formData.funeral_time.trim())) {
-          newErrors.funeral_time = '올바른 발인 시간(00:00~23:59)을 입력해주세요';
-        }
-      }
-    } else {
-      // 무빈소장례는 발인일시 선택 — 입력된 경우에만 형식 검사
-      if (formData.funeral_time) {
-        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-        if (!timeRegex.test(formData.funeral_time.trim())) {
-          newErrors.funeral_time = '올바른 발인 시간(00:00~23:59)을 입력해주세요';
-        }
+    }
+
+    // 발인 시간은 선택 입력 (화장장 예약 전 미정인 경우 비워둘 수 있음 — 입력된 경우에만 형식 검사)
+    if (formData.funeral_time && formData.funeral_time !== '00:00') {
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+      if (!timeRegex.test(formData.funeral_time.trim())) {
+        newErrors.funeral_time = '올바른 발인 시간(00:00~23:59)을 입력해주세요';
       }
     }
 
